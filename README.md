@@ -70,6 +70,12 @@ Make sure you have the following installed:
 
 2. **Setup the project**
 
+   install required flutter_rust_bridge_codegen. 
+
+   ```bash
+   cargo install flutter_rust_bridge_codegen
+   ```
+
    ```bash
    just setup
    ```
