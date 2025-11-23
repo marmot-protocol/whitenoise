@@ -1,8 +1,22 @@
+import 'dart:io';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/domain/models/media_file_download.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart' as media_files_api;
 import 'package:whitenoise/src/rust/api/media_files.dart' show MediaFile;
+
+bool _fileExistsAtPath(String? filePath) {
+  if (filePath == null || filePath.isEmpty) {
+    return false;
+  }
+
+  try {
+    return File(filePath).existsSync();
+  } catch (_) {
+    return false;
+  }
+}
 
 class MediaFileDownloadsState {
   const MediaFileDownloadsState({
@@ -29,7 +43,7 @@ class MediaFileDownloadsState {
       );
     }
 
-    if (file.filePath.isNotEmpty) {
+    if (_fileExistsAtPath(file.filePath)) {
       return MediaFileDownload.downloaded(
         originalFileHash: hash,
         downloadedFile: file,
@@ -121,7 +135,7 @@ class MediaFileDownloadsNotifier extends Notifier<MediaFileDownloadsState> {
     required String groupId,
     required String originalFileHash,
   }) async {
-    if (originalFile.filePath.isNotEmpty) {
+    if (_fileExistsAtPath(originalFile.filePath)) {
       return MediaFileDownload.downloaded(
         originalFileHash: originalFileHash,
         downloadedFile: originalFile,

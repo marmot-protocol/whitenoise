@@ -21,50 +21,42 @@ class MessageMediaTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final dimension = size.w;
-    return SizedBox(
-      width: dimension,
-      height: dimension,
-      child: _buildContent(ref),
-    );
-  }
-
-  Widget _buildContent(WidgetRef ref) {
     final download = ref.watch(
       mediaFileDownloadsProvider.select(
         (state) => state.getMediaFileDownload(mediaFile),
       ),
     );
 
-    final fileToDisplay = download.mediaFile;
-    final isDownloaded = _hasLocalFile(fileToDisplay);
-
-    if (download.isDownloaded && isDownloaded) {
-      return Image.file(
-        File(fileToDisplay.filePath),
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => _buildBlurhash(),
-      );
-    }
-
-    return _buildBlurhash();
-  }
-
-  Widget _buildBlurhash() {
-    final dimension = size.w;
-    return BlurhashPlaceholder(
-      hash: mediaFile.fileMetadata?.blurhash,
+    return SizedBox(
       width: dimension,
       height: dimension,
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 300),
+        child:
+            download.isDownloaded
+                ? Image.file(
+                  File(download.mediaFile.filePath),
+                  key: ValueKey('image_${download.mediaFile.originalFileHash}'),
+                  fit: BoxFit.cover,
+                  width: dimension,
+                  height: dimension,
+                  errorBuilder: (_, _, _) => _buildBlurhash(dimension),
+                )
+                : _buildBlurhash(dimension),
+      ),
     );
   }
 
-  bool _hasLocalFile(MediaFile file) {
-    if (file.filePath.isEmpty) return false;
-
-    try {
-      return File(file.filePath).existsSync();
-    } catch (_) {
-      return false;
-    }
+  Widget _buildBlurhash(double dimension) {
+    return SizedBox(
+      width: dimension,
+      height: dimension,
+      child: BlurhashPlaceholder(
+        key: ValueKey('blurhash_${mediaFile.originalFileHash}'),
+        hash: mediaFile.fileMetadata?.blurhash,
+        width: dimension,
+        height: dimension,
+      ),
+    );
   }
 }
