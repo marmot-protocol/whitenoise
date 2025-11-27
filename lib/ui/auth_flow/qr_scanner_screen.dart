@@ -7,12 +7,12 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:logging/logging.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:permission_handler/permission_handler.dart';
 import 'package:whitenoise/routing/routes.dart';
 import 'package:whitenoise/ui/core/themes/assets.dart';
 import 'package:whitenoise/ui/core/themes/src/extensions.dart';
 import 'package:whitenoise/ui/core/ui/wn_image.dart';
 import 'package:whitenoise/ui/shared/widgets/camera_permission_denied_widget.dart';
+import 'package:whitenoise/utils/camera_utils.dart';
 import 'package:whitenoise/utils/localization_extensions.dart';
 
 class QRScannerScreen extends StatefulWidget {
@@ -55,23 +55,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> with WidgetsBindingOb
       case AppLifecycleState.paused:
         return;
       case AppLifecycleState.resumed:
-        unawaited(_safeStartCamera());
+        unawaited(CameraUtils.safeStartCamera(_controller));
       case AppLifecycleState.inactive:
         unawaited(_controller.stop());
-    }
-  }
-
-  Future<void> _safeStartCamera() async {
-    try {
-      final status = await Permission.camera.status;
-      if (status.isDenied || status.isPermanentlyDenied) {
-        return;
-      }
-      if (mounted) {
-        await _controller.start();
-      }
-    } catch (e, s) {
-      logger.warning('Failed to start camera', e, s);
     }
   }
 

@@ -338,7 +338,7 @@
         "errorOccurred": "Ocurrió un error",
         "unknownError": "Error desconocido",
         "errorOccurredTryAgain": "Ocurrió un error, por favor intenta de nuevo.",
-        "invalidPublicKey": "Formato de clave pública inválido",
+        "invalidPublicKey": "Formato de llave pública inválido",
         "somethingWentWrong": "Algo salió mal",
         "internalError": "Se produjo un error interno",
         "invalidPublicKeySummary": "Una o más claves públicas son inválidas. Verifica todas las claves de participantes y administradores e inténtalo de nuevo.",
