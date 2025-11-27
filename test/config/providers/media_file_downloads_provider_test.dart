@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/config/providers/media_file_downloads_provider.dart';
@@ -54,6 +55,13 @@ MediaFile _createMediaFileWithPath(String hash, String path) {
     nostrKey: 'test_key',
     createdAt: DateTime.now(),
   );
+}
+
+Future<File> _createTempFile(Directory tempDir, String fileName) async {
+  final file = File('${tempDir.path}/$fileName');
+  const jpegHeader = [0xFF, 0xD8, 0xFF, 0xE0];
+  await file.writeAsBytes(jpegHeader);
+  return file;
 }
 
 void main() {
@@ -114,72 +122,106 @@ void main() {
         expect(download.mediaFile, file);
       });
 
-      test('returns downloaded media file download for file with path', () {
-        final state = container.read(mediaFileDownloadsProvider);
-        final file = _createMediaFileWithPath('test_hash', '/path/to/file');
+      group('with file path', () {
+        group('when file exists', () {
+          late File testFile;
+          setUp(() async {
+            final tempDir = await Directory.systemTemp.createTemp('media_downloads_test');
+            testFile = await _createTempFile(tempDir, 'test_file.jpg');
+            addTearDown(() => tempDir.delete(recursive: true));
+          });
+          test('returns downloaded media file download', () {
+            final state = container.read(mediaFileDownloadsProvider);
+            final file = _createMediaFileWithPath('test_hash', testFile.path);
 
-        final download = state.getMediaFileDownload(file);
+            final download = state.getMediaFileDownload(file);
 
-        expect(download.isDownloaded, true);
-        expect(download.originalFileHash, 'test_hash');
-        expect(download.mediaFile, file);
-      });
+            expect(download.isDownloaded, true);
+            expect(download.originalFileHash, 'test_hash');
+            expect(download.mediaFile, file);
+          });
 
-      test('returns pending media file donwload for file not in state without path', () {
-        final state = container.read(mediaFileDownloadsProvider);
-        final file = _createMediaFile('test_hash');
+          group('when in state is downloading', () {
+            test(
+              'returns downloaded media file download',
+              () {
+                final notifier = container.read(mediaFileDownloadsProvider.notifier);
+                final fileWithoutPath = _createMediaFile('test_hash');
+                final fileWithPath = _createMediaFileWithPath('test_hash', testFile.path);
 
-        final download = state.getMediaFileDownload(file);
+                notifier.state = MediaFileDownloadsState(
+                  mediaFileDownloadsMap: {
+                    'test_hash': MediaFileDownload.downloading(
+                      originalFileHash: 'test_hash',
+                      originalFile: fileWithoutPath,
+                    ),
+                  },
+                );
 
-        expect(download.isPending, true);
-        expect(download.originalFileHash, 'test_hash');
-        expect(download.mediaFile, file);
-      });
+                final state = container.read(mediaFileDownloadsProvider);
+                final download = state.getMediaFileDownload(fileWithPath);
 
-      test('returns downloading media file download from state when present', () {
-        final notifier = container.read(mediaFileDownloadsProvider.notifier);
-        final file = _createMediaFile('test_hash');
+                expect(download.isDownloaded, true);
+                expect(download.originalFileHash, 'test_hash');
+                expect(download.mediaFile.filePath, testFile.path);
+              },
+            );
+          });
+        });
 
-        notifier.state = MediaFileDownloadsState(
-          mediaFileDownloadsMap: {
-            'test_hash': MediaFileDownload.downloading(
-              originalFileHash: 'test_hash',
-              originalFile: file,
-            ),
-          },
-        );
+        group('when file does not exist', () {
+          test(
+            'returns pending media file download',
+            () {
+              final state = container.read(mediaFileDownloadsProvider);
+              final file = _createMediaFileWithPath('test_hash', '/path/to/file.jpg');
 
-        final state = container.read(mediaFileDownloadsProvider);
-        final download = state.getMediaFileDownload(file);
+              final download = state.getMediaFileDownload(file);
 
-        expect(download.isDownloading, true);
-        expect(download.originalFileHash, 'test_hash');
-      });
-
-      test(
-        'returns downloaded media file downloadfor file with path when state is downloading',
-        () {
-          final notifier = container.read(mediaFileDownloadsProvider.notifier);
-          final fileWithoutPath = _createMediaFile('test_hash');
-          final fileWithPath = _createMediaFileWithPath('test_hash', '/downloaded/file');
-
-          notifier.state = MediaFileDownloadsState(
-            mediaFileDownloadsMap: {
-              'test_hash': MediaFileDownload.downloading(
-                originalFileHash: 'test_hash',
-                originalFile: fileWithoutPath,
-              ),
+              expect(download.isPending, true);
+              expect(download.originalFileHash, 'test_hash');
+              expect(download.mediaFile, file);
             },
           );
+        });
+      });
 
-          final state = container.read(mediaFileDownloadsProvider);
-          final download = state.getMediaFileDownload(fileWithPath);
+      group('without file path', () {
+        group('without media file download in state', () {
+          test('returns pending media file download', () {
+            final state = container.read(mediaFileDownloadsProvider);
+            final file = _createMediaFile('test_hash');
 
-          expect(download.isDownloaded, true);
-          expect(download.originalFileHash, 'test_hash');
-          expect(download.mediaFile.filePath, '/downloaded/file');
-        },
-      );
+            final download = state.getMediaFileDownload(file);
+
+            expect(download.isPending, true);
+            expect(download.originalFileHash, 'test_hash');
+            expect(download.mediaFile, file);
+          });
+        });
+
+        group('with media file downloading in state', () {
+          test('returns downloading media file download', () {
+            final notifier = container.read(mediaFileDownloadsProvider.notifier);
+            final file = _createMediaFile('test_hash');
+
+            notifier.state = MediaFileDownloadsState(
+              mediaFileDownloadsMap: {
+                'test_hash': MediaFileDownload.downloading(
+                  originalFileHash: 'test_hash',
+                  originalFile: file,
+                ),
+              },
+            );
+
+            final state = container.read(mediaFileDownloadsProvider);
+            final download = state.getMediaFileDownload(file);
+
+            expect(download.isDownloading, true);
+            expect(download.originalFileHash, 'test_hash');
+          });
+        });
+      });
     });
 
     group('downloadMediaFiles', () {
@@ -207,20 +249,49 @@ void main() {
         expect(container.read(mediaFileDownloadsProvider).mediaFileDownloadsMap, isEmpty);
       });
 
-      test('does not download again for files with path', () async {
-        bool downloadCalled = false;
-        final container = _createTestContainer((hash) async {
-          downloadCalled = true;
-          return _createMediaFileWithPath(hash, '/path/to/$hash');
+      group('with file path', () {
+        group('when file exists', () {
+          late File testFile;
+
+          setUp(() async {
+            final tempDir = await Directory.systemTemp.createTemp('media_downloads_test');
+            testFile = await _createTempFile(tempDir, 'test_file.jpg');
+            addTearDown(() => tempDir.delete(recursive: true));
+          });
+
+          test('does not download again', () async {
+            bool downloadCalled = false;
+            final container = _createTestContainer((hash) async {
+              downloadCalled = true;
+              return _createMediaFileWithPath(hash, testFile.path);
+            });
+            addTearDown(container.dispose);
+
+            final fileWithPath = _createMediaFileWithPath('hash1', testFile.path);
+            await container.read(mediaFileDownloadsProvider.notifier).downloadMediaFiles([
+              fileWithPath,
+            ]);
+
+            expect(downloadCalled, false);
+          });
         });
-        addTearDown(container.dispose);
+        group('when file does not exist', () {
+          test('downloads again', () async {
+            bool downloadCalled = false;
+            final container = _createTestContainer((hash) async {
+              downloadCalled = true;
+              return _createMediaFileWithPath(hash, '/path/to/$hash');
+            });
+            addTearDown(container.dispose);
 
-        final fileWithPath = _createMediaFileWithPath('hash1', '/existing/path');
-        await container.read(mediaFileDownloadsProvider.notifier).downloadMediaFiles([
-          fileWithPath,
-        ]);
+            final fileWithPath = _createMediaFileWithPath('hash1', '/existing/path');
+            await container.read(mediaFileDownloadsProvider.notifier).downloadMediaFiles([
+              fileWithPath,
+            ]);
 
-        expect(downloadCalled, false);
+            expect(downloadCalled, true);
+          });
+        });
       });
 
       test('returns downloaded status for files with existing path', () async {
@@ -462,28 +533,40 @@ void main() {
         expect(results[1].isFailed, true);
       });
 
-      test('skips download for already downloaded files in mixed batch', () async {
-        final downloadedHashes = <String>[];
-        final container = _createTestContainer((hash) async {
-          downloadedHashes.add(hash);
-          return _createMediaFileWithPath(hash, '/downloaded/$hash');
+      group('with mixed status media file downloads', () {
+        late File testFile1;
+        late File testFile2;
+
+        setUp(() async {
+          final tempDir = await Directory.systemTemp.createTemp('media_downloads_test');
+          testFile1 = await _createTempFile(tempDir, 'test_file1.jpg');
+          testFile2 = await _createTempFile(tempDir, 'test_file2.jpg');
+          addTearDown(() => tempDir.delete(recursive: true));
         });
-        addTearDown(container.dispose);
 
-        final files = [
-          _createMediaFileWithPath('hash1', '/existing/hash1'),
-          _createMediaFile('hash2'),
-          _createMediaFileWithPath('hash3', '/existing/hash3'),
-          _createMediaFile('hash4'),
-        ];
-        await container.read(mediaFileDownloadsProvider.notifier).downloadMediaFiles(files);
+        test('skips download for already downloaded files in mixed batch', () async {
+          final downloadedHashes = <String>[];
+          final container = _createTestContainer((hash) async {
+            downloadedHashes.add(hash);
+            return _createMediaFileWithPath(hash, '/downloaded/$hash');
+          });
+          addTearDown(container.dispose);
 
-        expect(downloadedHashes, ['hash2', 'hash4']);
+          final files = [
+            _createMediaFileWithPath('hash1', testFile1.path),
+            _createMediaFileWithPath('hash2', testFile2.path),
+            _createMediaFileWithPath('hash3', 'broken/path'),
+            _createMediaFile('hash4'),
+          ];
+          await container.read(mediaFileDownloadsProvider.notifier).downloadMediaFiles(files);
+
+          expect(downloadedHashes, ['hash3', 'hash4']);
+        });
       });
 
       test('maintains result order with mixed downloaded and pending files', () async {
         final container = _createTestContainer((hash) async {
-          return _createMediaFileWithPath(hash, '/downloaded/$hash');
+          return _createMediaFileWithPath(hash, '/existing/$hash');
         });
         addTearDown(container.dispose);
 
