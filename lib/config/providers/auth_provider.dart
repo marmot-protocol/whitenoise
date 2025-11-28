@@ -1,26 +1,30 @@
 import 'dart:async';
-import 'dart:io';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:whitenoise/config/providers/active_account_provider.dart';
 import 'package:whitenoise/config/providers/active_pubkey_provider.dart';
 import 'package:whitenoise/config/providers/avatar_color_provider.dart';
 import 'package:whitenoise/config/states/auth_state.dart';
-import 'package:whitenoise/src/rust/api.dart' show createWhitenoiseConfig, initializeWhitenoise;
+import 'package:whitenoise/domain/services/auth_service.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/error.dart' show ApiError;
 import 'package:whitenoise/utils/pubkey_formatter.dart';
+
+final authServiceProvider = Provider<AuthService>((ref) {
+  return AuthService();
+});
 
 /// Auth Provider
 ///
 /// This provider manages authentication.
 class AuthNotifier extends Notifier<AuthState> {
   final _logger = Logger('AuthNotifier');
+  late final AuthService _authService;
 
   @override
   AuthState build() {
+    _authService = ref.read(authServiceProvider);
     return const AuthState();
   }
 
@@ -29,24 +33,11 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      /// 1. Create data and logs directories
-      final dir = await getApplicationDocumentsDirectory();
-      final dataDir = '${dir.path}/whitenoise/data';
-      final logsDir = '${dir.path}/whitenoise/logs';
-
-      await Directory(dataDir).create(recursive: true);
-      await Directory(logsDir).create(recursive: true);
-
-      /// 2. Create config and initialize Whitenoise instance
-      final config = await createWhitenoiseConfig(
-        dataDir: dataDir,
-        logsDir: logsDir,
-      );
-      await initializeWhitenoise(config: config);
+      await _authService.initialize();
 
       /// 3. Auto-login if an account is already active
       try {
-        final accounts = await getAccounts();
+        final accounts = await _authService.getAccountsList();
         if (accounts.isNotEmpty) {
           // Wait for active account provider to load from storage first
           final activePubkeyNotifier = ref.read(activePubkeyProvider.notifier);
@@ -93,7 +84,7 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(isLoading: true, error: null);
 
     try {
-      final account = await createIdentity();
+      final account = await _authService.createIdentityAccount();
 
       // Get the newly created account data and set it as active
       await ref.read(activePubkeyProvider.notifier).setActivePubkey(account.pubkey);
@@ -118,7 +109,7 @@ class AuthNotifier extends Notifier<AuthState> {
     state = state.copyWith(error: null);
 
     try {
-      final account = await createIdentity();
+      final account = await _authService.createIdentityAccount();
 
       // Get the newly created account data and set it as active
       await ref.read(activePubkeyProvider.notifier).setActivePubkey(account.pubkey);
@@ -144,14 +135,14 @@ class AuthNotifier extends Notifier<AuthState> {
       // Save existing accounts (before login)
       List<Account> existingAccounts = [];
       try {
-        existingAccounts = await getAccounts();
+        existingAccounts = await _authService.getAccountsList();
         _logger.info('Existing accounts before login: ${existingAccounts.length}');
       } catch (e) {
         _logger.info('No existing accounts or error fetching: $e');
       }
 
       /// 1. Perform login using Rust API
-      final account = await login(nsecOrHexPrivkey: nsecOrPrivkey);
+      final account = await _authService.loginWithKey(nsecOrPrivkey);
       _logger.info('Login successful, account created');
 
       // Get the logged in account data and set it as active
@@ -169,7 +160,7 @@ class AuthNotifier extends Notifier<AuthState> {
 
       // Check account count after login
       try {
-        final accountsAfterLogin = await getAccounts();
+        final accountsAfterLogin = await _authService.getAccountsList();
         _logger.info('Accounts after login: ${accountsAfterLogin.length}');
 
         // Check that the active account is set correctly
@@ -216,7 +207,7 @@ class AuthNotifier extends Notifier<AuthState> {
 
     try {
       /// 1. Perform login using Rust API
-      final account = await login(nsecOrHexPrivkey: nsecOrPrivkey);
+      final account = await _authService.loginWithKey(nsecOrPrivkey);
 
       // Account logged in successfully
 
@@ -255,7 +246,7 @@ class AuthNotifier extends Notifier<AuthState> {
     }
     try {
       // Try to get accounts and find the first one (active account)
-      final accounts = await getAccounts();
+      final accounts = await _authService.getAccountsList();
       if (accounts.isNotEmpty) {
         // Return the first account as the active one
         // In a real implementation, you might want to store which account is active
@@ -277,13 +268,13 @@ class AuthNotifier extends Notifier<AuthState> {
       final activeAccountState = await ref.read(activeAccountProvider.future);
       final activeAccount = activeAccountState.account;
       if (activeAccount != null) {
-        await logout(pubkey: activeAccount.pubkey);
+        await _authService.logoutAccount(activeAccount.pubkey);
 
         // Clear the active account
         await ref.read(activePubkeyProvider.notifier).clearActivePubkey();
 
         // Check if there are other accounts available
-        final remainingAccounts = await getAccounts();
+        final remainingAccounts = await _authService.getAccountsList();
         // Normalize pubkeys to hex then filter
         final activeHex = PubkeyFormatter(pubkey: activeAccount.pubkey).toHex();
         final otherAccounts = <Account>[];
@@ -316,7 +307,7 @@ class AuthNotifier extends Notifier<AuthState> {
         }
       } else {
         // No active account to logout, but check if any accounts exist
-        final accounts = await getAccounts();
+        final accounts = await _authService.getAccountsList();
         if (accounts.isNotEmpty) {
           // Set the first account as active
           await ref.read(activePubkeyProvider.notifier).setActivePubkey(accounts.first.pubkey);

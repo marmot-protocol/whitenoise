@@ -2,19 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:go_router/go_router.dart';
-import 'package:whitenoise/config/extensions/toast_extension.dart';
 import 'package:whitenoise/config/providers/auth_provider.dart';
-import 'package:whitenoise/routing/routes.dart';
 import 'package:whitenoise/ui/auth_flow/auth_header.dart';
-import 'package:whitenoise/ui/auth_flow/qr_scanner_screen.dart';
+import 'package:whitenoise/ui/auth_flow/controllers/login_controller.dart';
 import 'package:whitenoise/ui/core/themes/assets.dart';
 import 'package:whitenoise/ui/core/themes/src/extensions.dart';
 import 'package:whitenoise/ui/core/ui/wn_button.dart';
 import 'package:whitenoise/ui/core/ui/wn_icon_button.dart';
 import 'package:whitenoise/ui/core/ui/wn_image.dart';
 import 'package:whitenoise/ui/core/ui/wn_text_form_field.dart';
-import 'package:whitenoise/utils/clipboard_utils.dart';
 import 'package:whitenoise/utils/localization_extensions.dart';
 import 'package:whitenoise/utils/status_bar_utils.dart';
 
@@ -74,41 +70,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with WidgetsBindingOb
     _wasKeyboardVisible = keyboardVisible;
   }
 
-  Future<void> _onContinuePressed() async {
-    final key = _keyController.text.trim();
-
-    if (key.isEmpty) {
-      ref.showErrorToast('auth.pleaseEnterPrivateKey'.tr());
-      return;
-    }
-
-    final authNotifier = ref.read(authProvider.notifier);
-
-    // Use the regular login method that shows loading state
-    await authNotifier.loginWithKey(key);
-
-    final authState = ref.read(authProvider);
-
-    if (authState.isAuthenticated && authState.error == null) {
-      if (!mounted) return;
-      context.go(Routes.chats);
-    } else if (authState.error != null) {
-      // Error is already shown by the auth provider via toast
-      // No need to show additional error here
-    }
-  }
-
-  Future<void> _scanQRCode() async {
-    final scannedCode = await QRScannerScreen.navigate(context);
-    if (scannedCode != null && scannedCode.isNotEmpty) {
-      _keyController.text = scannedCode;
-      setState(() {});
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     ref.watch(authProvider);
+    final controller = ref.watch(loginControllerProvider(context));
 
     return StatusBarUtils.wrapWithAdaptiveIcons(
       context: context,
@@ -161,7 +126,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with WidgetsBindingOb
                               focusNode: _focusNode,
                               decoration: InputDecoration(
                                 suffixIcon: GestureDetector(
-                                  onTap: _scanQRCode,
+                                  onTap: () async {
+                                    final scannedCode = await controller.scanQRCode();
+                                    if (scannedCode != null && scannedCode.isNotEmpty) {
+                                      _keyController.text = scannedCode;
+                                      setState(() {});
+                                    }
+                                  },
                                   child: Padding(
                                     padding: EdgeInsets.all(12.w),
                                     child: WnImage(
@@ -187,13 +158,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with WidgetsBindingOb
                             ),
                             child: WnIconButton(
                               iconPath: AssetsPaths.icPaste,
-                              onTap:
-                                  () async => await ClipboardUtils.pasteWithToast(
-                                    ref: ref,
-                                    onPaste: (text) {
-                                      _keyController.text = text;
-                                    },
-                                  ),
+                              onTap: () async {
+                                await controller.pasteFromClipboard((text) {
+                                  _keyController.text = text;
+                                });
+                              },
                               padding: 20.w,
                               size: 56.h,
                             ),
@@ -206,7 +175,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with WidgetsBindingOb
                           final authState = ref.watch(authProvider);
                           return WnFilledButton(
                             loading: authState.isLoading,
-                            onPressed: _keyController.text.isEmpty ? null : _onContinuePressed,
+                            onPressed:
+                                _keyController.text.isEmpty
+                                    ? null
+                                    : () =>
+                                        controller.onContinuePressed(_keyController.text.trim()),
                             label: 'auth.login'.tr(),
                           );
                         },
