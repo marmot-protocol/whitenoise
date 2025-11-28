@@ -12,6 +12,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 ### Removed
 ### Fixed
+- Fixed message bubble width issue where bubbles could become too wide and cause layout problems [#856](https://github.com/parres-hq/whitenoise_flutter/issues/856)
+- Fixed timestamp alignment for received messages to align to the right side instead of left
 ### Security
 
 ## [0.2.1] - 2025-11-20
