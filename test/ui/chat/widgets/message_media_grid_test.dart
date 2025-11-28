@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/config/providers/media_file_downloads_provider.dart';
+import 'package:whitenoise/domain/models/media_file_download.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/ui/chat/widgets/message_media_grid.dart';
 import 'package:whitenoise/ui/chat/widgets/message_media_tile.dart';
 import 'package:whitenoise/utils/media_layout_calculator.dart';
 
 import '../../../test_helpers.dart';
+
+class _MockMediaFileDownloadsNotifier extends MediaFileDownloadsNotifier {
+  List<MediaFile>? downloadedMediaFiles;
+
+  @override
+  Future<List<MediaFileDownload>> downloadMediaFiles(List<MediaFile> mediaFiles) async {
+    downloadedMediaFiles = mediaFiles;
+    return [];
+  }
+}
 
 void main() {
   group('MessageMediaGrid', () {
@@ -390,6 +402,32 @@ void main() {
         );
 
         expect(find.text('+4'), findsOneWidget);
+      });
+    });
+
+    group('downloads', () {
+      late _MockMediaFileDownloadsNotifier mockNotifier;
+
+      setUp(() {
+        mockNotifier = _MockMediaFileDownloadsNotifier();
+      });
+
+      testWidgets('downloads media files when grid has files', (WidgetTester tester) async {
+        final mediaFiles = [
+          createTestMediaFile(id: '1'),
+          createTestMediaFile(id: '2'),
+        ];
+
+        await tester.pumpWidget(
+          createTestWidget(
+            MessageMediaGrid(mediaFiles: mediaFiles),
+            overrides: [
+              mediaFileDownloadsProvider.overrideWith(() => mockNotifier),
+            ],
+          ),
+        );
+
+        expect(mockNotifier.downloadedMediaFiles, equals(mediaFiles));
       });
     });
   });

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:whitenoise/config/providers/media_file_downloads_provider.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart' show MediaFile;
 import 'package:whitenoise/ui/chat/widgets/message_media_tile.dart';
 import 'package:whitenoise/ui/core/themes/src/extensions.dart';
 import 'package:whitenoise/utils/media_layout_calculator.dart';
 
-class MessageMediaGrid extends StatelessWidget {
+class MessageMediaGrid extends ConsumerWidget {
   const MessageMediaGrid({
     super.key,
     required this.mediaFiles,
@@ -16,10 +18,14 @@ class MessageMediaGrid extends StatelessWidget {
   final Function(int index)? onMediaTap;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     if (mediaFiles.isEmpty) {
       return const SizedBox.shrink();
     }
+
+    Future.microtask(() {
+      ref.read(mediaFileDownloadsProvider.notifier).downloadMediaFiles(mediaFiles);
+    });
 
     final layoutConfig = MediaLayoutCalculator.calculateLayout(mediaFiles.length);
     final visibleFiles = mediaFiles.take(layoutConfig.visibleItemsCount).toList();
