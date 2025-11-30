@@ -25,7 +25,7 @@ class ChatMessageBubble extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Container(
+          ConstrainedBox(
             constraints:
                 constraints ??
                 BoxConstraints(

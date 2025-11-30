@@ -108,12 +108,11 @@ class MessageWidget extends StatelessWidget {
   Widget _buildMessageContent(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        return IntrinsicWidth(
+        return ConstrainedBox(
+          constraints: BoxConstraints(
+            maxWidth: constraints.maxWidth,
+          ),
           child: Container(
-            constraints: BoxConstraints(
-              // This allows the bubble to dynamically and correctly adjust its width.
-              maxWidth: constraints.maxWidth,
-            ),
             padding: EdgeInsets.only(
               right: message.isMe ? 8.w : 0,
               left: message.isMe ? 0 : 8.w,
@@ -194,7 +193,7 @@ class MessageWidget extends StatelessWidget {
         return SizedBox(
           width: mediaWidth,
           child: Row(
-            mainAxisAlignment: message.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
               TimeAndStatus(message: message, context: context),
             ],
@@ -300,7 +299,7 @@ class MessageWidget extends StatelessWidget {
               SizedBox(
                 width: timestampRowWidth,
                 child: Row(
-                  mainAxisAlignment: message.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+                  mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     TimeAndStatus(message: message, context: context),
                   ],
@@ -309,7 +308,7 @@ class MessageWidget extends StatelessWidget {
             else
               // Timestamp is wider, it takes only its own width
               Row(
-                mainAxisAlignment: message.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.end,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   TimeAndStatus(message: message, context: context),
