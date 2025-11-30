@@ -135,10 +135,12 @@ class MessageWidget extends StatelessWidget {
                   ),
                   Gap(4.h),
                 ],
-                MessageReplyBox(
-                  replyingTo: message.replyTo,
-                  onTap:
-                      message.replyTo != null ? () => onReplyTap?.call(message.replyTo!.id) : null,
+                IntrinsicWidth(
+                  child: MessageReplyBox(
+                    replyingTo: message.replyTo,
+                    onTap:
+                        message.replyTo != null ? () => onReplyTap?.call(message.replyTo!.id) : null,
+                  ),
                 ),
                 if (message.mediaAttachments.isNotEmpty) ...[
                   MessageMediaGrid(
@@ -252,12 +254,15 @@ class MessageWidget extends StatelessWidget {
     double textMaxWidth;
     double containerWidth;
     
+    final hasReply = message.replyTo != null;
+    
     if (hasMedia && mediaWidth != null) {
       containerWidth = mediaWidth;
       textMaxWidth = canFitInline ? mediaWidth - timestampWidth : mediaWidth;
     } else {
       if (canFitInline) {
-        containerWidth = bubbleWidth + timestampWidth - 8.w;
+        final widthReduction = message.isMe && !hasReply ? 8.w : 0.0;
+        containerWidth = bubbleWidth + timestampWidth - widthReduction;
         textMaxWidth = bubbleWidth;
       } else {
         containerWidth = bubbleWidth > timestampWidth ? bubbleWidth : timestampWidth;
