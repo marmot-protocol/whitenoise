@@ -2087,7 +2087,9 @@ void main() {
       TestWidgetsFlutterBinding.ensureInitialized();
       late ProviderContainer container;
       const testGroupId = 'test-group-123';
-      const testPubkey = 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890';
+      // Use npub format since the code converts hex to npub via FFI
+      const testPubkey = 'npub1yx5dwahlw3sql3t7h7qrr0xrx5k3cf44rjfq3fvs37lhk8yq0dnq7z5zqh';
+      const otherUserPubkey = 'npub1z9qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqwpwcp';
 
       late MockMessageSenderService mockMessageSenderService;
       late MockGroupMessagesNotifier mockGroupMessagesNotifier;
@@ -2102,7 +2104,7 @@ void main() {
         testMessage = createTestMessage(
           id: 'msg-1',
           content: 'Hello',
-          senderPubkey: 'other-user-pubkey',
+          senderPubkey: otherUserPubkey,
           createdAt: DateTime.now(),
           groupId: testGroupId,
         );
@@ -2160,7 +2162,6 @@ void main() {
         expect(messages.first.reactions.first.emoji, reactionEmoji);
         expect(messages.first.reactions.first.user.npub, testPubkey);
       });
-
 
       test('updateMessageReaction reverts optimistic update on failure', () async {
         final notifier = container.read(chatProvider.notifier);
