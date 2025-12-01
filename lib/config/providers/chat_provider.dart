@@ -520,6 +520,10 @@ class ChatNotifier extends Notifier<ChatState> {
       }
 
       final activeUserNpub = PubkeyFormatter(pubkey: activePubkey).toNpub();
+      if (activeUserNpub == null) {
+        _logger.warning('Failed to convert active pubkey to npub format');
+        return false;
+      }
       final normalizedEmoji = emoji.trim().replaceAll('\u{FE0F}', '');
 
       final userCurrentReaction = message.reactions.firstWhereOrNull(
@@ -543,7 +547,7 @@ class ChatNotifier extends Notifier<ChatState> {
 
         final currentUser = User(
           id: activePubkey,
-          npub: activeUserNpub ?? activePubkey,
+          npub: activeUserNpub,
           displayName: 'You',
           nip05: '',
         );
