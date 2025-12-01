@@ -96,7 +96,7 @@ void main() {
         );
 
         final expectedWidth = MediaLayoutCalculator.singleImageSize.w;
-        expect(sizedBox.width, expectedWidth);
+        expect(sizedBox.width, closeTo(expectedWidth, 0.001));
       });
     });
 
@@ -152,9 +152,9 @@ void main() {
               .first,
         );
 
-        // 2 images: (140 * 2) + (4 * 1) spacing
+        // 2 images: (120 * 2) + (4 * 1) spacing
         final expectedWidth = (MediaLayoutCalculator.twoImagesSize.w * 2) + 4.w;
-        expect(sizedBox.width, expectedWidth);
+        expect(sizedBox.width, closeTo(expectedWidth, 0.001));
       });
     });
 
@@ -213,9 +213,9 @@ void main() {
               .first,
         );
 
-        // 3 images: (92 * 3) + (4 * 2) spacing
+        // 3 images: (80 * 3) + (4 * 2) spacing
         final expectedWidth = (MediaLayoutCalculator.multipleImagesSize.w * 3) + (4.w * 2);
-        expect(sizedBox.width, expectedWidth);
+        expect(sizedBox.width, closeTo(expectedWidth, 0.001));
       });
     });
 
@@ -335,9 +335,9 @@ void main() {
               .first,
         );
 
-        // 6 images in 3 columns: (92 * 3) + (4 * 2) spacing
+        // 6 images in 3 columns: (80 * 3) + (4 * 2) spacing
         final expectedWidth = (MediaLayoutCalculator.multipleImagesSize.w * 3) + (4.w * 2);
-        expect(sizedBox.width, expectedWidth);
+        expect(sizedBox.width, closeTo(expectedWidth, 0.001));
       });
     });
 

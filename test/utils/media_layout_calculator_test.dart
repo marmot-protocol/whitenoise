@@ -11,12 +11,12 @@ void main() {
 
       test('returns expected grid width', () {
         final result = MediaLayoutCalculator.calculateLayout(1);
-        expect(result.gridWidth, 250.0);
+        expect(result.gridWidth, 240.0);
       });
 
       test('returns expected item size', () {
         final result = MediaLayoutCalculator.calculateLayout(1);
-        expect(result.itemSize, 250.0);
+        expect(result.itemSize, 240.0);
       });
     });
 
@@ -28,13 +28,13 @@ void main() {
 
       test('returns expected grid width', () {
         final result = MediaLayoutCalculator.calculateLayout(2);
-        // (140 * 2) + (4 * 1) = 284
-        expect(result.gridWidth, 284.0);
+        // (120 * 2) + (4 * 1) = 244
+        expect(result.gridWidth, 244.0);
       });
 
       test('returns expected item size', () {
         final result = MediaLayoutCalculator.calculateLayout(2);
-        expect(result.itemSize, 140.0);
+        expect(result.itemSize, 120.0);
       });
     });
 
@@ -46,13 +46,13 @@ void main() {
 
       test('returns expected grid width', () {
         final result = MediaLayoutCalculator.calculateLayout(3);
-        // (92 * 3) + (4 * 2) = 284
-        expect(result.gridWidth, 284.0);
+        // (80 * 3) + (4 * 2) = 248
+        expect(result.gridWidth, 248.0);
       });
 
       test('returns expected item size', () {
         final result = MediaLayoutCalculator.calculateLayout(3);
-        expect(result.itemSize, 92.0);
+        expect(result.itemSize, 80.0);
       });
     });
 
@@ -64,13 +64,13 @@ void main() {
 
       test('returns expected grid width', () {
         final result = MediaLayoutCalculator.calculateLayout(4);
-        // (92 * 3) + (4 * 2) = 284
-        expect(result.gridWidth, 284.0);
+        // (80 * 3) + (4 * 2) = 248
+        expect(result.gridWidth, 248.0);
       });
 
       test('returns expected item size', () {
         final result = MediaLayoutCalculator.calculateLayout(4);
-        expect(result.itemSize, 92.0);
+        expect(result.itemSize, 80.0);
       });
     });
 
@@ -82,13 +82,13 @@ void main() {
 
       test('returns expected grid width', () {
         final result = MediaLayoutCalculator.calculateLayout(5);
-        // (92 * 3) + (4 * 2) = 284
-        expect(result.gridWidth, 284.0);
+        // (80 * 3) + (4 * 2) = 248
+        expect(result.gridWidth, 248.0);
       });
 
       test('returns expected item size', () {
         final result = MediaLayoutCalculator.calculateLayout(5);
-        expect(result.itemSize, 92.0);
+        expect(result.itemSize, 80.0);
       });
     });
 
@@ -100,13 +100,13 @@ void main() {
 
       test('returns expected grid width', () {
         final result = MediaLayoutCalculator.calculateLayout(6);
-        // (92 * 3) + (4 * 2) = 284
-        expect(result.gridWidth, 284.0);
+        // (80 * 3) + (4 * 2) = 248
+        expect(result.gridWidth, 248.0);
       });
 
       test('returns expected item size', () {
         final result = MediaLayoutCalculator.calculateLayout(6);
-        expect(result.itemSize, 92.0);
+        expect(result.itemSize, 80.0);
       });
     });
 
@@ -118,13 +118,13 @@ void main() {
 
       test('returns expected grid width', () {
         final result = MediaLayoutCalculator.calculateLayout(7);
-        // (92 * 3) + (4 * 2) = 284
-        expect(result.gridWidth, 284.0);
+        // (80 * 3) + (4 * 2) = 248
+        expect(result.gridWidth, 248.0);
       });
 
       test('returns expected item size', () {
         final result = MediaLayoutCalculator.calculateLayout(7);
-        expect(result.itemSize, 92.0);
+        expect(result.itemSize, 80.0);
       });
     });
 
@@ -136,13 +136,13 @@ void main() {
 
       test('returns expected grid width', () {
         final result = MediaLayoutCalculator.calculateLayout(8);
-        // (92 * 3) + (4 * 2) = 284
-        expect(result.gridWidth, 284.0);
+        // (80 * 3) + (4 * 2) = 248
+        expect(result.gridWidth, 248.0);
       });
 
       test('returns expected item size', () {
         final result = MediaLayoutCalculator.calculateLayout(8);
-        expect(result.itemSize, 92.0);
+        expect(result.itemSize, 80.0);
       });
     });
 
@@ -154,13 +154,13 @@ void main() {
 
       test('returns expected grid width', () {
         final result = MediaLayoutCalculator.calculateLayout(9);
-        // (92 * 3) + (4 * 2) = 284
-        expect(result.gridWidth, 284.0);
+        // (80 * 3) + (4 * 2) = 248
+        expect(result.gridWidth, 248.0);
       });
 
       test('returns expected item size', () {
         final result = MediaLayoutCalculator.calculateLayout(9);
-        expect(result.itemSize, 92.0);
+        expect(result.itemSize, 80.0);
       });
     });
   });

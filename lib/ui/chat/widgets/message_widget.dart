@@ -96,7 +96,6 @@ class MessageWidget extends StatelessWidget {
               ] else ...[
                 // Add spacer to maintain consistent tail alignment
                 SizedBox(width: 32.w + 4.w), // Same width as avatar + gap
-                SizedBox(width: 32.w + 4.w),
               ],
             ],
             messageContentStack,
@@ -197,7 +196,7 @@ class MessageWidget extends StatelessWidget {
   }) {
     final messageContent = message.content ?? '';
     final timestampWidth = _getTimestampWidth(context);
-    final spacingWidth = 4.w;
+    final spacingWidth = 6.w;
 
     if (messageContent.isEmpty) {
       if (hasMedia && mediaWidth != null) {
@@ -263,7 +262,7 @@ class MessageWidget extends StatelessWidget {
 
     final messageContent = message.content ?? '';
     final timestampWidth = _getTimestampWidth(context);
-    final spacingWidth = 4.w;
+    final spacingWidth = 6.w;
 
     if (messageContent.isEmpty) {
       if (hasMedia && mediaWidth != null) {
