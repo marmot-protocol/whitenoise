@@ -11,9 +11,9 @@ class MediaLayoutConfig {
 }
 
 class MediaLayoutCalculator {
-  static const double singleImageSize = 250.0;
-  static const double twoImagesSize = 140.0;
-  static const double multipleImagesSize = 92.0;
+  static const double singleImageSize = 240.0;
+  static const double twoImagesSize = 120.0;
+  static const double multipleImagesSize = 80.0;
   static const double spacing = 4.0;
 
   static MediaLayoutConfig calculateLayout(int mediaCount) {
