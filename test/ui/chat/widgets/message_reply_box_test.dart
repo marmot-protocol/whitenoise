@@ -11,7 +11,7 @@ void main() {
   group('MessageReplyBox', () {
     final testUser = User(
       id: 'test-id',
-      publicKey: 'test-pubkey',
+      npub: 'test-pubkey',
       displayName: 'Test User',
       nip05: '',
     );

@@ -283,7 +283,7 @@ class GroupsNotifier extends Notifier<GroupsState> {
         final members =
             _getGroupMembersFn?.call(group.mlsGroupId) ?? getGroupMembers(group.mlsGroupId);
         if (members != null && members.length == 2) {
-          final memberPubkeys = members.map((m) => m.publicKey).toSet();
+          final memberPubkeys = members.map((m) => m.npub).toSet();
           if (memberPubkeys.contains(currentUserNpub) && memberPubkeys.contains(otherUserNpub)) {
             _logger.info('Found existing DM group: ${group.mlsGroupId}');
             return group;
@@ -468,7 +468,7 @@ class GroupsNotifier extends Notifier<GroupsState> {
             id: npub,
             displayName: 'shared.unknownUser'.tr(),
             nip05: '',
-            publicKey: npub,
+            npub: npub,
           );
           members.add(fallbackUser);
         }
@@ -602,7 +602,7 @@ class GroupsNotifier extends Notifier<GroupsState> {
             id: npub,
             displayName: 'shared.unknownUser'.tr(),
             nip05: '',
-            publicKey: npub,
+            npub: npub,
           );
           admins.add(fallbackUser);
         }
@@ -1683,7 +1683,7 @@ extension GroupMemberUtils on GroupsNotifier {
     final otherMembers =
         members
             .where(
-              (member) => _pubkeyFormatter(pubkey: member.publicKey).toHex() != hexActivePubkey,
+              (member) => _pubkeyFormatter(pubkey: member.npub).toHex() != hexActivePubkey,
             )
             .toList();
     final npubActivePubkey = _pubkeyFormatter(pubkey: activePubkey).toNpub();

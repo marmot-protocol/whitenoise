@@ -27,7 +27,7 @@ class _SendMessageButtonState extends ConsumerState<SendMessageButton> {
   bool get _isLoading => _isCreatingGroup;
 
   Future<void> _createOrOpenDirectMessageGroup() async {
-    if (widget.user.publicKey.isEmpty) {
+    if (widget.user.npub.isEmpty) {
       ref.showErrorToast('chats.noUserToStartChatWith'.tr());
       return;
     }
@@ -42,8 +42,8 @@ class _SendMessageButtonState extends ConsumerState<SendMessageButton> {
             groupName: '',
             groupDescription: '',
             isDm: true,
-            memberPublicKeyHexs: [widget.user.publicKey],
-            adminPublicKeyHexs: [widget.user.publicKey],
+            memberPublicKeyHexs: [widget.user.npub],
+            adminPublicKeyHexs: [widget.user.npub],
           );
 
       if (group != null) {
@@ -105,19 +105,19 @@ class FollowToggleButton extends ConsumerStatefulWidget {
 
 class _FollowToggleButtonState extends ConsumerState<FollowToggleButton> {
   Future<void> _toggleFollow() async {
-    final followNotifier = ref.read(followProvider(widget.user.publicKey).notifier);
-    var currentFollowState = ref.read(followProvider(widget.user.publicKey));
+    final followNotifier = ref.read(followProvider(widget.user.npub).notifier);
+    var currentFollowState = ref.read(followProvider(widget.user.npub));
     late String successMessage;
 
     if (currentFollowState.isFollowing) {
       successMessage = 'ui.unfollowed'.tr({'name': widget.user.displayName});
-      await followNotifier.removeFollow(widget.user.publicKey);
+      await followNotifier.removeFollow(widget.user.npub);
     } else {
       successMessage = 'ui.followed'.tr({'name': widget.user.displayName});
-      await followNotifier.addFollow(widget.user.publicKey);
+      await followNotifier.addFollow(widget.user.npub);
     }
 
-    currentFollowState = ref.read(followProvider(widget.user.publicKey));
+    currentFollowState = ref.read(followProvider(widget.user.npub));
     final errorMessage = currentFollowState.error ?? '';
     if (errorMessage.isNotEmpty) {
       ref.showErrorToast(errorMessage);
@@ -128,7 +128,7 @@ class _FollowToggleButtonState extends ConsumerState<FollowToggleButton> {
 
   @override
   Widget build(BuildContext context) {
-    final followState = ref.watch(followProvider(widget.user.publicKey));
+    final followState = ref.watch(followProvider(widget.user.npub));
 
     return WnFilledButton(
       onPressed: followState.isLoading ? null : _toggleFollow,

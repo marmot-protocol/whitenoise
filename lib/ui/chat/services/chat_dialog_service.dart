@@ -75,7 +75,7 @@ class ChatDialogService {
               Navigator.pop(context);
               ref
                   .read(chatProvider.notifier)
-                  .updateMessageReaction(message: message, reaction: emoji.emoji);
+                  .updateMessageReaction(message: message, emoji: emoji.emoji);
             }),
           ),
         );
@@ -117,7 +117,7 @@ class ChatDialogService {
                   message: message,
                 );
               } else {
-                chatNotifier.updateMessageReaction(message: message, reaction: reaction);
+                chatNotifier.updateMessageReaction(message: message, emoji: reaction);
               }
             },
             onContextMenuTap: (menuItem) {
@@ -134,7 +134,7 @@ class ChatDialogService {
                   groupId: message.groupId ?? '',
                   messageId: message.id,
                   messageKind: message.kind,
-                  messagePubkey: message.sender.publicKey,
+                  messagePubkey: message.sender.npub,
                 );
               }
             },

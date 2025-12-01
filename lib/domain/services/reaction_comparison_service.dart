@@ -18,7 +18,7 @@ class ReactionComparisonService {
   static Map<String, List<String>> _buildReactionMap(List<Reaction> reactions) {
     final map = <String, List<String>>{};
     for (final reaction in reactions) {
-      map.putIfAbsent(reaction.emoji, () => []).add(reaction.user.publicKey);
+      map.putIfAbsent(reaction.emoji, () => []).add(reaction.user.npub);
     }
     return map;
   }

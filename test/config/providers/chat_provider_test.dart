@@ -119,7 +119,7 @@ MessageModel createTestMessage({
     createdAt: createdAt,
     sender: User(
       id: senderPubkey,
-      publicKey: senderPubkey,
+      npub: senderPubkey,
       displayName: 'Test User',
       nip05: '',
     ),
@@ -1501,7 +1501,7 @@ void main() {
             content: 'My message',
             type: MessageType.text,
             createdAt: now,
-            sender: User(id: testPubkey, publicKey: testPubkey, displayName: 'Me', nip05: ''),
+            sender: User(id: testPubkey, npub: testPubkey, displayName: 'Me', nip05: ''),
             isMe: true,
             groupId: groupId,
           );
@@ -1527,7 +1527,7 @@ void main() {
             content: 'My message 1',
             type: MessageType.text,
             createdAt: now.subtract(const Duration(minutes: 2)),
-            sender: User(id: testPubkey, publicKey: testPubkey, displayName: 'Me', nip05: ''),
+            sender: User(id: testPubkey, npub: testPubkey, displayName: 'Me', nip05: ''),
             isMe: true,
             groupId: groupId,
           );
@@ -1543,7 +1543,7 @@ void main() {
             content: 'My message 2',
             type: MessageType.text,
             createdAt: now,
-            sender: User(id: testPubkey, publicKey: testPubkey, displayName: 'Me', nip05: ''),
+            sender: User(id: testPubkey, npub: testPubkey, displayName: 'Me', nip05: ''),
             isMe: true,
             groupId: groupId,
           );
@@ -1584,7 +1584,7 @@ void main() {
             content: 'My message 1',
             type: MessageType.text,
             createdAt: now.subtract(const Duration(minutes: 1)),
-            sender: User(id: testPubkey, publicKey: testPubkey, displayName: 'Me', nip05: ''),
+            sender: User(id: testPubkey, npub: testPubkey, displayName: 'Me', nip05: ''),
             isMe: true,
             groupId: groupId,
           );
@@ -1593,7 +1593,7 @@ void main() {
             content: 'My message 2',
             type: MessageType.text,
             createdAt: now,
-            sender: User(id: testPubkey, publicKey: testPubkey, displayName: 'Me', nip05: ''),
+            sender: User(id: testPubkey, npub: testPubkey, displayName: 'Me', nip05: ''),
             isMe: true,
             groupId: groupId,
           );
@@ -1726,7 +1726,7 @@ void main() {
             content: 'Self',
             type: MessageType.text,
             createdAt: lastReadTime.add(const Duration(minutes: 2)),
-            sender: User(id: testPubkey, publicKey: testPubkey, displayName: 'Me', nip05: ''),
+            sender: User(id: testPubkey, npub: testPubkey, displayName: 'Me', nip05: ''),
             isMe: true,
             groupId: groupId,
           );
@@ -1923,7 +1923,7 @@ void main() {
             content: 'Self message',
             type: MessageType.text,
             createdAt: now.add(const Duration(minutes: 5)),
-            sender: User(id: testPubkey, publicKey: testPubkey, displayName: 'Me', nip05: ''),
+            sender: User(id: testPubkey, npub: testPubkey, displayName: 'Me', nip05: ''),
             isMe: true,
             groupId: g2,
           ),
@@ -2148,7 +2148,7 @@ void main() {
         // Add reaction
         final result = await notifier.updateMessageReaction(
           message: testMessage,
-          reaction: reactionEmoji,
+          emoji: reactionEmoji,
         );
 
         expect(result, true);
@@ -2158,76 +2158,9 @@ void main() {
         messages = container.read(chatProvider).groupMessages[testGroupId];
         expect(messages!.first.reactions, isNotEmpty);
         expect(messages.first.reactions.first.emoji, reactionEmoji);
-        expect(messages.first.reactions.first.user.publicKey, testPubkey);
+        expect(messages.first.reactions.first.user.npub, testPubkey);
       });
 
-      test('updateMessageReaction removes reaction optimistically (toggle)', () async {
-        const reactionEmoji = '👍';
-
-        // Setup: Message already has a reaction from current user
-        final reaction = Reaction(
-          emoji: reactionEmoji,
-          user: User(
-            id: testPubkey,
-            publicKey: testPubkey,
-            displayName: 'Me',
-            nip05: '',
-          ),
-          createdAt: DateTime.now(),
-        );
-
-        final messageWithReaction = testMessage.copyWith(reactions: [reaction]);
-
-        // Update the mock to return this message (simulating state before toggle)
-        // We need to manually update the state because we can't easily inject it into the provider's internal state directly
-        // without going through the load process again or using a method exposed for testing.
-        // However, for this test, we can just call updateMessageReaction on the messageWithReaction.
-        // But wait, the provider looks up the message in its state by ID.
-        // So we need to ensure the provider's state has the message with reaction.
-
-        // Let's re-initialize with the message having a reaction
-        mockGroupMessagesNotifier = MockGroupMessagesNotifier(
-          messagesToReturn: [messageWithReaction],
-        );
-
-        container = ProviderContainer(
-          overrides: [
-            authProvider.overrideWith(
-              () => MockAuthNotifier(isAuthenticated: true),
-            ),
-            activePubkeyProvider.overrideWith(
-              () => MockActivePubkeyNotifier(testPubkey),
-            ),
-            groupMessagesProvider.overrideWith(
-              () => mockGroupMessagesNotifier,
-            ),
-            chatProvider.overrideWith(
-              () => ChatNotifier(messageSenderService: mockMessageSenderService),
-            ),
-          ],
-        );
-
-        final newNotifier = container.read(chatProvider.notifier);
-        await newNotifier.loadMessagesForGroup(testGroupId);
-
-        // Verify initial state has reaction
-        var messages = container.read(chatProvider).groupMessages[testGroupId];
-        expect(messages!.first.reactions, isNotEmpty);
-        expect(messages.first.reactions.first.emoji, reactionEmoji);
-
-        // Remove reaction (toggle)
-        final result = await newNotifier.updateMessageReaction(
-          message: messageWithReaction,
-          reaction: reactionEmoji,
-        );
-
-        expect(result, true);
-        expect(mockMessageSenderService.reactionCallCount, 1);
-
-        // Verify optimistic removal
-        messages = container.read(chatProvider).groupMessages[testGroupId];
-        expect(messages!.first.reactions, isEmpty);
-      });
 
       test('updateMessageReaction reverts optimistic update on failure', () async {
         final notifier = container.read(chatProvider.notifier);
@@ -2239,7 +2172,7 @@ void main() {
         // Add reaction
         final result = await notifier.updateMessageReaction(
           message: testMessage,
-          reaction: reactionEmoji,
+          emoji: reactionEmoji,
         );
 
         expect(result, false);

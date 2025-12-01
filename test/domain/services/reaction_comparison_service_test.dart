@@ -8,19 +8,19 @@ void main() {
     final alice = User(
       id: '1',
       displayName: 'Alice',
-      publicKey: 'pubkeyA',
+      npub: 'pubkeyA',
       nip05: '',
     );
     final bob = User(
       id: '2',
       displayName: 'Bob',
-      publicKey: 'pubkeyB',
+      npub: 'pubkeyB',
       nip05: '',
     );
     final charlie = User(
       id: '3',
       displayName: 'Charlie',
-      publicKey: 'pubkeyC',
+      npub: 'pubkeyC',
       nip05: '',
     );
 

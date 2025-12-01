@@ -384,9 +384,9 @@ class ChatNotifier extends Notifier<ChatState> {
     if (selectedGroupId == null) return false;
     final groupMessages = state.groupMessages[selectedGroupId] ?? [];
     if (index <= 0 || index >= groupMessages.length) return false;
-    final currentSenderPubkey = groupMessages[index].sender.publicKey;
+    final currentSenderPubkey = groupMessages[index].sender.npub;
     final currentSenderHexPubkey = PubkeyFormatter(pubkey: currentSenderPubkey).toHex() ?? '';
-    final previousSenderPubkey = groupMessages[index - 1].sender.publicKey;
+    final previousSenderPubkey = groupMessages[index - 1].sender.npub;
     final previousSenderHexPubkey = PubkeyFormatter(pubkey: previousSenderPubkey).toHex() ?? '';
     if (currentSenderHexPubkey.isEmpty || previousSenderHexPubkey.isEmpty) return false;
     return currentSenderHexPubkey == previousSenderHexPubkey;
@@ -397,9 +397,9 @@ class ChatNotifier extends Notifier<ChatState> {
     if (selectedGroupId == null) return false;
     final groupMessages = state.groupMessages[selectedGroupId] ?? [];
     if (index < 0 || index >= groupMessages.length - 1) return false;
-    final currentSenderPubkey = groupMessages[index].sender.publicKey;
+    final currentSenderPubkey = groupMessages[index].sender.npub;
     final currentSenderHexPubkey = PubkeyFormatter(pubkey: currentSenderPubkey).toHex() ?? '';
-    final nextSenderPubkey = groupMessages[index + 1].sender.publicKey;
+    final nextSenderPubkey = groupMessages[index + 1].sender.npub;
     final nextSenderHexPubkey = PubkeyFormatter(pubkey: nextSenderPubkey).toHex() ?? '';
     if (currentSenderHexPubkey.isEmpty || nextSenderHexPubkey.isEmpty) return false;
     return currentSenderHexPubkey == nextSenderHexPubkey;
@@ -500,7 +500,7 @@ class ChatNotifier extends Notifier<ChatState> {
   /// Add or remove a reaction to/from a message
   Future<bool> updateMessageReaction({
     required MessageModel message,
-    required String reaction,
+    required String emoji,
     int? messageKind,
   }) async {
     if (!_isAuthAvailable()) {
@@ -519,68 +519,61 @@ class ChatNotifier extends Notifier<ChatState> {
         return false;
       }
 
-      _logger.info('ChatProvider: Adding reaction "$reaction" to message ${message.id}');
+      final activeUserNpub = PubkeyFormatter(pubkey: activePubkey).toNpub();
+      final normalizedEmoji = emoji.trim().replaceAll('\u{FE0F}', '');
+
+      final userCurrentReaction = message.reactions.firstWhereOrNull(
+        (r) => r.user.npub == activeUserNpub,
+      );
+
+      if (userCurrentReaction?.emoji == normalizedEmoji) {
+        _logger.fine('user has already reacted with $normalizedEmoji');
+        return false;
+      }
 
       final currentMessages = state.groupMessages[groupId] ?? [];
       final messageIndex = currentMessages.indexWhere((m) => m.id == message.id);
 
       if (messageIndex != -1) {
         final currentMessage = currentMessages[messageIndex];
-        final currentReactions = List<Reaction>.from(currentMessage.reactions);
+        final updatedReactions = List<Reaction>.from(currentMessage.reactions)
+          ..removeWhere((r) => r.user.npub == activeUserNpub);
 
-        final existingReactionIndex = currentReactions.indexWhere(
-          (r) => r.emoji == reaction && r.user.publicKey == activePubkey,
+        final currentUser = User(
+          id: activePubkey,
+          npub: activeUserNpub ?? activePubkey,
+          displayName: 'You',
+          nip05: '',
         );
 
-        if (existingReactionIndex != -1) {
-          currentReactions.removeAt(existingReactionIndex);
-        } else {
-          final currentUser = User(
-            id: activePubkey,
-            publicKey: activePubkey,
-            displayName: 'You',
-            nip05: '',
-          );
+        updatedReactions.add(
+          Reaction(emoji: normalizedEmoji, user: currentUser, createdAt: DateTime.now()),
+        );
 
-          currentReactions.add(
-            Reaction(emoji: reaction, user: currentUser, createdAt: DateTime.now()),
-          );
-        }
-
-        final updatedMessage = currentMessage.copyWith(reactions: currentReactions);
-        final updatedMessages = List<MessageModel>.from(currentMessages);
-        updatedMessages[messageIndex] = updatedMessage;
+        final updatedMessage = currentMessage.copyWith(reactions: updatedReactions);
+        final updatedMessages = List<MessageModel>.from(currentMessages)
+          ..[messageIndex] = updatedMessage;
 
         state = state.copyWith(
           groupMessages: {...state.groupMessages, groupId: updatedMessages},
         );
       }
 
-      // Use the message's actual kind (now stored in MessageModel)
-      final originalMessageKind = messageKind ?? message.kind;
       await _messageSenderService.sendReaction(
         pubkey: activePubkey,
-        groupId: message.groupId ?? '',
+        groupId: groupId,
         messageId: message.id,
-        messagePubkey: message.sender.publicKey,
-        messageKind: originalMessageKind,
-        emoji: reaction,
+        messagePubkey: message.sender.npub,
+        messageKind: messageKind ?? message.kind,
+        emoji: normalizedEmoji,
       );
 
-      // No need to refresh messages immediately as we updated optimistically
-      // The background sync or next fetch will ensure consistency
-
-      _logger.info('ChatProvider: Reaction added successfully');
       return true;
     } catch (e, st) {
       _logger.severe('ChatProvider.updateMessageReaction', e, st);
 
-      // Revert optimistic update if failed
       final groupId = message.groupId;
       if (groupId != null) {
-        // We can't easily revert to "originalMessages" because state might have changed in between (e.g. new messages)
-        // But for a quick reaction toggle, it's likely safe to just refresh from server or revert the specific message change if we tracked it carefully.
-        // A safer approach is to refresh from server to get the true state.
         await refreshMessagesForGroup(groupId);
       }
 

@@ -45,9 +45,9 @@ class ChatGroupAppbar extends ConsumerWidget {
           activePubkey != null ? PubkeyFormatter(pubkey: activePubkey).toNpub() : null;
 
       final otherMember = members?.firstWhereOrNull(
-        (m) => m.publicKey != activePubkeyNpub,
+        (m) => m.npub != activePubkeyNpub,
       );
-      avatarPubkey = otherMember?.publicKey;
+      avatarPubkey = otherMember?.npub;
     } else {
       avatarPubkey = ref.watch(
         groupsProvider.select((s) => s.groupsMap?[groupId]?.nostrGroupId),

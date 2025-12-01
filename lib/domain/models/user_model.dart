@@ -6,14 +6,14 @@ class User {
   final String id;
   final String displayName;
   final String nip05;
-  final String publicKey;
+  final String npub;
   final String? imagePath;
 
   User({
     required this.id,
     required this.displayName,
     required this.nip05,
-    required this.publicKey,
+    required this.npub,
     this.imagePath,
   });
 
@@ -30,7 +30,7 @@ class User {
       id: publicKey,
       displayName: finalDisplayName,
       nip05: metadata.nip05 ?? '',
-      publicKey: publicKey,
+      npub: publicKey,
       imagePath: metadata.picture,
     );
   }
@@ -42,12 +42,12 @@ class User {
     return other.id == id &&
         other.displayName == displayName &&
         other.nip05 == nip05 &&
-        other.publicKey == publicKey &&
+        other.npub == npub &&
         other.imagePath == imagePath;
   }
 
   @override
   int get hashCode {
-    return Object.hash(id, displayName, nip05, publicKey, imagePath);
+    return Object.hash(id, displayName, nip05, npub, imagePath);
   }
 }

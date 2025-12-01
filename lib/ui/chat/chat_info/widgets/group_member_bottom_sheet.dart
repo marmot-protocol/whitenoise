@@ -48,7 +48,7 @@ class _GroupMemberBottomSheetState extends ConsumerState<GroupMemberBottomSheet>
   bool _isRemoving = false;
 
   void _copyToClipboard() {
-    final npub = widget.member.publicKey;
+    final npub = widget.member.npub;
     ClipboardUtils.copyWithToast(
       ref: ref,
       textToCopy: npub,
@@ -58,11 +58,11 @@ class _GroupMemberBottomSheetState extends ConsumerState<GroupMemberBottomSheet>
   }
 
   void _openAddToGroup() {
-    if (widget.member.publicKey.isEmpty) {
+    if (widget.member.npub.isEmpty) {
       ref.showErrorToast('ui.noUserToAddToGroup'.tr());
       return;
     }
-    context.push('/add_to_group/${widget.member.publicKey}');
+    context.push('/add_to_group/${widget.member.npub}');
   }
 
   void _loadCurrentUserNpub() async {
@@ -83,7 +83,7 @@ class _GroupMemberBottomSheetState extends ConsumerState<GroupMemberBottomSheet>
           .read(groupsProvider.notifier)
           .removeFromGroup(
             groupId: widget.groupId,
-            membersNpubs: [widget.member.publicKey],
+            membersNpubs: [widget.member.npub],
           );
       if (mounted) {
         Navigator.pop(context, true);
@@ -178,7 +178,7 @@ class _GroupMemberBottomSheetState extends ConsumerState<GroupMemberBottomSheet>
             .watch(groupsProvider)
             .groupAdmins?[widget.groupId]
             ?.firstWhereOrNull(
-              (admin) => admin.publicKey == currentUserNpub,
+              (admin) => admin.npub == currentUserNpub,
             ) !=
         null;
 
@@ -215,7 +215,7 @@ class _GroupMemberBottomSheetState extends ConsumerState<GroupMemberBottomSheet>
             children: [
               Flexible(
                 child: Text(
-                  widget.member.publicKey.formatPublicKey(),
+                  widget.member.npub.formatPublicKey(),
                   textAlign: TextAlign.center,
                   style: context.textTheme.bodyMedium?.copyWith(
                     color: context.colors.mutedForeground,

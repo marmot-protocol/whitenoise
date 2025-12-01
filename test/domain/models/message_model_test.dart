@@ -9,7 +9,7 @@ void main() {
       id: 'user123',
       displayName: 'Test User',
       nip05: 'test@example.com',
-      publicKey: 'pubkey123',
+      npub: 'pubkey123',
     );
 
     final testMediaFile1 = MediaFile(

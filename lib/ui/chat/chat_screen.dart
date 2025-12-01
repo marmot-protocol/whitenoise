@@ -123,7 +123,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> with WidgetsBindingObse
       final members = groupsState.groupMembers?[widget.groupId];
 
       if (members != null && members.isNotEmpty) {
-        final pubkeys = members.map((m) => m.publicKey).where((p) => p.isNotEmpty).toList();
+        final pubkeys = members.map((m) => m.npub).where((p) => p.isNotEmpty).toList();
         if (pubkeys.isNotEmpty) {
           ref.read(avatarColorProvider.notifier).preloadColorTokens(pubkeys);
         }
@@ -524,7 +524,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> with WidgetsBindingObse
                                           onReactionTap: (reaction) {
                                             chatNotifier.updateMessageReaction(
                                               message: message,
-                                              reaction: reaction,
+                                              emoji: reaction,
                                             );
                                           },
                                           onReplyTap: (messageId) {

@@ -178,11 +178,11 @@ class _ChatListScreenState extends ConsumerState<ChatListScreen>
             // Find the member that's not the current user
             final activePubkey = ref.read(activePubkeyProvider);
             final otherMember = members.firstWhere(
-              (m) => m.publicKey != activePubkey,
+              (m) => m.npub != activePubkey,
               orElse: () => members.first,
             );
-            if (otherMember.publicKey.isNotEmpty) {
-              pubkeysToPreload.add(otherMember.publicKey);
+            if (otherMember.npub.isNotEmpty) {
+              pubkeysToPreload.add(otherMember.npub);
             }
           }
         } else {

@@ -158,7 +158,7 @@ class GroupMessagesNotifier extends FamilyNotifier<GroupMessagesState, String> {
       id: userProfile.publicKey,
       displayName: _getDisplayName(activePubkey: activePubkey, userProfile: userProfile),
       nip05: userProfile.nip05 ?? '',
-      publicKey: userProfile.publicKey,
+      npub: userProfile.publicKey,
       imagePath: userProfile.imagePath,
     );
   }

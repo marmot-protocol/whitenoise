@@ -94,7 +94,7 @@ void main() {
         id: 'user-123',
         displayName: 'Test User',
         nip05: '',
-        publicKey: 'npub1test',
+        npub: 'npub1test',
       );
 
       testGroup = Group(
