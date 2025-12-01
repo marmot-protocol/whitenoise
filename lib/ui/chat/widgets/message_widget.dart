@@ -109,7 +109,7 @@ class MessageWidget extends StatelessWidget {
   Widget _buildMessageContent(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final maxBubbleWidth = screenWidth * 0.74;
-    
+
     return LayoutBuilder(
       builder: (context, constraints) {
         return ConstrainedBox(
@@ -153,16 +153,16 @@ class MessageWidget extends StatelessWidget {
                     ],
                     ConstrainedBox(
                       constraints: BoxConstraints(
-                        minWidth: 0,
                         maxWidth: messageContentWidth > 0 ? messageContentWidth : double.infinity,
                       ),
                       child: IntrinsicWidth(
                         stepWidth: messageContentWidth > 0 ? messageContentWidth : null,
                         child: MessageReplyBox(
                           replyingTo: message.replyTo,
-                          onTap: message.replyTo != null 
-                              ? () => onReplyTap?.call(message.replyTo!.id) 
-                              : null,
+                          onTap:
+                              message.replyTo != null
+                                  ? () => onReplyTap?.call(message.replyTo!.id)
+                                  : null,
                         ),
                       ),
                     ),
@@ -232,10 +232,11 @@ class MessageWidget extends StatelessWidget {
     final availableWidth = maxWidth - lastLineWidth;
     final canFitInline = availableWidth >= (timestampWidth + spacingWidth);
 
-    final bubbleWidth = longestLineWidth > textMaxWidthForLayout ? textMaxWidthForLayout : longestLineWidth;
-    
+    final bubbleWidth =
+        longestLineWidth > textMaxWidthForLayout ? textMaxWidthForLayout : longestLineWidth;
+
     final hasReply = message.replyTo != null;
-    
+
     if (hasMedia && mediaWidth != null) {
       return mediaWidth;
     } else {
@@ -319,13 +320,14 @@ class MessageWidget extends StatelessWidget {
     final availableWidth = maxWidth - lastLineWidth;
     final canFitInline = availableWidth >= (timestampWidth + spacingWidth);
 
-    final bubbleWidth = longestLineWidth > textMaxWidthForLayout ? textMaxWidthForLayout : longestLineWidth;
-    
+    final bubbleWidth =
+        longestLineWidth > textMaxWidthForLayout ? textMaxWidthForLayout : longestLineWidth;
+
     double textMaxWidth;
     double containerWidth;
-    
+
     final hasReply = message.replyTo != null;
-    
+
     if (hasMedia && mediaWidth != null) {
       containerWidth = mediaWidth;
       textMaxWidth = canFitInline ? mediaWidth - timestampWidth - spacingWidth : mediaWidth;
@@ -342,7 +344,7 @@ class MessageWidget extends StatelessWidget {
         }
       }
     }
-    
+
     final textWidget = _buildHighlightedText(messageContent, textStyle, context);
 
     final heightDifference = lastLineHeight - timestampHeight;
@@ -378,7 +380,6 @@ class MessageWidget extends StatelessWidget {
       return Text(
         text,
         style: baseStyle,
-        maxLines: null,
       );
     }
     // Search is active, but this message has no matches. Dim the whole text.
@@ -388,7 +389,6 @@ class MessageWidget extends StatelessWidget {
         style: baseStyle.copyWith(
           color: context.colors.mutedForeground,
         ),
-        maxLines: null,
       );
     }
     // Search is active and this message has matches. Highlight them.
@@ -433,7 +433,6 @@ class MessageWidget extends StatelessWidget {
 
     return RichText(
       text: TextSpan(children: spans),
-      maxLines: null,
     );
   }
 
