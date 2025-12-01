@@ -96,6 +96,7 @@ class MessageWidget extends StatelessWidget {
               ] else ...[
                 // Add spacer to maintain consistent tail alignment
                 SizedBox(width: 32.w + 4.w), // Same width as avatar + gap
+                SizedBox(width: 32.w + 4.w),
               ],
             ],
             messageContentStack,
@@ -189,9 +190,15 @@ class MessageWidget extends StatelessWidget {
     final messageContent = message.content ?? '';
     final timestampWidth = _getTimestampWidth(context);
 
-    // If message content is empty, just show the timestamp
+    final spacingCharacter = Platform.isIOS ? '.' : 'm';
+    final characterPainter = TextPainter(
+      text: TextSpan(text: spacingCharacter, style: textStyle),
+      textDirection: Directionality.of(context),
+    );
+    characterPainter.layout();
+    final spacingWidth = characterPainter.width;
+
     if (messageContent.isEmpty) {
-      // If media exists, timestamp should align to media width on the right
       if (hasMedia && mediaWidth != null) {
         return SizedBox(
           width: mediaWidth,
@@ -203,7 +210,6 @@ class MessageWidget extends StatelessWidget {
           ),
         );
       }
-      // No media, normal timestamp display
       return Row(
         mainAxisAlignment: MainAxisAlignment.end,
         mainAxisSize: MainAxisSize.min,
@@ -212,26 +218,6 @@ class MessageWidget extends StatelessWidget {
         ],
       );
     }
-
-    final textWidget = _buildHighlightedText(messageContent, textStyle, context);
-
-    final textPainter = TextPainter(
-      text: TextSpan(text: messageContent, style: textStyle),
-      textDirection: Directionality.of(context),
-    );
-
-    textPainter.layout(maxWidth: maxWidth);
-    final lines = textPainter.computeLineMetrics();
-
-    if (lines.isEmpty) {
-      return const SizedBox.shrink();
-    }
-
-    final minPadding = 0.0;
-
-    final longestLineWidth = lines.map((line) => line.width).reduce((a, b) => a > b ? a : b);
-    final lastLineWidth = lines.last.width;
-    final lastLineHeight = lines.last.height;
 
     final timestampTextPainter = TextPainter(
       text: TextSpan(
@@ -246,10 +232,28 @@ class MessageWidget extends StatelessWidget {
     timestampTextPainter.layout();
     final timestampHeight = timestampTextPainter.height;
 
-    final availableWidth = maxWidth - lastLineWidth;
-    final canFitInline = availableWidth >= (timestampWidth + minPadding);
+    final textMaxWidthForLayout = maxWidth - timestampWidth - spacingWidth;
 
-    final bubbleWidth = longestLineWidth > maxWidth ? maxWidth : longestLineWidth;
+    final textPainter = TextPainter(
+      text: TextSpan(text: messageContent, style: textStyle),
+      textDirection: Directionality.of(context),
+    );
+
+    textPainter.layout(maxWidth: textMaxWidthForLayout);
+    final lines = textPainter.computeLineMetrics();
+
+    if (lines.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    final longestLineWidth = lines.map((line) => line.width).reduce((a, b) => a > b ? a : b);
+    final lastLineWidth = lines.last.width;
+    final lastLineHeight = lines.last.height;
+
+    final availableWidth = maxWidth - lastLineWidth;
+    final canFitInline = availableWidth >= (timestampWidth + spacingWidth);
+
+    final bubbleWidth = longestLineWidth > textMaxWidthForLayout ? textMaxWidthForLayout : longestLineWidth;
     
     double textMaxWidth;
     double containerWidth;
@@ -258,20 +262,22 @@ class MessageWidget extends StatelessWidget {
     
     if (hasMedia && mediaWidth != null) {
       containerWidth = mediaWidth;
-      textMaxWidth = canFitInline ? mediaWidth - timestampWidth : mediaWidth;
+      textMaxWidth = canFitInline ? mediaWidth - timestampWidth - spacingWidth : mediaWidth;
     } else {
       if (canFitInline) {
         final widthReduction = message.isMe && !hasReply ? 8.w : 0.0;
-        containerWidth = bubbleWidth + timestampWidth - widthReduction;
-        textMaxWidth = bubbleWidth;
+        containerWidth = bubbleWidth + timestampWidth + spacingWidth - widthReduction;
+        textMaxWidth = textMaxWidthForLayout;
       } else {
         containerWidth = bubbleWidth > timestampWidth ? bubbleWidth : timestampWidth;
-        textMaxWidth = containerWidth - timestampWidth;
+        textMaxWidth = containerWidth - timestampWidth - spacingWidth;
         if (textMaxWidth < 0) {
           textMaxWidth = containerWidth;
         }
       }
     }
+    
+    final textWidget = _buildHighlightedText(messageContent, textStyle, context);
 
     final heightDifference = lastLineHeight - timestampHeight;
     final bottomOffset = heightDifference > 0 ? (heightDifference * 0.3).toDouble() : 0.0;
@@ -281,14 +287,19 @@ class MessageWidget extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          SizedBox(
-            width: textMaxWidth,
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: textMaxWidth,
+            ),
             child: textWidget,
           ),
           Positioned(
             bottom: bottomOffset,
             right: 0,
-            child: TimeAndStatus(message: message, context: context),
+            child: Padding(
+              padding: EdgeInsets.only(left: spacingWidth),
+              child: TimeAndStatus(message: message, context: context),
+            ),
           ),
         ],
       ),
@@ -301,6 +312,7 @@ class MessageWidget extends StatelessWidget {
       return Text(
         text,
         style: baseStyle,
+        maxLines: null,
       );
     }
     // Search is active, but this message has no matches. Dim the whole text.
@@ -310,6 +322,7 @@ class MessageWidget extends StatelessWidget {
         style: baseStyle.copyWith(
           color: context.colors.mutedForeground,
         ),
+        maxLines: null,
       );
     }
     // Search is active and this message has matches. Highlight them.
@@ -354,6 +367,7 @@ class MessageWidget extends StatelessWidget {
 
     return RichText(
       text: TextSpan(children: spans),
+      maxLines: null,
     );
   }
 
