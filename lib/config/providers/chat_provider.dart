@@ -528,6 +528,8 @@ class ChatNotifier extends Notifier<ChatState> {
 
       if (userCurrentReaction?.emoji == normalizedEmoji) {
         _logger.fine('user has already reacted with $normalizedEmoji');
+        // TODO (codeswot) - maybe implement reaction removal in the future, suggestion
+        //TODO send a string like "__-remove__" to indicate removal
         return false;
       }
 
