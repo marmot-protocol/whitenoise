@@ -46,6 +46,16 @@ Make sure you have the following installed:
    ```bash
    git clone https://github.com/parres-hq/whitenoise
    cd whitenoise
+   ```
+   Next run Docker:
+  
+   ```bash
+   docker compose up -d
+   ```
+  
+   Or if using older Docker versions:
+  
+   ```bash
    docker-compose up -d
    ```
 
@@ -59,6 +69,12 @@ Make sure you have the following installed:
    ```
 
 2. **Setup the project**
+
+   install required flutter_rust_bridge_codegen. 
+
+   ```bash
+   cargo install flutter_rust_bridge_codegen
+   ```
 
    ```bash
    just setup
