@@ -16,7 +16,10 @@ import 'package:whitenoise/ui/core/themes/src/app_theme.dart';
 import 'package:whitenoise/ui/core/ui/wn_button.dart';
 import 'package:whitenoise/ui/core/ui/wn_image.dart';
 import 'package:whitenoise/ui/core/ui/wn_skeleton_container.dart';
+import 'package:whitenoise/ui/shared/widgets/camera_permission_denied_widget.dart';
 import 'package:whitenoise/ui/user_profile_list/start_chat_bottom_sheet.dart';
+import 'package:whitenoise/utils/camera_utils.dart';
+import 'package:whitenoise/utils/localization_extensions.dart';
 import 'package:whitenoise/utils/public_key_validation_extension.dart';
 
 class ShareProfileQrScanScreen extends ConsumerStatefulWidget {
@@ -82,7 +85,7 @@ class _ShareProfileQrScanScreenState extends ConsumerState<ShareProfileQrScanScr
                       const BackButton(),
                       Expanded(
                         child: Text(
-                          'Scan QR Code',
+                          'profile.scanQrCode'.tr(),
                           style: TextStyle(
                             fontSize: 18.sp,
                             fontWeight: FontWeight.w600,
@@ -124,13 +127,29 @@ class _ShareProfileQrScanScreenState extends ConsumerState<ShareProfileQrScanScr
                                             width: 1.w,
                                           ),
                                         ),
-                                        child: MobileScanner(controller: _controller),
+                                        child: MobileScanner(
+                                          controller: _controller,
+                                          errorBuilder: (context, error) {
+                                            if (error.errorCode ==
+                                                MobileScannerErrorCode.permissionDenied) {
+                                              return const CameraPermissionDeniedWidget();
+                                            }
+                                            return Center(
+                                              child: Text(
+                                                'errors.somethingWentWrong'.tr(),
+                                                style: TextStyle(
+                                                  color: context.colors.mutedForeground,
+                                                ),
+                                              ),
+                                            );
+                                          },
+                                        ),
                                       ),
                                     ),
                                   ),
                                   Gap(16.h),
                                   Text(
-                                    'Scan user\'s QR code to connect.',
+                                    'profile.scanToConnect'.tr(),
                                     textAlign: TextAlign.center,
                                     style: TextStyle(
                                       fontSize: 14.sp,
@@ -143,7 +162,7 @@ class _ShareProfileQrScanScreenState extends ConsumerState<ShareProfileQrScanScr
                                     Padding(
                                       padding: EdgeInsets.symmetric(horizontal: 8.w),
                                       child: WnFilledButton(
-                                        label: 'View QR Code',
+                                        label: 'ui.viewQrCode'.tr(),
                                         onPressed: () => context.pop(),
                                         suffixIcon: WnImage(
                                           AssetsPaths.icQrCode,
@@ -180,7 +199,7 @@ class _ShareProfileQrScanScreenState extends ConsumerState<ShareProfileQrScanScr
         return;
       case AppLifecycleState.resumed:
         _subscription = _controller.barcodes.listen(_handleBarcode);
-        unawaited(_controller.start());
+        unawaited(CameraUtils.safeStartCamera(_controller));
       case AppLifecycleState.inactive:
         unawaited(_subscription?.cancel());
         _subscription = null;
@@ -201,12 +220,11 @@ class _ShareProfileQrScanScreenState extends ConsumerState<ShareProfileQrScanScr
       if (rawValue.isNotEmpty) {
         final npub = rawValue.trim();
         if (!npub.isValidPublicKey) {
-          ref.showWarningToast('Invalid public key format');
+          ref.showWarningToast('errors.invalidPublicKey'.tr());
           return;
         }
         _controller.stop();
         final userProfileNotifier = ref.read(userProfileProvider.notifier);
-        // Use blocking fetch for QR code scan to ensure fresh metadata
         final userProfile = await userProfileNotifier.getUserProfile(npub.trim());
         if (mounted) {
           await StartChatBottomSheet.show(
@@ -214,7 +232,6 @@ class _ShareProfileQrScanScreenState extends ConsumerState<ShareProfileQrScanScr
             userProfile: userProfile,
             onChatCreated: (group) {
               if (group != null && mounted) {
-                // Navigate to home first, then to the group chat
                 WidgetsBinding.instance.addPostFrameCallback((_) {
                   if (mounted) {
                     context.go(Routes.home);
@@ -232,7 +249,7 @@ class _ShareProfileQrScanScreenState extends ConsumerState<ShareProfileQrScanScr
       }
     } catch (e, s) {
       _controller.stop();
-      String? errorMessage = 'Something went wrong';
+      String? errorMessage = 'errors.somethingWentWrong'.tr();
       if (e is ApiError) {
         errorMessage = await e.messageText();
       }
@@ -252,7 +269,7 @@ class _ShareProfileQrScanScreenState extends ConsumerState<ShareProfileQrScanScr
     _cameraRestartDebouncer?.cancel();
     _cameraRestartDebouncer = Timer(const Duration(milliseconds: 100), () {
       if (mounted) {
-        _controller.start();
+        CameraUtils.safeStartCamera(_controller);
       }
     });
   }
@@ -269,7 +286,6 @@ class _ProcessingQrSkeleton extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Spacer(),
-
           WnSkeletonContainer(
             width: 1.sw,
             height: 288.h,
