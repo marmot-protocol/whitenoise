@@ -196,7 +196,7 @@ class MessageWidget extends StatelessWidget {
   }) {
     final messageContent = message.content ?? '';
     final timestampWidth = _getTimestampWidth(context);
-    final spacingWidth = 6.w;
+    final spacingWidth = 4.w;
 
     if (messageContent.isEmpty) {
       if (hasMedia && mediaWidth != null) {
@@ -211,14 +211,12 @@ class MessageWidget extends StatelessWidget {
       color: message.isMe ? context.colors.meChatBubbleText : context.colors.otherChatBubbleText,
     );
 
-    final textMaxWidthForLayout = maxWidth - timestampWidth - spacingWidth;
-
     final textPainter = TextPainter(
       text: TextSpan(text: messageContent, style: textStyle),
       textDirection: Directionality.of(context),
     );
 
-    textPainter.layout(maxWidth: textMaxWidthForLayout);
+    textPainter.layout(maxWidth: maxWidth);
     final lines = textPainter.computeLineMetrics();
 
     if (lines.isEmpty) {
@@ -228,11 +226,10 @@ class MessageWidget extends StatelessWidget {
     final longestLineWidth = lines.map((line) => line.width).reduce((a, b) => a > b ? a : b);
     final lastLineWidth = lines.last.width;
 
-    final availableWidth = maxWidth - lastLineWidth;
-    final canFitInline = availableWidth >= (timestampWidth + spacingWidth);
+    final availableWidthOnLastLine = maxWidth - lastLineWidth;
+    final canFitInline = availableWidthOnLastLine >= (timestampWidth + spacingWidth);
 
-    final bubbleWidth =
-        longestLineWidth > textMaxWidthForLayout ? textMaxWidthForLayout : longestLineWidth;
+    final bubbleWidth = longestLineWidth > maxWidth ? maxWidth : longestLineWidth;
 
     final hasReply = message.replyTo != null;
 
@@ -254,15 +251,15 @@ class MessageWidget extends StatelessWidget {
     bool hasMedia = false,
     double? mediaWidth,
   }) {
+    final messageContent = message.content ?? '';
+    final timestampWidth = _getTimestampWidth(context);
+    final spacingWidth = 4.w;
+
     final textStyle = TextStyle(
       fontSize: 16.sp,
       fontWeight: FontWeight.w500,
       color: message.isMe ? context.colors.meChatBubbleText : context.colors.otherChatBubbleText,
     );
-
-    final messageContent = message.content ?? '';
-    final timestampWidth = _getTimestampWidth(context);
-    final spacingWidth = 6.w;
 
     if (messageContent.isEmpty) {
       if (hasMedia && mediaWidth != null) {
@@ -298,29 +295,26 @@ class MessageWidget extends StatelessWidget {
     timestampTextPainter.layout();
     final timestampHeight = timestampTextPainter.height;
 
-    final textMaxWidthForLayout = maxWidth - timestampWidth - spacingWidth;
-
-    final textPainter = TextPainter(
+    final textPainterFull = TextPainter(
       text: TextSpan(text: messageContent, style: textStyle),
       textDirection: Directionality.of(context),
     );
 
-    textPainter.layout(maxWidth: textMaxWidthForLayout);
-    final lines = textPainter.computeLineMetrics();
+    textPainterFull.layout(maxWidth: maxWidth);
+    final linesFull = textPainterFull.computeLineMetrics();
 
-    if (lines.isEmpty) {
+    if (linesFull.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    final longestLineWidth = lines.map((line) => line.width).reduce((a, b) => a > b ? a : b);
-    final lastLineWidth = lines.last.width;
-    final lastLineHeight = lines.last.height;
+    final longestLineWidth = linesFull.map((line) => line.width).reduce((a, b) => a > b ? a : b);
+    final lastLineWidth = linesFull.last.width;
+    final lastLineHeight = linesFull.last.height;
 
-    final availableWidth = maxWidth - lastLineWidth;
-    final canFitInline = availableWidth >= (timestampWidth + spacingWidth);
+    final availableWidthOnLastLine = maxWidth - lastLineWidth;
+    final canFitInline = availableWidthOnLastLine >= (timestampWidth + spacingWidth);
 
-    final bubbleWidth =
-        longestLineWidth > textMaxWidthForLayout ? textMaxWidthForLayout : longestLineWidth;
+    final bubbleWidth = longestLineWidth > maxWidth ? maxWidth : longestLineWidth;
 
     double textMaxWidth;
     double containerWidth;
@@ -334,43 +328,65 @@ class MessageWidget extends StatelessWidget {
       if (canFitInline) {
         final widthReduction = message.isMe && !hasReply ? 8.w : 0.0;
         containerWidth = bubbleWidth + timestampWidth + spacingWidth - widthReduction;
-        textMaxWidth = textMaxWidthForLayout;
+        textMaxWidth = bubbleWidth;
       } else {
         containerWidth = bubbleWidth > timestampWidth ? bubbleWidth : timestampWidth;
-        textMaxWidth = containerWidth - timestampWidth - spacingWidth;
-        if (textMaxWidth < 0) {
-          textMaxWidth = containerWidth;
-        }
+        textMaxWidth = containerWidth;
       }
     }
 
     final textWidget = _buildHighlightedText(messageContent, textStyle, context);
 
-    final heightDifference = lastLineHeight - timestampHeight;
-    final bottomOffset = heightDifference > 0 ? (heightDifference * 0.3).toDouble() : 0.0;
+    if (canFitInline) {
+      final heightDifference = lastLineHeight - timestampHeight;
+      final bottomOffset = heightDifference > 0 ? (heightDifference * 0.3).toDouble() : 0.0;
 
-    return SizedBox(
-      width: containerWidth,
-      child: Stack(
-        clipBehavior: Clip.none,
-        children: [
-          ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: textMaxWidth,
+      return SizedBox(
+        width: containerWidth,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: textMaxWidth,
+              ),
+              child: textWidget,
             ),
-            child: textWidget,
-          ),
-          Positioned(
-            bottom: bottomOffset,
-            right: 0,
-            child: Padding(
-              padding: EdgeInsets.only(left: spacingWidth),
-              child: TimeAndStatus(message: message, context: context),
+            Positioned(
+              bottom: bottomOffset,
+              right: 0,
+              child: Padding(
+                padding: EdgeInsets.only(left: spacingWidth),
+                child: TimeAndStatus(message: message, context: context),
+              ),
             ),
-          ),
-        ],
-      ),
-    );
+          ],
+        ),
+      );
+    } else {
+      return SizedBox(
+        width: containerWidth,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ConstrainedBox(
+              constraints: BoxConstraints(
+                maxWidth: textMaxWidth,
+              ),
+              child: textWidget,
+            ),
+            Gap(2.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                TimeAndStatus(message: message, context: context),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
   }
 
   Widget _buildHighlightedText(String text, TextStyle baseStyle, BuildContext context) {
