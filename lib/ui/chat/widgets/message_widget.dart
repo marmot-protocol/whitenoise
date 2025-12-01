@@ -82,7 +82,6 @@ class MessageWidget extends StatelessWidget {
           mainAxisAlignment: message.isMe ? MainAxisAlignment.end : MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Always reserve space for avatar in group messages to keep tails aligned
             if (isGroupMessage && !message.isMe) ...[
               if (!isSameSenderAsPrevious) ...[
                 WnAvatar(
@@ -94,8 +93,7 @@ class MessageWidget extends StatelessWidget {
                 ),
                 Gap(4.w),
               ] else ...[
-                // Add spacer to maintain consistent tail alignment
-                SizedBox(width: 32.w + 4.w), // Same width as avatar + gap
+                SizedBox(width: 32.w + 4.w),
               ],
             ],
             messageContentStack,
@@ -196,7 +194,7 @@ class MessageWidget extends StatelessWidget {
   }) {
     final messageContent = message.content ?? '';
     final timestampWidth = _getTimestampWidth(context);
-    final spacingWidth = 4.w;
+    final spacingWidth = 6.w;
 
     if (messageContent.isEmpty) {
       if (hasMedia && mediaWidth != null) {
@@ -253,7 +251,7 @@ class MessageWidget extends StatelessWidget {
   }) {
     final messageContent = message.content ?? '';
     final timestampWidth = _getTimestampWidth(context);
-    final spacingWidth = 4.w;
+    final spacingWidth = 6.w;
 
     final textStyle = TextStyle(
       fontSize: 16.sp,
@@ -295,66 +293,89 @@ class MessageWidget extends StatelessWidget {
     timestampTextPainter.layout();
     final timestampHeight = timestampTextPainter.height;
 
+    final hasReply = message.replyTo != null;
+    final widthReduction = message.isMe && !hasReply ? 8.w : 0.0;
+    final effectiveMaxWidth = maxWidth - widthReduction;
+
     final textPainterFull = TextPainter(
       text: TextSpan(text: messageContent, style: textStyle),
       textDirection: Directionality.of(context),
     );
-
-    textPainterFull.layout(maxWidth: maxWidth);
+    textPainterFull.layout(maxWidth: effectiveMaxWidth);
     final linesFull = textPainterFull.computeLineMetrics();
 
     if (linesFull.isEmpty) {
       return const SizedBox.shrink();
     }
 
-    final longestLineWidth = linesFull.map((line) => line.width).reduce((a, b) => a > b ? a : b);
     final lastLineWidth = linesFull.last.width;
     final lastLineHeight = linesFull.last.height;
+    final heightDifference = lastLineHeight - timestampHeight;
+    final bottomOffset = heightDifference > 0 ? (heightDifference * 0.3).toDouble() : 0.0;
 
-    final availableWidthOnLastLine = maxWidth - lastLineWidth;
-    final canFitInline = availableWidthOnLastLine >= (timestampWidth + spacingWidth);
+    final canFitInline = lastLineWidth + timestampWidth + spacingWidth <= effectiveMaxWidth;
 
-    final bubbleWidth = longestLineWidth > maxWidth ? maxWidth : longestLineWidth;
-
-    double textMaxWidth;
     double containerWidth;
+    double textMaxWidth;
 
-    final hasReply = message.replyTo != null;
-
-    if (hasMedia && mediaWidth != null) {
-      containerWidth = mediaWidth;
-      textMaxWidth = canFitInline ? mediaWidth - timestampWidth - spacingWidth : mediaWidth;
+    if (canFitInline) {
+      final firstLinesMaxWidth = linesFull.length > 1 
+          ? linesFull.sublist(0, linesFull.length - 1)
+              .map((line) => line.width)
+              .reduce((a, b) => a > b ? a : b)
+          : 0.0;
+      
+      final textMaxWidthWithTimestamp = effectiveMaxWidth - timestampWidth - spacingWidth;
+      final textPainterWithTimestamp = TextPainter(
+        text: TextSpan(text: messageContent, style: textStyle),
+        textDirection: Directionality.of(context),
+      );
+      textPainterWithTimestamp.layout(maxWidth: textMaxWidthWithTimestamp);
+      final linesWithTimestamp = textPainterWithTimestamp.computeLineMetrics();
+      
+      final lastLineWidthWithTimestamp = linesWithTimestamp.last.width;
+      final totalLastLineWidth = lastLineWidthWithTimestamp + timestampWidth + spacingWidth;
+      
+      containerWidth = firstLinesMaxWidth > totalLastLineWidth 
+          ? firstLinesMaxWidth 
+          : totalLastLineWidth;
+      textMaxWidth = effectiveMaxWidth;
     } else {
-      if (canFitInline) {
-        final widthReduction = message.isMe && !hasReply ? 8.w : 0.0;
-        containerWidth = bubbleWidth + timestampWidth + spacingWidth - widthReduction;
-        textMaxWidth = bubbleWidth;
-      } else {
-        containerWidth = bubbleWidth > timestampWidth ? bubbleWidth : timestampWidth;
-        textMaxWidth = containerWidth;
-      }
+      final longestLineWidth = linesFull.map((line) => line.width).reduce((a, b) => a > b ? a : b);
+      containerWidth = longestLineWidth;
+      textMaxWidth = effectiveMaxWidth;
     }
+
+    final constrainedContainerWidth = containerWidth > effectiveMaxWidth ? effectiveMaxWidth : containerWidth;
 
     final textWidget = _buildHighlightedText(messageContent, textStyle, context);
 
-    if (canFitInline) {
-      final heightDifference = lastLineHeight - timestampHeight;
-      final bottomOffset = heightDifference > 0 ? (heightDifference * 0.3).toDouble() : 0.0;
+    if (hasMedia && mediaWidth != null) {
+      final mediaTextMaxWidth = mediaWidth - timestampWidth - spacingWidth;
+      final mediaTextPainter = TextPainter(
+        text: TextSpan(text: messageContent, style: textStyle),
+        textDirection: Directionality.of(context),
+      );
+      mediaTextPainter.layout(maxWidth: mediaTextMaxWidth);
+      final mediaLines = mediaTextPainter.computeLineMetrics();
+      final mediaLastLineHeight = mediaLines.isNotEmpty ? mediaLines.last.height : 0.0;
+      final mediaHeightDifference = mediaLastLineHeight - timestampHeight;
+      final mediaBottomOffset = mediaHeightDifference > 0 ? (mediaHeightDifference * 0.3).toDouble() : 0.0;
 
       return SizedBox(
-        width: containerWidth,
+        width: mediaWidth,
         child: Stack(
           clipBehavior: Clip.none,
           children: [
             ConstrainedBox(
               constraints: BoxConstraints(
-                maxWidth: textMaxWidth,
+                maxWidth: mediaTextMaxWidth,
               ),
               child: textWidget,
             ),
             Positioned(
-              bottom: bottomOffset,
               right: 0,
+              bottom: mediaBottomOffset,
               child: Padding(
                 padding: EdgeInsets.only(left: spacingWidth),
                 child: TimeAndStatus(message: message, context: context),
@@ -363,41 +384,39 @@ class MessageWidget extends StatelessWidget {
           ],
         ),
       );
-    } else {
-      return SizedBox(
-        width: containerWidth,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ConstrainedBox(
-              constraints: BoxConstraints(
-                maxWidth: textMaxWidth,
-              ),
-              child: textWidget,
-            ),
-            Gap(2.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                TimeAndStatus(message: message, context: context),
-              ],
-            ),
-          ],
-        ),
-      );
     }
+
+    return SizedBox(
+      width: constrainedContainerWidth,
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          ConstrainedBox(
+            constraints: BoxConstraints(
+              maxWidth: textMaxWidth,
+            ),
+            child: textWidget,
+          ),
+          Positioned(
+            right: 0,
+            bottom: bottomOffset,
+            child: Padding(
+              padding: EdgeInsets.only(left: spacingWidth),
+              child: TimeAndStatus(message: message, context: context),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildHighlightedText(String text, TextStyle baseStyle, BuildContext context) {
-    // No search is active, show normal text.
     if (!isSearchActive) {
       return Text(
         text,
         style: baseStyle,
       );
     }
-    // Search is active, but this message has no matches. Dim the whole text.
     if (searchMatch == null || searchMatch!.textMatches.isEmpty) {
       return Text(
         text,
@@ -406,7 +425,6 @@ class MessageWidget extends StatelessWidget {
         ),
       );
     }
-    // Search is active and this message has matches. Highlight them.
     final spans = <TextSpan>[];
     int currentIndex = 0;
 
