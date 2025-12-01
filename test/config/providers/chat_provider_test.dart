@@ -19,6 +19,7 @@ class MockMessageSenderService implements MessageSenderService {
   MessageWithTokens? messageToReturn;
   Exception? errorToThrow;
   int sendCallCount = 0;
+  int reactionCallCount = 0;
 
   MockMessageSenderService({
     this.messageToReturn,
@@ -52,6 +53,30 @@ class MockMessageSenderService implements MessageSenderService {
       throw errorToThrow!;
     }
     return messageToReturn!;
+  }
+
+  @override
+  Future<MessageWithTokens> sendReaction({
+    required String pubkey,
+    required String groupId,
+    required String messageId,
+    required String messagePubkey,
+    required int messageKind,
+    required String emoji,
+  }) async {
+    reactionCallCount++;
+    if (errorToThrow != null) {
+      throw errorToThrow!;
+    }
+    // Return a dummy message as it's not used for reaction response in the provider usually
+    return MessageWithTokens(
+      id: 'reaction-id',
+      pubkey: pubkey,
+      kind: 7,
+      createdAt: DateTime.now(),
+      content: emoji,
+      tokens: [],
+    );
   }
 
   @override
@@ -2056,6 +2081,173 @@ void main() {
         final state = container.read(chatProvider);
         expect(state.getUnreadCountForGroup(g1), 1);
         expect(state.getUnreadCountForGroup(g2), 0);
+      });
+    });
+    group('ChatProvider Reaction Tests', () {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      late ProviderContainer container;
+      const testGroupId = 'test-group-123';
+      const testPubkey = 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890';
+
+      late MockMessageSenderService mockMessageSenderService;
+      late MockGroupMessagesNotifier mockGroupMessagesNotifier;
+      late MessageModel testMessage;
+
+      setUp(() async {
+        SharedPreferences.setMockInitialValues({});
+        // LastReadManager doesn't need init
+
+        mockMessageSenderService = MockMessageSenderService();
+
+        testMessage = createTestMessage(
+          id: 'msg-1',
+          content: 'Hello',
+          senderPubkey: 'other-user-pubkey',
+          createdAt: DateTime.now(),
+          groupId: testGroupId,
+        );
+
+        mockGroupMessagesNotifier = MockGroupMessagesNotifier(
+          messagesToReturn: [testMessage],
+        );
+
+        container = ProviderContainer(
+          overrides: [
+            authProvider.overrideWith(
+              () => MockAuthNotifier(isAuthenticated: true),
+            ),
+            activePubkeyProvider.overrideWith(
+              () => MockActivePubkeyNotifier(testPubkey),
+            ),
+            groupMessagesProvider.overrideWith(
+              () => mockGroupMessagesNotifier,
+            ),
+            chatProvider.overrideWith(
+              () => ChatNotifier(messageSenderService: mockMessageSenderService),
+            ),
+          ],
+        );
+
+        // Initialize the provider and load messages
+        final notifier = container.read(chatProvider.notifier);
+        await notifier.loadMessagesForGroup(testGroupId);
+      });
+
+      tearDown(() {
+        container.dispose();
+      });
+
+      test('updateMessageReaction adds reaction optimistically', () async {
+        final notifier = container.read(chatProvider.notifier);
+        const reactionEmoji = '👍';
+
+        // Verify initial state
+        var messages = container.read(chatProvider).groupMessages[testGroupId];
+        expect(messages!.first.reactions, isEmpty);
+
+        // Add reaction
+        final result = await notifier.updateMessageReaction(
+          message: testMessage,
+          reaction: reactionEmoji,
+        );
+
+        expect(result, true);
+        expect(mockMessageSenderService.reactionCallCount, 1);
+
+        // Verify optimistic update
+        messages = container.read(chatProvider).groupMessages[testGroupId];
+        expect(messages!.first.reactions, isNotEmpty);
+        expect(messages.first.reactions.first.emoji, reactionEmoji);
+        expect(messages.first.reactions.first.user.publicKey, testPubkey);
+      });
+
+      test('updateMessageReaction removes reaction optimistically (toggle)', () async {
+        const reactionEmoji = '👍';
+
+        // Setup: Message already has a reaction from current user
+        final reaction = Reaction(
+          emoji: reactionEmoji,
+          user: User(
+            id: testPubkey,
+            publicKey: testPubkey,
+            displayName: 'Me',
+            nip05: '',
+          ),
+          createdAt: DateTime.now(),
+        );
+
+        final messageWithReaction = testMessage.copyWith(reactions: [reaction]);
+
+        // Update the mock to return this message (simulating state before toggle)
+        // We need to manually update the state because we can't easily inject it into the provider's internal state directly
+        // without going through the load process again or using a method exposed for testing.
+        // However, for this test, we can just call updateMessageReaction on the messageWithReaction.
+        // But wait, the provider looks up the message in its state by ID.
+        // So we need to ensure the provider's state has the message with reaction.
+
+        // Let's re-initialize with the message having a reaction
+        mockGroupMessagesNotifier = MockGroupMessagesNotifier(
+          messagesToReturn: [messageWithReaction],
+        );
+
+        container = ProviderContainer(
+          overrides: [
+            authProvider.overrideWith(
+              () => MockAuthNotifier(isAuthenticated: true),
+            ),
+            activePubkeyProvider.overrideWith(
+              () => MockActivePubkeyNotifier(testPubkey),
+            ),
+            groupMessagesProvider.overrideWith(
+              () => mockGroupMessagesNotifier,
+            ),
+            chatProvider.overrideWith(
+              () => ChatNotifier(messageSenderService: mockMessageSenderService),
+            ),
+          ],
+        );
+
+        final newNotifier = container.read(chatProvider.notifier);
+        await newNotifier.loadMessagesForGroup(testGroupId);
+
+        // Verify initial state has reaction
+        var messages = container.read(chatProvider).groupMessages[testGroupId];
+        expect(messages!.first.reactions, isNotEmpty);
+        expect(messages.first.reactions.first.emoji, reactionEmoji);
+
+        // Remove reaction (toggle)
+        final result = await newNotifier.updateMessageReaction(
+          message: messageWithReaction,
+          reaction: reactionEmoji,
+        );
+
+        expect(result, true);
+        expect(mockMessageSenderService.reactionCallCount, 1);
+
+        // Verify optimistic removal
+        messages = container.read(chatProvider).groupMessages[testGroupId];
+        expect(messages!.first.reactions, isEmpty);
+      });
+
+      test('updateMessageReaction reverts optimistic update on failure', () async {
+        final notifier = container.read(chatProvider.notifier);
+        const reactionEmoji = '👍';
+
+        // Setup failure
+        mockMessageSenderService.errorToThrow = Exception('Network error');
+
+        // Add reaction
+        final result = await notifier.updateMessageReaction(
+          message: testMessage,
+          reaction: reactionEmoji,
+        );
+
+        expect(result, false);
+        expect(mockMessageSenderService.reactionCallCount, 1);
+
+        // Verify reaction is NOT present (reverted)
+        final messages = container.read(chatProvider).groupMessages[testGroupId]!;
+        expect(messages.first.reactions, isEmpty);
       });
     });
   });
