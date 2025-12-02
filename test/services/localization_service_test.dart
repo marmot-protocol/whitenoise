@@ -45,6 +45,7 @@ void main() {
 
       expect(locales.containsKey('system'), isTrue);
       expect(locales.containsKey('en'), isTrue);
+      expect(locales.containsKey('es'), isTrue);
     });
 
     test('supportedLocaleObjects excludes "system"', () {
