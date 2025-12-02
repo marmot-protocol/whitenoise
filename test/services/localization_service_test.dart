@@ -140,5 +140,22 @@ void main() {
       expect(result, isFalse);
     });
   });
+    group('LocalizationService.getDeviceLocale with override', () {
+    test('returns supported override locale when available', () {
+      LocalizationService.setDeviceLocaleOverrideForTest(const Locale('de'));
+
+      final localeCode = LocalizationService.getDeviceLocale();
+
+      expect(localeCode, 'de'); // de is in _supportedLocales
+    });
+
+    test('falls back to fallbackLocale when override locale unsupported', () {
+      LocalizationService.setDeviceLocaleOverrideForTest(const Locale('ja'));
+
+      final localeCode = LocalizationService.getDeviceLocale();
+
+      expect(localeCode, 'en'); // ja not in _supportedLocales → fallback en
+    });
+  });
   //
 }
