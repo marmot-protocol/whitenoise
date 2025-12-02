@@ -126,6 +126,19 @@ void main() {
       expect(section, isEmpty);
     });
   });
+  group('LocalizationService.setLocale', () {
+    test('setLocale loads supported locale and updates currentLocale', () async {
+      final result = await LocalizationService.setLocale('en');
 
+      expect(result, isTrue);
+      expect(LocalizationService.currentLocale, 'en');
+    });
+
+    test('setLocale returns false for unsupported locale', () async {
+      final result = await LocalizationService.setLocale('xx');
+
+      expect(result, isFalse);
+    });
+  });
   //
 }
