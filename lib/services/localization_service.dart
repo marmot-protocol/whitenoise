@@ -190,11 +190,15 @@ class LocalizationService {
 extension LanguageTextExtension on String {
   String toLanguageDisplayText() {
     final deviceLocale = LocalizationService.getDeviceLocale();
+
     if (this == 'system') {
-      return 'System ( ${deviceLocale.getLanguageText()} )';
-    } else {
-      return LocalizationService.supportedLocales[this] ?? toUpperCase();
+      final systemLang =
+          LocalizationService.supportedLocales[deviceLocale] ?? deviceLocale.toUpperCase();
+
+      return 'System ($systemLang)';
     }
+
+    return LocalizationService.supportedLocales[this] ?? toUpperCase();
   }
 }
 
