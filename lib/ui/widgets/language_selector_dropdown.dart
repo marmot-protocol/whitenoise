@@ -80,7 +80,7 @@ class _LanguageSelectorDropdownState extends ConsumerState<LanguageSelectorDropd
                   supportedLocales.entries.map((locale) {
                     return _LanguageOption(
                       localeCode: locale.key,
-                      text: LocalizationService.getLanguageText(locale.key),
+                      text: locale.key.getLanguageText(),
                       isSelected: locale.key == selectedLanguage,
                       onTap: () async {
                         if (locale.key != selectedLanguage) {
