@@ -157,5 +157,28 @@ void main() {
       expect(localeCode, 'en'); // ja not in _supportedLocales → fallback en
     });
   });
+    group('LocalizationService.setLocalePreference', () {
+    setUp(() async {
+      await LocalizationService.load(const Locale('en'));
+    });
+
+    test('setLocalePreference("system") uses device locale via override', () async {
+      LocalizationService.setDeviceLocaleOverrideForTest(const Locale('de'));
+
+      final result = await LocalizationService.setLocalePreference('system');
+
+      expect(result, isTrue);
+      expect(LocalizationService.selectedLocale, 'system');
+      expect(LocalizationService.currentLocale, 'de');
+    });
+
+    test('setLocalePreference with explicit locale uses that locale', () async {
+      final result = await LocalizationService.setLocalePreference('fr');
+
+      expect(result, isTrue);
+      expect(LocalizationService.selectedLocale, 'fr');
+      expect(LocalizationService.currentLocale, 'fr');
+    });
+  });
   //
 }
