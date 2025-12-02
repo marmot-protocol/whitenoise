@@ -60,4 +60,21 @@ void main() {
       }
     });
   });
+  group('LocalizationService.load', () {
+    test('loads valid locale and sets currentLocale', () async {
+      final result = await LocalizationService.load(const Locale('en'));
+
+      expect(result, isTrue);
+      expect(LocalizationService.currentLocale, 'en');
+      expect(LocalizationService.currentLocaleObject.languageCode, 'en');
+    });
+
+    test('falls back to fallbackLocale when locale is unsupported', () async {
+      final result = await LocalizationService.load(const Locale('xx'));
+
+      expect(result, isTrue);
+      expect(LocalizationService.currentLocale, 'en'); // fallback
+    });
+  });
+  //
 }
