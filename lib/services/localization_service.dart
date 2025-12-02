@@ -162,11 +162,6 @@ class LocalizationService {
     });
   }
 
-  // Gets Human readable language string
-  static String getLanguageText(String languageCode) {
-    return LocalizationService.supportedLocales[languageCode] ?? languageCode.toUpperCase();
-  }
-
   /// Set locale and reload translations
   static Future<bool> setLocale(String localeCode) async {
     if (_supportedLocales.containsKey(localeCode)) {
