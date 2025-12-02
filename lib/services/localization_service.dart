@@ -162,6 +162,11 @@ class LocalizationService {
     });
   }
 
+  // Gets Human readable language string
+  static String getLanguageText(String languageCode) {
+    return LocalizationService.supportedLocales[languageCode] ?? languageCode.toUpperCase();
+  }
+
   /// Set locale and reload translations
   static Future<bool> setLocale(String localeCode) async {
     if (_supportedLocales.containsKey(localeCode)) {
@@ -178,6 +183,17 @@ class LocalizationService {
       return _supportedLocales.containsKey(localeCode) ? localeCode : _fallbackLocale;
     } catch (e) {
       return _fallbackLocale;
+    }
+  }
+}
+
+extension LanguageTextExtension on String {
+  String toLanguageDisplayText() {
+    final deviceLocale = LocalizationService.getDeviceLocale();
+    if (this == 'system') {
+      return 'System ( ${LocalizationService.getLanguageText(deviceLocale)} )';
+    } else {
+      return LocalizationService.supportedLocales[this] ?? toUpperCase();
     }
   }
 }
