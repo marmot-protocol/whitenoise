@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:whitenoise/utils/localization_extensions.dart';
 
 class LocalizationService {
   /// deviceLocaleOverride is just an override to help with test
@@ -208,10 +207,16 @@ extension LanguageTextExtension on String {
     final deviceLocale = LocalizationService.getDeviceLocale();
 
     if (this == 'system') {
+      // Try to use translated "System" if available, otherwise fall back
+      final systemLabel =
+          LocalizationService.hasKey('shared.system')
+              ? LocalizationService.translate('shared.system')
+              : (LocalizationService.supportedLocales['system'] ?? 'System');
+
       final systemLang =
           LocalizationService.supportedLocales[deviceLocale] ?? deviceLocale.toUpperCase();
 
-      return '${'shared.system'.tr()} ($systemLang)';
+      return '$systemLabel ($systemLang)';
     }
 
     return LocalizationService.supportedLocales[this] ?? toUpperCase();
