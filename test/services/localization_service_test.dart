@@ -26,7 +26,6 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
       'flutter/assets',
       (ByteData? message) async {
-        // In a real test you might inspect [message] to choose different JSON
         // based on the requested asset path. For now we return the same JSON
         // for any requested locale.
         return byteData;
