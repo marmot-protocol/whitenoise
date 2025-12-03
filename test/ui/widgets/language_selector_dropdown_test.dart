@@ -52,16 +52,6 @@ class WidgetTestHelper extends StatelessWidget {
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  const fakeTranslationsJson = '''
-  {
-    "settings": {
-      "title": "Settings",
-      "subtitle": "Configure your app"
-    },
-    "greeting": "Hello {name}"
-  }
-  ''';
-
   setUpAll(() {
     const fakeTranslationsJson = '''
   {
