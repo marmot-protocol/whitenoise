@@ -182,12 +182,8 @@ class NotificationService {
 
       if (Platform.isAndroid) {
         try {
-          if (!await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
-            await FlutterForegroundTask.requestIgnoreBatteryOptimization();
-          }
-          if (!await FlutterForegroundTask.canScheduleExactAlarms) {
-            await FlutterForegroundTask.openAlarmsAndRemindersSettings();
-          }
+          await FlutterForegroundTask.requestIgnoreBatteryOptimization();
+          await FlutterForegroundTask.openAlarmsAndRemindersSettings();
         } catch (e) {
           _logger.warning('Failed to configure Android-specific settings: $e');
         }
