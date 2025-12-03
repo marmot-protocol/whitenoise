@@ -126,55 +126,6 @@ void main() {
       expect(section, isEmpty);
     });
   });
-  group('LocalizationService.translate, hasKey, getSection', () {
-    setUp(() async {
-      await LocalizationService.load(const Locale('en'));
-    });
-
-    test('translate returns value for nested key', () {
-      final text = LocalizationService.translate('settings.title');
-
-      expect(text, 'Settings');
-    });
-
-    test('translate with params replaces placeholders', () {
-      final text = LocalizationService.translate('greeting', params: {'name': 'Abdul'});
-
-      expect(text, 'Hello Abdul');
-    });
-
-    test('translate returns key when path not found', () {
-      final text = LocalizationService.translate('settings.unknown');
-
-      expect(text, 'settings.unknown');
-    });
-
-    test('hasKey is true for existing key', () {
-      final exists = LocalizationService.hasKey('settings.title');
-
-      expect(exists, isTrue);
-    });
-
-    test('hasKey is false for non-existing key', () {
-      final exists = LocalizationService.hasKey('settings.missing');
-
-      expect(exists, isFalse);
-    });
-
-    test('getSection returns flattened map for section', () {
-      final section = LocalizationService.getSection('settings');
-
-      expect(section.length, 2);
-      expect(section['title'], 'Settings');
-      expect(section['subtitle'], 'Configure your app');
-    });
-
-    test('getSection returns empty map for invalid section', () {
-      final section = LocalizationService.getSection('unknown');
-
-      expect(section, isEmpty);
-    });
-  });
 
   group('LocalizationService.setLocale', () {
     test('setLocale loads supported locale and updates currentLocale', () async {
@@ -253,7 +204,7 @@ void main() {
 
   group('LanguageTextExtension.toLanguageDisplayText', () {
     test('value "system" uses device locale name when supported', () {
-      LocalizationService.setDeviceLocaleOverrideForTest(const Locale('en '));
+      LocalizationService.setDeviceLocaleOverrideForTest(const Locale('en'));
 
       const value = 'system';
       final result = value.toLanguageDisplayText();
