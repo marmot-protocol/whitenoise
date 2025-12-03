@@ -161,5 +161,34 @@ void main() {
     LocalizationService.resetDeviceLocaleOverride();
   });
 
-  group('LanguageSelectorDropdown', () {});
+  group('LanguageSelectorDropdown', () {
+    testWidgets(
+      'header shows "System (English)" when selectedLanguage is system and device locale is en',
+      (tester) async {
+        // New non-deprecated viewport API
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        LocalizationService.setDeviceLocaleOverrideForTest(const Locale('en'));
+
+        final fakeNotifier = FakeLocalizationNotifier(
+          initialSelectedLanguage: 'system',
+        );
+
+        await tester.pumpWidget(
+          WidgetTestHelper(
+            fakeNotifier: fakeNotifier,
+            child: const LanguageSelectorDropdown(),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('System (English)'), findsOneWidget);
+      },
+    );
+  });
 }
