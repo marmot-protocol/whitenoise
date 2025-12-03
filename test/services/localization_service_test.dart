@@ -10,6 +10,9 @@ void main() {
 
   const fakeTranslationsJson = '''
   {
+   "shared": {
+        "system": "System"
+    },
     "settings": {
       "title": "Settings",
       "subtitle": "Configure your app"
