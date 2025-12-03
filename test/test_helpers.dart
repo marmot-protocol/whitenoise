@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:whitenoise/config/providers/localization_provider.dart';
 import 'package:whitenoise/config/providers/toast_message_provider.dart';
+import 'package:whitenoise/config/states/localization_state.dart';
 import 'package:whitenoise/config/states/toast_state.dart';
 import 'package:whitenoise/services/localization_service.dart';
 
@@ -63,4 +65,52 @@ Widget createTestWidget(Widget child, {List<Override>? overrides}) {
           ),
     ),
   );
+}
+
+/// ------------------------------------------------------------------
+/// Fake notifier that we use ONLY in tests
+/// It extends your real LocalizationNotifier, so the provider type matches.
+/// ------------------------------------------------------------------
+class FakeLocalizationNotifier extends LocalizationNotifier {
+  FakeLocalizationNotifier({
+    required String initialSelectedLanguage,
+    Map<String, String>? supported,
+  }) : _supportedLocales = supported ?? LocalizationService.supportedLocales {
+    final deviceLocaleCode = LocalizationService.getDeviceLocale();
+
+    state = LocalizationState(
+      currentLocale: Locale(
+        initialSelectedLanguage == 'system' ? deviceLocaleCode : initialSelectedLanguage,
+      ),
+      selectedLanguage: initialSelectedLanguage,
+    );
+  }
+
+  final Map<String, String> _supportedLocales;
+
+  String? lastChangedLocale;
+  int changeLocaleCallCount = 0;
+
+  @override
+  Map<String, String> get supportedLocales => _supportedLocales;
+
+  @override
+  Future<bool> changeLocale(String localeCode) async {
+    changeLocaleCallCount++;
+    lastChangedLocale = localeCode;
+
+    final deviceLocaleCode = LocalizationService.getDeviceLocale();
+
+    state = state.copyWith(
+      selectedLanguage: localeCode,
+      currentLocale: Locale(
+        localeCode == 'system' ? deviceLocaleCode : localeCode,
+      ),
+      isLoading: false,
+      error: null,
+    );
+
+    // Always report success in the fake
+    return true;
+  }
 }
