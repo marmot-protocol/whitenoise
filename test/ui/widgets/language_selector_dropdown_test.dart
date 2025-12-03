@@ -1,16 +1,60 @@
-import 'dart:convert';
-
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 import 'package:whitenoise/config/providers/localization_provider.dart';
+import 'package:whitenoise/config/states/localization_state.dart';
 import 'package:whitenoise/services/localization_service.dart';
 import 'package:whitenoise/ui/widgets/language_selector_dropdown.dart';
 
-import '../../test_helpers.dart' show FakeLocalizationNotifier;
+/// ------------------------------------------------------------------
+/// Fake notifier that we use ONLY in tests
+/// It extends your real LocalizationNotifier, so the provider type matches.
+/// ------------------------------------------------------------------
+class FakeLocalizationNotifier extends LocalizationNotifier {
+  FakeLocalizationNotifier({
+    required String initialSelectedLanguage,
+    Map<String, String>? supported,
+  }) : _supportedLocales = supported ?? LocalizationService.supportedLocales {
+    final deviceLocaleCode = LocalizationService.getDeviceLocale();
+
+    state = LocalizationState(
+      currentLocale: Locale(
+        initialSelectedLanguage == 'system' ? deviceLocaleCode : initialSelectedLanguage,
+      ),
+      selectedLanguage: initialSelectedLanguage,
+    );
+  }
+
+  final Map<String, String> _supportedLocales;
+
+  String? lastChangedLocale;
+  int changeLocaleCallCount = 0;
+
+  @override
+  Map<String, String> get supportedLocales => _supportedLocales;
+
+  @override
+  Future<bool> changeLocale(String localeCode) async {
+    changeLocaleCallCount++;
+    lastChangedLocale = localeCode;
+
+    final deviceLocaleCode = LocalizationService.getDeviceLocale();
+
+    state = state.copyWith(
+      selectedLanguage: localeCode,
+      currentLocale: Locale(
+        localeCode == 'system' ? deviceLocaleCode : localeCode,
+      ),
+      isLoading: false,
+      error: null,
+    );
+
+    // Always report success in the fake
+    return true;
+  }
+}
 
 /// ------------------------------------------------------------------
 /// Test wrapper that sets up ProviderScope + ScreenUtil + MaterialApp
@@ -51,54 +95,6 @@ class WidgetTestHelper extends StatelessWidget {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-
-  setUpAll(() {
-    const fakeTranslationsJson = '''
-  {
-    "settings": {
-      "title": "Settings",
-      "subtitle": "Configure your app"
-    },
-    "greeting": "Hello {name}"
-  }
-  ''';
-
-    // JSON for locales
-    final jsonEncoded = utf8.encode(fakeTranslationsJson);
-    final jsonByteData = ByteData.view(Uint8List.fromList(jsonEncoded).buffer);
-
-    // Minimal valid SVG (1x1 transparent)
-    const tinySvg = '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>';
-    final svgEncoded = utf8.encode(tinySvg);
-    final svgByteData = ByteData.view(Uint8List.fromList(svgEncoded).buffer);
-
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
-      'flutter/assets',
-      (ByteData? message) async {
-        if (message == null) return null;
-
-        final assetKey = utf8.decode(
-          message.buffer.asUint8List(
-            message.offsetInBytes,
-            message.lengthInBytes,
-          ),
-        );
-
-        // ✅ Only intercept your localization JSON files
-        if (assetKey.startsWith('lib/locales/')) {
-          return jsonByteData;
-        }
-
-        // ✅ Stub the chevron SVGs with a tiny valid SVG
-        if (assetKey.contains('ic_chevron_down.svg') || assetKey.contains('ic_chevron_up.svg')) {
-          return svgByteData;
-        }
-
-        // Let everything else behave normally
-        return null;
-      },
-    );
-  });
 
   setUp(() {
     LocalizationService.resetDeviceLocaleOverride();
