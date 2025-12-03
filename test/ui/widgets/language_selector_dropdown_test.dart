@@ -190,5 +190,56 @@ void main() {
         expect(find.text('System (English)'), findsOneWidget);
       },
     );
+    testWidgets(
+      'after selecting Deutsch, the first option still represents the system language',
+      (tester) async {
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        LocalizationService.setDeviceLocaleOverrideForTest(const Locale('en'));
+
+        final fakeNotifier = FakeLocalizationNotifier(
+          initialSelectedLanguage: 'system',
+          supported: const {
+            'system': 'System',
+            'en': 'English',
+            'de': 'Deutsch',
+          },
+        );
+
+        await tester.pumpWidget(
+          WidgetTestHelper(
+            fakeNotifier: fakeNotifier,
+            child: const LanguageSelectorDropdown(),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Open dropdown
+        await tester.tap(find.text('System (English)'));
+        await tester.pumpAndSettle();
+
+        // Select Deutsch
+        await tester.tap(find.text('Deutsch'));
+        await tester.pumpAndSettle();
+
+        // Header is Deutsch now
+        expect(find.text('Deutsch'), findsOneWidget);
+
+        // Re-open
+        await tester.tap(find.text('Deutsch'));
+        await tester.pumpAndSettle();
+
+        // We still see "System" entry as first system option
+        expect(find.text('System'), findsOneWidget);
+        // And "English" & "Deutsch" as regular entries
+        expect(find.text('English'), findsOneWidget);
+        expect(find.text('Deutsch'), findsNWidgets(2)); // header + option
+      },
+    );
   });
 }
