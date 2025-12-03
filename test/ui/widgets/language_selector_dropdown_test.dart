@@ -241,5 +241,34 @@ void main() {
         expect(find.text('Deutsch'), findsNWidgets(2)); // header + option
       },
     );
+    testWidgets(
+      'system label adapts when device locale is German',
+      (tester) async {
+        tester.view.physicalSize = const Size(390, 844);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(() {
+          tester.view.resetPhysicalSize();
+          tester.view.resetDevicePixelRatio();
+        });
+
+        // Pretend system is German
+        LocalizationService.setDeviceLocaleOverrideForTest(const Locale('de'));
+
+        final fakeNotifier = FakeLocalizationNotifier(
+          initialSelectedLanguage: 'system',
+        );
+
+        await tester.pumpWidget(
+          WidgetTestHelper(
+            fakeNotifier: fakeNotifier,
+            child: const LanguageSelectorDropdown(),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        // Header uses toLanguageDisplayText() → "System (Deutsch)"
+        expect(find.text('System (Deutsch)'), findsOneWidget);
+      },
+    );
   });
 }
