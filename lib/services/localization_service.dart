@@ -225,6 +225,11 @@ extension LanguageTextExtension on String {
 
 extension LanguageCodeExtension on String {
   String getLanguageText() {
+    if (this == 'system') {
+      return LocalizationService.hasKey('shared.system')
+          ? LocalizationService.translate('shared.system')
+          : (LocalizationService.supportedLocales['system'] ?? 'System');
+    }
     return LocalizationService.supportedLocales[this] ?? toUpperCase();
   }
 }
