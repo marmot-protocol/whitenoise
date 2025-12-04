@@ -47,9 +47,10 @@ class MessageReplyBox extends ConsumerWidget {
                     ),
                   ),
                 ],
-                Expanded(
+                Flexible(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
                     children: [
                       Text(
                         MessageUtils.getDisplayName(replyingTo, null),

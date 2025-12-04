@@ -39,8 +39,12 @@ class ChatMessageBubble extends StatelessWidget {
               ),
               child: Container(
                 margin: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.w),
-                // Add subtle internal padding
-                padding: EdgeInsets.symmetric(horizontal: 2.w, vertical: 6.h),
+                padding: EdgeInsets.only(
+                  left: 2.w,
+                  right: 2.w,
+                  top: 2.h,
+                  bottom: 6.h,
+                ),
                 child: child,
               ),
             ),
