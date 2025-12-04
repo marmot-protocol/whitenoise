@@ -964,7 +964,7 @@ void main() {
             id: testAccountPubkey,
             displayName: 'Test User',
             nip05: '',
-            publicKey: testAccountPubkey,
+            npub: testAccountPubkey,
           );
 
           replyToMessage = MessageModel(

@@ -77,8 +77,8 @@ class _GroupChatInfoState extends ConsumerState<GroupChatInfo> {
 
       for (final admin in admins) {
         if (!members.any((member) {
-          final hexMemberKey = PubkeyFormatter(pubkey: member.publicKey).toHex();
-          final hexAdminKey = PubkeyFormatter(pubkey: admin.publicKey).toHex();
+          final hexMemberKey = PubkeyFormatter(pubkey: member.npub).toHex();
+          final hexAdminKey = PubkeyFormatter(pubkey: admin.npub).toHex();
           return hexMemberKey == hexAdminKey;
         })) {
           allMembers.add(admin);
@@ -87,15 +87,15 @@ class _GroupChatInfoState extends ConsumerState<GroupChatInfo> {
 
       // Sort members: admins first (A-Z), then regular members (A-Z), current user last
       allMembers.sort((a, b) {
-        final hexPubkeyA = PubkeyFormatter(pubkey: a.publicKey).toHex();
-        final hexPubkeyB = PubkeyFormatter(pubkey: b.publicKey).toHex();
+        final hexPubkeyA = PubkeyFormatter(pubkey: a.npub).toHex();
+        final hexPubkeyB = PubkeyFormatter(pubkey: b.npub).toHex();
         final hexCurrentUserNpub = PubkeyFormatter(pubkey: currentUserNpub).toHex();
         final aIsAdmin = admins.any((admin) {
-          final hexAdminKey = PubkeyFormatter(pubkey: admin.publicKey).toHex();
+          final hexAdminKey = PubkeyFormatter(pubkey: admin.npub).toHex();
           return hexAdminKey == hexPubkeyA;
         });
         final bIsAdmin = admins.any((admin) {
-          final hexAdminKey = PubkeyFormatter(pubkey: admin.publicKey).toHex();
+          final hexAdminKey = PubkeyFormatter(pubkey: admin.npub).toHex();
           return hexAdminKey == hexPubkeyB;
         });
         final aIsCurrentUser = currentUserNpub != null && (hexCurrentUserNpub == hexPubkeyA);
@@ -145,7 +145,7 @@ class _GroupChatInfoState extends ConsumerState<GroupChatInfo> {
   }
 
   void _goToAddMembersScreen() {
-    final existingMemberPubkeys = groupMembers.map((member) => member.publicKey).toList();
+    final existingMemberPubkeys = groupMembers.map((member) => member.npub).toList();
 
     Routes.goToAddGroupMembers(
       context,
@@ -164,7 +164,7 @@ class _GroupChatInfoState extends ConsumerState<GroupChatInfo> {
       if (currentUserNpub == null) {
         return false;
       }
-      final hexAdminKey = PubkeyFormatter(pubkey: admin.publicKey).toHex();
+      final hexAdminKey = PubkeyFormatter(pubkey: admin.npub).toHex();
       final hexCurrentUserKey = PubkeyFormatter(pubkey: currentUserNpub).toHex();
       return hexAdminKey == hexCurrentUserKey;
     });
@@ -278,14 +278,14 @@ class _GroupChatInfoState extends ConsumerState<GroupChatInfo> {
 
   Widget _buildMemberListTile(User member, {String? currentUserNpub}) {
     final isAdmin = groupAdmins.any((admin) {
-      final hexAdminKey = PubkeyFormatter(pubkey: admin.publicKey).toHex();
-      final hexMemberKey = PubkeyFormatter(pubkey: member.publicKey).toHex();
+      final hexAdminKey = PubkeyFormatter(pubkey: admin.npub).toHex();
+      final hexMemberKey = PubkeyFormatter(pubkey: member.npub).toHex();
       return hexAdminKey == hexMemberKey;
     });
     final isCurrentUser =
         currentUserNpub != null &&
         PubkeyFormatter(pubkey: currentUserNpub).toHex() ==
-            PubkeyFormatter(pubkey: member.publicKey).toHex();
+            PubkeyFormatter(pubkey: member.npub).toHex();
     return ListTile(
       contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
       onTap:
@@ -301,7 +301,7 @@ class _GroupChatInfoState extends ConsumerState<GroupChatInfo> {
         displayName: member.displayName,
         size: 40.w,
         showBorder: true,
-        pubkey: member.publicKey,
+        pubkey: member.npub,
       ),
       title: Text(
         isCurrentUser

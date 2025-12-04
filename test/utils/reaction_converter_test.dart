@@ -12,13 +12,13 @@ void main() {
         id: 'hater_user_123',
         displayName: 'Hater John',
         nip05: 'john@hater.com',
-        publicKey: 'npub1_hater_john_123',
+        npub: 'npub1_hater_john_123',
       );
       final niceUser = domain_user.User(
         id: 'nice_user_456',
         displayName: 'Nice Jane',
         nip05: 'jane@nice.com',
-        publicKey: 'npub1_nice_jane_456',
+        npub: 'npub1_nice_jane_456',
       );
 
       final dislikeReaction = UserReaction(
@@ -96,7 +96,7 @@ void main() {
           expect(secondReactionUser.id, 'npub1_nice_jane_456');
           expect(secondReactionUser.displayName, 'shared.unknownUser'.tr());
           expect(secondReactionUser.nip05, '');
-          expect(secondReactionUser.publicKey, 'npub1_nice_jane_456');
+          expect(secondReactionUser.npub, 'npub1_nice_jane_456');
         });
       });
 

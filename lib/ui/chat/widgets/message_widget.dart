@@ -89,7 +89,7 @@ class MessageWidget extends StatelessWidget {
                   imageUrl: message.sender.imagePath ?? '',
                   size: 32.w,
                   displayName: message.sender.displayName,
-                  pubkey: message.sender.publicKey,
+                  pubkey: message.sender.npub,
                   showBorder: true,
                 ),
                 Gap(4.w),

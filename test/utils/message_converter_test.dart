@@ -20,14 +20,14 @@ void main() {
       id: currentUserPublicKey,
       displayName: 'Current User',
       nip05: 'current@example.com',
-      publicKey: currentUserPublicKey,
+      npub: currentUserPublicKey,
     );
 
     final otherUser = domain_user.User(
       id: otherUserPublicKey,
       displayName: 'Other User',
       nip05: 'other@example.com',
-      publicKey: otherUserPublicKey,
+      npub: otherUserPublicKey,
     );
 
     final usersMap = <String, domain_user.User>{
@@ -135,7 +135,7 @@ void main() {
           expect(result.sender.id, unknownUserPubkey);
           expect(result.sender.displayName, 'shared.unknownUser'.tr());
           expect(result.sender.nip05, '');
-          expect(result.sender.publicKey, unknownUserPubkey);
+          expect(result.sender.npub, unknownUserPubkey);
         });
       });
 
@@ -592,7 +592,7 @@ void main() {
 
           test('returns me as sender', () {
             expect(optimisticMessage.sender.displayName, 'You');
-            expect(optimisticMessage.sender.publicKey, currentUserPublicKey);
+            expect(optimisticMessage.sender.npub, currentUserPublicKey);
           });
 
           test('returns true for isMe', () {

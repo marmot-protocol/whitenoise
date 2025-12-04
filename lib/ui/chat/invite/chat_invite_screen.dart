@@ -243,9 +243,8 @@ class DMInviteHeader extends ConsumerWidget {
     }
 
     final welcomerName = welcomerUser.displayName;
-    final welcomerNpub =
-        PubkeyFormatter(pubkey: welcomerUser.publicKey).toNpub()?.formatPublicKey();
-    final welcomerPubkey = welcomerUser.publicKey;
+    final welcomerNpub = PubkeyFormatter(pubkey: welcomerUser.npub).toNpub()?.formatPublicKey();
+    final welcomerPubkey = welcomerUser.npub;
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 24.w),
       child: Column(
@@ -334,7 +333,7 @@ class WelcomeAppbar extends ConsumerWidget {
     if (welcomerUser == null) {
       return const SizedBox.shrink();
     }
-    final welcomerPubkey = welcomerUser.publicKey;
+    final welcomerPubkey = welcomerUser.npub;
 
     return Row(
       children: [

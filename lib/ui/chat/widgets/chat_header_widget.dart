@@ -131,7 +131,7 @@ class DirectMessageHeader extends ConsumerWidget {
             displayName: displayName,
             size: 96.r,
             showBorder: true,
-            pubkey: otherMember.publicKey,
+            pubkey: otherMember.npub,
           ),
           Gap(12.h),
           Text(
@@ -152,7 +152,7 @@ class DirectMessageHeader extends ConsumerWidget {
           ),
           Gap(12.h),
           Text(
-            otherMember.publicKey.formatPublicKey(),
+            otherMember.npub.formatPublicKey(),
             textAlign: TextAlign.center,
             style: TextStyle(
               fontSize: 12.sp,

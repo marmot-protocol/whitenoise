@@ -53,7 +53,7 @@ class DMChatInfo extends ConsumerWidget {
         activePubkey.isNotEmpty
             ? ref.read(groupsProvider.notifier).getOtherGroupMember(groupId)
             : null;
-    final otherUserPubkey = otherMember?.publicKey;
+    final otherUserPubkey = otherMember?.npub;
 
     final followState =
         otherUserPubkey != null ? ref.watch(followProvider(otherUserPubkey)) : const FollowState();
@@ -68,7 +68,7 @@ class DMChatInfo extends ConsumerWidget {
               imageUrl: otherMember?.imagePath ?? '',
               displayName: otherMember?.displayName ?? 'chats.unknown'.tr(),
               size: 96.w,
-              pubkey: otherMember?.publicKey,
+              pubkey: otherMember?.npub,
               showBorder: true,
             ),
             SizedBox(height: 16.h),
@@ -92,7 +92,7 @@ class DMChatInfo extends ConsumerWidget {
               children: [
                 Flexible(
                   child: Text(
-                    otherMember?.publicKey.formatPublicKey() ?? '',
+                    otherMember?.npub.formatPublicKey() ?? '',
                     textAlign: TextAlign.center,
                     style: context.textTheme.bodyMedium?.copyWith(
                       color: context.colors.mutedForeground,

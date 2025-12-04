@@ -19,6 +19,7 @@ class MockMessageSenderService implements MessageSenderService {
   MessageWithTokens? messageToReturn;
   Exception? errorToThrow;
   int sendCallCount = 0;
+  int reactionCallCount = 0;
 
   MockMessageSenderService({
     this.messageToReturn,
@@ -52,6 +53,30 @@ class MockMessageSenderService implements MessageSenderService {
       throw errorToThrow!;
     }
     return messageToReturn!;
+  }
+
+  @override
+  Future<MessageWithTokens> sendReaction({
+    required String pubkey,
+    required String groupId,
+    required String messageId,
+    required String messagePubkey,
+    required int messageKind,
+    required String emoji,
+  }) async {
+    reactionCallCount++;
+    if (errorToThrow != null) {
+      throw errorToThrow!;
+    }
+    // Return a dummy message as it's not used for reaction response in the provider usually
+    return MessageWithTokens(
+      id: 'reaction-id',
+      pubkey: pubkey,
+      kind: 7,
+      createdAt: DateTime.now(),
+      content: emoji,
+      tokens: [],
+    );
   }
 
   @override
@@ -94,7 +119,7 @@ MessageModel createTestMessage({
     createdAt: createdAt,
     sender: User(
       id: senderPubkey,
-      publicKey: senderPubkey,
+      npub: senderPubkey,
       displayName: 'Test User',
       nip05: '',
     ),
@@ -1476,7 +1501,7 @@ void main() {
             content: 'My message',
             type: MessageType.text,
             createdAt: now,
-            sender: User(id: testPubkey, publicKey: testPubkey, displayName: 'Me', nip05: ''),
+            sender: User(id: testPubkey, npub: testPubkey, displayName: 'Me', nip05: ''),
             isMe: true,
             groupId: groupId,
           );
@@ -1502,7 +1527,7 @@ void main() {
             content: 'My message 1',
             type: MessageType.text,
             createdAt: now.subtract(const Duration(minutes: 2)),
-            sender: User(id: testPubkey, publicKey: testPubkey, displayName: 'Me', nip05: ''),
+            sender: User(id: testPubkey, npub: testPubkey, displayName: 'Me', nip05: ''),
             isMe: true,
             groupId: groupId,
           );
@@ -1518,7 +1543,7 @@ void main() {
             content: 'My message 2',
             type: MessageType.text,
             createdAt: now,
-            sender: User(id: testPubkey, publicKey: testPubkey, displayName: 'Me', nip05: ''),
+            sender: User(id: testPubkey, npub: testPubkey, displayName: 'Me', nip05: ''),
             isMe: true,
             groupId: groupId,
           );
@@ -1559,7 +1584,7 @@ void main() {
             content: 'My message 1',
             type: MessageType.text,
             createdAt: now.subtract(const Duration(minutes: 1)),
-            sender: User(id: testPubkey, publicKey: testPubkey, displayName: 'Me', nip05: ''),
+            sender: User(id: testPubkey, npub: testPubkey, displayName: 'Me', nip05: ''),
             isMe: true,
             groupId: groupId,
           );
@@ -1568,7 +1593,7 @@ void main() {
             content: 'My message 2',
             type: MessageType.text,
             createdAt: now,
-            sender: User(id: testPubkey, publicKey: testPubkey, displayName: 'Me', nip05: ''),
+            sender: User(id: testPubkey, npub: testPubkey, displayName: 'Me', nip05: ''),
             isMe: true,
             groupId: groupId,
           );
@@ -1701,7 +1726,7 @@ void main() {
             content: 'Self',
             type: MessageType.text,
             createdAt: lastReadTime.add(const Duration(minutes: 2)),
-            sender: User(id: testPubkey, publicKey: testPubkey, displayName: 'Me', nip05: ''),
+            sender: User(id: testPubkey, npub: testPubkey, displayName: 'Me', nip05: ''),
             isMe: true,
             groupId: groupId,
           );
@@ -1898,7 +1923,7 @@ void main() {
             content: 'Self message',
             type: MessageType.text,
             createdAt: now.add(const Duration(minutes: 5)),
-            sender: User(id: testPubkey, publicKey: testPubkey, displayName: 'Me', nip05: ''),
+            sender: User(id: testPubkey, npub: testPubkey, displayName: 'Me', nip05: ''),
             isMe: true,
             groupId: g2,
           ),
@@ -2056,6 +2081,107 @@ void main() {
         final state = container.read(chatProvider);
         expect(state.getUnreadCountForGroup(g1), 1);
         expect(state.getUnreadCountForGroup(g2), 0);
+      });
+    });
+    group('ChatProvider Reaction Tests', () {
+      TestWidgetsFlutterBinding.ensureInitialized();
+      late ProviderContainer container;
+      const testGroupId = 'test-group-123';
+      // Use npub format since the code converts hex to npub via FFI
+      const testPubkey = 'npub1yx5dwahlw3sql3t7h7qrr0xrx5k3cf44rjfq3fvs37lhk8yq0dnq7z5zqh';
+      const otherUserPubkey = 'npub1z9qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqwpwcp';
+
+      late MockMessageSenderService mockMessageSenderService;
+      late MockGroupMessagesNotifier mockGroupMessagesNotifier;
+      late MessageModel testMessage;
+
+      setUp(() async {
+        SharedPreferences.setMockInitialValues({});
+        // LastReadManager doesn't need init
+
+        mockMessageSenderService = MockMessageSenderService();
+
+        testMessage = createTestMessage(
+          id: 'msg-1',
+          content: 'Hello',
+          senderPubkey: otherUserPubkey,
+          createdAt: DateTime.now(),
+          groupId: testGroupId,
+        );
+
+        mockGroupMessagesNotifier = MockGroupMessagesNotifier(
+          messagesToReturn: [testMessage],
+        );
+
+        container = ProviderContainer(
+          overrides: [
+            authProvider.overrideWith(
+              () => MockAuthNotifier(isAuthenticated: true),
+            ),
+            activePubkeyProvider.overrideWith(
+              () => MockActivePubkeyNotifier(testPubkey),
+            ),
+            groupMessagesProvider.overrideWith(
+              () => mockGroupMessagesNotifier,
+            ),
+            chatProvider.overrideWith(
+              () => ChatNotifier(messageSenderService: mockMessageSenderService),
+            ),
+          ],
+        );
+
+        // Initialize the provider and load messages
+        final notifier = container.read(chatProvider.notifier);
+        await notifier.loadMessagesForGroup(testGroupId);
+      });
+
+      tearDown(() {
+        container.dispose();
+      });
+
+      test('updateMessageReaction adds reaction optimistically', () async {
+        final notifier = container.read(chatProvider.notifier);
+        const reactionEmoji = '👍';
+
+        // Verify initial state
+        var messages = container.read(chatProvider).groupMessages[testGroupId];
+        expect(messages!.first.reactions, isEmpty);
+
+        // Add reaction
+        final result = await notifier.updateMessageReaction(
+          message: testMessage,
+          emoji: reactionEmoji,
+        );
+
+        expect(result, true);
+        expect(mockMessageSenderService.reactionCallCount, 1);
+
+        // Verify optimistic update
+        messages = container.read(chatProvider).groupMessages[testGroupId];
+        expect(messages!.first.reactions, isNotEmpty);
+        expect(messages.first.reactions.first.emoji, reactionEmoji);
+        expect(messages.first.reactions.first.user.npub, testPubkey);
+      });
+
+      test('updateMessageReaction reverts optimistic update on failure', () async {
+        final notifier = container.read(chatProvider.notifier);
+        const reactionEmoji = '👍';
+
+        // Setup failure
+        mockMessageSenderService.errorToThrow = Exception('Network error');
+
+        // Add reaction
+        final result = await notifier.updateMessageReaction(
+          message: testMessage,
+          emoji: reactionEmoji,
+        );
+
+        expect(result, false);
+        expect(mockMessageSenderService.reactionCallCount, 1);
+
+        // Verify reaction is NOT present (reverted)
+        final messages = container.read(chatProvider).groupMessages[testGroupId]!;
+        expect(messages.first.reactions, isEmpty);
       });
     });
   });

@@ -118,7 +118,7 @@ class MessageConverter {
       id: currentUserPublicKey,
       displayName: 'You',
       nip05: '',
-      publicKey: currentUserPublicKey,
+      npub: currentUserPublicKey,
     );
 
     return MessageModel(
@@ -140,7 +140,7 @@ class MessageConverter {
       id: pubkey,
       displayName: 'shared.unknownUser'.tr(),
       nip05: '',
-      publicKey: pubkey,
+      npub: pubkey,
     );
   }
 
@@ -223,7 +223,7 @@ class MessageConverter {
         id: 'unknown',
         displayName: 'shared.unknownUser'.tr(),
         nip05: '',
-        publicKey: 'unknown',
+        npub: 'unknown',
       ),
       isMe: false,
       groupId: groupId,

@@ -240,7 +240,7 @@ MessageModel _createMessage({
     createdAt: createdAt ?? DateTime.now(),
     sender: User(
       id: 'test_id',
-      publicKey: 'test_pubkey',
+      npub: 'test_pubkey',
       displayName: 'Test User',
       nip05: '',
     ),

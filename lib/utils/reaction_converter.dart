@@ -18,7 +18,7 @@ class ReactionConverter {
             id: userReaction.user,
             displayName: 'shared.unknownUser'.tr(),
             nip05: '',
-            publicKey: userReaction.user,
+            npub: userReaction.user,
           );
 
       final reaction = Reaction(

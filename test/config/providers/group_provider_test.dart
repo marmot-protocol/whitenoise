@@ -131,7 +131,7 @@ void main() {
           id: 'test_id',
           displayName: 'Test User',
           nip05: 'test@example.com',
-          publicKey: 'test_pubkey',
+          npub: 'test_pubkey',
         );
         final testGroupMembers = <String, List<User>>{
           'group1': [testUser],
@@ -150,7 +150,7 @@ void main() {
           id: 'admin_id',
           displayName: 'Admin User',
           nip05: 'admin@example.com',
-          publicKey: 'admin_pubkey',
+          npub: 'admin_pubkey',
         );
         final testGroupAdmins = <String, List<User>>{
           'group1': [testUser],
@@ -308,7 +308,7 @@ void main() {
           id: 'member_id',
           displayName: 'Member User',
           nip05: 'member@example.com',
-          publicKey: 'member_pubkey',
+          npub: 'member_pubkey',
         );
         final testGroupMembers = <String, List<User>>{
           'group1': [testUser],
@@ -331,7 +331,7 @@ void main() {
           id: 'admin_id',
           displayName: 'Admin User',
           nip05: 'admin@example.com',
-          publicKey: 'admin_pubkey',
+          npub: 'admin_pubkey',
         );
         final testGroupAdmins = <String, List<User>>{
           'group1': [testUser],
@@ -356,7 +356,7 @@ void main() {
           id: 'test_id',
           displayName: 'Test User',
           nip05: 'test@example.com',
-          publicKey: 'test_pubkey',
+          npub: 'test_pubkey',
         );
         notifier.state = notifier.state.copyWith(
           groups: testGroups,
@@ -603,13 +603,13 @@ void main() {
               return [
                 User(
                   id: 'test_active_pubkey_123',
-                  publicKey: 'test_active_pubkey_123',
+                  npub: 'test_active_pubkey_123',
                   displayName: 'Active User',
                   nip05: '',
                 ),
                 User(
                   id: 'other_user_pubkey',
-                  publicKey: 'other_user_pubkey',
+                  npub: 'other_user_pubkey',
                   displayName: 'Other User',
                   nip05: '',
                 ),

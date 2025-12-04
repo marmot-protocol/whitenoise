@@ -10,6 +10,7 @@ import 'package:whitenoise/config/providers/group_messages_provider.dart';
 import 'package:whitenoise/config/providers/group_provider.dart';
 import 'package:whitenoise/config/states/chat_state.dart';
 import 'package:whitenoise/domain/models/message_model.dart';
+import 'package:whitenoise/domain/models/user_model.dart';
 import 'package:whitenoise/domain/services/last_read_manager.dart';
 import 'package:whitenoise/domain/services/last_read_service.dart';
 import 'package:whitenoise/domain/services/message_merger_service.dart';
@@ -383,9 +384,9 @@ class ChatNotifier extends Notifier<ChatState> {
     if (selectedGroupId == null) return false;
     final groupMessages = state.groupMessages[selectedGroupId] ?? [];
     if (index <= 0 || index >= groupMessages.length) return false;
-    final currentSenderPubkey = groupMessages[index].sender.publicKey;
+    final currentSenderPubkey = groupMessages[index].sender.npub;
     final currentSenderHexPubkey = PubkeyFormatter(pubkey: currentSenderPubkey).toHex() ?? '';
-    final previousSenderPubkey = groupMessages[index - 1].sender.publicKey;
+    final previousSenderPubkey = groupMessages[index - 1].sender.npub;
     final previousSenderHexPubkey = PubkeyFormatter(pubkey: previousSenderPubkey).toHex() ?? '';
     if (currentSenderHexPubkey.isEmpty || previousSenderHexPubkey.isEmpty) return false;
     return currentSenderHexPubkey == previousSenderHexPubkey;
@@ -396,9 +397,9 @@ class ChatNotifier extends Notifier<ChatState> {
     if (selectedGroupId == null) return false;
     final groupMessages = state.groupMessages[selectedGroupId] ?? [];
     if (index < 0 || index >= groupMessages.length - 1) return false;
-    final currentSenderPubkey = groupMessages[index].sender.publicKey;
+    final currentSenderPubkey = groupMessages[index].sender.npub;
     final currentSenderHexPubkey = PubkeyFormatter(pubkey: currentSenderPubkey).toHex() ?? '';
-    final nextSenderPubkey = groupMessages[index + 1].sender.publicKey;
+    final nextSenderPubkey = groupMessages[index + 1].sender.npub;
     final nextSenderHexPubkey = PubkeyFormatter(pubkey: nextSenderPubkey).toHex() ?? '';
     if (currentSenderHexPubkey.isEmpty || nextSenderHexPubkey.isEmpty) return false;
     return currentSenderHexPubkey == nextSenderHexPubkey;
@@ -499,7 +500,7 @@ class ChatNotifier extends Notifier<ChatState> {
   /// Add or remove a reaction to/from a message
   Future<bool> updateMessageReaction({
     required MessageModel message,
-    required String reaction,
+    required String emoji,
     int? messageKind,
   }) async {
     if (!_isAuthAvailable()) {
@@ -518,26 +519,68 @@ class ChatNotifier extends Notifier<ChatState> {
         return false;
       }
 
-      _logger.info('ChatProvider: Adding reaction "$reaction" to message ${message.id}');
+      final activeUserNpub = PubkeyFormatter(pubkey: activePubkey).toNpub();
+      if (activeUserNpub == null) {
+        _logger.warning('Failed to convert active pubkey to npub format');
+        return false;
+      }
+      final normalizedEmoji = emoji.trim().replaceAll('\u{FE0F}', '');
 
-      // Use the message's actual kind (now stored in MessageModel)
-      final originalMessageKind = messageKind ?? message.kind;
-      await _messageSenderService.sendReaction(
-        pubkey: activePubkey,
-        groupId: message.groupId ?? '',
-        messageId: message.id,
-        messagePubkey: message.sender.publicKey,
-        messageKind: originalMessageKind,
-        emoji: reaction,
+      final userCurrentReaction = message.reactions.firstWhereOrNull(
+        (r) => r.user.npub == activeUserNpub,
       );
 
-      // Refresh messages to get updated reactions
-      await refreshMessagesForGroup(message.groupId ?? '');
+      if (userCurrentReaction?.emoji == normalizedEmoji) {
+        _logger.fine('user has already reacted with $normalizedEmoji');
+        return false;
+      }
 
-      _logger.info('ChatProvider: Reaction added successfully');
+      final currentMessages = state.groupMessages[groupId] ?? [];
+      final messageIndex = currentMessages.indexWhere((m) => m.id == message.id);
+
+      if (messageIndex != -1) {
+        final currentMessage = currentMessages[messageIndex];
+        final updatedReactions = List<Reaction>.from(currentMessage.reactions)
+          ..removeWhere((r) => r.user.npub == activeUserNpub);
+
+        final currentUser = User(
+          id: activePubkey,
+          npub: activeUserNpub,
+          displayName: 'You',
+          nip05: '',
+        );
+
+        updatedReactions.add(
+          Reaction(emoji: normalizedEmoji, user: currentUser, createdAt: DateTime.now()),
+        );
+
+        final updatedMessage = currentMessage.copyWith(reactions: updatedReactions);
+        final updatedMessages = List<MessageModel>.from(currentMessages)
+          ..[messageIndex] = updatedMessage;
+
+        state = state.copyWith(
+          groupMessages: {...state.groupMessages, groupId: updatedMessages},
+        );
+      }
+
+      await _messageSenderService.sendReaction(
+        pubkey: activePubkey,
+        groupId: groupId,
+        messageId: message.id,
+        messagePubkey: message.sender.npub,
+        messageKind: messageKind ?? message.kind,
+        emoji: normalizedEmoji,
+      );
+
       return true;
     } catch (e, st) {
       _logger.severe('ChatProvider.updateMessageReaction', e, st);
+
+      final groupId = message.groupId;
+      if (groupId != null) {
+        await refreshMessagesForGroup(groupId);
+      }
+
       return false;
     }
   }

@@ -167,7 +167,7 @@ class WelcomesNotifier extends Notifier<WelcomesState> {
                 id: welcomerPubkey,
                 displayName: 'shared.unknownUser'.tr(),
                 nip05: '',
-                publicKey: welcomerPubkey,
+                npub: welcomerPubkey,
               );
             } else {
               failedPubkeys.add(welcomerPubkey);

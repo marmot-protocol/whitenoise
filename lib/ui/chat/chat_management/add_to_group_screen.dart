@@ -243,8 +243,7 @@ class _AddToGroupScreenState extends ConsumerState<AddToGroupScreen> {
                         PubkeyFormatter(pubkey: widget.userNpub).toHex() ?? widget.userNpub;
 
                     final isUserInGroup = members.any((member) {
-                      final memberHex =
-                          PubkeyFormatter(pubkey: member.publicKey).toHex() ?? member.publicKey;
+                      final memberHex = PubkeyFormatter(pubkey: member.npub).toHex() ?? member.npub;
                       return memberHex == userHex;
                     });
 
