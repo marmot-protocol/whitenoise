@@ -1,6 +1,3 @@
-import 'dart:convert';
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -98,51 +95,6 @@ class WidgetTestHelper extends StatelessWidget {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
-  const fakeTranslationsJson = '''
-{
-  "shared": {
-    "system": "System"
-  },
-  "settings": {
-    "title": "Settings",
-    "subtitle": "Configure your app"
-  },
-  "greeting": "Hello {name}"
-}
-''';
-
-  setUpAll(() {
-    final jsonEncoded = utf8.encode(fakeTranslationsJson);
-    final jsonByteData = ByteData.view(Uint8List.fromList(jsonEncoded).buffer);
-
-    const tinySvg = '<svg xmlns="http://www.w3.org/2000/svg" width="1" height="1"></svg>';
-    final svgEncoded = utf8.encode(tinySvg);
-    final svgByteData = ByteData.view(Uint8List.fromList(svgEncoded).buffer);
-
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMessageHandler(
-      'flutter/assets',
-      (ByteData? message) async {
-        if (message == null) return null;
-
-        final assetKey = utf8.decode(
-          message.buffer.asUint8List(
-            message.offsetInBytes,
-            message.lengthInBytes,
-          ),
-        );
-
-        if (assetKey.startsWith('lib/locales/')) {
-          return jsonByteData;
-        }
-
-        if (assetKey.contains('ic_chevron_down.svg') || assetKey.contains('ic_chevron_up.svg')) {
-          return svgByteData;
-        }
-
-        return null;
-      },
-    );
-  });
 
   setUp(() {
     LocalizationService.resetDeviceLocaleOverride();

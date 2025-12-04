@@ -215,13 +215,13 @@ void main() {
       expect(result, 'System (English)');
     });
 
-    test('value "system" uses upper-cased code when device locale not supported', () {
+    test('value "system" falls back to English when device locale not supported', () {
       LocalizationService.setDeviceLocaleOverrideForTest(const Locale('ja'));
 
       const value = 'system';
       final result = value.toLanguageDisplayText();
 
-      // ja not in supportedLocales → JA
+      // ja not in supportedLocales → falls back to English
       expect(result, 'System (English)');
     });
 
