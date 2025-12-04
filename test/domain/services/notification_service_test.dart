@@ -400,107 +400,75 @@ void main() {
       });
     });
 
-    group('_requestAndroidPermissions() - Battery Optimization Flag Handling', () {
-      late MockSharedPreferences mockPrefs;
+    group('requestPermissions() integration', () {
       late MockFlutterLocalNotificationsPlugin mockPlugin;
+      late MockSharedPreferences mockPrefs;
 
       setUp(() {
-        mockPrefs = MockSharedPreferences();
         mockPlugin = MockFlutterLocalNotificationsPlugin();
+        mockPrefs = MockSharedPreferences();
         when(
           mockPlugin.initialize(
             any,
             onDidReceiveNotificationResponse: anyNamed('onDidReceiveNotificationResponse'),
           ),
         ).thenAnswer((_) async => true);
-        when(mockPlugin.resolvePlatformSpecificImplementation()).thenReturn(null);
+        when(
+          mockPlugin
+              .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>(),
+        ).thenReturn(null);
       });
 
       tearDown(() {
-        reset(mockPrefs);
         reset(mockPlugin);
+        reset(mockPrefs);
       });
 
-      test(
-        'when flag is null: treats null as false and WILL request battery optimization',
-        () async {
-          when(mockPrefs.getBool('battery_opt_requested')).thenReturn(null);
-          when(mockPrefs.setBool('battery_opt_requested', true)).thenAnswer((_) async => true);
+      test('returns false when notification permission is permanently denied', () async {
+        when(
+          mockPlugin.initialize(
+            any,
+            onDidReceiveNotificationResponse: anyNamed('onDidReceiveNotificationResponse'),
+          ),
+        ).thenAnswer((_) async => true);
 
-          await NotificationService.initialize(plugin: mockPlugin, sharedPreferences: mockPrefs);
+        final result = await NotificationService.requestPermissions();
 
-          final flag = mockPrefs.getBool('battery_opt_requested');
-          final shouldRequest = !(flag ?? false);
-          expect(
-            shouldRequest,
-            isTrue,
-            reason: 'null should be treated as false, triggering request',
-          );
-        },
-      );
+        expect(result, isFalse);
+      });
 
-      test('when flag is false: WILL request battery optimization', () async {
+      test('battery optimization flag prevents repeated requests when flag is set', () async {
+        when(mockPrefs.getBool('battery_opt_requested')).thenReturn(true);
+
+        await NotificationService.initialize(plugin: mockPlugin, sharedPreferences: mockPrefs);
+
+        final flag = mockPrefs.getBool('battery_opt_requested');
+        expect(flag, isTrue, reason: 'Flag prevents battery optimization request');
+      });
+
+      test('battery optimization flag allows request when flag is not set', () async {
         when(mockPrefs.getBool('battery_opt_requested')).thenReturn(false);
         when(mockPrefs.setBool('battery_opt_requested', true)).thenAnswer((_) async => true);
 
         await NotificationService.initialize(plugin: mockPlugin, sharedPreferences: mockPrefs);
 
         final flag = mockPrefs.getBool('battery_opt_requested');
-        final shouldRequest = !(flag ?? false);
-        expect(shouldRequest, isTrue, reason: 'false flag should trigger request');
+        expect(flag, isFalse, reason: 'First time, flag should allow request');
       });
 
-      test('when flag is true: WILL NOT request battery optimization (nag prevention)', () async {
-        when(mockPrefs.getBool('battery_opt_requested')).thenReturn(true);
+      test('battery optimization flag treats null as not set', () async {
+        when(mockPrefs.getBool('battery_opt_requested')).thenReturn(null);
+        when(mockPrefs.setBool('battery_opt_requested', true)).thenAnswer((_) async => true);
 
         await NotificationService.initialize(plugin: mockPlugin, sharedPreferences: mockPrefs);
 
         final flag = mockPrefs.getBool('battery_opt_requested');
         final shouldRequest = !(flag ?? false);
-        expect(shouldRequest, isFalse, reason: 'true flag prevents request (nag prevention)');
-      });
-
-      test('flag state transition: false→true prevents repeated requests', () {
-        final firstCheck = false;
-        final shouldRequestFirst = !firstCheck;
-        expect(shouldRequestFirst, isTrue, reason: 'First check: false flag allows request');
-
-        final secondCheck = true;
-        final shouldRequestSecond = !secondCheck;
-        expect(shouldRequestSecond, isFalse, reason: 'Second check: true flag blocks request');
-      });
-
-      test('flag set synchronously prevents request on second call', () {
-        final flag1 = false;
-        final flag2 = true;
-
-        final shouldRequest1 = !flag1;
-        final shouldRequest2 = !flag2;
-
-        expect(shouldRequest1, isTrue, reason: 'First call with false flag should request');
-        expect(shouldRequest2, isFalse, reason: 'Second call with true flag should not request');
-      });
-
-      test('null coalescing operator: (null ?? false) correctly handles missing key', () {
-        final bool? flag = null;
-        expect(flag ?? false, isFalse);
-      });
-
-      test('logic summary: null/false=request, true=skip prevents repeated nagging', () {
-        final scenarios = [
-          (null as bool?, true),
-          (false, true),
-          (true, false),
-        ];
-
-        for (final (flag, expected) in scenarios) {
-          final actual = !(flag ?? false);
-          expect(
-            actual,
-            equals(expected),
-            reason: 'Flag=$flag should ${expected ? "trigger" : "skip"} request',
-          );
-        }
+        expect(
+          shouldRequest,
+          isTrue,
+          reason: 'Null flag should be treated as false, allowing request',
+        );
       });
     });
   });

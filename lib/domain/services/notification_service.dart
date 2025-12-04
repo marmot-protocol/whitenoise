@@ -199,9 +199,9 @@ class NotificationService {
   static Future<void> _requestAndroidPermissions() async {
     final prefs = _sharedPreferencesInstance ?? await SharedPreferences.getInstance();
     if (!(prefs.getBool(_batteryOptRequestedKey) ?? false)) {
-      await prefs.setBool(_batteryOptRequestedKey, true);
       try {
         await FlutterForegroundTask.requestIgnoreBatteryOptimization();
+        await prefs.setBool(_batteryOptRequestedKey, true);
       } catch (e) {
         _logger.warning('Failed to request battery optimization exemption: $e');
       }
