@@ -10,21 +10,25 @@ void useActiveChat({
   required void Function(String) cancelGroupNotifications,
 }) {
   useEffect(() {
-    Future.microtask(() => setActiveChat(groupId));
-    cancelGroupNotifications(groupId);
+    Future.microtask(() {
+      setActiveChat(groupId);
+      cancelGroupNotifications(groupId);
+    });
     return () => Future.microtask(clearActiveChat);
   }, [groupId]);
 
   useOnAppLifecycleStateChange((previous, current) {
     switch (current) {
       case AppLifecycleState.resumed:
-        setActiveChat(groupId);
-        cancelGroupNotifications(groupId);
+        Future.microtask(() {
+          setActiveChat(groupId);
+          cancelGroupNotifications(groupId);
+        });
       case AppLifecycleState.paused:
       case AppLifecycleState.inactive:
       case AppLifecycleState.hidden:
       case AppLifecycleState.detached:
-        clearActiveChat();
+        Future.microtask(clearActiveChat);
     }
   });
 }

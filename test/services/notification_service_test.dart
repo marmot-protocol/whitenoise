@@ -14,8 +14,8 @@ class _MockNotificationsPlugin implements FlutterLocalNotificationsPlugin {
   int? lastCancelledId;
 
   @override
-  Future<bool?> initialize(
-    InitializationSettings initializationSettings, {
+  Future<bool?> initialize({
+    required InitializationSettings settings,
     onDidReceiveNotificationResponse,
     onDidReceiveBackgroundNotificationResponse,
   }) async {
@@ -25,11 +25,11 @@ class _MockNotificationsPlugin implements FlutterLocalNotificationsPlugin {
   }
 
   @override
-  Future<void> show(
-    int id,
+  Future<void> show({
+    required int id,
     String? title,
     String? body,
-    NotificationDetails? notificationDetails, {
+    NotificationDetails? notificationDetails,
     String? payload,
   }) async {
     calls.add('show');
@@ -40,7 +40,7 @@ class _MockNotificationsPlugin implements FlutterLocalNotificationsPlugin {
   }
 
   @override
-  Future<void> cancel(int id, {String? tag}) async {
+  Future<void> cancel({required int id, String? tag}) async {
     calls.add('cancel');
     lastCancelledId = id;
   }
@@ -123,12 +123,13 @@ void main() {
       });
 
       test('skips when not initialized', () async {
+        final uninitMock = _MockNotificationsPlugin();
         final uninitService = NotificationService(
-          plugin: _MockNotificationsPlugin(),
+          plugin: uninitMock,
           enabled: true,
         );
         await uninitService.show(groupId: 'g1', title: 't', body: 'b', receiverPubkey: 'pk1');
-        expect(mockPlugin.calls, isNot(contains('show')));
+        expect(uninitMock.calls, isNot(contains('show')));
       });
 
       test('payload contains message trigger and receiver pubkey as JSON', () async {

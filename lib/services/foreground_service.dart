@@ -17,10 +17,7 @@ class _KeepAliveTaskHandler extends TaskHandler {
   }
 
   @override
-  void onRepeatEvent(DateTime timestamp) {
-    // No-op: we only need to keep the process alive
-    // The actual notification stream runs in the main isolate
-  }
+  void onRepeatEvent(DateTime timestamp) {}
 
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {

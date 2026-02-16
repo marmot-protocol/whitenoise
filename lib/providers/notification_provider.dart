@@ -46,7 +46,7 @@ final notificationListenerProvider = Provider.autoDispose<void>((ref) {
   });
 });
 
-Future<void> _initializeAndListen(
+void _initializeAndListen(
   NotificationService notificationService,
   ForegroundService foregroundService,
   Ref ref,
@@ -54,9 +54,15 @@ Future<void> _initializeAndListen(
 ) async {
   try {
     await notificationService.initialize();
+    if (!ref.mounted) return;
     await notificationService.requestPermission();
+    if (!ref.mounted) return;
 
     await foregroundService.start();
+    if (!ref.mounted) {
+      await foregroundService.stop();
+      return;
+    }
     await foregroundService.requestBatteryOptimizationExemption();
 
     final stream = notifications_api.subscribeToNotifications();
@@ -71,6 +77,11 @@ Future<void> _initializeAndListen(
       },
     );
 
+    if (!ref.mounted) {
+      await subscription.cancel();
+      await foregroundService.stop();
+      return;
+    }
     onSubscription(subscription);
     _logger.info('Notification listener started');
   } catch (error, stackTrace) {

@@ -3,6 +3,9 @@ import 'package:whitenoise/l10n/generated/app_localizations_en.dart';
 import 'package:whitenoise/providers/notification_provider.dart';
 import 'package:whitenoise/src/rust/api/notifications.dart';
 
+const _receiverPubkey = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+const _senderPubkey = 'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210';
+
 void main() {
   final l10n = AppLocalizationsEn();
 
@@ -12,8 +15,8 @@ void main() {
         trigger: NotificationTrigger.newMessage,
         mlsGroupId: 'group123',
         isDm: true,
-        receiver: const NotificationUser(pubkey: 'receiver123'),
-        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Alice'),
+        receiver: const NotificationUser(pubkey: _receiverPubkey),
+        sender: const NotificationUser(pubkey: _senderPubkey, displayName: 'Alice'),
         content: 'Hello there',
         timestamp: DateTime.now(),
       );
@@ -31,8 +34,8 @@ void main() {
         mlsGroupId: 'group123',
         groupName: 'Friends Group',
         isDm: false,
-        receiver: const NotificationUser(pubkey: 'receiver123'),
-        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Bob'),
+        receiver: const NotificationUser(pubkey: _receiverPubkey),
+        sender: const NotificationUser(pubkey: _senderPubkey, displayName: 'Bob'),
         content: 'Hey everyone',
         timestamp: DateTime.now(),
       );
@@ -49,8 +52,8 @@ void main() {
         trigger: NotificationTrigger.groupInvite,
         mlsGroupId: 'group123',
         isDm: true,
-        receiver: const NotificationUser(pubkey: 'receiver123'),
-        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Carol'),
+        receiver: const NotificationUser(pubkey: _receiverPubkey),
+        sender: const NotificationUser(pubkey: _senderPubkey, displayName: 'Carol'),
         content: '',
         timestamp: DateTime.now(),
       );
@@ -68,8 +71,8 @@ void main() {
         mlsGroupId: 'group123',
         groupName: 'New Project',
         isDm: false,
-        receiver: const NotificationUser(pubkey: 'receiver123'),
-        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Dave'),
+        receiver: const NotificationUser(pubkey: _receiverPubkey),
+        sender: const NotificationUser(pubkey: _senderPubkey, displayName: 'Dave'),
         content: '',
         timestamp: DateTime.now(),
       );
@@ -86,8 +89,8 @@ void main() {
         trigger: NotificationTrigger.newMessage,
         mlsGroupId: 'group123',
         isDm: true,
-        receiver: const NotificationUser(pubkey: 'receiver123'),
-        sender: const NotificationUser(pubkey: 'sender123'),
+        receiver: const NotificationUser(pubkey: _receiverPubkey),
+        sender: const NotificationUser(pubkey: _senderPubkey),
         content: 'Anonymous message',
         timestamp: DateTime.now(),
       );
@@ -102,8 +105,8 @@ void main() {
         trigger: NotificationTrigger.newMessage,
         mlsGroupId: 'group123',
         isDm: false,
-        receiver: const NotificationUser(pubkey: 'receiver123'),
-        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Eve'),
+        receiver: const NotificationUser(pubkey: _receiverPubkey),
+        sender: const NotificationUser(pubkey: _senderPubkey, displayName: 'Eve'),
         content: 'Hello',
         timestamp: DateTime.now(),
       );
@@ -118,8 +121,8 @@ void main() {
         trigger: NotificationTrigger.groupInvite,
         mlsGroupId: 'group123',
         isDm: false,
-        receiver: const NotificationUser(pubkey: 'receiver123'),
-        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Frank'),
+        receiver: const NotificationUser(pubkey: _receiverPubkey),
+        sender: const NotificationUser(pubkey: _senderPubkey, displayName: 'Frank'),
         content: '',
         timestamp: DateTime.now(),
       );
@@ -136,8 +139,8 @@ void main() {
         trigger: NotificationTrigger.groupInvite,
         mlsGroupId: 'group123',
         isDm: true,
-        receiver: const NotificationUser(pubkey: 'receiver123'),
-        sender: const NotificationUser(pubkey: 'sender123'),
+        receiver: const NotificationUser(pubkey: _receiverPubkey),
+        sender: const NotificationUser(pubkey: _senderPubkey),
         content: '',
         timestamp: DateTime.now(),
       );
@@ -156,8 +159,8 @@ void main() {
         trigger: NotificationTrigger.newMessage,
         mlsGroupId: 'group123',
         isDm: true,
-        receiver: const NotificationUser(pubkey: 'receiver123', displayName: 'MyAccount'),
-        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Alice'),
+        receiver: const NotificationUser(pubkey: _receiverPubkey, displayName: 'MyAccount'),
+        sender: const NotificationUser(pubkey: _senderPubkey, displayName: 'Alice'),
         content: 'Hello there',
         timestamp: DateTime.now(),
       );
@@ -179,8 +182,8 @@ void main() {
         mlsGroupId: 'group123',
         groupName: 'Friends Group',
         isDm: false,
-        receiver: const NotificationUser(pubkey: 'receiver123', displayName: 'MyAccount'),
-        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Bob'),
+        receiver: const NotificationUser(pubkey: _receiverPubkey, displayName: 'MyAccount'),
+        sender: const NotificationUser(pubkey: _senderPubkey, displayName: 'Bob'),
         content: 'Hey everyone',
         timestamp: DateTime.now(),
       );
@@ -201,8 +204,8 @@ void main() {
         trigger: NotificationTrigger.groupInvite,
         mlsGroupId: 'group123',
         isDm: true,
-        receiver: const NotificationUser(pubkey: 'receiver123', displayName: 'MyAccount'),
-        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Carol'),
+        receiver: const NotificationUser(pubkey: _receiverPubkey, displayName: 'MyAccount'),
+        sender: const NotificationUser(pubkey: _senderPubkey, displayName: 'Carol'),
         content: '',
         timestamp: DateTime.now(),
       );
@@ -224,8 +227,8 @@ void main() {
         mlsGroupId: 'group123',
         groupName: 'New Project',
         isDm: false,
-        receiver: const NotificationUser(pubkey: 'receiver123', displayName: 'MyAccount'),
-        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Dave'),
+        receiver: const NotificationUser(pubkey: _receiverPubkey, displayName: 'MyAccount'),
+        sender: const NotificationUser(pubkey: _senderPubkey, displayName: 'Dave'),
         content: '',
         timestamp: DateTime.now(),
       );
@@ -246,8 +249,8 @@ void main() {
         trigger: NotificationTrigger.newMessage,
         mlsGroupId: 'group123',
         isDm: true,
-        receiver: const NotificationUser(pubkey: 'receiver123', displayName: 'MyAccount'),
-        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Alice'),
+        receiver: const NotificationUser(pubkey: _receiverPubkey, displayName: 'MyAccount'),
+        sender: const NotificationUser(pubkey: _senderPubkey, displayName: 'Alice'),
         content: 'Hello',
         timestamp: DateTime.now(),
       );

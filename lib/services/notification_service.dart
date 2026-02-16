@@ -39,7 +39,7 @@ class NotificationService {
     const initSettings = InitializationSettings(android: androidSettings);
 
     await _plugin.initialize(
-      initSettings,
+      settings: initSettings,
       onDidReceiveNotificationResponse: _handleNotificationTap,
     );
 
@@ -100,15 +100,24 @@ class NotificationService {
 
     const details = NotificationDetails(android: androidDetails);
 
-    await _plugin.show(notificationId, title, body, details, payload: payload);
+    await _plugin.show(
+      id: notificationId,
+      title: title,
+      body: body,
+      notificationDetails: details,
+      payload: payload,
+    );
     _logger.fine('Showed notification for group $groupId: $title');
   }
 
   Future<void> cancelForGroup(String groupId) async {
     if (!_enabled) return;
+    if (!_initialized) {
+      _logger.warning('NotificationService not initialized, skipping cancel');
+    }
 
     final notificationId = generateNotificationId(groupId);
-    await _plugin.cancel(notificationId);
+    await _plugin.cancel(id: notificationId);
     _logger.fine('Cancelled notification for group $groupId');
   }
 
