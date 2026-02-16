@@ -48,10 +48,6 @@ useRelayResolution({
   final controller = useTextEditingController();
   final state = useState(const RelayResolutionState());
 
-  useEffect(() {
-    return () => controller.clear();
-  }, const []);
-
   Future<bool> publishDefaults() async {
     state.value = state.value.copyWith(isLoading: true, clearError: true);
 

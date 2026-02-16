@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
@@ -207,7 +209,7 @@ class AuthNotifier extends AsyncNotifier<String?> {
 
   Future<void> _completeLogin(String pubkey) async {
     final storage = ref.read(secureStorageProvider);
-    users_api.userMetadata(pubkey: pubkey, blockingDataSync: false);
+    unawaited(users_api.userMetadata(pubkey: pubkey, blockingDataSync: false));
     await storage.write(key: _storageKey, value: pubkey);
     state = AsyncData(pubkey);
     ref.read(isAddingAccountProvider.notifier).set(false);

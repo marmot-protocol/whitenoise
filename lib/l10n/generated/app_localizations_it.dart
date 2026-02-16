@@ -746,38 +746,50 @@ class AppLocalizationsIt extends AppLocalizations {
   String get deleteAllDataError => 'Impossibile eliminare tutti i dati. Riprova.';
 
   @override
-  String get relayResolutionTitle => 'Relay Setup';
+  String get relayResolutionTitle => 'Configurazione relay';
 
   @override
   String get relayResolutionDescription =>
-      'We couldn\'t find your relay lists on the network. You can provide a relay where your lists are published, or use our default relays to get started.';
+      'Non abbiamo trovato le tue liste di relay sulla rete. Puoi fornire un relay dove sono pubblicate le tue liste oppure utilizzare i nostri relay predefiniti per iniziare.';
 
   @override
-  String get relayResolutionUseDefaults => 'Use default relays';
+  String get relayResolutionUseDefaults => 'Usa relay predefiniti';
 
   @override
-  String get relayResolutionTryRelay => 'Search relay';
+  String get relayResolutionTryRelay => 'Cerca relay';
 
   @override
   String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
 
   @override
-  String get relayResolutionRelayLabel => 'Relay URL';
+  String get relayResolutionRelayLabel => 'URL del relay';
 
   @override
   String get relayResolutionNotFound =>
-      'No relay lists found on this relay. Try another or use defaults.';
+      'Nessuna lista di relay trovata su questo relay. Prova con un altro o usa quelli predefiniti.';
 
   @override
-  String get loginErrorInvalidKey => 'Invalid private key format. Please check and try again.';
+  String get loginErrorInvalidKey => 'Formato della chiave privata non valido. Verifica e riprova.';
 
   @override
   String get loginErrorNoRelayConnections =>
-      'Could not connect to any relays. Please check your connection and try again.';
+      'Impossibile connettersi ai relay. Controlla la connessione e riprova.';
 
   @override
-  String get loginErrorTimeout => 'Login timed out. Please try again.';
+  String get loginErrorTimeout => 'Accesso scaduto. Riprova.';
 
   @override
-  String get loginErrorGeneric => 'An error occurred during login. Please try again.';
+  String get loginErrorGeneric => 'Si è verificato un errore durante l\'accesso. Riprova.';
+
+  @override
+  String get loginErrorNoLoginInProgress => 'Nessun accesso in corso. Ricomincia da capo.';
+
+  @override
+  String get loginErrorInternal => 'Si è verificato un errore interno. Riprova.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Niente da incollare';
+
+  @override
+  String get loginPasteFailed => 'Impossibile incollare dagli appunti';
 }

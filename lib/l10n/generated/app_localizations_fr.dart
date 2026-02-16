@@ -750,38 +750,52 @@ class AppLocalizationsFr extends AppLocalizations {
       'Échec de la suppression de toutes les données. Veuillez réessayer.';
 
   @override
-  String get relayResolutionTitle => 'Relay Setup';
+  String get relayResolutionTitle => 'Configuration du relais';
 
   @override
   String get relayResolutionDescription =>
-      'We couldn\'t find your relay lists on the network. You can provide a relay where your lists are published, or use our default relays to get started.';
+      'Nous n\'avons pas trouvé vos listes de relais sur le réseau. Vous pouvez fournir un relais où vos listes sont publiées ou utiliser nos relais par défaut pour commencer.';
 
   @override
-  String get relayResolutionUseDefaults => 'Use default relays';
+  String get relayResolutionUseDefaults => 'Utiliser les relais par défaut';
 
   @override
-  String get relayResolutionTryRelay => 'Search relay';
+  String get relayResolutionTryRelay => 'Rechercher un relais';
 
   @override
-  String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
+  String get relayResolutionRelayPlaceholder => 'wss://relais.exemple.com';
 
   @override
-  String get relayResolutionRelayLabel => 'Relay URL';
+  String get relayResolutionRelayLabel => 'URL du relais';
 
   @override
   String get relayResolutionNotFound =>
-      'No relay lists found on this relay. Try another or use defaults.';
+      'Aucune liste de relais trouvée sur ce relais. Essayez un autre ou utilisez les valeurs par défaut.';
 
   @override
-  String get loginErrorInvalidKey => 'Invalid private key format. Please check and try again.';
+  String get loginErrorInvalidKey =>
+      'Format de clé privée invalide. Veuillez vérifier et réessayer.';
 
   @override
   String get loginErrorNoRelayConnections =>
-      'Could not connect to any relays. Please check your connection and try again.';
+      'Impossible de se connecter à des relais. Vérifiez votre connexion et réessayez.';
 
   @override
-  String get loginErrorTimeout => 'Login timed out. Please try again.';
+  String get loginErrorTimeout => 'La connexion a expiré. Veuillez réessayer.';
 
   @override
-  String get loginErrorGeneric => 'An error occurred during login. Please try again.';
+  String get loginErrorGeneric =>
+      'Une erreur est survenue lors de la connexion. Veuillez réessayer.';
+
+  @override
+  String get loginErrorNoLoginInProgress => 'Aucune connexion en cours. Veuillez recommencer.';
+
+  @override
+  String get loginErrorInternal => 'Une erreur interne est survenue. Veuillez réessayer.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Rien à coller';
+
+  @override
+  String get loginPasteFailed => 'Échec du collage depuis le presse-papiers';
 }

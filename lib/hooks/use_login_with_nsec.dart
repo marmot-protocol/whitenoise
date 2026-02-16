@@ -35,6 +35,8 @@ String _loginErrorMessage(Object error) {
     ApiError_LoginInvalidKeyFormat() => 'loginErrorInvalidKey',
     ApiError_LoginNoRelayConnections() => 'loginErrorNoRelayConnections',
     ApiError_LoginTimeout() => 'loginErrorTimeout',
+    ApiError_LoginNoLoginInProgress() => 'loginErrorNoLoginInProgress',
+    ApiError_LoginInternal() => 'loginErrorInternal',
     _ => 'loginErrorGeneric',
   };
 }
@@ -50,10 +52,6 @@ useLoginWithNsec(LoginStartCallback loginStart) {
   final controller = useTextEditingController();
   final state = useState(const LoginWithNsecState());
 
-  useEffect(() {
-    return () => controller.clear();
-  }, const []);
-
   Future<void> paste() async {
     try {
       final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
@@ -64,7 +62,7 @@ useLoginWithNsec(LoginStartCallback loginStart) {
       final trimmedText = clipboardData!.text!.trim();
       if (trimmedText.isEmpty) {
         state.value = state.value.copyWith(
-          error: 'Nothing to paste',
+          error: 'loginPasteNothingToPaste',
         );
         return;
       }
@@ -74,7 +72,7 @@ useLoginWithNsec(LoginStartCallback loginStart) {
     } catch (e) {
       _logger.warning('Failed to paste from clipboard: $e');
       state.value = state.value.copyWith(
-        error: 'Failed to paste from clipboard',
+        error: 'loginPasteFailed',
       );
     }
   }

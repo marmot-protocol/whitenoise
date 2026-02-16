@@ -1511,6 +1511,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'An error occurred during login. Please try again.'**
   String get loginErrorGeneric;
+
+  /// Error when trying to continue a login that was not started
+  ///
+  /// In en, this message translates to:
+  /// **'No login in progress. Please start over.'**
+  String get loginErrorNoLoginInProgress;
+
+  /// Error for internal login failures
+  ///
+  /// In en, this message translates to:
+  /// **'An internal error occurred. Please try again.'**
+  String get loginErrorInternal;
+
+  /// Error when clipboard is empty during login paste
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to paste'**
+  String get loginPasteNothingToPaste;
+
+  /// Error when clipboard paste fails during login
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to paste from clipboard'**
+  String get loginPasteFailed;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

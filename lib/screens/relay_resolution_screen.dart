@@ -18,8 +18,6 @@ import 'package:whitenoise/widgets/wn_system_notice.dart'
 String _resolveError(String errorKey, AppLocalizations l10n) {
   return switch (errorKey) {
     'relayResolutionNotFound' => l10n.relayResolutionNotFound,
-    'relayResolutionPublishFailed' => l10n.loginErrorGeneric,
-    'loginErrorGeneric' => l10n.loginErrorGeneric,
     _ => l10n.loginErrorGeneric,
   };
 }

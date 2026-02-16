@@ -753,38 +753,53 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudieron eliminar todos los datos. Por favor, inténtalo de nuevo.';
 
   @override
-  String get relayResolutionTitle => 'Relay Setup';
+  String get relayResolutionTitle => 'Configuración de relay';
 
   @override
   String get relayResolutionDescription =>
-      'We couldn\'t find your relay lists on the network. You can provide a relay where your lists are published, or use our default relays to get started.';
+      'No pudimos encontrar tus listas de relays en la red. Puedes proporcionar un relay donde estén publicadas tus listas o usar nuestros relays predeterminados para comenzar.';
 
   @override
-  String get relayResolutionUseDefaults => 'Use default relays';
+  String get relayResolutionUseDefaults => 'Usar relays predeterminados';
 
   @override
-  String get relayResolutionTryRelay => 'Search relay';
+  String get relayResolutionTryRelay => 'Buscar relay';
 
   @override
   String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
 
   @override
-  String get relayResolutionRelayLabel => 'Relay URL';
+  String get relayResolutionRelayLabel => 'URL del relay';
 
   @override
   String get relayResolutionNotFound =>
-      'No relay lists found on this relay. Try another or use defaults.';
+      'No se encontraron listas de relays en este relay. Prueba con otro o usa los predeterminados.';
 
   @override
-  String get loginErrorInvalidKey => 'Invalid private key format. Please check and try again.';
+  String get loginErrorInvalidKey =>
+      'Formato de clave privada no válido. Por favor, verifica e inténtalo de nuevo.';
 
   @override
   String get loginErrorNoRelayConnections =>
-      'Could not connect to any relays. Please check your connection and try again.';
+      'No se pudo conectar a ningún relay. Verifica tu conexión e inténtalo de nuevo.';
 
   @override
-  String get loginErrorTimeout => 'Login timed out. Please try again.';
+  String get loginErrorTimeout => 'La conexión ha expirado. Inténtalo de nuevo.';
 
   @override
-  String get loginErrorGeneric => 'An error occurred during login. Please try again.';
+  String get loginErrorGeneric =>
+      'Se produjo un error durante el inicio de sesión. Inténtalo de nuevo.';
+
+  @override
+  String get loginErrorNoLoginInProgress =>
+      'No hay inicio de sesión en curso. Por favor, empieza de nuevo.';
+
+  @override
+  String get loginErrorInternal => 'Se produjo un error interno. Inténtalo de nuevo.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Nada que pegar';
+
+  @override
+  String get loginPasteFailed => 'Error al pegar desde el portapapeles';
 }

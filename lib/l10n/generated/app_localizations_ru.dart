@@ -752,38 +752,51 @@ class AppLocalizationsRu extends AppLocalizations {
   String get deleteAllDataError => 'Не удалось удалить все данные. Пожалуйста, попробуйте снова.';
 
   @override
-  String get relayResolutionTitle => 'Relay Setup';
+  String get relayResolutionTitle => 'Настройка реле';
 
   @override
   String get relayResolutionDescription =>
-      'We couldn\'t find your relay lists on the network. You can provide a relay where your lists are published, or use our default relays to get started.';
+      'Мы не нашли ваши списки реле в сети. Вы можете указать реле, где опубликованы ваши списки, или использовать наши стандартные реле для начала работы.';
 
   @override
-  String get relayResolutionUseDefaults => 'Use default relays';
+  String get relayResolutionUseDefaults => 'Использовать стандартные реле';
 
   @override
-  String get relayResolutionTryRelay => 'Search relay';
+  String get relayResolutionTryRelay => 'Поиск реле';
 
   @override
   String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
 
   @override
-  String get relayResolutionRelayLabel => 'Relay URL';
+  String get relayResolutionRelayLabel => 'URL реле';
 
   @override
   String get relayResolutionNotFound =>
-      'No relay lists found on this relay. Try another or use defaults.';
+      'На этом реле не найдено списков. Попробуйте другое или используйте стандартные.';
 
   @override
-  String get loginErrorInvalidKey => 'Invalid private key format. Please check and try again.';
+  String get loginErrorInvalidKey =>
+      'Неверный формат приватного ключа. Пожалуйста, проверьте и попробуйте снова.';
 
   @override
   String get loginErrorNoRelayConnections =>
-      'Could not connect to any relays. Please check your connection and try again.';
+      'Не удалось подключиться ни к одному реле. Проверьте соединение и попробуйте снова.';
 
   @override
-  String get loginErrorTimeout => 'Login timed out. Please try again.';
+  String get loginErrorTimeout => 'Время входа истекло. Пожалуйста, попробуйте снова.';
 
   @override
-  String get loginErrorGeneric => 'An error occurred during login. Please try again.';
+  String get loginErrorGeneric => 'Произошла ошибка при входе. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get loginErrorNoLoginInProgress => 'Нет активного входа. Пожалуйста, начните сначала.';
+
+  @override
+  String get loginErrorInternal => 'Произошла внутренняя ошибка. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Нечего вставить';
+
+  @override
+  String get loginPasteFailed => 'Не удалось вставить из буфера обмена';
 }

@@ -337,6 +337,112 @@ void main() {
       });
     });
 
+    group('loginPublishDefaultRelays', () {
+      test('sets state to pubkey on complete', () async {
+        final result = await container
+            .read(authProvider.notifier)
+            .loginPublishDefaultRelays(testPubkeyA);
+        expect(result.status, LoginStatus.complete);
+        expect(container.read(authProvider).value, testPubkeyA);
+      });
+
+      test('fetches metadata without awaiting', () async {
+        await container.read(authProvider.notifier).loginPublishDefaultRelays(testPubkeyA);
+        expect(mockApi.metadataCalledWithPubkey, testPubkeyA);
+        expect(mockApi.metadataCompleter.isCompleted, isFalse);
+      });
+
+      test('resets isAddingAccountProvider to false', () async {
+        container.read(isAddingAccountProvider.notifier).set(true);
+        await container.read(authProvider.notifier).loginPublishDefaultRelays(testPubkeyA);
+        expect(container.read(isAddingAccountProvider), false);
+      });
+    });
+
+    group('loginWithCustomRelay', () {
+      test('sets state to pubkey on complete', () async {
+        final result = await container
+            .read(authProvider.notifier)
+            .loginWithCustomRelay(testPubkeyA, 'wss://relay.example.com');
+        expect(result.status, LoginStatus.complete);
+        expect(container.read(authProvider).value, testPubkeyA);
+      });
+
+      test('fetches metadata without awaiting', () async {
+        await container
+            .read(authProvider.notifier)
+            .loginWithCustomRelay(testPubkeyA, 'wss://relay.example.com');
+        expect(mockApi.metadataCalledWithPubkey, testPubkeyA);
+        expect(mockApi.metadataCompleter.isCompleted, isFalse);
+      });
+
+      test('resets isAddingAccountProvider to false', () async {
+        container.read(isAddingAccountProvider.notifier).set(true);
+        await container
+            .read(authProvider.notifier)
+            .loginWithCustomRelay(testPubkeyA, 'wss://relay.example.com');
+        expect(container.read(isAddingAccountProvider), false);
+      });
+    });
+
+    group('loginCancel', () {
+      test('calls Rust API loginCancel', () async {
+        await container.read(authProvider.notifier).loginCancel(testPubkeyA);
+      });
+    });
+
+    group('loginExternalSignerPublishDefaultRelays', () {
+      test('sets state to pubkey on complete', () async {
+        final result = await container
+            .read(authProvider.notifier)
+            .loginExternalSignerPublishDefaultRelays(testPubkeyA);
+        expect(result.status, LoginStatus.complete);
+        expect(container.read(authProvider).value, testPubkeyA);
+      });
+
+      test('fetches metadata without awaiting', () async {
+        await container
+            .read(authProvider.notifier)
+            .loginExternalSignerPublishDefaultRelays(testPubkeyA);
+        expect(mockApi.metadataCalledWithPubkey, testPubkeyA);
+        expect(mockApi.metadataCompleter.isCompleted, isFalse);
+      });
+
+      test('resets isAddingAccountProvider to false', () async {
+        container.read(isAddingAccountProvider.notifier).set(true);
+        await container
+            .read(authProvider.notifier)
+            .loginExternalSignerPublishDefaultRelays(testPubkeyA);
+        expect(container.read(isAddingAccountProvider), false);
+      });
+    });
+
+    group('loginExternalSignerWithCustomRelay', () {
+      test('sets state to pubkey on complete', () async {
+        final result = await container
+            .read(authProvider.notifier)
+            .loginExternalSignerWithCustomRelay(testPubkeyA, 'wss://relay.example.com');
+        expect(result.status, LoginStatus.complete);
+        expect(container.read(authProvider).value, testPubkeyA);
+      });
+
+      test('fetches metadata without awaiting', () async {
+        await container
+            .read(authProvider.notifier)
+            .loginExternalSignerWithCustomRelay(testPubkeyA, 'wss://relay.example.com');
+        expect(mockApi.metadataCalledWithPubkey, testPubkeyA);
+        expect(mockApi.metadataCompleter.isCompleted, isFalse);
+      });
+
+      test('resets isAddingAccountProvider to false', () async {
+        container.read(isAddingAccountProvider.notifier).set(true);
+        await container
+            .read(authProvider.notifier)
+            .loginExternalSignerWithCustomRelay(testPubkeyA, 'wss://relay.example.com');
+        expect(container.read(isAddingAccountProvider), false);
+      });
+    });
+
     group('signup', () {
       test('returns created pubkey', () async {
         final pubkey = await container.read(authProvider.notifier).signup();

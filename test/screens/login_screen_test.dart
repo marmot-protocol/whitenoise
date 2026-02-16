@@ -12,6 +12,7 @@ import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/home_screen.dart';
 import 'package:whitenoise/screens/login_screen.dart';
+import 'package:whitenoise/screens/relay_resolution_screen.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -43,9 +44,11 @@ class _MockAuthNotifier extends AuthNotifier {
   bool loginCalled = false;
   String? lastNsec;
   Exception? errorToThrow;
+  LoginStatus loginResultStatus = LoginStatus.complete;
   bool loginWithSignerCalled = false;
   String? lastSignerPubkey;
   Exception? signerErrorToThrow;
+  LoginStatus signerLoginResultStatus = LoginStatus.complete;
   Completer<void>? loginCompleter;
   Completer<void>? signerLoginCompleter;
 
@@ -60,7 +63,9 @@ class _MockAuthNotifier extends AuthNotifier {
       await loginCompleter!.future;
     }
     if (errorToThrow != null) throw errorToThrow!;
-    state = const AsyncData(testPubkeyA);
+    if (loginResultStatus == LoginStatus.complete) {
+      state = const AsyncData(testPubkeyA);
+    }
     return LoginResult(
       account: Account(
         pubkey: testPubkeyA,
@@ -68,7 +73,7 @@ class _MockAuthNotifier extends AuthNotifier {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       ),
-      status: LoginStatus.complete,
+      status: loginResultStatus,
     );
   }
 
@@ -82,7 +87,9 @@ class _MockAuthNotifier extends AuthNotifier {
       await signerLoginCompleter!.future;
     }
     if (signerErrorToThrow != null) throw signerErrorToThrow!;
-    state = AsyncData(pubkey);
+    if (signerLoginResultStatus == LoginStatus.complete) {
+      state = AsyncData(pubkey);
+    }
     return LoginResult(
       account: Account(
         pubkey: pubkey,
@@ -90,7 +97,7 @@ class _MockAuthNotifier extends AuthNotifier {
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),
       ),
-      status: LoginStatus.complete,
+      status: signerLoginResultStatus,
     );
   }
 }
@@ -182,6 +189,18 @@ void main() {
           await tester.tap(find.byKey(const Key('login_button')));
           await tester.pumpAndSettle();
           expect(find.byType(ChatListScreen), findsOneWidget);
+        });
+      });
+
+      group('when login needs relay lists', () {
+        testWidgets('navigates to relay resolution screen', (tester) async {
+          await pumpLoginScreen(tester);
+          mockAuth.loginResultStatus = LoginStatus.needsRelayLists;
+          await tester.enterText(find.byType(TextField), 'nsec1test');
+          await tester.pump();
+          await tester.tap(find.byKey(const Key('login_button')));
+          await tester.pumpAndSettle();
+          expect(find.byType(RelayResolutionScreen), findsOneWidget);
         });
       });
 

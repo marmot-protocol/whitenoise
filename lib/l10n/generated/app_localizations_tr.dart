@@ -745,38 +745,51 @@ class AppLocalizationsTr extends AppLocalizations {
   String get deleteAllDataError => 'Tüm veriler silinemedi. Lütfen tekrar deneyin.';
 
   @override
-  String get relayResolutionTitle => 'Relay Setup';
+  String get relayResolutionTitle => 'Röle Ayarları';
 
   @override
   String get relayResolutionDescription =>
-      'We couldn\'t find your relay lists on the network. You can provide a relay where your lists are published, or use our default relays to get started.';
+      'Röle listelerinizi ağda bulamadık. Listelerinizin yayınlandığı bir röle sağlayabilir veya başlamak için varsayılan rölelerimizi kullanabilirsiniz.';
 
   @override
-  String get relayResolutionUseDefaults => 'Use default relays';
+  String get relayResolutionUseDefaults => 'Varsayılan röleleri kullan';
 
   @override
-  String get relayResolutionTryRelay => 'Search relay';
+  String get relayResolutionTryRelay => 'Röle ara';
 
   @override
   String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
 
   @override
-  String get relayResolutionRelayLabel => 'Relay URL';
+  String get relayResolutionRelayLabel => 'Röle URL\'si';
 
   @override
   String get relayResolutionNotFound =>
-      'No relay lists found on this relay. Try another or use defaults.';
+      'Bu rölede röle listesi bulunamadı. Başka bir tane deneyin veya varsayılanları kullanın.';
 
   @override
-  String get loginErrorInvalidKey => 'Invalid private key format. Please check and try again.';
+  String get loginErrorInvalidKey =>
+      'Geçersiz özel anahtar biçimi. Lütfen kontrol edip tekrar deneyin.';
 
   @override
   String get loginErrorNoRelayConnections =>
-      'Could not connect to any relays. Please check your connection and try again.';
+      'Hiçbir röleye bağlanılamadı. Bağlantınızı kontrol edip tekrar deneyin.';
 
   @override
-  String get loginErrorTimeout => 'Login timed out. Please try again.';
+  String get loginErrorTimeout => 'Giriş zaman aşımına uğradı. Lütfen tekrar deneyin.';
 
   @override
-  String get loginErrorGeneric => 'An error occurred during login. Please try again.';
+  String get loginErrorGeneric => 'Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get loginErrorNoLoginInProgress => 'Devam eden giriş yok. Lütfen yeniden başlayın.';
+
+  @override
+  String get loginErrorInternal => 'Dahili bir hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Yapıştırılacak bir şey yok';
+
+  @override
+  String get loginPasteFailed => 'Panodan yapıştırma başarısız';
 }

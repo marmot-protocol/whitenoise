@@ -670,6 +670,27 @@ void main() {
       });
     });
 
+    group('loginExternalSignerPublishDefaultRelays', () {
+      test('returns LoginResult with complete status', () async {
+        final result = await const AndroidSignerService().loginExternalSignerPublishDefaultRelays(
+          testPubkeyA,
+        );
+        expect(result.account.pubkey, testPubkeyA);
+        expect(result.status, LoginStatus.complete);
+      });
+    });
+
+    group('loginExternalSignerWithCustomRelay', () {
+      test('returns LoginResult with complete status', () async {
+        final result = await const AndroidSignerService().loginExternalSignerWithCustomRelay(
+          testPubkeyA,
+          'wss://relay.example.com',
+        );
+        expect(result.account.pubkey, testPubkeyA);
+        expect(result.status, LoginStatus.complete);
+      });
+    });
+
     group('registerExternalSigner', () {
       setUp(() {
         mockAndroidSigner = mockAndroidSignerChannel();

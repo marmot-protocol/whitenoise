@@ -1227,5 +1227,25 @@
   "loginErrorGeneric": "An error occurred during login. Please try again.",
   "@loginErrorGeneric": {
     "description": "Generic fallback error message for login"
+  },
+
+  "loginErrorNoLoginInProgress": "No login in progress. Please start over.",
+  "@loginErrorNoLoginInProgress": {
+    "description": "Error when trying to continue a login that was not started"
+  },
+
+  "loginErrorInternal": "An internal error occurred. Please try again.",
+  "@loginErrorInternal": {
+    "description": "Error for internal login failures"
+  },
+
+  "loginPasteNothingToPaste": "Nothing to paste",
+  "@loginPasteNothingToPaste": {
+    "description": "Error when clipboard is empty during login paste"
+  },
+
+  "loginPasteFailed": "Failed to paste from clipboard",
+  "@loginPasteFailed": {
+    "description": "Error when clipboard paste fails during login"
   }
 }

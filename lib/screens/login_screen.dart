@@ -51,6 +51,10 @@ String _loginErrorL10n(String errorKey, AppLocalizations l10n) {
     'loginErrorInvalidKey' => l10n.loginErrorInvalidKey,
     'loginErrorNoRelayConnections' => l10n.loginErrorNoRelayConnections,
     'loginErrorTimeout' => l10n.loginErrorTimeout,
+    'loginErrorNoLoginInProgress' => l10n.loginErrorNoLoginInProgress,
+    'loginErrorInternal' => l10n.loginErrorInternal,
+    'loginPasteNothingToPaste' => l10n.loginPasteNothingToPaste,
+    'loginPasteFailed' => l10n.loginPasteFailed,
     _ => l10n.loginErrorGeneric,
   };
 }

@@ -779,4 +779,16 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginErrorGeneric => 'An error occurred during login. Please try again.';
+
+  @override
+  String get loginErrorNoLoginInProgress => 'No login in progress. Please start over.';
+
+  @override
+  String get loginErrorInternal => 'An internal error occurred. Please try again.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Nothing to paste';
+
+  @override
+  String get loginPasteFailed => 'Failed to paste from clipboard';
 }

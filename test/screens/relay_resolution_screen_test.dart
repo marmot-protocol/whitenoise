@@ -12,6 +12,7 @@ import 'package:whitenoise/src/rust/api/accounts.dart'
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/widgets/wn_overlay.dart' show WnOverlay;
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 import '../mocks/mock_wn_api.dart';
@@ -128,6 +129,7 @@ void main() {
     WidgetTester tester, {
     bool isExternalSigner = false,
     bool useRouter = false,
+    MediaQueryData? mediaQueryData,
   }) async {
     mockAuth = _MockAuthNotifier();
     setUpTestView(tester);
@@ -149,38 +151,58 @@ void main() {
               isExternalSigner: isExternalSigner,
             ),
           ),
+          GoRoute(
+            path: '/chats',
+            builder: (context, state) => const Scaffold(
+              body: Text('Chat List'),
+            ),
+          ),
         ],
       );
+
+      Widget app = MaterialApp.router(
+        routerConfig: router,
+        locale: const Locale('en'),
+        localizationsDelegates: _localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+      );
+
+      if (mediaQueryData != null) {
+        app = MediaQuery(data: mediaQueryData, child: app);
+      }
 
       await tester.pumpWidget(
         ProviderScope(
           overrides: [authProvider.overrideWith(() => mockAuth)],
           child: ScreenUtilInit(
             designSize: testDesignSize,
-            builder: (_, _) => MaterialApp.router(
-              routerConfig: router,
-              locale: const Locale('en'),
-              localizationsDelegates: _localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-            ),
+            builder: (_, _) => app,
           ),
         ),
       );
     } else {
+      final Widget home = RelayResolutionScreen(
+        pubkey: testPubkeyA,
+        isExternalSigner: isExternalSigner,
+      );
+
+      Widget app = MaterialApp(
+        locale: const Locale('en'),
+        localizationsDelegates: _localizationsDelegates,
+        supportedLocales: AppLocalizations.supportedLocales,
+        home: home,
+      );
+
+      if (mediaQueryData != null) {
+        app = MediaQuery(data: mediaQueryData, child: app);
+      }
+
       await tester.pumpWidget(
         ProviderScope(
           overrides: [authProvider.overrideWith(() => mockAuth)],
           child: ScreenUtilInit(
             designSize: testDesignSize,
-            builder: (_, _) => MaterialApp(
-              locale: const Locale('en'),
-              localizationsDelegates: _localizationsDelegates,
-              supportedLocales: AppLocalizations.supportedLocales,
-              home: RelayResolutionScreen(
-                pubkey: testPubkeyA,
-                isExternalSigner: isExternalSigner,
-              ),
-            ),
+            builder: (_, _) => app,
           ),
         ),
       );
@@ -288,6 +310,71 @@ void main() {
           find.text('An error occurred during login. Please try again.'),
           findsOneWidget,
         );
+      });
+
+      testWidgets('shows generic error for unknown error key', (tester) async {
+        await pumpRelayResolutionScreen(tester);
+        mockAuth.customRelayError = Exception('Unknown error');
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump();
+        await tester.tap(find.byKey(const Key('try_custom_relay_button')));
+        await tester.pumpAndSettle();
+        expect(find.byType(WnSystemNotice), findsOneWidget);
+        expect(
+          find.text('An error occurred during login. Please try again.'),
+          findsOneWidget,
+        );
+      });
+    });
+
+    group('successful navigation', () {
+      testWidgets('navigates to chat list when use default relays succeeds', (tester) async {
+        await pumpRelayResolutionScreen(tester, useRouter: true);
+        await tester.tap(find.byKey(const Key('use_default_relays_button')));
+        await tester.pumpAndSettle();
+        expect(find.text('Chat List'), findsOneWidget);
+      });
+
+      testWidgets('navigates to chat list when try custom relay succeeds', (tester) async {
+        await pumpRelayResolutionScreen(tester, useRouter: true);
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump();
+        await tester.tap(find.byKey(const Key('try_custom_relay_button')));
+        await tester.pumpAndSettle();
+        expect(find.text('Chat List'), findsOneWidget);
+      });
+    });
+
+    group('external signer', () {
+      testWidgets('uses external signer callbacks for publish defaults', (tester) async {
+        await pumpRelayResolutionScreen(tester, isExternalSigner: true, useRouter: true);
+        await tester.tap(find.byKey(const Key('use_default_relays_button')));
+        await tester.pumpAndSettle();
+        expect(find.text('Chat List'), findsOneWidget);
+      });
+
+      testWidgets('uses external signer callbacks for custom relay', (tester) async {
+        await pumpRelayResolutionScreen(tester, isExternalSigner: true, useRouter: true);
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump();
+        await tester.tap(find.byKey(const Key('try_custom_relay_button')));
+        await tester.pumpAndSettle();
+        expect(find.text('Chat List'), findsOneWidget);
+      });
+    });
+
+    group('keyboard overlay', () {
+      testWidgets('shows WnOverlay when keyboard is open', (tester) async {
+        await pumpRelayResolutionScreen(
+          tester,
+          mediaQueryData: const MediaQueryData(viewInsets: EdgeInsets.only(bottom: 300)),
+        );
+        expect(find.byType(WnOverlay), findsOneWidget);
+      });
+
+      testWidgets('does not show WnOverlay when keyboard is closed', (tester) async {
+        await pumpRelayResolutionScreen(tester);
+        expect(find.byType(WnOverlay), findsNothing);
       });
     });
   });

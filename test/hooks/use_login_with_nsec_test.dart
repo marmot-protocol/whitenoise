@@ -346,7 +346,7 @@ void main() {
         await capturedPaste();
         await tester.pumpAndSettle();
 
-        expect(capturedState.error, 'Nothing to paste');
+        expect(capturedState.error, 'loginPasteNothingToPaste');
       });
 
       testWidgets('shows error when clipboard is empty string', (tester) async {
@@ -367,7 +367,7 @@ void main() {
         await capturedPaste();
         await tester.pumpAndSettle();
 
-        expect(capturedState.error, 'Nothing to paste');
+        expect(capturedState.error, 'loginPasteNothingToPaste');
       });
 
       testWidgets('handles clipboard exception gracefully', (tester) async {
@@ -388,28 +388,7 @@ void main() {
         await capturedPaste();
         await tester.pumpAndSettle();
 
-        expect(capturedState.error, 'Failed to paste from clipboard');
-      });
-    });
-
-    group('dispose', () {
-      testWidgets('clears controller text on dispose', (tester) async {
-        late TextEditingController capturedController;
-
-        final widget = _TestWidget(
-          loginCallback: (_) async => _completeLoginResult(),
-          onBuild: (controller, state, paste, submit, clearError) {
-            capturedController = controller;
-          },
-        );
-        await mountWidget(widget, tester);
-
-        await tester.enterText(find.byType(TextField), 'nsec1test');
-        expect(capturedController.text, 'nsec1test');
-
-        await tester.pumpWidget(const MaterialApp(home: SizedBox()));
-
-        expect(capturedController.text, isEmpty);
+        expect(capturedState.error, 'loginPasteFailed');
       });
     });
 
