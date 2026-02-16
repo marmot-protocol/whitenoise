@@ -348,5 +348,20 @@ void main() {
       await tester.tap(editIcon);
       await tester.pumpAndSettle();
     });
+
+    testWidgets('tapping close button navigates back', (tester) async {
+      final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
+      await pumpGroupDetailsScreen(tester, users);
+
+      expect(find.byType(WnSlateNavigationHeader), findsOneWidget);
+
+      final closeButton = find.byKey(const Key('slate_close_button'));
+      expect(closeButton, findsOneWidget);
+
+      await tester.tap(closeButton);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(WnSlateNavigationHeader), findsNothing);
+    });
   });
 }
