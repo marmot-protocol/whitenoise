@@ -17,6 +17,7 @@ import 'package:whitenoise/screens/chat_screen.dart' show ChatScreen;
 import 'package:whitenoise/screens/developer_settings_screen.dart' show DeveloperSettingsScreen;
 import 'package:whitenoise/screens/donate_screen.dart' show DonateScreen;
 import 'package:whitenoise/screens/edit_profile_screen.dart' show EditProfileScreen;
+import 'package:whitenoise/screens/group_details_screen.dart' show GroupDetailsScreen;
 import 'package:whitenoise/screens/home_screen.dart' show HomeScreen;
 import 'package:whitenoise/screens/login_screen.dart' show LoginScreen;
 import 'package:whitenoise/screens/network_screen.dart' show NetworkScreen;
@@ -32,8 +33,10 @@ import 'package:whitenoise/screens/signup_screen.dart' show SignupScreen;
 import 'package:whitenoise/screens/start_chat_screen.dart' show StartChatScreen;
 import 'package:whitenoise/screens/switch_profile_screen.dart' show SwitchProfileScreen;
 import 'package:whitenoise/screens/user_search_screen.dart' show UserSearchScreen;
+import 'package:whitenoise/screens/user_selection_screen.dart' show UserSelectionScreen;
 import 'package:whitenoise/screens/wip_screen.dart' show WipScreen;
 import 'package:whitenoise/src/rust/api/metadata.dart' show FlutterMetadata;
+import 'package:whitenoise/src/rust/api/users.dart' show User;
 import 'package:whitenoise/widgets/wn_slate_content_transition.dart' show WnSlateContentTransition;
 
 abstract final class Routes {
@@ -60,6 +63,8 @@ abstract final class Routes {
   static const _network = '/network';
   static const _relayResolution = '/relay-resolution';
   static const _userSearch = '/user-search';
+  static const _userSelection = '/user-selection';
+  static const _groupDetails = '/group-details';
   static const _startChat = '/start-chat/:userPubkey';
   static const _chatInfo = '/chat-info/:userPubkey';
   static const _invite = '/invites/:mlsGroupId';
@@ -238,6 +243,32 @@ abstract final class Routes {
           ),
         ),
         GoRoute(
+          path: _userSelection,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: const UserSelectionScreen(),
+          ),
+        ),
+        GoRoute(
+          name: 'groupDetails',
+          path: _groupDetails,
+          pageBuilder: (context, state) {
+            final selectedUsers = state.extra as List<User>?;
+            if (selectedUsers == null || selectedUsers.isEmpty) {
+              return _navigationTransition(
+                state: state,
+                child: const UserSelectionScreen(),
+              );
+            }
+            return _navigationTransition(
+              state: state,
+              child: GroupDetailsScreen(
+                selectedUsers: selectedUsers,
+              ),
+            );
+          },
+        ),
+        GoRoute(
           name: 'startChat',
           path: _startChat,
           pageBuilder: (context, state) => _navigationTransition(
@@ -393,6 +424,17 @@ abstract final class Routes {
 
   static void pushToUserSearch(BuildContext context) {
     GoRouter.of(context).push(_userSearch);
+  }
+
+  static void pushToUserSelection(BuildContext context) {
+    GoRouter.of(context).push(_userSelection);
+  }
+
+  static void pushToGroupDetails(BuildContext context, List<User> selectedUsers) {
+    GoRouter.of(context).pushNamed(
+      'groupDetails',
+      extra: selectedUsers,
+    );
   }
 
   static void pushToInvite(BuildContext context, String mlsGroupId) {
