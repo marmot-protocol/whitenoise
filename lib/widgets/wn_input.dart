@@ -14,6 +14,17 @@ enum WnInputSize {
   final int height;
 }
 
+enum WnInputFieldButtonSize {
+  size36(36, 16),
+  size40(40, 18),
+  size48(48, 18)
+  ;
+
+  const WnInputFieldButtonSize(this.dimension, this.iconSize);
+  final int dimension;
+  final int iconSize;
+}
+
 class WnInput extends HookWidget {
   const WnInput({
     super.key,
@@ -150,8 +161,9 @@ class WnInput extends HookWidget {
   ) {
     final typography = context.typographyScaled;
     final fieldHeight = size.height.h;
-    final inlineActionWidth = size == WnInputSize.size44 ? 36.w : 48.w;
-    final inlineActionHeight = size == WnInputSize.size44 ? 36.h : 48.h;
+    final inlineActionSize = size == WnInputSize.size44
+        ? WnInputFieldButtonSize.size36.dimension
+        : WnInputFieldButtonSize.size48.dimension;
     final borderColor = _getBorderColor(colors, isFocused.value, isHovered.value);
 
     return MouseRegion(
@@ -220,8 +232,8 @@ class WnInput extends HookWidget {
               IgnorePointer(
                 ignoring: !enabled,
                 child: SizedBox(
-                  width: inlineActionWidth,
-                  height: inlineActionHeight,
+                  width: inlineActionSize.w,
+                  height: inlineActionSize.h,
                   child: inlineAction,
                 ),
               ),
@@ -261,25 +273,22 @@ class WnInputFieldButton extends StatelessWidget {
     super.key,
     required this.icon,
     required this.onPressed,
-    this.size = WnInputSize.size56,
+    this.buttonSize = WnInputFieldButtonSize.size48,
   });
 
   final WnIcons icon;
   final VoidCallback onPressed;
-  final WnInputSize size;
+  final WnInputFieldButtonSize buttonSize;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final buttonWidth = size == WnInputSize.size44 ? 36.w : 48.w;
-    final buttonHeight = size == WnInputSize.size44 ? 36.h : 48.h;
-    final iconSize = 16.w;
 
     return GestureDetector(
       onTap: onPressed,
       child: Container(
-        width: buttonWidth,
-        height: buttonHeight,
+        width: buttonSize.dimension.w,
+        height: buttonSize.dimension.h,
         decoration: BoxDecoration(
           color: colors.fillTertiary,
           borderRadius: BorderRadius.circular(8.r),
@@ -287,7 +296,7 @@ class WnInputFieldButton extends StatelessWidget {
         child: Center(
           child: WnIcon(
             icon,
-            size: iconSize,
+            size: buttonSize.iconSize.w,
             color: colors.backgroundContentPrimary,
           ),
         ),

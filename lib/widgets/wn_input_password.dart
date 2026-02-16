@@ -186,11 +186,14 @@ class WnInputPassword extends HookWidget {
     ValueNotifier<bool> isVisible,
     bool isEmpty,
   ) {
-    final buttonWidth = size == WnInputSize.size44 ? 36.w : 48.w;
-    final buttonHeight = size == WnInputSize.size44 ? 36.h : 48.h;
+    final btnSize = size == WnInputSize.size44
+        ? WnInputFieldButtonSize.size36
+        : WnInputFieldButtonSize.size48;
+    final buttonWidth = btnSize.dimension.w;
+    final buttonHeight = btnSize.dimension.h;
     final iconWrapperWidth = 36.w;
     final iconWrapperHeight = 36.h;
-    final iconSize = 16.w;
+    final iconSize = btnSize.iconSize.w;
 
     return Row(
       mainAxisSize: MainAxisSize.min,

@@ -291,6 +291,39 @@ Widget wnInputShowcase(BuildContext context) {
         const SizedBox(height: 32),
         _buildSection(
           context,
+          'Input Field Button Sizes',
+          'Input field buttons come in three sizes: 48px (default), 40px, and 36px (compact).',
+          [
+            _InputExample(
+              label: 'Button 48px (Default)',
+              child: _StaticInput(
+                placeholder: 'Enter text...',
+                showInlineAction: true,
+                inlineActionButtonSize: WnInputFieldButtonSize.size48,
+              ),
+            ),
+            _InputExample(
+              label: 'Button 40px',
+              child: _StaticInput(
+                placeholder: 'Enter text...',
+                showInlineAction: true,
+                inlineActionButtonSize: WnInputFieldButtonSize.size40,
+              ),
+            ),
+            _InputExample(
+              label: 'Button 36px (Compact)',
+              child: _StaticInput(
+                placeholder: 'Enter text...',
+                size: WnInputSize.size44,
+                showInlineAction: true,
+                inlineActionButtonSize: WnInputFieldButtonSize.size36,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 32),
+        _buildSection(
+          context,
           'Complete Examples',
           'Full configurations combining multiple features.',
           [
@@ -407,6 +440,7 @@ class _StaticInput extends StatelessWidget {
     this.leadingIconData,
     this.showInlineAction = false,
     this.showTrailingAction = false,
+    this.inlineActionButtonSize,
   });
 
   final String placeholder;
@@ -422,9 +456,16 @@ class _StaticInput extends StatelessWidget {
   final WnIcons? leadingIconData;
   final bool showInlineAction;
   final bool showTrailingAction;
+  final WnInputFieldButtonSize? inlineActionButtonSize;
 
   @override
   Widget build(BuildContext context) {
+    final effectiveButtonSize =
+        inlineActionButtonSize ??
+        (size == WnInputSize.size44
+            ? WnInputFieldButtonSize.size36
+            : WnInputFieldButtonSize.size48);
+
     return WnInput(
       placeholder: placeholder,
       label: inputLabel,
@@ -448,7 +489,7 @@ class _StaticInput extends StatelessWidget {
           ? WnInputFieldButton(
               icon: WnIcons.closeSmall,
               onPressed: () {},
-              size: size,
+              buttonSize: effectiveButtonSize,
             )
           : null,
       trailingAction: showTrailingAction
@@ -476,6 +517,13 @@ class _InteractiveInput extends StatelessWidget {
       initialOption: WnInputSize.size56,
       labelBuilder: (value) => value == WnInputSize.size56 ? '56px' : '44px',
     );
+    final inlineButtonSize = this.context.knobs.object
+        .dropdown<WnInputFieldButtonSize>(
+          label: 'Inline Button Size',
+          options: WnInputFieldButtonSize.values,
+          initialOption: WnInputFieldButtonSize.size48,
+          labelBuilder: (value) => '${value.dimension}px',
+        );
 
     return WnInput(
       placeholder: this.context.knobs.string(
@@ -526,7 +574,7 @@ class _InteractiveInput extends StatelessWidget {
           ? WnInputFieldButton(
               icon: WnIcons.closeSmall,
               onPressed: () {},
-              size: size,
+              buttonSize: inlineButtonSize,
             )
           : null,
       trailingAction:

@@ -341,6 +341,47 @@ void main() {
       await tester.pump();
       expect(pressed, isTrue);
     });
+
+    testWidgets('defaults to size48 with 48x48 dimensions', (tester) async {
+      await mountWidget(
+        WnInputFieldButton(
+          icon: WnIcons.search,
+          onPressed: () {},
+        ),
+        tester,
+      );
+      final buttonSize = tester.getSize(find.byType(WnInputFieldButton));
+      expect(buttonSize.width, equals(48.0));
+      expect(buttonSize.height, equals(48.0));
+    });
+
+    testWidgets('size40 renders with 40x40 dimensions', (tester) async {
+      await mountWidget(
+        WnInputFieldButton(
+          icon: WnIcons.search,
+          onPressed: () {},
+          buttonSize: WnInputFieldButtonSize.size40,
+        ),
+        tester,
+      );
+      final buttonSize = tester.getSize(find.byType(WnInputFieldButton));
+      expect(buttonSize.width, equals(40.0));
+      expect(buttonSize.height, equals(40.0));
+    });
+
+    testWidgets('size36 renders with 36x36 dimensions', (tester) async {
+      await mountWidget(
+        WnInputFieldButton(
+          icon: WnIcons.search,
+          onPressed: () {},
+          buttonSize: WnInputFieldButtonSize.size36,
+        ),
+        tester,
+      );
+      final buttonSize = tester.getSize(find.byType(WnInputFieldButton));
+      expect(buttonSize.width, equals(36.0));
+      expect(buttonSize.height, equals(36.0));
+    });
   });
 
   group('WnInputTrailingButton', () {
