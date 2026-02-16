@@ -860,7 +860,11 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
       fillContentPrimary: Color.lerp(fillContentPrimary, other.fillContentPrimary, t)!,
       fillContentSecondary: Color.lerp(fillContentSecondary, other.fillContentSecondary, t)!,
       fillContentTertiary: Color.lerp(fillContentTertiary, other.fillContentTertiary, t)!,
-      fillContentQuaternary: Color.lerp(fillContentQuaternary, other.fillContentQuaternary, t)!,
+      fillContentQuaternary: Color.lerp(
+        fillContentQuaternary,
+        other.fillContentQuaternary,
+        t,
+      )!,
       borderPrimary: Color.lerp(borderPrimary, other.borderPrimary, t)!,
       borderSecondary: Color.lerp(borderSecondary, other.borderSecondary, t)!,
       borderTertiary: Color.lerp(borderTertiary, other.borderTertiary, t)!,
