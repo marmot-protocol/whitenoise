@@ -361,12 +361,12 @@ void main() {
         final updated = SemanticColors.light.copyWith(
           fillContentPrimary: Colors.red,
           fillContentSecondary: Colors.green,
-          fillContentDestructive: Colors.blue,
+          fillContentQuaternary: Colors.blue,
         );
 
         expect(updated.fillContentPrimary, Colors.red);
         expect(updated.fillContentSecondary, Colors.green);
-        expect(updated.fillContentDestructive, Colors.blue);
+        expect(updated.fillContentQuaternary, Colors.blue);
       });
 
       test('returns new instance with updated border colors', () {
@@ -753,10 +753,10 @@ void main() {
           ),
         );
         expect(
-          result.fillContentDestructive,
+          result.fillContentQuaternary,
           Color.lerp(
-            SemanticColors.light.fillContentDestructive,
-            SemanticColors.dark.fillContentDestructive,
+            SemanticColors.light.fillContentQuaternary,
+            SemanticColors.dark.fillContentQuaternary,
             0.5,
           ),
         );
