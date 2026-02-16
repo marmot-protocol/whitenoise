@@ -1,13 +1,62 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/l10n/generated/app_localizations_en.dart';
+import 'package:whitenoise/providers/active_chat_provider.dart';
+import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart';
+import 'package:whitenoise/services/notification_service.dart';
+import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/notifications.dart';
+import 'package:whitenoise/src/rust/frb_generated.dart';
+
+import '../mocks/mock_wn_api.dart';
+import '../test_helpers.dart';
 
 const _receiverPubkey = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 const _senderPubkey = 'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210';
 
+class _MockNotificationService extends NotificationService {
+  _MockNotificationService() : super(enabled: false);
+
+  final List<
+    ({
+      String groupId,
+      String title,
+      String body,
+      String receiverPubkey,
+      bool isInvite,
+    })
+  >
+  showCalls = [];
+
+  @override
+  Future<void> show({
+    required String groupId,
+    required String title,
+    required String body,
+    required String receiverPubkey,
+    bool isInvite = false,
+  }) async {
+    showCalls.add((
+      groupId: groupId,
+      title: title,
+      body: body,
+      receiverPubkey: receiverPubkey,
+      isInvite: isInvite,
+    ));
+  }
+}
+
+class _MockApi extends MockWnApi {}
+
 void main() {
   final l10n = AppLocalizationsEn();
+  late _MockApi mockApi;
+
+  setUpAll(() {
+    mockApi = _MockApi();
+    RustLib.initMock(api: mockApi);
+  });
 
   group('Notification formatting', () {
     test('formats DM new message correctly', () {
@@ -258,6 +307,371 @@ void main() {
       final (title, _, _) = formatNotification(update, l10n);
 
       expect(title, equals('Alice'));
+    });
+  });
+
+  group('handleNotificationUpdate', () {
+    late _MockNotificationService mockNotificationService;
+    late ProviderContainer container;
+
+    setUp(() {
+      mockApi.reset();
+      mockApi.accounts = [];
+      mockNotificationService = _MockNotificationService();
+      container = ProviderContainer();
+    });
+
+    tearDown(() => container.dispose());
+
+    Future<Ref> captureRef() async {
+      late Ref capturedRef;
+      final refProvider = Provider<void>((ref) {
+        capturedRef = ref;
+      });
+      container.read(refProvider);
+      await container.read(localeProvider.future);
+      return capturedRef;
+    }
+
+    test('shows notification for a new DM message', () async {
+      final ref = await captureRef();
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+        content: 'Hello there',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+      final call = mockNotificationService.showCalls.first;
+      expect(call.groupId, testGroupId);
+      expect(call.title, 'Alice');
+      expect(call.body, 'Hello there');
+      expect(call.receiverPubkey, testPubkeyA);
+      expect(call.isInvite, isFalse);
+    });
+
+    test('shows notification for a new group message', () async {
+      final ref = await captureRef();
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: testGroupId,
+        groupName: 'Dev Team',
+        isDm: false,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Bob'),
+        content: 'Hey everyone',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+      final call = mockNotificationService.showCalls.first;
+      expect(call.groupId, testGroupId);
+      expect(call.title, 'Dev Team');
+      expect(call.body, 'Bob: Hey everyone');
+      expect(call.isInvite, isFalse);
+    });
+
+    test('shows notification for a DM invite', () async {
+      final ref = await captureRef();
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.groupInvite,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Carol'),
+        content: '',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+      final call = mockNotificationService.showCalls.first;
+      expect(call.title, 'Carol');
+      expect(call.body, 'Has invited you to a secure chat');
+      expect(call.isInvite, isTrue);
+    });
+
+    test('shows notification for a group invite', () async {
+      final ref = await captureRef();
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.groupInvite,
+        mlsGroupId: testGroupId,
+        groupName: 'New Project',
+        isDm: false,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Dave'),
+        content: '',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+      final call = mockNotificationService.showCalls.first;
+      expect(call.title, 'New Project');
+      expect(call.body, 'Dave has invited you to a secure chat');
+      expect(call.isInvite, isTrue);
+    });
+
+    test('skips notification when active chat matches group', () async {
+      container.read(activeChatProvider.notifier).set(testGroupId);
+      final ref = await captureRef();
+
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+        content: 'Hello',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, isEmpty);
+    });
+
+    test('shows notification when active chat is different group', () async {
+      container.read(activeChatProvider.notifier).set(otherTestGroupId);
+      final ref = await captureRef();
+
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+        content: 'Hello',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+    });
+
+    test('shows notification when no active chat is set', () async {
+      final ref = await captureRef();
+
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+        content: 'Hello',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+    });
+
+    test('includes receiver name when multiple accounts exist', () async {
+      mockApi.accounts = [
+        Account(
+          pubkey: testPubkeyA,
+          accountType: AccountType.local,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+        Account(
+          pubkey: testPubkeyB,
+          accountType: AccountType.local,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ];
+      final ref = await captureRef();
+
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA, displayName: 'MyAccount'),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+        content: 'Hello',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+      expect(mockNotificationService.showCalls.first.title, 'Alice (MyAccount)');
+    });
+
+    test(
+      'uses Unknown user as receiver name when display name is null with multiple accounts',
+      () async {
+        mockApi.accounts = [
+          Account(
+            pubkey: testPubkeyA,
+            accountType: AccountType.local,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+          Account(
+            pubkey: testPubkeyB,
+            accountType: AccountType.local,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        ];
+        final ref = await captureRef();
+
+        final update = NotificationUpdate(
+          trigger: NotificationTrigger.newMessage,
+          mlsGroupId: testGroupId,
+          isDm: true,
+          receiver: const NotificationUser(pubkey: testPubkeyA),
+          sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+          content: 'Hello',
+          timestamp: DateTime.now(),
+        );
+
+        await handleNotificationUpdate(update, mockNotificationService, ref);
+
+        expect(mockNotificationService.showCalls, hasLength(1));
+        expect(mockNotificationService.showCalls.first.title, 'Alice (Unknown user)');
+      },
+    );
+
+    test('does not include receiver name with single account', () async {
+      mockApi.accounts = [
+        Account(
+          pubkey: testPubkeyA,
+          accountType: AccountType.local,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ];
+      final ref = await captureRef();
+
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA, displayName: 'MyAccount'),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+        content: 'Hello',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+      expect(mockNotificationService.showCalls.first.title, 'Alice');
+    });
+
+    test('does not include receiver name with zero accounts', () async {
+      final ref = await captureRef();
+
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+        content: 'Hello',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+      expect(mockNotificationService.showCalls.first.title, 'Alice');
+    });
+
+    test('passes correct receiverPubkey to show', () async {
+      final ref = await captureRef();
+
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyC),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+        content: 'Hello',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls.first.receiverPubkey, testPubkeyC);
+    });
+
+    test('includes receiver name in group invite with multiple accounts', () async {
+      mockApi.accounts = [
+        Account(
+          pubkey: testPubkeyA,
+          accountType: AccountType.local,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+        Account(
+          pubkey: testPubkeyB,
+          accountType: AccountType.local,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ];
+      final ref = await captureRef();
+
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.groupInvite,
+        mlsGroupId: testGroupId,
+        groupName: 'Team Chat',
+        isDm: false,
+        receiver: const NotificationUser(pubkey: testPubkeyA, displayName: 'MyAccount'),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Dave'),
+        content: '',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+      final call = mockNotificationService.showCalls.first;
+      expect(call.title, 'Team Chat (MyAccount)');
+      expect(call.body, 'Dave has invited you to a secure chat');
+      expect(call.isInvite, isTrue);
+    });
+  });
+
+  group('notificationListenerProvider', () {
+    late ProviderContainer container;
+
+    setUp(() {
+      mockApi.reset();
+      container = ProviderContainer();
+    });
+
+    tearDown(() => container.dispose());
+
+    test('can be read without error', () {
+      expect(() => container.read(notificationListenerProvider), returnsNormally);
+    });
+  });
+
+  group('notificationServiceProvider', () {
+    test('creates a NotificationService', () {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final service = container.read(notificationServiceProvider);
+
+      expect(service, isA<NotificationService>());
     });
   });
 }

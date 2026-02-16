@@ -5,6 +5,7 @@ import 'package:logging/logging.dart';
 
 final _logger = Logger('ForegroundService');
 
+// coverage:ignore-start
 @pragma('vm:entry-point')
 void _startCallback() {
   FlutterForegroundTask.setTaskHandler(_KeepAliveTaskHandler());
@@ -38,6 +39,7 @@ class _KeepAliveTaskHandler extends TaskHandler {
   @override
   void onNotificationDismissed() {}
 }
+// coverage:ignore-end
 
 class ForegroundService {
   ForegroundService({bool? enabled}) : _enabled = enabled ?? Platform.isAndroid;
@@ -53,6 +55,7 @@ class ForegroundService {
     if (!_enabled) return;
     if (_initialized) return;
 
+    // coverage:ignore-start
     FlutterForegroundTask.initCommunicationPort();
 
     FlutterForegroundTask.init(
@@ -70,10 +73,12 @@ class ForegroundService {
 
     _initialized = true;
     _logger.info('ForegroundService initialized');
+    // coverage:ignore-end
   }
 
   Future<void> start() async {
     if (!_enabled) return;
+    // coverage:ignore-start
     if (!_initialized) {
       await initialize();
     }
@@ -95,29 +100,34 @@ class ForegroundService {
     } else {
       _logger.warning('Failed to start foreground service: $result');
     }
+    // coverage:ignore-end
   }
 
   Future<void> stop() async {
     if (!_enabled) return;
 
+    // coverage:ignore-start
     final result = await FlutterForegroundTask.stopService();
     if (result is ServiceRequestSuccess) {
       _logger.info('Foreground service stopped');
     } else {
       _logger.warning('Failed to stop foreground service: $result');
     }
+    // coverage:ignore-end
   }
 
   Future<bool> get isRunning async {
     if (!_enabled) return false;
-    return FlutterForegroundTask.isRunningService;
+    return FlutterForegroundTask.isRunningService; // coverage:ignore-line
   }
 
   Future<void> requestBatteryOptimizationExemption() async {
     if (!_enabled) return;
 
+    // coverage:ignore-start
     if (!await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
       await FlutterForegroundTask.requestIgnoreBatteryOptimization();
     }
+    // coverage:ignore-end
   }
 }

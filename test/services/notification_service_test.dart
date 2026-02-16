@@ -7,6 +7,13 @@ import 'package:whitenoise/services/notification_service.dart';
 const _pubkey1 = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
 const _pubkey2 = 'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210';
 
+class _MockAndroidPlugin extends AndroidFlutterLocalNotificationsPlugin {
+  bool? permissionResult = true;
+
+  @override
+  Future<bool?> requestNotificationsPermission() async => permissionResult;
+}
+
 class _MockNotificationsPlugin implements FlutterLocalNotificationsPlugin {
   final List<String> calls = [];
   void Function(NotificationResponse)? tapCallback;
@@ -15,6 +22,15 @@ class _MockNotificationsPlugin implements FlutterLocalNotificationsPlugin {
   String? lastShownBody;
   String? lastPayload;
   int? lastCancelledId;
+  AndroidFlutterLocalNotificationsPlugin? androidPlugin;
+
+  @override
+  T? resolvePlatformSpecificImplementation<T extends FlutterLocalNotificationsPlatform>() {
+    if (T == AndroidFlutterLocalNotificationsPlugin) {
+      return androidPlugin as T?;
+    }
+    return null;
+  }
 
   @override
   Future<bool?> initialize({
@@ -209,6 +225,53 @@ void main() {
         final showId = mockPlugin.lastShownId;
         await service.cancelForGroup('g1');
         expect(mockPlugin.lastCancelledId, showId);
+      });
+    });
+
+    group('requestPermission', () {
+      test('returns false when platform implementation is null', () async {
+        final mockPlugin = _MockNotificationsPlugin();
+        final service = NotificationService(plugin: mockPlugin, enabled: true);
+        await service.initialize();
+
+        final result = await service.requestPermission();
+        expect(result, isFalse);
+      });
+
+      test('returns true when permission is granted', () async {
+        final androidPlugin = _MockAndroidPlugin();
+        androidPlugin.permissionResult = true;
+        final mockPlugin = _MockNotificationsPlugin();
+        mockPlugin.androidPlugin = androidPlugin;
+        final service = NotificationService(plugin: mockPlugin, enabled: true);
+        await service.initialize();
+
+        final result = await service.requestPermission();
+        expect(result, isTrue);
+      });
+
+      test('returns false when permission is denied', () async {
+        final androidPlugin = _MockAndroidPlugin();
+        androidPlugin.permissionResult = false;
+        final mockPlugin = _MockNotificationsPlugin();
+        mockPlugin.androidPlugin = androidPlugin;
+        final service = NotificationService(plugin: mockPlugin, enabled: true);
+        await service.initialize();
+
+        final result = await service.requestPermission();
+        expect(result, isFalse);
+      });
+
+      test('returns false when permission result is null', () async {
+        final androidPlugin = _MockAndroidPlugin();
+        androidPlugin.permissionResult = null;
+        final mockPlugin = _MockNotificationsPlugin();
+        mockPlugin.androidPlugin = androidPlugin;
+        final service = NotificationService(plugin: mockPlugin, enabled: true);
+        await service.initialize();
+
+        final result = await service.requestPermission();
+        expect(result, isFalse);
       });
     });
 

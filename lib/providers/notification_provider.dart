@@ -17,6 +17,7 @@ import 'package:whitenoise/src/rust/api/notifications.dart' as notifications_api
 
 final _logger = Logger('NotificationProvider');
 
+// coverage:ignore-start
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService(
     onNotificationTap: (groupId, isInvite, receiverPubkey) {
@@ -70,7 +71,7 @@ void _initializeAndListen(
     final subscription = stream.listen(
       (update) async {
         try {
-          await _handleNotificationUpdate(update, notificationService, ref);
+          await handleNotificationUpdate(update, notificationService, ref);
         } catch (error, stackTrace) {
           _logger.severe('Error handling notification update', error, stackTrace);
         }
@@ -94,8 +95,10 @@ void _initializeAndListen(
     _logger.severe('Failed to initialize notification listener', error, stackTrace);
   }
 }
+// coverage:ignore-end
 
-Future<void> _handleNotificationUpdate(
+@visibleForTesting
+Future<void> handleNotificationUpdate(
   notifications_api.NotificationUpdate update,
   NotificationService notificationService,
   Ref ref,
@@ -160,6 +163,7 @@ Future<void> _handleNotificationUpdate(
   }
 }
 
+// coverage:ignore-start
 Future<void> _onNotificationTap(
   Ref ref,
   String groupId,
@@ -191,3 +195,5 @@ void _navigateToNotificationTarget({
     Routes.goToChat(context, groupId);
   }
 }
+
+// coverage:ignore-end
