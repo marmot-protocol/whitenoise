@@ -82,8 +82,8 @@ void main() {
 
     testWidgets('continue button is disabled when no users selected', (tester) async {
       await pumpUserSelectionScreen(tester);
-      final button = tester.widget<WnButton>(find.widgetWithText(WnButton, 'Continue'));
-      expect(button.onPressed, isNull);
+      final actualButton = tester.widget<WnButton>(find.widgetWithText(WnButton, 'Continue'));
+      expect(actualButton.onPressed, isNull);
     });
 
     testWidgets('displays user list from follows', (tester) async {

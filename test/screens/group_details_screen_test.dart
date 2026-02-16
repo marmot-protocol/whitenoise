@@ -342,7 +342,7 @@ void main() {
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
       await pumpGroupDetailsScreen(tester, users);
 
-      final editIcon = find.byIcon(Icons.edit);
+      final editIcon = find.byKey(const Key('edit_group_image_icon'));
       expect(editIcon, findsOneWidget);
 
       await tester.tap(editIcon);

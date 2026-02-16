@@ -93,10 +93,7 @@ typedef CreateGroupActions = ({
 
     usersWithKeyPackage.value = withKeyPackage;
     usersWithoutKeyPackage.value = withoutKeyPackage;
-
-    if (isMountedRef.value) {
-      isFilteringUsers.value = false;
-    }
+    isFilteringUsers.value = false;
   }
 
   Future<groups_api.Group?> createGroup(String accountPubkey) async {
@@ -136,6 +133,8 @@ typedef CreateGroupActions = ({
             filePath: selectedImagePath.value!,
             serverUrl: serverUrl,
           );
+
+          if (!isMountedRef.value) return group;
 
           await group.updateGroupData(
             accountPubkey: accountPubkey,

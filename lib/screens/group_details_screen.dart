@@ -154,6 +154,7 @@ class GroupDetailsScreen extends HookConsumerWidget {
                                       ),
                                       child: Icon(
                                         Icons.edit,
+                                        key: const Key('edit_group_image_icon'),
                                         size: 16.sp,
                                         color: colors.backgroundSecondary,
                                       ),
