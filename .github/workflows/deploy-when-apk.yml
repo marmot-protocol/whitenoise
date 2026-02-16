@@ -1,0 +1,42 @@
+name: Deploy WHEN APK site
+
+on:
+  # Trigger when the Android APK Build workflow completes on master
+  workflow_run:
+    workflows: ["Android APK Build"]
+    types: [completed]
+    branches: [master]
+
+  # Also allow manual trigger
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Generate & Deploy to Cloudflare Pages
+    runs-on: ubuntu-latest
+    # Only deploy if the APK build succeeded (or manual trigger)
+    if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout helpers
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: sudo apt-get install -y jq
+
+      - name: Generate static site
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          chmod +x ./generate-site.sh
+          ./generate-site.sh
+
+      - name: Deploy to Cloudflare Pages
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          command: pages deploy site --project-name=wn-when-apk
