@@ -14,25 +14,24 @@ API="https://api.github.com"
 OUT_DIR="site"
 
 # ---------------------------------------------------------------------------
-# Auth (optional but recommended – unauthenticated rate-limit is 60/h)
-# Token is written to a temp config file so it never appears in process args.
+# Auth header (optional but recommended – unauthenticated rate-limit is 60/h)
 # ---------------------------------------------------------------------------
-CURL_CONFIG=$(mktemp)
-trap 'rm -f "$CURL_CONFIG"' EXIT
-chmod 600 "$CURL_CONFIG"
-
-echo 'header = "Accept: application/vnd.github+json"' > "$CURL_CONFIG"
+AUTH_HEADER=""
 if [[ -n "${GITHUB_TOKEN:-}" ]]; then
-  printf 'header = "Authorization: Bearer %s"\n' "$GITHUB_TOKEN" >> "$CURL_CONFIG"
+  AUTH_HEADER="Authorization: Bearer $GITHUB_TOKEN"
 fi
 
 gh_api() {
   local url="$1"
-  curl -fsSL -K "$CURL_CONFIG" "$url"
+  if [[ -n "$AUTH_HEADER" ]]; then
+    curl -fsSL -H "$AUTH_HEADER" -H "Accept: application/vnd.github+json" "$url"
+  else
+    curl -fsSL -H "Accept: application/vnd.github+json" "$url"
+  fi
 }
 
 html_escape() {
-  echo "$1" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#39;/g'
+  printf '%s' "$1" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#39;/g'
 }
 
 # ---------------------------------------------------------------------------
@@ -73,7 +72,7 @@ if [[ "$ARTIFACT_EXPIRED" == "true" ]]; then
   echo "Warning: artifact has expired and may not be downloadable" >&2
 fi
 
-ARTIFACT_SIZE_MB=$(awk -v size="$ARTIFACT_SIZE" 'BEGIN {printf "%.1f", size / 1048576}')
+ARTIFACT_SIZE_MB=$(awk "BEGIN {printf \"%.1f\", $ARTIFACT_SIZE / 1048576}")
 
 NIGHTLY_LINK_URL="https://nightly.link/$REPO/actions/artifacts/$ARTIFACT_ID.zip"
 
@@ -100,25 +99,16 @@ echo "  Commit: $SHORT_SHA by $COMMIT_AUTHOR — $COMMIT_MSG"
 mkdir -p "$OUT_DIR"
 
 format_date() {
-  date -d "$1" '+%B %d, %Y at %H:%M UTC' 2>/dev/null \
-    || date -jf '%Y-%m-%dT%H:%M:%SZ' "$1" '+%B %d, %Y at %H:%M UTC' 2>/dev/null \
+  date -u -d "$1" '+%B %d, %Y at %H:%M UTC' 2>/dev/null \
+    || TZ=UTC date -jf '%Y-%m-%dT%H:%M:%SZ' "$1" '+%B %d, %Y at %H:%M UTC' 2>/dev/null \
     || echo "$1"
 }
 
 PRETTY_BUILD_DATE=$(format_date "$RUN_DATE")
 PRETTY_COMMIT_DATE=$(format_date "$COMMIT_DATE")
 
-# HTML-escape all API-derived values before injecting into the page
+# Escape commit message for safe HTML embedding
 COMMIT_MSG_ESCAPED=$(html_escape "$COMMIT_MSG")
-ARTIFACT_NAME_ESCAPED=$(html_escape "$ARTIFACT_NAME")
-ARTIFACT_SIZE_MB_ESCAPED=$(html_escape "$ARTIFACT_SIZE_MB")
-PRETTY_BUILD_DATE_ESCAPED=$(html_escape "$PRETTY_BUILD_DATE")
-PRETTY_COMMIT_DATE_ESCAPED=$(html_escape "$PRETTY_COMMIT_DATE")
-RUN_URL_ESCAPED=$(html_escape "$RUN_URL")
-RUN_ID_ESCAPED=$(html_escape "$RUN_ID")
-NIGHTLY_LINK_URL_ESCAPED=$(html_escape "$NIGHTLY_LINK_URL")
-COMMIT_URL_ESCAPED=$(html_escape "$COMMIT_URL")
-SHORT_SHA_ESCAPED=$(html_escape "$SHORT_SHA")
 
 cat > "$OUT_DIR/index.html" <<'HTMLEOF_PART1'
 <!DOCTYPE html>
@@ -126,7 +116,6 @@ cat > "$OUT_DIR/index.html" <<'HTMLEOF_PART1'
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; script-src 'unsafe-inline'; img-src 'self';">
   <title>WHEN APK — WhiteNoise Android Download</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
@@ -438,12 +427,12 @@ HTMLEOF_PART1
 
 # --- inject dynamic values ---
 cat >> "$OUT_DIR/index.html" <<HTMLEOF_PART2
-    <a class="nes-btn" href="${NIGHTLY_LINK_URL_ESCAPED}">
+    <a class="nes-btn" href="${NIGHTLY_LINK_URL}">
       &#9733; DOWNLOAD APK &#9733;
     </a>
     <p class="meta-text">
-      ${ARTIFACT_NAME_ESCAPED}<br>
-      ${ARTIFACT_SIZE_MB_ESCAPED} MB (zip) &bull; Built ${PRETTY_BUILD_DATE_ESCAPED}
+      ${ARTIFACT_NAME}<br>
+      ${ARTIFACT_SIZE_MB} MB (zip) &bull; Built ${PRETTY_BUILD_DATE}
     </p>
     <p class="meta-text" style="color: var(--nes-orange); margin-top: 0.5rem;">
       Contains split APKs (arm64-v8a, armeabi-v7a, x86_64).<br>
@@ -457,7 +446,7 @@ cat >> "$OUT_DIR/index.html" <<HTMLEOF_PART2
     <table class="commit-table">
       <tr>
         <td>COMMIT</td>
-        <td><a href="${COMMIT_URL_ESCAPED}"><span class="sha">${SHORT_SHA_ESCAPED}</span></a></td>
+        <td><a href="${COMMIT_URL}"><span class="sha">${SHORT_SHA}</span></a></td>
       </tr>
       <tr>
         <td>HERO</td>
@@ -465,7 +454,7 @@ cat >> "$OUT_DIR/index.html" <<HTMLEOF_PART2
       </tr>
       <tr>
         <td>DATE</td>
-        <td>${PRETTY_COMMIT_DATE_ESCAPED}</td>
+        <td>${PRETTY_COMMIT_DATE}</td>
       </tr>
       <tr>
         <td>MESSAGE</td>
@@ -480,7 +469,7 @@ cat >> "$OUT_DIR/index.html" <<HTMLEOF_PART2
     <table class="commit-table">
       <tr>
         <td>WORKFLOW</td>
-        <td><a href="${RUN_URL_ESCAPED}">Run #${RUN_ID_ESCAPED}</a></td>
+        <td><a href="${RUN_URL}">Run #${RUN_ID}</a></td>
       </tr>
       <tr>
         <td>REPO</td>
