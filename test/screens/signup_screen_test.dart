@@ -196,7 +196,7 @@ void main() {
 
     group('keyboard', () {
       testWidgets(
-        'scrolls to bottom when keyboard appears',
+        'inputs remain visible when keyboard appears',
         (tester) async {
           tester.view.physicalSize = const Size(390, 550);
           tester.view.devicePixelRatio = 1.0;
@@ -223,14 +223,14 @@ void main() {
           Routes.pushToSignup(tester.element(find.byType(Scaffold)));
           await tester.pumpAndSettle();
 
-          final signUpButtonFinder = find.text('Sign Up');
-          expect(signUpButtonFinder, findsOneWidget);
+          expect(find.text('Choose a name'), findsOneWidget);
+          expect(find.text('Sign Up'), findsOneWidget);
 
           tester.view.viewInsets = const FakeViewPadding(bottom: 300);
           await tester.pump();
           await tester.pump(const Duration(milliseconds: 400));
 
-          expect(signUpButtonFinder, findsOneWidget);
+          expect(find.text('Choose a name'), findsOneWidget);
 
           addTearDown(() => tester.view.resetViewInsets());
         },

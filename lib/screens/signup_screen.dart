@@ -1,12 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart'
-    show
-        HookWidget,
-        useAnimationController,
-        useEffect,
-        useScrollController,
-        useState,
-        useTextEditingController;
+    show HookWidget, useAnimationController, useEffect, useState, useTextEditingController;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart' show Gap;
 import 'package:hooks_riverpod/hooks_riverpod.dart' show HookConsumerWidget, WidgetRef;
@@ -35,7 +29,6 @@ class SignupScreen extends HookConsumerWidget {
     final colors = context.colors;
     final displayNameController = useTextEditingController();
     final bioController = useTextEditingController();
-    final scrollController = useScrollController();
     final (:state, :submit, :onImageSelected, :clearErrors) = useSignup(
       () => ref.read(authProvider.notifier).signup(),
     );
@@ -67,20 +60,6 @@ class SignupScreen extends HookConsumerWidget {
         showCarousel.value = false;
       });
     }
-
-    final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
-    useEffect(() {
-      if (keyboardHeight > 0 && scrollController.hasClients) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          scrollController.animateTo(
-            scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 350),
-            curve: Curves.easeOutCubic,
-          );
-        });
-      }
-      return null;
-    }, [keyboardHeight]);
 
     useEffect(() {
       if (imagePickerError != null) {
@@ -169,7 +148,6 @@ class SignupScreen extends HookConsumerWidget {
                                   )
                                 : null,
                             child: SingleChildScrollView(
-                              controller: scrollController,
                               child: Padding(
                                 padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
                                 child: Column(
