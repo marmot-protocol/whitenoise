@@ -50,10 +50,10 @@ import 'package:whitenoise_widgetbook/components/wn_copy_card.dart'
     as _whitenoise_widgetbook_components_wn_copy_card;
 import 'package:whitenoise_widgetbook/components/wn_profile_switcher_item.dart'
     as _whitenoise_widgetbook_components_wn_profile_switcher_item;
-import 'package:whitenoise_widgetbook/components/wn_user_item.dart'
-    as _whitenoise_widgetbook_components_wn_user_item;
 import 'package:whitenoise_widgetbook/components/wn_slate_headers.dart'
     as _whitenoise_widgetbook_components_wn_slate_headers;
+import 'package:whitenoise_widgetbook/components/wn_user_item.dart'
+    as _whitenoise_widgetbook_components_wn_user_item;
 import 'package:whitenoise_widgetbook/foundations/semantic_colors.dart'
     as _whitenoise_widgetbook_foundations_semantic_colors;
 import 'package:whitenoise_widgetbook/foundations/typography.dart'
@@ -310,16 +310,6 @@ final directories = <_widgetbook.WidgetbookNode>[
         ],
       ),
       _widgetbook.WidgetbookComponent(
-        name: 'WnUserItemStory',
-        useCases: [
-          _widgetbook.WidgetbookUseCase(
-            name: 'User Item',
-            builder: _whitenoise_widgetbook_components_wn_user_item
-                .wnUserItemShowcase,
-          ),
-        ],
-      ),
-      _widgetbook.WidgetbookComponent(
         name: 'WnTimestampStory',
         useCases: [
           _widgetbook.WidgetbookUseCase(
@@ -336,6 +326,16 @@ final directories = <_widgetbook.WidgetbookNode>[
             name: 'Tooltip',
             builder:
                 _whitenoise_widgetbook_components_tooltip.wnTooltipShowcase,
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookComponent(
+        name: 'WnUserItemStory',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'User Item',
+            builder: _whitenoise_widgetbook_components_wn_user_item
+                .wnUserItemShowcase,
           ),
         ],
       ),

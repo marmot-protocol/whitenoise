@@ -5,6 +5,8 @@ import 'package:whitenoise/widgets/wn_user_item.dart';
 import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
+const _sampleImageUrl = 'https://www.whitenoise.chat/images/mask-man.webp';
+
 class WnUserItemStory extends StatelessWidget {
   const WnUserItemStory({super.key});
 
@@ -86,6 +88,29 @@ Widget wnUserItemShowcase(BuildContext context) {
               child: WnUserItem(
                 displayName: 'Fred Durst',
                 avatarColor: AvatarColor.blue,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 32),
+        _buildSection(
+          context,
+          'With Image',
+          'User items with a profile picture instead of initials.',
+          [
+            _UserItemExample(
+              label: 'Image with Label',
+              child: WnUserItem(
+                displayName: 'Fred Durst',
+                label: 'Admin',
+                pictureUrl: _sampleImageUrl,
+              ),
+            ),
+            _UserItemExample(
+              label: 'Image without Label',
+              child: WnUserItem(
+                displayName: 'Fred Durst',
+                pictureUrl: _sampleImageUrl,
               ),
             ),
           ],
@@ -239,6 +264,10 @@ class _InteractiveUserItem extends StatelessWidget {
       label: 'Label',
       initialValue: 'Label',
     );
+    final hasImage = context.knobs.boolean(
+      label: 'Has Image',
+      initialValue: false,
+    );
     final color = context.knobs.object.dropdown<AvatarColor>(
       label: 'Avatar Color',
       options: AvatarColor.values,
@@ -249,6 +278,7 @@ class _InteractiveUserItem extends StatelessWidget {
     return WnUserItem(
       displayName: displayName,
       label: labelText,
+      pictureUrl: hasImage ? _sampleImageUrl : null,
       avatarColor: color,
     );
   }
