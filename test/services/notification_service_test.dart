@@ -65,7 +65,7 @@ void main() {
       });
 
       test('show is no-op', () async {
-        await service.show(groupId: 'g', title: 't', body: 'b');
+        await service.show(groupId: 'g', title: 't', body: 'b', receiverPubkey: 'pk1');
       });
 
       test('cancelForGroup is no-op', () async {
@@ -110,12 +110,12 @@ void main() {
       });
 
       test('calls plugin show', () async {
-        await service.show(groupId: 'g1', title: 'Title', body: 'Body');
+        await service.show(groupId: 'g1', title: 'Title', body: 'Body', receiverPubkey: 'pk1');
         expect(mockPlugin.calls, contains('show'));
       });
 
       test('passes title and body', () async {
-        await service.show(groupId: 'g1', title: 'Alice', body: 'Hello');
+        await service.show(groupId: 'g1', title: 'Alice', body: 'Hello', receiverPubkey: 'pk1');
         expect(mockPlugin.lastShownTitle, 'Alice');
         expect(mockPlugin.lastShownBody, 'Hello');
       });
@@ -125,24 +125,30 @@ void main() {
           plugin: _MockNotificationsPlugin(),
           enabled: true,
         );
-        await uninitService.show(groupId: 'g1', title: 't', body: 'b');
+        await uninitService.show(groupId: 'g1', title: 't', body: 'b', receiverPubkey: 'pk1');
         expect(mockPlugin.calls, isNot(contains('show')));
       });
 
-      test('payload contains message trigger by default', () async {
-        await service.show(groupId: 'g1', title: 't', body: 'b');
-        expect(mockPlugin.lastPayload, 'g1|message');
+      test('payload contains message trigger and receiver pubkey', () async {
+        await service.show(groupId: 'g1', title: 't', body: 'b', receiverPubkey: 'pk1');
+        expect(mockPlugin.lastPayload, 'g1|message|pk1');
       });
 
-      test('payload contains invite trigger', () async {
-        await service.show(groupId: 'g1', title: 't', body: 'b', isInvite: true);
-        expect(mockPlugin.lastPayload, 'g1|invite');
+      test('payload contains invite trigger and receiver pubkey', () async {
+        await service.show(
+          groupId: 'g1',
+          title: 't',
+          body: 'b',
+          receiverPubkey: 'pk1',
+          isInvite: true,
+        );
+        expect(mockPlugin.lastPayload, 'g1|invite|pk1');
       });
 
       test('uses consistent notification ID for same groupId', () async {
-        await service.show(groupId: 'g1', title: 't1', body: 'b1');
+        await service.show(groupId: 'g1', title: 't1', body: 'b1', receiverPubkey: 'pk1');
         final firstId = mockPlugin.lastShownId;
-        await service.show(groupId: 'g1', title: 't2', body: 'b2');
+        await service.show(groupId: 'g1', title: 't2', body: 'b2', receiverPubkey: 'pk1');
         expect(mockPlugin.lastShownId, firstId);
       });
     });
@@ -187,7 +193,7 @@ void main() {
 
       test('uses same ID as show for same groupId', () async {
         await service.initialize();
-        await service.show(groupId: 'g1', title: 't', body: 'b');
+        await service.show(groupId: 'g1', title: 't', body: 'b', receiverPubkey: 'pk1');
         final showId = mockPlugin.lastShownId;
         await service.cancelForGroup('g1');
         expect(mockPlugin.lastCancelledId, showId);
@@ -198,17 +204,20 @@ void main() {
       late _MockNotificationsPlugin mockPlugin;
       String? tappedGroupId;
       bool? tappedIsInvite;
+      String? tappedReceiverPubkey;
 
       setUp(() async {
         mockPlugin = _MockNotificationsPlugin();
         tappedGroupId = null;
         tappedIsInvite = null;
+        tappedReceiverPubkey = null;
         final service = NotificationService(
           plugin: mockPlugin,
           enabled: true,
-          onNotificationTap: (groupId, isInvite) {
+          onNotificationTap: (groupId, isInvite, receiverPubkey) {
             tappedGroupId = groupId;
             tappedIsInvite = isInvite;
+            tappedReceiverPubkey = receiverPubkey;
           },
         );
         await service.initialize();
@@ -222,15 +231,17 @@ void main() {
       }
 
       test('calls onNotificationTap for message payload', () {
-        mockPlugin.tapCallback!(response(payload: 'group123|message'));
+        mockPlugin.tapCallback!(response(payload: 'group123|message|pk1'));
         expect(tappedGroupId, 'group123');
         expect(tappedIsInvite, isFalse);
+        expect(tappedReceiverPubkey, 'pk1');
       });
 
       test('calls onNotificationTap for invite payload', () {
-        mockPlugin.tapCallback!(response(payload: 'group456|invite'));
+        mockPlugin.tapCallback!(response(payload: 'group456|invite|pk2'));
         expect(tappedGroupId, 'group456');
         expect(tappedIsInvite, isTrue);
+        expect(tappedReceiverPubkey, 'pk2');
       });
 
       test('ignores null payload', () {
@@ -238,8 +249,13 @@ void main() {
         expect(tappedGroupId, isNull);
       });
 
-      test('ignores malformed payload', () {
+      test('ignores malformed payload with no separators', () {
         mockPlugin.tapCallback!(response(payload: 'no-separator'));
+        expect(tappedGroupId, isNull);
+      });
+
+      test('ignores payload with only two parts', () {
+        mockPlugin.tapCallback!(response(payload: 'group123|message'));
         expect(tappedGroupId, isNull);
       });
 
@@ -250,7 +266,7 @@ void main() {
           enabled: true,
         );
         await service.initialize();
-        noCallbackPlugin.tapCallback!(response(payload: 'g|message'));
+        noCallbackPlugin.tapCallback!(response(payload: 'g|message|pk1'));
         expect(tappedGroupId, isNull);
       });
     });

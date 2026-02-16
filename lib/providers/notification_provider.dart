@@ -9,6 +9,7 @@ import 'package:whitenoise/providers/active_chat_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/foreground_service_provider.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
+import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/services/foreground_service.dart';
 import 'package:whitenoise/services/notification_service.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart' as accounts_api;
@@ -17,7 +18,11 @@ import 'package:whitenoise/src/rust/api/notifications.dart' as notifications_api
 final _logger = Logger('NotificationProvider');
 
 final notificationServiceProvider = Provider<NotificationService>((ref) {
-  return NotificationService();
+  return NotificationService(
+    onNotificationTap: (groupId, isInvite, receiverPubkey) {
+      _onNotificationTap(ref, groupId, isInvite, receiverPubkey);
+    },
+  );
 });
 
 final notificationListenerProvider = Provider.autoDispose<void>((ref) {
@@ -110,6 +115,7 @@ void _handleNotificationUpdate(
     groupId: update.mlsGroupId,
     title: title,
     body: body,
+    receiverPubkey: update.receiver.pubkey,
     isInvite: isInvite,
   );
 }
@@ -142,5 +148,37 @@ void _handleNotificationUpdate(
         final groupName = update.groupName ?? l10n.unknownGroup;
         return (applyReceiver(groupName), l10n.userInvitedYouToSecureChat(senderName), true);
       }
+  }
+}
+
+Future<void> _onNotificationTap(
+  Ref ref,
+  String groupId,
+  bool isInvite,
+  String receiverPubkey,
+) async {
+  final activePubkey = ref.read(authProvider).value;
+  if (activePubkey != receiverPubkey) {
+    await ref.read(authProvider.notifier).switchProfile(receiverPubkey);
+    _logger.info('Switched to account $receiverPubkey for notification tap');
+  }
+
+  _navigateToNotificationTarget(groupId: groupId, isInvite: isInvite);
+}
+
+void _navigateToNotificationTarget({
+  required String groupId,
+  required bool isInvite,
+}) {
+  final context = Routes.navigatorKey.currentContext;
+  if (context == null) {
+    _logger.warning('No navigator context available for notification tap');
+    return;
+  }
+
+  if (isInvite) {
+    Routes.pushToInvite(context, groupId);
+  } else {
+    Routes.goToChat(context, groupId);
   }
 }

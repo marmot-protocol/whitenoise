@@ -13,14 +13,14 @@ const _payloadTriggerInvite = 'invite';
 class NotificationService {
   NotificationService({
     FlutterLocalNotificationsPlugin? plugin,
-    void Function(String groupId, bool isInvite)? onNotificationTap,
+    void Function(String groupId, bool isInvite, String receiverPubkey)? onNotificationTap,
     bool? enabled,
   }) : _plugin = plugin ?? FlutterLocalNotificationsPlugin(),
        _onNotificationTap = onNotificationTap,
        _enabled = enabled ?? Platform.isAndroid;
 
   final FlutterLocalNotificationsPlugin _plugin;
-  final void Function(String groupId, bool isInvite)? _onNotificationTap;
+  final void Function(String groupId, bool isInvite, String receiverPubkey)? _onNotificationTap;
   final bool _enabled;
   bool _initialized = false;
 
@@ -49,17 +49,19 @@ class NotificationService {
     if (payload == null || _onNotificationTap == null) return;
 
     final parts = payload.split('|');
-    if (parts.length < 2) return;
+    if (parts.length < 3) return;
 
     final groupId = parts[0];
     final isInvite = parts[1] == _payloadTriggerInvite;
-    _onNotificationTap(groupId, isInvite);
+    final receiverPubkey = parts[2];
+    _onNotificationTap(groupId, isInvite, receiverPubkey);
   }
 
   Future<void> show({
     required String groupId,
     required String title,
     required String body,
+    required String receiverPubkey,
     bool isInvite = false,
   }) async {
     if (!_enabled) return;
@@ -69,7 +71,8 @@ class NotificationService {
     }
 
     final notificationId = generateNotificationId(groupId);
-    final payload = '$groupId|${isInvite ? _payloadTriggerInvite : _payloadTriggerMessage}';
+    final trigger = isInvite ? _payloadTriggerInvite : _payloadTriggerMessage;
+    final payload = '$groupId|$trigger|$receiverPubkey';
 
     const androidDetails = AndroidNotificationDetails(
       _channelId,
