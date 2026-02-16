@@ -1,5 +1,7 @@
+import 'dart:convert' show utf8;
 import 'dart:io' show Platform;
 
+import 'package:crypto/crypto.dart' show sha256;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:logging/logging.dart';
 
@@ -66,7 +68,7 @@ class NotificationService {
       return;
     }
 
-    final notificationId = _generateNotificationId(groupId);
+    final notificationId = generateNotificationId(groupId);
     final payload = '$groupId|${isInvite ? _payloadTriggerInvite : _payloadTriggerMessage}';
 
     const androidDetails = AndroidNotificationDetails(
@@ -86,7 +88,7 @@ class NotificationService {
   Future<void> cancelForGroup(String groupId) async {
     if (!_enabled) return;
 
-    final notificationId = _generateNotificationId(groupId);
+    final notificationId = generateNotificationId(groupId);
     await _plugin.cancel(notificationId);
     _logger.fine('Cancelled notification for group $groupId');
   }
@@ -104,7 +106,9 @@ class NotificationService {
     return granted ?? false;
   }
 
-  int _generateNotificationId(String groupId) {
-    return groupId.hashCode.abs() % 0x7FFFFFFF;
+  static int generateNotificationId(String groupId) {
+    final bytes = sha256.convert(utf8.encode(groupId)).bytes;
+    final id = (bytes[0] << 24) | (bytes[1] << 16) | (bytes[2] << 8) | bytes[3];
+    return id & 0x7FFFFFFF;
   }
 }

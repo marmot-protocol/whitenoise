@@ -46,25 +46,30 @@ Future<void> _initializeAndListen(
   Ref ref,
   void Function(StreamSubscription<notifications_api.NotificationUpdate>) onSubscription,
 ) async {
-  await notificationService.initialize();
-  await notificationService.requestPermission();
+  try {
+    await notificationService.initialize();
+    await notificationService.requestPermission();
 
-  await foregroundService.start();
+    await foregroundService.start();
+    await foregroundService.requestBatteryOptimizationExemption();
 
-  final stream = notifications_api.subscribeToNotifications();
+    final stream = notifications_api.subscribeToNotifications();
 
-  final subscription = stream.listen(
-    (update) => _handleNotificationUpdate(update, notificationService, ref),
-    onError: (error) {
-      _logger.severe('Notification stream error', error);
-    },
-    onDone: () {
-      _logger.info('Notification stream closed');
-    },
-  );
+    final subscription = stream.listen(
+      (update) => _handleNotificationUpdate(update, notificationService, ref),
+      onError: (error) {
+        _logger.severe('Notification stream error', error);
+      },
+      onDone: () {
+        _logger.info('Notification stream closed');
+      },
+    );
 
-  onSubscription(subscription);
-  _logger.info('Notification listener started');
+    onSubscription(subscription);
+    _logger.info('Notification listener started');
+  } catch (error, stackTrace) {
+    _logger.severe('Failed to initialize notification listener', error, stackTrace);
+  }
 }
 
 void _handleNotificationUpdate(

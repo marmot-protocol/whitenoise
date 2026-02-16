@@ -59,6 +59,15 @@ void main() {
       setUp(() {
         service = NotificationService(enabled: false);
       });
+
+      test('initialize is no-op', () async {
+        await service.initialize();
+      });
+
+      test('show is no-op', () async {
+        await service.show(groupId: 'g', title: 't', body: 'b');
+      });
+
       test('cancelForGroup is no-op', () async {
         await service.cancelForGroup('g');
       });
@@ -135,6 +144,30 @@ void main() {
         final firstId = mockPlugin.lastShownId;
         await service.show(groupId: 'g1', title: 't2', body: 'b2');
         expect(mockPlugin.lastShownId, firstId);
+      });
+    });
+
+    group('generateNotificationId', () {
+      test('returns consistent ID for same input', () {
+        final id1 = NotificationService.generateNotificationId('group-abc');
+        final id2 = NotificationService.generateNotificationId('group-abc');
+        expect(id1, id2);
+      });
+
+      test('returns different IDs for different inputs', () {
+        final id1 = NotificationService.generateNotificationId('group-abc');
+        final id2 = NotificationService.generateNotificationId('group-xyz');
+        expect(id1, isNot(id2));
+      });
+
+      test('returns non-negative value', () {
+        final id = NotificationService.generateNotificationId('any-group');
+        expect(id, greaterThanOrEqualTo(0));
+      });
+
+      test('returns value within 31-bit range', () {
+        final id = NotificationService.generateNotificationId('any-group');
+        expect(id, lessThanOrEqualTo(0x7FFFFFFF));
       });
     });
 

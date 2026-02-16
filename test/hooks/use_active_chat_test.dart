@@ -31,6 +31,7 @@ void main() {
           cancelGroupNotifications: cancelGroupNotifications,
         );
       });
+      await tester.pump();
 
       expect(setActiveChatCalls, ['group123']);
       expect(cancelNotificationsCalls, ['group123']);

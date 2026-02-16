@@ -5,22 +5,33 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('ForegroundService', () {
-    test('disabled service stop is no-op', () async {
-      final service = ForegroundService(enabled: false);
-      // Should not throw
-      await service.stop();
-    });
+    group('when disabled', () {
+      late ForegroundService service;
 
-    test('disabled service isRunning returns false', () async {
-      final service = ForegroundService(enabled: false);
-      final isRunning = await service.isRunning;
-      expect(isRunning, isFalse);
-    });
+      setUp(() {
+        service = ForegroundService(enabled: false);
+      });
 
-    test('disabled service requestBatteryOptimizationExemption is no-op', () async {
-      final service = ForegroundService(enabled: false);
-      // Should not throw
-      await service.requestBatteryOptimizationExemption();
+      test('initialize is no-op', () async {
+        await service.initialize();
+      });
+
+      test('start is no-op', () async {
+        await service.start();
+      });
+
+      test('stop is no-op', () async {
+        await service.stop();
+      });
+
+      test('isRunning returns false', () async {
+        final isRunning = await service.isRunning;
+        expect(isRunning, isFalse);
+      });
+
+      test('requestBatteryOptimizationExemption is no-op', () async {
+        await service.requestBatteryOptimizationExemption();
+      });
     });
   });
 }

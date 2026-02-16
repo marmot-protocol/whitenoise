@@ -1,3 +1,5 @@
+import 'dart:async' show Future;
+
 import 'package:flutter/widgets.dart';
 import 'package:whitenoise/providers/active_chat_provider.dart';
 
@@ -32,22 +34,22 @@ class ActiveChatRouteObserver extends NavigatorObserver {
   void _updateFromRoute(Route<dynamic>? route) {
     final path = route?.settings.name;
     if (path == null) {
-      _notifier.clear();
+      Future.microtask(() => _notifier.clear());
       return;
     }
 
     final chatMatch = _chatPattern.firstMatch(path);
     if (chatMatch != null) {
-      _notifier.set(chatMatch.group(1)!);
+      Future.microtask(() => _notifier.set(chatMatch.group(1)!));
       return;
     }
 
     final inviteMatch = _invitePattern.firstMatch(path);
     if (inviteMatch != null) {
-      _notifier.set(inviteMatch.group(1)!);
+      Future.microtask(() => _notifier.set(inviteMatch.group(1)!));
       return;
     }
 
-    _notifier.clear();
+    Future.microtask(() => _notifier.clear());
   }
 }
