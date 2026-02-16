@@ -44,6 +44,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Invite callout [PR #230](https://github.com/marmot-protocol/whitenoise/pull/230)
 - Show replies in invite screen [PR #232](https://github.com/marmot-protocol/whitenoise/pull/232)
 - Show last message for invites in chat list [#310](https://github.com/marmot-protocol/whitenoise/pull/310)
+- Create group [PR #288](https://github.com/marmot-protocol/whitenoise/pull/288)
 
 ### Changed
 
