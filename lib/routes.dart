@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart' show BuildContext, Navigator, Widget;
+import 'package:flutter/material.dart'
+    show BuildContext, GlobalKey, Navigator, NavigatorState, Widget;
 import 'package:flutter_riverpod/flutter_riverpod.dart' show WidgetRef;
 import 'package:go_router/go_router.dart'
     show CustomTransitionPage, GoRoute, GoRouter, GoRouterState;
@@ -35,6 +36,8 @@ import 'package:whitenoise/src/rust/api/metadata.dart' show FlutterMetadata;
 import 'package:whitenoise/widgets/wn_slate_content_transition.dart' show WnSlateContentTransition;
 
 abstract final class Routes {
+  static final navigatorKey = GlobalKey<NavigatorState>();
+
   static const _home = '/';
   static const _login = '/login';
   static const _scanNsec = '/scan-nsec';
@@ -63,6 +66,7 @@ abstract final class Routes {
 
   static GoRouter build(WidgetRef ref) {
     return GoRouter(
+      navigatorKey: navigatorKey,
       initialLocation: _home,
       observers: [routeObserver, ActiveChatRouteObserver(ref.read(activeChatProvider.notifier))],
       redirect: (context, state) {

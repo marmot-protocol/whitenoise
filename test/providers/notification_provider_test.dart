@@ -149,4 +149,112 @@ void main() {
       expect(isInvite, isTrue);
     });
   });
+
+  group('Notification formatting with receiver name (multi-account)', () {
+    test('appends receiver name to DM message title', () {
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: 'group123',
+        isDm: true,
+        receiver: const NotificationUser(pubkey: 'receiver123', displayName: 'MyAccount'),
+        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Alice'),
+        content: 'Hello there',
+        timestamp: DateTime.now(),
+      );
+
+      final (title, body, isInvite) = formatNotification(
+        update,
+        l10n,
+        receiverName: 'MyAccount',
+      );
+
+      expect(title, equals('Alice (MyAccount)'));
+      expect(body, equals('Hello there'));
+      expect(isInvite, isFalse);
+    });
+
+    test('appends receiver name to group message title', () {
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: 'group123',
+        groupName: 'Friends Group',
+        isDm: false,
+        receiver: const NotificationUser(pubkey: 'receiver123', displayName: 'MyAccount'),
+        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Bob'),
+        content: 'Hey everyone',
+        timestamp: DateTime.now(),
+      );
+
+      final (title, body, isInvite) = formatNotification(
+        update,
+        l10n,
+        receiverName: 'MyAccount',
+      );
+
+      expect(title, equals('Friends Group (MyAccount)'));
+      expect(body, equals('Bob: Hey everyone'));
+      expect(isInvite, isFalse);
+    });
+
+    test('appends receiver name to DM invite title', () {
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.groupInvite,
+        mlsGroupId: 'group123',
+        isDm: true,
+        receiver: const NotificationUser(pubkey: 'receiver123', displayName: 'MyAccount'),
+        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Carol'),
+        content: '',
+        timestamp: DateTime.now(),
+      );
+
+      final (title, body, isInvite) = formatNotification(
+        update,
+        l10n,
+        receiverName: 'MyAccount',
+      );
+
+      expect(title, equals('Carol (MyAccount)'));
+      expect(body, equals('Has invited you to a secure chat'));
+      expect(isInvite, isTrue);
+    });
+
+    test('appends receiver name to group invite title', () {
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.groupInvite,
+        mlsGroupId: 'group123',
+        groupName: 'New Project',
+        isDm: false,
+        receiver: const NotificationUser(pubkey: 'receiver123', displayName: 'MyAccount'),
+        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Dave'),
+        content: '',
+        timestamp: DateTime.now(),
+      );
+
+      final (title, body, isInvite) = formatNotification(
+        update,
+        l10n,
+        receiverName: 'MyAccount',
+      );
+
+      expect(title, equals('New Project (MyAccount)'));
+      expect(body, equals('Dave has invited you to a secure chat'));
+      expect(isInvite, isTrue);
+    });
+
+    test('does not append receiver name when not provided', () {
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: 'group123',
+        isDm: true,
+        receiver: const NotificationUser(pubkey: 'receiver123', displayName: 'MyAccount'),
+        sender: const NotificationUser(pubkey: 'sender123', displayName: 'Alice'),
+        content: 'Hello',
+        timestamp: DateTime.now(),
+      );
+
+      final (title, _, _) = formatNotification(update, l10n);
+
+      expect(title, equals('Alice'));
+    });
+  });
 }
