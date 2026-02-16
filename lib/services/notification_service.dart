@@ -1,4 +1,4 @@
-import 'dart:convert' show utf8;
+import 'dart:convert' show jsonDecode, jsonEncode, utf8;
 import 'dart:io' show Platform;
 
 import 'package:crypto/crypto.dart' show sha256;
@@ -7,6 +7,9 @@ import 'package:logging/logging.dart';
 
 final _logger = Logger('NotificationService');
 
+const _payloadKeyGroupId = 'groupId';
+const _payloadKeyTrigger = 'trigger';
+const _payloadKeyReceiverPubkey = 'receiverPubkey';
 const _payloadTriggerMessage = 'message';
 const _payloadTriggerInvite = 'invite';
 
@@ -48,13 +51,22 @@ class NotificationService {
     final payload = response.payload;
     if (payload == null || _onNotificationTap == null) return;
 
-    final parts = payload.split('|');
-    if (parts.length < 3) return;
+    try {
+      final data = jsonDecode(payload) as Map<String, dynamic>;
+      final groupId = data[_payloadKeyGroupId] as String?;
+      final trigger = data[_payloadKeyTrigger] as String?;
+      final receiverPubkey = data[_payloadKeyReceiverPubkey] as String?;
 
-    final groupId = parts[0];
-    final isInvite = parts[1] == _payloadTriggerInvite;
-    final receiverPubkey = parts[2];
-    _onNotificationTap(groupId, isInvite, receiverPubkey);
+      if (groupId == null || groupId.isEmpty || trigger == null || receiverPubkey == null) {
+        _logger.warning('Malformed notification payload: $payload');
+        return;
+      }
+
+      final isInvite = trigger == _payloadTriggerInvite;
+      _onNotificationTap(groupId, isInvite, receiverPubkey);
+    } catch (e) {
+      _logger.warning('Failed to parse notification payload: $payload', e);
+    }
   }
 
   Future<void> show({
@@ -72,7 +84,11 @@ class NotificationService {
 
     final notificationId = generateNotificationId(groupId);
     final trigger = isInvite ? _payloadTriggerInvite : _payloadTriggerMessage;
-    final payload = '$groupId|$trigger|$receiverPubkey';
+    final payload = jsonEncode({
+      _payloadKeyGroupId: groupId,
+      _payloadKeyTrigger: trigger,
+      _payloadKeyReceiverPubkey: receiverPubkey,
+    });
 
     const androidDetails = AndroidNotificationDetails(
       _channelId,

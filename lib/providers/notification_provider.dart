@@ -59,18 +59,10 @@ Future<void> _initializeAndListen(
     await foregroundService.start();
     await foregroundService.requestBatteryOptimizationExemption();
 
-    final accounts = await accounts_api.getAccounts();
-    final accountCount = accounts.length;
-
     final stream = notifications_api.subscribeToNotifications();
 
     final subscription = stream.listen(
-      (update) => _handleNotificationUpdate(
-        update,
-        notificationService,
-        ref,
-        accountCount: accountCount,
-      ),
+      (update) => _handleNotificationUpdate(update, notificationService, ref),
       onError: (error) {
         _logger.severe('Notification stream error', error);
       },
@@ -86,12 +78,11 @@ Future<void> _initializeAndListen(
   }
 }
 
-void _handleNotificationUpdate(
+Future<void> _handleNotificationUpdate(
   notifications_api.NotificationUpdate update,
   NotificationService notificationService,
-  Ref ref, {
-  required int accountCount,
-}) {
+  Ref ref,
+) async {
   final activeChat = ref.read(activeChatProvider);
   if (activeChat == update.mlsGroupId) {
     _logger.fine('Skipping notification for active chat ${update.mlsGroupId}');
@@ -101,7 +92,8 @@ void _handleNotificationUpdate(
   final locale = ref.read(localeProvider.notifier).resolveLocale();
   final l10n = lookupAppLocalizations(locale);
 
-  final String? receiverName = accountCount > 1
+  final accounts = await accounts_api.getAccounts();
+  final String? receiverName = accounts.length > 1
       ? (update.receiver.displayName ?? l10n.unknownUser)
       : null;
 

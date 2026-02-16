@@ -1,3 +1,5 @@
+import 'dart:convert' show jsonDecode, jsonEncode;
+
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/services/notification_service.dart';
@@ -129,12 +131,15 @@ void main() {
         expect(mockPlugin.calls, isNot(contains('show')));
       });
 
-      test('payload contains message trigger and receiver pubkey', () async {
+      test('payload contains message trigger and receiver pubkey as JSON', () async {
         await service.show(groupId: 'g1', title: 't', body: 'b', receiverPubkey: 'pk1');
-        expect(mockPlugin.lastPayload, 'g1|message|pk1');
+        final data = jsonDecode(mockPlugin.lastPayload!) as Map<String, dynamic>;
+        expect(data['groupId'], 'g1');
+        expect(data['trigger'], 'message');
+        expect(data['receiverPubkey'], 'pk1');
       });
 
-      test('payload contains invite trigger and receiver pubkey', () async {
+      test('payload contains invite trigger and receiver pubkey as JSON', () async {
         await service.show(
           groupId: 'g1',
           title: 't',
@@ -142,7 +147,10 @@ void main() {
           receiverPubkey: 'pk1',
           isInvite: true,
         );
-        expect(mockPlugin.lastPayload, 'g1|invite|pk1');
+        final data = jsonDecode(mockPlugin.lastPayload!) as Map<String, dynamic>;
+        expect(data['groupId'], 'g1');
+        expect(data['trigger'], 'invite');
+        expect(data['receiverPubkey'], 'pk1');
       });
 
       test('uses consistent notification ID for same groupId', () async {
@@ -231,17 +239,39 @@ void main() {
       }
 
       test('calls onNotificationTap for message payload', () {
-        mockPlugin.tapCallback!(response(payload: 'group123|message|pk1'));
+        final payload = jsonEncode({
+          'groupId': 'group123',
+          'trigger': 'message',
+          'receiverPubkey': 'pk1',
+        });
+        mockPlugin.tapCallback!(response(payload: payload));
         expect(tappedGroupId, 'group123');
         expect(tappedIsInvite, isFalse);
         expect(tappedReceiverPubkey, 'pk1');
       });
 
       test('calls onNotificationTap for invite payload', () {
-        mockPlugin.tapCallback!(response(payload: 'group456|invite|pk2'));
+        final payload = jsonEncode({
+          'groupId': 'group456',
+          'trigger': 'invite',
+          'receiverPubkey': 'pk2',
+        });
+        mockPlugin.tapCallback!(response(payload: payload));
         expect(tappedGroupId, 'group456');
         expect(tappedIsInvite, isTrue);
         expect(tappedReceiverPubkey, 'pk2');
+      });
+
+      test('handles groupId containing pipe characters', () {
+        final payload = jsonEncode({
+          'groupId': 'group|with|pipes',
+          'trigger': 'message',
+          'receiverPubkey': 'pk1',
+        });
+        mockPlugin.tapCallback!(response(payload: payload));
+        expect(tappedGroupId, 'group|with|pipes');
+        expect(tappedIsInvite, isFalse);
+        expect(tappedReceiverPubkey, 'pk1');
       });
 
       test('ignores null payload', () {
@@ -249,13 +279,36 @@ void main() {
         expect(tappedGroupId, isNull);
       });
 
-      test('ignores malformed payload with no separators', () {
-        mockPlugin.tapCallback!(response(payload: 'no-separator'));
+      test('ignores non-JSON payload', () {
+        mockPlugin.tapCallback!(response(payload: 'not-json'));
         expect(tappedGroupId, isNull);
       });
 
-      test('ignores payload with only two parts', () {
-        mockPlugin.tapCallback!(response(payload: 'group123|message'));
+      test('ignores payload with missing groupId', () {
+        final payload = jsonEncode({'trigger': 'message', 'receiverPubkey': 'pk1'});
+        mockPlugin.tapCallback!(response(payload: payload));
+        expect(tappedGroupId, isNull);
+      });
+
+      test('ignores payload with empty groupId', () {
+        final payload = jsonEncode({
+          'groupId': '',
+          'trigger': 'message',
+          'receiverPubkey': 'pk1',
+        });
+        mockPlugin.tapCallback!(response(payload: payload));
+        expect(tappedGroupId, isNull);
+      });
+
+      test('ignores payload with missing trigger', () {
+        final payload = jsonEncode({'groupId': 'g1', 'receiverPubkey': 'pk1'});
+        mockPlugin.tapCallback!(response(payload: payload));
+        expect(tappedGroupId, isNull);
+      });
+
+      test('ignores payload with missing receiverPubkey', () {
+        final payload = jsonEncode({'groupId': 'g1', 'trigger': 'message'});
+        mockPlugin.tapCallback!(response(payload: payload));
         expect(tappedGroupId, isNull);
       });
 
@@ -266,7 +319,12 @@ void main() {
           enabled: true,
         );
         await service.initialize();
-        noCallbackPlugin.tapCallback!(response(payload: 'g|message|pk1'));
+        final payload = jsonEncode({
+          'groupId': 'g',
+          'trigger': 'message',
+          'receiverPubkey': 'pk1',
+        });
+        noCallbackPlugin.tapCallback!(response(payload: payload));
         expect(tappedGroupId, isNull);
       });
     });
