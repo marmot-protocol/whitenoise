@@ -58,7 +58,7 @@ useRelayResolution({
       _logger.severe('Failed to publish default relays', e, stackTrace);
       state.value = state.value.copyWith(
         isLoading: false,
-        error: 'relayResolutionPublishFailed',
+        error: 'loginErrorGeneric',
       );
       return false;
     }

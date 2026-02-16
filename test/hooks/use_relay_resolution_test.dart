@@ -202,7 +202,7 @@ void main() {
         await tester.pump();
 
         expect(result, false);
-        expect(capturedState.error, 'relayResolutionPublishFailed');
+        expect(capturedState.error, 'loginErrorGeneric');
       });
     });
 

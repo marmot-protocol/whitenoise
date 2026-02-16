@@ -52,6 +52,10 @@ useLoginWithNsec(LoginStartCallback loginStart) {
   final controller = useTextEditingController();
   final state = useState(const LoginWithNsecState());
 
+  useEffect(() {
+    return () => controller.clear();
+  }, const []);
+
   Future<void> paste() async {
     try {
       final clipboardData = await Clipboard.getData(Clipboard.kTextPlain);
