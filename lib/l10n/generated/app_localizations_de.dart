@@ -408,6 +408,86 @@ class AppLocalizationsDe extends AppLocalizations {
   String get goBack => 'Zurück';
 
   @override
+  String get createGroup => 'Gruppe erstellen';
+
+  @override
+  String get selectMembers => 'Mitglieder auswählen';
+
+  @override
+  String selectedCount(int count) {
+    return '$count ausgewählt';
+  }
+
+  @override
+  String get clearSelection => 'Löschen';
+
+  @override
+  String get continueButton => 'Weiter';
+
+  @override
+  String get groupDetails => 'Gruppendetails';
+
+  @override
+  String get groupName => 'Gruppenname';
+
+  @override
+  String get groupNamePlaceholder => 'Gruppenname eingeben';
+
+  @override
+  String get groupDescription => 'Gruppenbeschreibung';
+
+  @override
+  String get groupDescriptionPlaceholder => 'Gruppenbeschreibung eingeben (optional)';
+
+  @override
+  String members(int count) {
+    return '$count Mitglieder';
+  }
+
+  @override
+  String get usersWithoutKeyPackages =>
+      'Benutzer ohne Schlüsselpakete (können nicht hinzugefügt werden)';
+
+  @override
+  String usersNotOnWhiteNoise(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Diese Benutzer sind nicht auf White Noise',
+      one: 'Dieser Benutzer ist nicht auf White Noise',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String usersNotOnWhiteNoiseDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Diese Benutzer können nicht zur Gruppe hinzugefügt werden, da sie White Noise nicht installiert haben oder ihre Schlüsselpakete noch nicht veröffentlicht haben.',
+      one:
+          'Dieser Benutzer kann nicht zur Gruppe hinzugefügt werden, da White Noise nicht installiert ist oder das Schlüsselpaket noch nicht veröffentlicht wurde.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get uploadingImage => 'Bild wird hochgeladen...';
+
+  @override
+  String get creatingGroup => 'Gruppe wird erstellt...';
+
+  @override
+  String get groupNameRequired => 'Gruppenname ist erforderlich';
+
+  @override
+  String get noUsersWithKeyPackages => 'Keine Benutzer mit Schlüsselpaketen zum Hinzufügen';
+
+  @override
+  String get createGroupFailed => 'Gruppe erstellen fehlgeschlagen';
+
+  @override
   String get reportError => 'Fehler melden';
 
   @override

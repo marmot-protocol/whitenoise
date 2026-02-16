@@ -404,6 +404,100 @@ class AppLocalizationsRu extends AppLocalizations {
   String get goBack => 'Назад';
 
   @override
+  String get createGroup => 'Создать Группу';
+
+  @override
+  String get selectMembers => 'Выбрать Участников';
+
+  @override
+  String selectedCount(int count) {
+    return '$count выбрано';
+  }
+
+  @override
+  String get clearSelection => 'Очистить';
+
+  @override
+  String get continueButton => 'Продолжить';
+
+  @override
+  String get groupDetails => 'Детали Группы';
+
+  @override
+  String get groupName => 'Название Группы';
+
+  @override
+  String get groupNamePlaceholder => 'Введите название группы';
+
+  @override
+  String get groupDescription => 'Описание Группы';
+
+  @override
+  String get groupDescriptionPlaceholder => 'Введите описание группы (необязательно)';
+
+  @override
+  String members(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count участников',
+      many: '$count участников',
+      few: '$count участника',
+      one: '1 участник',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get usersWithoutKeyPackages =>
+      'Пользователи без ключевых пакетов (не могут быть добавлены)';
+
+  @override
+  String usersNotOnWhiteNoise(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Эти пользователи не в White Noise',
+      many: 'Эти пользователи не в White Noise',
+      few: 'Эти пользователи не в White Noise',
+      one: 'Этот пользователь не в White Noise',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String usersNotOnWhiteNoiseDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Эти пользователи не могут быть добавлены в группу, потому что у них не установлен White Noise или они еще не опубликовали свои ключевые пакеты.',
+      many:
+          'Эти пользователи не могут быть добавлены в группу, потому что у них не установлен White Noise или они еще не опубликовали свои ключевые пакеты.',
+      few:
+          'Эти пользователи не могут быть добавлены в группу, потому что у них не установлен White Noise или они еще не опубликовали свои ключевые пакеты.',
+      one:
+          'Этот пользователь не может быть добавлен в группу, потому что у него не установлен White Noise или он еще не опубликовал свой ключевой пакет.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get uploadingImage => 'Загрузка изображения...';
+
+  @override
+  String get creatingGroup => 'Создание группы...';
+
+  @override
+  String get groupNameRequired => 'Требуется название группы';
+
+  @override
+  String get noUsersWithKeyPackages => 'Нет пользователей с ключевыми пакетами для добавления';
+
+  @override
+  String get createGroupFailed => 'Не удалось создать группу';
+
+  @override
   String get reportError => 'Сообщить об ошибке';
 
   @override

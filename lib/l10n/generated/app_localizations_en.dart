@@ -403,6 +403,85 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goBack => 'Go back';
 
   @override
+  String get createGroup => 'Create Group';
+
+  @override
+  String get selectMembers => 'Select Members';
+
+  @override
+  String selectedCount(int count) {
+    return '$count selected';
+  }
+
+  @override
+  String get clearSelection => 'Clear';
+
+  @override
+  String get continueButton => 'Continue';
+
+  @override
+  String get groupDetails => 'Group Details';
+
+  @override
+  String get groupName => 'Group Name';
+
+  @override
+  String get groupNamePlaceholder => 'Enter group name';
+
+  @override
+  String get groupDescription => 'Group Description';
+
+  @override
+  String get groupDescriptionPlaceholder => 'Enter group description (optional)';
+
+  @override
+  String members(int count) {
+    return '$count members';
+  }
+
+  @override
+  String get usersWithoutKeyPackages => 'Users without key packages (cannot be added)';
+
+  @override
+  String usersNotOnWhiteNoise(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'These users are not on White Noise',
+      one: 'This user is not on White Noise',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String usersNotOnWhiteNoiseDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'These users cannot be added to the group because they don\'t have White Noise installed or haven\'t published their key packages yet.',
+      one:
+          'This user cannot be added to the group because they don\'t have White Noise installed or haven\'t published their key package yet.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get uploadingImage => 'Uploading image...';
+
+  @override
+  String get creatingGroup => 'Creating group...';
+
+  @override
+  String get groupNameRequired => 'Group name is required';
+
+  @override
+  String get noUsersWithKeyPackages => 'No users with key packages to add';
+
+  @override
+  String get createGroupFailed => 'Failed to create group';
+
+  @override
   String get reportError => 'Report error';
 
   @override

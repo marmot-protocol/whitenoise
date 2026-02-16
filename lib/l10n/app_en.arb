@@ -645,6 +645,122 @@
     "description": "Go back button text"
   },
 
+  "createGroup": "Create Group",
+  "@createGroup": {
+    "description": "Create group button text"
+  },
+
+  "selectMembers": "Select Members",
+  "@selectMembers": {
+    "description": "User selection screen title"
+  },
+
+  "selectedCount": "{count} selected",
+  "@selectedCount": {
+    "description": "Number of selected users",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "clearSelection": "Clear",
+  "@clearSelection": {
+    "description": "Clear selection button text"
+  },
+
+  "continueButton": "Continue",
+  "@continueButton": {
+    "description": "Continue button text"
+  },
+
+  "groupDetails": "Group Details",
+  "@groupDetails": {
+    "description": "Group details screen title"
+  },
+
+  "groupName": "Group Name",
+  "@groupName": {
+    "description": "Group name label"
+  },
+
+  "groupNamePlaceholder": "Enter group name",
+  "@groupNamePlaceholder": {
+    "description": "Group name input placeholder"
+  },
+
+  "groupDescription": "Group Description",
+  "@groupDescription": {
+    "description": "Group description label"
+  },
+
+  "groupDescriptionPlaceholder": "Enter group description (optional)",
+  "@groupDescriptionPlaceholder": {
+    "description": "Group description input placeholder"
+  },
+
+  "members": "{count} members",
+  "@members": {
+    "description": "Number of members",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "usersWithoutKeyPackages": "Users without key packages (cannot be added)",
+  "@usersWithoutKeyPackages": {
+    "description": "Message for users without key packages"
+  },
+
+  "usersNotOnWhiteNoise": "{count, plural, =1{This user is not on White Noise} other{These users are not on White Noise}}",
+  "@usersNotOnWhiteNoise": {
+    "description": "Title for users without key packages",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "usersNotOnWhiteNoiseDescription": "{count, plural, =1{This user cannot be added to the group because they don't have White Noise installed or haven't published their key package yet.} other{These users cannot be added to the group because they don't have White Noise installed or haven't published their key packages yet.}}",
+  "@usersNotOnWhiteNoiseDescription": {
+    "description": "Description for users without key packages",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "uploadingImage": "Uploading image...",
+  "@uploadingImage": {
+    "description": "Uploading image status"
+  },
+
+  "creatingGroup": "Creating group...",
+  "@creatingGroup": {
+    "description": "Creating group status"
+  },
+
+  "groupNameRequired": "Group name is required",
+  "@groupNameRequired": {
+    "description": "Error message when group name is empty"
+  },
+
+  "noUsersWithKeyPackages": "No users with key packages to add",
+  "@noUsersWithKeyPackages": {
+    "description": "Error message when no users have key packages"
+  },
+
+
+  "createGroupFailed": "Failed to create group",
+  "@createGroupFailed": {
+    "description": "Error message when group creation fails"
+  },
+
   "reportError": "Report error",
   "@reportError": {
     "description": "Report error button text"
