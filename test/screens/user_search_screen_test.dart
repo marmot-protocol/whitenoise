@@ -104,6 +104,20 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
     });
 
+    testWidgets('displays create group button', (tester) async {
+      await pumpUserSearchScreen(tester);
+      expect(find.text('Create Group'), findsOneWidget);
+    });
+
+    testWidgets('tapping create group button navigates to user selection', (tester) async {
+      await pumpUserSearchScreen(tester);
+
+      await tester.tap(find.text('Create Group'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Select Members'), findsOneWidget);
+    });
+
     testWidgets('tapping close icon goes back', (tester) async {
       await pumpUserSearchScreen(tester);
       await tester.tap(find.byKey(const Key('slate_close_button')));
