@@ -11,7 +11,6 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated_io.dart';
 
 import 'api.dart';
 import 'api/account_groups.dart';
-import 'api/account_settings.dart';
 import 'api/accounts.dart';
 import 'api/chat_list.dart';
 import 'api/error.dart';
@@ -237,9 +236,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AccountGroup dco_decode_account_group(dynamic raw);
 
   @protected
-  AccountSettings dco_decode_account_settings(dynamic raw);
-
-  @protected
   AccountType dco_decode_account_type(dynamic raw);
 
   @protected
@@ -402,6 +398,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<UserSearchResult> dco_decode_list_user_search_result(dynamic raw);
+
+  @protected
+  LoginResult dco_decode_login_result(dynamic raw);
+
+  @protected
+  LoginStatus dco_decode_login_status(dynamic raw);
 
   @protected
   MatchQuality dco_decode_match_quality(dynamic raw);
@@ -696,9 +698,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AccountGroup sse_decode_account_group(SseDeserializer deserializer);
 
   @protected
-  AccountSettings sse_decode_account_settings(SseDeserializer deserializer);
-
-  @protected
   AccountType sse_decode_account_type(SseDeserializer deserializer);
 
   @protected
@@ -899,6 +898,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<UserSearchResult> sse_decode_list_user_search_result(
     SseDeserializer deserializer,
   );
+
+  @protected
+  LoginResult sse_decode_login_result(SseDeserializer deserializer);
+
+  @protected
+  LoginStatus sse_decode_login_status(SseDeserializer deserializer);
 
   @protected
   MatchQuality sse_decode_match_quality(SseDeserializer deserializer);
@@ -1248,12 +1253,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_account_group(AccountGroup self, SseSerializer serializer);
 
   @protected
-  void sse_encode_account_settings(
-    AccountSettings self,
-    SseSerializer serializer,
-  );
-
-  @protected
   void sse_encode_account_type(AccountType self, SseSerializer serializer);
 
   @protected
@@ -1507,6 +1506,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     List<UserSearchResult> self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_login_result(LoginResult self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_login_status(LoginStatus self, SseSerializer serializer);
 
   @protected
   void sse_encode_match_quality(MatchQuality self, SseSerializer serializer);

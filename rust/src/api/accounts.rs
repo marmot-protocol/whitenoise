@@ -3,7 +3,8 @@ use chrono::{DateTime, TimeZone, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
 use whitenoise::{
-    Account as WhitenoiseAccount, AccountType as WhitenoiseAccountType, ImageType, RelayType,
+    Account as WhitenoiseAccount, AccountType as WhitenoiseAccountType, ImageType,
+    LoginResult as WhitenoiseLoginResult, LoginStatus as WhitenoiseLoginStatus, RelayType,
     Whitenoise,
 };
 
@@ -45,6 +46,43 @@ impl From<WhitenoiseAccount> for Account {
             last_synced_at: account.last_synced_at,
             created_at: account.created_at,
             updated_at: account.updated_at,
+        }
+    }
+}
+
+/// The status of a login attempt.
+#[frb(non_opaque)]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum LoginStatus {
+    /// Login completed successfully.
+    Complete,
+    /// Relay lists were not found. The caller must resolve relay lists before
+    /// login can complete.
+    NeedsRelayLists,
+}
+
+impl From<WhitenoiseLoginStatus> for LoginStatus {
+    fn from(status: WhitenoiseLoginStatus) -> Self {
+        match status {
+            WhitenoiseLoginStatus::Complete => LoginStatus::Complete,
+            WhitenoiseLoginStatus::NeedsRelayLists => LoginStatus::NeedsRelayLists,
+        }
+    }
+}
+
+/// The result of a login attempt.
+#[frb(non_opaque)]
+#[derive(Debug, Clone)]
+pub struct LoginResult {
+    pub account: Account,
+    pub status: LoginStatus,
+}
+
+impl From<WhitenoiseLoginResult> for LoginResult {
+    fn from(result: WhitenoiseLoginResult) -> Self {
+        Self {
+            account: result.account.into(),
+            status: result.status.into(),
         }
     }
 }
@@ -104,11 +142,45 @@ pub async fn create_identity() -> Result<Account, ApiError> {
     Ok(account.into())
 }
 
+// -----------------------------------------------------------------------
+// Multi-step login API (nsec / hex private key)
+// -----------------------------------------------------------------------
+
 #[frb]
-pub async fn login(nsec_or_hex_privkey: String) -> Result<Account, ApiError> {
+pub async fn login_start(nsec_or_hex_privkey: String) -> Result<LoginResult, ApiError> {
     let whitenoise = Whitenoise::get_instance()?;
-    let account = whitenoise.login(nsec_or_hex_privkey).await?;
-    Ok(account.into())
+    let result = whitenoise.login_start(nsec_or_hex_privkey).await?;
+    Ok(result.into())
+}
+
+#[frb]
+pub async fn login_publish_default_relays(pubkey: String) -> Result<LoginResult, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let result = whitenoise.login_publish_default_relays(&pubkey).await?;
+    Ok(result.into())
+}
+
+#[frb]
+pub async fn login_with_custom_relay(
+    pubkey: String,
+    relay_url: String,
+) -> Result<LoginResult, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let relay_url = RelayUrl::parse(&relay_url)?;
+    let result = whitenoise
+        .login_with_custom_relay(&pubkey, relay_url)
+        .await?;
+    Ok(result.into())
+}
+
+#[frb]
+pub async fn login_cancel(pubkey: String) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    whitenoise.login_cancel(&pubkey).await?;
+    Ok(())
 }
 
 #[frb]

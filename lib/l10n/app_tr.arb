@@ -222,5 +222,16 @@
   "deleteAllData": "Tüm Verileri Sil",
   "deleteAllDataConfirmation": "Tüm veriler silinsin mi?",
   "deleteAllDataWarning": "Bu işlem, bu cihazdaki tüm sohbetlerinizi, mesajlarınızı ve ayarlarınızı kalıcı olarak silecektir. Bu işlem geri alınamaz.",
-  "deleteAllDataError": "Tüm veriler silinemedi. Lütfen tekrar deneyin."
+  "deleteAllDataError": "Tüm veriler silinemedi. Lütfen tekrar deneyin.",
+  "relayResolutionTitle": "Relay Setup",
+  "relayResolutionDescription": "We couldn't find your relay lists on the network. You can provide a relay where your lists are published, or use our default relays to get started.",
+  "relayResolutionUseDefaults": "Use default relays",
+  "relayResolutionTryRelay": "Search relay",
+  "relayResolutionRelayPlaceholder": "wss://relay.example.com",
+  "relayResolutionRelayLabel": "Relay URL",
+  "relayResolutionNotFound": "No relay lists found on this relay. Try another or use defaults.",
+  "loginErrorInvalidKey": "Invalid private key format. Please check and try again.",
+  "loginErrorNoRelayConnections": "Could not connect to any relays. Please check your connection and try again.",
+  "loginErrorTimeout": "Login timed out. Please try again.",
+  "loginErrorGeneric": "An error occurred during login. Please try again."
 }

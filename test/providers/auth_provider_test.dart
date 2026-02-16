@@ -48,7 +48,7 @@ class _MockRustLibApi implements RustLibApi {
   }
 
   @override
-  Future<Account> crateApiSignerLoginWithExternalSignerAndCallbacks({
+  Future<LoginResult> crateApiSignerLoginExternalSignerStart({
     required String pubkey,
     required FutureOr<String> Function(String) signEvent,
     required FutureOr<String> Function(String, String) nip04Encrypt,
@@ -68,11 +68,45 @@ class _MockRustLibApi implements RustLibApi {
     }
     existingAccounts.add(pubkey);
     accountTypes[pubkey] = AccountType.external_;
-    return Account(
-      pubkey: pubkey,
-      accountType: AccountType.external_,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
+    return LoginResult(
+      account: Account(
+        pubkey: pubkey,
+        accountType: AccountType.external_,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
+    );
+  }
+
+  @override
+  Future<LoginResult> crateApiSignerLoginExternalSignerPublishDefaultRelays({
+    required String pubkey,
+  }) async {
+    return LoginResult(
+      account: Account(
+        pubkey: pubkey,
+        accountType: AccountType.external_,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
+    );
+  }
+
+  @override
+  Future<LoginResult> crateApiSignerLoginExternalSignerWithCustomRelay({
+    required String pubkey,
+    required String relayUrl,
+  }) async {
+    return LoginResult(
+      account: Account(
+        pubkey: pubkey,
+        accountType: AccountType.external_,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
     );
   }
 
@@ -105,15 +139,54 @@ class _MockRustLibApi implements RustLibApi {
   }
 
   @override
-  Future<Account> crateApiAccountsLogin({required String nsecOrHexPrivkey}) async {
+  Future<LoginResult> crateApiAccountsLoginStart({
+    required String nsecOrHexPrivkey,
+  }) async {
     existingAccounts.add(testPubkeyB);
-    return Account(
-      pubkey: testPubkeyB,
-      accountType: AccountType.local,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
+    return LoginResult(
+      account: Account(
+        pubkey: testPubkeyB,
+        accountType: AccountType.local,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
     );
   }
+
+  @override
+  Future<LoginResult> crateApiAccountsLoginPublishDefaultRelays({
+    required String pubkey,
+  }) async {
+    return LoginResult(
+      account: Account(
+        pubkey: pubkey,
+        accountType: AccountType.local,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
+    );
+  }
+
+  @override
+  Future<LoginResult> crateApiAccountsLoginWithCustomRelay({
+    required String pubkey,
+    required String relayUrl,
+  }) async {
+    return LoginResult(
+      account: Account(
+        pubkey: pubkey,
+        accountType: AccountType.local,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
+    );
+  }
+
+  @override
+  Future<void> crateApiAccountsLoginCancel({required String pubkey}) async {}
 
   @override
   Future<void> crateApiAccountsLogout({required String pubkey}) async {
@@ -238,14 +311,20 @@ void main() {
       });
     });
 
-    group('login', () {
+    group('loginStart', () {
       test('sets state to pubkey', () async {
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         expect(container.read(authProvider).value, testPubkeyB);
       });
 
+      test('returns LoginResult with complete status', () async {
+        final result = await container.read(authProvider.notifier).loginStart('nsec123');
+        expect(result.account.pubkey, testPubkeyB);
+        expect(result.status, LoginStatus.complete);
+      });
+
       test('fetches account metadata without awaiting', () async {
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         expect(mockApi.metadataCalledWithPubkey, testPubkeyB);
         expect(mockApi.metadataCompleter.isCompleted, isFalse);
       });
@@ -253,7 +332,7 @@ void main() {
       test('resets isAddingAccountProvider to false', () async {
         container.read(isAddingAccountProvider.notifier).set(true);
         expect(container.read(isAddingAccountProvider), true);
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         expect(container.read(isAddingAccountProvider), false);
       });
     });
@@ -274,19 +353,19 @@ void main() {
 
     group('logout', () {
       test('clears state when no other accounts', () async {
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         await container.read(authProvider.notifier).logout();
         expect(container.read(authProvider).value, isNull);
       });
 
       test('clears storage when no other accounts', () async {
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         await container.read(authProvider.notifier).logout();
         expect(await mockStorage.read(key: 'active_account_pubkey'), isNull);
       });
 
       test('calls Rust API logout', () async {
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         await container.read(authProvider.notifier).logout();
         expect(mockApi.logoutCalledWithPubkey, testPubkeyB);
       });
@@ -299,7 +378,7 @@ void main() {
       });
 
       test('switches to another account when available', () async {
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         mockApi.existingAccounts.add('other_pubkey');
         mockApi.allAccounts = [
           Account(
@@ -316,7 +395,7 @@ void main() {
       });
 
       test('filters out logged-out account when switching', () async {
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         mockApi.existingAccounts.add(testPubkeyD);
         mockApi.allAccounts = [
           Account(
@@ -338,13 +417,13 @@ void main() {
       });
 
       test('returns null when no other accounts', () async {
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         final nextPubkey = await container.read(authProvider.notifier).logout();
         expect(nextPubkey, isNull);
       });
 
       test('returns null when getAccounts fails', () async {
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         mockApi.getAccountsError = Exception('Network error');
         final nextPubkey = await container.read(authProvider.notifier).logout();
         expect(nextPubkey, isNull);
@@ -354,7 +433,7 @@ void main() {
 
     group('resetAuth', () {
       test('clears state', () async {
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         expect(container.read(authProvider).value, testPubkeyB);
 
         await container.read(authProvider.notifier).resetAuth();
@@ -362,7 +441,7 @@ void main() {
       });
 
       test('clears secure storage', () async {
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         expect(await mockStorage.read(key: 'active_account_pubkey'), testPubkeyB);
 
         await container.read(authProvider.notifier).resetAuth();
@@ -370,7 +449,7 @@ void main() {
       });
 
       test('does not call Rust API logout', () async {
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         await container.read(authProvider.notifier).resetAuth();
         expect(mockApi.logoutCalledWithPubkey, isNull);
       });
@@ -378,41 +457,51 @@ void main() {
 
     group('switchProfile', () {
       test('updates state to new pubkey', () async {
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         mockApi.existingAccounts.add('new_pubkey');
         await container.read(authProvider.notifier).switchProfile('new_pubkey');
         expect(container.read(authProvider).value, 'new_pubkey');
       });
 
       test('updates storage with new pubkey', () async {
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         mockApi.existingAccounts.add('new_pubkey');
         await container.read(authProvider.notifier).switchProfile('new_pubkey');
         expect(await mockStorage.read(key: 'active_account_pubkey'), 'new_pubkey');
       });
 
       test('clears state when account not found', () async {
-        await container.read(authProvider.notifier).loginWithNsec('nsec123');
+        await container.read(authProvider.notifier).loginStart('nsec123');
         await container.read(authProvider.notifier).switchProfile('nonexistent');
         expect(container.read(authProvider).value, isNull);
         expect(await mockStorage.read(key: 'active_account_pubkey'), isNull);
       });
     });
 
-    group('loginWithAndroidSigner', () {
+    group('loginExternalSignerStart', () {
       test('sets state to pubkey on success', () async {
         await container
             .read(authProvider.notifier)
-            .loginWithAndroidSigner(
+            .loginExternalSignerStart(
               pubkey: testPubkeyA,
             );
         expect(container.read(authProvider).value, testPubkeyA);
       });
 
-      test('calls Rust API loginWithExternalSignerAndCallbacks', () async {
+      test('returns LoginResult with complete status', () async {
+        final result = await container
+            .read(authProvider.notifier)
+            .loginExternalSignerStart(
+              pubkey: testPubkeyA,
+            );
+        expect(result.account.pubkey, testPubkeyA);
+        expect(result.status, LoginStatus.complete);
+      });
+
+      test('calls Rust API loginExternalSignerStart', () async {
         await container
             .read(authProvider.notifier)
-            .loginWithAndroidSigner(
+            .loginExternalSignerStart(
               pubkey: testPubkeyA,
             );
         expect(mockApi.loginWithSignerCalled, isTrue);
@@ -422,7 +511,7 @@ void main() {
       test('fetches metadata without awaiting', () async {
         await container
             .read(authProvider.notifier)
-            .loginWithAndroidSigner(
+            .loginExternalSignerStart(
               pubkey: testPubkeyA,
             );
         expect(mockApi.metadataCalledWithPubkey, testPubkeyA);
@@ -433,7 +522,7 @@ void main() {
         container.read(isAddingAccountProvider.notifier).set(true);
         await container
             .read(authProvider.notifier)
-            .loginWithAndroidSigner(
+            .loginExternalSignerStart(
               pubkey: testPubkeyA,
             );
         expect(container.read(isAddingAccountProvider), false);
@@ -445,7 +534,7 @@ void main() {
         await expectLater(
           () => container
               .read(authProvider.notifier)
-              .loginWithAndroidSigner(
+              .loginExternalSignerStart(
                 pubkey: testPubkeyA,
               ),
           throwsA(isA<ApiError>()),

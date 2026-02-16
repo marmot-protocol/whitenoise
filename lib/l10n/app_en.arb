@@ -1172,5 +1172,60 @@
   "deleteAllDataError": "Failed to delete all data. Please try again.",
   "@deleteAllDataError": {
     "description": "Error message when data deletion fails"
+  },
+
+  "relayResolutionTitle": "Relay Setup",
+  "@relayResolutionTitle": {
+    "description": "Title for the relay resolution screen"
+  },
+
+  "relayResolutionDescription": "We couldn't find your relay lists on the network. You can provide a relay where your lists are published, or use our default relays to get started.",
+  "@relayResolutionDescription": {
+    "description": "Explanation of what happened during relay resolution"
+  },
+
+  "relayResolutionUseDefaults": "Use default relays",
+  "@relayResolutionUseDefaults": {
+    "description": "Button text for publishing defaults"
+  },
+
+  "relayResolutionTryRelay": "Search relay",
+  "@relayResolutionTryRelay": {
+    "description": "Button text for trying a custom relay"
+  },
+
+  "relayResolutionRelayPlaceholder": "wss://relay.example.com",
+  "@relayResolutionRelayPlaceholder": {
+    "description": "Placeholder for relay URL input"
+  },
+
+  "relayResolutionRelayLabel": "Relay URL",
+  "@relayResolutionRelayLabel": {
+    "description": "Label for relay URL input"
+  },
+
+  "relayResolutionNotFound": "No relay lists found on this relay. Try another or use defaults.",
+  "@relayResolutionNotFound": {
+    "description": "Error when custom relay didn't find lists"
+  },
+
+  "loginErrorInvalidKey": "Invalid private key format. Please check and try again.",
+  "@loginErrorInvalidKey": {
+    "description": "Error message for LoginInvalidKeyFormat"
+  },
+
+  "loginErrorNoRelayConnections": "Could not connect to any relays. Please check your connection and try again.",
+  "@loginErrorNoRelayConnections": {
+    "description": "Error message for LoginNoRelayConnections"
+  },
+
+  "loginErrorTimeout": "Login timed out. Please try again.",
+  "@loginErrorTimeout": {
+    "description": "Error message for LoginTimeout"
+  },
+
+  "loginErrorGeneric": "An error occurred during login. Please try again.",
+  "@loginErrorGeneric": {
+    "description": "Generic fallback error message for login"
   }
 }

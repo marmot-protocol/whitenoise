@@ -343,15 +343,29 @@ class AndroidSignerService {
     );
   }
 
-  Future<Account> loginWithExternalSigner(String pubkey) async {
+  Future<LoginResult> loginExternalSignerStart(String pubkey) async {
     final callbacks = _createSignerCallbacks(pubkey);
-    return signer_api.loginWithExternalSignerAndCallbacks(
+    return signer_api.loginExternalSignerStart(
       pubkey: pubkey,
       signEvent: callbacks.signEvent,
       nip04Encrypt: callbacks.nip04Encrypt,
       nip04Decrypt: callbacks.nip04Decrypt,
       nip44Encrypt: callbacks.nip44Encrypt,
       nip44Decrypt: callbacks.nip44Decrypt,
+    );
+  }
+
+  Future<LoginResult> loginExternalSignerPublishDefaultRelays(String pubkey) async {
+    return signer_api.loginExternalSignerPublishDefaultRelays(pubkey: pubkey);
+  }
+
+  Future<LoginResult> loginExternalSignerWithCustomRelay(
+    String pubkey,
+    String relayUrl,
+  ) async {
+    return signer_api.loginExternalSignerWithCustomRelay(
+      pubkey: pubkey,
+      relayUrl: relayUrl,
     );
   }
 

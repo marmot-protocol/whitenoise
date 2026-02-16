@@ -5,6 +5,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/login_screen.dart';
+import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_scan_box.dart';
@@ -31,8 +32,17 @@ class _MockAuthNotifier extends AuthNotifier {
   Future<String?> build() async => null;
 
   @override
-  Future<void> loginWithNsec(String nsec) async {
+  Future<LoginResult> loginStart(String nsec) async {
     state = const AsyncData(testPubkeyA);
+    return LoginResult(
+      account: Account(
+        pubkey: testPubkeyA,
+        accountType: AccountType.local,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
+    );
   }
 }
 

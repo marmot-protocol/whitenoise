@@ -12,6 +12,7 @@ import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/home_screen.dart';
 import 'package:whitenoise/screens/login_screen.dart';
+import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
@@ -52,7 +53,7 @@ class _MockAuthNotifier extends AuthNotifier {
   Future<String?> build() async => null;
 
   @override
-  Future<void> loginWithNsec(String nsec) async {
+  Future<LoginResult> loginStart(String nsec) async {
     loginCalled = true;
     lastNsec = nsec;
     if (loginCompleter != null) {
@@ -60,10 +61,19 @@ class _MockAuthNotifier extends AuthNotifier {
     }
     if (errorToThrow != null) throw errorToThrow!;
     state = const AsyncData(testPubkeyA);
+    return LoginResult(
+      account: Account(
+        pubkey: testPubkeyA,
+        accountType: AccountType.local,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
+    );
   }
 
   @override
-  Future<void> loginWithAndroidSigner({
+  Future<LoginResult> loginExternalSignerStart({
     required String pubkey,
   }) async {
     loginWithSignerCalled = true;
@@ -73,6 +83,15 @@ class _MockAuthNotifier extends AuthNotifier {
     }
     if (signerErrorToThrow != null) throw signerErrorToThrow!;
     state = AsyncData(pubkey);
+    return LoginResult(
+      account: Account(
+        pubkey: pubkey,
+        accountType: AccountType.external_,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
+    );
   }
 }
 
@@ -185,7 +204,7 @@ void main() {
           await tester.tap(find.byKey(const Key('login_button')));
           await tester.pumpAndSettle();
           expect(
-            find.textContaining('Oh no! An error occurred, please try again.'),
+            find.textContaining('An error occurred during login. Please try again.'),
             findsOneWidget,
           );
         });
@@ -323,7 +342,7 @@ void main() {
         );
       });
       testWidgets(
-        'calls loginWithAndroidSigner when signer button is tapped',
+        'calls loginExternalSignerStart when signer button is tapped',
         (tester) async {
           await pumpLoginScreen(tester, signerAvailable: true);
           mockAuth.signerLoginCompleter = Completer<void>();
@@ -540,14 +559,14 @@ void main() {
         await tester.tap(find.byKey(const Key('login_button')));
         await tester.pumpAndSettle();
         expect(
-          find.textContaining('Oh no! An error occurred, please try again.'),
+          find.textContaining('An error occurred during login. Please try again.'),
           findsOneWidget,
         );
 
         await tester.enterText(find.byType(TextField), 'nsec1new');
         await tester.pumpAndSettle();
         expect(
-          find.textContaining('Oh no! An error occurred, please try again.'),
+          find.textContaining('An error occurred during login. Please try again.'),
           findsNothing,
         );
       });

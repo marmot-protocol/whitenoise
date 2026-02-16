@@ -22,6 +22,7 @@ import 'package:whitenoise/screens/login_screen.dart' show LoginScreen;
 import 'package:whitenoise/screens/network_screen.dart' show NetworkScreen;
 import 'package:whitenoise/screens/privacy_security_screen.dart' show PrivacySecurityScreen;
 import 'package:whitenoise/screens/profile_keys_screen.dart' show ProfileKeysScreen;
+import 'package:whitenoise/screens/relay_resolution_screen.dart' show RelayResolutionScreen;
 import 'package:whitenoise/screens/scan_npub_screen.dart' show ScanNpubScreen;
 import 'package:whitenoise/screens/scan_nsec_screen.dart' show ScanNsecScreen;
 import 'package:whitenoise/screens/settings_screen.dart' show SettingsScreen;
@@ -57,12 +58,13 @@ abstract final class Routes {
   static const _switchProfile = '/switch-profile';
   static const _addProfile = '/add-profile';
   static const _network = '/network';
+  static const _relayResolution = '/relay-resolution';
   static const _userSearch = '/user-search';
   static const _startChat = '/start-chat/:userPubkey';
   static const _chatInfo = '/chat-info/:userPubkey';
   static const _invite = '/invites/:mlsGroupId';
   static const _chat = '/chats/:groupId';
-  static const _publicRoutes = {_home, _login, _scanNsec, _signup};
+  static const _publicRoutes = {_home, _login, _scanNsec, _signup, _relayResolution};
 
   static GoRouter build(WidgetRef ref) {
     return GoRouter(
@@ -213,6 +215,20 @@ abstract final class Routes {
             state: state,
             child: const NetworkScreen(),
           ),
+        ),
+        GoRoute(
+          name: 'relayResolution',
+          path: _relayResolution,
+          pageBuilder: (context, state) {
+            final extra = state.extra! as Map<String, dynamic>;
+            return _navigationTransition(
+              state: state,
+              child: RelayResolutionScreen(
+                pubkey: extra['pubkey'] as String,
+                isExternalSigner: extra['isExternalSigner'] as bool,
+              ),
+            );
+          },
         ),
         GoRoute(
           path: _userSearch,
@@ -382,6 +398,20 @@ abstract final class Routes {
 
   static void goToChat(BuildContext context, String groupId) {
     GoRouter.of(context).goNamed('chat', pathParameters: {'groupId': groupId});
+  }
+
+  static void pushToRelayResolution(
+    BuildContext context, {
+    required String pubkey,
+    required bool isExternalSigner,
+  }) {
+    GoRouter.of(context).push(
+      _relayResolution,
+      extra: {
+        'pubkey': pubkey,
+        'isExternalSigner': isExternalSigner,
+      },
+    );
   }
 
   static void pushToNetwork(BuildContext context) {

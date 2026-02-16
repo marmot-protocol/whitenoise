@@ -1445,6 +1445,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to delete all data. Please try again.'**
   String get deleteAllDataError;
+
+  /// Title for the relay resolution screen
+  ///
+  /// In en, this message translates to:
+  /// **'Relay Setup'**
+  String get relayResolutionTitle;
+
+  /// Explanation of what happened during relay resolution
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find your relay lists on the network. You can provide a relay where your lists are published, or use our default relays to get started.'**
+  String get relayResolutionDescription;
+
+  /// Button text for publishing defaults
+  ///
+  /// In en, this message translates to:
+  /// **'Use default relays'**
+  String get relayResolutionUseDefaults;
+
+  /// Button text for trying a custom relay
+  ///
+  /// In en, this message translates to:
+  /// **'Search relay'**
+  String get relayResolutionTryRelay;
+
+  /// Placeholder for relay URL input
+  ///
+  /// In en, this message translates to:
+  /// **'wss://relay.example.com'**
+  String get relayResolutionRelayPlaceholder;
+
+  /// Label for relay URL input
+  ///
+  /// In en, this message translates to:
+  /// **'Relay URL'**
+  String get relayResolutionRelayLabel;
+
+  /// Error when custom relay didn't find lists
+  ///
+  /// In en, this message translates to:
+  /// **'No relay lists found on this relay. Try another or use defaults.'**
+  String get relayResolutionNotFound;
+
+  /// Error message for LoginInvalidKeyFormat
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid private key format. Please check and try again.'**
+  String get loginErrorInvalidKey;
+
+  /// Error message for LoginNoRelayConnections
+  ///
+  /// In en, this message translates to:
+  /// **'Could not connect to any relays. Please check your connection and try again.'**
+  String get loginErrorNoRelayConnections;
+
+  /// Error message for LoginTimeout
+  ///
+  /// In en, this message translates to:
+  /// **'Login timed out. Please try again.'**
+  String get loginErrorTimeout;
+
+  /// Generic fallback error message for login
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred during login. Please try again.'**
+  String get loginErrorGeneric;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

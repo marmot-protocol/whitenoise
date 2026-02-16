@@ -222,5 +222,16 @@
   "deleteAllData": "Alle Daten löschen",
   "deleteAllDataConfirmation": "Alle Daten löschen?",
   "deleteAllDataWarning": "Dies wird alle deine Chats, Nachrichten und Einstellungen von diesem Gerät dauerhaft löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
-  "deleteAllDataError": "Fehler beim Löschen aller Daten. Bitte versuche es erneut."
+  "deleteAllDataError": "Fehler beim Löschen aller Daten. Bitte versuche es erneut.",
+  "relayResolutionTitle": "Relay Setup",
+  "relayResolutionDescription": "We couldn't find your relay lists on the network. You can provide a relay where your lists are published, or use our default relays to get started.",
+  "relayResolutionUseDefaults": "Use default relays",
+  "relayResolutionTryRelay": "Search relay",
+  "relayResolutionRelayPlaceholder": "wss://relay.example.com",
+  "relayResolutionRelayLabel": "Relay URL",
+  "relayResolutionNotFound": "No relay lists found on this relay. Try another or use defaults.",
+  "loginErrorInvalidKey": "Invalid private key format. Please check and try again.",
+  "loginErrorNoRelayConnections": "Could not connect to any relays. Please check your connection and try again.",
+  "loginErrorTimeout": "Login timed out. Please try again.",
+  "loginErrorGeneric": "An error occurred during login. Please try again."
 }

@@ -11,7 +11,7 @@ import 'metadata.dart';
 import 'relays.dart';
 import 'users.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`
 
 Future<List<Account>> getAccounts() => RustLib.instance.api.crateApiAccountsGetAccounts();
 
@@ -20,8 +20,24 @@ Future<Account> getAccount({required String pubkey}) =>
 
 Future<Account> createIdentity() => RustLib.instance.api.crateApiAccountsCreateIdentity();
 
-Future<Account> login({required String nsecOrHexPrivkey}) =>
-    RustLib.instance.api.crateApiAccountsLogin(nsecOrHexPrivkey: nsecOrHexPrivkey);
+Future<LoginResult> loginStart({required String nsecOrHexPrivkey}) =>
+    RustLib.instance.api.crateApiAccountsLoginStart(nsecOrHexPrivkey: nsecOrHexPrivkey);
+
+Future<LoginResult> loginPublishDefaultRelays({required String pubkey}) =>
+    RustLib.instance.api.crateApiAccountsLoginPublishDefaultRelays(
+      pubkey: pubkey,
+    );
+
+Future<LoginResult> loginWithCustomRelay({
+  required String pubkey,
+  required String relayUrl,
+}) => RustLib.instance.api.crateApiAccountsLoginWithCustomRelay(
+  pubkey: pubkey,
+  relayUrl: relayUrl,
+);
+
+Future<void> loginCancel({required String pubkey}) =>
+    RustLib.instance.api.crateApiAccountsLoginCancel(pubkey: pubkey);
 
 Future<void> logout({required String pubkey}) =>
     RustLib.instance.api.crateApiAccountsLogout(pubkey: pubkey);
@@ -217,4 +233,36 @@ class FlutterEvent {
           kind == other.kind &&
           tags == other.tags &&
           content == other.content;
+}
+
+/// The result of a login attempt.
+class LoginResult {
+  final Account account;
+  final LoginStatus status;
+
+  const LoginResult({
+    required this.account,
+    required this.status,
+  });
+
+  @override
+  int get hashCode => account.hashCode ^ status.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LoginResult &&
+          runtimeType == other.runtimeType &&
+          account == other.account &&
+          status == other.status;
+}
+
+/// The status of a login attempt.
+enum LoginStatus {
+  /// Login completed successfully.
+  complete,
+
+  /// Relay lists were not found. The caller must resolve relay lists before
+  /// login can complete.
+  needsRelayLists,
 }
