@@ -47,7 +47,6 @@ class RelayResolutionScreen extends HookConsumerWidget {
       :clearError,
     ) = useRelayResolution(
       pubkey: pubkey,
-      isExternalSigner: isExternalSigner,
       publishDefaultRelays: isExternalSigner
           ? (p) => authNotifier.loginExternalSignerPublishDefaultRelays(p)
           : (p) => authNotifier.loginPublishDefaultRelays(p),
@@ -154,7 +153,7 @@ class RelayResolutionScreen extends HookConsumerWidget {
                                 text: context.l10n.relayResolutionTryRelay,
                                 onPressed: onTryCustomRelay,
                                 loading: relayResolutionState.isLoading,
-                                disabled: relayUrlEmpty,
+                                disabled: relayUrlEmpty || relayResolutionState.isLoading,
                               ),
                               WnButton(
                                 key: const Key('use_default_relays_button'),
@@ -162,6 +161,7 @@ class RelayResolutionScreen extends HookConsumerWidget {
                                 type: WnButtonType.outline,
                                 onPressed: onPublishDefaults,
                                 loading: relayResolutionState.isLoading,
+                                disabled: relayResolutionState.isLoading,
                               ),
                             ],
                           );

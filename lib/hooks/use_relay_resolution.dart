@@ -40,7 +40,6 @@ typedef CancelLoginCallback = Future<void> Function(String pubkey);
 })
 useRelayResolution({
   required String pubkey,
-  required bool isExternalSigner,
   required PublishDefaultRelaysCallback publishDefaultRelays,
   required CustomRelayCallback customRelay,
   required CancelLoginCallback cancelLogin,

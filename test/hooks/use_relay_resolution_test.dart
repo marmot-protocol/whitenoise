@@ -60,7 +60,6 @@ class _TestWidget extends HookWidget {
       clearError: clearError,
     ) = useRelayResolution(
       pubkey: testPubkeyA,
-      isExternalSigner: false,
       publishDefaultRelays: publishDefaultRelays,
       customRelay: customRelay,
       cancelLogin: cancelLogin,

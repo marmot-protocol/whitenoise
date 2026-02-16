@@ -16,6 +16,7 @@ class _MockRustLibApi implements RustLibApi {
   var metadataCompleter = Completer<FlutterMetadata>();
   String? metadataCalledWithPubkey;
   String? logoutCalledWithPubkey;
+  String? loginCancelCalledWithPubkey;
   final Set<String> existingAccounts = {};
   Object? getAccountError;
   Object? getAccountsError;
@@ -186,7 +187,9 @@ class _MockRustLibApi implements RustLibApi {
   }
 
   @override
-  Future<void> crateApiAccountsLoginCancel({required String pubkey}) async {}
+  Future<void> crateApiAccountsLoginCancel({required String pubkey}) async {
+    loginCancelCalledWithPubkey = pubkey;
+  }
 
   @override
   Future<void> crateApiAccountsLogout({required String pubkey}) async {
@@ -386,8 +389,9 @@ void main() {
     });
 
     group('loginCancel', () {
-      test('calls Rust API loginCancel', () async {
+      test('calls Rust API loginCancel with correct pubkey', () async {
         await container.read(authProvider.notifier).loginCancel(testPubkeyA);
+        expect(mockApi.loginCancelCalledWithPubkey, testPubkeyA);
       });
     });
 
