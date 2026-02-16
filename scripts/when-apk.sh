@@ -5,7 +5,7 @@ set -euo pipefail
 # Android APK from GitHub Actions. Retro NES vibes. Marmot energy.
 #
 # Requirements: curl, jq
-# Usage:   GITHUB_TOKEN=ghp_xxx ./generate-site.sh
+# Usage:   GITHUB_TOKEN=ghp_xxx ./scripts/when-apk.sh
 # Output:  site/index.html  (ready to deploy to Cloudflare Pages)
 
 REPO="marmot-protocol/whitenoise"
@@ -82,6 +82,7 @@ COMMIT_JSON=$(gh_api "$API/repos/$REPO/commits/$HEAD_SHA")
 
 COMMIT_MSG=$(echo "$COMMIT_JSON"    | jq -r '.commit.message' | head -1)
 COMMIT_AUTHOR=$(echo "$COMMIT_JSON" | jq -r '.commit.author.name')
+COMMIT_AUTHOR_ESCAPED=$(echo "$COMMIT_AUTHOR" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#39;/g')
 COMMIT_DATE=$(echo "$COMMIT_JSON"   | jq -r '.commit.author.date')
 COMMIT_URL="https://github.com/$REPO/commit/$HEAD_SHA"
 SHORT_SHA="${HEAD_SHA:0:7}"
@@ -445,7 +446,7 @@ cat >> "$OUT_DIR/index.html" <<HTMLEOF_PART2
       </tr>
       <tr>
         <td>HERO</td>
-        <td>${COMMIT_AUTHOR}</td>
+        <td>${COMMIT_AUTHOR_ESCAPED}</td>
       </tr>
       <tr>
         <td>DATE</td>
