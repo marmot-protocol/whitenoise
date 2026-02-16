@@ -4,9 +4,15 @@ class ActiveChatNotifier extends Notifier<String?> {
   @override
   String? build() => null;
 
-  void set(String groupId) => state = groupId;
+  void set(String groupId) {
+    if (!ref.mounted) return;
+    state = groupId;
+  }
 
-  void clear() => state = null;
+  void clear() {
+    if (!ref.mounted) return;
+    state = null;
+  }
 }
 
 final activeChatProvider = NotifierProvider<ActiveChatNotifier, String?>(
