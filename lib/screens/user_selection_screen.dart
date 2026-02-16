@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_user_search.dart';
+import 'package:whitenoise/hooks/use_user_selection.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
@@ -14,14 +15,13 @@ import 'package:whitenoise/utils/metadata.dart' show presentName;
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_fade_overlay.dart';
-import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_middle_ellipsis_text.dart';
 import 'package:whitenoise/widgets/wn_search_field.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 
-class UserSearchScreen extends HookConsumerWidget {
-  const UserSearchScreen({super.key});
+class UserSelectionScreen extends HookConsumerWidget {
+  const UserSelectionScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -31,10 +31,12 @@ class UserSearchScreen extends HookConsumerWidget {
     final searchController = useTextEditingController();
     final searchQuery = useState('');
 
-    final state = useUserSearch(
+    final searchState = useUserSearch(
       accountPubkey: accountPubkey,
       searchQuery: searchQuery.value,
     );
+
+    final selectionHook = useUserSelection();
 
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
@@ -43,8 +45,24 @@ class UserSearchScreen extends HookConsumerWidget {
           padding: EdgeInsets.symmetric(vertical: 16.h),
           child: WnSlate(
             header: WnSlateNavigationHeader(
-              title: context.l10n.startNewChat,
+              title: context.l10n.selectMembers,
               onNavigate: () => Routes.goBack(context),
+            ),
+            footer: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+              child: SizedBox(
+                width: double.infinity,
+                child: WnButton(
+                  onPressed: selectionHook.state.selectedCount > 0
+                      ? () => Routes.pushToGroupDetails(
+                          context,
+                          selectionHook.state.selectedUsers,
+                        )
+                      : null,
+                  text: context.l10n.continueButton,
+                  size: WnButtonSize.medium,
+                ),
+              ),
             ),
             child: Padding(
               padding: EdgeInsets.symmetric(horizontal: 14.w),
@@ -57,30 +75,51 @@ class UserSearchScreen extends HookConsumerWidget {
                     controller: searchController,
                     onChanged: (value) => searchQuery.value = value,
                     onScan: () => Routes.pushToScanNpub(context),
-                    isLoading: state.isSearching,
+                    isLoading: searchState.isSearching,
                   ),
-                  Gap(16.h),
-                  SizedBox(
-                    width: double.infinity,
-                    child: WnButton(
-                      onPressed: () => Routes.pushToUserSelection(context),
-                      text: context.l10n.createGroup,
-                      size: WnButtonSize.medium,
-                      trailingIcon: WnIcons.newGroupChat,
+                  if (selectionHook.state.selectedCount > 0) ...[
+                    Gap(16.h),
+                    Container(
+                      padding: EdgeInsets.all(12.w),
+                      decoration: BoxDecoration(
+                        color: colors.backgroundSecondary,
+                        borderRadius: BorderRadius.circular(12.r),
+                      ),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Text(
+                              context.l10n.selectedCount(selectionHook.state.selectedCount),
+                              style: typography.medium14.copyWith(
+                                color: colors.backgroundContentPrimary,
+                              ),
+                            ),
+                          ),
+                          TextButton(
+                            onPressed: selectionHook.actions.clearSelection,
+                            child: Text(
+                              context.l10n.clearSelection,
+                              style: typography.medium14.copyWith(
+                                color: colors.fillPrimary,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
+                  ],
                   Expanded(
-                    child: state.isLoading
+                    child: searchState.isLoading
                         ? Center(
                             child: CircularProgressIndicator(
                               color: colors.backgroundContentPrimary,
                               strokeCap: StrokeCap.round,
                             ),
                           )
-                        : state.users.isEmpty
+                        : searchState.users.isEmpty
                         ? Center(
                             child: Text(
-                              state.hasSearchQuery
+                              searchState.hasSearchQuery
                                   ? context.l10n.noResults
                                   : context.l10n.noFollowsYet,
                               style: typography.medium14.copyWith(
@@ -92,16 +131,15 @@ class UserSearchScreen extends HookConsumerWidget {
                             children: [
                               ListView.builder(
                                 padding: EdgeInsets.symmetric(vertical: 12.h),
-                                itemCount: state.users.length,
+                                itemCount: searchState.users.length,
                                 itemBuilder: (context, index) {
-                                  final user = state.users[index];
-                                  return _UserListTile(
+                                  final user = searchState.users[index];
+                                  final isSelected = selectionHook.state.isSelected(user);
+                                  return _UserSelectionTile(
+                                    key: Key(user.pubkey),
                                     user: user,
-                                    onTap: () => Routes.pushToStartChat(
-                                      context,
-                                      user.pubkey,
-                                      metadata: user.metadata,
-                                    ),
+                                    isSelected: isSelected,
+                                    onTap: () => selectionHook.actions.toggleUser(user),
                                   );
                                 },
                               ),
@@ -120,13 +158,16 @@ class UserSearchScreen extends HookConsumerWidget {
   }
 }
 
-class _UserListTile extends StatelessWidget {
-  const _UserListTile({
+class _UserSelectionTile extends StatelessWidget {
+  const _UserSelectionTile({
+    super.key,
     required this.user,
+    required this.isSelected,
     required this.onTap,
   });
 
   final User user;
+  final bool isSelected;
   final VoidCallback onTap;
 
   @override
@@ -139,8 +180,13 @@ class _UserListTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: Padding(
-        padding: EdgeInsets.symmetric(vertical: 10.h),
+      child: Container(
+        padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 12.w),
+        margin: EdgeInsets.only(bottom: 8.h),
+        decoration: BoxDecoration(
+          color: isSelected ? colors.backgroundSecondary : Colors.transparent,
+          borderRadius: BorderRadius.circular(12.r),
+        ),
         child: Row(
           children: [
             WnAvatar(
@@ -149,7 +195,7 @@ class _UserListTile extends StatelessWidget {
               displayName: displayName,
               color: AvatarColor.fromPubkey(user.pubkey),
             ),
-            Gap(8.w),
+            Gap(12.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -179,6 +225,26 @@ class _UserListTile extends StatelessWidget {
                   ),
                 ],
               ),
+            ),
+            Gap(12.w),
+            Container(
+              width: 24.w,
+              height: 24.h,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                border: Border.all(
+                  color: isSelected ? colors.fillPrimary : colors.backgroundContentTertiary,
+                  width: 2.w,
+                ),
+                color: isSelected ? colors.fillPrimary : Colors.transparent,
+              ),
+              child: isSelected
+                  ? Icon(
+                      Icons.check,
+                      size: 16.sp,
+                      color: colors.backgroundPrimary,
+                    )
+                  : null,
             ),
           ],
         ),
