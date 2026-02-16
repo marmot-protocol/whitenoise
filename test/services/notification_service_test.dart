@@ -4,6 +4,9 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/services/notification_service.dart';
 
+const _pubkey1 = '0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef';
+const _pubkey2 = 'fedcba9876543210fedcba9876543210fedcba9876543210fedcba9876543210';
+
 class _MockNotificationsPlugin implements FlutterLocalNotificationsPlugin {
   final List<String> calls = [];
   void Function(NotificationResponse)? tapCallback;
@@ -67,7 +70,7 @@ void main() {
       });
 
       test('show is no-op', () async {
-        await service.show(groupId: 'g', title: 't', body: 'b', receiverPubkey: 'pk1');
+        await service.show(groupId: 'g', title: 't', body: 'b', receiverPubkey: _pubkey1);
       });
 
       test('cancelForGroup is no-op', () async {
@@ -112,12 +115,12 @@ void main() {
       });
 
       test('calls plugin show', () async {
-        await service.show(groupId: 'g1', title: 'Title', body: 'Body', receiverPubkey: 'pk1');
+        await service.show(groupId: 'g1', title: 'Title', body: 'Body', receiverPubkey: _pubkey1);
         expect(mockPlugin.calls, contains('show'));
       });
 
       test('passes title and body', () async {
-        await service.show(groupId: 'g1', title: 'Alice', body: 'Hello', receiverPubkey: 'pk1');
+        await service.show(groupId: 'g1', title: 'Alice', body: 'Hello', receiverPubkey: _pubkey1);
         expect(mockPlugin.lastShownTitle, 'Alice');
         expect(mockPlugin.lastShownBody, 'Hello');
       });
@@ -128,16 +131,16 @@ void main() {
           plugin: uninitMock,
           enabled: true,
         );
-        await uninitService.show(groupId: 'g1', title: 't', body: 'b', receiverPubkey: 'pk1');
+        await uninitService.show(groupId: 'g1', title: 't', body: 'b', receiverPubkey: _pubkey1);
         expect(uninitMock.calls, isNot(contains('show')));
       });
 
       test('payload contains message trigger and receiver pubkey as JSON', () async {
-        await service.show(groupId: 'g1', title: 't', body: 'b', receiverPubkey: 'pk1');
+        await service.show(groupId: 'g1', title: 't', body: 'b', receiverPubkey: _pubkey1);
         final data = jsonDecode(mockPlugin.lastPayload!) as Map<String, dynamic>;
         expect(data['groupId'], 'g1');
         expect(data['trigger'], 'message');
-        expect(data['receiverPubkey'], 'pk1');
+        expect(data['receiverPubkey'], _pubkey1);
       });
 
       test('payload contains invite trigger and receiver pubkey as JSON', () async {
@@ -145,19 +148,19 @@ void main() {
           groupId: 'g1',
           title: 't',
           body: 'b',
-          receiverPubkey: 'pk1',
+          receiverPubkey: _pubkey1,
           isInvite: true,
         );
         final data = jsonDecode(mockPlugin.lastPayload!) as Map<String, dynamic>;
         expect(data['groupId'], 'g1');
         expect(data['trigger'], 'invite');
-        expect(data['receiverPubkey'], 'pk1');
+        expect(data['receiverPubkey'], _pubkey1);
       });
 
       test('uses consistent notification ID for same groupId', () async {
-        await service.show(groupId: 'g1', title: 't1', body: 'b1', receiverPubkey: 'pk1');
+        await service.show(groupId: 'g1', title: 't1', body: 'b1', receiverPubkey: _pubkey1);
         final firstId = mockPlugin.lastShownId;
-        await service.show(groupId: 'g1', title: 't2', body: 'b2', receiverPubkey: 'pk1');
+        await service.show(groupId: 'g1', title: 't2', body: 'b2', receiverPubkey: _pubkey1);
         expect(mockPlugin.lastShownId, firstId);
       });
     });
@@ -202,7 +205,7 @@ void main() {
 
       test('uses same ID as show for same groupId', () async {
         await service.initialize();
-        await service.show(groupId: 'g1', title: 't', body: 'b', receiverPubkey: 'pk1');
+        await service.show(groupId: 'g1', title: 't', body: 'b', receiverPubkey: _pubkey1);
         final showId = mockPlugin.lastShownId;
         await service.cancelForGroup('g1');
         expect(mockPlugin.lastCancelledId, showId);
@@ -243,36 +246,36 @@ void main() {
         final payload = jsonEncode({
           'groupId': 'group123',
           'trigger': 'message',
-          'receiverPubkey': 'pk1',
+          'receiverPubkey': _pubkey1,
         });
         mockPlugin.tapCallback!(response(payload: payload));
         expect(tappedGroupId, 'group123');
         expect(tappedIsInvite, isFalse);
-        expect(tappedReceiverPubkey, 'pk1');
+        expect(tappedReceiverPubkey, _pubkey1);
       });
 
       test('calls onNotificationTap for invite payload', () {
         final payload = jsonEncode({
           'groupId': 'group456',
           'trigger': 'invite',
-          'receiverPubkey': 'pk2',
+          'receiverPubkey': _pubkey2,
         });
         mockPlugin.tapCallback!(response(payload: payload));
         expect(tappedGroupId, 'group456');
         expect(tappedIsInvite, isTrue);
-        expect(tappedReceiverPubkey, 'pk2');
+        expect(tappedReceiverPubkey, _pubkey2);
       });
 
       test('handles groupId containing pipe characters', () {
         final payload = jsonEncode({
           'groupId': 'group|with|pipes',
           'trigger': 'message',
-          'receiverPubkey': 'pk1',
+          'receiverPubkey': _pubkey1,
         });
         mockPlugin.tapCallback!(response(payload: payload));
         expect(tappedGroupId, 'group|with|pipes');
         expect(tappedIsInvite, isFalse);
-        expect(tappedReceiverPubkey, 'pk1');
+        expect(tappedReceiverPubkey, _pubkey1);
       });
 
       test('ignores null payload', () {
@@ -286,7 +289,7 @@ void main() {
       });
 
       test('ignores payload with missing groupId', () {
-        final payload = jsonEncode({'trigger': 'message', 'receiverPubkey': 'pk1'});
+        final payload = jsonEncode({'trigger': 'message', 'receiverPubkey': _pubkey1});
         mockPlugin.tapCallback!(response(payload: payload));
         expect(tappedGroupId, isNull);
       });
@@ -295,20 +298,40 @@ void main() {
         final payload = jsonEncode({
           'groupId': '',
           'trigger': 'message',
-          'receiverPubkey': 'pk1',
+          'receiverPubkey': _pubkey1,
         });
         mockPlugin.tapCallback!(response(payload: payload));
         expect(tappedGroupId, isNull);
       });
 
       test('ignores payload with missing trigger', () {
-        final payload = jsonEncode({'groupId': 'g1', 'receiverPubkey': 'pk1'});
+        final payload = jsonEncode({'groupId': 'g1', 'receiverPubkey': _pubkey1});
         mockPlugin.tapCallback!(response(payload: payload));
         expect(tappedGroupId, isNull);
       });
 
       test('ignores payload with missing receiverPubkey', () {
         final payload = jsonEncode({'groupId': 'g1', 'trigger': 'message'});
+        mockPlugin.tapCallback!(response(payload: payload));
+        expect(tappedGroupId, isNull);
+      });
+
+      test('ignores payload with empty receiverPubkey', () {
+        final payload = jsonEncode({
+          'groupId': 'g1',
+          'trigger': 'message',
+          'receiverPubkey': '',
+        });
+        mockPlugin.tapCallback!(response(payload: payload));
+        expect(tappedGroupId, isNull);
+      });
+
+      test('ignores payload with unknown trigger', () {
+        final payload = jsonEncode({
+          'groupId': 'g1',
+          'trigger': 'unknown',
+          'receiverPubkey': _pubkey1,
+        });
         mockPlugin.tapCallback!(response(payload: payload));
         expect(tappedGroupId, isNull);
       });
@@ -323,7 +346,7 @@ void main() {
         final payload = jsonEncode({
           'groupId': 'g',
           'trigger': 'message',
-          'receiverPubkey': 'pk1',
+          'receiverPubkey': _pubkey1,
         });
         noCallbackPlugin.tapCallback!(response(payload: payload));
         expect(tappedGroupId, isNull);

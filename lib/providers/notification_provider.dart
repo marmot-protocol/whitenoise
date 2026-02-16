@@ -68,7 +68,13 @@ void _initializeAndListen(
     final stream = notifications_api.subscribeToNotifications();
 
     final subscription = stream.listen(
-      (update) => _handleNotificationUpdate(update, notificationService, ref),
+      (update) async {
+        try {
+          await _handleNotificationUpdate(update, notificationService, ref);
+        } catch (error, stackTrace) {
+          _logger.severe('Error handling notification update', error, stackTrace);
+        }
+      },
       onError: (error) {
         _logger.severe('Notification stream error', error);
       },
@@ -114,7 +120,7 @@ Future<void> _handleNotificationUpdate(
     receiverName: receiverName,
   );
 
-  notificationService.show(
+  await notificationService.show(
     groupId: update.mlsGroupId,
     title: title,
     body: body,

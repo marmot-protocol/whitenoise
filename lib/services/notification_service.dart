@@ -57,8 +57,17 @@ class NotificationService {
       final trigger = data[_payloadKeyTrigger] as String?;
       final receiverPubkey = data[_payloadKeyReceiverPubkey] as String?;
 
-      if (groupId == null || groupId.isEmpty || trigger == null || receiverPubkey == null) {
+      if (groupId == null ||
+          groupId.isEmpty ||
+          trigger == null ||
+          receiverPubkey == null ||
+          receiverPubkey.isEmpty) {
         _logger.warning('Malformed notification payload: $payload');
+        return;
+      }
+
+      if (trigger != _payloadTriggerMessage && trigger != _payloadTriggerInvite) {
+        _logger.warning('Unknown notification trigger: $trigger');
         return;
       }
 
