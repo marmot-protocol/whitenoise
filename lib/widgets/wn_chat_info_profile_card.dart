@@ -25,7 +25,6 @@ class WnChatInfoProfileCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final typography = context.typographyScaled;
     final displayName = presentName(metadata);
     final hasDisplayName = displayName != null && displayName.isNotEmpty;
     final npub = npubFromHex(userPubkey);
@@ -45,7 +44,7 @@ class WnChatInfoProfileCard extends StatelessWidget {
           Text(
             displayName,
             key: const Key('chat_info_display_name'),
-            style: typography.semiBold20.copyWith(
+            style: context.typographyScaled.semiBold20.copyWith(
               color: colors.backgroundContentPrimary,
             ),
             textAlign: TextAlign.center,
