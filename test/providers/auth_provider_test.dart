@@ -332,6 +332,14 @@ void main() {
         expect(mockApi.metadataCompleter.isCompleted, isFalse);
       });
 
+      test('completes login even when metadata fetch fails', () async {
+        await container.read(authProvider.notifier).loginStart('nsec123');
+        expect(container.read(authProvider).value, testPubkeyB);
+        mockApi.metadataCompleter.completeError(Exception('Network error'));
+        await Future<void>.delayed(Duration.zero);
+        expect(container.read(authProvider).value, testPubkeyB);
+      });
+
       test('resets isAddingAccountProvider to false', () async {
         container.read(isAddingAccountProvider.notifier).set(true);
         expect(container.read(isAddingAccountProvider), true);

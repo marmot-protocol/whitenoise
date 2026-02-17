@@ -389,6 +389,43 @@ void main() {
 
         expect(capturedIsRelayUrlValid, false);
       });
+
+      testWidgets(
+        'clears validationError and sets isRelayUrlValid false when text cleared to prefix',
+        (tester) async {
+          late bool capturedIsRelayUrlValid;
+          late RelayResolutionState capturedState;
+
+          final widget = _buildTestWidget(
+            onBuild:
+                (
+                  controller,
+                  state,
+                  isRelayUrlValid,
+                  publishDefaults,
+                  tryCustomRelay,
+                  cancel,
+                  clearError,
+                ) {
+                  capturedIsRelayUrlValid = isRelayUrlValid;
+                  capturedState = state;
+                },
+          );
+          await mountWidget(widget, tester);
+
+          await tester.enterText(find.byType(TextField), 'wss://bad');
+          await tester.pump(const Duration(milliseconds: 600));
+
+          expect(capturedIsRelayUrlValid, false);
+          expect(capturedState.validationError, isNotNull);
+
+          await tester.enterText(find.byType(TextField), 'wss://');
+          await tester.pump(const Duration(milliseconds: 600));
+
+          expect(capturedIsRelayUrlValid, false);
+          expect(capturedState.validationError, isNull);
+        },
+      );
     });
 
     group('publishDefaults', () {

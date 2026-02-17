@@ -45,12 +45,17 @@ class _MockAuthNotifier extends AuthNotifier {
   String? lastCancelPubkey;
   Completer<LoginResult>? publishDefaultRelaysCompleter;
   Completer<LoginResult>? customRelayCompleter;
+  bool loginPublishDefaultRelaysCalled = false;
+  bool loginWithCustomRelayCalled = false;
+  bool externalSignerPublishDefaultRelaysCalled = false;
+  bool externalSignerWithCustomRelayCalled = false;
 
   @override
   Future<String?> build() async => null;
 
   @override
   Future<LoginResult> loginPublishDefaultRelays(String pubkey) async {
+    loginPublishDefaultRelaysCalled = true;
     if (publishDefaultRelaysCompleter != null) return publishDefaultRelaysCompleter!.future;
     if (publishDefaultRelaysError != null) throw publishDefaultRelaysError!;
     return publishDefaultRelaysResult ??
@@ -67,6 +72,7 @@ class _MockAuthNotifier extends AuthNotifier {
 
   @override
   Future<LoginResult> loginWithCustomRelay(String pubkey, String relayUrl) async {
+    loginWithCustomRelayCalled = true;
     if (customRelayCompleter != null) return customRelayCompleter!.future;
     if (customRelayError != null) throw customRelayError!;
     return customRelayResult ??
@@ -89,6 +95,7 @@ class _MockAuthNotifier extends AuthNotifier {
 
   @override
   Future<LoginResult> loginExternalSignerPublishDefaultRelays(String pubkey) async {
+    externalSignerPublishDefaultRelaysCalled = true;
     if (publishDefaultRelaysError != null) throw publishDefaultRelaysError!;
     return publishDefaultRelaysResult ??
         LoginResult(
@@ -104,6 +111,7 @@ class _MockAuthNotifier extends AuthNotifier {
 
   @override
   Future<LoginResult> loginExternalSignerWithCustomRelay(String pubkey, String relayUrl) async {
+    externalSignerWithCustomRelayCalled = true;
     if (customRelayError != null) throw customRelayError!;
     return customRelayResult ??
         LoginResult(
@@ -483,6 +491,8 @@ void main() {
         await tester.tap(find.byKey(const Key('use_default_relays_button')));
         await tester.pumpAndSettle();
         expect(find.text('Chat List'), findsOneWidget);
+        expect(mockAuth.externalSignerPublishDefaultRelaysCalled, isTrue);
+        expect(mockAuth.loginPublishDefaultRelaysCalled, isFalse);
       });
 
       testWidgets('uses external signer callbacks for custom relay', (tester) async {
@@ -492,6 +502,8 @@ void main() {
         await tester.tap(find.byKey(const Key('try_custom_relay_button')));
         await tester.pumpAndSettle();
         expect(find.text('Chat List'), findsOneWidget);
+        expect(mockAuth.externalSignerWithCustomRelayCalled, isTrue);
+        expect(mockAuth.loginWithCustomRelayCalled, isFalse);
       });
     });
 
