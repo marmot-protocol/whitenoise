@@ -750,14 +750,14 @@ class AppLocalizationsFr extends AppLocalizations {
       'Échec de la suppression de toutes les données. Veuillez réessayer.';
 
   @override
-  String get chatInformation => 'Chat Information';
+  String get chatInformation => 'Informations du chat';
 
   @override
-  String get addAsContact => 'Add as contact';
+  String get addAsContact => 'Ajouter comme contact';
 
   @override
-  String get removeAsContact => 'Remove as contact';
+  String get removeAsContact => 'Retirer des contacts';
 
   @override
-  String get addToGroup => 'Add to group';
+  String get addToGroup => 'Ajouter à un groupe';
 }

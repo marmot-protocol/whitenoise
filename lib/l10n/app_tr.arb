@@ -224,22 +224,22 @@
   "deleteAllDataWarning": "Bu işlem, bu cihazdaki tüm sohbetlerinizi, mesajlarınızı ve ayarlarınızı kalıcı olarak silecektir. Bu işlem geri alınamaz.",
   "deleteAllDataError": "Tüm veriler silinemedi. Lütfen tekrar deneyin.",
 
-  "chatInformation": "Chat Information",
+  "chatInformation": "Sohbet Bilgileri",
   "@chatInformation": {
     "description": "Chat information screen title"
   },
 
-  "addAsContact": "Add as contact",
+  "addAsContact": "Kişi olarak ekle",
   "@addAsContact": {
     "description": "Action label to add a user as contact"
   },
 
-  "removeAsContact": "Remove as contact",
+  "removeAsContact": "Kişilerden çıkar",
   "@removeAsContact": {
     "description": "Action label to remove a user as contact"
   },
 
-  "addToGroup": "Add to group",
+  "addToGroup": "Gruba ekle",
   "@addToGroup": {
     "description": "Action label to add this user to a group"
   }

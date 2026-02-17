@@ -745,14 +745,14 @@ class AppLocalizationsTr extends AppLocalizations {
   String get deleteAllDataError => 'Tüm veriler silinemedi. Lütfen tekrar deneyin.';
 
   @override
-  String get chatInformation => 'Chat Information';
+  String get chatInformation => 'Sohbet Bilgileri';
 
   @override
-  String get addAsContact => 'Add as contact';
+  String get addAsContact => 'Kişi olarak ekle';
 
   @override
-  String get removeAsContact => 'Remove as contact';
+  String get removeAsContact => 'Kişilerden çıkar';
 
   @override
-  String get addToGroup => 'Add to group';
+  String get addToGroup => 'Gruba ekle';
 }

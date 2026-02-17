@@ -746,14 +746,14 @@ class AppLocalizationsIt extends AppLocalizations {
   String get deleteAllDataError => 'Impossibile eliminare tutti i dati. Riprova.';
 
   @override
-  String get chatInformation => 'Chat Information';
+  String get chatInformation => 'Informazioni chat';
 
   @override
-  String get addAsContact => 'Add as contact';
+  String get addAsContact => 'Aggiungi come contatto';
 
   @override
-  String get removeAsContact => 'Remove as contact';
+  String get removeAsContact => 'Rimuovi come contatto';
 
   @override
-  String get addToGroup => 'Add to group';
+  String get addToGroup => 'Aggiungi al gruppo';
 }

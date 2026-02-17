@@ -224,22 +224,22 @@
   "deleteAllDataWarning": "Dies wird alle deine Chats, Nachrichten und Einstellungen von diesem Gerät dauerhaft löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
   "deleteAllDataError": "Fehler beim Löschen aller Daten. Bitte versuche es erneut.",
 
-  "chatInformation": "Chat Information",
+  "chatInformation": "Chat-Informationen",
   "@chatInformation": {
     "description": "Chat information screen title"
   },
 
-  "addAsContact": "Add as contact",
+  "addAsContact": "Als Kontakt hinzufügen",
   "@addAsContact": {
     "description": "Action label to add a user as contact"
   },
 
-  "removeAsContact": "Remove as contact",
+  "removeAsContact": "Als Kontakt entfernen",
   "@removeAsContact": {
     "description": "Action label to remove a user as contact"
   },
 
-  "addToGroup": "Add to group",
+  "addToGroup": "Zur Gruppe hinzufügen",
   "@addToGroup": {
     "description": "Action label to add this user to a group"
   }

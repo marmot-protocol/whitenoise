@@ -753,14 +753,14 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudieron eliminar todos los datos. Por favor, inténtalo de nuevo.';
 
   @override
-  String get chatInformation => 'Chat Information';
+  String get chatInformation => 'Información del chat';
 
   @override
-  String get addAsContact => 'Add as contact';
+  String get addAsContact => 'Añadir como contacto';
 
   @override
-  String get removeAsContact => 'Remove as contact';
+  String get removeAsContact => 'Eliminar como contacto';
 
   @override
-  String get addToGroup => 'Add to group';
+  String get addToGroup => 'Añadir al grupo';
 }

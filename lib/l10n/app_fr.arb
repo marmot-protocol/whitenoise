@@ -224,22 +224,22 @@
   "deleteAllDataWarning": "Cela supprimera définitivement tous vos chats, messages et paramètres de cet appareil. Cette action ne peut pas être annulée.",
   "deleteAllDataError": "Échec de la suppression de toutes les données. Veuillez réessayer.",
 
-  "chatInformation": "Chat Information",
+  "chatInformation": "Informations du chat",
   "@chatInformation": {
     "description": "Chat information screen title"
   },
 
-  "addAsContact": "Add as contact",
+  "addAsContact": "Ajouter comme contact",
   "@addAsContact": {
     "description": "Action label to add a user as contact"
   },
 
-  "removeAsContact": "Remove as contact",
+  "removeAsContact": "Retirer des contacts",
   "@removeAsContact": {
     "description": "Action label to remove a user as contact"
   },
 
-  "addToGroup": "Add to group",
+  "addToGroup": "Ajouter à un groupe",
   "@addToGroup": {
     "description": "Action label to add this user to a group"
   }

@@ -762,14 +762,14 @@ class AppLocalizationsDe extends AppLocalizations {
   String get deleteAllDataError => 'Fehler beim Löschen aller Daten. Bitte versuche es erneut.';
 
   @override
-  String get chatInformation => 'Chat Information';
+  String get chatInformation => 'Chat-Informationen';
 
   @override
-  String get addAsContact => 'Add as contact';
+  String get addAsContact => 'Als Kontakt hinzufügen';
 
   @override
-  String get removeAsContact => 'Remove as contact';
+  String get removeAsContact => 'Als Kontakt entfernen';
 
   @override
-  String get addToGroup => 'Add to group';
+  String get addToGroup => 'Zur Gruppe hinzufügen';
 }

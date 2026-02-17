@@ -224,22 +224,22 @@
   "deleteAllDataWarning": "Это действие безвозвратно удалит все ваши чаты, сообщения и настройки с этого устройства. Отменить невозможно.",
   "deleteAllDataError": "Не удалось удалить все данные. Пожалуйста, попробуйте снова.",
 
-  "chatInformation": "Chat Information",
+  "chatInformation": "Информация о чате",
   "@chatInformation": {
     "description": "Chat information screen title"
   },
 
-  "addAsContact": "Add as contact",
+  "addAsContact": "Добавить в контакты",
   "@addAsContact": {
     "description": "Action label to add a user as contact"
   },
 
-  "removeAsContact": "Remove as contact",
+  "removeAsContact": "Удалить из контактов",
   "@removeAsContact": {
     "description": "Action label to remove a user as contact"
   },
 
-  "addToGroup": "Add to group",
+  "addToGroup": "Добавить в группу",
   "@addToGroup": {
     "description": "Action label to add this user to a group"
   }
