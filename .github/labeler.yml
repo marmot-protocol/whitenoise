@@ -1,0 +1,42 @@
+flutter-ui:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'lib/screens/**'
+          - 'lib/widgets/**'
+          - 'lib/theme.dart'
+          - 'assets/**'
+
+flutter:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'lib/**'
+          - 'pubspec.yaml'
+          - 'analysis_options.yaml'
+          - 'l10n.yaml'
+
+rust:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'rust/**'
+          - 'flutter_rust_bridge.yaml'
+          - 'lib/src/rust/**'
+
+tests:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'test/**'
+          - 'rust/**/tests/**'
+
+ci:
+  - changed-files:
+      - any-glob-to-any-file:
+          - '.github/workflows/**'
+          - 'scripts/**'
+          - 'justfile'
+
+docs:
+  - changed-files:
+      - any-glob-to-any-file:
+          - 'README.md'
+          - 'CHANGELOG.md'
+          - '**/*.md'

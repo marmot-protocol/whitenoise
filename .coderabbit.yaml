@@ -1,15 +1,195 @@
 # yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
 language: "en-US"
 early_access: false
+
 reviews:
   profile: "assertive"
   request_changes_workflow: false
   high_level_summary: true
+  high_level_summary_placeholder: "@coderabbitai summary"
   poem: false
   review_status: true
-  collapse_walkthrough: false
+  review_details: true
+  collapse_walkthrough: true
+  sequence_diagrams: true
+  changed_files_summary: true
+  estimate_code_review_effort: true
+  assess_linked_issues: true
+  related_prs: true
+
+  # --- Reviewer suggestions ----------------------------------------------
+  suggested_reviewers: true
+
+  # --- Path filters (skip generated & non-reviewable files) ---------------
+  path_filters:
+    # Generated Flutter-Rust bridge code (auto-generated, DO NOT EDIT)
+    - "!lib/src/rust/frb_generated.dart"
+    - "!lib/src/rust/frb_generated.io.dart"
+    - "!rust/src/frb_generated.rs"
+    # Generated localizations
+    - "!lib/l10n/generated/**"
+    # Freezed generated code
+    - "!**/*.freezed.dart"
+    # Widgetbook generated directories file
+    - "!widgetbook/lib/main.directories.g.dart"
+    # Platform-generated plugin registrants
+    - "!**/generated_plugin_registrant.*"
+    - "!**/generated_plugins.cmake"
+    - "!**/GeneratedPluginRegistrant.*"
+    # Lock files
+    - "!pubspec.lock"
+    - "!rust/Cargo.lock"
+    # Assets (images, fonts)
+    - "!assets/images/**"
+    - "!assets/fonts/**"
+
+  # --- Path-specific review instructions ----------------------------------
+  path_instructions:
+    - path: "lib/screens/**"
+      instructions: |
+        This is a Flutter screen (full-page widget).
+        Architecture rules:
+        - Screens should WATCH Riverpod providers for shared state
+        - Use flutter_hooks for ephemeral/local state (NOT StatefulWidget)
+        - Pass data to hooks, not refs
+        - Use flutter_screenutil (.w, .h, .sp, .r) for all size values
+        - Widgets should use const constructors where possible
+        - No comments except for truly complex logic
+        - Widget files should be prefixed wn_ and classes prefixed Wn
+
+    - path: "lib/widgets/**"
+      instructions: |
+        This is a reusable widget.
+        Rules:
+        - File must be prefixed with wn_ (e.g. wn_filled_button.dart)
+        - Class must be prefixed with Wn (e.g. WnFilledButton)
+        - Use const constructors where possible
+        - Use flutter_screenutil (.w, .h, .sp, .r) for all dimensions
+        - Avoid StatefulWidget — prefer hooks for local state
+        - No comments except for truly complex logic
+
+    - path: "lib/providers/**"
+      instructions: |
+        This is a Riverpod provider (shared app-wide state).
+        Rules:
+        - Files must end with _provider.dart
+        - Provider variables must end with Provider (e.g. authProvider)
+        - Don't duplicate logic from the Rust crate — whitenoise is source of truth
+        - Don't cache data that whitenoise already persists in its local DB
+
+    - path: "lib/hooks/**"
+      instructions: |
+        This is a flutter_hooks hook (ephemeral widget-local state).
+        Rules:
+        - Files must be prefixed with use_ (e.g. use_chat_list.dart)
+        - Hook functions must start with use (e.g. useChatList())
+        - Hooks receive data as parameters, not widget refs
+        - Ensure proper cleanup/dispose of subscriptions and resources
+
+    - path: "lib/services/**"
+      instructions: |
+        Services are stateless operations (API calls, etc.).
+        They should not hold state — that belongs in providers.
+        Check that they don't duplicate logic from whitenoise-rs.
+
+    - path: "rust/src/api/**"
+      instructions: |
+        This is the Rust API layer exposed to Flutter via flutter_rust_bridge.
+        Rules:
+        - Functions use #[frb] attribute for bridge generation
+        - Structs use #[frb(non_opaque)] for Flutter compatibility
+        - Errors must be wrapped in the ApiError enum using thiserror
+        - This is a thin wrapper around the whitenoise crate — keep it thin
+        - No unwrap() in non-test code; use proper error handling
+        - Check for correct async patterns
+
+    - path: "test/**"
+      instructions: |
+        IMPORTANT: Test coverage must never decrease. Minimum 95% coverage required.
+        Rules:
+        - Test files mirror source structure with _test.dart suffix
+        - Use helpers from test/test_helpers.dart (setUpTestView, mountTestApp, etc.)
+        - Mock Rust API using RustLib.initMock(api: mockApi)
+        - Always extend MockWnApi from test/mocks/mock_wn_api.dart
+        - Prefer find.byKey() over find.byIcon() for widget testing
+        - Use valid 64-char hex strings for pubkeys, not dummy values like 'abc'
+        - Tests must be deterministic — no external service dependencies
+
+    - path: "**/*.arb"
+      instructions: |
+        These are localization files. Check for:
+        - Consistent key naming across all locale files
+        - Proper ICU message format for plurals/gender
+        - No hardcoded strings that should be localized
+
+    - path: "scripts/**"
+      instructions: "Build and CI scripts. Check for portability and proper error handling."
+
+  # --- Auto review settings -----------------------------------------------
   auto_review:
     enabled: true
     drafts: true
+    auto_incremental_review: true
+    ignore_title_keywords:
+      - "WIP"
+      - "DO NOT MERGE"
+      - "wip"
+    base_branches: []
+
+  # --- Pre-merge checks ---------------------------------------------------
+  pre_merge_checks:
+    title:
+      mode: "warning"
+      requirements: >
+        Use a descriptive title. Preferred format: type(scope): description
+        where type is feat/fix/chore/docs/refactor/test and scope is optional.
+        Examples: "feat: add group creation flow", "fix(auth): handle relay timeout"
+    description:
+      mode: "warning"
+    issue_assessment:
+      mode: "warning"
+
+  # --- Finishing touches ---------------------------------------------------
+  finishing_touches:
+    docstrings:
+      enabled: false  # Project prefers self-explanatory code over docstrings
+    unit_tests:
+      enabled: true
+
+  # --- Tools --------------------------------------------------------------
+  tools:
+    # Secret scanning (important for crypto/key-handling project)
+    gitleaks:
+      enabled: true
+    trufflehog:
+      enabled: true
+    # Dart/Flutter analysis handled by analysis_options.yaml in-repo
+    # YAML linting for config files
+    yamllint:
+      enabled: true
+    # Markdown linting for docs
+    markdownlint:
+      enabled: true
+    # Shell script checking
+    shellcheck:
+      enabled: true
+    # Not relevant for this project
+    biome:
+      enabled: false
+    ruff:
+      enabled: false
+    phpstan:
+      enabled: false
+    phpmd:
+      enabled: false
+    phpcs:
+      enabled: false
+    golangci-lint:
+      enabled: false
+    hadolint:
+      enabled: false
+    checkov:
+      enabled: false
+
 chat:
   auto_reply: true
