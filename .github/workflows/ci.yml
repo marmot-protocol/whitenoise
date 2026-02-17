@@ -172,6 +172,26 @@ jobs:
       pull-requests: write
 
     steps:
+    - name: Download coverage artifact from test job
+      uses: actions/download-artifact@v4
+      with:
+        name: coverage-report-lcov
+        path: coverage-input
+
+    - name: Read coverage percentage from shared artifact
+      id: current_coverage
+      run: |
+        chmod +x scripts/check-coverage.sh
+        LCOV_FILE=$(find coverage-input -type f -name 'lcov.info' | head -n 1)
+
+        if [ -z "$LCOV_FILE" ]; then
+          echo "::error::Could not find lcov.info in downloaded coverage artifact."
+          exit 1
+        fi
+
+        CURRENT=$(./scripts/check-coverage.sh "$LCOV_FILE")
+        echo "percentage=$CURRENT" >> "$GITHUB_OUTPUT"
+        echo "Current coverage from shared artifact: $CURRENT%"
 
     - name: Get master branch coverage
       id: master_coverage
@@ -221,7 +241,7 @@ jobs:
       if: steps.master_coverage.outputs.baseline != '0'
       id: coverage_delta
       run: |
-        CURRENT=${{ needs.test.outputs.coverage }}
+        CURRENT=${{ steps.current_coverage.outputs.percentage }}
         BASELINE=${{ steps.master_coverage.outputs.baseline }}
 
         echo "=== Coverage Comparison ==="
@@ -253,7 +273,7 @@ jobs:
             echo "## Coverage"
             echo ""
             echo "Could not find a master baseline artifact, so comparison was skipped."
-            echo "Current PR coverage: **${{ needs.test.outputs.coverage }}%**"
+            echo "Current PR coverage: **${{ steps.current_coverage.outputs.percentage }}%**"
           } >> "$GITHUB_STEP_SUMMARY"
           exit 0
         fi
@@ -287,7 +307,7 @@ jobs:
       uses: actions/github-script@v7
       with:
         script: |
-          const current = parseFloat('${{ needs.test.outputs.coverage }}');
+          const current = parseFloat('${{ steps.current_coverage.outputs.percentage }}');
           const baseline = parseFloat('${{ steps.master_coverage.outputs.baseline }}');
           const rawDiff = current - baseline;
           const displayDiff = rawDiff.toFixed(2);
