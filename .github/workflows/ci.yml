@@ -351,6 +351,11 @@ jobs:
             }
           }
 
+          const shaEntryPrefix = `- \`${sha}\``;
+          historyEntries = historyEntries.filter(
+            line => !line.trim().startsWith(shaEntryPrefix)
+          );
+
           historyEntries.push(
             `- \`${sha}\` ${now} — **${current}%** (${sign}${displayDiff}% vs base)`
           );
