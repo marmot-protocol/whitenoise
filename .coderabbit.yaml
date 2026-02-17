@@ -105,7 +105,7 @@ reviews:
 
     - path: "test/**"
       instructions: |
-        IMPORTANT: Test coverage must never decrease. Minimum 95% coverage required.
+        IMPORTANT: CI enforces coverage regression (coverage must never decrease). It does not enforce a fixed 95% minimum threshold.
         Rules:
         - Test files mirror source structure with _test.dart suffix
         - Use helpers from test/test_helpers.dart (setUpTestView, mountTestApp, etc.)

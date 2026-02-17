@@ -178,6 +178,9 @@ jobs:
         name: coverage-report-lcov
         path: coverage-input
 
+    - name: Checkout code
+      uses: actions/checkout@v4
+
     - name: Read coverage percentage from shared artifact
       id: current_coverage
       run: |
