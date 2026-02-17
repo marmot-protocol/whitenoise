@@ -34,7 +34,7 @@ jobs:
       with:
         path: |
           ~/.pub-cache
-          ${{ runner.workspace }}/.pub-cache
+          ${{ github.workspace }}/.pub-cache
         key: ${{ runner.os }}-pub-cache-${{ hashFiles('**/pubspec.lock') }}
         restore-keys: |
           ${{ runner.os }}-pub-cache-
@@ -95,7 +95,7 @@ jobs:
       with:
         path: |
           ~/.pub-cache
-          ${{ runner.workspace }}/.pub-cache
+          ${{ github.workspace }}/.pub-cache
         key: ${{ runner.os }}-pub-cache-${{ hashFiles('**/pubspec.lock') }}
         restore-keys: |
           ${{ runner.os }}-pub-cache-
@@ -136,7 +136,7 @@ jobs:
       with:
         path: |
           ~/.pub-cache
-          ${{ runner.workspace }}/.pub-cache
+          ${{ github.workspace }}/.pub-cache
         key: ${{ runner.os }}-pub-cache-${{ hashFiles('**/pubspec.lock') }}
         restore-keys: |
           ${{ runner.os }}-pub-cache-
