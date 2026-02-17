@@ -6,7 +6,7 @@ import 'package:whitenoise/src/rust/api.dart' as api;
 
 final _logger = Logger('useDeleteAllData');
 
-const defaultTimeout = Duration(seconds: 30);
+const defaultTimeout = Duration(seconds: 10);
 
 class DeleteAllDataState {
   final bool isDeleting;
