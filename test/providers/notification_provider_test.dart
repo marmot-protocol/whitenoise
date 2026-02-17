@@ -264,7 +264,7 @@ void main() {
       expect(isInvite, isTrue);
     });
 
-    test('prefers sender displayName over resolved senderName', () {
+    test('prefers senderName parameter over sender displayName', () {
       final update = NotificationUpdate(
         trigger: NotificationTrigger.newMessage,
         mlsGroupId: 'group123',
@@ -278,10 +278,10 @@ void main() {
       final (title, _, _) = formatNotification(
         update,
         l10n,
-        senderName: 'Alice',
+        senderName: 'Bob',
       );
 
-      expect(title, equals('Alice'));
+      expect(title, equals('Bob'));
     });
   });
 
