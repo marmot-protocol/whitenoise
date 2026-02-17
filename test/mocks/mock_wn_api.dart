@@ -50,6 +50,7 @@ class MockWnApi implements RustLibApi {
   bool deleteAllDataCalled = false;
   bool deleteAllDataShouldFail = false;
   Duration deleteAllDataDelay = Duration.zero;
+  Completer<void>? deleteAllDataCompleter;
 
   LoginResult? loginStartResult;
   LoginResult? loginExternalSignerStartResult;
@@ -302,6 +303,9 @@ class MockWnApi implements RustLibApi {
   @override
   Future<void> crateApiDeleteAllData() async {
     deleteAllDataCalled = true;
+    if (deleteAllDataCompleter != null) {
+      await deleteAllDataCompleter!.future;
+    }
     if (deleteAllDataDelay > Duration.zero) {
       await Future.delayed(deleteAllDataDelay);
     }
@@ -439,6 +443,7 @@ class MockWnApi implements RustLibApi {
     deleteAllDataCalled = false;
     deleteAllDataShouldFail = false;
     deleteAllDataDelay = Duration.zero;
+    deleteAllDataCompleter = null;
     loginStartResult = null;
     loginExternalSignerStartResult = null;
     registerExternalSignerCalled = false;

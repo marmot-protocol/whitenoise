@@ -105,7 +105,7 @@ void main() {
       expect(find.byType(HomeScreen), findsOneWidget);
     });
 
-    testWidgets('delete app data button shows loading state', (tester) async {
+    testWidgets('confirm button shows loading during delete operation', (tester) async {
       mockApi.deleteAllDataDelay = const Duration(seconds: 2);
 
       await pumpPrivacySecurityScreen(tester);
@@ -117,8 +117,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
 
-      final button = tester.widget<WnButton>(find.byKey(const Key('delete_all_data_button')));
-      expect(button.loading, true);
+      final confirmButton = tester.widget<WnButton>(find.byKey(const Key('confirm_button')));
+      expect(confirmButton.loading, true);
 
       await tester.pumpAndSettle();
     });

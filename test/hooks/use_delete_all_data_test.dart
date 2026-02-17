@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_delete_all_data.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -151,6 +153,53 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(result, false);
+    });
+
+    testWidgets('deleteAllData returns false on timeout', (tester) async {
+      late Future<bool> Function() deleteAllData;
+
+      mockApi.deleteAllDataCompleter = Completer<void>();
+
+      await mountHook(
+        tester,
+        () {
+          final hook = useDeleteAllData(timeout: const Duration(seconds: 1));
+          deleteAllData = hook.deleteAllData;
+          return null;
+        },
+      );
+
+      final resultFuture = deleteAllData();
+      await tester.pump(const Duration(seconds: 2));
+
+      final result = await resultFuture;
+      await tester.pumpAndSettle();
+
+      expect(result, false);
+      expect(mockApi.deleteAllDataCalled, true);
+    });
+
+    testWidgets('deleteAllData sets isDeleting to false after timeout', (tester) async {
+      late Future<bool> Function() deleteAllData;
+
+      mockApi.deleteAllDataCompleter = Completer<void>();
+
+      final getState = await mountHook(
+        tester,
+        () {
+          final hook = useDeleteAllData(timeout: const Duration(seconds: 1));
+          deleteAllData = hook.deleteAllData;
+          return hook.state;
+        },
+      );
+
+      final resultFuture = deleteAllData();
+      await tester.pump(const Duration(seconds: 2));
+
+      await resultFuture;
+      await tester.pumpAndSettle();
+
+      expect(getState().isDeleting, false);
     });
 
     testWidgets('deleteAllData returns true after clearing previous error', (tester) async {

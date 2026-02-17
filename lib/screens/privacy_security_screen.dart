@@ -25,30 +25,28 @@ class PrivacySecurityScreen extends HookConsumerWidget {
     final systemNotice = useSystemNotice();
 
     Future<void> handleDeleteAllData() async {
-      final confirmed = await WnConfirmationSlate.show(
+      final result = await WnConfirmationSlate.show(
         context: context,
         title: context.l10n.deleteAllAppDataConfirmation,
         message: context.l10n.deleteAllAppDataWarning,
         confirmText: context.l10n.deleteAppData,
         cancelText: context.l10n.cancel,
         isDestructive: true,
+        onConfirmAsync: deleteAllData,
       );
 
-      if (confirmed == true) {
-        final success = await deleteAllData();
-        if (!context.mounted) return;
+      if (!context.mounted || result == null) return;
 
-        if (success) {
-          await ref.read(authProvider.notifier).resetAuth();
+      if (result) {
+        await ref.read(authProvider.notifier).resetAuth();
 
-          WidgetsBinding.instance.addPostFrameCallback((_) {
-            if (context.mounted) {
-              Routes.goToHome(context);
-            }
-          });
-        } else {
-          systemNotice.showErrorNotice(context.l10n.deleteAllDataError);
-        }
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) {
+            Routes.goToHome(context);
+          }
+        });
+      } else {
+        systemNotice.showErrorNotice(context.l10n.deleteAllDataError);
       }
     }
 
