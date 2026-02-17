@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' as groups_api;
@@ -13,6 +14,8 @@ enum CreateGroupError {
 }
 
 typedef CreateGroupState = ({
+  TextEditingController groupNameController,
+  TextEditingController groupDescriptionController,
   String groupName,
   String groupDescription,
   String? selectedImagePath,
@@ -26,8 +29,6 @@ typedef CreateGroupState = ({
 });
 
 typedef CreateGroupActions = ({
-  void Function(String) updateGroupName,
-  void Function(String) updateGroupDescription,
   void Function(String?) updateSelectedImagePath,
   void Function(List<User>) updateSelectedUsers,
   Future<void> Function() filterUsersByKeyPackage,
@@ -37,6 +38,8 @@ typedef CreateGroupActions = ({
 });
 
 ({CreateGroupState state, CreateGroupActions actions}) useCreateGroup() {
+  final groupNameController = useTextEditingController();
+  final groupDescriptionController = useTextEditingController();
   final groupName = useState('');
   final groupDescription = useState('');
   final selectedImagePath = useState<String?>(null);
@@ -55,6 +58,25 @@ typedef CreateGroupActions = ({
       isMountedRef.value = false;
     };
   }, []);
+
+  useEffect(() {
+    void onNameChanged() {
+      groupName.value = groupNameController.text;
+      error.value = null;
+    }
+
+    void onDescriptionChanged() {
+      groupDescription.value = groupDescriptionController.text;
+      error.value = null;
+    }
+
+    groupNameController.addListener(onNameChanged);
+    groupDescriptionController.addListener(onDescriptionChanged);
+    return () {
+      groupNameController.removeListener(onNameChanged);
+      groupDescriptionController.removeListener(onDescriptionChanged);
+    };
+  }, [groupNameController, groupDescriptionController]);
 
   Future<void> filterUsersByKeyPackage() async {
     if (selectedUsers.value.isEmpty) {
@@ -166,16 +188,6 @@ typedef CreateGroupActions = ({
     }
   }
 
-  void updateGroupName(String name) {
-    groupName.value = name;
-    error.value = null;
-  }
-
-  void updateGroupDescription(String description) {
-    groupDescription.value = description;
-    error.value = null;
-  }
-
   void updateSelectedImagePath(String? path) {
     selectedImagePath.value = path;
     error.value = null;
@@ -191,8 +203,8 @@ typedef CreateGroupActions = ({
   }
 
   void reset() {
-    groupName.value = '';
-    groupDescription.value = '';
+    groupNameController.clear();
+    groupDescriptionController.clear();
     selectedImagePath.value = null;
     selectedUsers.value = [];
     usersWithKeyPackage.value = [];
@@ -205,6 +217,8 @@ typedef CreateGroupActions = ({
 
   return (
     state: (
+      groupNameController: groupNameController,
+      groupDescriptionController: groupDescriptionController,
       groupName: groupName.value,
       groupDescription: groupDescription.value,
       selectedImagePath: selectedImagePath.value,
@@ -217,8 +231,6 @@ typedef CreateGroupActions = ({
       isFilteringUsers: isFilteringUsers.value,
     ),
     actions: (
-      updateGroupName: updateGroupName,
-      updateGroupDescription: updateGroupDescription,
       updateSelectedImagePath: updateSelectedImagePath,
       updateSelectedUsers: updateSelectedUsers,
       filterUsersByKeyPackage: filterUsersByKeyPackage,

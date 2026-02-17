@@ -407,6 +407,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get createGroup => 'Создать Группу';
 
   @override
+  String get newGroupChat => 'Новый групповой чат';
+
+  @override
   String get selectMembers => 'Выбрать Участников';
 
   @override
@@ -421,7 +424,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get continueButton => 'Продолжить';
 
   @override
-  String get groupDetails => 'Детали Группы';
+  String get setUpGroup => 'Настроить группу';
 
   @override
   String get groupName => 'Название Группы';
@@ -433,7 +436,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get groupDescription => 'Описание Группы';
 
   @override
-  String get groupDescriptionPlaceholder => 'Введите описание группы (необязательно)';
+  String get description => 'Описание';
+
+  @override
+  String get groupDescriptionPlaceholder => 'Для чего эта группа?';
 
   @override
   String members(int count) {
@@ -444,6 +450,19 @@ class AppLocalizationsRu extends AppLocalizations {
       many: '$count участников',
       few: '$count участника',
       one: '1 участник',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String invitingMembers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Приглашение участников:',
+      many: 'Приглашение участников:',
+      few: 'Приглашение участников:',
+      one: 'Приглашение участника:',
     );
     return '$_temp0';
   }

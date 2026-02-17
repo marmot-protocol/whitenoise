@@ -407,6 +407,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get createGroup => 'Créer un Groupe';
 
   @override
+  String get newGroupChat => 'Nouvelle discussion de groupe';
+
+  @override
   String get selectMembers => 'Sélectionner les Membres';
 
   @override
@@ -421,7 +424,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get continueButton => 'Continuer';
 
   @override
-  String get groupDetails => 'Détails du Groupe';
+  String get setUpGroup => 'Configurer le groupe';
 
   @override
   String get groupName => 'Nom du Groupe';
@@ -433,11 +436,25 @@ class AppLocalizationsFr extends AppLocalizations {
   String get groupDescription => 'Description du Groupe';
 
   @override
-  String get groupDescriptionPlaceholder => 'Entrez la description du groupe (optionnel)';
+  String get description => 'Description';
+
+  @override
+  String get groupDescriptionPlaceholder => 'À quoi sert ce groupe ?';
 
   @override
   String members(int count) {
     return '$count membres';
+  }
+
+  @override
+  String invitingMembers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Invitation de membres :',
+      one: 'Invitation de membre :',
+    );
+    return '$_temp0';
   }
 
   @override

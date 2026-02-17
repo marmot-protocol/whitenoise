@@ -161,42 +161,38 @@ void main() {
       expect(state.isFilteringUsers, isFalse);
     });
 
-    testWidgets('updateGroupName updates state', (tester) async {
+    testWidgets('groupNameController updates state', (tester) async {
       late CreateGroupState state;
-      late CreateGroupActions actions;
 
       await mountHook(
         tester,
         () {
           final result = useCreateGroup();
           state = result.state;
-          actions = result.actions;
           return Container();
         },
       );
 
-      actions.updateGroupName('Test Group');
+      state.groupNameController.text = 'Test Group';
       await tester.pump();
 
       expect(state.groupName, 'Test Group');
       expect(state.error, isNull);
     });
 
-    testWidgets('updateGroupDescription updates state', (tester) async {
+    testWidgets('groupDescriptionController updates state', (tester) async {
       late CreateGroupState state;
-      late CreateGroupActions actions;
 
       await mountHook(
         tester,
         () {
           final result = useCreateGroup();
           state = result.state;
-          actions = result.actions;
           return Container();
         },
       );
 
-      actions.updateGroupDescription('Test Description');
+      state.groupDescriptionController.text = 'Test Description';
       await tester.pump();
 
       expect(state.groupDescription, 'Test Description');
@@ -320,7 +316,7 @@ void main() {
         },
       );
 
-      actions.updateGroupName('Test Group');
+      state.groupNameController.text = 'Test Group';
       await tester.pump();
 
       final group = await actions.createGroup(testPubkeyA);
@@ -335,19 +331,21 @@ void main() {
       mockApi.userHasKeyPackageMap[testPubkeyB] = true;
       mockApi.userHasKeyPackageMap[testPubkeyC] = true;
 
+      late CreateGroupState state;
       late CreateGroupActions actions;
 
       await mountHook(
         tester,
         () {
           final result = useCreateGroup();
+          state = result.state;
           actions = result.actions;
           return Container();
         },
       );
 
-      actions.updateGroupName('Test Group');
-      actions.updateGroupDescription('Test Description');
+      state.groupNameController.text = 'Test Group';
+      state.groupDescriptionController.text = 'Test Description';
       await tester.pump();
 
       final users = [
@@ -414,8 +412,8 @@ void main() {
         },
       );
 
-      actions.updateGroupName('Test Group');
-      actions.updateGroupDescription('Test Description');
+      state.groupNameController.text = 'Test Group';
+      state.groupDescriptionController.text = 'Test Description';
       actions.updateSelectedImagePath('/path/to/image.jpg');
       actions.updateSelectedUsers([_createTestUser(testPubkeyB, name: 'Bob')]);
       await tester.pump();
@@ -473,18 +471,20 @@ void main() {
     testWidgets('createGroup with image path sets uploading state', (tester) async {
       mockApi.userHasKeyPackageMap[testPubkeyB] = true;
 
+      late CreateGroupState state;
       late CreateGroupActions actions;
 
       await mountHook(
         tester,
         () {
           final result = useCreateGroup();
+          state = result.state;
           actions = result.actions;
           return Container();
         },
       );
 
-      actions.updateGroupName('Test Group');
+      state.groupNameController.text = 'Test Group';
       actions.updateSelectedImagePath('/path/to/image.jpg');
       actions.updateSelectedUsers([_createTestUser(testPubkeyB, name: 'Bob')]);
       await tester.pump();
@@ -549,7 +549,7 @@ void main() {
         },
       );
 
-      actions.updateGroupName('Test Group');
+      state.groupNameController.text = 'Test Group';
       actions.updateSelectedUsers([_createTestUser(testPubkeyB, name: 'Bob')]);
       await tester.pump();
 
@@ -579,7 +579,7 @@ void main() {
         },
       );
 
-      actions.updateGroupName('Test Group');
+      state.groupNameController.text = 'Test Group';
       actions.updateSelectedImagePath('/path/to/image.jpg');
       actions.updateSelectedUsers([_createTestUser(testPubkeyB, name: 'Bob')]);
       await tester.pump();
@@ -599,18 +599,20 @@ void main() {
       mockApi.userHasKeyPackageMap[testPubkeyB] = true;
       mockApi.shouldThrowOnUploadImage = true;
 
+      late CreateGroupState state;
       late CreateGroupActions actions;
 
       await mountHook(
         tester,
         () {
           final result = useCreateGroup();
+          state = result.state;
           actions = result.actions;
           return Container();
         },
       );
 
-      actions.updateGroupName('Test Group');
+      state.groupNameController.text = 'Test Group';
       actions.updateSelectedImagePath('/path/to/image.jpg');
       actions.updateSelectedUsers([_createTestUser(testPubkeyB, name: 'Bob')]);
       await tester.pump();

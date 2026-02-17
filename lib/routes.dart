@@ -17,7 +17,6 @@ import 'package:whitenoise/screens/chat_screen.dart' show ChatScreen;
 import 'package:whitenoise/screens/developer_settings_screen.dart' show DeveloperSettingsScreen;
 import 'package:whitenoise/screens/donate_screen.dart' show DonateScreen;
 import 'package:whitenoise/screens/edit_profile_screen.dart' show EditProfileScreen;
-import 'package:whitenoise/screens/group_details_screen.dart' show GroupDetailsScreen;
 import 'package:whitenoise/screens/home_screen.dart' show HomeScreen;
 import 'package:whitenoise/screens/login_screen.dart' show LoginScreen;
 import 'package:whitenoise/screens/network_screen.dart' show NetworkScreen;
@@ -26,6 +25,7 @@ import 'package:whitenoise/screens/profile_keys_screen.dart' show ProfileKeysScr
 import 'package:whitenoise/screens/relay_resolution_screen.dart' show RelayResolutionScreen;
 import 'package:whitenoise/screens/scan_npub_screen.dart' show ScanNpubScreen;
 import 'package:whitenoise/screens/scan_nsec_screen.dart' show ScanNsecScreen;
+import 'package:whitenoise/screens/set_up_group_screen.dart' show SetUpGroupScreen;
 import 'package:whitenoise/screens/settings_screen.dart' show SettingsScreen;
 import 'package:whitenoise/screens/share_profile_screen.dart' show ShareProfileScreen;
 import 'package:whitenoise/screens/sign_out_screen.dart' show SignOutScreen;
@@ -64,7 +64,7 @@ abstract final class Routes {
   static const _relayResolution = '/relay-resolution';
   static const _userSearch = '/user-search';
   static const _userSelection = '/user-selection';
-  static const _groupDetails = '/group-details';
+  static const _setUpGroup = '/set-up-group';
   static const _startChat = '/start-chat/:userPubkey';
   static const _chatInfo = '/chat-info/:userPubkey';
   static const _invite = '/invites/:mlsGroupId';
@@ -250,8 +250,8 @@ abstract final class Routes {
           ),
         ),
         GoRoute(
-          name: 'groupDetails',
-          path: _groupDetails,
+          name: 'setUpGroup',
+          path: _setUpGroup,
           pageBuilder: (context, state) {
             final selectedUsers = state.extra as List<User>?;
             if (selectedUsers == null || selectedUsers.isEmpty) {
@@ -262,7 +262,7 @@ abstract final class Routes {
             }
             return _navigationTransition(
               state: state,
-              child: GroupDetailsScreen(
+              child: SetUpGroupScreen(
                 selectedUsers: selectedUsers,
               ),
             );
@@ -430,9 +430,9 @@ abstract final class Routes {
     GoRouter.of(context).push(_userSelection);
   }
 
-  static void pushToGroupDetails(BuildContext context, List<User> selectedUsers) {
+  static void pushToSetUpGroup(BuildContext context, List<User> selectedUsers) {
     GoRouter.of(context).pushNamed(
-      'groupDetails',
+      'setUpGroup',
       extra: selectedUsers,
     );
   }

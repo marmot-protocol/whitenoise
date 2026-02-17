@@ -9,6 +9,7 @@ import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
+import 'package:whitenoise/widgets/wn_user_bubble.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
@@ -72,7 +73,7 @@ void main() {
     testWidgets('displays screen header with title', (tester) async {
       await pumpUserSelectionScreen(tester);
       expect(find.byType(WnSlateNavigationHeader), findsOneWidget);
-      expect(find.text('Select Members'), findsOneWidget);
+      expect(find.text('New group chat'), findsOneWidget);
     });
 
     testWidgets('displays continue button in footer', (tester) async {
@@ -97,16 +98,17 @@ void main() {
       expect(find.text('Name or npub1...'), findsOneWidget);
     });
 
-    testWidgets('selecting user shows selected count', (tester) async {
+    testWidgets('selecting user shows user bubble', (tester) async {
       await pumpUserSelectionScreen(tester);
 
       await tester.tap(find.text('Bob'));
       await tester.pumpAndSettle();
 
-      expect(find.text('1 selected'), findsOneWidget);
+      expect(find.byType(WnUserBubble), findsOneWidget);
+      expect(find.byKey(const Key('selected_users_bubbles')), findsOneWidget);
     });
 
-    testWidgets('selecting multiple users updates count', (tester) async {
+    testWidgets('selecting multiple users shows multiple bubbles', (tester) async {
       await pumpUserSelectionScreen(tester);
 
       await tester.tap(find.text('Bob'));
@@ -115,21 +117,21 @@ void main() {
       await tester.tap(find.text('Charlie'));
       await tester.pumpAndSettle();
 
-      expect(find.text('2 selected'), findsOneWidget);
+      expect(find.byType(WnUserBubble), findsNWidgets(2));
     });
 
-    testWidgets('clear selection button clears all selections', (tester) async {
+    testWidgets('tapping user bubble deselects user', (tester) async {
       await pumpUserSelectionScreen(tester);
 
       await tester.tap(find.text('Bob'));
       await tester.pumpAndSettle();
 
-      expect(find.text('1 selected'), findsOneWidget);
+      expect(find.byType(WnUserBubble), findsOneWidget);
 
-      await tester.tap(find.text('Clear'));
+      await tester.tap(find.byKey(const Key('bubble_$testPubkeyB')));
       await tester.pumpAndSettle();
 
-      expect(find.text('1 selected'), findsNothing);
+      expect(find.byType(WnUserBubble), findsNothing);
     });
 
     testWidgets('continue button is enabled when users selected', (tester) async {
@@ -184,7 +186,21 @@ void main() {
       await tester.tap(continueButton);
       await tester.pumpAndSettle();
 
-      expect(find.text('Group Details'), findsOneWidget);
+      expect(find.text('Set up group'), findsOneWidget);
+    });
+
+    testWidgets('tapping close button navigates back', (tester) async {
+      await pumpUserSelectionScreen(tester);
+
+      expect(find.byType(WnSlateNavigationHeader), findsOneWidget);
+
+      final closeButton = find.byKey(const Key('slate_close_button'));
+      expect(closeButton, findsOneWidget);
+
+      await tester.tap(closeButton);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(WnSlateNavigationHeader), findsNothing);
     });
 
     testWidgets('tapping scan button navigates to scan screen', (tester) async {

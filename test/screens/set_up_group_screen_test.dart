@@ -14,8 +14,10 @@ import 'package:whitenoise/src/rust/lib.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_input.dart';
+import 'package:whitenoise/widgets/wn_input_text_area.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
@@ -46,6 +48,7 @@ class _MockApi extends MockWnApi {
   bool shouldDelayCreateGroup = false;
   bool shouldDelayUploadImage = false;
   bool shouldDelayUserHasKeyPackage = false;
+  bool shouldThrowOnCreateGroup = false;
 
   @override
   Future<Group> crateApiGroupsCreateGroup({
@@ -57,6 +60,9 @@ class _MockApi extends MockWnApi {
     required GroupType groupType,
   }) async {
     createGroupCalled = true;
+    if (shouldThrowOnCreateGroup) {
+      throw Exception('Failed to create group');
+    }
     if (shouldDelayCreateGroup) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
@@ -141,6 +147,7 @@ void main() {
     _api.shouldDelayCreateGroup = false;
     _api.shouldDelayUploadImage = false;
     _api.shouldDelayUserHasKeyPackage = false;
+    _api.shouldThrowOnCreateGroup = false;
     _mockImagePicker = _MockImagePickerPlatform();
     ImagePickerPlatform.instance = _mockImagePicker;
   });
@@ -149,7 +156,7 @@ void main() {
     ImagePickerPlatform.instance = _originalImagePickerPlatform;
   });
 
-  Future<void> pumpGroupDetailsScreen(
+  Future<void> pumpSetUpGroupScreen(
     WidgetTester tester,
     List<User> selectedUsers,
   ) async {
@@ -158,50 +165,53 @@ void main() {
       overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
     );
     await tester.pumpAndSettle();
-    Routes.pushToGroupDetails(
+    Routes.pushToSetUpGroup(
       tester.element(find.byType(Scaffold)),
       selectedUsers,
     );
     await tester.pumpAndSettle();
   }
 
-  group('GroupDetailsScreen', () {
+  group('SetUpGroupScreen', () {
     testWidgets('displays slate container', (tester) async {
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
       expect(find.byType(WnSlate), findsOneWidget);
     });
 
     testWidgets('displays screen header with title', (tester) async {
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
       expect(find.byType(WnSlateNavigationHeader), findsOneWidget);
-      expect(find.text('Group Details'), findsOneWidget);
+      expect(find.text('Set up group'), findsOneWidget);
     });
 
     testWidgets('displays group name input', (tester) async {
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
       expect(find.text('Group Name'), findsOneWidget);
       expect(find.widgetWithText(WnInput, 'Enter group name'), findsOneWidget);
     });
 
     testWidgets('displays group description input', (tester) async {
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
-      await pumpGroupDetailsScreen(tester, users);
-      expect(find.text('Group Description'), findsOneWidget);
-      expect(find.widgetWithText(WnInput, 'Enter group description (optional)'), findsOneWidget);
+      await pumpSetUpGroupScreen(tester, users);
+      expect(find.text('Description'), findsOneWidget);
+      expect(
+        find.widgetWithText(WnInputTextArea, 'What is this group for?'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('displays avatar', (tester) async {
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
       expect(find.byType(WnAvatar), findsWidgets);
     });
 
     testWidgets('displays create group button in footer', (tester) async {
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
       expect(find.text('Create Group'), findsOneWidget);
     });
 
@@ -209,7 +219,7 @@ void main() {
       _api.userHasKeyPackageMap[testPubkeyB] = true;
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
 
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
 
       final button = tester.widget<WnButton>(find.widgetWithText(WnButton, 'Create Group'));
       expect(button.onPressed, isNull);
@@ -224,9 +234,9 @@ void main() {
         _userFactory(testPubkeyC, displayName: 'Charlie'),
       ];
 
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
 
-      expect(find.text('1 members'), findsOneWidget);
+      expect(find.text('Inviting member:'), findsOneWidget);
       expect(find.text('Bob'), findsOneWidget);
     });
 
@@ -239,7 +249,7 @@ void main() {
         _userFactory(testPubkeyC, displayName: 'Charlie'),
       ];
 
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
 
       expect(find.textContaining('This user is not on White Noise:'), findsOneWidget);
     });
@@ -248,7 +258,7 @@ void main() {
       _api.userHasKeyPackageMap[testPubkeyB] = true;
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
 
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
 
       await tester.enterText(find.widgetWithText(WnInput, 'Enter group name'), 'My Group');
       await tester.pumpAndSettle();
@@ -266,9 +276,9 @@ void main() {
         _userFactory(testPubkeyC, displayName: 'Charlie'),
       ];
 
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
 
-      expect(find.text('2 members'), findsOneWidget);
+      expect(find.text('Inviting members:'), findsOneWidget);
       expect(find.text('Bob'), findsOneWidget);
       expect(find.text('Charlie'), findsOneWidget);
     });
@@ -282,7 +292,7 @@ void main() {
         _userFactory(testPubkeyC, displayName: 'Charlie'),
       ];
 
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
 
       expect(find.text('Charlie'), findsOneWidget);
       expect(find.textContaining('This user is not on White Noise:'), findsOneWidget);
@@ -300,9 +310,9 @@ void main() {
         ),
       ];
 
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
 
-      expect(find.text('1 members'), findsOneWidget);
+      expect(find.text('Inviting member:'), findsOneWidget);
     });
 
     testWidgets('displays user without display name in excluded list', (tester) async {
@@ -317,7 +327,7 @@ void main() {
         ),
       ];
 
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
 
       expect(find.textContaining('This user is not on White Noise:'), findsOneWidget);
     });
@@ -326,7 +336,7 @@ void main() {
       _api.userHasKeyPackageMap[testPubkeyB] = true;
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
 
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
 
       await tester.enterText(find.widgetWithText(WnInput, 'Enter group name'), 'My Group');
       await tester.pumpAndSettle();
@@ -340,7 +350,7 @@ void main() {
     testWidgets('tapping edit icon triggers image picker', (tester) async {
       _mockImagePicker.imageToReturn = XFile('/fake/path/image.jpg');
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
 
       final editIcon = find.byKey(const Key('edit_group_image_icon'));
       expect(editIcon, findsOneWidget);
@@ -349,9 +359,26 @@ void main() {
       await tester.pumpAndSettle();
     });
 
+    testWidgets('shows error notice when createGroup fails', (tester) async {
+      _api.userHasKeyPackageMap[testPubkeyB] = true;
+      _api.shouldThrowOnCreateGroup = true;
+      final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
+
+      await pumpSetUpGroupScreen(tester, users);
+
+      await tester.enterText(find.widgetWithText(WnInput, 'Enter group name'), 'My Group');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(WnButton, 'Create Group'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(find.text('Failed to create group'), findsOneWidget);
+    });
+
     testWidgets('tapping close button navigates back', (tester) async {
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
-      await pumpGroupDetailsScreen(tester, users);
+      await pumpSetUpGroupScreen(tester, users);
 
       expect(find.byType(WnSlateNavigationHeader), findsOneWidget);
 

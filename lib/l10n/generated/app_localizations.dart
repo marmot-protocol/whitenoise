@@ -846,6 +846,12 @@ abstract class AppLocalizations {
   /// **'Create Group'**
   String get createGroup;
 
+  /// Menu item text to start a new group chat
+  ///
+  /// In en, this message translates to:
+  /// **'New group chat'**
+  String get newGroupChat;
+
   /// User selection screen title
   ///
   /// In en, this message translates to:
@@ -870,11 +876,11 @@ abstract class AppLocalizations {
   /// **'Continue'**
   String get continueButton;
 
-  /// Group details screen title
+  /// Set up group screen title
   ///
   /// In en, this message translates to:
-  /// **'Group Details'**
-  String get groupDetails;
+  /// **'Set up group'**
+  String get setUpGroup;
 
   /// Group name label
   ///
@@ -894,10 +900,16 @@ abstract class AppLocalizations {
   /// **'Group Description'**
   String get groupDescription;
 
+  /// Generic description label
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get description;
+
   /// Group description input placeholder
   ///
   /// In en, this message translates to:
-  /// **'Enter group description (optional)'**
+  /// **'What is this group for?'**
   String get groupDescriptionPlaceholder;
 
   /// Number of members
@@ -905,6 +917,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} members'**
   String members(int count);
+
+  /// Label for inviting members in group setup
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Inviting member:} other{Inviting members:}}'**
+  String invitingMembers(int count);
 
   /// Message for users without key packages
   ///

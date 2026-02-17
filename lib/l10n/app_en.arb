@@ -650,6 +650,11 @@
     "description": "Create group button text"
   },
 
+  "newGroupChat": "New group chat",
+  "@newGroupChat": {
+    "description": "Menu item text to start a new group chat"
+  },
+
   "selectMembers": "Select Members",
   "@selectMembers": {
     "description": "User selection screen title"
@@ -675,9 +680,9 @@
     "description": "Continue button text"
   },
 
-  "groupDetails": "Group Details",
-  "@groupDetails": {
-    "description": "Group details screen title"
+  "setUpGroup": "Set up group",
+  "@setUpGroup": {
+    "description": "Set up group screen title"
   },
 
   "groupName": "Group Name",
@@ -695,7 +700,12 @@
     "description": "Group description label"
   },
 
-  "groupDescriptionPlaceholder": "Enter group description (optional)",
+  "description": "Description",
+  "@description": {
+    "description": "Generic description label"
+  },
+
+  "groupDescriptionPlaceholder": "What is this group for?",
   "@groupDescriptionPlaceholder": {
     "description": "Group description input placeholder"
   },
@@ -703,6 +713,16 @@
   "members": "{count} members",
   "@members": {
     "description": "Number of members",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "invitingMembers": "{count, plural, =1{Inviting member:} other{Inviting members:}}",
+  "@invitingMembers": {
+    "description": "Label for inviting members in group setup",
     "placeholders": {
       "count": {
         "type": "int"
