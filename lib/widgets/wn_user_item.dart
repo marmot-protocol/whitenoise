@@ -173,13 +173,12 @@ class _MediumBigLayout extends StatelessWidget {
 
     return Container(
       key: const Key('user_item_container'),
-      height: isBig ? 76.h : null,
+      constraints: isBig ? BoxConstraints(minHeight: 76.h) : null,
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: colors.fillTertiary,
         borderRadius: BorderRadius.circular(8.r),
       ),
-      clipBehavior: Clip.antiAlias,
       child: Row(
         children: [
           Expanded(
@@ -209,15 +208,13 @@ class _MediumBigLayout extends StatelessWidget {
                       ),
                       if (npub != null) ...[
                         Gap(6.h),
-                        Flexible(
-                          child: WnMiddleEllipsisText(
-                            key: const Key('user_item_npub'),
-                            text: npub!,
-                            style: typography.medium14Compact.copyWith(
-                              color: colors.backgroundContentSecondary,
-                            ),
-                            maxLines: 2,
+                        WnMiddleEllipsisText(
+                          key: const Key('user_item_npub'),
+                          text: npub!,
+                          style: typography.medium14Compact.copyWith(
+                            color: colors.backgroundContentSecondary,
                           ),
+                          maxLines: 2,
                         ),
                       ],
                     ],
