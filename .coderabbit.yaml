@@ -133,7 +133,6 @@ reviews:
     ignore_title_keywords:
       - "WIP"
       - "DO NOT MERGE"
-      - "wip"
     base_branches: []
 
   # --- Pre-merge checks ---------------------------------------------------
