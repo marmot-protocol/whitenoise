@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_input.dart';
+import 'package:whitenoise/widgets/wn_input_field_button.dart';
 import 'package:whitenoise/widgets/wn_input_password.dart';
 import 'package:whitenoise/widgets/wn_input_text_area.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -291,6 +292,98 @@ Widget wnInputShowcase(BuildContext context) {
         const SizedBox(height: 32),
         _buildSection(
           context,
+          'Inline Action Buttons',
+          'Inline action buttons auto-size based on the input size. '
+              'Size 56 inputs use 48px buttons, size 44 inputs use 36px buttons.',
+          [
+            _InputExample(
+              label: 'Size 56 (48px button)',
+              child: _StaticInput(
+                placeholder: 'Enter text...',
+                showInlineAction: true,
+              ),
+            ),
+            _InputExample(
+              label: 'Size 44 (36px button)',
+              child: _StaticInput(
+                placeholder: 'Enter text...',
+                size: WnInputSize.size44,
+                showInlineAction: true,
+              ),
+            ),
+            _InputExample(
+              label: 'Unfilled (transparent)',
+              child: _StaticInput(
+                placeholder: 'Enter text...',
+                showInlineAction: true,
+                inlineActionFilled: false,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 32),
+        _buildSection(
+          context,
+          'Standalone Button Sizes',
+          'WnInputFieldButton comes in 48px, 40px, and 36px, '
+              'each in filled or unfilled style.',
+          [
+            _InputExample(
+              label: 'Filled (48, 40, 36)',
+              child: Row(
+                children: [
+                  WnInputFieldButton(
+                    icon: WnIcons.closeSmall,
+                    onPressed: () {},
+                    buttonSize: WnInputFieldButtonSize.size48,
+                  ),
+                  const SizedBox(width: 8),
+                  WnInputFieldButton(
+                    icon: WnIcons.closeSmall,
+                    onPressed: () {},
+                    buttonSize: WnInputFieldButtonSize.size40,
+                  ),
+                  const SizedBox(width: 8),
+                  WnInputFieldButton(
+                    icon: WnIcons.closeSmall,
+                    onPressed: () {},
+                    buttonSize: WnInputFieldButtonSize.size36,
+                  ),
+                ],
+              ),
+            ),
+            _InputExample(
+              label: 'Unfilled (48, 40, 36)',
+              child: Row(
+                children: [
+                  WnInputFieldButton(
+                    icon: WnIcons.closeSmall,
+                    onPressed: () {},
+                    buttonSize: WnInputFieldButtonSize.size48,
+                    filled: false,
+                  ),
+                  const SizedBox(width: 8),
+                  WnInputFieldButton(
+                    icon: WnIcons.closeSmall,
+                    onPressed: () {},
+                    buttonSize: WnInputFieldButtonSize.size40,
+                    filled: false,
+                  ),
+                  const SizedBox(width: 8),
+                  WnInputFieldButton(
+                    icon: WnIcons.closeSmall,
+                    onPressed: () {},
+                    buttonSize: WnInputFieldButtonSize.size36,
+                    filled: false,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 32),
+        _buildSection(
+          context,
           'Complete Examples',
           'Full configurations combining multiple features.',
           [
@@ -406,6 +499,7 @@ class _StaticInput extends StatelessWidget {
     this.showLeadingIcon = false,
     this.leadingIconData,
     this.showInlineAction = false,
+    this.inlineActionFilled = true,
     this.showTrailingAction = false,
   });
 
@@ -421,6 +515,7 @@ class _StaticInput extends StatelessWidget {
   final bool showLeadingIcon;
   final WnIcons? leadingIconData;
   final bool showInlineAction;
+  final bool inlineActionFilled;
   final bool showTrailingAction;
 
   @override
@@ -444,13 +539,9 @@ class _StaticInput extends StatelessWidget {
               color: context.colors.backgroundContentSecondary,
             )
           : null,
-      inlineAction: showInlineAction
-          ? WnInputFieldButton(
-              icon: WnIcons.closeSmall,
-              onPressed: () {},
-              size: size,
-            )
-          : null,
+      inlineActionIcon: showInlineAction ? WnIcons.closeSmall : null,
+      inlineActionOnPressed: showInlineAction ? () {} : null,
+      inlineActionFilled: inlineActionFilled,
       trailingAction: showTrailingAction
           ? WnInputTrailingButton(
               icon: WnIcons.scan,
@@ -475,6 +566,14 @@ class _InteractiveInput extends StatelessWidget {
       options: WnInputSize.values,
       initialOption: WnInputSize.size56,
       labelBuilder: (value) => value == WnInputSize.size56 ? '56px' : '44px',
+    );
+    final showInlineAction = this.context.knobs.boolean(
+      label: 'Show Inline Action',
+      initialValue: false,
+    );
+    final inlineActionFilled = this.context.knobs.boolean(
+      label: 'Inline Action Filled',
+      initialValue: true,
     );
 
     return WnInput(
@@ -518,17 +617,9 @@ class _InteractiveInput extends StatelessWidget {
               color: colors.backgroundContentSecondary,
             )
           : null,
-      inlineAction:
-          this.context.knobs.boolean(
-            label: 'Show Inline Action',
-            initialValue: false,
-          )
-          ? WnInputFieldButton(
-              icon: WnIcons.closeSmall,
-              onPressed: () {},
-              size: size,
-            )
-          : null,
+      inlineActionIcon: showInlineAction ? WnIcons.closeSmall : null,
+      inlineActionOnPressed: showInlineAction ? () {} : null,
+      inlineActionFilled: inlineActionFilled,
       trailingAction:
           this.context.knobs.boolean(
             label: 'Show Trailing Action',

@@ -12,6 +12,8 @@ import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/home_screen.dart';
 import 'package:whitenoise/screens/login_screen.dart';
+import 'package:whitenoise/screens/relay_resolution_screen.dart';
+import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
@@ -42,9 +44,11 @@ class _MockAuthNotifier extends AuthNotifier {
   bool loginCalled = false;
   String? lastNsec;
   Exception? errorToThrow;
+  LoginStatus loginResultStatus = LoginStatus.complete;
   bool loginWithSignerCalled = false;
   String? lastSignerPubkey;
   Exception? signerErrorToThrow;
+  LoginStatus signerLoginResultStatus = LoginStatus.complete;
   Completer<void>? loginCompleter;
   Completer<void>? signerLoginCompleter;
 
@@ -52,18 +56,29 @@ class _MockAuthNotifier extends AuthNotifier {
   Future<String?> build() async => null;
 
   @override
-  Future<void> loginWithNsec(String nsec) async {
+  Future<LoginResult> loginStart(String nsec) async {
     loginCalled = true;
     lastNsec = nsec;
     if (loginCompleter != null) {
       await loginCompleter!.future;
     }
     if (errorToThrow != null) throw errorToThrow!;
-    state = const AsyncData(testPubkeyA);
+    if (loginResultStatus == LoginStatus.complete) {
+      state = const AsyncData(testPubkeyA);
+    }
+    return LoginResult(
+      account: Account(
+        pubkey: testPubkeyA,
+        accountType: AccountType.local,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: loginResultStatus,
+    );
   }
 
   @override
-  Future<void> loginWithAndroidSigner({
+  Future<LoginResult> loginExternalSignerStart({
     required String pubkey,
   }) async {
     loginWithSignerCalled = true;
@@ -72,7 +87,18 @@ class _MockAuthNotifier extends AuthNotifier {
       await signerLoginCompleter!.future;
     }
     if (signerErrorToThrow != null) throw signerErrorToThrow!;
-    state = AsyncData(pubkey);
+    if (signerLoginResultStatus == LoginStatus.complete) {
+      state = AsyncData(pubkey);
+    }
+    return LoginResult(
+      account: Account(
+        pubkey: pubkey,
+        accountType: AccountType.external_,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: signerLoginResultStatus,
+    );
   }
 }
 
@@ -166,6 +192,18 @@ void main() {
         });
       });
 
+      group('when login needs relay lists', () {
+        testWidgets('navigates to relay resolution screen', (tester) async {
+          await pumpLoginScreen(tester);
+          mockAuth.loginResultStatus = LoginStatus.needsRelayLists;
+          await tester.enterText(find.byType(TextField), 'nsec1test');
+          await tester.pump();
+          await tester.tap(find.byKey(const Key('login_button')));
+          await tester.pumpAndSettle();
+          expect(find.byType(RelayResolutionScreen), findsOneWidget);
+        });
+      });
+
       group('when login fails', () {
         testWidgets('does not redirect to chat list screen', (tester) async {
           await pumpLoginScreen(tester);
@@ -185,7 +223,7 @@ void main() {
           await tester.tap(find.byKey(const Key('login_button')));
           await tester.pumpAndSettle();
           expect(
-            find.textContaining('Oh no! An error occurred, please try again.'),
+            find.textContaining('An error occurred during login. Please try again.'),
             findsOneWidget,
           );
         });
@@ -323,7 +361,7 @@ void main() {
         );
       });
       testWidgets(
-        'calls loginWithAndroidSigner when signer button is tapped',
+        'calls loginExternalSignerStart when signer button is tapped',
         (tester) async {
           await pumpLoginScreen(tester, signerAvailable: true);
           mockAuth.signerLoginCompleter = Completer<void>();
@@ -540,14 +578,14 @@ void main() {
         await tester.tap(find.byKey(const Key('login_button')));
         await tester.pumpAndSettle();
         expect(
-          find.textContaining('Oh no! An error occurred, please try again.'),
+          find.textContaining('An error occurred during login. Please try again.'),
           findsOneWidget,
         );
 
         await tester.enterText(find.byType(TextField), 'nsec1new');
         await tester.pumpAndSettle();
         expect(
-          find.textContaining('Oh no! An error occurred, please try again.'),
+          find.textContaining('An error occurred during login. Please try again.'),
           findsNothing,
         );
       });

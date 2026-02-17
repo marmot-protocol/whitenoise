@@ -223,24 +223,23 @@
   "deleteAllDataConfirmation": "Supprimer toutes les données ?",
   "deleteAllDataWarning": "Cela supprimera définitivement tous vos chats, messages et paramètres de cet appareil. Cette action ne peut pas être annulée.",
   "deleteAllDataError": "Échec de la suppression de toutes les données. Veuillez réessayer.",
-
   "chatInformation": "Informations du chat",
-  "@chatInformation": {
-    "description": "Chat information screen title"
-  },
-
   "addAsContact": "Ajouter comme contact",
-  "@addAsContact": {
-    "description": "Action label to add a user as contact"
-  },
-
   "removeAsContact": "Retirer des contacts",
-  "@removeAsContact": {
-    "description": "Action label to remove a user as contact"
-  },
-
   "addToGroup": "Ajouter à un groupe",
-  "@addToGroup": {
-    "description": "Action label to add this user to a group"
-  }
+  "relayResolutionTitle": "Configuration du relais",
+  "relayResolutionDescription": "Nous n'avons pas trouvé vos listes de relais sur le réseau. Vous pouvez fournir un relais où vos listes sont publiées ou utiliser nos relais par défaut pour commencer.",
+  "relayResolutionUseDefaults": "Utiliser les relais par défaut",
+  "relayResolutionTryRelay": "Rechercher un relais",
+  "relayResolutionRelayPlaceholder": "wss://relais.exemple.com",
+  "relayResolutionRelayLabel": "URL du relais",
+  "relayResolutionNotFound": "Aucune liste de relais trouvée sur ce relais. Essayez un autre ou utilisez les valeurs par défaut.",
+  "loginErrorInvalidKey": "Format de clé privée invalide. Veuillez vérifier et réessayer.",
+  "loginErrorNoRelayConnections": "Impossible de se connecter à des relais. Vérifiez votre connexion et réessayez.",
+  "loginErrorTimeout": "La connexion a expiré. Veuillez réessayer.",
+  "loginErrorGeneric": "Une erreur est survenue lors de la connexion. Veuillez réessayer.",
+  "loginErrorNoLoginInProgress": "Aucune connexion en cours. Veuillez recommencer.",
+  "loginErrorInternal": "Une erreur interne est survenue. Veuillez réessayer.",
+  "loginPasteNothingToPaste": "Rien à coller",
+  "loginPasteFailed": "Échec du collage depuis le presse-papiers"
 }

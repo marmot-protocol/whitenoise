@@ -772,4 +772,54 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get addToGroup => 'Zur Gruppe hinzufügen';
+
+  @override
+  String get relayResolutionTitle => 'Relay-Einrichtung';
+
+  @override
+  String get relayResolutionDescription =>
+      'Wir konnten Ihre Relay-Listen nicht im Netzwerk finden. Sie können ein Relay angeben, auf dem Ihre Listen veröffentlicht sind, oder unsere Standard-Relays verwenden, um loszulegen.';
+
+  @override
+  String get relayResolutionUseDefaults => 'Standard-Relays verwenden';
+
+  @override
+  String get relayResolutionTryRelay => 'Relay durchsuchen';
+
+  @override
+  String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
+
+  @override
+  String get relayResolutionRelayLabel => 'Relay-URL';
+
+  @override
+  String get relayResolutionNotFound =>
+      'Keine Relay-Listen auf diesem Relay gefunden. Versuchen Sie ein anderes oder verwenden Sie die Standardeinstellungen.';
+
+  @override
+  String get loginErrorInvalidKey =>
+      'Ungültiges Format des privaten Schlüssels. Bitte überprüfen und erneut versuchen.';
+
+  @override
+  String get loginErrorNoRelayConnections =>
+      'Verbindung zu Relays nicht möglich. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.';
+
+  @override
+  String get loginErrorTimeout => 'Zeitüberschreitung bei der Anmeldung. Bitte erneut versuchen.';
+
+  @override
+  String get loginErrorGeneric =>
+      'Bei der Anmeldung ist ein Fehler aufgetreten. Bitte erneut versuchen.';
+
+  @override
+  String get loginErrorNoLoginInProgress => 'Kein Anmeldevorgang aktiv. Bitte starten Sie erneut.';
+
+  @override
+  String get loginErrorInternal => 'Ein interner Fehler ist aufgetreten. Bitte erneut versuchen.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Nichts zum Einfügen';
+
+  @override
+  String get loginPasteFailed => 'Einfügen aus der Zwischenablage fehlgeschlagen';
 }

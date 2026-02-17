@@ -27,7 +27,7 @@ class AuthNotifier extends AsyncNotifier<String?> {
         await const AndroidSignerService().registerExternalSigner(pubkey);
       }
     } catch (e) {
-      if (e is ApiError && e.message.contains('Account not found')) {
+      if (e is ApiError_Whitenoise && e.message.contains('Account not found')) {
         await storage.delete(key: _storageKey);
         return null;
       }
@@ -35,41 +35,105 @@ class AuthNotifier extends AsyncNotifier<String?> {
     return pubkey;
   }
 
-  /// Login with a private key (nsec) or hex key.
-  Future<void> loginWithNsec(String nsec) async {
-    _logger.info('Login attempt started');
-    final storage = ref.read(secureStorageProvider);
-    final account = await accounts_api.login(nsecOrHexPrivkey: nsec);
-    users_api.userMetadata(pubkey: account.pubkey, blockingDataSync: false);
-    await storage.write(key: _storageKey, value: account.pubkey);
-    state = AsyncData(account.pubkey);
-    ref.read(isAddingAccountProvider.notifier).set(false);
-    _logger.info('Login successful');
+  // ---------------------------------------------------------------------------
+  // Multi-step login (nsec / hex private key)
+  // ---------------------------------------------------------------------------
+
+  Future<accounts_api.LoginResult> loginStart(String nsec) async {
+    _logger.info('Login start attempt');
+    final result = await accounts_api.loginStart(nsecOrHexPrivkey: nsec);
+
+    if (result.status == accounts_api.LoginStatus.complete) {
+      await _completeLogin(result.account.pubkey);
+    }
+
+    return result;
   }
 
-  //  NIP-55 (https://github.com/nostr-protocol/nips/blob/master/55.md)
-  Future<void> loginWithAndroidSigner({
+  Future<accounts_api.LoginResult> loginPublishDefaultRelays(String pubkey) async {
+    _logger.info('Publishing default relays for $pubkey');
+    final result = await accounts_api.loginPublishDefaultRelays(pubkey: pubkey);
+
+    if (result.status == accounts_api.LoginStatus.complete) {
+      await _completeLogin(result.account.pubkey);
+    }
+
+    return result;
+  }
+
+  Future<accounts_api.LoginResult> loginWithCustomRelay(
+    String pubkey,
+    String relayUrl,
+  ) async {
+    _logger.info('Trying custom relay $relayUrl for $pubkey');
+    final result = await accounts_api.loginWithCustomRelay(
+      pubkey: pubkey,
+      relayUrl: relayUrl,
+    );
+
+    if (result.status == accounts_api.LoginStatus.complete) {
+      await _completeLogin(result.account.pubkey);
+    }
+
+    return result;
+  }
+
+  Future<void> loginCancel(String pubkey) async {
+    _logger.info('Cancelling login for $pubkey');
+    await accounts_api.loginCancel(pubkey: pubkey);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Multi-step login (external signer / NIP-55)
+  // ---------------------------------------------------------------------------
+
+  Future<accounts_api.LoginResult> loginExternalSignerStart({
     required String pubkey,
   }) async {
-    _logger.info('Android signer login attempt started');
-    final storage = ref.read(secureStorageProvider);
+    _logger.info('External signer login start attempt');
     final signerService = const AndroidSignerService();
+    final result = await signerService.loginExternalSignerStart(pubkey);
 
-    try {
-      final account = await signerService.loginWithExternalSigner(pubkey);
-
-      users_api.userMetadata(pubkey: account.pubkey, blockingDataSync: false);
-      await storage.write(key: _storageKey, value: account.pubkey);
-      state = AsyncData(account.pubkey);
-      ref.read(isAddingAccountProvider.notifier).set(false);
-      _logger.info('Android signer login successful with key package published');
-    } catch (e) {
-      _logger.warning('Android signer login failed with unexpected error: $e');
-      rethrow;
+    if (result.status == accounts_api.LoginStatus.complete) {
+      await _completeLogin(result.account.pubkey);
     }
+
+    return result;
   }
 
-  /// Create a new identity (signup).
+  Future<accounts_api.LoginResult> loginExternalSignerPublishDefaultRelays(
+    String pubkey,
+  ) async {
+    _logger.info('External signer: publishing default relays for $pubkey');
+    final signerService = const AndroidSignerService();
+    final result = await signerService.loginExternalSignerPublishDefaultRelays(pubkey);
+
+    if (result.status == accounts_api.LoginStatus.complete) {
+      await _completeLogin(result.account.pubkey);
+    }
+
+    return result;
+  }
+
+  Future<accounts_api.LoginResult> loginExternalSignerWithCustomRelay(
+    String pubkey,
+    String relayUrl,
+  ) async {
+    _logger.info('External signer: trying custom relay $relayUrl for $pubkey');
+    final signerService = const AndroidSignerService();
+    final result = await signerService.loginExternalSignerWithCustomRelay(pubkey, relayUrl);
+
+    if (result.status == accounts_api.LoginStatus.complete) {
+      await _completeLogin(result.account.pubkey);
+    }
+
+    return result;
+  }
+
+  // ---------------------------------------------------------------------------
+  // Signup / Logout / Profile switching
+  // ---------------------------------------------------------------------------
+
   Future<String> signup() async {
     _logger.info('Signup started');
     final storage = ref.read(secureStorageProvider);
@@ -118,7 +182,6 @@ class AuthNotifier extends AsyncNotifier<String?> {
     _logger.info('Auth state reset complete');
   }
 
-  /// Switch the active profile to the given pubkey.
   Future<void> switchProfile(String pubkey) async {
     _logger.info('Switching profile');
     final storage = ref.read(secureStorageProvider);
@@ -128,7 +191,7 @@ class AuthNotifier extends AsyncNotifier<String?> {
       state = AsyncData(pubkey);
       _logger.info('Profile switched successfully');
     } catch (e) {
-      if (e is ApiError && e.message.contains('Account not found')) {
+      if (e is ApiError_Whitenoise && e.message.contains('Account not found')) {
         _logger.warning('Account not found during switch');
         await storage.delete(key: _storageKey);
         state = const AsyncData(null);
@@ -136,6 +199,25 @@ class AuthNotifier extends AsyncNotifier<String?> {
         rethrow;
       }
     }
+  }
+
+  // ---------------------------------------------------------------------------
+  // Private helpers
+  // ---------------------------------------------------------------------------
+
+  Future<void> _completeLogin(String pubkey) async {
+    final storage = ref.read(secureStorageProvider);
+    () async {
+      try {
+        await users_api.userMetadata(pubkey: pubkey, blockingDataSync: false);
+      } catch (e, stackTrace) {
+        _logger.warning('Failed to fetch user metadata for $pubkey', e, stackTrace);
+      }
+    }();
+    await storage.write(key: _storageKey, value: pubkey);
+    state = AsyncData(pubkey);
+    ref.read(isAddingAccountProvider.notifier).set(false);
+    _logger.info('Login completed for $pubkey');
   }
 }
 

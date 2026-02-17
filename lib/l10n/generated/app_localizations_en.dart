@@ -755,4 +755,52 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get addToGroup => 'Add to group';
+
+  @override
+  String get relayResolutionTitle => 'Relay Setup';
+
+  @override
+  String get relayResolutionDescription =>
+      'We couldn\'t find your relay lists on the network. You can provide a relay where your lists are published, or use our default relays to get started.';
+
+  @override
+  String get relayResolutionUseDefaults => 'Use default relays';
+
+  @override
+  String get relayResolutionTryRelay => 'Search relay';
+
+  @override
+  String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
+
+  @override
+  String get relayResolutionRelayLabel => 'Relay URL';
+
+  @override
+  String get relayResolutionNotFound =>
+      'No relay lists found on this relay. Try another or use defaults.';
+
+  @override
+  String get loginErrorInvalidKey => 'Invalid private key format. Please check and try again.';
+
+  @override
+  String get loginErrorNoRelayConnections =>
+      'Could not connect to any relays. Please check your connection and try again.';
+
+  @override
+  String get loginErrorTimeout => 'Login timed out. Please try again.';
+
+  @override
+  String get loginErrorGeneric => 'An error occurred during login. Please try again.';
+
+  @override
+  String get loginErrorNoLoginInProgress => 'No login in progress. Please start over.';
+
+  @override
+  String get loginErrorInternal => 'An internal error occurred. Please try again.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Nothing to paste';
+
+  @override
+  String get loginPasteFailed => 'Failed to paste from clipboard';
 }

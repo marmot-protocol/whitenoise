@@ -760,4 +760,54 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get addToGroup => 'Adicionar ao grupo';
+
+  @override
+  String get relayResolutionTitle => 'Configuração de relay';
+
+  @override
+  String get relayResolutionDescription =>
+      'Não conseguimos encontrar as suas listas de relays na rede. Pode fornecer um relay onde as suas listas estejam publicadas ou utilizar os nossos relays predefinidos para começar.';
+
+  @override
+  String get relayResolutionUseDefaults => 'Usar relays predefinidos';
+
+  @override
+  String get relayResolutionTryRelay => 'Pesquisar relay';
+
+  @override
+  String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
+
+  @override
+  String get relayResolutionRelayLabel => 'URL do relay';
+
+  @override
+  String get relayResolutionNotFound =>
+      'Nenhuma lista de relays encontrada neste relay. Tente outro ou use os predefinidos.';
+
+  @override
+  String get loginErrorInvalidKey =>
+      'Formato de chave privada inválido. Verifique e tente novamente.';
+
+  @override
+  String get loginErrorNoRelayConnections =>
+      'Não foi possível conectar a nenhum relay. Verifique a sua conexão e tente novamente.';
+
+  @override
+  String get loginErrorTimeout => 'Tempo de login esgotado. Tente novamente.';
+
+  @override
+  String get loginErrorGeneric => 'Ocorreu um erro durante o login. Tente novamente.';
+
+  @override
+  String get loginErrorNoLoginInProgress =>
+      'Nenhum login em andamento. Por favor, comece novamente.';
+
+  @override
+  String get loginErrorInternal => 'Ocorreu um erro interno. Tente novamente.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Nada para colar';
+
+  @override
+  String get loginPasteFailed => 'Falha ao colar da área de transferência';
 }

@@ -1,6 +1,7 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/services/android_signer_service.dart';
+import 'package:whitenoise/src/rust/api/accounts.dart' show LoginResult;
 
 final _logger = Logger('useLoginWithAndroidSigner');
 
@@ -25,15 +26,18 @@ class LoginWithAndroidSignerState {
   }
 }
 
-typedef LoginWithAndroidSignerCallback = Future<void> Function(String pubkey);
+typedef LoginExternalSignerStartCallback =
+    Future<LoginResult> Function({
+      required String pubkey,
+    });
 
 ({
   bool isAndroidSignerAvailable,
   LoginWithAndroidSignerState loginWithAndroidSignerState,
-  Future<bool> Function() submitLoginWithAndroidSigner,
+  Future<LoginResult?> Function() submitLoginWithAndroidSigner,
   void Function() clearLoginWithAndroidSignerError,
 })
-useLoginWithAndroidSigner(LoginWithAndroidSignerCallback login) {
+useLoginWithAndroidSigner(LoginExternalSignerStartCallback loginExternalSignerStart) {
   final isAndroidSignerAvailable = useState(false);
   final state = useState(const LoginWithAndroidSignerState());
 
@@ -59,24 +63,24 @@ useLoginWithAndroidSigner(LoginWithAndroidSignerCallback login) {
     }
   }
 
-  Future<bool> submitLoginWithAndroidSigner() async {
+  Future<LoginResult?> submitLoginWithAndroidSigner() async {
     state.value = state.value.copyWith(isLoading: true, clearError: true);
     try {
       final pubkey = await const AndroidSignerService().getPublicKey();
-      await login(pubkey);
+      final result = await loginExternalSignerStart(pubkey: pubkey);
       state.value = state.value.copyWith(isLoading: false);
-      return true;
+      return result;
     } on AndroidSignerException catch (e, stackTrace) {
       _logger.severe('Android signer login failed', e, stackTrace);
       state.value = state.value.copyWith(isLoading: false, error: e.code);
-      return false;
+      return null;
     } catch (e, stackTrace) {
       _logger.severe('Android signer login failed', e, stackTrace);
       state.value = state.value.copyWith(
         isLoading: false,
         error: 'CONNECTION_ERROR',
       );
-      return false;
+      return null;
     }
   }
 

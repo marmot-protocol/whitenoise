@@ -28,6 +28,21 @@ pub enum ApiError {
     #[error("Nostr hex error: {message}")]
     NostrHex { message: String },
 
+    #[error("Invalid private key format: {message}")]
+    LoginInvalidKeyFormat { message: String },
+
+    #[error("Failed to connect to any relays")]
+    LoginNoRelayConnections,
+
+    #[error("Login operation timed out: {message}")]
+    LoginTimeout { message: String },
+
+    #[error("No login in progress for this account")]
+    LoginNoLoginInProgress,
+
+    #[error("Login error: {message}")]
+    LoginInternal { message: String },
+
     #[error("Other error: {message}")]
     Other { message: String },
 }
@@ -37,6 +52,20 @@ impl From<whitenoise::WhitenoiseError> for ApiError {
     fn from(error: whitenoise::WhitenoiseError) -> Self {
         Self::Whitenoise {
             message: error.to_string(),
+        }
+    }
+}
+
+impl From<whitenoise::LoginError> for ApiError {
+    fn from(error: whitenoise::LoginError) -> Self {
+        match error {
+            whitenoise::LoginError::InvalidKeyFormat(msg) => {
+                Self::LoginInvalidKeyFormat { message: msg }
+            }
+            whitenoise::LoginError::NoRelayConnections => Self::LoginNoRelayConnections,
+            whitenoise::LoginError::Timeout(msg) => Self::LoginTimeout { message: msg },
+            whitenoise::LoginError::NoLoginInProgress => Self::LoginNoLoginInProgress,
+            whitenoise::LoginError::Internal(msg) => Self::LoginInternal { message: msg },
         }
     }
 }
@@ -108,6 +137,11 @@ impl ApiError {
             ApiError::NostrEvent { .. } => "NostrEvent".to_string(),
             ApiError::NostrParse { .. } => "NostrParse".to_string(),
             ApiError::NostrHex { .. } => "NostrHex".to_string(),
+            ApiError::LoginInvalidKeyFormat { .. } => "LoginInvalidKeyFormat".to_string(),
+            ApiError::LoginNoRelayConnections => "LoginNoRelayConnections".to_string(),
+            ApiError::LoginTimeout { .. } => "LoginTimeout".to_string(),
+            ApiError::LoginNoLoginInProgress => "LoginNoLoginInProgress".to_string(),
+            ApiError::LoginInternal { .. } => "LoginInternal".to_string(),
             ApiError::Other { .. } => "Other".to_string(),
         }
     }
@@ -122,6 +156,11 @@ impl ApiError {
             ApiError::NostrEvent { message } => message.clone(),
             ApiError::NostrParse { message } => message.clone(),
             ApiError::NostrHex { message } => message.clone(),
+            ApiError::LoginInvalidKeyFormat { message } => message.clone(),
+            ApiError::LoginNoRelayConnections => "Failed to connect to any relays".to_string(),
+            ApiError::LoginTimeout { message } => message.clone(),
+            ApiError::LoginNoLoginInProgress => "No login in progress for this account".to_string(),
+            ApiError::LoginInternal { message } => message.clone(),
             ApiError::Other { message } => message.clone(),
         }
     }

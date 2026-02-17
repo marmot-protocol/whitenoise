@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
+import 'package:whitenoise/utils/relay_url_validation.dart';
 
 final _logger = Logger('useAddRelay');
 
@@ -19,42 +20,16 @@ useAddRelay() {
   final validationError = useState<String?>(null);
   final debounceTimer = useRef<Timer?>(null);
 
-  String? validateUrl(String url) {
-    if (!url.startsWith('wss://') && !url.startsWith('ws://')) {
-      return 'URL must start with wss:// or ws://';
-    }
-
-    final uri = Uri.tryParse(url);
-    if (uri == null || !uri.hasScheme) {
-      return 'Invalid relay URL';
-    }
-
-    if (uri.host.isEmpty) {
-      return 'Invalid relay URL';
-    }
-
-    if (uri.host.contains('wss://') || uri.host.contains('ws://') || uri.host.contains('://')) {
-      return 'Invalid relay URL';
-    }
-
-    final hostParts = uri.host.split('.');
-    if (hostParts.length < 2 || hostParts.any((part) => part.isEmpty)) {
-      return 'Invalid relay URL';
-    }
-
-    return null;
-  }
-
-  void validateRelayUrl() {
+  void runValidation() {
     final url = controller.text.trim();
 
-    if (url.isEmpty || url == 'wss://' || url == 'ws://') {
+    if (isRelayUrlEmpty(url)) {
       isValid.value = false;
       validationError.value = null;
       return;
     }
 
-    final error = validateUrl(url);
+    final error = validateRelayUrl(url);
 
     if (error == null) {
       isValid.value = true;
@@ -68,7 +43,7 @@ useAddRelay() {
   void onUrlChanged() {
     debounceTimer.value?.cancel();
     isValid.value = false;
-    debounceTimer.value = Timer(const Duration(milliseconds: 500), validateRelayUrl);
+    debounceTimer.value = Timer(const Duration(milliseconds: 500), runValidation);
   }
 
   useEffect(() {
@@ -92,7 +67,7 @@ useAddRelay() {
         }
 
         debounceTimer.value?.cancel();
-        debounceTimer.value = Timer(const Duration(milliseconds: 100), validateRelayUrl);
+        debounceTimer.value = Timer(const Duration(milliseconds: 100), runValidation);
       }
     } catch (e) {
       _logger.warning('Failed to paste from clipboard: $e');

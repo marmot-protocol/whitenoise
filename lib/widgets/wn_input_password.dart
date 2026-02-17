@@ -5,6 +5,7 @@ import 'package:gap/gap.dart' show Gap;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_input.dart';
+import 'package:whitenoise/widgets/wn_input_field_button.dart';
 
 class WnInputPassword extends HookWidget {
   const WnInputPassword({
@@ -186,58 +187,30 @@ class WnInputPassword extends HookWidget {
     ValueNotifier<bool> isVisible,
     bool isEmpty,
   ) {
-    final buttonWidth = size == WnInputSize.size44 ? 36.w : 48.w;
-    final buttonHeight = size == WnInputSize.size44 ? 36.h : 48.h;
-    final iconWrapperWidth = 36.w;
-    final iconWrapperHeight = 36.h;
-    final iconSize = 16.w;
+    final btnSize = size.inlineActionButtonSize;
 
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
         if (onScan != null)
-          GestureDetector(
-            key: const Key('scan_button'),
-            onTap: enabled ? onScan : null,
-            child: Container(
-              width: buttonWidth,
-              height: buttonHeight,
-              color: Colors.transparent,
-              child: Center(
-                child: SizedBox(
-                  width: iconWrapperWidth,
-                  height: iconWrapperHeight,
-                  child: Center(
-                    child: WnIcon(
-                      WnIcons.scan,
-                      size: iconSize,
-                      color: colors.backgroundContentPrimary,
-                    ),
-                  ),
-                ),
-              ),
+          IgnorePointer(
+            ignoring: !enabled,
+            child: WnInputFieldButton(
+              key: const Key('scan_button'),
+              icon: WnIcons.scan,
+              onPressed: onScan!,
+              buttonSize: btnSize,
+              filled: false,
             ),
           ),
-        GestureDetector(
-          key: const Key('visibility_toggle'),
-          onTap: enabled ? () => isVisible.value = !isVisible.value : null,
-          child: Container(
-            width: buttonWidth,
-            height: buttonHeight,
-            color: Colors.transparent,
-            child: Center(
-              child: SizedBox(
-                width: iconWrapperWidth,
-                height: iconWrapperHeight,
-                child: Center(
-                  child: WnIcon(
-                    isVisible.value ? WnIcons.viewOff : WnIcons.view,
-                    size: iconSize,
-                    color: colors.backgroundContentPrimary,
-                  ),
-                ),
-              ),
-            ),
+        IgnorePointer(
+          ignoring: !enabled,
+          child: WnInputFieldButton(
+            key: const Key('visibility_toggle'),
+            icon: isVisible.value ? WnIcons.viewOff : WnIcons.view,
+            onPressed: () => isVisible.value = !isVisible.value,
+            buttonSize: btnSize,
+            filled: false,
           ),
         ),
       ],

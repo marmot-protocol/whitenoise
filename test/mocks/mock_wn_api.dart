@@ -11,7 +11,7 @@ import 'package:whitenoise/src/rust/api/user_search.dart';
 import 'package:whitenoise/src/rust/api/users.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
-import '../test_helpers.dart' show testHexToNpub, testNpubToHex;
+import '../test_helpers.dart' show testHexToNpub, testNpubToHex, testPubkeyA;
 
 class MockThemeMode implements rust_api.ThemeMode {
   final String mode;
@@ -50,6 +50,10 @@ class MockWnApi implements RustLibApi {
   bool deleteAllDataCalled = false;
   bool deleteAllDataShouldFail = false;
   Duration deleteAllDataDelay = Duration.zero;
+
+  LoginResult? loginStartResult;
+  LoginResult? loginExternalSignerStartResult;
+  bool registerExternalSignerCalled = false;
 
   @override
   Future<bool> crateApiUsersUserHasKeyPackage({
@@ -306,6 +310,120 @@ class MockWnApi implements RustLibApi {
     }
   }
 
+  @override
+  Future<LoginResult> crateApiAccountsLoginStart({
+    required String nsecOrHexPrivkey,
+  }) async {
+    if (loginStartResult != null) return loginStartResult!;
+    return LoginResult(
+      account: Account(
+        pubkey: testPubkeyA,
+        accountType: AccountType.local,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
+    );
+  }
+
+  @override
+  Future<LoginResult> crateApiAccountsLoginPublishDefaultRelays({
+    required String pubkey,
+  }) async {
+    return LoginResult(
+      account: Account(
+        pubkey: pubkey,
+        accountType: AccountType.local,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
+    );
+  }
+
+  @override
+  Future<LoginResult> crateApiAccountsLoginWithCustomRelay({
+    required String pubkey,
+    required String relayUrl,
+  }) async {
+    return LoginResult(
+      account: Account(
+        pubkey: pubkey,
+        accountType: AccountType.local,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
+    );
+  }
+
+  @override
+  Future<void> crateApiAccountsLoginCancel({required String pubkey}) async {}
+
+  @override
+  Future<LoginResult> crateApiSignerLoginExternalSignerStart({
+    required String pubkey,
+    required FutureOr<String> Function(String) signEvent,
+    required FutureOr<String> Function(String, String) nip04Encrypt,
+    required FutureOr<String> Function(String, String) nip04Decrypt,
+    required FutureOr<String> Function(String, String) nip44Encrypt,
+    required FutureOr<String> Function(String, String) nip44Decrypt,
+  }) async {
+    if (loginExternalSignerStartResult != null) return loginExternalSignerStartResult!;
+    return LoginResult(
+      account: Account(
+        pubkey: pubkey,
+        accountType: AccountType.external_,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
+    );
+  }
+
+  @override
+  Future<LoginResult> crateApiSignerLoginExternalSignerPublishDefaultRelays({
+    required String pubkey,
+  }) async {
+    return LoginResult(
+      account: Account(
+        pubkey: pubkey,
+        accountType: AccountType.external_,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
+    );
+  }
+
+  @override
+  Future<LoginResult> crateApiSignerLoginExternalSignerWithCustomRelay({
+    required String pubkey,
+    required String relayUrl,
+  }) async {
+    return LoginResult(
+      account: Account(
+        pubkey: pubkey,
+        accountType: AccountType.external_,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
+    );
+  }
+
+  @override
+  Future<void> crateApiSignerRegisterExternalSigner({
+    required String pubkey,
+    required FutureOr<String> Function(String) signEvent,
+    required FutureOr<String> Function(String, String) nip04Encrypt,
+    required FutureOr<String> Function(String, String) nip04Decrypt,
+    required FutureOr<String> Function(String, String) nip44Encrypt,
+    required FutureOr<String> Function(String, String) nip44Decrypt,
+  }) async {
+    registerExternalSignerCalled = true;
+  }
+
   void reset() {
     currentThemeMode = 'system';
     currentLanguage = 'system';
@@ -321,6 +439,9 @@ class MockWnApi implements RustLibApi {
     deleteAllDataCalled = false;
     deleteAllDataShouldFail = false;
     deleteAllDataDelay = Duration.zero;
+    loginStartResult = null;
+    loginExternalSignerStartResult = null;
+    registerExternalSignerCalled = false;
   }
 
   @override

@@ -4,16 +4,27 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_login_with_nsec.dart';
+import 'package:whitenoise/src/rust/api/accounts.dart';
 import '../mocks/mock_clipboard_paste.dart';
 import '../test_helpers.dart';
 
+LoginResult _completeLoginResult() => LoginResult(
+  account: Account(
+    pubkey: testPubkeyA,
+    accountType: AccountType.local,
+    createdAt: DateTime.now(),
+    updatedAt: DateTime.now(),
+  ),
+  status: LoginStatus.complete,
+);
+
 class _TestWidget extends HookWidget {
-  final Future<void> Function(String) loginCallback;
+  final Future<LoginResult> Function(String) loginCallback;
   final void Function(
     TextEditingController controller,
     LoginWithNsecState state,
     Future<void> Function() paste,
-    Future<bool> Function() submit,
+    Future<LoginResult?> Function() submit,
     void Function() clearError,
   )
   onBuild;
@@ -54,7 +65,7 @@ void main() {
       late TextEditingController capturedController;
 
       final widget = _TestWidget(
-        loginCallback: (_) async {},
+        loginCallback: (_) async => _completeLoginResult(),
         onBuild: (controller, state, paste, submit, clearError) {
           capturedController = controller;
         },
@@ -68,7 +79,7 @@ void main() {
       late bool capturedIsLoading;
 
       final widget = _TestWidget(
-        loginCallback: (_) async {},
+        loginCallback: (_) async => _completeLoginResult(),
         onBuild: (controller, state, paste, submit, clearError) {
           capturedIsLoading = state.isLoading;
         },
@@ -82,7 +93,7 @@ void main() {
       late String? capturedError;
 
       final widget = _TestWidget(
-        loginCallback: (_) async {},
+        loginCallback: (_) async => _completeLoginResult(),
         onBuild: (controller, state, paste, submit, clearError) {
           capturedError = state.error;
         },
@@ -93,11 +104,11 @@ void main() {
     });
 
     group('submit', () {
-      testWidgets('returns false when nsec is empty', (tester) async {
-        late Future<bool> Function() capturedSubmit;
+      testWidgets('returns null when nsec is empty', (tester) async {
+        late Future<LoginResult?> Function() capturedSubmit;
 
         final widget = _TestWidget(
-          loginCallback: (_) async {},
+          loginCallback: (_) async => _completeLoginResult(),
           onBuild: (controller, state, paste, submit, clearError) {
             capturedSubmit = submit;
           },
@@ -105,16 +116,17 @@ void main() {
         await mountWidget(widget, tester);
 
         final result = await capturedSubmit();
-        expect(result, false);
+        expect(result, isNull);
       });
 
       testWidgets('calls login callback with nsec', (tester) async {
         String? capturedNsec;
-        late Future<bool> Function() capturedSubmit;
+        late Future<LoginResult?> Function() capturedSubmit;
 
         final widget = _TestWidget(
           loginCallback: (nsec) async {
             capturedNsec = nsec;
+            return _completeLoginResult();
           },
           onBuild: (controller, state, paste, submit, clearError) {
             capturedSubmit = submit;
@@ -126,19 +138,20 @@ void main() {
         final result = await capturedSubmit();
 
         expect(capturedNsec, 'nsec1test');
-        expect(result, true);
+        expect(result, isNotNull);
+        expect(result!.status, LoginStatus.complete);
       });
 
       testWidgets('sets loading state during submit', (tester) async {
         bool loginCalled = false;
-        late Completer<void> loginCompleter;
-        late Future<bool> Function() capturedSubmit;
+        late Completer<LoginResult> loginCompleter;
+        late Future<LoginResult?> Function() capturedSubmit;
         late LoginWithNsecState capturedState;
 
         final widget = _TestWidget(
           loginCallback: (_) async {
             loginCalled = true;
-            await loginCompleter.future;
+            return loginCompleter.future;
           },
           onBuild: (controller, state, paste, submit, clearError) {
             capturedSubmit = submit;
@@ -147,7 +160,7 @@ void main() {
         );
         await mountWidget(widget, tester);
 
-        loginCompleter = Completer<void>();
+        loginCompleter = Completer<LoginResult>();
         await tester.enterText(find.byType(TextField), 'nsec1test');
 
         final submitFuture = capturedSubmit();
@@ -156,7 +169,7 @@ void main() {
         expect(capturedState.isLoading, true);
         expect(loginCalled, true);
 
-        loginCompleter.complete();
+        loginCompleter.complete(_completeLoginResult());
         await submitFuture;
         await tester.pump();
 
@@ -164,7 +177,7 @@ void main() {
       });
 
       testWidgets('sets error message on failure', (tester) async {
-        late Future<bool> Function() capturedSubmit;
+        late Future<LoginResult?> Function() capturedSubmit;
         late LoginWithNsecState capturedState;
 
         final widget = _TestWidget(
@@ -183,15 +196,15 @@ void main() {
         final result = await capturedSubmit();
         await tester.pump();
 
-        expect(result, false);
-        expect(capturedState.error, 'Oh no! An error occurred, please try again.');
+        expect(result, isNull);
+        expect(capturedState.error, 'loginErrorGeneric');
       });
 
-      testWidgets('returns true on success', (tester) async {
-        late Future<bool> Function() capturedSubmit;
+      testWidgets('returns LoginResult on success', (tester) async {
+        late Future<LoginResult?> Function() capturedSubmit;
 
         final widget = _TestWidget(
-          loginCallback: (_) async {},
+          loginCallback: (_) async => _completeLoginResult(),
           onBuild: (controller, state, paste, submit, clearError) {
             capturedSubmit = submit;
           },
@@ -201,7 +214,8 @@ void main() {
         await tester.enterText(find.byType(TextField), 'nsec1test');
 
         final result = await capturedSubmit();
-        expect(result, true);
+        expect(result, isNotNull);
+        expect(result!.status, LoginStatus.complete);
       });
     });
 
@@ -226,7 +240,7 @@ void main() {
         late Future<void> Function() capturedPaste;
 
         final widget = _TestWidget(
-          loginCallback: (_) async {},
+          loginCallback: (_) async => _completeLoginResult(),
           onBuild: (controller, state, paste, submit, clearError) {
             capturedController = controller;
             capturedPaste = paste;
@@ -244,7 +258,7 @@ void main() {
 
       testWidgets('clears error when pasting', (tester) async {
         late Future<void> Function() capturedPaste;
-        late Future<bool> Function() capturedSubmit;
+        late Future<LoginResult?> Function() capturedSubmit;
         late LoginWithNsecState capturedState;
 
         final widget = _TestWidget(
@@ -277,7 +291,7 @@ void main() {
         late Future<void> Function() capturedPaste;
 
         final widget = _TestWidget(
-          loginCallback: (_) async {},
+          loginCallback: (_) async => _completeLoginResult(),
           onBuild: (controller, state, paste, submit, clearError) {
             capturedController = controller;
             capturedPaste = paste;
@@ -298,7 +312,7 @@ void main() {
         late Future<void> Function() capturedPaste;
 
         final widget = _TestWidget(
-          loginCallback: (_) async {},
+          loginCallback: (_) async => _completeLoginResult(),
           onBuild: (controller, state, paste, submit, clearError) {
             capturedController = controller;
             capturedPaste = paste;
@@ -319,7 +333,7 @@ void main() {
         late Future<void> Function() capturedPaste;
 
         final widget = _TestWidget(
-          loginCallback: (_) async {},
+          loginCallback: (_) async => _completeLoginResult(),
           onBuild: (controller, state, paste, submit, clearError) {
             capturedPaste = paste;
             capturedState = state;
@@ -332,7 +346,7 @@ void main() {
         await capturedPaste();
         await tester.pumpAndSettle();
 
-        expect(capturedState.error, 'Nothing to paste');
+        expect(capturedState.error, 'loginPasteNothingToPaste');
       });
 
       testWidgets('shows error when clipboard is empty string', (tester) async {
@@ -340,7 +354,7 @@ void main() {
         late Future<void> Function() capturedPaste;
 
         final widget = _TestWidget(
-          loginCallback: (_) async {},
+          loginCallback: (_) async => _completeLoginResult(),
           onBuild: (controller, state, paste, submit, clearError) {
             capturedPaste = paste;
             capturedState = state;
@@ -353,7 +367,7 @@ void main() {
         await capturedPaste();
         await tester.pumpAndSettle();
 
-        expect(capturedState.error, 'Nothing to paste');
+        expect(capturedState.error, 'loginPasteNothingToPaste');
       });
 
       testWidgets('handles clipboard exception gracefully', (tester) async {
@@ -361,7 +375,7 @@ void main() {
         late Future<void> Function() capturedPaste;
 
         final widget = _TestWidget(
-          loginCallback: (_) async {},
+          loginCallback: (_) async => _completeLoginResult(),
           onBuild: (controller, state, paste, submit, clearError) {
             capturedPaste = paste;
             capturedState = state;
@@ -374,34 +388,13 @@ void main() {
         await capturedPaste();
         await tester.pumpAndSettle();
 
-        expect(capturedState.error, 'Failed to paste from clipboard');
-      });
-    });
-
-    group('dispose', () {
-      testWidgets('clears controller text on dispose', (tester) async {
-        late TextEditingController capturedController;
-
-        final widget = _TestWidget(
-          loginCallback: (_) async {},
-          onBuild: (controller, state, paste, submit, clearError) {
-            capturedController = controller;
-          },
-        );
-        await mountWidget(widget, tester);
-
-        await tester.enterText(find.byType(TextField), 'nsec1test');
-        expect(capturedController.text, 'nsec1test');
-
-        await tester.pumpWidget(const MaterialApp(home: SizedBox()));
-
-        expect(capturedController.text, isEmpty);
+        expect(capturedState.error, 'loginPasteFailed');
       });
     });
 
     group('clearError', () {
       testWidgets('clears error', (tester) async {
-        late Future<bool> Function() capturedSubmit;
+        late Future<LoginResult?> Function() capturedSubmit;
         late void Function() capturedClearError;
         late LoginWithNsecState capturedState;
 

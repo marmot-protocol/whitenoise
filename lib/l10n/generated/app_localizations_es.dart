@@ -763,4 +763,55 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get addToGroup => 'Añadir al grupo';
+
+  @override
+  String get relayResolutionTitle => 'Configuración de relay';
+
+  @override
+  String get relayResolutionDescription =>
+      'No pudimos encontrar tus listas de relays en la red. Puedes proporcionar un relay donde estén publicadas tus listas o usar nuestros relays predeterminados para comenzar.';
+
+  @override
+  String get relayResolutionUseDefaults => 'Usar relays predeterminados';
+
+  @override
+  String get relayResolutionTryRelay => 'Buscar relay';
+
+  @override
+  String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
+
+  @override
+  String get relayResolutionRelayLabel => 'URL del relay';
+
+  @override
+  String get relayResolutionNotFound =>
+      'No se encontraron listas de relays en este relay. Prueba con otro o usa los predeterminados.';
+
+  @override
+  String get loginErrorInvalidKey =>
+      'Formato de clave privada no válido. Por favor, verifica e inténtalo de nuevo.';
+
+  @override
+  String get loginErrorNoRelayConnections =>
+      'No se pudo conectar a ningún relay. Verifica tu conexión e inténtalo de nuevo.';
+
+  @override
+  String get loginErrorTimeout => 'La conexión ha expirado. Inténtalo de nuevo.';
+
+  @override
+  String get loginErrorGeneric =>
+      'Se produjo un error durante el inicio de sesión. Inténtalo de nuevo.';
+
+  @override
+  String get loginErrorNoLoginInProgress =>
+      'No hay inicio de sesión en curso. Por favor, empieza de nuevo.';
+
+  @override
+  String get loginErrorInternal => 'Se produjo un error interno. Inténtalo de nuevo.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Nada que pegar';
+
+  @override
+  String get loginPasteFailed => 'Error al pegar desde el portapapeles';
 }

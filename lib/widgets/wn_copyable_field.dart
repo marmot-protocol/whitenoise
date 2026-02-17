@@ -3,7 +3,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_input.dart';
 
@@ -40,7 +39,6 @@ class WnCopyableField extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final controller = useTextEditingController(text: _getDisplayValue());
 
     useEffect(() {
@@ -54,24 +52,10 @@ class WnCopyableField extends HookWidget {
       controller: controller,
       readOnly: true,
       size: WnInputSize.size44,
-      inlineAction: obscurable
-          ? GestureDetector(
-              key: const Key('visibility_toggle'),
-              onTap: onToggleVisibility,
-              child: Container(
-                width: 36.w,
-                height: 36.h,
-                color: Colors.transparent,
-                child: Center(
-                  child: WnIcon(
-                    obscured ? WnIcons.view : WnIcons.viewOff,
-                    size: 16.w,
-                    color: colors.backgroundContentPrimary,
-                  ),
-                ),
-              ),
-            )
-          : null,
+      inlineActionIcon: obscurable ? (obscured ? WnIcons.view : WnIcons.viewOff) : null,
+      inlineActionOnPressed: obscurable ? onToggleVisibility : null,
+      inlineActionFilled: false,
+      inlineActionKey: obscurable ? const Key('visibility_toggle') : null,
       trailingAction: Row(
         mainAxisSize: MainAxisSize.min,
         children: [

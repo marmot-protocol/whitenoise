@@ -10,7 +10,7 @@ import '../frb_generated.dart';
 
 part 'error.freezed.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
 
 @freezed
 sealed class ApiError with _$ApiError implements FrbException {
@@ -38,6 +38,17 @@ sealed class ApiError with _$ApiError implements FrbException {
   const factory ApiError.nostrHex({
     required String message,
   }) = ApiError_NostrHex;
+  const factory ApiError.loginInvalidKeyFormat({
+    required String message,
+  }) = ApiError_LoginInvalidKeyFormat;
+  const factory ApiError.loginNoRelayConnections() = ApiError_LoginNoRelayConnections;
+  const factory ApiError.loginTimeout({
+    required String message,
+  }) = ApiError_LoginTimeout;
+  const factory ApiError.loginNoLoginInProgress() = ApiError_LoginNoLoginInProgress;
+  const factory ApiError.loginInternal({
+    required String message,
+  }) = ApiError_LoginInternal;
   const factory ApiError.other({
     required String message,
   }) = ApiError_Other;

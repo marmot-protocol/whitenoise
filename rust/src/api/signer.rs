@@ -11,6 +11,7 @@ use std::borrow::Cow;
 use std::fmt::Debug;
 use std::sync::Arc;
 
+use crate::api::accounts::LoginResult;
 use crate::api::error::ApiError;
 
 /// An external signer that delegates signing operations to Dart callbacks.
@@ -142,20 +143,11 @@ impl NostrSigner for DartSigner {
 /// Register an external signer for an existing account.
 ///
 /// This function is used to re-register an external signer after app restart.
-/// Unlike `login_with_external_signer_and_callbacks`, this does NOT perform
-/// any account setup or key package publishing - it only registers the signer
-/// so that subsequent signing operations will work.
+/// Unlike the login functions, this does NOT perform any account setup or key
+/// package publishing - it only registers the signer so that subsequent
+/// signing operations will work.
 ///
 /// Call this on app startup when restoring an external signer account session.
-///
-/// # Arguments
-///
-/// * `pubkey` - The account's public key (hex format).
-/// * `sign_event` - Callback to sign unsigned events.
-/// * `nip04_encrypt` - Callback for NIP-04 encryption.
-/// * `nip04_decrypt` - Callback for NIP-04 decryption.
-/// * `nip44_encrypt` - Callback for NIP-44 encryption.
-/// * `nip44_decrypt` - Callback for NIP-44 decryption.
 #[frb]
 pub fn register_external_signer(
     pubkey: String,
@@ -181,35 +173,26 @@ pub fn register_external_signer(
     Ok(())
 }
 
-/// Login with an external signer (like Amber via NIP-55) and publish key package.
+// -----------------------------------------------------------------------
+// Multi-step login API (external signer)
+// -----------------------------------------------------------------------
+
+/// Step 1 of the multi-step external signer login flow.
 ///
-/// This function creates an account for the given public key and uses the provided
-/// callbacks to sign events. The whitenoise crate handles all the orchestration:
-/// - Account creation/setup
-/// - Relay configuration (fetches existing or uses defaults)
-/// - Publishing relay lists when using defaults
-/// - Publishing the MLS key package
+/// Creates an account for the given public key using the provided signer
+/// callbacks, then attempts to discover existing relay lists from the network.
 ///
-/// The signer is stored in whitenoise and will be used automatically for all
-/// subsequent signing operations (key package deletion, publishing, etc.).
-///
-/// # Arguments
-///
-/// * `pubkey` - The user's public key (hex format) obtained from the external signer.
-/// * `sign_event` - Callback to sign unsigned events. Takes unsigned event JSON, returns signed event JSON.
-/// * `nip04_encrypt` - Callback for NIP-04 encryption. Takes (plaintext, recipient_pubkey), returns ciphertext.
-/// * `nip04_decrypt` - Callback for NIP-04 decryption. Takes (ciphertext, sender_pubkey), returns plaintext.
-/// * `nip44_encrypt` - Callback for NIP-44 encryption. Takes (plaintext, recipient_pubkey), returns ciphertext.
-/// * `nip44_decrypt` - Callback for NIP-44 decryption. Takes (ciphertext, sender_pubkey), returns plaintext.
+/// Returns `LoginStatus::Complete` on the happy path, or
+/// `LoginStatus::NeedsRelayLists` if relay lists were not found.
 #[frb]
-pub async fn login_with_external_signer_and_callbacks(
+pub async fn login_external_signer_start(
     pubkey: String,
     sign_event: impl Fn(String) -> DartFnFuture<String> + Send + Sync + 'static,
     nip04_encrypt: impl Fn(String, String) -> DartFnFuture<String> + Send + Sync + 'static,
     nip04_decrypt: impl Fn(String, String) -> DartFnFuture<String> + Send + Sync + 'static,
     nip44_encrypt: impl Fn(String, String) -> DartFnFuture<String> + Send + Sync + 'static,
     nip44_decrypt: impl Fn(String, String) -> DartFnFuture<String> + Send + Sync + 'static,
-) -> Result<crate::api::accounts::Account, ApiError> {
+) -> Result<LoginResult, ApiError> {
     let whitenoise = whitenoise::Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
 
@@ -222,12 +205,40 @@ pub async fn login_with_external_signer_and_callbacks(
         nip44_decrypt,
     );
 
-    // Login handles: account setup, relay config, publishing relay lists
-    // (if defaults used), and publishing the key package.
-    // The signer is stored in whitenoise for future operations.
-    let account = whitenoise
-        .login_with_external_signer(pubkey, signer)
+    let result = whitenoise
+        .login_external_signer_start(pubkey, signer)
         .await?;
+    Ok(result.into())
+}
 
-    Ok(account.into())
+/// Step 2a for external signer: publish default relay lists and complete login.
+///
+/// Called after `login_external_signer_start` returned `NeedsRelayLists`.
+#[frb]
+pub async fn login_external_signer_publish_default_relays(
+    pubkey: String,
+) -> Result<LoginResult, ApiError> {
+    let whitenoise = whitenoise::Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let result = whitenoise
+        .login_external_signer_publish_default_relays(&pubkey)
+        .await?;
+    Ok(result.into())
+}
+
+/// Step 2b for external signer: search a user-provided relay for existing lists.
+///
+/// Called after `login_external_signer_start` returned `NeedsRelayLists`.
+#[frb]
+pub async fn login_external_signer_with_custom_relay(
+    pubkey: String,
+    relay_url: String,
+) -> Result<LoginResult, ApiError> {
+    let whitenoise = whitenoise::Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let relay_url = nostr_sdk::RelayUrl::parse(&relay_url)?;
+    let result = whitenoise
+        .login_external_signer_with_custom_relay(&pubkey, relay_url)
+        .await?;
+    Ok(result.into())
 }

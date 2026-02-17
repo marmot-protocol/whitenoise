@@ -223,24 +223,23 @@
   "deleteAllDataConfirmation": "¿Eliminar todos los datos?",
   "deleteAllDataWarning": "Esto eliminará permanentemente todos tus chats, mensajes y configuraciones de este dispositivo. Esta acción no se puede deshacer.",
   "deleteAllDataError": "No se pudieron eliminar todos los datos. Por favor, inténtalo de nuevo.",
-
   "chatInformation": "Información del chat",
-  "@chatInformation": {
-    "description": "Chat information screen title"
-  },
-
   "addAsContact": "Añadir como contacto",
-  "@addAsContact": {
-    "description": "Action label to add a user as contact"
-  },
-
   "removeAsContact": "Eliminar como contacto",
-  "@removeAsContact": {
-    "description": "Action label to remove a user as contact"
-  },
-
   "addToGroup": "Añadir al grupo",
-  "@addToGroup": {
-    "description": "Action label to add this user to a group"
-  }
+  "relayResolutionTitle": "Configuración de relay",
+  "relayResolutionDescription": "No pudimos encontrar tus listas de relays en la red. Puedes proporcionar un relay donde estén publicadas tus listas o usar nuestros relays predeterminados para comenzar.",
+  "relayResolutionUseDefaults": "Usar relays predeterminados",
+  "relayResolutionTryRelay": "Buscar relay",
+  "relayResolutionRelayPlaceholder": "wss://relay.example.com",
+  "relayResolutionRelayLabel": "URL del relay",
+  "relayResolutionNotFound": "No se encontraron listas de relays en este relay. Prueba con otro o usa los predeterminados.",
+  "loginErrorInvalidKey": "Formato de clave privada no válido. Por favor, verifica e inténtalo de nuevo.",
+  "loginErrorNoRelayConnections": "No se pudo conectar a ningún relay. Verifica tu conexión e inténtalo de nuevo.",
+  "loginErrorTimeout": "La conexión ha expirado. Inténtalo de nuevo.",
+  "loginErrorGeneric": "Se produjo un error durante el inicio de sesión. Inténtalo de nuevo.",
+  "loginErrorNoLoginInProgress": "No hay inicio de sesión en curso. Por favor, empieza de nuevo.",
+  "loginErrorInternal": "Se produjo un error interno. Inténtalo de nuevo.",
+  "loginPasteNothingToPaste": "Nada que pegar",
+  "loginPasteFailed": "Error al pegar desde el portapapeles"
 }

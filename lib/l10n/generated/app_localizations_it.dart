@@ -756,4 +756,52 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get addToGroup => 'Aggiungi al gruppo';
+
+  @override
+  String get relayResolutionTitle => 'Configurazione relay';
+
+  @override
+  String get relayResolutionDescription =>
+      'Non abbiamo trovato le tue liste di relay sulla rete. Puoi fornire un relay dove sono pubblicate le tue liste oppure utilizzare i nostri relay predefiniti per iniziare.';
+
+  @override
+  String get relayResolutionUseDefaults => 'Usa relay predefiniti';
+
+  @override
+  String get relayResolutionTryRelay => 'Cerca relay';
+
+  @override
+  String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
+
+  @override
+  String get relayResolutionRelayLabel => 'URL del relay';
+
+  @override
+  String get relayResolutionNotFound =>
+      'Nessuna lista di relay trovata su questo relay. Prova con un altro o usa quelli predefiniti.';
+
+  @override
+  String get loginErrorInvalidKey => 'Formato della chiave privata non valido. Verifica e riprova.';
+
+  @override
+  String get loginErrorNoRelayConnections =>
+      'Impossibile connettersi ai relay. Controlla la connessione e riprova.';
+
+  @override
+  String get loginErrorTimeout => 'Accesso scaduto. Riprova.';
+
+  @override
+  String get loginErrorGeneric => 'Si è verificato un errore durante l\'accesso. Riprova.';
+
+  @override
+  String get loginErrorNoLoginInProgress => 'Nessun accesso in corso. Ricomincia da capo.';
+
+  @override
+  String get loginErrorInternal => 'Si è verificato un errore interno. Riprova.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Niente da incollare';
+
+  @override
+  String get loginPasteFailed => 'Impossibile incollare dagli appunti';
 }

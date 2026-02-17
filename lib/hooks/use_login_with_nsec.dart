@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
+import 'package:whitenoise/src/rust/api/accounts.dart' show LoginResult;
+import 'package:whitenoise/src/rust/api/error.dart';
 
 final _logger = Logger('useLoginWithNsec');
 
@@ -26,16 +28,27 @@ class LoginWithNsecState {
   }
 }
 
-typedef LoginWithNsecCallback = Future<void> Function(String nsec);
+typedef LoginStartCallback = Future<LoginResult> Function(String nsec);
+
+String _loginErrorMessage(Object error) {
+  return switch (error) {
+    ApiError_LoginInvalidKeyFormat() => 'loginErrorInvalidKey',
+    ApiError_LoginNoRelayConnections() => 'loginErrorNoRelayConnections',
+    ApiError_LoginTimeout() => 'loginErrorTimeout',
+    ApiError_LoginNoLoginInProgress() => 'loginErrorNoLoginInProgress',
+    ApiError_LoginInternal() => 'loginErrorInternal',
+    _ => 'loginErrorGeneric',
+  };
+}
 
 ({
   TextEditingController nsecInputController,
   LoginWithNsecState loginWithNsecState,
   Future<void> Function() pasteNsec,
-  Future<bool> Function() submitLoginWithNsec,
+  Future<LoginResult?> Function() submitLoginWithNsec,
   void Function() clearLoginWithNsecError,
 })
-useLoginWithNsec(LoginWithNsecCallback login) {
+useLoginWithNsec(LoginStartCallback loginStart) {
   final controller = useTextEditingController();
   final state = useState(const LoginWithNsecState());
 
@@ -53,7 +66,7 @@ useLoginWithNsec(LoginWithNsecCallback login) {
       final trimmedText = clipboardData!.text!.trim();
       if (trimmedText.isEmpty) {
         state.value = state.value.copyWith(
-          error: 'Nothing to paste',
+          error: 'loginPasteNothingToPaste',
         );
         return;
       }
@@ -63,28 +76,28 @@ useLoginWithNsec(LoginWithNsecCallback login) {
     } catch (e) {
       _logger.warning('Failed to paste from clipboard: $e');
       state.value = state.value.copyWith(
-        error: 'Failed to paste from clipboard',
+        error: 'loginPasteFailed',
       );
     }
   }
 
-  Future<bool> submit() async {
+  Future<LoginResult?> submit() async {
     final nsec = controller.text.trim();
-    if (nsec.isEmpty) return false;
+    if (nsec.isEmpty) return null;
 
     state.value = state.value.copyWith(isLoading: true, clearError: true);
 
     try {
-      await login(nsec);
+      final result = await loginStart(nsec);
       state.value = state.value.copyWith(isLoading: false);
-      return true;
+      return result;
     } catch (e, stackTrace) {
       _logger.severe('Login failed', e, stackTrace);
       state.value = state.value.copyWith(
         isLoading: false,
-        error: 'Oh no! An error occurred, please try again.',
+        error: _loginErrorMessage(e),
       );
-      return false;
+      return null;
     }
   }
 

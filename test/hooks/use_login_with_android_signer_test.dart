@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_login_with_android_signer.dart';
+import 'package:whitenoise/src/rust/api/accounts.dart';
 
 import '../mocks/mock_android_signer_channel.dart';
 import '../test_helpers.dart';
@@ -26,11 +27,21 @@ void main() {
 
   group('useLoginWithAndroidSigner', () {
     late MockAndroidSignerChannel mockChannel;
-    late LoginWithAndroidSignerCallback loginCallback;
+    late LoginExternalSignerStartCallback loginCallback;
+
+    LoginResult completeResult(String pubkey) => LoginResult(
+      account: Account(
+        pubkey: pubkey,
+        accountType: AccountType.external_,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
+    );
 
     setUp(() {
       mockChannel = mockAndroidSignerChannel();
-      loginCallback = (_) async {};
+      loginCallback = ({required pubkey}) async => completeResult(pubkey);
     });
 
     tearDown(() {
@@ -142,7 +153,7 @@ void main() {
     group('submitLoginWithAndroidSigner', () {
       group('on success', () {
         testWidgets(
-          'returns true',
+          'returns LoginResult',
           (tester) async {
             mockChannel.setResult('isExternalSignerInstalled', true);
             mockChannel.setResult('getPublicKey', {'result': testPubkeyA});
@@ -153,10 +164,11 @@ void main() {
             );
             await tester.pumpAndSettle();
 
-            final success = await getResult().submitLoginWithAndroidSigner();
+            final result = await getResult().submitLoginWithAndroidSigner();
             await tester.pumpAndSettle();
 
-            expect(success, isTrue);
+            expect(result, isNotNull);
+            expect(result!.status, LoginStatus.complete);
           },
           variant: TargetPlatformVariant.only(TargetPlatform.android),
         );
@@ -168,8 +180,9 @@ void main() {
             mockChannel.setResult('getPublicKey', {'result': testPubkeyA});
 
             String? capturedPubkey;
-            loginCallback = (pubkey) async {
+            loginCallback = ({required pubkey}) async {
               capturedPubkey = pubkey;
+              return completeResult(pubkey);
             };
 
             final getResult = await mountHook(
@@ -229,8 +242,8 @@ void main() {
             mockChannel.setResult('isExternalSignerInstalled', true);
             mockChannel.setResult('getPublicKey', {'result': testPubkeyA});
 
-            final loginCompleter = Completer<void>();
-            loginCallback = (_) => loginCompleter.future;
+            final loginCompleter = Completer<LoginResult>();
+            loginCallback = ({required pubkey}) => loginCompleter.future;
 
             final getResult = await mountHook(
               tester,
@@ -243,7 +256,7 @@ void main() {
 
             expect(getResult().loginWithAndroidSignerState.isLoading, isTrue);
 
-            loginCompleter.complete();
+            loginCompleter.complete(completeResult(testPubkeyA));
             await submitFuture;
           },
           variant: TargetPlatformVariant.only(TargetPlatform.android),
@@ -271,7 +284,7 @@ void main() {
 
       group('when getPublicKey throws AndroidSignerException', () {
         testWidgets(
-          'returns false',
+          'returns null',
           (tester) async {
             mockChannel.setResult('isExternalSignerInstalled', true);
             mockChannel.setException(
@@ -285,10 +298,10 @@ void main() {
             );
             await tester.pumpAndSettle();
 
-            final success = await getResult().submitLoginWithAndroidSigner();
+            final result = await getResult().submitLoginWithAndroidSigner();
             await tester.pumpAndSettle();
 
-            expect(success, isFalse);
+            expect(result, isNull);
           },
           variant: TargetPlatformVariant.only(TargetPlatform.android),
         );
@@ -338,16 +351,16 @@ void main() {
       });
 
       group('when login callback throws generic exception', () {
-        late LoginWithAndroidSignerCallback throwingLoginCallback;
+        late LoginExternalSignerStartCallback throwingLoginCallback;
 
         setUp(() {
-          throwingLoginCallback = (_) async {
+          throwingLoginCallback = ({required pubkey}) async {
             throw Exception('Login failed');
           };
         });
 
         testWidgets(
-          'returns false',
+          'returns null',
           (tester) async {
             mockChannel.setResult('isExternalSignerInstalled', true);
             mockChannel.setResult('getPublicKey', {'result': testPubkeyA});
@@ -358,10 +371,10 @@ void main() {
             );
             await tester.pumpAndSettle();
 
-            final success = await getResult().submitLoginWithAndroidSigner();
+            final result = await getResult().submitLoginWithAndroidSigner();
             await tester.pumpAndSettle();
 
-            expect(success, isFalse);
+            expect(result, isNull);
           },
           variant: TargetPlatformVariant.only(TargetPlatform.android),
         );

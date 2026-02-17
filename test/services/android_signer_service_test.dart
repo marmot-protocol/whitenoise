@@ -13,7 +13,6 @@ import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
 class _SignerCallbackCaptureMock extends MockWnApi {
-  bool registerExternalSignerCalled = false;
   FutureOr<String> Function(String)? signEventCallback;
   FutureOr<String> Function(String, String)? nip04EncryptCallback;
   FutureOr<String> Function(String, String)? nip04DecryptCallback;
@@ -21,7 +20,7 @@ class _SignerCallbackCaptureMock extends MockWnApi {
   FutureOr<String> Function(String, String)? nip44DecryptCallback;
 
   @override
-  Future<Account> crateApiSignerLoginWithExternalSignerAndCallbacks({
+  Future<LoginResult> crateApiSignerLoginExternalSignerStart({
     required String pubkey,
     required FutureOr<String> Function(String) signEvent,
     required FutureOr<String> Function(String, String) nip04Encrypt,
@@ -34,11 +33,14 @@ class _SignerCallbackCaptureMock extends MockWnApi {
     nip04DecryptCallback = nip04Decrypt;
     nip44EncryptCallback = nip44Encrypt;
     nip44DecryptCallback = nip44Decrypt;
-    return Account(
-      pubkey: pubkey,
-      accountType: AccountType.external_,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
+    return LoginResult(
+      account: Account(
+        pubkey: pubkey,
+        accountType: AccountType.external_,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
     );
   }
 
@@ -588,7 +590,7 @@ void main() {
       });
     });
 
-    group('loginWithExternalSigner', () {
+    group('loginExternalSignerStart', () {
       setUp(() {
         mockAndroidSigner = mockAndroidSignerChannel();
         debugDefaultTargetPlatformOverride = TargetPlatform.android;
@@ -599,14 +601,15 @@ void main() {
         debugDefaultTargetPlatformOverride = null;
       });
 
-      test('returns account when signer responds successfully', () async {
-        final account = await const AndroidSignerService().loginWithExternalSigner(testPubkeyA);
-        expect(account.pubkey, testPubkeyA);
+      test('returns LoginResult when signer responds successfully', () async {
+        final result = await const AndroidSignerService().loginExternalSignerStart(testPubkeyA);
+        expect(result.account.pubkey, testPubkeyA);
+        expect(result.status, LoginStatus.complete);
       });
 
       test('signEvent callback returns signed event when signer returns event', () async {
         mockAndroidSigner.setResult('signEvent', {'event': 'signed_event_json'});
-        await const AndroidSignerService().loginWithExternalSigner(testPubkeyA);
+        await const AndroidSignerService().loginExternalSignerStart(testPubkeyA);
         final result = await signerMock.signEventCallback!('{}');
         expect(result, 'signed_event_json');
       });
@@ -615,7 +618,7 @@ void main() {
         'signEvent callback throws NO_EVENT when signer returns signature but no event',
         () async {
           mockAndroidSigner.setResult('signEvent', {'result': 'sig_without_event'});
-          await const AndroidSignerService().loginWithExternalSigner(testPubkeyA);
+          await const AndroidSignerService().loginExternalSignerStart(testPubkeyA);
           expect(
             () => signerMock.signEventCallback!('{}'),
             throwsA(
@@ -631,7 +634,7 @@ void main() {
 
       test('signEvent callback throws NO_RESULT when signer returns empty event', () async {
         mockAndroidSigner.setResult('signEvent', {'event': ''});
-        await const AndroidSignerService().loginWithExternalSigner(testPubkeyA);
+        await const AndroidSignerService().loginExternalSignerStart(testPubkeyA);
         expect(
           () => signerMock.signEventCallback!('{}'),
           throwsA(isA<AndroidSignerException>().having((e) => e.code, 'code', 'NO_RESULT')),
@@ -640,30 +643,51 @@ void main() {
 
       test('nip04Encrypt callback returns ciphertext from signer', () async {
         mockAndroidSigner.setResult('nip04Encrypt', {'result': 'encrypted'});
-        await const AndroidSignerService().loginWithExternalSigner(testPubkeyA);
+        await const AndroidSignerService().loginExternalSignerStart(testPubkeyA);
         final result = await signerMock.nip04EncryptCallback!('plain', testPubkeyB);
         expect(result, 'encrypted');
       });
 
       test('nip04Decrypt callback returns plaintext from signer', () async {
         mockAndroidSigner.setResult('nip04Decrypt', {'result': 'decrypted'});
-        await const AndroidSignerService().loginWithExternalSigner(testPubkeyA);
+        await const AndroidSignerService().loginExternalSignerStart(testPubkeyA);
         final result = await signerMock.nip04DecryptCallback!('cipher', testPubkeyB);
         expect(result, 'decrypted');
       });
 
       test('nip44Encrypt callback returns ciphertext from signer', () async {
         mockAndroidSigner.setResult('nip44Encrypt', {'result': 'enc44'});
-        await const AndroidSignerService().loginWithExternalSigner(testPubkeyA);
+        await const AndroidSignerService().loginExternalSignerStart(testPubkeyA);
         final result = await signerMock.nip44EncryptCallback!('plain', testPubkeyB);
         expect(result, 'enc44');
       });
 
       test('nip44Decrypt callback returns plaintext from signer', () async {
         mockAndroidSigner.setResult('nip44Decrypt', {'result': 'dec44'});
-        await const AndroidSignerService().loginWithExternalSigner(testPubkeyA);
+        await const AndroidSignerService().loginExternalSignerStart(testPubkeyA);
         final result = await signerMock.nip44DecryptCallback!('cipher', testPubkeyB);
         expect(result, 'dec44');
+      });
+    });
+
+    group('loginExternalSignerPublishDefaultRelays', () {
+      test('returns LoginResult with complete status', () async {
+        final result = await const AndroidSignerService().loginExternalSignerPublishDefaultRelays(
+          testPubkeyA,
+        );
+        expect(result.account.pubkey, testPubkeyA);
+        expect(result.status, LoginStatus.complete);
+      });
+    });
+
+    group('loginExternalSignerWithCustomRelay', () {
+      test('returns LoginResult with complete status', () async {
+        final result = await const AndroidSignerService().loginExternalSignerWithCustomRelay(
+          testPubkeyA,
+          'wss://relay.example.com',
+        );
+        expect(result.account.pubkey, testPubkeyA);
+        expect(result.status, LoginStatus.complete);
       });
     });
 

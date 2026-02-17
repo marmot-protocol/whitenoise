@@ -223,24 +223,23 @@
   "deleteAllDataConfirmation": "Eliminare tutti i dati?",
   "deleteAllDataWarning": "Questo eliminerà permanentemente tutte le tue chat, messaggi e impostazioni da questo dispositivo. Questa azione non può essere annullata.",
   "deleteAllDataError": "Impossibile eliminare tutti i dati. Riprova.",
-
   "chatInformation": "Informazioni chat",
-  "@chatInformation": {
-    "description": "Chat information screen title"
-  },
-
   "addAsContact": "Aggiungi come contatto",
-  "@addAsContact": {
-    "description": "Action label to add a user as contact"
-  },
-
   "removeAsContact": "Rimuovi come contatto",
-  "@removeAsContact": {
-    "description": "Action label to remove a user as contact"
-  },
-
   "addToGroup": "Aggiungi al gruppo",
-  "@addToGroup": {
-    "description": "Action label to add this user to a group"
-  }
+  "relayResolutionTitle": "Configurazione relay",
+  "relayResolutionDescription": "Non abbiamo trovato le tue liste di relay sulla rete. Puoi fornire un relay dove sono pubblicate le tue liste oppure utilizzare i nostri relay predefiniti per iniziare.",
+  "relayResolutionUseDefaults": "Usa relay predefiniti",
+  "relayResolutionTryRelay": "Cerca relay",
+  "relayResolutionRelayPlaceholder": "wss://relay.example.com",
+  "relayResolutionRelayLabel": "URL del relay",
+  "relayResolutionNotFound": "Nessuna lista di relay trovata su questo relay. Prova con un altro o usa quelli predefiniti.",
+  "loginErrorInvalidKey": "Formato della chiave privata non valido. Verifica e riprova.",
+  "loginErrorNoRelayConnections": "Impossibile connettersi ai relay. Controlla la connessione e riprova.",
+  "loginErrorTimeout": "Accesso scaduto. Riprova.",
+  "loginErrorGeneric": "Si è verificato un errore durante l'accesso. Riprova.",
+  "loginErrorNoLoginInProgress": "Nessun accesso in corso. Ricomincia da capo.",
+  "loginErrorInternal": "Si è verificato un errore interno. Riprova.",
+  "loginPasteNothingToPaste": "Niente da incollare",
+  "loginPasteFailed": "Impossibile incollare dagli appunti"
 }

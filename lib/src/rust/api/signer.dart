@@ -15,20 +15,11 @@ import 'error.dart';
 /// Register an external signer for an existing account.
 ///
 /// This function is used to re-register an external signer after app restart.
-/// Unlike `login_with_external_signer_and_callbacks`, this does NOT perform
-/// any account setup or key package publishing - it only registers the signer
-/// so that subsequent signing operations will work.
+/// Unlike the login functions, this does NOT perform any account setup or key
+/// package publishing - it only registers the signer so that subsequent
+/// signing operations will work.
 ///
 /// Call this on app startup when restoring an external signer account session.
-///
-/// # Arguments
-///
-/// * `pubkey` - The account's public key (hex format).
-/// * `sign_event` - Callback to sign unsigned events.
-/// * `nip04_encrypt` - Callback for NIP-04 encryption.
-/// * `nip04_decrypt` - Callback for NIP-04 decryption.
-/// * `nip44_encrypt` - Callback for NIP-44 encryption.
-/// * `nip44_decrypt` - Callback for NIP-44 decryption.
 Future<void> registerExternalSigner({
   required String pubkey,
   required FutureOr<String> Function(String) signEvent,
@@ -45,40 +36,45 @@ Future<void> registerExternalSigner({
   nip44Decrypt: nip44Decrypt,
 );
 
-/// Login with an external signer (like Amber via NIP-55) and publish key package.
+/// Step 1 of the multi-step external signer login flow.
 ///
-/// This function creates an account for the given public key and uses the provided
-/// callbacks to sign events. The whitenoise crate handles all the orchestration:
-/// - Account creation/setup
-/// - Relay configuration (fetches existing or uses defaults)
-/// - Publishing relay lists when using defaults
-/// - Publishing the MLS key package
+/// Creates an account for the given public key using the provided signer
+/// callbacks, then attempts to discover existing relay lists from the network.
 ///
-/// The signer is stored in whitenoise and will be used automatically for all
-/// subsequent signing operations (key package deletion, publishing, etc.).
-///
-/// # Arguments
-///
-/// * `pubkey` - The user's public key (hex format) obtained from the external signer.
-/// * `sign_event` - Callback to sign unsigned events. Takes unsigned event JSON, returns signed event JSON.
-/// * `nip04_encrypt` - Callback for NIP-04 encryption. Takes (plaintext, recipient_pubkey), returns ciphertext.
-/// * `nip04_decrypt` - Callback for NIP-04 decryption. Takes (ciphertext, sender_pubkey), returns plaintext.
-/// * `nip44_encrypt` - Callback for NIP-44 encryption. Takes (plaintext, recipient_pubkey), returns ciphertext.
-/// * `nip44_decrypt` - Callback for NIP-44 decryption. Takes (ciphertext, sender_pubkey), returns plaintext.
-Future<Account> loginWithExternalSignerAndCallbacks({
+/// Returns `LoginStatus::Complete` on the happy path, or
+/// `LoginStatus::NeedsRelayLists` if relay lists were not found.
+Future<LoginResult> loginExternalSignerStart({
   required String pubkey,
   required FutureOr<String> Function(String) signEvent,
   required FutureOr<String> Function(String, String) nip04Encrypt,
   required FutureOr<String> Function(String, String) nip04Decrypt,
   required FutureOr<String> Function(String, String) nip44Encrypt,
   required FutureOr<String> Function(String, String) nip44Decrypt,
-}) => RustLib.instance.api.crateApiSignerLoginWithExternalSignerAndCallbacks(
+}) => RustLib.instance.api.crateApiSignerLoginExternalSignerStart(
   pubkey: pubkey,
   signEvent: signEvent,
   nip04Encrypt: nip04Encrypt,
   nip04Decrypt: nip04Decrypt,
   nip44Encrypt: nip44Encrypt,
   nip44Decrypt: nip44Decrypt,
+);
+
+/// Step 2a for external signer: publish default relay lists and complete login.
+///
+/// Called after `login_external_signer_start` returned `NeedsRelayLists`.
+Future<LoginResult> loginExternalSignerPublishDefaultRelays({
+  required String pubkey,
+}) => RustLib.instance.api.crateApiSignerLoginExternalSignerPublishDefaultRelays(pubkey: pubkey);
+
+/// Step 2b for external signer: search a user-provided relay for existing lists.
+///
+/// Called after `login_external_signer_start` returned `NeedsRelayLists`.
+Future<LoginResult> loginExternalSignerWithCustomRelay({
+  required String pubkey,
+  required String relayUrl,
+}) => RustLib.instance.api.crateApiSignerLoginExternalSignerWithCustomRelay(
+  pubkey: pubkey,
+  relayUrl: relayUrl,
 );
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<DartSigner>>

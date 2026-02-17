@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/theme/semantic_colors.dart' show SemanticColors;
 import 'package:whitenoise/widgets/wn_icon.dart' show WnIcon, WnIcons;
 import 'package:whitenoise/widgets/wn_input.dart';
+import 'package:whitenoise/widgets/wn_input_field_button.dart';
 import '../test_helpers.dart' show mountWidget;
 
 void main() {
@@ -289,20 +290,60 @@ void main() {
     });
 
     group('with inline action', () {
-      testWidgets('displays inline action when provided', (tester) async {
+      testWidgets('displays inline action when icon and callback provided', (tester) async {
         await mountWidget(
           WnInput(
             label: 'Label',
             placeholder: 'hint',
-            inlineAction: WnInputFieldButton(
-              key: const Key('inline_action'),
-              icon: WnIcons.search,
-              onPressed: () {},
-            ),
+            inlineActionIcon: WnIcons.search,
+            inlineActionOnPressed: () {},
           ),
           tester,
         );
-        expect(find.byKey(const Key('inline_action')), findsOneWidget);
+        expect(find.byType(WnInputFieldButton), findsOneWidget);
+      });
+
+      testWidgets('renders inline action even without callback', (tester) async {
+        await mountWidget(
+          const WnInput(
+            label: 'Label',
+            placeholder: 'hint',
+            inlineActionIcon: WnIcons.search,
+          ),
+          tester,
+        );
+        expect(find.byType(WnInputFieldButton), findsOneWidget);
+      });
+
+      testWidgets('renders unfilled inline action when inlineActionFilled is false', (
+        tester,
+      ) async {
+        await mountWidget(
+          WnInput(
+            label: 'Label',
+            placeholder: 'hint',
+            inlineActionIcon: WnIcons.search,
+            inlineActionOnPressed: () {},
+            inlineActionFilled: false,
+          ),
+          tester,
+        );
+        final button = tester.widget<WnInputFieldButton>(find.byType(WnInputFieldButton));
+        expect(button.filled, isFalse);
+      });
+
+      testWidgets('uses correct button size based on input size', (tester) async {
+        await mountWidget(
+          WnInput(
+            placeholder: 'hint',
+            size: WnInputSize.size44,
+            inlineActionIcon: WnIcons.search,
+            inlineActionOnPressed: () {},
+          ),
+          tester,
+        );
+        final button = tester.widget<WnInputFieldButton>(find.byType(WnInputFieldButton));
+        expect(button.buttonSize, equals(WnInputFieldButtonSize.size36));
       });
     });
 
@@ -340,6 +381,72 @@ void main() {
       await tester.tap(find.byType(WnInputFieldButton));
       await tester.pump();
       expect(pressed, isTrue);
+    });
+
+    testWidgets('defaults to size48 with 48x48 dimensions', (tester) async {
+      await mountWidget(
+        WnInputFieldButton(
+          icon: WnIcons.search,
+          onPressed: () {},
+        ),
+        tester,
+      );
+      final buttonSize = tester.getSize(find.byType(WnInputFieldButton));
+      expect(buttonSize.width, equals(48.0));
+      expect(buttonSize.height, equals(48.0));
+    });
+
+    testWidgets('size40 renders with 40x40 dimensions', (tester) async {
+      await mountWidget(
+        WnInputFieldButton(
+          icon: WnIcons.search,
+          onPressed: () {},
+          buttonSize: WnInputFieldButtonSize.size40,
+        ),
+        tester,
+      );
+      final buttonSize = tester.getSize(find.byType(WnInputFieldButton));
+      expect(buttonSize.width, equals(40.0));
+      expect(buttonSize.height, equals(40.0));
+    });
+
+    testWidgets('size36 renders with 36x36 dimensions', (tester) async {
+      await mountWidget(
+        WnInputFieldButton(
+          icon: WnIcons.search,
+          onPressed: () {},
+          buttonSize: WnInputFieldButtonSize.size36,
+        ),
+        tester,
+      );
+      final buttonSize = tester.getSize(find.byType(WnInputFieldButton));
+      expect(buttonSize.width, equals(36.0));
+      expect(buttonSize.height, equals(36.0));
+    });
+
+    testWidgets('defaults to filled style', (tester) async {
+      await mountWidget(
+        WnInputFieldButton(
+          icon: WnIcons.search,
+          onPressed: () {},
+        ),
+        tester,
+      );
+      final button = tester.widget<WnInputFieldButton>(find.byType(WnInputFieldButton));
+      expect(button.filled, isTrue);
+    });
+
+    testWidgets('renders with transparent background when filled is false', (tester) async {
+      await mountWidget(
+        WnInputFieldButton(
+          icon: WnIcons.search,
+          onPressed: () {},
+          filled: false,
+        ),
+        tester,
+      );
+      final button = tester.widget<WnInputFieldButton>(find.byType(WnInputFieldButton));
+      expect(button.filled, isFalse);
     });
   });
 

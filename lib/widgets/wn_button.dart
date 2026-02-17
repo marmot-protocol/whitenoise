@@ -82,7 +82,7 @@ class WnButton extends StatelessWidget {
     return _buildButton(
       backgroundColor: colors.fillDestructive,
       overlayColor: colors.fillDestructiveHover,
-      contentColor: colors.fillContentDestructive,
+      contentColor: colors.fillContentQuaternary,
       borderSide: BorderSide.none,
     );
   }

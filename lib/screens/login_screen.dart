@@ -6,6 +6,7 @@ import 'package:whitenoise/hooks/use_login_with_nsec.dart' show useLoginWithNsec
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
 import 'package:whitenoise/routes.dart' show Routes;
+import 'package:whitenoise/src/rust/api/accounts.dart' show LoginResult, LoginStatus;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_input_password.dart' show WnInputPassword;
@@ -45,6 +46,37 @@ String _signerErrorL10n(String code, AppLocalizations l10n) {
   }
 }
 
+String _loginErrorL10n(String errorKey, AppLocalizations l10n) {
+  return switch (errorKey) {
+    'loginErrorInvalidKey' => l10n.loginErrorInvalidKey,
+    'loginErrorNoRelayConnections' => l10n.loginErrorNoRelayConnections,
+    'loginErrorTimeout' => l10n.loginErrorTimeout,
+    'loginErrorNoLoginInProgress' => l10n.loginErrorNoLoginInProgress,
+    'loginErrorInternal' => l10n.loginErrorInternal,
+    'loginPasteNothingToPaste' => l10n.loginPasteNothingToPaste,
+    'loginPasteFailed' => l10n.loginPasteFailed,
+    _ => l10n.loginErrorGeneric,
+  };
+}
+
+void _handleLoginResult(
+  BuildContext context,
+  LoginResult result, {
+  required bool isExternalSigner,
+}) {
+  if (!context.mounted) return;
+
+  if (result.status == LoginStatus.complete) {
+    Routes.goToChatList(context);
+  } else if (result.status == LoginStatus.needsRelayLists) {
+    Routes.pushToRelayResolution(
+      context,
+      pubkey: result.account.pubkey,
+      isExternalSigner: isExternalSigner,
+    );
+  }
+}
+
 class LoginScreen extends HookConsumerWidget {
   const LoginScreen({super.key});
 
@@ -58,7 +90,7 @@ class LoginScreen extends HookConsumerWidget {
       :submitLoginWithNsec,
       :clearLoginWithNsecError,
     ) = useLoginWithNsec(
-      (nsec) => ref.read(authProvider.notifier).loginWithNsec(nsec),
+      (nsec) => ref.read(authProvider.notifier).loginStart(nsec),
     );
     final (
       :isAndroidSignerAvailable,
@@ -66,13 +98,14 @@ class LoginScreen extends HookConsumerWidget {
       :submitLoginWithAndroidSigner,
       :clearLoginWithAndroidSignerError,
     ) = useLoginWithAndroidSigner(
-      (pubkey) => ref.read(authProvider.notifier).loginWithAndroidSigner(pubkey: pubkey),
+      ({required pubkey}) =>
+          ref.read(authProvider.notifier).loginExternalSignerStart(pubkey: pubkey),
     );
 
     Future<void> onSubmit() async {
-      final success = await submitLoginWithNsec();
-      if (success && context.mounted) {
-        Routes.goToChatList(context);
+      final result = await submitLoginWithNsec();
+      if (result != null && context.mounted) {
+        _handleLoginResult(context, result, isExternalSigner: false);
       }
     }
 
@@ -86,9 +119,9 @@ class LoginScreen extends HookConsumerWidget {
 
     Future<void> onAndroidSignerSubmit() async {
       clearLoginWithNsecError();
-      final success = await submitLoginWithAndroidSigner();
-      if (success && context.mounted) {
-        Routes.goToChatList(context);
+      final result = await submitLoginWithAndroidSigner();
+      if (result != null && context.mounted) {
+        _handleLoginResult(context, result, isExternalSigner: true);
       }
     }
 
@@ -151,7 +184,9 @@ class LoginScreen extends HookConsumerWidget {
                         label: context.l10n.enterPrivateKey,
                         placeholder: context.l10n.nsecPlaceholder,
                         controller: nsecInputController,
-                        errorText: loginWithNsecState.error,
+                        errorText: loginWithNsecState.error != null
+                            ? _loginErrorL10n(loginWithNsecState.error!, context.l10n)
+                            : null,
                         onChanged: (_) => clearLoginWithNsecError(),
                         onPaste: pasteNsec,
                         onScan: onScan,

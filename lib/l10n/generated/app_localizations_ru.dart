@@ -762,4 +762,53 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get addToGroup => 'Добавить в группу';
+
+  @override
+  String get relayResolutionTitle => 'Настройка реле';
+
+  @override
+  String get relayResolutionDescription =>
+      'Мы не нашли ваши списки реле в сети. Вы можете указать реле, где опубликованы ваши списки, или использовать наши стандартные реле для начала работы.';
+
+  @override
+  String get relayResolutionUseDefaults => 'Использовать стандартные реле';
+
+  @override
+  String get relayResolutionTryRelay => 'Поиск реле';
+
+  @override
+  String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
+
+  @override
+  String get relayResolutionRelayLabel => 'URL реле';
+
+  @override
+  String get relayResolutionNotFound =>
+      'На этом реле не найдено списков. Попробуйте другое или используйте стандартные.';
+
+  @override
+  String get loginErrorInvalidKey =>
+      'Неверный формат приватного ключа. Пожалуйста, проверьте и попробуйте снова.';
+
+  @override
+  String get loginErrorNoRelayConnections =>
+      'Не удалось подключиться ни к одному реле. Проверьте соединение и попробуйте снова.';
+
+  @override
+  String get loginErrorTimeout => 'Время входа истекло. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get loginErrorGeneric => 'Произошла ошибка при входе. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get loginErrorNoLoginInProgress => 'Нет активного входа. Пожалуйста, начните сначала.';
+
+  @override
+  String get loginErrorInternal => 'Произошла внутренняя ошибка. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Нечего вставить';
+
+  @override
+  String get loginPasteFailed => 'Не удалось вставить из буфера обмена';
 }

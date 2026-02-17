@@ -755,4 +755,53 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get addToGroup => 'Gruba ekle';
+
+  @override
+  String get relayResolutionTitle => 'Röle Ayarları';
+
+  @override
+  String get relayResolutionDescription =>
+      'Röle listelerinizi ağda bulamadık. Listelerinizin yayınlandığı bir röle sağlayabilir veya başlamak için varsayılan rölelerimizi kullanabilirsiniz.';
+
+  @override
+  String get relayResolutionUseDefaults => 'Varsayılan röleleri kullan';
+
+  @override
+  String get relayResolutionTryRelay => 'Röle ara';
+
+  @override
+  String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
+
+  @override
+  String get relayResolutionRelayLabel => 'Röle URL\'si';
+
+  @override
+  String get relayResolutionNotFound =>
+      'Bu rölede röle listesi bulunamadı. Başka bir tane deneyin veya varsayılanları kullanın.';
+
+  @override
+  String get loginErrorInvalidKey =>
+      'Geçersiz özel anahtar biçimi. Lütfen kontrol edip tekrar deneyin.';
+
+  @override
+  String get loginErrorNoRelayConnections =>
+      'Hiçbir röleye bağlanılamadı. Bağlantınızı kontrol edip tekrar deneyin.';
+
+  @override
+  String get loginErrorTimeout => 'Giriş zaman aşımına uğradı. Lütfen tekrar deneyin.';
+
+  @override
+  String get loginErrorGeneric => 'Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get loginErrorNoLoginInProgress => 'Devam eden giriş yok. Lütfen yeniden başlayın.';
+
+  @override
+  String get loginErrorInternal => 'Dahili bir hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Yapıştırılacak bir şey yok';
+
+  @override
+  String get loginPasteFailed => 'Panodan yapıştırma başarısız';
 }

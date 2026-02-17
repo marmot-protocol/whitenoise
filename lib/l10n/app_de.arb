@@ -223,24 +223,23 @@
   "deleteAllDataConfirmation": "Alle Daten löschen?",
   "deleteAllDataWarning": "Dies wird alle deine Chats, Nachrichten und Einstellungen von diesem Gerät dauerhaft löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
   "deleteAllDataError": "Fehler beim Löschen aller Daten. Bitte versuche es erneut.",
-
   "chatInformation": "Chat-Informationen",
-  "@chatInformation": {
-    "description": "Chat information screen title"
-  },
-
   "addAsContact": "Als Kontakt hinzufügen",
-  "@addAsContact": {
-    "description": "Action label to add a user as contact"
-  },
-
   "removeAsContact": "Als Kontakt entfernen",
-  "@removeAsContact": {
-    "description": "Action label to remove a user as contact"
-  },
-
   "addToGroup": "Zur Gruppe hinzufügen",
-  "@addToGroup": {
-    "description": "Action label to add this user to a group"
-  }
+  "relayResolutionTitle": "Relay-Einrichtung",
+  "relayResolutionDescription": "Wir konnten Ihre Relay-Listen nicht im Netzwerk finden. Sie können ein Relay angeben, auf dem Ihre Listen veröffentlicht sind, oder unsere Standard-Relays verwenden, um loszulegen.",
+  "relayResolutionUseDefaults": "Standard-Relays verwenden",
+  "relayResolutionTryRelay": "Relay durchsuchen",
+  "relayResolutionRelayPlaceholder": "wss://relay.example.com",
+  "relayResolutionRelayLabel": "Relay-URL",
+  "relayResolutionNotFound": "Keine Relay-Listen auf diesem Relay gefunden. Versuchen Sie ein anderes oder verwenden Sie die Standardeinstellungen.",
+  "loginErrorInvalidKey": "Ungültiges Format des privaten Schlüssels. Bitte überprüfen und erneut versuchen.",
+  "loginErrorNoRelayConnections": "Verbindung zu Relays nicht möglich. Bitte überprüfen Sie Ihre Verbindung und versuchen Sie es erneut.",
+  "loginErrorTimeout": "Zeitüberschreitung bei der Anmeldung. Bitte erneut versuchen.",
+  "loginErrorGeneric": "Bei der Anmeldung ist ein Fehler aufgetreten. Bitte erneut versuchen.",
+  "loginErrorNoLoginInProgress": "Kein Anmeldevorgang aktiv. Bitte starten Sie erneut.",
+  "loginErrorInternal": "Ein interner Fehler ist aufgetreten. Bitte erneut versuchen.",
+  "loginPasteNothingToPaste": "Nichts zum Einfügen",
+  "loginPasteFailed": "Einfügen aus der Zwischenablage fehlgeschlagen"
 }
