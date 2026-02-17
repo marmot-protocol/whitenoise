@@ -6,6 +6,8 @@ import 'package:widgetbook/widgetbook.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
 const _sampleImageUrl = 'https://www.whitenoise.chat/images/mask-man.webp';
+const _sampleNpub =
+    'npub 1zuu ajd7 u3sx 8xu9 2yav 9jwx pr83 9cs0 kc3q 6t56 vd5u 9q03 3xmh sk6c 2uc';
 
 class WnUserItemStory extends StatelessWidget {
   const WnUserItemStory({super.key});
@@ -35,8 +37,8 @@ Widget wnUserItemShowcase(BuildContext context) {
         ),
         const SizedBox(height: 8),
         Text(
-          'A simple row used to display a user. It shows the user avatar, '
-          'name, and an optional label when additional context is needed.',
+          'A row used to display a user. Comes in three sizes: small (name + label), '
+          'medium (name + npub + checkbox), and big (larger avatar + npub + checkbox).',
           style: TextStyle(
             fontSize: 14,
             color: colors.backgroundContentSecondary,
@@ -63,7 +65,7 @@ Widget wnUserItemShowcase(BuildContext context) {
         Align(
           alignment: Alignment.centerLeft,
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 368),
+            constraints: const BoxConstraints(maxWidth: 400),
             child: _InteractiveUserItem(context: context),
           ),
         ),
@@ -72,8 +74,8 @@ Widget wnUserItemShowcase(BuildContext context) {
         const SizedBox(height: 24),
         _buildSection(
           context,
-          'With Label',
-          'User item with an optional label for additional context.',
+          'Small',
+          'Compact row with name and optional label. No checkbox.',
           [
             _UserItemExample(
               label: 'With Label',
@@ -90,27 +92,89 @@ Widget wnUserItemShowcase(BuildContext context) {
                 avatarColor: AvatarColor.blue,
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 32),
-        _buildSection(
-          context,
-          'With Image',
-          'User items with a profile picture instead of initials.',
-          [
             _UserItemExample(
-              label: 'Image with Label',
+              label: 'With Image',
               child: WnUserItem(
                 displayName: 'Fred Durst',
                 label: 'Admin',
                 pictureUrl: _sampleImageUrl,
               ),
             ),
+          ],
+        ),
+        const SizedBox(height: 32),
+        _buildSection(
+          context,
+          'Medium',
+          'Row with name, npub (middle-ellipsis, 2 lines), and optional checkbox.',
+          [
             _UserItemExample(
-              label: 'Image without Label',
+              label: 'With Checkbox (Unselected)',
               child: WnUserItem(
                 displayName: 'Fred Durst',
+                npub: _sampleNpub,
                 pictureUrl: _sampleImageUrl,
+                size: WnUserItemSize.medium,
+                showCheckbox: true,
+              ),
+            ),
+            _UserItemExample(
+              label: 'With Checkbox (Selected)',
+              child: WnUserItem(
+                displayName: 'Fred Durst',
+                npub: _sampleNpub,
+                pictureUrl: _sampleImageUrl,
+                size: WnUserItemSize.medium,
+                showCheckbox: true,
+                isSelected: true,
+              ),
+            ),
+            _UserItemExample(
+              label: 'Without Checkbox',
+              child: WnUserItem(
+                displayName: 'Fred Durst',
+                npub: _sampleNpub,
+                pictureUrl: _sampleImageUrl,
+                size: WnUserItemSize.medium,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 32),
+        _buildSection(
+          context,
+          'Big',
+          'Larger avatar, fixed height, name, npub, and optional checkbox.',
+          [
+            _UserItemExample(
+              label: 'With Checkbox (Unselected)',
+              child: WnUserItem(
+                displayName: 'Fred Durst',
+                npub: _sampleNpub,
+                pictureUrl: _sampleImageUrl,
+                size: WnUserItemSize.big,
+                showCheckbox: true,
+              ),
+            ),
+            _UserItemExample(
+              label: 'With Checkbox (Selected)',
+              child: WnUserItem(
+                displayName: 'Fred Durst',
+                npub: _sampleNpub,
+                pictureUrl: _sampleImageUrl,
+                size: WnUserItemSize.big,
+                showCheckbox: true,
+                isSelected: true,
+              ),
+            ),
+            _UserItemExample(
+              label: 'Initials Avatar',
+              child: WnUserItem(
+                displayName: 'Fred Durst',
+                npub: _sampleNpub,
+                avatarColor: AvatarColor.emerald,
+                size: WnUserItemSize.big,
+                showCheckbox: true,
               ),
             ),
           ],
@@ -147,32 +211,6 @@ Widget wnUserItemShowcase(BuildContext context) {
                 displayName: 'Diana',
                 label: 'Guest',
                 avatarColor: AvatarColor.rose,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 32),
-        _buildSection(
-          context,
-          'Long Content',
-          'User items with long names and labels that truncate with ellipsis.',
-          [
-            _UserItemExample(
-              label: 'Long Name',
-              child: WnUserItem(
-                displayName:
-                    'This Is A Very Long Display Name That Should Truncate',
-                label: 'Member',
-                avatarColor: AvatarColor.violet,
-              ),
-            ),
-            _UserItemExample(
-              label: 'Long Label',
-              child: WnUserItem(
-                displayName: 'Fred Durst',
-                label:
-                    'This is a very long label that should also truncate properly',
-                avatarColor: AvatarColor.cyan,
               ),
             ),
           ],
@@ -229,7 +267,7 @@ class _UserItemExample extends StatelessWidget {
     final colors = context.colors;
 
     return SizedBox(
-      width: 368,
+      width: 400,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -260,14 +298,29 @@ class _InteractiveUserItem extends StatelessWidget {
       label: 'Display Name',
       initialValue: 'Fred Durst',
     );
-    final labelText = context.knobs.stringOrNull(
-      label: 'Label',
-      initialValue: 'Label',
+    final size = context.knobs.object.dropdown<WnUserItemSize>(
+      label: 'Size',
+      options: WnUserItemSize.values,
+      initialOption: WnUserItemSize.small,
+      labelBuilder: (s) => s.name[0].toUpperCase() + s.name.substring(1),
     );
+    final isSmall = size == WnUserItemSize.small;
+    final labelText = isSmall
+        ? context.knobs.stringOrNull(label: 'Label', initialValue: 'Label')
+        : null;
+    final npubText = !isSmall
+        ? context.knobs.stringOrNull(label: 'Npub', initialValue: _sampleNpub)
+        : null;
     final hasImage = context.knobs.boolean(
       label: 'Has Image',
       initialValue: false,
     );
+    final showCheckbox = !isSmall
+        ? context.knobs.boolean(label: 'Show Checkbox', initialValue: true)
+        : false;
+    final isSelected = showCheckbox
+        ? context.knobs.boolean(label: 'Selected', initialValue: false)
+        : false;
     final color = context.knobs.object.dropdown<AvatarColor>(
       label: 'Avatar Color',
       options: AvatarColor.values,
@@ -278,8 +331,12 @@ class _InteractiveUserItem extends StatelessWidget {
     return WnUserItem(
       displayName: displayName,
       label: labelText,
+      npub: npubText,
       pictureUrl: hasImage ? _sampleImageUrl : null,
       avatarColor: color,
+      size: size,
+      showCheckbox: showCheckbox,
+      isSelected: isSelected,
     );
   }
 }
