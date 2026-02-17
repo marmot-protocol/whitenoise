@@ -403,7 +403,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get goBack => 'Go back';
 
   @override
-  String get createGroup => 'Create Group';
+  String get createGroup => 'Create group';
 
   @override
   String get newGroupChat => 'New group chat';

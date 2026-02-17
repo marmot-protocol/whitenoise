@@ -645,7 +645,7 @@
     "description": "Go back button text"
   },
 
-  "createGroup": "Create Group",
+  "createGroup": "Create group",
   "@createGroup": {
     "description": "Create group button text"
   },

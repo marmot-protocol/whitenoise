@@ -404,7 +404,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get goBack => 'Torna indietro';
 
   @override
-  String get createGroup => 'Crea Gruppo';
+  String get createGroup => 'Crea gruppo';
 
   @override
   String get newGroupChat => 'Nuova chat di gruppo';

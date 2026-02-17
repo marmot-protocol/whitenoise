@@ -843,7 +843,7 @@ abstract class AppLocalizations {
   /// Create group button text
   ///
   /// In en, this message translates to:
-  /// **'Create Group'**
+  /// **'Create group'**
   String get createGroup;
 
   /// Menu item text to start a new group chat

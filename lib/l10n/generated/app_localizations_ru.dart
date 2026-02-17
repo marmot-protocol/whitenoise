@@ -404,7 +404,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get goBack => 'Назад';
 
   @override
-  String get createGroup => 'Создать Группу';
+  String get createGroup => 'Создать группу';
 
   @override
   String get newGroupChat => 'Новый групповой чат';

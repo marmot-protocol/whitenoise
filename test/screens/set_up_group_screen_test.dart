@@ -212,7 +212,7 @@ void main() {
     testWidgets('displays create group button in footer', (tester) async {
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
       await pumpSetUpGroupScreen(tester, users);
-      expect(find.text('Create Group'), findsOneWidget);
+      expect(find.text('Create group'), findsOneWidget);
     });
 
     testWidgets('create button is disabled when group name is empty', (tester) async {
@@ -221,7 +221,7 @@ void main() {
 
       await pumpSetUpGroupScreen(tester, users);
 
-      final button = tester.widget<WnButton>(find.widgetWithText(WnButton, 'Create Group'));
+      final button = tester.widget<WnButton>(find.widgetWithText(WnButton, 'Create group'));
       expect(button.onPressed, isNull);
     });
 
@@ -263,7 +263,7 @@ void main() {
       await tester.enterText(find.widgetWithText(WnInput, 'Enter group name'), 'My Group');
       await tester.pumpAndSettle();
 
-      final button = tester.widget<WnButton>(find.widgetWithText(WnButton, 'Create Group'));
+      final button = tester.widget<WnButton>(find.widgetWithText(WnButton, 'Create group'));
       expect(button.onPressed, isNotNull);
     });
 
@@ -341,7 +341,7 @@ void main() {
       await tester.enterText(find.widgetWithText(WnInput, 'Enter group name'), 'My Group');
       await tester.pumpAndSettle();
 
-      await tester.tap(find.widgetWithText(WnButton, 'Create Group'));
+      await tester.tap(find.widgetWithText(WnButton, 'Create group'));
       await tester.pumpAndSettle();
 
       expect(_api.createGroupCalled, isTrue);
@@ -369,7 +369,7 @@ void main() {
       await tester.enterText(find.widgetWithText(WnInput, 'Enter group name'), 'My Group');
       await tester.pumpAndSettle();
 
-      await tester.tap(find.widgetWithText(WnButton, 'Create Group'));
+      await tester.tap(find.widgetWithText(WnButton, 'Create group'));
       await tester.pumpAndSettle();
 
       expect(find.byType(WnSystemNotice), findsOneWidget);

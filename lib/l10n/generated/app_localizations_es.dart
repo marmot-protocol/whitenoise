@@ -405,7 +405,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get goBack => 'Volver';
 
   @override
-  String get createGroup => 'Crear Grupo';
+  String get createGroup => 'Crear grupo';
 
   @override
   String get newGroupChat => 'Nuevo chat grupal';

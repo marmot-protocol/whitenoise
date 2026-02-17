@@ -403,7 +403,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get goBack => 'Geri dön';
 
   @override
-  String get createGroup => 'Grup Oluştur';
+  String get createGroup => 'Grup oluştur';
 
   @override
   String get newGroupChat => 'Yeni grup sohbeti';
