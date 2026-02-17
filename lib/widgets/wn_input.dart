@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart' show Gap;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_input_field_button.dart';
 
 enum WnInputSize {
   size44(44),
@@ -12,17 +13,9 @@ enum WnInputSize {
 
   const WnInputSize(this.height);
   final int height;
-}
 
-enum WnInputFieldButtonSize {
-  size36(36, 16),
-  size40(40, 18),
-  size48(48, 18)
-  ;
-
-  const WnInputFieldButtonSize(this.dimension, this.iconSize);
-  final int dimension;
-  final int iconSize;
+  WnInputFieldButtonSize get inlineActionButtonSize =>
+      this == WnInputSize.size44 ? WnInputFieldButtonSize.size36 : WnInputFieldButtonSize.size48;
 }
 
 class WnInput extends HookWidget {
@@ -41,7 +34,10 @@ class WnInput extends HookWidget {
     this.onChanged,
     this.textInputAction,
     this.leadingIcon,
-    this.inlineAction,
+    this.inlineActionIcon,
+    this.inlineActionOnPressed,
+    this.inlineActionFilled = true,
+    this.inlineActionKey,
     this.trailingAction,
     this.focusNode,
   });
@@ -59,9 +55,14 @@ class WnInput extends HookWidget {
   final ValueChanged<String>? onChanged;
   final TextInputAction? textInputAction;
   final Widget? leadingIcon;
-  final Widget? inlineAction;
+  final WnIcons? inlineActionIcon;
+  final VoidCallback? inlineActionOnPressed;
+  final bool inlineActionFilled;
+  final Key? inlineActionKey;
   final Widget? trailingAction;
   final FocusNode? focusNode;
+
+  bool get _hasInlineAction => inlineActionIcon != null;
 
   bool get _hasError => errorText != null;
 
@@ -161,9 +162,6 @@ class WnInput extends HookWidget {
   ) {
     final typography = context.typographyScaled;
     final fieldHeight = size.height.h;
-    final inlineActionSize = size == WnInputSize.size44
-        ? WnInputFieldButtonSize.size36.dimension
-        : WnInputFieldButtonSize.size48.dimension;
     final borderColor = _getBorderColor(colors, isFocused.value, isHovered.value);
 
     return MouseRegion(
@@ -228,13 +226,15 @@ class WnInput extends HookWidget {
                 ),
               ),
             ),
-            if (inlineAction != null) ...[
+            if (_hasInlineAction) ...[
               IgnorePointer(
-                ignoring: !enabled,
-                child: SizedBox(
-                  width: inlineActionSize.w,
-                  height: inlineActionSize.h,
-                  child: inlineAction,
+                ignoring: !enabled || inlineActionOnPressed == null,
+                child: WnInputFieldButton(
+                  key: inlineActionKey,
+                  icon: inlineActionIcon!,
+                  onPressed: inlineActionOnPressed ?? () {},
+                  buttonSize: size.inlineActionButtonSize,
+                  filled: inlineActionFilled,
                 ),
               ),
               Gap(4.w),
@@ -263,43 +263,6 @@ class WnInput extends HookWidget {
       child: Text(
         errorText!,
         style: typography.medium14.copyWith(color: colors.backgroundContentDestructive),
-      ),
-    );
-  }
-}
-
-class WnInputFieldButton extends StatelessWidget {
-  const WnInputFieldButton({
-    super.key,
-    required this.icon,
-    required this.onPressed,
-    this.buttonSize = WnInputFieldButtonSize.size48,
-  });
-
-  final WnIcons icon;
-  final VoidCallback onPressed;
-  final WnInputFieldButtonSize buttonSize;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: buttonSize.dimension.w,
-        height: buttonSize.dimension.h,
-        decoration: BoxDecoration(
-          color: colors.fillTertiary,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Center(
-          child: WnIcon(
-            icon,
-            size: buttonSize.iconSize.w,
-            color: colors.backgroundContentPrimary,
-          ),
-        ),
       ),
     );
   }
