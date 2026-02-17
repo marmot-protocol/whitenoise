@@ -6,6 +6,7 @@ import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart';
 import 'package:whitenoise/services/notification_service.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
+import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/notifications.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
@@ -47,7 +48,19 @@ class _MockNotificationService extends NotificationService {
   }
 }
 
-class _MockApi extends MockWnApi {}
+class _MockApi extends MockWnApi {
+  Map<String, FlutterMetadata> metadataByPubkey = {};
+  bool shouldFailMetadataFetch = false;
+
+  @override
+  Future<FlutterMetadata> crateApiUsersUserMetadata({
+    required bool blockingDataSync,
+    required String pubkey,
+  }) async {
+    if (shouldFailMetadataFetch) throw Exception('Network error');
+    return metadataByPubkey[pubkey] ?? const FlutterMetadata(custom: {});
+  }
+}
 
 void main() {
   final l10n = AppLocalizationsEn();
@@ -56,6 +69,11 @@ void main() {
   setUpAll(() {
     mockApi = _MockApi();
     RustLib.initMock(api: mockApi);
+  });
+
+  setUp(() {
+    mockApi.metadataByPubkey = {};
+    mockApi.shouldFailMetadataFetch = false;
   });
 
   group('Notification formatting', () {
@@ -200,6 +218,71 @@ void main() {
       expect(body, equals('Has invited you to a secure chat'));
       expect(isInvite, isTrue);
     });
+
+    test('uses resolved senderName when provided for DM invite', () {
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.groupInvite,
+        mlsGroupId: 'group123',
+        isDm: true,
+        receiver: const NotificationUser(pubkey: _receiverPubkey),
+        sender: const NotificationUser(pubkey: _senderPubkey),
+        content: '',
+        timestamp: DateTime.now(),
+      );
+
+      final (title, body, isInvite) = formatNotification(
+        update,
+        l10n,
+        senderName: 'ResolvedName',
+      );
+
+      expect(title, equals('ResolvedName'));
+      expect(body, equals('Has invited you to a secure chat'));
+      expect(isInvite, isTrue);
+    });
+
+    test('uses resolved senderName for group invite subtitle', () {
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.groupInvite,
+        mlsGroupId: 'group123',
+        groupName: 'Dev Team',
+        isDm: false,
+        receiver: const NotificationUser(pubkey: _receiverPubkey),
+        sender: const NotificationUser(pubkey: _senderPubkey),
+        content: '',
+        timestamp: DateTime.now(),
+      );
+
+      final (title, body, isInvite) = formatNotification(
+        update,
+        l10n,
+        senderName: 'ResolvedSender',
+      );
+
+      expect(title, equals('Dev Team'));
+      expect(body, equals('ResolvedSender has invited you to a secure chat'));
+      expect(isInvite, isTrue);
+    });
+
+    test('prefers sender displayName over resolved senderName', () {
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: 'group123',
+        isDm: true,
+        receiver: const NotificationUser(pubkey: _receiverPubkey),
+        sender: const NotificationUser(pubkey: _senderPubkey, displayName: 'Alice'),
+        content: 'Hello',
+        timestamp: DateTime.now(),
+      );
+
+      final (title, _, _) = formatNotification(
+        update,
+        l10n,
+        senderName: 'Alice',
+      );
+
+      expect(title, equals('Alice'));
+    });
   });
 
   group('Notification formatting with receiver name (multi-account)', () {
@@ -317,6 +400,8 @@ void main() {
     setUp(() {
       mockApi.reset();
       mockApi.accounts = [];
+      mockApi.metadataByPubkey = {};
+      mockApi.shouldFailMetadataFetch = false;
       mockNotificationService = _MockNotificationService();
       container = ProviderContainer();
     });
@@ -646,6 +731,153 @@ void main() {
       expect(call.title, 'Team Chat (MyAccount)');
       expect(call.body, 'Dave has invited you to a secure chat');
       expect(call.isInvite, isTrue);
+    });
+
+    test('resolves sender name from metadata when displayName is null', () async {
+      mockApi.metadataByPubkey[_senderPubkey] = const FlutterMetadata(
+        displayName: 'Carol',
+        custom: {},
+      );
+      final ref = await captureRef();
+
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.groupInvite,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: _senderPubkey),
+        content: '',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+      final call = mockNotificationService.showCalls.first;
+      expect(call.title, 'Carol');
+      expect(call.body, 'Has invited you to a secure chat');
+      expect(call.isInvite, isTrue);
+    });
+
+    test('resolves sender name for group invite when displayName is null', () async {
+      mockApi.metadataByPubkey[_senderPubkey] = const FlutterMetadata(
+        name: 'dave_nostr',
+        custom: {},
+      );
+      final ref = await captureRef();
+
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.groupInvite,
+        mlsGroupId: testGroupId,
+        groupName: 'Dev Team',
+        isDm: false,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: _senderPubkey),
+        content: '',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+      final call = mockNotificationService.showCalls.first;
+      expect(call.title, 'Dev Team');
+      expect(call.body, 'dave_nostr has invited you to a secure chat');
+      expect(call.isInvite, isTrue);
+    });
+
+    test('resolves sender name for new message when displayName is null', () async {
+      mockApi.metadataByPubkey[_senderPubkey] = const FlutterMetadata(
+        displayName: 'Alice',
+        custom: {},
+      );
+      final ref = await captureRef();
+
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: _senderPubkey),
+        content: 'Hello there',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+      final call = mockNotificationService.showCalls.first;
+      expect(call.title, 'Alice');
+      expect(call.body, 'Hello there');
+    });
+
+    test('falls back to Unknown user when metadata fetch fails', () async {
+      mockApi.shouldFailMetadataFetch = true;
+      final ref = await captureRef();
+
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.groupInvite,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: _senderPubkey),
+        content: '',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+      final call = mockNotificationService.showCalls.first;
+      expect(call.title, 'Unknown user');
+    });
+
+    test('falls back to Unknown user when metadata has no name fields', () async {
+      mockApi.metadataByPubkey[_senderPubkey] = const FlutterMetadata(
+        picture: 'https://example.com/avatar.png',
+        custom: {},
+      );
+      final ref = await captureRef();
+
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.groupInvite,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: _senderPubkey),
+        content: '',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+      final call = mockNotificationService.showCalls.first;
+      expect(call.title, 'Unknown user');
+    });
+
+    test('skips metadata fetch when sender displayName is already set', () async {
+      mockApi.metadataByPubkey[_senderPubkey] = const FlutterMetadata(
+        displayName: 'Should Not Be Used',
+        custom: {},
+      );
+      final ref = await captureRef();
+
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: _senderPubkey, displayName: 'Alice'),
+        content: 'Hello',
+        timestamp: DateTime.now(),
+      );
+
+      await handleNotificationUpdate(update, mockNotificationService, ref);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+      final call = mockNotificationService.showCalls.first;
+      expect(call.title, 'Alice');
     });
   });
 

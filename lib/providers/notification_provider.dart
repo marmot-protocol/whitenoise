@@ -12,8 +12,10 @@ import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/services/foreground_service.dart';
 import 'package:whitenoise/services/notification_service.dart';
+import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart' as accounts_api;
 import 'package:whitenoise/src/rust/api/notifications.dart' as notifications_api;
+import 'package:whitenoise/utils/metadata.dart';
 
 final _logger = Logger('NotificationProvider');
 
@@ -117,10 +119,13 @@ Future<void> handleNotificationUpdate(
       ? (update.receiver.displayName ?? l10n.unknownUser)
       : null;
 
+  final senderName = await _resolveSenderName(update.sender);
+
   final (title, body, isInvite) = formatNotification(
     update,
     l10n,
     receiverName: receiverName,
+    senderName: senderName,
   );
 
   await notificationService.show(
@@ -132,13 +137,25 @@ Future<void> handleNotificationUpdate(
   );
 }
 
+Future<String?> _resolveSenderName(notifications_api.NotificationUser sender) async {
+  if (sender.displayName != null) return sender.displayName;
+  try {
+    final metadata = await UserService(sender.pubkey).fetchMetadata();
+    return presentName(metadata);
+  } catch (e) {
+    _logger.warning('Failed to fetch sender metadata', e);
+    return null;
+  }
+}
+
 @visibleForTesting
 (String title, String body, bool isInvite) formatNotification(
   notifications_api.NotificationUpdate update,
   AppLocalizations l10n, {
   String? receiverName,
+  String? senderName,
 }) {
-  final senderName = update.sender.displayName ?? l10n.unknownUser;
+  senderName ??= update.sender.displayName ?? l10n.unknownUser;
 
   String applyReceiver(String title) {
     if (receiverName == null) return title;
