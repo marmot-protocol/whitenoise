@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
@@ -9,6 +11,7 @@ import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/screens/relay_resolution_screen.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart'
     show LoginResult, LoginStatus, Account, AccountType;
+import 'package:whitenoise/src/rust/api/error.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
@@ -36,16 +39,19 @@ class _MockApi extends MockWnApi {
 class _MockAuthNotifier extends AuthNotifier {
   LoginResult? publishDefaultRelaysResult;
   LoginResult? customRelayResult;
-  Exception? publishDefaultRelaysError;
-  Exception? customRelayError;
+  Object? publishDefaultRelaysError;
+  Object? customRelayError;
   bool loginCancelCalled = false;
   String? lastCancelPubkey;
+  Completer<LoginResult>? publishDefaultRelaysCompleter;
+  Completer<LoginResult>? customRelayCompleter;
 
   @override
   Future<String?> build() async => null;
 
   @override
   Future<LoginResult> loginPublishDefaultRelays(String pubkey) async {
+    if (publishDefaultRelaysCompleter != null) return publishDefaultRelaysCompleter!.future;
     if (publishDefaultRelaysError != null) throw publishDefaultRelaysError!;
     return publishDefaultRelaysResult ??
         LoginResult(
@@ -61,6 +67,7 @@ class _MockAuthNotifier extends AuthNotifier {
 
   @override
   Future<LoginResult> loginWithCustomRelay(String pubkey, String relayUrl) async {
+    if (customRelayCompleter != null) return customRelayCompleter!.future;
     if (customRelayError != null) throw customRelayError!;
     return customRelayResult ??
         LoginResult(
@@ -244,18 +251,32 @@ void main() {
     });
 
     group('button states', () {
-      testWidgets('search relay button is disabled when relay URL is empty', (tester) async {
+      testWidgets('search relay button is disabled initially with wss:// prefill', (
+        tester,
+      ) async {
         await pumpRelayResolutionScreen(tester);
         final button = tester.widget<WnButton>(find.byKey(const Key('try_custom_relay_button')));
         expect(button.disabled, isTrue);
       });
 
-      testWidgets('search relay button is enabled when relay URL is entered', (tester) async {
+      testWidgets('search relay button is enabled when valid URL entered and debounce completes', (
+        tester,
+      ) async {
         await pumpRelayResolutionScreen(tester);
         await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
-        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
         final button = tester.widget<WnButton>(find.byKey(const Key('try_custom_relay_button')));
         expect(button.disabled, isFalse);
+      });
+
+      testWidgets('search relay button is disabled when URL has validation errors', (
+        tester,
+      ) async {
+        await pumpRelayResolutionScreen(tester);
+        await tester.enterText(find.byType(TextField), 'wss://invalid');
+        await tester.pump(const Duration(milliseconds: 600));
+        final button = tester.widget<WnButton>(find.byKey(const Key('try_custom_relay_button')));
+        expect(button.disabled, isTrue);
       });
 
       testWidgets('use default relays button is always enabled', (tester) async {
@@ -264,6 +285,89 @@ void main() {
           find.byKey(const Key('use_default_relays_button')),
         );
         expect(button.disabled, isFalse);
+      });
+    });
+
+    group('independent button loading', () {
+      testWidgets('only use default relays button shows loading when publishing defaults', (
+        tester,
+      ) async {
+        await pumpRelayResolutionScreen(tester, useRouter: true);
+        mockAuth.publishDefaultRelaysCompleter = Completer<LoginResult>();
+        await tester.tap(find.byKey(const Key('use_default_relays_button')));
+        await tester.pump();
+
+        final defaultsButton = tester.widget<WnButton>(
+          find.byKey(const Key('use_default_relays_button')),
+        );
+        expect(defaultsButton.loading, isTrue);
+
+        final searchButton = tester.widget<WnButton>(
+          find.byKey(const Key('try_custom_relay_button')),
+        );
+        expect(searchButton.loading, isFalse);
+
+        expect(defaultsButton.disabled, isTrue);
+        expect(searchButton.disabled, isTrue);
+
+        mockAuth.publishDefaultRelaysCompleter!.complete(
+          LoginResult(
+            account: Account(
+              pubkey: testPubkeyA,
+              accountType: AccountType.local,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
+            status: LoginStatus.complete,
+          ),
+        );
+        await tester.pumpAndSettle();
+      });
+
+      testWidgets('only search relay button shows loading when searching custom relay', (
+        tester,
+      ) async {
+        await pumpRelayResolutionScreen(tester, useRouter: true);
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump(const Duration(milliseconds: 600));
+        mockAuth.customRelayCompleter = Completer<LoginResult>();
+        await tester.tap(find.byKey(const Key('try_custom_relay_button')));
+        await tester.pump();
+
+        final searchButton = tester.widget<WnButton>(
+          find.byKey(const Key('try_custom_relay_button')),
+        );
+        expect(searchButton.loading, isTrue);
+
+        final defaultsButton = tester.widget<WnButton>(
+          find.byKey(const Key('use_default_relays_button')),
+        );
+        expect(defaultsButton.loading, isFalse);
+
+        expect(searchButton.disabled, isTrue);
+        expect(defaultsButton.disabled, isTrue);
+
+        mockAuth.customRelayCompleter!.complete(
+          LoginResult(
+            account: Account(
+              pubkey: testPubkeyA,
+              accountType: AccountType.local,
+              createdAt: DateTime.now(),
+              updatedAt: DateTime.now(),
+            ),
+            status: LoginStatus.complete,
+          ),
+        );
+        await tester.pumpAndSettle();
+      });
+    });
+
+    group('validation error display', () {
+      testWidgets('shows validation error text for invalid URL', (tester) async {
+        await pumpRelayResolutionScreen(tester);
+        await tester.enterText(find.byType(TextField), 'wss://invalid');
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(find.text('Invalid relay URL'), findsOneWidget);
       });
     });
 
@@ -290,7 +394,7 @@ void main() {
           status: LoginStatus.needsRelayLists,
         );
         await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
-        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
         await tester.tap(find.byKey(const Key('try_custom_relay_button')));
         await tester.pumpAndSettle();
         expect(find.byType(WnSystemNotice), findsOneWidget);
@@ -312,11 +416,39 @@ void main() {
         );
       });
 
+      testWidgets('shows timeout error when publish defaults times out', (tester) async {
+        await pumpRelayResolutionScreen(tester);
+        mockAuth.publishDefaultRelaysError = const ApiError.loginTimeout(message: 'timed out');
+        await tester.tap(find.byKey(const Key('use_default_relays_button')));
+        await tester.pumpAndSettle();
+        expect(find.byType(WnSystemNotice), findsOneWidget);
+        expect(
+          find.text('Login timed out. Please try again.'),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('shows connection error when custom relay has no connections', (tester) async {
+        await pumpRelayResolutionScreen(tester);
+        mockAuth.customRelayError = const ApiError.loginNoRelayConnections();
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump(const Duration(milliseconds: 600));
+        await tester.tap(find.byKey(const Key('try_custom_relay_button')));
+        await tester.pumpAndSettle();
+        expect(find.byType(WnSystemNotice), findsOneWidget);
+        expect(
+          find.text(
+            'Could not connect to any relays. Please check your connection and try again.',
+          ),
+          findsOneWidget,
+        );
+      });
+
       testWidgets('shows generic error for unknown error key', (tester) async {
         await pumpRelayResolutionScreen(tester);
         mockAuth.customRelayError = Exception('Unknown error');
         await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
-        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
         await tester.tap(find.byKey(const Key('try_custom_relay_button')));
         await tester.pumpAndSettle();
         expect(find.byType(WnSystemNotice), findsOneWidget);
@@ -338,7 +470,7 @@ void main() {
       testWidgets('navigates to chat list when try custom relay succeeds', (tester) async {
         await pumpRelayResolutionScreen(tester, useRouter: true);
         await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
-        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
         await tester.tap(find.byKey(const Key('try_custom_relay_button')));
         await tester.pumpAndSettle();
         expect(find.text('Chat List'), findsOneWidget);
@@ -356,7 +488,7 @@ void main() {
       testWidgets('uses external signer callbacks for custom relay', (tester) async {
         await pumpRelayResolutionScreen(tester, isExternalSigner: true, useRouter: true);
         await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
-        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
         await tester.tap(find.byKey(const Key('try_custom_relay_button')));
         await tester.pumpAndSettle();
         expect(find.text('Chat List'), findsOneWidget);

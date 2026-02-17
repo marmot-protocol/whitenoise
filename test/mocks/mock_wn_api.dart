@@ -11,7 +11,7 @@ import 'package:whitenoise/src/rust/api/user_search.dart';
 import 'package:whitenoise/src/rust/api/users.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
-import '../test_helpers.dart' show testHexToNpub, testNpubToHex;
+import '../test_helpers.dart' show testHexToNpub, testNpubToHex, testPubkeyA;
 
 class MockThemeMode implements rust_api.ThemeMode {
   final String mode;
@@ -317,7 +317,7 @@ class MockWnApi implements RustLibApi {
     if (loginStartResult != null) return loginStartResult!;
     return LoginResult(
       account: Account(
-        pubkey: testNpubToHex.values.first,
+        pubkey: testPubkeyA,
         accountType: AccountType.local,
         createdAt: DateTime.now(),
         updatedAt: DateTime.now(),

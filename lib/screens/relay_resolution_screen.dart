@@ -18,6 +18,9 @@ import 'package:whitenoise/widgets/wn_system_notice.dart'
 String _resolveError(String errorKey, AppLocalizations l10n) {
   return switch (errorKey) {
     'relayResolutionNotFound' => l10n.relayResolutionNotFound,
+    'loginErrorNoRelayConnections' => l10n.loginErrorNoRelayConnections,
+    'loginErrorTimeout' => l10n.loginErrorTimeout,
+    'loginErrorInternal' => l10n.loginErrorInternal,
     _ => l10n.loginErrorGeneric,
   };
 }
@@ -41,6 +44,7 @@ class RelayResolutionScreen extends HookConsumerWidget {
     final (
       :relayUrlController,
       :relayResolutionState,
+      :isRelayUrlValid,
       :publishDefaults,
       :tryCustomRelay,
       :cancel,
@@ -136,36 +140,31 @@ class RelayResolutionScreen extends HookConsumerWidget {
                         label: context.l10n.relayResolutionRelayLabel,
                         placeholder: context.l10n.relayResolutionRelayPlaceholder,
                         controller: relayUrlController,
+                        errorText: relayResolutionState.validationError,
                         onChanged: (_) => clearError(),
                         textInputAction: TextInputAction.done,
                       ),
-                      ListenableBuilder(
-                        listenable: relayUrlController,
-                        builder: (context, _) {
-                          final relayUrlEmpty = relayUrlController.text.trim().isEmpty;
-                          return Column(
-                            spacing: 8.h,
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              WnButton(
-                                key: const Key('try_custom_relay_button'),
-                                text: context.l10n.relayResolutionTryRelay,
-                                onPressed: onTryCustomRelay,
-                                loading: relayResolutionState.isLoading,
-                                disabled: relayUrlEmpty || relayResolutionState.isLoading,
-                              ),
-                              WnButton(
-                                key: const Key('use_default_relays_button'),
-                                text: context.l10n.relayResolutionUseDefaults,
-                                type: WnButtonType.outline,
-                                onPressed: onPublishDefaults,
-                                loading: relayResolutionState.isLoading,
-                                disabled: relayResolutionState.isLoading,
-                              ),
-                            ],
-                          );
-                        },
+                      Column(
+                        spacing: 8.h,
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          WnButton(
+                            key: const Key('try_custom_relay_button'),
+                            text: context.l10n.relayResolutionTryRelay,
+                            onPressed: onTryCustomRelay,
+                            loading: relayResolutionState.isSearchingRelay,
+                            disabled: !isRelayUrlValid || relayResolutionState.isLoading,
+                          ),
+                          WnButton(
+                            key: const Key('use_default_relays_button'),
+                            text: context.l10n.relayResolutionUseDefaults,
+                            type: WnButtonType.outline,
+                            onPressed: onPublishDefaults,
+                            loading: relayResolutionState.isPublishingDefaults,
+                            disabled: relayResolutionState.isLoading,
+                          ),
+                        ],
                       ),
                     ],
                   ),
