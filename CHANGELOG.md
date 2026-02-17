@@ -46,7 +46,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Redesign chat info as a non-opaque over-chat slate matching Figma: updated action layout, refined spacing, lighter overlay blur, and header name/avatar tap navigation to chat info.
+- Redesign chat info as a non-opaque over-chat slate matching Figma: updated action layout, refined spacing, lighter overlay blur, and header name/avatar tap navigation to chat info. [PR #303](https://github.com/marmot-protocol/whitenoise/pull/303)
 - Redesign user list tile to match profile switcher pattern [PR #234](https://github.com/marmot-protocol/whitenoise/pull/234)
 - Sort follows list: users with metadata alphabetically first, then users without [PR #234](https://github.com/marmot-protocol/whitenoise/pull/234)
 - Periodically refresh follows list to pick up background metadata updates [PR #234](https://github.com/marmot-protocol/whitenoise/pull/234)
