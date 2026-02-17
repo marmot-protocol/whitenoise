@@ -336,6 +336,15 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(ChatInfoScreen), findsOneWidget);
       });
+
+      testWidgets('name navigates to chat info screen for DM', (tester) async {
+        _api.isDm = true;
+        _api.groupMembers = [_testPubkey, testPubkeyC];
+        await pumpChatScreen(tester);
+        await tester.tap(find.byKey(const Key('header_name_tap_area')));
+        await tester.pumpAndSettle();
+        expect(find.byType(ChatInfoScreen), findsOneWidget);
+      });
     });
 
     group('message sending', () {

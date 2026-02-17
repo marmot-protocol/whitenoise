@@ -238,6 +238,7 @@ abstract final class Routes {
           pageBuilder: (context, state) => _navigationTransition(
             state: state,
             child: ChatInfoScreen(userPubkey: state.pathParameters['userPubkey']!),
+            opaque: false,
           ),
         ),
         GoRoute(
@@ -263,11 +264,13 @@ abstract final class Routes {
   static CustomTransitionPage<void> _navigationTransition({
     required GoRouterState state,
     required Widget child,
+    bool opaque = true,
   }) {
     return CustomTransitionPage<void>(
       key: state.pageKey,
       name: state.uri.path,
       child: child,
+      opaque: opaque,
       transitionDuration: WnSlateContentTransition.duration,
       reverseTransitionDuration: WnSlateContentTransition.duration,
       transitionsBuilder: (context, animation, secondaryAnimation, child) {

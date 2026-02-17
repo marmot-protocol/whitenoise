@@ -9,10 +9,12 @@ void main() {
   group('WnSlateChatHeader', () {
     late bool backPressed;
     late bool avatarTapped;
+    late bool nameTapped;
 
     setUp(() {
       backPressed = false;
       avatarTapped = false;
+      nameTapped = false;
     });
 
     Future<void> pumpHeader(
@@ -28,6 +30,7 @@ void main() {
           pictureUrl: pictureUrl,
           onBack: () => backPressed = true,
           onAvatarTap: () => avatarTapped = true,
+          onNameTap: () => nameTapped = true,
         ),
         tester,
       );
@@ -87,6 +90,15 @@ void main() {
         await tester.tap(find.byKey(const Key('header_avatar_tap_area')));
 
         expect(avatarTapped, isTrue);
+      });
+    });
+
+    group('name tap', () {
+      testWidgets('triggers onNameTap callback', (tester) async {
+        await pumpHeader(tester);
+        await tester.tap(find.byKey(const Key('header_name_tap_area')));
+
+        expect(nameTapped, isTrue);
       });
     });
   });

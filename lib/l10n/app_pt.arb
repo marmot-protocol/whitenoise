@@ -222,5 +222,25 @@
   "deleteAllData": "Excluir Todos os Dados",
   "deleteAllDataConfirmation": "Excluir todos os dados?",
   "deleteAllDataWarning": "Isso excluirá permanentemente todos os seus chats, mensagens e configurações deste dispositivo. Esta ação não pode ser desfeita.",
-  "deleteAllDataError": "Falha ao excluir todos os dados. Por favor, tente novamente."
+  "deleteAllDataError": "Falha ao excluir todos os dados. Por favor, tente novamente.",
+
+  "chatInformation": "Chat Information",
+  "@chatInformation": {
+    "description": "Chat information screen title"
+  },
+
+  "addAsContact": "Add as contact",
+  "@addAsContact": {
+    "description": "Action label to add a user as contact"
+  },
+
+  "removeAsContact": "Remove as contact",
+  "@removeAsContact": {
+    "description": "Action label to remove a user as contact"
+  },
+
+  "addToGroup": "Add to group",
+  "@addToGroup": {
+    "description": "Action label to add this user to a group"
+  }
 }

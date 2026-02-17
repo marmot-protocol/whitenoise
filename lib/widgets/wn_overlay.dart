@@ -17,8 +17,8 @@ class WnOverlay extends StatelessWidget {
 
   final WnOverlayVariant variant;
 
-  double get _sigmaX => variant == WnOverlayVariant.heavy ? 40.0.r : 10.0.r;
-  double get _sigmaY => variant == WnOverlayVariant.heavy ? 40.0.r : 10.0.r;
+  double get _sigmaX => variant == WnOverlayVariant.heavy ? 40.0.r : 4.0.r;
+  double get _sigmaY => variant == WnOverlayVariant.heavy ? 40.0.r : 4.0.r;
 
   @override
   Widget build(BuildContext context) {

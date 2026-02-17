@@ -12,6 +12,7 @@ class WnSlateChatHeader extends StatelessWidget {
     this.pictureUrl,
     required this.onBack,
     required this.onAvatarTap,
+    this.onNameTap,
   });
 
   final String displayName;
@@ -19,6 +20,7 @@ class WnSlateChatHeader extends StatelessWidget {
   final String? pictureUrl;
   final VoidCallback onBack;
   final VoidCallback onAvatarTap;
+  final VoidCallback? onNameTap;
 
   @override
   Widget build(BuildContext context) {
@@ -45,12 +47,17 @@ class WnSlateChatHeader extends StatelessWidget {
             child: WnAvatar(pictureUrl: pictureUrl, displayName: displayName, color: avatarColor),
           ),
           Expanded(
-            child: Text(
-              displayName,
-              style: context.typographyScaled.semiBold16.copyWith(
-                color: colors.backgroundContentPrimary,
+            child: GestureDetector(
+              key: const Key('header_name_tap_area'),
+              onTap: onNameTap ?? onAvatarTap,
+              behavior: HitTestBehavior.opaque,
+              child: Text(
+                displayName,
+                style: context.typographyScaled.semiBold16.copyWith(
+                  color: colors.backgroundContentPrimary,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

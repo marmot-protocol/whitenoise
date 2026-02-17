@@ -748,4 +748,16 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get deleteAllDataError => 'Falha ao excluir todos os dados. Por favor, tente novamente.';
+
+  @override
+  String get chatInformation => 'Chat Information';
+
+  @override
+  String get addAsContact => 'Add as contact';
+
+  @override
+  String get removeAsContact => 'Remove as contact';
+
+  @override
+  String get addToGroup => 'Add to group';
 }

@@ -10,6 +10,7 @@ import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_copy_card.dart';
+import 'package:whitenoise/widgets/wn_overlay.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
@@ -101,6 +102,7 @@ void main() {
   Future<void> pumpChatInfoScreen(
     WidgetTester tester, {
     required String userPubkey,
+    bool settle = true,
   }) async {
     await mountTestApp(
       tester,
@@ -108,267 +110,224 @@ void main() {
     );
     await tester.pumpAndSettle();
     Routes.pushToChatInfo(tester.element(find.byType(Scaffold)), userPubkey);
-    await tester.pumpAndSettle();
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      await tester.pump();
+    }
   }
 
   group('ChatInfoScreen', () {
-    testWidgets('displays slate container', (tester) async {
-      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-      expect(find.byType(WnSlate), findsOneWidget);
-    });
+    Finder chatInfoSlateFinder() {
+      return find.ancestor(
+        of: find.text('Chat Information'),
+        matching: find.byType(WnSlate),
+      );
+    }
 
-    testWidgets('displays screen header with Profile title', (tester) async {
+    testWidgets('displays slate container and chat info header', (tester) async {
       await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+
+      expect(chatInfoSlateFinder(), findsOneWidget);
       expect(find.byType(WnSlateNavigationHeader), findsOneWidget);
-      expect(find.text('Profile'), findsOneWidget);
+      expect(find.text('Chat Information'), findsOneWidget);
+      expect(find.byKey(const Key('slate_close_button')), findsOneWidget);
     });
 
-    testWidgets('displays avatar', (tester) async {
+    testWidgets('uses light overlay variant', (tester) async {
       await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+
+      final overlay = tester.widget<WnOverlay>(find.byType(WnOverlay));
+      expect(overlay.variant, WnOverlayVariant.light);
+    });
+
+    testWidgets('slate height matches content and is not full screen', (tester) async {
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+
+      final slateHeight = tester.getSize(chatInfoSlateFinder()).height;
+      final screenHeight = tester.view.physicalSize.height / tester.view.devicePixelRatio;
+      expect(slateHeight, lessThan(screenHeight));
+    });
+
+    testWidgets('renders profile card and copy card', (tester) async {
+      _api.metadata = const FlutterMetadata(displayName: 'Alice', custom: {});
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+
       expect(find.byType(WnAvatar), findsOneWidget);
+      expect(find.text('Alice'), findsOneWidget);
+      expect(find.byType(WnCopyCard), findsOneWidget);
     });
 
-    group('with metadata', () {
-      setUp(() {
-        _api.metadata = const FlutterMetadata(
-          displayName: 'Alice',
-          name: 'alice',
-          nip05: 'alice@example.com',
-          about: 'I love Nostr!',
-          custom: {},
-        );
-      });
+    testWidgets('does not render nip05 and about in chat info card', (tester) async {
+      _api.metadata = const FlutterMetadata(
+        displayName: 'Alice',
+        nip05: 'alice@example.com',
+        about: 'I love Nostr!',
+        custom: {},
+      );
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
 
-      testWidgets('displays display name', (tester) async {
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-        expect(find.text('Alice'), findsOneWidget);
-      });
-
-      testWidgets('displays nip05', (tester) async {
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-        expect(find.text('alice@example.com'), findsOneWidget);
-      });
-
-      testWidgets('displays about', (tester) async {
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-        expect(find.text('I love Nostr!'), findsOneWidget);
-      });
-
-      testWidgets('shows pubkey copy card', (tester) async {
-        await pumpChatInfoScreen(tester, userPubkey: testPubkeyA);
-        final copyCard = tester.widget<WnCopyCard>(find.byType(WnCopyCard));
-        expect(copyCard.textToDisplay, testNpubAFormatted);
-        expect(copyCard.textToCopy, testNpubA);
-      });
+      expect(find.text('alice@example.com'), findsNothing);
+      expect(find.text('I love Nostr!'), findsNothing);
     });
 
-    group('with minimal metadata', () {
-      setUp(() {
-        _api.metadata = const FlutterMetadata(name: 'bob', custom: {});
-      });
-
-      testWidgets('falls back to name when displayName is null', (tester) async {
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-        expect(find.text('bob'), findsOneWidget);
-      });
-
-      testWidgets('does not show nip05 when null', (tester) async {
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-        expect(find.text('alice@example.com'), findsNothing);
-      });
-
-      testWidgets('does not show about when null', (tester) async {
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-        expect(find.text('I love Nostr!'), findsNothing);
-      });
+    testWidgets('shows add as contact for non-followed user', (tester) async {
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+      expect(find.text('Add as contact'), findsOneWidget);
     });
 
-    group('follow button', () {
-      setUp(() {
-        _api.metadata = const FlutterMetadata(displayName: 'Other User', custom: {});
-      });
-
-      testWidgets('shows Follow button for non-followed user', (tester) async {
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-        expect(find.text('Follow'), findsOneWidget);
-      });
-
-      testWidgets('shows Unfollow button for followed user', (tester) async {
-        _api.followingPubkeys.add(_otherPubkey);
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-        expect(find.text('Unfollow'), findsOneWidget);
-      });
-
-      testWidgets('calls follow API when Follow is tapped', (tester) async {
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-
-        await tester.tap(find.byKey(const Key('follow_button')));
-        await tester.pumpAndSettle();
-
-        expect(_api.followCalls.length, 1);
-        expect(_api.followCalls[0].account, _testPubkey);
-        expect(_api.followCalls[0].target, _otherPubkey);
-      });
-
-      testWidgets('calls unfollow API when Unfollow is tapped', (tester) async {
-        _api.followingPubkeys.add(_otherPubkey);
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-
-        await tester.tap(find.byKey(const Key('follow_button')));
-        await tester.pumpAndSettle();
-
-        expect(_api.unfollowCalls.length, 1);
-        expect(_api.unfollowCalls[0].account, _testPubkey);
-        expect(_api.unfollowCalls[0].target, _otherPubkey);
-      });
-
-      testWidgets('shows loading state during follow action', (tester) async {
-        _api.followCompleter = Completer();
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-
-        await tester.tap(find.byKey(const Key('follow_button')));
-        await tester.pump();
-
-        final button = tester.widget<WnButton>(find.byType(WnButton));
-        expect(button.loading, isTrue);
-      });
-
-      testWidgets('shows loading state during unfollow action', (tester) async {
-        _api.followingPubkeys.add(_otherPubkey);
-        _api.unfollowCompleter = Completer();
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-
-        await tester.tap(find.byKey(const Key('follow_button')));
-        await tester.pump();
-
-        final button = tester.widget<WnButton>(find.byType(WnButton));
-        expect(button.loading, isTrue);
-      });
-
-      testWidgets('shows system notice when follow fails', (tester) async {
-        _api.followError = Exception('Network error');
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-
-        await tester.tap(find.byKey(const Key('follow_button')));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(WnSystemNotice), findsOneWidget);
-        expect(
-          find.text('Failed to update follow status. Please try again.'),
-          findsOneWidget,
-        );
-      });
-
-      testWidgets('shows system notice when unfollow fails', (tester) async {
-        _api.followingPubkeys.add(_otherPubkey);
-        _api.unfollowError = Exception('Network error');
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-
-        await tester.tap(find.byKey(const Key('follow_button')));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(WnSystemNotice), findsOneWidget);
-        expect(
-          find.text('Failed to update follow status. Please try again.'),
-          findsOneWidget,
-        );
-      });
+    testWidgets('shows remove as contact for followed user', (tester) async {
+      _api.followingPubkeys.add(_otherPubkey);
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+      expect(find.text('Remove as contact'), findsOneWidget);
     });
 
-    group('own profile', () {
-      setUp(() {
-        _api.metadata = const FlutterMetadata(displayName: 'My Profile', custom: {});
-      });
+    testWidgets('calls follow API when add as contact is tapped', (tester) async {
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
 
-      testWidgets('does not show follow button for own profile', (tester) async {
-        await pumpChatInfoScreen(tester, userPubkey: _testPubkey);
+      await tester.tap(find.byKey(const Key('contact_button')));
+      await tester.pumpAndSettle();
 
-        expect(find.byKey(const Key('follow_button')), findsNothing);
-        expect(find.text('Follow'), findsNothing);
-        expect(find.text('Unfollow'), findsNothing);
-      });
-
-      testWidgets('displays own profile data', (tester) async {
-        await pumpChatInfoScreen(tester, userPubkey: _testPubkey);
-
-        expect(find.text('My Profile'), findsOneWidget);
-      });
+      expect(_api.followCalls.length, 1);
+      expect(_api.followCalls[0].account, _testPubkey);
+      expect(_api.followCalls[0].target, _otherPubkey);
     });
 
-    group('loading state', () {
-      testWidgets('hides loading indicator when metadata loads', (tester) async {
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+    testWidgets('calls unfollow API when remove as contact is tapped', (tester) async {
+      _api.followingPubkeys.add(_otherPubkey);
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
 
-        expect(find.byType(CircularProgressIndicator), findsNothing);
-      });
+      await tester.tap(find.byKey(const Key('contact_button')));
+      await tester.pumpAndSettle();
+
+      expect(_api.unfollowCalls.length, 1);
+      expect(_api.unfollowCalls[0].account, _testPubkey);
+      expect(_api.unfollowCalls[0].target, _otherPubkey);
     });
 
-    group('system notice', () {
-      setUp(() {
-        _api.metadata = const FlutterMetadata(displayName: 'Test User', custom: {});
-      });
+    testWidgets('shows contact button loading state during follow action', (tester) async {
+      _api.followCompleter = Completer();
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
 
-      testWidgets('shows notice when public key is copied', (tester) async {
-        mockClipboard();
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+      await tester.tap(find.byKey(const Key('contact_button')));
+      await tester.pump();
 
-        await tester.tap(find.byKey(const Key('copy_button')));
-        await tester.pump();
-
-        expect(find.text('Public key copied to clipboard'), findsOneWidget);
-      });
-
-      testWidgets('shows error notice when public key copy fails', (tester) async {
-        mockClipboardFailing();
-        addTearDown(clearClipboardMock);
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-
-        await tester.tap(find.byKey(const Key('copy_button')));
-        await tester.pumpAndSettle();
-
-        expect(find.text('Failed to copy public key. Please try again.'), findsOneWidget);
-      });
-
-      testWidgets('shows error notice when follow action fails', (tester) async {
-        _api.follows = [];
-        _api.followCompleter = Completer();
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-
-        await tester.tap(find.byKey(const Key('follow_button')));
-        await tester.pump();
-
-        _api.followCompleter!.completeError(Exception('Network error'));
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 300));
-
-        expect(find.text('Failed to update follow status. Please try again.'), findsOneWidget);
-      });
-
-      testWidgets('dismisses notice after auto-hide duration', (tester) async {
-        mockClipboard();
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-
-        await tester.tap(find.byKey(const Key('copy_button')));
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 300));
-        expect(find.byType(WnSystemNotice), findsOneWidget);
-
-        await tester.pump(const Duration(seconds: 3));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(WnSystemNotice), findsNothing);
-      });
+      final button = tester.widget<WnButton>(find.byKey(const Key('contact_button')));
+      expect(button.loading, isTrue);
     });
 
-    group('navigation', () {
-      testWidgets('navigates back when back button is pressed', (tester) async {
-        await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+    testWidgets('shows error notice when follow action fails', (tester) async {
+      _api.followError = Exception('Network error');
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
 
-        await tester.tap(find.byKey(const Key('slate_back_button')));
-        await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('contact_button')));
+      await tester.pumpAndSettle();
 
-        expect(find.text('Profile'), findsNothing);
-      });
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(
+        find.text('Failed to update follow status. Please try again.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('shows error notice when unfollow action fails', (tester) async {
+      _api.followingPubkeys.add(_otherPubkey);
+      _api.unfollowError = Exception('Network error');
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+
+      await tester.tap(find.byKey(const Key('contact_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(
+        find.text('Failed to update follow status. Please try again.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('hides contact button for own profile', (tester) async {
+      await pumpChatInfoScreen(tester, userPubkey: _testPubkey);
+
+      expect(find.byKey(const Key('contact_button')), findsNothing);
+      expect(find.byKey(const Key('search_button')), findsOneWidget);
+      expect(find.byKey(const Key('add_to_group_button')), findsOneWidget);
+    });
+
+    testWidgets('shows notice when public key is copied', (tester) async {
+      mockClipboard();
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+
+      await tester.tap(find.byKey(const Key('copy_button')));
+      await tester.pump();
+
+      expect(find.text('Public key copied to clipboard'), findsOneWidget);
+    });
+
+    testWidgets('shows error notice when public key copy fails', (tester) async {
+      mockClipboardFailing();
+      addTearDown(clearClipboardMock);
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+
+      await tester.tap(find.byKey(const Key('copy_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Failed to copy public key. Please try again.'), findsOneWidget);
+    });
+
+    testWidgets('dismisses notice after auto-hide duration', (tester) async {
+      mockClipboard();
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+
+      await tester.tap(find.byKey(const Key('copy_button')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(WnSystemNotice), findsNothing);
+    });
+
+    testWidgets('navigates to wip screen when search is pressed', (tester) async {
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+
+      await tester.tap(find.byKey(const Key('search_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('We\'re working on this'), findsOneWidget);
+    });
+
+    testWidgets('does not show mute action', (tester) async {
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+
+      expect(find.byKey(const Key('mute_button')), findsNothing);
+      expect(find.text('Mute'), findsNothing);
+    });
+
+    testWidgets('navigates to wip screen when add to group is pressed', (tester) async {
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+
+      await tester.tap(find.byKey(const Key('add_to_group_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('We\'re working on this'), findsOneWidget);
+    });
+
+    testWidgets('navigates back when close button is pressed', (tester) async {
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+
+      await tester.tap(find.byKey(const Key('slate_close_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Chat Information'), findsNothing);
+    });
+
+    testWidgets('does not show archive or delete actions', (tester) async {
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
+
+      expect(find.text('Archive'), findsNothing);
+      expect(find.text('Delete chat'), findsNothing);
     });
   });
 }

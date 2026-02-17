@@ -17,6 +17,7 @@ class WnSlate extends HookWidget {
     this.child,
     this.footer,
     this.animateContent = true,
+    this.shrinkWrapContent = false,
   });
 
   final String tag;
@@ -28,6 +29,7 @@ class WnSlate extends HookWidget {
   final Widget? child;
   final Widget? footer;
   final bool animateContent;
+  final bool shrinkWrapContent;
 
   BoxDecoration _decoration(SemanticColors colors) {
     return BoxDecoration(
@@ -98,9 +100,11 @@ class WnSlate extends HookWidget {
     final content = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (systemNotice != null) Flexible(child: systemNotice!),
+        if (systemNotice != null)
+          if (shrinkWrapContent) systemNotice! else Flexible(child: systemNotice!),
         if (header != null) header!,
-        if (childWidget != null) Flexible(child: childWidget),
+        if (childWidget != null)
+          if (shrinkWrapContent) childWidget else Flexible(child: childWidget),
         if (footer != null) footer!,
       ],
     );
