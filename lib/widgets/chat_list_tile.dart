@@ -59,16 +59,21 @@ class ChatListTile extends HookConsumerWidget {
     final String? avatarName;
 
     if (isPending) {
+      final hasMessages = chatSummary.lastMessage != null;
       if (isDm) {
         title = welcomerName ?? chatSummary.name ?? context.l10n.unknownUser;
         pictureUrl = welcomerSnapshot.data?.picture ?? chatSummary.groupImageUrl;
         avatarName = welcomerName ?? chatSummary.name;
-        subtitle = context.l10n.hasInvitedYouToSecureChat;
+        subtitle = hasMessages
+            ? chatSummary.lastMessage!.content
+            : context.l10n.hasInvitedYouToSecureChat;
       } else {
         title = hasGroupName ? chatSummary.name! : context.l10n.unknownGroup;
         pictureUrl = chatSummary.groupImagePath;
         avatarName = hasGroupName ? chatSummary.name! : null;
-        if (welcomerName != null) {
+        if (hasMessages) {
+          subtitle = chatSummary.lastMessage!.content;
+        } else if (welcomerName != null) {
           subtitle = context.l10n.userInvitedYouToSecureChat(welcomerName);
         } else {
           subtitle = context.l10n.youHaveBeenInvitedToSecureChat;
