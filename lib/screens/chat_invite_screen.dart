@@ -43,7 +43,7 @@ class ChatInviteScreen extends HookConsumerWidget {
       noticeMessage.value = null;
     }
 
-    final chatProfile = useChatProfile(pubkey, mlsGroupId);
+    final chatProfile = useChatProfile(context, pubkey, mlsGroupId);
     final chatMessages = useChatMessages(mlsGroupId);
 
     useActiveChat(

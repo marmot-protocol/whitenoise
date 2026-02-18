@@ -54,7 +54,7 @@ class ChatScreen extends HookConsumerWidget {
     ) = useChatMessages(
       groupId,
     );
-    final chatProfile = useChatProfile(pubkey, groupId);
+    final chatProfile = useChatProfile(context, pubkey, groupId);
     final scrollToMessageResult = useScrollToMessage(
       getReversedMessageIndex: getReversedMessageIndex,
     );
@@ -221,7 +221,7 @@ class ChatScreen extends HookConsumerWidget {
                           if (otherPubkey != null) {
                             Routes.pushToChatInfo(context, otherPubkey);
                           } else {
-                            Routes.pushToWip(context);
+                            Routes.pushToGroupInfo(context, groupId);
                           }
                         },
                       ),
