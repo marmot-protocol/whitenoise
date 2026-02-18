@@ -11,8 +11,10 @@ class MockScannerController implements MobileScannerController {
   final List<VoidCallback> _listeners = [];
 
   bool startCalled = false;
+  int startCallCount = 0;
   bool stopCalled = false;
   bool disposeCalled = false;
+  MobileScannerException? startException;
 
   MobileScannerState _value = const MobileScannerState.uninitialized();
 
@@ -62,6 +64,8 @@ class MockScannerController implements MobileScannerController {
   @override
   Future<void> start({CameraFacing? cameraDirection}) async {
     startCalled = true;
+    startCallCount++;
+    if (startException != null) throw startException!;
   }
 
   @override
@@ -92,8 +96,10 @@ class MockScannerController implements MobileScannerController {
 
   void reset() {
     startCalled = false;
+    startCallCount = 0;
     stopCalled = false;
     disposeCalled = false;
+    startException = null;
   }
 
   @override

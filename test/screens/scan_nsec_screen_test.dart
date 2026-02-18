@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/login_screen.dart';
@@ -49,6 +50,14 @@ class _MockAuthNotifier extends AuthNotifier {
 void main() {
   setUpAll(() {
     RustLib.initMock(api: _MockApi());
+  });
+
+  setUp(() {
+    setPermissionRequester(() async => PermissionStatus.granted);
+  });
+
+  tearDown(() {
+    resetPermissionRequester();
   });
 
   late _MockAuthNotifier mockAuth;

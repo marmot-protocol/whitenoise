@@ -16,7 +16,8 @@ class ScanNpubScreen extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final showError = useState(false);
+    final l10n = context.l10n;
+    final showInvalidNpubError = useState(false);
 
     void onBarcodeDetected(String value) {
       final hexPubkey = hexFromNpub(value);
@@ -24,7 +25,7 @@ class ScanNpubScreen extends HookWidget {
         Routes.goBack(context);
         Routes.pushToStartChat(context, hexPubkey);
       } else if (value.startsWith('npub1')) {
-        showError.value = true;
+        showInvalidNpubError.value = true;
       }
     }
 
@@ -35,7 +36,8 @@ class ScanNpubScreen extends HookWidget {
           padding: EdgeInsets.symmetric(vertical: 16.h),
           child: WnSlate(
             header: WnSlateNavigationHeader(
-              title: context.l10n.scanNpub,
+              title: l10n.scanNpub,
+              type: WnSlateNavigationType.back,
               onNavigate: () => Routes.goBack(context),
             ),
             child: Padding(
@@ -44,16 +46,18 @@ class ScanNpubScreen extends HookWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
                   Expanded(
-                    child: WnScanBox(onBarcodeDetected: onBarcodeDetected),
+                    child: WnScanBox(
+                      onBarcodeDetected: onBarcodeDetected,
+                    ),
                   ),
                   Gap(12.h),
                   Text(
-                    showError.value ? context.l10n.invalidNpub : context.l10n.scanNpubHint,
+                    showInvalidNpubError.value ? l10n.invalidNpub : l10n.scanNpubHint,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
-                      color: showError.value
+                      color: showInvalidNpubError.value
                           ? colors.backgroundContentDestructive
                           : colors.backgroundContentSecondary,
                     ),
