@@ -156,6 +156,7 @@
   "remove": "Entfernen",
   "messageActions": "Nachrichtenaktionen",
   "reply": "Antworten",
+  "copyMessage": "Kopieren",
   "delete": "Löschen",
   "failedToDeleteMessage": "Nachricht konnte nicht gelöscht werden. Bitte erneut versuchen.",
   "failedToSendReaction": "Reaktion konnte nicht gesendet werden. Bitte erneut versuchen.",

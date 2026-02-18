@@ -1044,6 +1044,12 @@ abstract class AppLocalizations {
   /// **'Reply'**
   String get reply;
 
+  /// Copy message button text
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copyMessage;
+
   /// Delete button text
   ///
   /// In en, this message translates to:

@@ -537,6 +537,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get reply => 'Yanıtla';
 
   @override
+  String get copyMessage => 'Kopyala';
+
+  @override
   String get delete => 'Sil';
 
   @override

@@ -156,6 +156,7 @@
   "remove": "Remover",
   "messageActions": "Ações da mensagem",
   "reply": "Responder",
+  "copyMessage": "Copiar",
   "delete": "Excluir",
   "failedToDeleteMessage": "Falha ao excluir mensagem. Por favor, tente novamente.",
   "failedToSendReaction": "Falha ao enviar reação. Por favor, tente novamente.",

@@ -156,6 +156,7 @@
   "remove": "Kaldır",
   "messageActions": "Mesaj işlemleri",
   "reply": "Yanıtla",
+  "copyMessage": "Kopyala",
   "delete": "Sil",
   "failedToDeleteMessage": "Mesaj silinemedi. Lütfen tekrar deneyin.",
   "failedToSendReaction": "Tepki gönderilemedi. Lütfen tekrar deneyin.",

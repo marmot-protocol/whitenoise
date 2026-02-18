@@ -543,6 +543,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get reply => 'Antworten';
 
   @override
+  String get copyMessage => 'Kopieren';
+
+  @override
   String get delete => 'Löschen';
 
   @override

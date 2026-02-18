@@ -555,6 +555,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reply => 'Ответить';
 
   @override
+  String get copyMessage => 'Копировать';
+
+  @override
   String get delete => 'Удалить';
 
   @override

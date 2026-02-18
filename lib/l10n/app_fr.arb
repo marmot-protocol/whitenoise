@@ -156,6 +156,7 @@
   "remove": "Supprimer",
   "messageActions": "Actions du message",
   "reply": "Répondre",
+  "copyMessage": "Copier",
   "delete": "Supprimer",
   "failedToDeleteMessage": "Échec de la suppression du message. Veuillez réessayer.",
   "failedToSendReaction": "Échec de l'envoi de la réaction. Veuillez réessayer.",

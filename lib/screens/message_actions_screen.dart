@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
@@ -256,14 +257,30 @@ class MessageActionsModal extends StatelessWidget {
                 key: const Key('reply_button'),
                 text: context.l10n.reply,
                 type: WnButtonType.outline,
+                size: WnButtonSize.medium,
+                trailingIcon: WnIcons.reply,
                 onPressed: onReply,
               ),
+            Gap(8.h),
+            WnButton(
+              key: const Key('copy_button'),
+              text: context.l10n.copyMessage,
+              type: WnButtonType.outline,
+              size: WnButtonSize.medium,
+              trailingIcon: WnIcons.copy,
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: message.content));
+                Navigator.of(context).pop();
+              },
+            ),
             if (onDelete != null) ...[
               Gap(8.h),
               WnButton(
                 key: const Key('delete_button'),
                 text: context.l10n.delete,
-                type: WnButtonType.outline,
+                type: WnButtonType.destructive,
+                size: WnButtonSize.medium,
+                trailingIcon: WnIcons.trashCan,
                 onPressed: onDelete,
               ),
             ],

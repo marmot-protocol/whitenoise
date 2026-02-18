@@ -539,6 +539,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get reply => 'Responder';
 
   @override
+  String get copyMessage => 'Copiar';
+
+  @override
   String get delete => 'Eliminar';
 
   @override

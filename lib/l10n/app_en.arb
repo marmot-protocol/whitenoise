@@ -841,6 +841,11 @@
     "description": "Reply button text"
   },
 
+  "copyMessage": "Copy",
+  "@copyMessage": {
+    "description": "Copy message button text"
+  },
+
   "delete": "Delete",
   "@delete": {
     "description": "Delete button text"
