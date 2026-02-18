@@ -180,21 +180,24 @@ class SetUpGroupScreen extends HookConsumerWidget {
                             ),
                           ),
                           Gap(16.h),
-                          ...createGroupHook.state.usersWithKeyPackage.map((user) {
+                          ...createGroupHook.state.usersWithKeyPackage.expand((user) {
                             final displayName = presentName(user.metadata);
                             final formattedPubKey = formatPublicKey(
                               npubFromHex(user.pubkey) ?? user.pubkey,
                             );
-                            return Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 14.w),
-                              child: WnUserItem(
-                                key: Key('member_${user.pubkey}'),
-                                displayName: displayName ?? formattedPubKey,
-                                pictureUrl: user.metadata.picture,
-                                avatarColor: AvatarColor.fromPubkey(user.pubkey),
+                            return [
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 14.w),
+                                child: WnUserItem(
+                                  key: Key('member_${user.pubkey}'),
+                                  displayName: displayName ?? formattedPubKey,
+                                  pictureUrl: user.metadata.picture,
+                                  avatarColor: AvatarColor.fromPubkey(user.pubkey),
+                                ),
                               ),
-                            );
-                          }),
+                              Gap(12.h),
+                            ];
+                          }).toList()..removeLast(),
                         ],
                         if (createGroupHook.state.usersWithoutKeyPackage.isNotEmpty) ...[
                           Gap(12.h),
@@ -210,24 +213,27 @@ class SetUpGroupScreen extends HookConsumerWidget {
                             ),
                           ),
                           Gap(16.h),
-                          ...createGroupHook.state.usersWithoutKeyPackage.map((user) {
+                          ...createGroupHook.state.usersWithoutKeyPackage.expand((user) {
                             final displayName = presentName(user.metadata);
                             final formattedPubKey = formatPublicKey(
                               npubFromHex(user.pubkey) ?? user.pubkey,
                             );
-                            return Opacity(
-                              opacity: 0.5,
-                              child: Padding(
-                                padding: EdgeInsets.symmetric(horizontal: 14.w),
-                                child: WnUserItem(
-                                  key: Key('excluded_${user.pubkey}'),
-                                  displayName: displayName ?? formattedPubKey,
-                                  pictureUrl: user.metadata.picture,
-                                  avatarColor: AvatarColor.fromPubkey(user.pubkey),
+                            return [
+                              Opacity(
+                                opacity: 0.5,
+                                child: Padding(
+                                  padding: EdgeInsets.symmetric(horizontal: 14.w),
+                                  child: WnUserItem(
+                                    key: Key('excluded_${user.pubkey}'),
+                                    displayName: displayName ?? formattedPubKey,
+                                    pictureUrl: user.metadata.picture,
+                                    avatarColor: AvatarColor.fromPubkey(user.pubkey),
+                                  ),
                                 ),
                               ),
-                            );
-                          }),
+                              Gap(12.h),
+                            ];
+                          }).toList()..removeLast(),
                         ],
                         Gap(16.h),
                       ],
