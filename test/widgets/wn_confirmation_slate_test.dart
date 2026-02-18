@@ -85,29 +85,6 @@ void main() {
       expect(cancelled, true);
     });
 
-    testWidgets('cancel button dismisses slate', (tester) async {
-      bool? result;
-
-      await mountTestApp(tester);
-
-      final context = tester.element(find.byType(Scaffold));
-
-      WnConfirmationSlate.show(
-        context: context,
-        title: 'Test Title',
-        message: 'Test Message',
-        confirmText: 'Confirm',
-        cancelText: 'Cancel',
-      ).then((value) => result = value);
-
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(const Key('cancel_button')));
-      await tester.pumpAndSettle();
-
-      expect(result, false);
-    });
-
     testWidgets('uses destructive button style when isDestructive is true', (tester) async {
       await mountWidget(
         WnConfirmationSlate(
@@ -126,29 +103,6 @@ void main() {
 
       final confirmButton = tester.widget<WnButton>(find.byKey(const Key('confirm_button')));
       expect(confirmButton.type, WnButtonType.destructive);
-    });
-
-    testWidgets('show returns true when confirmed', (tester) async {
-      bool? result;
-
-      await mountTestApp(tester);
-
-      final context = tester.element(find.byType(Scaffold));
-
-      WnConfirmationSlate.show(
-        context: context,
-        title: 'Test Title',
-        message: 'Test Message',
-        confirmText: 'Confirm',
-        cancelText: 'Cancel',
-      ).then((value) => result = value);
-
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(const Key('confirm_button')));
-      await tester.pumpAndSettle();
-
-      expect(result, true);
     });
 
     testWidgets('loading state disables cancel button', (tester) async {

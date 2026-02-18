@@ -36,50 +36,22 @@ class WnConfirmationSlate extends StatelessWidget {
     required String confirmText,
     required String cancelText,
     bool isDestructive = false,
-    Future<bool> Function()? onConfirmAsync,
+    required Future<bool> Function() onConfirmAsync,
   }) async {
     final colors = context.colors;
 
     return await Navigator.of(context).push<bool>(
       PageRouteBuilder(
         opaque: false,
-        barrierDismissible: onConfirmAsync == null,
         barrierColor: colors.backgroundPrimary.withValues(alpha: 0.8),
         pageBuilder: (context, _, _) {
-          if (onConfirmAsync != null) {
-            return _AsyncConfirmationOverlay(
-              title: title,
-              message: message,
-              confirmText: confirmText,
-              cancelText: cancelText,
-              isDestructive: isDestructive,
-              onConfirmAsync: onConfirmAsync,
-            );
-          }
-
-          return SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.h),
-              child: Column(
-                children: [
-                  WnConfirmationSlate(
-                    title: title,
-                    message: message,
-                    confirmText: confirmText,
-                    cancelText: cancelText,
-                    onConfirm: () => Navigator.of(context).pop(true),
-                    onCancel: () => Navigator.of(context).pop(false),
-                    isDestructive: isDestructive,
-                  ),
-                  Expanded(
-                    child: GestureDetector(
-                      onTap: () => Navigator.of(context).pop(false),
-                      behavior: HitTestBehavior.opaque,
-                    ),
-                  ),
-                ],
-              ),
-            ),
+          return _AsyncConfirmationOverlay(
+            title: title,
+            message: message,
+            confirmText: confirmText,
+            cancelText: cancelText,
+            isDestructive: isDestructive,
+            onConfirmAsync: onConfirmAsync,
           );
         },
         transitionsBuilder: (_, animation, _, child) {
