@@ -577,8 +577,177 @@ class AppLocalizationsFr extends AppLocalizations {
   String get monthDecShort => 'Déc';
 
   @override
-  String get loginWithSigner => 'Se connecter avec Signer';
+  String get loginWithSigner => 'Login with Signer';
 
   @override
   String get signerConnectionError => 'Impossible de se connecter au signer. Veuillez réessayer.';
+
+  @override
+  String get search => 'Rechercher';
+
+  @override
+  String get filterChats => 'Discussions';
+
+  @override
+  String get filterArchive => 'Archives';
+
+  @override
+  String get signerErrorUserRejected => 'Connexion annulée';
+
+  @override
+  String get signerErrorNotConnected => 'Non connecté au signer. Veuillez réessayer.';
+
+  @override
+  String get signerErrorNoSigner =>
+      'Aucune application signer trouvée. Veuillez installer un signer compatible NIP-55.';
+
+  @override
+  String get signerErrorNoResponse => 'Aucune réponse du signer. Veuillez réessayer.';
+
+  @override
+  String get signerErrorNoPubkey => 'Impossible d\'obtenir la clé publique du signer.';
+
+  @override
+  String get signerErrorNoResult => 'Le signer n\'a renvoyé aucun résultat.';
+
+  @override
+  String get signerErrorNoEvent => 'Le signer n\'a renvoyé aucun événement signé.';
+
+  @override
+  String get signerErrorRequestInProgress => 'Une autre requête est en cours. Veuillez patienter.';
+
+  @override
+  String get signerErrorNoActivity => 'Impossible de lancer le signer. Veuillez réessayer.';
+
+  @override
+  String get signerErrorLaunchError => 'Échec du lancement de l\'application signer.';
+
+  @override
+  String get signerErrorUnknown => 'Une erreur s\'est produite avec le signer. Veuillez réessayer.';
+
+  @override
+  String get messageNotFound => 'Message introuvable';
+
+  @override
+  String get pin => 'Épingler';
+
+  @override
+  String get unpin => 'Désépingler';
+
+  @override
+  String get mute => 'Muet';
+
+  @override
+  String get archive => 'Archiver';
+
+  @override
+  String get failedToPinChat => 'Échec de l\'épinglage. Veuillez réessayer.';
+
+  @override
+  String get carouselPrivacyTitle => 'Confidentialité et sécurité';
+
+  @override
+  String get carouselPrivacyDescription =>
+      'Gardez vos conversations privées. Même en cas de violation, vos messages restent sécurisés.';
+
+  @override
+  String get carouselIdentityTitle => 'Choisissez votre identité';
+
+  @override
+  String get carouselIdentityDescription =>
+      'Discutez sans révéler votre numéro de téléphone ou votre e-mail. Choisissez votre identité : nom réel, pseudonyme ou anonyme.';
+
+  @override
+  String get carouselDecentralizedTitle => 'Décentralisé et sans permission';
+
+  @override
+  String get carouselDecentralizedDescription =>
+      'Aucune autorité centrale ne contrôle votre communication – pas de permissions nécessaires, pas de censure possible.';
+
+  @override
+  String get learnMore => 'En savoir plus';
+
+  @override
+  String get backToSignUp => 'Retour à l\'inscription';
+
+  @override
+  String get deleteAllData => 'Supprimer Toutes les Données';
+
+  @override
+  String get deleteAllDataConfirmation => 'Supprimer toutes les données ?';
+
+  @override
+  String get deleteAllDataWarning =>
+      'Cela supprimera définitivement tous vos chats, messages et paramètres de cet appareil. Cette action ne peut pas être annulée.';
+
+  @override
+  String get deleteAllDataError =>
+      'Échec de la suppression de toutes les données. Veuillez réessayer.';
+
+  @override
+  String get relayResolutionTitle => 'Configuration du relais';
+
+  @override
+  String get relayResolutionDescription =>
+      'Nous n\'avons pas trouvé vos listes de relais sur le réseau. Vous pouvez fournir un relais où vos listes sont publiées ou utiliser nos relais par défaut pour commencer.';
+
+  @override
+  String get relayResolutionUseDefaults => 'Utiliser les relais par défaut';
+
+  @override
+  String get relayResolutionTryRelay => 'Rechercher un relais';
+
+  @override
+  String get relayResolutionRelayPlaceholder => 'wss://relais.exemple.com';
+
+  @override
+  String get relayResolutionRelayLabel => 'URL du relais';
+
+  @override
+  String get relayResolutionNotFound =>
+      'Aucune liste de relais trouvée sur ce relais. Essayez un autre ou utilisez les valeurs par défaut.';
+
+  @override
+  String get loginErrorInvalidKey =>
+      'Format de clé privée invalide. Veuillez vérifier et réessayer.';
+
+  @override
+  String get loginErrorNoRelayConnections =>
+      'Impossible de se connecter à des relais. Vérifiez votre connexion et réessayez.';
+
+  @override
+  String get loginErrorTimeout => 'La connexion a expiré. Veuillez réessayer.';
+
+  @override
+  String get loginErrorGeneric =>
+      'Une erreur est survenue lors de la connexion. Veuillez réessayer.';
+
+  @override
+  String get loginErrorNoLoginInProgress => 'Aucune connexion en cours. Veuillez recommencer.';
+
+  @override
+  String get loginErrorInternal => 'Une erreur interne est survenue. Veuillez réessayer.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Rien à coller';
+
+  @override
+  String get loginPasteFailed => 'Échec du collage depuis le presse-papiers';
+
+  @override
+  String get openSettings => 'Ouvrir les paramètres';
+
+  @override
+  String get scannerError => 'Erreur du scanner';
+
+  @override
+  String get scannerErrorDescription =>
+      'Une erreur s\'est produite avec le scanner. Veuillez réessayer.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'Veuillez activer l\'accès à la caméra dans les paramètres de votre appareil pour scanner les codes QR.';
+
+  @override
+  String get retry => 'Réessayer';
 }

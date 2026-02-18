@@ -580,4 +580,173 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get signerConnectionError =>
       'Não foi possível conectar ao signer. Por favor, tente novamente.';
+
+  @override
+  String get search => 'Pesquisar';
+
+  @override
+  String get filterChats => 'Conversas';
+
+  @override
+  String get filterArchive => 'Arquivo';
+
+  @override
+  String get signerErrorUserRejected => 'Login cancelado';
+
+  @override
+  String get signerErrorNotConnected => 'Não conectado ao signer. Por favor, tente novamente.';
+
+  @override
+  String get signerErrorNoSigner =>
+      'Nenhum app de signer encontrado. Instale um signer compatível com NIP-55.';
+
+  @override
+  String get signerErrorNoResponse => 'Sem resposta do signer. Por favor, tente novamente.';
+
+  @override
+  String get signerErrorNoPubkey => 'Não foi possível obter a chave pública do signer.';
+
+  @override
+  String get signerErrorNoResult => 'O signer não retornou um resultado.';
+
+  @override
+  String get signerErrorNoEvent => 'O signer não retornou um evento assinado.';
+
+  @override
+  String get signerErrorRequestInProgress => 'Outra solicitação em andamento. Por favor, aguarde.';
+
+  @override
+  String get signerErrorNoActivity =>
+      'Não foi possível iniciar o signer. Por favor, tente novamente.';
+
+  @override
+  String get signerErrorLaunchError => 'Falha ao iniciar o app do signer.';
+
+  @override
+  String get signerErrorUnknown => 'Ocorreu um erro com o signer. Por favor, tente novamente.';
+
+  @override
+  String get messageNotFound => 'Mensagem não encontrada';
+
+  @override
+  String get pin => 'Fixar';
+
+  @override
+  String get unpin => 'Desafixar';
+
+  @override
+  String get mute => 'Silenciar';
+
+  @override
+  String get archive => 'Arquivar';
+
+  @override
+  String get failedToPinChat => 'Erro ao fixar. Por favor, tente novamente.';
+
+  @override
+  String get carouselPrivacyTitle => 'Privacidade e segurança';
+
+  @override
+  String get carouselPrivacyDescription =>
+      'Mantenha suas conversas privadas. Mesmo em caso de violação, suas mensagens permanecem seguras.';
+
+  @override
+  String get carouselIdentityTitle => 'Escolha sua identidade';
+
+  @override
+  String get carouselIdentityDescription =>
+      'Converse sem revelar seu número de telefone ou email. Escolha sua identidade: nome real, pseudônimo ou anônimo.';
+
+  @override
+  String get carouselDecentralizedTitle => 'Descentralizado e sem permissões';
+
+  @override
+  String get carouselDecentralizedDescription =>
+      'Nenhuma autoridade central controla sua comunicação – sem permissões necessárias, sem censura possível.';
+
+  @override
+  String get learnMore => 'Saiba mais';
+
+  @override
+  String get backToSignUp => 'Voltar ao cadastro';
+
+  @override
+  String get deleteAllData => 'Excluir Todos os Dados';
+
+  @override
+  String get deleteAllDataConfirmation => 'Excluir todos os dados?';
+
+  @override
+  String get deleteAllDataWarning =>
+      'Isso excluirá permanentemente todos os seus chats, mensagens e configurações deste dispositivo. Esta ação não pode ser desfeita.';
+
+  @override
+  String get deleteAllDataError => 'Falha ao excluir todos os dados. Por favor, tente novamente.';
+
+  @override
+  String get relayResolutionTitle => 'Configuração de relay';
+
+  @override
+  String get relayResolutionDescription =>
+      'Não conseguimos encontrar as suas listas de relays na rede. Pode fornecer um relay onde as suas listas estejam publicadas ou utilizar os nossos relays predefinidos para começar.';
+
+  @override
+  String get relayResolutionUseDefaults => 'Usar relays predefinidos';
+
+  @override
+  String get relayResolutionTryRelay => 'Pesquisar relay';
+
+  @override
+  String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
+
+  @override
+  String get relayResolutionRelayLabel => 'URL do relay';
+
+  @override
+  String get relayResolutionNotFound =>
+      'Nenhuma lista de relays encontrada neste relay. Tente outro ou use os predefinidos.';
+
+  @override
+  String get loginErrorInvalidKey =>
+      'Formato de chave privada inválido. Verifique e tente novamente.';
+
+  @override
+  String get loginErrorNoRelayConnections =>
+      'Não foi possível conectar a nenhum relay. Verifique a sua conexão e tente novamente.';
+
+  @override
+  String get loginErrorTimeout => 'Tempo de login esgotado. Tente novamente.';
+
+  @override
+  String get loginErrorGeneric => 'Ocorreu um erro durante o login. Tente novamente.';
+
+  @override
+  String get loginErrorNoLoginInProgress =>
+      'Nenhum login em andamento. Por favor, comece novamente.';
+
+  @override
+  String get loginErrorInternal => 'Ocorreu um erro interno. Tente novamente.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Nada para colar';
+
+  @override
+  String get loginPasteFailed => 'Falha ao colar da área de transferência';
+
+  @override
+  String get openSettings => 'Abrir configurações';
+
+  @override
+  String get scannerError => 'Erro do scanner';
+
+  @override
+  String get scannerErrorDescription =>
+      'Algo deu errado com o scanner. Por favor, tente novamente.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'Por favor, habilite o acesso à câmera nas configurações do seu dispositivo para escanear códigos QR.';
+
+  @override
+  String get retry => 'Tentar novamente';
 }

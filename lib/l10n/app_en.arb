@@ -919,5 +919,254 @@
   "signerConnectionError": "Unable to connect to signer. Please try again.",
   "@signerConnectionError": {
     "description": "Error message when connection to external signer fails"
+  },
+
+  "search": "Search",
+  "@search": {
+    "description": "Search placeholder text"
+  },
+
+  "filterChats": "Chats",
+  "@filterChats": {
+    "description": "Chat list filter chip for chats"
+  },
+
+  "filterArchive": "Archive",
+  "@filterArchive": {
+    "description": "Chat list filter chip for archived chats"
+  },
+  "signerErrorUserRejected": "Login cancelled",
+  "@signerErrorUserRejected": {
+    "description": "Android signer error when user rejects the request"
+  },
+  "signerErrorNotConnected": "Not connected to signer. Please try again.",
+  "@signerErrorNotConnected": {
+    "description": "Android signer error when not connected"
+  },
+  "signerErrorNoSigner": "No signer app found. Please install a NIP-55 compatible signer.",
+  "@signerErrorNoSigner": {
+    "description": "Android signer error when no signer app is installed"
+  },
+  "signerErrorNoResponse": "No response from signer. Please try again.",
+  "@signerErrorNoResponse": {
+    "description": "Android signer error when signer does not respond"
+  },
+  "signerErrorNoPubkey": "Unable to get public key from signer.",
+  "@signerErrorNoPubkey": {
+    "description": "Android signer error when public key is not returned"
+  },
+  "signerErrorNoResult": "Signer did not return a result.",
+  "@signerErrorNoResult": {
+    "description": "Android signer error when signer returns no result"
+  },
+  "signerErrorNoEvent": "Signer did not return a signed event.",
+  "@signerErrorNoEvent": {
+    "description": "Android signer error when signed event is not returned"
+  },
+  "signerErrorRequestInProgress": "Another request is in progress. Please wait.",
+  "@signerErrorRequestInProgress": {
+    "description": "Android signer error when a request is already in progress"
+  },
+  "signerErrorNoActivity": "Unable to launch signer. Please try again.",
+  "@signerErrorNoActivity": {
+    "description": "Android signer error when signer cannot be launched"
+  },
+  "signerErrorLaunchError": "Failed to launch signer app.",
+  "@signerErrorLaunchError": {
+    "description": "Android signer error when launch fails"
+  },
+  "signerErrorUnknown": "An error occurred with the signer. Please try again.",
+  "@signerErrorUnknown": {
+    "description": "Android signer generic error message"
+  },
+
+  "messageNotFound": "Message not found",
+  "@messageNotFound": {
+    "description": "Text shown in reply preview when the original message is deleted or not available"
+  },
+
+  "pin": "Pin",
+  "@pin": {
+    "description": "Pin chat context menu action"
+  },
+
+  "unpin": "Unpin",
+  "@unpin": {
+    "description": "Unpin chat context menu action"
+  },
+
+  "mute": "Mute",
+  "@mute": {
+    "description": "Mute chat context menu action"
+  },
+
+  "archive": "Archive",
+  "@archive": {
+    "description": "Archive chat context menu action"
+  },
+
+  "failedToPinChat": "Failed to update pin. Please try again.",
+  "@failedToPinChat": {
+    "description": "Error message when pin/unpin operation fails"
+  },
+
+  "carouselPrivacyTitle": "Privacy and security",
+  "@carouselPrivacyTitle": {
+    "description": "Login carousel slide 1 title"
+  },
+
+  "carouselPrivacyDescription": "Keep your conversations private. Even in case of a breach, your messages remain secure.",
+  "@carouselPrivacyDescription": {
+    "description": "Login carousel slide 1 description"
+  },
+
+  "carouselIdentityTitle": "Choose your identity",
+  "@carouselIdentityTitle": {
+    "description": "Login carousel slide 2 title"
+  },
+
+  "carouselIdentityDescription": "Chat without revealing your phone number or email. Choose your identity: real name, pseudonym, or anonymous.",
+  "@carouselIdentityDescription": {
+    "description": "Login carousel slide 2 description"
+  },
+
+  "carouselDecentralizedTitle": "Decentralized and permissionless",
+  "@carouselDecentralizedTitle": {
+    "description": "Login carousel slide 3 title"
+  },
+
+  "carouselDecentralizedDescription": "No central authority controls your communication-no permissions needed, no censorship possible.",
+  "@carouselDecentralizedDescription": {
+    "description": "Login carousel slide 3 description"
+  },
+
+  "learnMore": "Learn more",
+  "@learnMore": {
+    "description": "Learn more button text on signup screen"
+  },
+
+  "backToSignUp": "Back to sign up",
+  "@backToSignUp": {
+    "description": "Button to return to signup from carousel"
+  },
+
+  "deleteAllData": "Delete All Data",
+  "@deleteAllData": {
+    "description": "Button to delete all application data"
+  },
+
+  "deleteAllDataConfirmation": "Delete all data?",
+  "@deleteAllDataConfirmation": {
+    "description": "Confirmation dialog title for delete all data"
+  },
+
+  "deleteAllDataWarning": "This will permanently delete all your chats, messages, and settings from this device. This action cannot be undone.",
+  "@deleteAllDataWarning": {
+    "description": "Warning message for delete all data action"
+  },
+
+  "deleteAllDataError": "Failed to delete all data. Please try again.",
+  "@deleteAllDataError": {
+    "description": "Error message when data deletion fails"
+  },
+
+  "relayResolutionTitle": "Relay Setup",
+  "@relayResolutionTitle": {
+    "description": "Title for the relay resolution screen"
+  },
+
+  "relayResolutionDescription": "We couldn't find your relay lists on the network. You can provide a relay where your lists are published, or use our default relays to get started.",
+  "@relayResolutionDescription": {
+    "description": "Explanation of what happened during relay resolution"
+  },
+
+  "relayResolutionUseDefaults": "Use default relays",
+  "@relayResolutionUseDefaults": {
+    "description": "Button text for publishing defaults"
+  },
+
+  "relayResolutionTryRelay": "Search relay",
+  "@relayResolutionTryRelay": {
+    "description": "Button text for trying a custom relay"
+  },
+
+  "relayResolutionRelayPlaceholder": "wss://relay.example.com",
+  "@relayResolutionRelayPlaceholder": {
+    "description": "Placeholder for relay URL input"
+  },
+
+  "relayResolutionRelayLabel": "Relay URL",
+  "@relayResolutionRelayLabel": {
+    "description": "Label for relay URL input"
+  },
+
+  "relayResolutionNotFound": "No relay lists found on this relay. Try another or use defaults.",
+  "@relayResolutionNotFound": {
+    "description": "Error when custom relay didn't find lists"
+  },
+
+  "loginErrorInvalidKey": "Invalid private key format. Please check and try again.",
+  "@loginErrorInvalidKey": {
+    "description": "Error message for LoginInvalidKeyFormat"
+  },
+
+  "loginErrorNoRelayConnections": "Could not connect to any relays. Please check your connection and try again.",
+  "@loginErrorNoRelayConnections": {
+    "description": "Error message for LoginNoRelayConnections"
+  },
+
+  "loginErrorTimeout": "Login timed out. Please try again.",
+  "@loginErrorTimeout": {
+    "description": "Error message for LoginTimeout"
+  },
+
+  "loginErrorGeneric": "An error occurred during login. Please try again.",
+  "@loginErrorGeneric": {
+    "description": "Generic fallback error message for login"
+  },
+
+  "loginErrorNoLoginInProgress": "No login in progress. Please start over.",
+  "@loginErrorNoLoginInProgress": {
+    "description": "Error when trying to continue a login that was not started"
+  },
+
+  "loginErrorInternal": "An internal error occurred. Please try again.",
+  "@loginErrorInternal": {
+    "description": "Error for internal login failures"
+  },
+
+  "loginPasteNothingToPaste": "Nothing to paste",
+  "@loginPasteNothingToPaste": {
+    "description": "Error when clipboard is empty during login paste"
+  },
+
+  "loginPasteFailed": "Failed to paste from clipboard",
+  "@loginPasteFailed": {
+    "description": "Error when clipboard paste fails during login"
+  },
+
+  "openSettings": "Open Settings",
+  "@openSettings": {
+    "description": "Button text to open device settings"
+  },
+
+  "scannerError": "Scanner error",
+  "@scannerError": {
+    "description": "Generic scanner error message"
+  },
+
+  "scannerErrorDescription": "Something went wrong with the scanner. Please try again.",
+  "@scannerErrorDescription": {
+    "description": "Description for generic scanner error"
+  },
+
+  "cameraPermissionDeniedDescription": "Please enable camera access in your device settings to scan QR codes.",
+  "@cameraPermissionDeniedDescription": {
+    "description": "Description for camera permission denied error"
+  },
+
+  "retry": "Retry",
+  "@retry": {
+    "description": "Retry button text"
   }
 }

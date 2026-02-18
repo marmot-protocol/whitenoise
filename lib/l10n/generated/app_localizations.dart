@@ -1139,6 +1139,318 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to connect to signer. Please try again.'**
   String get signerConnectionError;
+
+  /// Search placeholder text
+  ///
+  /// In en, this message translates to:
+  /// **'Search'**
+  String get search;
+
+  /// Chat list filter chip for chats
+  ///
+  /// In en, this message translates to:
+  /// **'Chats'**
+  String get filterChats;
+
+  /// Chat list filter chip for archived chats
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get filterArchive;
+
+  /// Android signer error when user rejects the request
+  ///
+  /// In en, this message translates to:
+  /// **'Login cancelled'**
+  String get signerErrorUserRejected;
+
+  /// Android signer error when not connected
+  ///
+  /// In en, this message translates to:
+  /// **'Not connected to signer. Please try again.'**
+  String get signerErrorNotConnected;
+
+  /// Android signer error when no signer app is installed
+  ///
+  /// In en, this message translates to:
+  /// **'No signer app found. Please install a NIP-55 compatible signer.'**
+  String get signerErrorNoSigner;
+
+  /// Android signer error when signer does not respond
+  ///
+  /// In en, this message translates to:
+  /// **'No response from signer. Please try again.'**
+  String get signerErrorNoResponse;
+
+  /// Android signer error when public key is not returned
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to get public key from signer.'**
+  String get signerErrorNoPubkey;
+
+  /// Android signer error when signer returns no result
+  ///
+  /// In en, this message translates to:
+  /// **'Signer did not return a result.'**
+  String get signerErrorNoResult;
+
+  /// Android signer error when signed event is not returned
+  ///
+  /// In en, this message translates to:
+  /// **'Signer did not return a signed event.'**
+  String get signerErrorNoEvent;
+
+  /// Android signer error when a request is already in progress
+  ///
+  /// In en, this message translates to:
+  /// **'Another request is in progress. Please wait.'**
+  String get signerErrorRequestInProgress;
+
+  /// Android signer error when signer cannot be launched
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to launch signer. Please try again.'**
+  String get signerErrorNoActivity;
+
+  /// Android signer error when launch fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to launch signer app.'**
+  String get signerErrorLaunchError;
+
+  /// Android signer generic error message
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred with the signer. Please try again.'**
+  String get signerErrorUnknown;
+
+  /// Text shown in reply preview when the original message is deleted or not available
+  ///
+  /// In en, this message translates to:
+  /// **'Message not found'**
+  String get messageNotFound;
+
+  /// Pin chat context menu action
+  ///
+  /// In en, this message translates to:
+  /// **'Pin'**
+  String get pin;
+
+  /// Unpin chat context menu action
+  ///
+  /// In en, this message translates to:
+  /// **'Unpin'**
+  String get unpin;
+
+  /// Mute chat context menu action
+  ///
+  /// In en, this message translates to:
+  /// **'Mute'**
+  String get mute;
+
+  /// Archive chat context menu action
+  ///
+  /// In en, this message translates to:
+  /// **'Archive'**
+  String get archive;
+
+  /// Error message when pin/unpin operation fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to update pin. Please try again.'**
+  String get failedToPinChat;
+
+  /// Login carousel slide 1 title
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy and security'**
+  String get carouselPrivacyTitle;
+
+  /// Login carousel slide 1 description
+  ///
+  /// In en, this message translates to:
+  /// **'Keep your conversations private. Even in case of a breach, your messages remain secure.'**
+  String get carouselPrivacyDescription;
+
+  /// Login carousel slide 2 title
+  ///
+  /// In en, this message translates to:
+  /// **'Choose your identity'**
+  String get carouselIdentityTitle;
+
+  /// Login carousel slide 2 description
+  ///
+  /// In en, this message translates to:
+  /// **'Chat without revealing your phone number or email. Choose your identity: real name, pseudonym, or anonymous.'**
+  String get carouselIdentityDescription;
+
+  /// Login carousel slide 3 title
+  ///
+  /// In en, this message translates to:
+  /// **'Decentralized and permissionless'**
+  String get carouselDecentralizedTitle;
+
+  /// Login carousel slide 3 description
+  ///
+  /// In en, this message translates to:
+  /// **'No central authority controls your communication-no permissions needed, no censorship possible.'**
+  String get carouselDecentralizedDescription;
+
+  /// Learn more button text on signup screen
+  ///
+  /// In en, this message translates to:
+  /// **'Learn more'**
+  String get learnMore;
+
+  /// Button to return to signup from carousel
+  ///
+  /// In en, this message translates to:
+  /// **'Back to sign up'**
+  String get backToSignUp;
+
+  /// Button to delete all application data
+  ///
+  /// In en, this message translates to:
+  /// **'Delete All Data'**
+  String get deleteAllData;
+
+  /// Confirmation dialog title for delete all data
+  ///
+  /// In en, this message translates to:
+  /// **'Delete all data?'**
+  String get deleteAllDataConfirmation;
+
+  /// Warning message for delete all data action
+  ///
+  /// In en, this message translates to:
+  /// **'This will permanently delete all your chats, messages, and settings from this device. This action cannot be undone.'**
+  String get deleteAllDataWarning;
+
+  /// Error message when data deletion fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete all data. Please try again.'**
+  String get deleteAllDataError;
+
+  /// Title for the relay resolution screen
+  ///
+  /// In en, this message translates to:
+  /// **'Relay Setup'**
+  String get relayResolutionTitle;
+
+  /// Explanation of what happened during relay resolution
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t find your relay lists on the network. You can provide a relay where your lists are published, or use our default relays to get started.'**
+  String get relayResolutionDescription;
+
+  /// Button text for publishing defaults
+  ///
+  /// In en, this message translates to:
+  /// **'Use default relays'**
+  String get relayResolutionUseDefaults;
+
+  /// Button text for trying a custom relay
+  ///
+  /// In en, this message translates to:
+  /// **'Search relay'**
+  String get relayResolutionTryRelay;
+
+  /// Placeholder for relay URL input
+  ///
+  /// In en, this message translates to:
+  /// **'wss://relay.example.com'**
+  String get relayResolutionRelayPlaceholder;
+
+  /// Label for relay URL input
+  ///
+  /// In en, this message translates to:
+  /// **'Relay URL'**
+  String get relayResolutionRelayLabel;
+
+  /// Error when custom relay didn't find lists
+  ///
+  /// In en, this message translates to:
+  /// **'No relay lists found on this relay. Try another or use defaults.'**
+  String get relayResolutionNotFound;
+
+  /// Error message for LoginInvalidKeyFormat
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid private key format. Please check and try again.'**
+  String get loginErrorInvalidKey;
+
+  /// Error message for LoginNoRelayConnections
+  ///
+  /// In en, this message translates to:
+  /// **'Could not connect to any relays. Please check your connection and try again.'**
+  String get loginErrorNoRelayConnections;
+
+  /// Error message for LoginTimeout
+  ///
+  /// In en, this message translates to:
+  /// **'Login timed out. Please try again.'**
+  String get loginErrorTimeout;
+
+  /// Generic fallback error message for login
+  ///
+  /// In en, this message translates to:
+  /// **'An error occurred during login. Please try again.'**
+  String get loginErrorGeneric;
+
+  /// Error when trying to continue a login that was not started
+  ///
+  /// In en, this message translates to:
+  /// **'No login in progress. Please start over.'**
+  String get loginErrorNoLoginInProgress;
+
+  /// Error for internal login failures
+  ///
+  /// In en, this message translates to:
+  /// **'An internal error occurred. Please try again.'**
+  String get loginErrorInternal;
+
+  /// Error when clipboard is empty during login paste
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing to paste'**
+  String get loginPasteNothingToPaste;
+
+  /// Error when clipboard paste fails during login
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to paste from clipboard'**
+  String get loginPasteFailed;
+
+  /// Button text to open device settings
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// Generic scanner error message
+  ///
+  /// In en, this message translates to:
+  /// **'Scanner error'**
+  String get scannerError;
+
+  /// Description for generic scanner error
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong with the scanner. Please try again.'**
+  String get scannerErrorDescription;
+
+  /// Description for camera permission denied error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable camera access in your device settings to scan QR codes.'**
+  String get cameraPermissionDeniedDescription;
+
+  /// Retry button text
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

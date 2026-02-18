@@ -583,4 +583,170 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get signerConnectionError => 'Не удалось подключиться к signer. Попробуйте снова.';
+
+  @override
+  String get search => 'Поиск';
+
+  @override
+  String get filterChats => 'Чаты';
+
+  @override
+  String get filterArchive => 'Архив';
+
+  @override
+  String get signerErrorUserRejected => 'Вход отменён';
+
+  @override
+  String get signerErrorNotConnected => 'Нет подключения к signer. Попробуйте снова.';
+
+  @override
+  String get signerErrorNoSigner =>
+      'Приложение signer не найдено. Установите совместимый с NIP-55 signer.';
+
+  @override
+  String get signerErrorNoResponse => 'Нет ответа от signer. Попробуйте снова.';
+
+  @override
+  String get signerErrorNoPubkey => 'Не удалось получить публичный ключ от signer.';
+
+  @override
+  String get signerErrorNoResult => 'Signer не вернул результат.';
+
+  @override
+  String get signerErrorNoEvent => 'Signer не вернул подписанное событие.';
+
+  @override
+  String get signerErrorRequestInProgress => 'Выполняется другой запрос. Подождите.';
+
+  @override
+  String get signerErrorNoActivity => 'Не удалось запустить signer. Попробуйте снова.';
+
+  @override
+  String get signerErrorLaunchError => 'Не удалось запустить приложение signer.';
+
+  @override
+  String get signerErrorUnknown => 'Произошла ошибка с signer. Попробуйте снова.';
+
+  @override
+  String get messageNotFound => 'Сообщение не найдено';
+
+  @override
+  String get pin => 'Закрепить';
+
+  @override
+  String get unpin => 'Открепить';
+
+  @override
+  String get mute => 'Без звука';
+
+  @override
+  String get archive => 'Архивировать';
+
+  @override
+  String get failedToPinChat => 'Не удалось закрепить. Попробуйте снова.';
+
+  @override
+  String get carouselPrivacyTitle => 'Конфиденциальность и безопасность';
+
+  @override
+  String get carouselPrivacyDescription =>
+      'Сохраняйте конфиденциальность ваших разговоров. Даже в случае утечки ваши сообщения остаются защищёнными.';
+
+  @override
+  String get carouselIdentityTitle => 'Выберите свою личность';
+
+  @override
+  String get carouselIdentityDescription =>
+      'Общайтесь, не раскрывая номер телефона или email. Выбирайте: настоящее имя, псевдоним или анонимность.';
+
+  @override
+  String get carouselDecentralizedTitle => 'Децентрализованный и без разрешений';
+
+  @override
+  String get carouselDecentralizedDescription =>
+      'Никакая центральная власть не контролирует вашу коммуникацию – разрешения не нужны, цензура невозможна.';
+
+  @override
+  String get learnMore => 'Узнать больше';
+
+  @override
+  String get backToSignUp => 'Вернуться к регистрации';
+
+  @override
+  String get deleteAllData => 'Удалить все данные';
+
+  @override
+  String get deleteAllDataConfirmation => 'Удалить все данные?';
+
+  @override
+  String get deleteAllDataWarning =>
+      'Это действие безвозвратно удалит все ваши чаты, сообщения и настройки с этого устройства. Отменить невозможно.';
+
+  @override
+  String get deleteAllDataError => 'Не удалось удалить все данные. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get relayResolutionTitle => 'Настройка реле';
+
+  @override
+  String get relayResolutionDescription =>
+      'Мы не нашли ваши списки реле в сети. Вы можете указать реле, где опубликованы ваши списки, или использовать наши стандартные реле для начала работы.';
+
+  @override
+  String get relayResolutionUseDefaults => 'Использовать стандартные реле';
+
+  @override
+  String get relayResolutionTryRelay => 'Поиск реле';
+
+  @override
+  String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
+
+  @override
+  String get relayResolutionRelayLabel => 'URL реле';
+
+  @override
+  String get relayResolutionNotFound =>
+      'На этом реле не найдено списков. Попробуйте другое или используйте стандартные.';
+
+  @override
+  String get loginErrorInvalidKey =>
+      'Неверный формат приватного ключа. Пожалуйста, проверьте и попробуйте снова.';
+
+  @override
+  String get loginErrorNoRelayConnections =>
+      'Не удалось подключиться ни к одному реле. Проверьте соединение и попробуйте снова.';
+
+  @override
+  String get loginErrorTimeout => 'Время входа истекло. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get loginErrorGeneric => 'Произошла ошибка при входе. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get loginErrorNoLoginInProgress => 'Нет активного входа. Пожалуйста, начните сначала.';
+
+  @override
+  String get loginErrorInternal => 'Произошла внутренняя ошибка. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Нечего вставить';
+
+  @override
+  String get loginPasteFailed => 'Не удалось вставить из буфера обмена';
+
+  @override
+  String get openSettings => 'Открыть настройки';
+
+  @override
+  String get scannerError => 'Ошибка сканера';
+
+  @override
+  String get scannerErrorDescription => 'Произошла ошибка сканера. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'Пожалуйста, включите доступ к камере в настройках устройства для сканирования QR-кодов.';
+
+  @override
+  String get retry => 'Повторить';
 }

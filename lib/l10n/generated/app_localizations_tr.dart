@@ -577,4 +577,170 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get signerConnectionError => 'Signer\'a bağlanılamadı. Lütfen tekrar deneyin.';
+
+  @override
+  String get search => 'Ara';
+
+  @override
+  String get filterChats => 'Sohbetler';
+
+  @override
+  String get filterArchive => 'Arşiv';
+
+  @override
+  String get signerErrorUserRejected => 'Giriş iptal edildi';
+
+  @override
+  String get signerErrorNotConnected => 'Signer\'a bağlı değil. Lütfen tekrar deneyin.';
+
+  @override
+  String get signerErrorNoSigner =>
+      'Signer uygulaması bulunamadı. NIP-55 uyumlu bir signer yükleyin.';
+
+  @override
+  String get signerErrorNoResponse => 'Signer\'dan yanıt alınamadı. Lütfen tekrar deneyin.';
+
+  @override
+  String get signerErrorNoPubkey => 'Signer\'dan ortak anahtar alınamadı.';
+
+  @override
+  String get signerErrorNoResult => 'Signer sonuç döndürmedi.';
+
+  @override
+  String get signerErrorNoEvent => 'Signer imzalı etkinlik döndürmedi.';
+
+  @override
+  String get signerErrorRequestInProgress => 'Başka bir istek işleniyor. Lütfen bekleyin.';
+
+  @override
+  String get signerErrorNoActivity => 'Signer başlatılamadı. Lütfen tekrar deneyin.';
+
+  @override
+  String get signerErrorLaunchError => 'Signer uygulaması başlatılamadı.';
+
+  @override
+  String get signerErrorUnknown => 'Signer ile bir hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get messageNotFound => 'Mesaj bulunamadı';
+
+  @override
+  String get pin => 'Sabitle';
+
+  @override
+  String get unpin => 'Sabitlemeden Kaldır';
+
+  @override
+  String get mute => 'Sessiz';
+
+  @override
+  String get archive => 'Arşivle';
+
+  @override
+  String get failedToPinChat => 'Sabitleme başarısız. Lütfen tekrar deneyin.';
+
+  @override
+  String get carouselPrivacyTitle => 'Gizlilik ve güvenlik';
+
+  @override
+  String get carouselPrivacyDescription =>
+      'Konuşmalarınızı gizli tutun. Bir ihlal durumunda bile mesajlarınız güvende kalır.';
+
+  @override
+  String get carouselIdentityTitle => 'Kimliğinizi seçin';
+
+  @override
+  String get carouselIdentityDescription =>
+      'Telefon numaranızı veya e-postanızı açıklamadan sohbet edin. Kimliğinizi seçin: gerçek ad, takma ad veya anonim.';
+
+  @override
+  String get carouselDecentralizedTitle => 'Merkezi olmayan ve izinsiz';
+
+  @override
+  String get carouselDecentralizedDescription =>
+      'Hiçbir merkezi otorite iletişiminizi kontrol etmez – izin gerekmez, sansür mümkün değildir.';
+
+  @override
+  String get learnMore => 'Daha fazla bilgi';
+
+  @override
+  String get backToSignUp => 'Kayıta geri dön';
+
+  @override
+  String get deleteAllData => 'Tüm Verileri Sil';
+
+  @override
+  String get deleteAllDataConfirmation => 'Tüm veriler silinsin mi?';
+
+  @override
+  String get deleteAllDataWarning =>
+      'Bu işlem, bu cihazdaki tüm sohbetlerinizi, mesajlarınızı ve ayarlarınızı kalıcı olarak silecektir. Bu işlem geri alınamaz.';
+
+  @override
+  String get deleteAllDataError => 'Tüm veriler silinemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get relayResolutionTitle => 'Röle Ayarları';
+
+  @override
+  String get relayResolutionDescription =>
+      'Röle listelerinizi ağda bulamadık. Listelerinizin yayınlandığı bir röle sağlayabilir veya başlamak için varsayılan rölelerimizi kullanabilirsiniz.';
+
+  @override
+  String get relayResolutionUseDefaults => 'Varsayılan röleleri kullan';
+
+  @override
+  String get relayResolutionTryRelay => 'Röle ara';
+
+  @override
+  String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
+
+  @override
+  String get relayResolutionRelayLabel => 'Röle URL\'si';
+
+  @override
+  String get relayResolutionNotFound =>
+      'Bu rölede röle listesi bulunamadı. Başka bir tane deneyin veya varsayılanları kullanın.';
+
+  @override
+  String get loginErrorInvalidKey =>
+      'Geçersiz özel anahtar biçimi. Lütfen kontrol edip tekrar deneyin.';
+
+  @override
+  String get loginErrorNoRelayConnections =>
+      'Hiçbir röleye bağlanılamadı. Bağlantınızı kontrol edip tekrar deneyin.';
+
+  @override
+  String get loginErrorTimeout => 'Giriş zaman aşımına uğradı. Lütfen tekrar deneyin.';
+
+  @override
+  String get loginErrorGeneric => 'Giriş sırasında bir hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get loginErrorNoLoginInProgress => 'Devam eden giriş yok. Lütfen yeniden başlayın.';
+
+  @override
+  String get loginErrorInternal => 'Dahili bir hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Yapıştırılacak bir şey yok';
+
+  @override
+  String get loginPasteFailed => 'Panodan yapıştırma başarısız';
+
+  @override
+  String get openSettings => 'Ayarları aç';
+
+  @override
+  String get scannerError => 'Tarayıcı hatası';
+
+  @override
+  String get scannerErrorDescription => 'Tarayıcıda bir hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'QR kodlarını taramak için cihaz ayarlarınızda kamera erişimini etkinleştirin.';
+
+  @override
+  String get retry => 'Yeniden dene';
 }

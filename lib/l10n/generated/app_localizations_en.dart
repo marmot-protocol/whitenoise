@@ -577,4 +577,169 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get signerConnectionError => 'Unable to connect to signer. Please try again.';
+
+  @override
+  String get search => 'Search';
+
+  @override
+  String get filterChats => 'Chats';
+
+  @override
+  String get filterArchive => 'Archive';
+
+  @override
+  String get signerErrorUserRejected => 'Login cancelled';
+
+  @override
+  String get signerErrorNotConnected => 'Not connected to signer. Please try again.';
+
+  @override
+  String get signerErrorNoSigner =>
+      'No signer app found. Please install a NIP-55 compatible signer.';
+
+  @override
+  String get signerErrorNoResponse => 'No response from signer. Please try again.';
+
+  @override
+  String get signerErrorNoPubkey => 'Unable to get public key from signer.';
+
+  @override
+  String get signerErrorNoResult => 'Signer did not return a result.';
+
+  @override
+  String get signerErrorNoEvent => 'Signer did not return a signed event.';
+
+  @override
+  String get signerErrorRequestInProgress => 'Another request is in progress. Please wait.';
+
+  @override
+  String get signerErrorNoActivity => 'Unable to launch signer. Please try again.';
+
+  @override
+  String get signerErrorLaunchError => 'Failed to launch signer app.';
+
+  @override
+  String get signerErrorUnknown => 'An error occurred with the signer. Please try again.';
+
+  @override
+  String get messageNotFound => 'Message not found';
+
+  @override
+  String get pin => 'Pin';
+
+  @override
+  String get unpin => 'Unpin';
+
+  @override
+  String get mute => 'Mute';
+
+  @override
+  String get archive => 'Archive';
+
+  @override
+  String get failedToPinChat => 'Failed to update pin. Please try again.';
+
+  @override
+  String get carouselPrivacyTitle => 'Privacy and security';
+
+  @override
+  String get carouselPrivacyDescription =>
+      'Keep your conversations private. Even in case of a breach, your messages remain secure.';
+
+  @override
+  String get carouselIdentityTitle => 'Choose your identity';
+
+  @override
+  String get carouselIdentityDescription =>
+      'Chat without revealing your phone number or email. Choose your identity: real name, pseudonym, or anonymous.';
+
+  @override
+  String get carouselDecentralizedTitle => 'Decentralized and permissionless';
+
+  @override
+  String get carouselDecentralizedDescription =>
+      'No central authority controls your communication-no permissions needed, no censorship possible.';
+
+  @override
+  String get learnMore => 'Learn more';
+
+  @override
+  String get backToSignUp => 'Back to sign up';
+
+  @override
+  String get deleteAllData => 'Delete All Data';
+
+  @override
+  String get deleteAllDataConfirmation => 'Delete all data?';
+
+  @override
+  String get deleteAllDataWarning =>
+      'This will permanently delete all your chats, messages, and settings from this device. This action cannot be undone.';
+
+  @override
+  String get deleteAllDataError => 'Failed to delete all data. Please try again.';
+
+  @override
+  String get relayResolutionTitle => 'Relay Setup';
+
+  @override
+  String get relayResolutionDescription =>
+      'We couldn\'t find your relay lists on the network. You can provide a relay where your lists are published, or use our default relays to get started.';
+
+  @override
+  String get relayResolutionUseDefaults => 'Use default relays';
+
+  @override
+  String get relayResolutionTryRelay => 'Search relay';
+
+  @override
+  String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
+
+  @override
+  String get relayResolutionRelayLabel => 'Relay URL';
+
+  @override
+  String get relayResolutionNotFound =>
+      'No relay lists found on this relay. Try another or use defaults.';
+
+  @override
+  String get loginErrorInvalidKey => 'Invalid private key format. Please check and try again.';
+
+  @override
+  String get loginErrorNoRelayConnections =>
+      'Could not connect to any relays. Please check your connection and try again.';
+
+  @override
+  String get loginErrorTimeout => 'Login timed out. Please try again.';
+
+  @override
+  String get loginErrorGeneric => 'An error occurred during login. Please try again.';
+
+  @override
+  String get loginErrorNoLoginInProgress => 'No login in progress. Please start over.';
+
+  @override
+  String get loginErrorInternal => 'An internal error occurred. Please try again.';
+
+  @override
+  String get loginPasteNothingToPaste => 'Nothing to paste';
+
+  @override
+  String get loginPasteFailed => 'Failed to paste from clipboard';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get scannerError => 'Scanner error';
+
+  @override
+  String get scannerErrorDescription => 'Something went wrong with the scanner. Please try again.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'Please enable camera access in your device settings to scan QR codes.';
+
+  @override
+  String get retry => 'Retry';
 }
