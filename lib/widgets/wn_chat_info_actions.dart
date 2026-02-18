@@ -25,7 +25,7 @@ class WnChatInfoActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final contactLabel = isFollowing ? context.l10n.removeAsContact : context.l10n.addAsContact;
+    final contactLabel = isFollowing ? context.l10n.unfollow : context.l10n.follow;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,

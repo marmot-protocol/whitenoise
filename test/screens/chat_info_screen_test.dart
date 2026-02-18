@@ -171,18 +171,18 @@ void main() {
       expect(find.text('I love Nostr!'), findsNothing);
     });
 
-    testWidgets('shows add as contact for non-followed user', (tester) async {
+    testWidgets('shows follow for non-followed user', (tester) async {
       await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-      expect(find.text('Add as contact'), findsOneWidget);
+      expect(find.text('Follow'), findsOneWidget);
     });
 
-    testWidgets('shows remove as contact for followed user', (tester) async {
+    testWidgets('shows unfollow for followed user', (tester) async {
       _api.followingPubkeys.add(_otherPubkey);
       await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-      expect(find.text('Remove as contact'), findsOneWidget);
+      expect(find.text('Unfollow'), findsOneWidget);
     });
 
-    testWidgets('calls follow API when add as contact is tapped', (tester) async {
+    testWidgets('calls follow API when follow is tapped', (tester) async {
       await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
 
       await tester.tap(find.byKey(const Key('contact_button')));
@@ -193,7 +193,7 @@ void main() {
       expect(_api.followCalls[0].target, _otherPubkey);
     });
 
-    testWidgets('calls unfollow API when remove as contact is tapped', (tester) async {
+    testWidgets('calls unfollow API when unfollow is tapped', (tester) async {
       _api.followingPubkeys.add(_otherPubkey);
       await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
 
