@@ -47,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Create group [PR #288](https://github.com/marmot-protocol/whitenoise/pull/288)
 - Group info & management [PR #315](https://github.com/marmot-protocol/whitenoise/pull/315)
 - Copy message to clipboard from message actions [PR #317](https://github.com/marmot-protocol/whitenoise/pull/317)
+- Mark messages as read [PR #316](https://github.com/marmot-protocol/whitenoise/pull/316)
 
 ### Changed
 
