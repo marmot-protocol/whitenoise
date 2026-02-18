@@ -137,8 +137,8 @@ class EditGroupScreen extends HookConsumerWidget {
                     builder: (context) {
                       _logger.warning('Group error: ${state.error}');
                       final message = state.currentGroup == null
-                          ? context.l10n.profileLoadError
-                          : context.l10n.profileSaveError;
+                          ? context.l10n.groupLoadError
+                          : context.l10n.groupSaveError;
                       return Center(
                         child: Text(
                           message,

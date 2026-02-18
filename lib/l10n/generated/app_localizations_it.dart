@@ -67,9 +67,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get startChat => 'Inizia una chat';
 
   @override
-  String get addToGroup => 'Aggiungi al gruppo';
-
-  @override
   String get settings => 'Impostazioni';
 
   @override
@@ -858,6 +855,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get removeAsContact => 'Rimuovi come contatto';
 
   @override
+  String get addToGroup => 'Aggiungi al gruppo';
+
+  @override
   String get relayResolutionTitle => 'Configurazione relay';
 
   @override
@@ -1000,4 +1000,10 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get groupUpdatedSuccessfully => 'Gruppo aggiornato con successo';
+
+  @override
+  String get groupLoadError => 'Impossibile caricare il gruppo. Riprova.';
+
+  @override
+  String get groupSaveError => 'Impossibile salvare il gruppo. Riprova.';
 }

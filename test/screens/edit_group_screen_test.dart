@@ -230,7 +230,7 @@ void main() {
       _api.getGroupError = Exception('Network error');
       await pumpEditGroupScreen(tester);
 
-      expect(find.text('Unable to load profile. Please try again.'), findsOneWidget);
+      expect(find.text('Unable to load group. Please try again.'), findsOneWidget);
     });
 
     testWidgets('shows save error when update fails', (tester) async {
@@ -243,7 +243,7 @@ void main() {
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Unable to save profile. Please try again.'), findsOneWidget);
+      expect(find.text('Unable to save group. Please try again.'), findsOneWidget);
     });
 
     testWidgets('shows image picker error as system notice', (tester) async {

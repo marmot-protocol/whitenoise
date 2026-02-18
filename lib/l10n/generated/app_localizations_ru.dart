@@ -67,9 +67,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get startChat => 'Начать чат';
 
   @override
-  String get addToGroup => 'Добавить в группу';
-
-  @override
   String get settings => 'Настройки';
 
   @override
@@ -880,6 +877,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get removeAsContact => 'Удалить из контактов';
 
   @override
+  String get addToGroup => 'Добавить в группу';
+
+  @override
   String get relayResolutionTitle => 'Настройка реле';
 
   @override
@@ -1025,4 +1025,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get groupUpdatedSuccessfully => 'Группа успешно обновлена';
+
+  @override
+  String get groupLoadError => 'Не удалось загрузить группу. Попробуйте снова.';
+
+  @override
+  String get groupSaveError => 'Не удалось сохранить группу. Попробуйте снова.';
 }

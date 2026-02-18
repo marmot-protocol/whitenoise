@@ -96,11 +96,6 @@
     "description": "Button text to start a new chat"
   },
 
-  "addToGroup": "Add to group",
-  "@addToGroup": {
-    "description": "Button text to add a user to a group"
-  },
-
   "settings": "Settings",
   "@settings": {
     "description": "Settings screen title"
@@ -1558,5 +1553,15 @@
   "groupUpdatedSuccessfully": "Group updated successfully",
   "@groupUpdatedSuccessfully": {
     "description": "System notice message when group settings are updated"
+  },
+
+  "groupLoadError": "Unable to load group. Please try again.",
+  "@groupLoadError": {
+    "description": "User-friendly error when group fails to load"
+  },
+
+  "groupSaveError": "Unable to save group. Please try again.",
+  "@groupSaveError": {
+    "description": "User-friendly error when group fails to save"
   }
 }

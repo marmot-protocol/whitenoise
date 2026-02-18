@@ -292,5 +292,7 @@
   "failedToRemoveFromGroup": "Mitglied konnte nicht entfernt werden. Bitte erneut versuchen.",
   "failedToMakeAdmin": "Admin konnte nicht ernannt werden. Bitte erneut versuchen.",
   "failedToRemoveAdmin": "Admin konnte nicht entfernt werden. Bitte erneut versuchen.",
-  "groupUpdatedSuccessfully": "Gruppe erfolgreich aktualisiert"
+  "groupUpdatedSuccessfully": "Gruppe erfolgreich aktualisiert",
+  "groupLoadError": "Gruppe konnte nicht geladen werden. Bitte erneut versuchen.",
+  "groupSaveError": "Gruppe konnte nicht gespeichert werden. Bitte erneut versuchen."
 }

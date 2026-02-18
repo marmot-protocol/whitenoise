@@ -293,5 +293,7 @@
   "membersCount": "{count, plural, =1{1 Üye} other{{count} Üye}}",
   "adminBadge": "Yönetici",
   "membersLabel": "Üyeler:",
-  "groupUpdatedSuccessfully": "Grup başarıyla güncellendi"
+  "groupUpdatedSuccessfully": "Grup başarıyla güncellendi",
+  "groupLoadError": "Grup yüklenemedi. Lütfen tekrar deneyin.",
+  "groupSaveError": "Grup kaydedilemedi. Lütfen tekrar deneyin."
 }

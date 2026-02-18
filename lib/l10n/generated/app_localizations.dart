@@ -222,12 +222,6 @@ abstract class AppLocalizations {
   /// **'Start a chat'**
   String get startChat;
 
-  /// Action label to add this user to a group
-  ///
-  /// In en, this message translates to:
-  /// **'Add to group'**
-  String get addToGroup;
-
   /// Settings screen title
   ///
   /// In en, this message translates to:
@@ -1608,6 +1602,12 @@ abstract class AppLocalizations {
   /// **'Remove as contact'**
   String get removeAsContact;
 
+  /// Action label to add this user to a group
+  ///
+  /// In en, this message translates to:
+  /// **'Add to group'**
+  String get addToGroup;
+
   /// Title for the relay resolution screen
   ///
   /// In en, this message translates to:
@@ -1865,6 +1865,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Group updated successfully'**
   String get groupUpdatedSuccessfully;
+
+  /// User-friendly error when group fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load group. Please try again.'**
+  String get groupLoadError;
+
+  /// User-friendly error when group fails to save
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to save group. Please try again.'**
+  String get groupSaveError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

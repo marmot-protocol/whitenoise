@@ -67,9 +67,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get startChat => 'Sohbet başlat';
 
   @override
-  String get addToGroup => 'Gruba ekle';
-
-  @override
   String get settings => 'Ayarlar';
 
   @override
@@ -856,6 +853,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get removeAsContact => 'Kişilerden çıkar';
 
   @override
+  String get addToGroup => 'Gruba ekle';
+
+  @override
   String get relayResolutionTitle => 'Röle Ayarları';
 
   @override
@@ -999,4 +999,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get groupUpdatedSuccessfully => 'Grup başarıyla güncellendi';
+
+  @override
+  String get groupLoadError => 'Grup yüklenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get groupSaveError => 'Grup kaydedilemedi. Lütfen tekrar deneyin.';
 }

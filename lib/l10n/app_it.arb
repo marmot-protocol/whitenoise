@@ -292,5 +292,7 @@
   "failedToRemoveFromGroup": "Impossibile rimuovere il membro. Riprova.",
   "failedToMakeAdmin": "Impossibile rendere admin. Riprova.",
   "failedToRemoveAdmin": "Impossibile rimuovere admin. Riprova.",
-  "groupUpdatedSuccessfully": "Gruppo aggiornato con successo"
+  "groupUpdatedSuccessfully": "Gruppo aggiornato con successo",
+  "groupLoadError": "Impossibile caricare il gruppo. Riprova.",
+  "groupSaveError": "Impossibile salvare il gruppo. Riprova."
 }

@@ -292,5 +292,7 @@
   "failedToRemoveFromGroup": "Не удалось удалить участника. Попробуйте снова.",
   "failedToMakeAdmin": "Не удалось сделать админом. Попробуйте снова.",
   "failedToRemoveAdmin": "Не удалось снять админа. Попробуйте снова.",
-  "groupUpdatedSuccessfully": "Группа успешно обновлена"
+  "groupUpdatedSuccessfully": "Группа успешно обновлена",
+  "groupLoadError": "Не удалось загрузить группу. Попробуйте снова.",
+  "groupSaveError": "Не удалось сохранить группу. Попробуйте снова."
 }
