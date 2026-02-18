@@ -6,8 +6,8 @@ import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_info_screen.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
+import 'package:whitenoise/screens/group_info_screen.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
-import 'package:whitenoise/screens/wip_screen.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -321,11 +321,11 @@ void main() {
         expect(find.byType(ChatListScreen), findsOneWidget);
       });
 
-      testWidgets('avatar navigates to wip screen for group chat', (tester) async {
+      testWidgets('avatar navigates to group info screen for group chat', (tester) async {
         await pumpChatScreen(tester);
         await tester.tap(find.byKey(const Key('header_avatar_tap_area')));
         await tester.pumpAndSettle();
-        expect(find.byType(WipScreen), findsOneWidget);
+        expect(find.byType(GroupInfoScreen), findsOneWidget);
       });
 
       testWidgets('avatar navigates to chat info screen for DM', (tester) async {

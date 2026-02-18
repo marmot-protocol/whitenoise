@@ -1,4 +1,5 @@
-import 'package:flutter/widgets.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_profile.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
@@ -78,7 +79,17 @@ final _api = _MockApi();
 late AsyncSnapshot<ChatProfile> Function() getResult;
 
 Future<void> _mountHook(WidgetTester tester) async {
-  getResult = await mountHook(tester, () => useChatProfile(_pubkey, _groupId));
+  await tester.pumpWidget(
+    MaterialApp(
+      home: HookBuilder(
+        builder: (context) {
+          final result = useChatProfile(context, _pubkey, _groupId);
+          getResult = () => result;
+          return const SizedBox();
+        },
+      ),
+    ),
+  );
   await tester.pump();
 }
 
