@@ -804,4 +804,20 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get loginPasteFailed => 'Impossibile incollare dagli appunti';
+
+  @override
+  String get openSettings => 'Apri impostazioni';
+
+  @override
+  String get scannerError => 'Errore scanner';
+
+  @override
+  String get scannerErrorDescription => 'Qualcosa è andato storto con lo scanner. Riprova.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'Abilita l\'accesso alla fotocamera nelle impostazioni del dispositivo per scansionare i codici QR.';
+
+  @override
+  String get retry => 'Riprova';
 }

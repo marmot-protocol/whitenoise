@@ -241,5 +241,10 @@
   "loginErrorNoLoginInProgress": "Aucune connexion en cours. Veuillez recommencer.",
   "loginErrorInternal": "Une erreur interne est survenue. Veuillez réessayer.",
   "loginPasteNothingToPaste": "Rien à coller",
-  "loginPasteFailed": "Échec du collage depuis le presse-papiers"
+  "loginPasteFailed": "Échec du collage depuis le presse-papiers",
+  "openSettings": "Ouvrir les paramètres",
+  "scannerError": "Erreur du scanner",
+  "scannerErrorDescription": "Une erreur s'est produite avec le scanner. Veuillez réessayer.",
+  "cameraPermissionDeniedDescription": "Veuillez activer l'accès à la caméra dans les paramètres de votre appareil pour scanner les codes QR.",
+  "retry": "Réessayer"
 }

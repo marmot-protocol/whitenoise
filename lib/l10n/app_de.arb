@@ -241,5 +241,10 @@
   "loginErrorNoLoginInProgress": "Kein Anmeldevorgang aktiv. Bitte starten Sie erneut.",
   "loginErrorInternal": "Ein interner Fehler ist aufgetreten. Bitte erneut versuchen.",
   "loginPasteNothingToPaste": "Nichts zum Einfügen",
-  "loginPasteFailed": "Einfügen aus der Zwischenablage fehlgeschlagen"
+  "loginPasteFailed": "Einfügen aus der Zwischenablage fehlgeschlagen",
+  "openSettings": "Einstellungen öffnen",
+  "scannerError": "Scanner-Fehler",
+  "scannerErrorDescription": "Ein Fehler ist beim Scanner aufgetreten. Bitte versuchen Sie es erneut.",
+  "cameraPermissionDeniedDescription": "Bitte aktivieren Sie den Kamerazugriff in Ihren Geräteeinstellungen, um QR-Codes zu scannen.",
+  "retry": "Erneut versuchen"
 }

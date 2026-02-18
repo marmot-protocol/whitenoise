@@ -822,4 +822,21 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get loginPasteFailed => 'Einfügen aus der Zwischenablage fehlgeschlagen';
+
+  @override
+  String get openSettings => 'Einstellungen öffnen';
+
+  @override
+  String get scannerError => 'Scanner-Fehler';
+
+  @override
+  String get scannerErrorDescription =>
+      'Ein Fehler ist beim Scanner aufgetreten. Bitte versuchen Sie es erneut.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'Bitte aktivieren Sie den Kamerazugriff in Ihren Geräteeinstellungen, um QR-Codes zu scannen.';
+
+  @override
+  String get retry => 'Erneut versuchen';
 }

@@ -241,5 +241,10 @@
   "loginErrorNoLoginInProgress": "No hay inicio de sesión en curso. Por favor, empieza de nuevo.",
   "loginErrorInternal": "Se produjo un error interno. Inténtalo de nuevo.",
   "loginPasteNothingToPaste": "Nada que pegar",
-  "loginPasteFailed": "Error al pegar desde el portapapeles"
+  "loginPasteFailed": "Error al pegar desde el portapapeles",
+  "openSettings": "Abrir ajustes",
+  "scannerError": "Error del escáner",
+  "scannerErrorDescription": "Algo salió mal con el escáner. Por favor, inténtalo de nuevo.",
+  "cameraPermissionDeniedDescription": "Por favor, habilita el acceso a la cámara en los ajustes de tu dispositivo para escanear códigos QR.",
+  "retry": "Reintentar"
 }

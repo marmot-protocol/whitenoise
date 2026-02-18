@@ -6,6 +6,7 @@ list(APPEND FLUTTER_PLUGIN_LIST
   emoji_picker_flutter
   file_selector_windows
   flutter_secure_storage_windows
+  permission_handler_windows
   url_launcher_windows
 )
 

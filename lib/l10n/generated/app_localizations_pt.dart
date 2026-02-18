@@ -810,4 +810,21 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get loginPasteFailed => 'Falha ao colar da área de transferência';
+
+  @override
+  String get openSettings => 'Abrir configurações';
+
+  @override
+  String get scannerError => 'Erro do scanner';
+
+  @override
+  String get scannerErrorDescription =>
+      'Algo deu errado com o scanner. Por favor, tente novamente.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'Por favor, habilite o acesso à câmera nas configurações do seu dispositivo para escanear códigos QR.';
+
+  @override
+  String get retry => 'Tentar novamente';
 }

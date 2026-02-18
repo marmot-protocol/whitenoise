@@ -1559,6 +1559,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to paste from clipboard'**
   String get loginPasteFailed;
+
+  /// Button text to open device settings
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// Generic scanner error message
+  ///
+  /// In en, this message translates to:
+  /// **'Scanner error'**
+  String get scannerError;
+
+  /// Description for generic scanner error
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong with the scanner. Please try again.'**
+  String get scannerErrorDescription;
+
+  /// Description for camera permission denied error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable camera access in your device settings to scan QR codes.'**
+  String get cameraPermissionDeniedDescription;
+
+  /// Retry button text
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

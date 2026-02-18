@@ -241,5 +241,10 @@
   "loginErrorNoLoginInProgress": "Nessun accesso in corso. Ricomincia da capo.",
   "loginErrorInternal": "Si è verificato un errore interno. Riprova.",
   "loginPasteNothingToPaste": "Niente da incollare",
-  "loginPasteFailed": "Impossibile incollare dagli appunti"
+  "loginPasteFailed": "Impossibile incollare dagli appunti",
+  "openSettings": "Apri impostazioni",
+  "scannerError": "Errore scanner",
+  "scannerErrorDescription": "Qualcosa è andato storto con lo scanner. Riprova.",
+  "cameraPermissionDeniedDescription": "Abilita l'accesso alla fotocamera nelle impostazioni del dispositivo per scansionare i codici QR.",
+  "retry": "Riprova"
 }

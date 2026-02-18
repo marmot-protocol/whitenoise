@@ -804,4 +804,20 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get loginPasteFailed => 'Panodan yapıştırma başarısız';
+
+  @override
+  String get openSettings => 'Ayarları aç';
+
+  @override
+  String get scannerError => 'Tarayıcı hatası';
+
+  @override
+  String get scannerErrorDescription => 'Tarayıcıda bir hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'QR kodlarını taramak için cihaz ayarlarınızda kamera erişimini etkinleştirin.';
+
+  @override
+  String get retry => 'Yeniden dene';
 }

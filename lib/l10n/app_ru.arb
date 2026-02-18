@@ -241,5 +241,10 @@
   "loginErrorNoLoginInProgress": "Нет активного входа. Пожалуйста, начните сначала.",
   "loginErrorInternal": "Произошла внутренняя ошибка. Пожалуйста, попробуйте снова.",
   "loginPasteNothingToPaste": "Нечего вставить",
-  "loginPasteFailed": "Не удалось вставить из буфера обмена"
+  "loginPasteFailed": "Не удалось вставить из буфера обмена",
+  "openSettings": "Открыть настройки",
+  "scannerError": "Ошибка сканера",
+  "scannerErrorDescription": "Произошла ошибка сканера. Пожалуйста, попробуйте снова.",
+  "cameraPermissionDeniedDescription": "Пожалуйста, включите доступ к камере в настройках устройства для сканирования QR-кодов.",
+  "retry": "Повторить"
 }

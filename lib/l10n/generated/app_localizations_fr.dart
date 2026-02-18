@@ -810,4 +810,21 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get loginPasteFailed => 'Échec du collage depuis le presse-papiers';
+
+  @override
+  String get openSettings => 'Ouvrir les paramètres';
+
+  @override
+  String get scannerError => 'Erreur du scanner';
+
+  @override
+  String get scannerErrorDescription =>
+      'Une erreur s\'est produite avec le scanner. Veuillez réessayer.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'Veuillez activer l\'accès à la caméra dans les paramètres de votre appareil pour scanner les codes QR.';
+
+  @override
+  String get retry => 'Réessayer';
 }

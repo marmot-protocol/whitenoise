@@ -811,4 +811,20 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get loginPasteFailed => 'Не удалось вставить из буфера обмена';
+
+  @override
+  String get openSettings => 'Открыть настройки';
+
+  @override
+  String get scannerError => 'Ошибка сканера';
+
+  @override
+  String get scannerErrorDescription => 'Произошла ошибка сканера. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'Пожалуйста, включите доступ к камере в настройках устройства для сканирования QR-кодов.';
+
+  @override
+  String get retry => 'Повторить';
 }

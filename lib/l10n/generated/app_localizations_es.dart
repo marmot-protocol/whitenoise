@@ -814,4 +814,21 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get loginPasteFailed => 'Error al pegar desde el portapapeles';
+
+  @override
+  String get openSettings => 'Abrir ajustes';
+
+  @override
+  String get scannerError => 'Error del escáner';
+
+  @override
+  String get scannerErrorDescription =>
+      'Algo salió mal con el escáner. Por favor, inténtalo de nuevo.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'Por favor, habilita el acceso a la cámara en los ajustes de tu dispositivo para escanear códigos QR.';
+
+  @override
+  String get retry => 'Reintentar';
 }

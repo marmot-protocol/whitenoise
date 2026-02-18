@@ -803,4 +803,20 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get loginPasteFailed => 'Failed to paste from clipboard';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get scannerError => 'Scanner error';
+
+  @override
+  String get scannerErrorDescription => 'Something went wrong with the scanner. Please try again.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'Please enable camera access in your device settings to scan QR codes.';
+
+  @override
+  String get retry => 'Retry';
 }

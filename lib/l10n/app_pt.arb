@@ -241,5 +241,10 @@
   "loginErrorNoLoginInProgress": "Nenhum login em andamento. Por favor, comece novamente.",
   "loginErrorInternal": "Ocorreu um erro interno. Tente novamente.",
   "loginPasteNothingToPaste": "Nada para colar",
-  "loginPasteFailed": "Falha ao colar da área de transferência"
+  "loginPasteFailed": "Falha ao colar da área de transferência",
+  "openSettings": "Abrir configurações",
+  "scannerError": "Erro do scanner",
+  "scannerErrorDescription": "Algo deu errado com o scanner. Por favor, tente novamente.",
+  "cameraPermissionDeniedDescription": "Por favor, habilite o acesso à câmera nas configurações do seu dispositivo para escanear códigos QR.",
+  "retry": "Tentar novamente"
 }

@@ -241,5 +241,11 @@
   "loginErrorNoLoginInProgress": "Devam eden giriş yok. Lütfen yeniden başlayın.",
   "loginErrorInternal": "Dahili bir hata oluştu. Lütfen tekrar deneyin.",
   "loginPasteNothingToPaste": "Yapıştırılacak bir şey yok",
-  "loginPasteFailed": "Panodan yapıştırma başarısız"
+  "loginPasteFailed": "Panodan yapıştırma başarısız",
+  "signerConnectionError": "Signer'a bağlanılamadı. Lütfen tekrar deneyin.",
+  "openSettings": "Ayarları aç",
+  "scannerError": "Tarayıcı hatası",
+  "scannerErrorDescription": "Tarayıcıda bir hata oluştu. Lütfen tekrar deneyin.",
+  "cameraPermissionDeniedDescription": "QR kodlarını taramak için cihaz ayarlarınızda kamera erişimini etkinleştirin.",
+  "retry": "Yeniden dene"
 }

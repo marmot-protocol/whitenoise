@@ -108,12 +108,16 @@ class SignupScreen extends HookConsumerWidget {
       }
     }
 
-    final slideAnimation = Tween<Offset>(begin: Offset.zero, end: const Offset(0, 1)).animate(
-      CurvedAnimation(
-        parent: carouselAnimationController,
-        curve: Curves.easeInOut,
-      ),
-    );
+    final slideAnimation =
+        Tween<Offset>(
+          begin: Offset.zero,
+          end: const Offset(0, 1),
+        ).animate(
+          CurvedAnimation(
+            parent: carouselAnimationController,
+            curve: Curves.easeInOut,
+          ),
+        );
 
     final fadeAnimation = CurvedAnimation(
       parent: carouselAnimationController,
