@@ -1241,6 +1241,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.4.0"
+  unique_names_generator:
+    dependency: transitive
+    description:
+      name: unique_names_generator
+      sha256: "1faaa9ad393d3cde99de74f88e32c66f96d7bb9bd016e087725ceee834a88535"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   url_launcher:
     dependency: "direct main"
     description:
@@ -1457,5 +1465,5 @@ packages:
     source: hosted
     version: "3.1.3"
 sdks:
-  dart: ">=3.10.3 <4.0.0"
+  dart: ">=3.10.3 <3.16.0"
   flutter: ">=3.38.4 <4.0.0"
