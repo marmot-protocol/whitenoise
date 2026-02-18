@@ -151,6 +151,12 @@ void main() {
             return null;
           },
         );
+        addTearDown(() {
+          tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            SystemChannels.platform,
+            null,
+          );
+        });
 
         await mountWidget(
           MessageActionsModal(
@@ -168,11 +174,6 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(clipboardContent, 'Hello, world!');
-
-        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-          SystemChannels.platform,
-          null,
-        );
       });
     });
 
@@ -459,6 +460,12 @@ void main() {
           return null;
         },
       );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
 
       await mountShowTest(
         tester,
@@ -484,11 +491,6 @@ void main() {
 
       expect(clipboardContent, 'Copy this text');
       expect(find.text('Message actions'), findsNothing);
-
-      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
-        SystemChannels.platform,
-        null,
-      );
     });
 
     testWidgets('shows delete button for own message', (tester) async {
