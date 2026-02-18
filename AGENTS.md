@@ -57,7 +57,7 @@ whitenoise/
 │   ├── providers/          # Riverpod providers (shared state)
 │   ├── hooks/              # Flutter hooks (ephemeral state)
 │   ├── screens/            # Full-page UI components
-│   ├── widgets/            # Reusable components (prefixed wn_)
+│   ├── widgets/            # Reusable components (see Widget Naming)
 │   ├── services/           # Stateless operations (API calls)
 │   ├── extensions/         # Dart extensions
 │   ├── utils/              # Utility functions
@@ -165,8 +165,17 @@ rust tests...       ✓
 
 ### Widget Naming
 
-- Reusable widgets prefixed with `wn_` (e.g., `wn_filled_button.dart`)
-- Widget class names use `Wn` prefix (e.g., `WnFilledButton`)
+There are three categories of widgets with different naming rules:
+
+1. **Design system widgets** — Simple, presentational widgets that match the Figma design system. They have Widgetbook stories, no translations, and no Rust API calls.
+   - File prefixed with `wn_` (e.g., `wn_filled_button.dart`)
+   - Class prefixed with `Wn` (e.g., `WnFilledButton`)
+
+2. **Complex reusable widgets** — Used across multiple screens but contain translations, hooks with Rust API calls, or other complex logic.
+   - No `wn_`/`Wn` prefix (e.g., `onboarding_carousel.dart` / `OnboardingCarousel`)
+
+3. **Screen-scoped widgets** — Extracted from a single screen for simplicity, only used in that one screen.
+   - Prefixed with the screen name (e.g., `ChatListTile` for a widget only used in the chat list screen)
 
 ### Hook Naming
 

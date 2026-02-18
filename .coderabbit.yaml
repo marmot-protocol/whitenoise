@@ -55,14 +55,31 @@ reviews:
         - Use flutter_screenutil (.w, .h, .sp, .r) for all size values
         - Widgets should use const constructors where possible
         - No comments except for truly complex logic
-        - Widget files should be prefixed wn_ and classes prefixed Wn
+        - When a widget is extracted from a screen and only used in that one
+          screen, it should be prefixed with the screen name (e.g.
+          ChatListTile for a widget only used in the chat list screen).
+          These are screen-scoped widgets and do NOT use the Wn prefix.
 
     - path: "lib/widgets/**"
       instructions: |
         This is a reusable widget.
-        Rules:
-        - File must be prefixed with wn_ (e.g. wn_filled_button.dart)
-        - Class must be prefixed with Wn (e.g. WnFilledButton)
+        There are two kinds of reusable widgets:
+
+        1. Design system widgets — simple, presentational widgets that match
+           the Figma design system in name and structure. They have Widgetbook
+           stories, contain only presentational logic, and do NOT have
+           translations or Rust API calls.
+           - File MUST be prefixed with wn_ (e.g. wn_filled_button.dart)
+           - Class MUST be prefixed with Wn (e.g. WnFilledButton)
+
+        2. Complex reusable widgets — used across multiple screens but contain
+           translations, hooks with Rust API calls, or other complex logic
+           that makes them harder to display in Widgetbook.
+           - These do NOT use the wn_/Wn prefix
+           - Example: OnboardingCarousel (used in multiple screens, has
+             translations and a page controller inside)
+
+        General rules for all widgets in this directory:
         - Use const constructors where possible
         - Use flutter_screenutil (.w, .h, .sp, .r) for all dimensions
         - Avoid StatefulWidget — prefer hooks for local state
