@@ -222,6 +222,12 @@ abstract class AppLocalizations {
   /// **'Start a chat'**
   String get startChat;
 
+  /// Action label to add this user to a group
+  ///
+  /// In en, this message translates to:
+  /// **'Add to group'**
+  String get addToGroup;
+
   /// Settings screen title
   ///
   /// In en, this message translates to:
@@ -1602,12 +1608,6 @@ abstract class AppLocalizations {
   /// **'Remove as contact'**
   String get removeAsContact;
 
-  /// Action label to add this user to a group
-  ///
-  /// In en, this message translates to:
-  /// **'Add to group'**
-  String get addToGroup;
-
   /// Title for the relay resolution screen
   ///
   /// In en, this message translates to:
@@ -1727,6 +1727,138 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Retry'**
   String get retry;
+
+  /// Group info screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Group Information'**
+  String get groupInformation;
+
+  /// Edit group screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Group'**
+  String get editGroup;
+
+  /// Button text for editing a group in group info screen
+  ///
+  /// In en, this message translates to:
+  /// **'Edit group'**
+  String get editGroupAction;
+
+  /// Label for group name input
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get groupNameLabel;
+
+  /// Label for group description input
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get groupDescriptionLabel;
+
+  /// Member count label for group info
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 Member} other{{count} Members}}'**
+  String membersCount(int count);
+
+  /// Badge label for admin users in group member list
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get adminBadge;
+
+  /// Section label for group member list
+  ///
+  /// In en, this message translates to:
+  /// **'Members:'**
+  String get membersLabel;
+
+  /// Badge label for regular (non-admin) members in a group
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get memberBadge;
+
+  /// Action label to send a message to a user
+  ///
+  /// In en, this message translates to:
+  /// **'Send message'**
+  String get sendMessage;
+
+  /// Action label to make a group member an admin
+  ///
+  /// In en, this message translates to:
+  /// **'Make admin'**
+  String get makeAdmin;
+
+  /// Action label to remove admin role from a group member
+  ///
+  /// In en, this message translates to:
+  /// **'Remove admin'**
+  String get removeAdminRole;
+
+  /// Action label to remove a member from a group
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from group'**
+  String get removeFromGroup;
+
+  /// Confirmation dialog title for removing a member from group
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from group?'**
+  String get removeFromGroupConfirmation;
+
+  /// Warning message for removing a member from group
+  ///
+  /// In en, this message translates to:
+  /// **'This member will be removed from the group and will no longer be able to see new messages.'**
+  String get removeFromGroupWarning;
+
+  /// Confirmation dialog title for making a member admin
+  ///
+  /// In en, this message translates to:
+  /// **'Make admin?'**
+  String get makeAdminConfirmation;
+
+  /// Warning message for making a member admin
+  ///
+  /// In en, this message translates to:
+  /// **'This member will be able to manage the group, add or remove members, and change group settings.'**
+  String get makeAdminWarning;
+
+  /// Confirmation dialog title for removing admin role
+  ///
+  /// In en, this message translates to:
+  /// **'Remove admin?'**
+  String get removeAdminConfirmation;
+
+  /// Warning message for removing admin role
+  ///
+  /// In en, this message translates to:
+  /// **'This member will no longer be able to manage the group, add or remove members, or change group settings.'**
+  String get removeAdminWarning;
+
+  /// Error message when removing a member from group fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to remove member. Please try again.'**
+  String get failedToRemoveFromGroup;
+
+  /// Error message when making a member admin fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to make admin. Please try again.'**
+  String get failedToMakeAdmin;
+
+  /// Error message when removing admin role fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to remove admin. Please try again.'**
+  String get failedToRemoveAdmin;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

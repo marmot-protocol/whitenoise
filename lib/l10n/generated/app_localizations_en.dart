@@ -67,6 +67,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get startChat => 'Start a chat';
 
   @override
+  String get addToGroup => 'Add to group';
+
+  @override
   String get settings => 'Settings';
 
   @override
@@ -853,9 +856,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get removeAsContact => 'Remove as contact';
 
   @override
-  String get addToGroup => 'Add to group';
-
-  @override
   String get relayResolutionTitle => 'Relay Setup';
 
   @override
@@ -918,4 +918,81 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get retry => 'Retry';
+
+  @override
+  String get groupInformation => 'Group Information';
+
+  @override
+  String get editGroup => 'Edit Group';
+
+  @override
+  String get editGroupAction => 'Edit group';
+
+  @override
+  String get groupNameLabel => 'Name';
+
+  @override
+  String get groupDescriptionLabel => 'About';
+
+  @override
+  String membersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Members',
+      one: '1 Member',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminBadge => 'Admin';
+
+  @override
+  String get membersLabel => 'Members:';
+
+  @override
+  String get memberBadge => 'Member';
+
+  @override
+  String get sendMessage => 'Send message';
+
+  @override
+  String get makeAdmin => 'Make admin';
+
+  @override
+  String get removeAdminRole => 'Remove admin';
+
+  @override
+  String get removeFromGroup => 'Remove from group';
+
+  @override
+  String get removeFromGroupConfirmation => 'Remove from group?';
+
+  @override
+  String get removeFromGroupWarning =>
+      'This member will be removed from the group and will no longer be able to see new messages.';
+
+  @override
+  String get makeAdminConfirmation => 'Make admin?';
+
+  @override
+  String get makeAdminWarning =>
+      'This member will be able to manage the group, add or remove members, and change group settings.';
+
+  @override
+  String get removeAdminConfirmation => 'Remove admin?';
+
+  @override
+  String get removeAdminWarning =>
+      'This member will no longer be able to manage the group, add or remove members, or change group settings.';
+
+  @override
+  String get failedToRemoveFromGroup => 'Failed to remove member. Please try again.';
+
+  @override
+  String get failedToMakeAdmin => 'Failed to make admin. Please try again.';
+
+  @override
+  String get failedToRemoveAdmin => 'Failed to remove admin. Please try again.';
 }

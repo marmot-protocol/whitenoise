@@ -96,6 +96,11 @@
     "description": "Button text to start a new chat"
   },
 
+  "addToGroup": "Add to group",
+  "@addToGroup": {
+    "description": "Button text to add a user to a group"
+  },
+
   "settings": "Settings",
   "@settings": {
     "description": "Settings screen title"
@@ -1433,5 +1438,120 @@
   "retry": "Retry",
   "@retry": {
     "description": "Retry button text"
+  },
+
+  "groupInformation": "Group Information",
+  "@groupInformation": {
+    "description": "Group info screen title"
+  },
+
+  "editGroup": "Edit Group",
+  "@editGroup": {
+    "description": "Edit group screen title"
+  },
+
+  "editGroupAction": "Edit group",
+  "@editGroupAction": {
+    "description": "Button text for editing a group in group info screen"
+  },
+
+  "groupNameLabel": "Name",
+  "@groupNameLabel": {
+    "description": "Label for group name input"
+  },
+
+  "groupDescriptionLabel": "About",
+  "@groupDescriptionLabel": {
+    "description": "Label for group description input"
+  },
+
+  "membersCount": "{count, plural, =1{1 Member} other{{count} Members}}",
+  "@membersCount": {
+    "description": "Member count label for group info",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "adminBadge": "Admin",
+  "@adminBadge": {
+    "description": "Badge label for admin users in group member list"
+  },
+
+  "membersLabel": "Members:",
+  "@membersLabel": {
+    "description": "Section label for group member list"
+  },
+
+  "memberBadge": "Member",
+  "@memberBadge": {
+    "description": "Badge label for regular (non-admin) members in a group"
+  },
+
+  "sendMessage": "Send message",
+  "@sendMessage": {
+    "description": "Action label to send a message to a user"
+  },
+
+  "makeAdmin": "Make admin",
+  "@makeAdmin": {
+    "description": "Action label to make a group member an admin"
+  },
+
+  "removeAdminRole": "Remove admin",
+  "@removeAdminRole": {
+    "description": "Action label to remove admin role from a group member"
+  },
+
+  "removeFromGroup": "Remove from group",
+  "@removeFromGroup": {
+    "description": "Action label to remove a member from a group"
+  },
+
+  "removeFromGroupConfirmation": "Remove from group?",
+  "@removeFromGroupConfirmation": {
+    "description": "Confirmation dialog title for removing a member from group"
+  },
+
+  "removeFromGroupWarning": "This member will be removed from the group and will no longer be able to see new messages.",
+  "@removeFromGroupWarning": {
+    "description": "Warning message for removing a member from group"
+  },
+
+  "makeAdminConfirmation": "Make admin?",
+  "@makeAdminConfirmation": {
+    "description": "Confirmation dialog title for making a member admin"
+  },
+
+  "makeAdminWarning": "This member will be able to manage the group, add or remove members, and change group settings.",
+  "@makeAdminWarning": {
+    "description": "Warning message for making a member admin"
+  },
+
+  "removeAdminConfirmation": "Remove admin?",
+  "@removeAdminConfirmation": {
+    "description": "Confirmation dialog title for removing admin role"
+  },
+
+  "removeAdminWarning": "This member will no longer be able to manage the group, add or remove members, or change group settings.",
+  "@removeAdminWarning": {
+    "description": "Warning message for removing admin role"
+  },
+
+  "failedToRemoveFromGroup": "Failed to remove member. Please try again.",
+  "@failedToRemoveFromGroup": {
+    "description": "Error message when removing a member from group fails"
+  },
+
+  "failedToMakeAdmin": "Failed to make admin. Please try again.",
+  "@failedToMakeAdmin": {
+    "description": "Error message when making a member admin fails"
+  },
+
+  "failedToRemoveAdmin": "Failed to remove admin. Please try again.",
+  "@failedToRemoveAdmin": {
+    "description": "Error message when removing admin role fails"
   }
 }
