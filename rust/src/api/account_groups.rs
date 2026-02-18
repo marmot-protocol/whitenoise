@@ -110,6 +110,25 @@ pub async fn decline_account_group(
     Ok(updated.into())
 }
 
+#[frb]
+pub async fn get_account_group(
+    account_pubkey: String,
+    mls_group_id: String,
+) -> Result<AccountGroup, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let group_id_bytes = ::hex::decode(&mls_group_id)?;
+    let group_id = GroupId::from_slice(&group_id_bytes);
+
+    let ag = WhitenoiseAccountGroup::get(whitenoise, &pubkey, &group_id)
+        .await?
+        .ok_or_else(|| ApiError::Other {
+            message: "AccountGroup not found".to_string(),
+        })?;
+
+    Ok(ag.into())
+}
+
 /// Marks a message as read for the given account.
 ///
 /// Updates the `last_read_message_id` for the account-group pair containing
