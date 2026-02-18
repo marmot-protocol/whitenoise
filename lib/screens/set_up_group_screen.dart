@@ -38,7 +38,7 @@ class SetUpGroupScreen extends HookConsumerWidget {
 
     final scrollController = useScrollController();
 
-    final createGroupHook = useCreateGroup();
+    final createGroupHook = useCreateGroup(selectedUsers);
     final groupNameController = createGroupHook.state.groupNameController;
     final groupDescriptionController = createGroupHook.state.groupDescriptionController;
     final imagePickerHook = useImagePicker(
@@ -47,12 +47,6 @@ class SetUpGroupScreen extends HookConsumerWidget {
 
     final (:noticeMessage, :noticeType, :showErrorNotice, :showSuccessNotice, :dismissNotice) =
         useSystemNotice();
-
-    useEffect(() {
-      createGroupHook.actions.updateSelectedUsers(selectedUsers);
-      createGroupHook.actions.filterUsersByKeyPackage();
-      return null;
-    }, const []);
 
     Future<void> handleCreateGroup() async {
       final group = await createGroupHook.actions.createGroup(accountPubkey);

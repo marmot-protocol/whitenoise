@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_create_group.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
@@ -143,7 +144,7 @@ void main() {
       await mountHook(
         tester,
         () {
-          final result = useCreateGroup();
+          final result = useCreateGroup(const []);
           state = result.state;
           return Container();
         },
@@ -152,7 +153,6 @@ void main() {
       expect(state.groupName, isEmpty);
       expect(state.groupDescription, isEmpty);
       expect(state.selectedImagePath, isNull);
-      expect(state.selectedUsers, isEmpty);
       expect(state.usersWithKeyPackage, isEmpty);
       expect(state.usersWithoutKeyPackage, isEmpty);
       expect(state.isCreating, isFalse);
@@ -167,7 +167,7 @@ void main() {
       await mountHook(
         tester,
         () {
-          final result = useCreateGroup();
+          final result = useCreateGroup(const []);
           state = result.state;
           return Container();
         },
@@ -186,7 +186,7 @@ void main() {
       await mountHook(
         tester,
         () {
-          final result = useCreateGroup();
+          final result = useCreateGroup(const []);
           state = result.state;
           return Container();
         },
@@ -206,7 +206,7 @@ void main() {
       await mountHook(
         tester,
         () {
-          final result = useCreateGroup();
+          final result = useCreateGroup(const []);
           state = result.state;
           actions = result.actions;
           return Container();
@@ -220,58 +220,25 @@ void main() {
       expect(state.error, isNull);
     });
 
-    testWidgets('updateSelectedUsers updates state', (tester) async {
-      late CreateGroupState state;
-      late CreateGroupActions actions;
-
-      await mountHook(
-        tester,
-        () {
-          final result = useCreateGroup();
-          state = result.state;
-          actions = result.actions;
-          return Container();
-        },
-      );
-
-      final users = [
-        _createTestUser(testPubkeyA, name: 'Alice'),
-        _createTestUser(testPubkeyB, name: 'Bob'),
-      ];
-
-      actions.updateSelectedUsers(users);
-      await tester.pump();
-
-      expect(state.selectedUsers, hasLength(2));
-      expect(state.error, isNull);
-    });
-
-    testWidgets('filterUsersByKeyPackage separates users correctly', (tester) async {
+    testWidgets('filters users by key package on init', (tester) async {
       mockApi.userHasKeyPackageMap[testPubkeyA] = true;
       mockApi.userHasKeyPackageMap[testPubkeyB] = false;
 
-      late CreateGroupState state;
-      late CreateGroupActions actions;
-
-      await mountHook(
-        tester,
-        () {
-          final result = useCreateGroup();
-          state = result.state;
-          actions = result.actions;
-          return Container();
-        },
-      );
-
       final users = [
         _createTestUser(testPubkeyA, name: 'Alice'),
         _createTestUser(testPubkeyB, name: 'Bob'),
       ];
 
-      actions.updateSelectedUsers(users);
-      await tester.pump();
+      late CreateGroupState state;
 
-      await actions.filterUsersByKeyPackage();
+      await mountHook(
+        tester,
+        () {
+          final result = useCreateGroup(users);
+          state = result.state;
+          return Container();
+        },
+      );
       await tester.pumpAndSettle();
 
       expect(state.usersWithKeyPackage, hasLength(1));
@@ -287,7 +254,7 @@ void main() {
       await mountHook(
         tester,
         () {
-          final result = useCreateGroup();
+          final result = useCreateGroup(const []);
           state = result.state;
           actions = result.actions;
           return Container();
@@ -309,7 +276,7 @@ void main() {
       await mountHook(
         tester,
         () {
-          final result = useCreateGroup();
+          final result = useCreateGroup(const []);
           state = result.state;
           actions = result.actions;
           return Container();
@@ -331,13 +298,18 @@ void main() {
       mockApi.userHasKeyPackageMap[testPubkeyB] = true;
       mockApi.userHasKeyPackageMap[testPubkeyC] = true;
 
+      final users = [
+        _createTestUser(testPubkeyB, name: 'Bob'),
+        _createTestUser(testPubkeyC, name: 'Charlie'),
+      ];
+
       late CreateGroupState state;
       late CreateGroupActions actions;
 
       await mountHook(
         tester,
         () {
-          final result = useCreateGroup();
+          final result = useCreateGroup(users);
           state = result.state;
           actions = result.actions;
           return Container();
@@ -346,17 +318,6 @@ void main() {
 
       state.groupNameController.text = 'Test Group';
       state.groupDescriptionController.text = 'Test Description';
-      await tester.pump();
-
-      final users = [
-        _createTestUser(testPubkeyB, name: 'Bob'),
-        _createTestUser(testPubkeyC, name: 'Charlie'),
-      ];
-
-      actions.updateSelectedUsers(users);
-      await tester.pump();
-
-      await actions.filterUsersByKeyPackage();
       await tester.pumpAndSettle();
 
       final group = await actions.createGroup(testPubkeyA);
@@ -378,7 +339,7 @@ void main() {
       await mountHook(
         tester,
         () {
-          final result = useCreateGroup();
+          final result = useCreateGroup(const []);
           state = result.state;
           actions = result.actions;
           return Container();
@@ -399,13 +360,15 @@ void main() {
     testWidgets('reset clears all state', (tester) async {
       mockApi.userHasKeyPackageMap[testPubkeyB] = true;
 
+      final users = [_createTestUser(testPubkeyB, name: 'Bob')];
+
       late CreateGroupState state;
       late CreateGroupActions actions;
 
       await mountHook(
         tester,
         () {
-          final result = useCreateGroup();
+          final result = useCreateGroup(users);
           state = result.state;
           actions = result.actions;
           return Container();
@@ -415,16 +378,12 @@ void main() {
       state.groupNameController.text = 'Test Group';
       state.groupDescriptionController.text = 'Test Description';
       actions.updateSelectedImagePath('/path/to/image.jpg');
-      actions.updateSelectedUsers([_createTestUser(testPubkeyB, name: 'Bob')]);
-      await tester.pump();
-
-      await actions.filterUsersByKeyPackage();
       await tester.pumpAndSettle();
 
       expect(state.groupName, isNotEmpty);
       expect(state.groupDescription, isNotEmpty);
       expect(state.selectedImagePath, isNotNull);
-      expect(state.selectedUsers, isNotEmpty);
+      expect(state.usersWithKeyPackage, isNotEmpty);
 
       actions.reset();
       await tester.pump();
@@ -432,7 +391,6 @@ void main() {
       expect(state.groupName, isEmpty);
       expect(state.groupDescription, isEmpty);
       expect(state.selectedImagePath, isNull);
-      expect(state.selectedUsers, isEmpty);
       expect(state.usersWithKeyPackage, isEmpty);
       expect(state.usersWithoutKeyPackage, isEmpty);
       expect(state.isCreating, isFalse);
@@ -441,28 +399,21 @@ void main() {
       expect(state.isFilteringUsers, isFalse);
     });
 
-    testWidgets('filterUsersByKeyPackage handles individual user errors', (tester) async {
-      late CreateGroupState state;
-      late CreateGroupActions actions;
-
-      await mountHook(
-        tester,
-        () {
-          final result = useCreateGroup();
-          state = result.state;
-          actions = result.actions;
-          return Container();
-        },
-      );
-
+    testWidgets('users without key packages are placed in correct list', (tester) async {
       final users = [
         _createTestUser(testPubkeyB, name: 'Bob'),
       ];
 
-      actions.updateSelectedUsers(users);
-      await tester.pump();
+      late CreateGroupState state;
 
-      await actions.filterUsersByKeyPackage();
+      await mountHook(
+        tester,
+        () {
+          final result = useCreateGroup(users);
+          state = result.state;
+          return Container();
+        },
+      );
       await tester.pumpAndSettle();
 
       expect(state.usersWithoutKeyPackage, hasLength(1));
@@ -471,13 +422,15 @@ void main() {
     testWidgets('createGroup with image path sets uploading state', (tester) async {
       mockApi.userHasKeyPackageMap[testPubkeyB] = true;
 
+      final users = [_createTestUser(testPubkeyB, name: 'Bob')];
+
       late CreateGroupState state;
       late CreateGroupActions actions;
 
       await mountHook(
         tester,
         () {
-          final result = useCreateGroup();
+          final result = useCreateGroup(users);
           state = result.state;
           actions = result.actions;
           return Container();
@@ -486,10 +439,6 @@ void main() {
 
       state.groupNameController.text = 'Test Group';
       actions.updateSelectedImagePath('/path/to/image.jpg');
-      actions.updateSelectedUsers([_createTestUser(testPubkeyB, name: 'Bob')]);
-      await tester.pump();
-
-      await actions.filterUsersByKeyPackage();
       await tester.pumpAndSettle();
 
       final groupFuture = actions.createGroup(testPubkeyA);
@@ -501,31 +450,24 @@ void main() {
       expect(mockApi.createGroupCalled, isTrue);
     });
 
-    testWidgets('filterUsersByKeyPackage handles individual user check errors', (tester) async {
+    testWidgets('key package check errors place users in without list', (tester) async {
       mockApi.shouldThrowOnUserHasKeyPackage = true;
-
-      late CreateGroupState state;
-      late CreateGroupActions actions;
-
-      await mountHook(
-        tester,
-        () {
-          final result = useCreateGroup();
-          state = result.state;
-          actions = result.actions;
-          return Container();
-        },
-      );
 
       final users = [
         _createTestUser(testPubkeyA, name: 'Alice'),
         _createTestUser(testPubkeyB, name: 'Bob'),
       ];
 
-      actions.updateSelectedUsers(users);
-      await tester.pump();
+      late CreateGroupState state;
 
-      await actions.filterUsersByKeyPackage();
+      await mountHook(
+        tester,
+        () {
+          final result = useCreateGroup(users);
+          state = result.state;
+          return Container();
+        },
+      );
       await tester.pumpAndSettle();
 
       expect(state.usersWithoutKeyPackage, hasLength(2));
@@ -536,13 +478,15 @@ void main() {
       mockApi.userHasKeyPackageMap[testPubkeyB] = true;
       mockApi.shouldThrowOnCreateGroup = true;
 
+      final users = [_createTestUser(testPubkeyB, name: 'Bob')];
+
       late CreateGroupState state;
       late CreateGroupActions actions;
 
       await mountHook(
         tester,
         () {
-          final result = useCreateGroup();
+          final result = useCreateGroup(users);
           state = result.state;
           actions = result.actions;
           return Container();
@@ -550,10 +494,6 @@ void main() {
       );
 
       state.groupNameController.text = 'Test Group';
-      actions.updateSelectedUsers([_createTestUser(testPubkeyB, name: 'Bob')]);
-      await tester.pump();
-
-      await actions.filterUsersByKeyPackage();
       await tester.pumpAndSettle();
 
       final group = await actions.createGroup(testPubkeyA);
@@ -566,13 +506,15 @@ void main() {
     testWidgets('createGroup with image upload success', (tester) async {
       mockApi.userHasKeyPackageMap[testPubkeyB] = true;
 
+      final users = [_createTestUser(testPubkeyB, name: 'Bob')];
+
       late CreateGroupState state;
       late CreateGroupActions actions;
 
       await mountHook(
         tester,
         () {
-          final result = useCreateGroup();
+          final result = useCreateGroup(users);
           state = result.state;
           actions = result.actions;
           return Container();
@@ -581,10 +523,6 @@ void main() {
 
       state.groupNameController.text = 'Test Group';
       actions.updateSelectedImagePath('/path/to/image.jpg');
-      actions.updateSelectedUsers([_createTestUser(testPubkeyB, name: 'Bob')]);
-      await tester.pump();
-
-      await actions.filterUsersByKeyPackage();
       await tester.pumpAndSettle();
 
       final group = await actions.createGroup(testPubkeyA);
@@ -599,13 +537,15 @@ void main() {
       mockApi.userHasKeyPackageMap[testPubkeyB] = true;
       mockApi.shouldThrowOnUploadImage = true;
 
+      final users = [_createTestUser(testPubkeyB, name: 'Bob')];
+
       late CreateGroupState state;
       late CreateGroupActions actions;
 
       await mountHook(
         tester,
         () {
-          final result = useCreateGroup();
+          final result = useCreateGroup(users);
           state = result.state;
           actions = result.actions;
           return Container();
@@ -614,10 +554,6 @@ void main() {
 
       state.groupNameController.text = 'Test Group';
       actions.updateSelectedImagePath('/path/to/image.jpg');
-      actions.updateSelectedUsers([_createTestUser(testPubkeyB, name: 'Bob')]);
-      await tester.pump();
-
-      await actions.filterUsersByKeyPackage();
       await tester.pumpAndSettle();
 
       final group = await actions.createGroup(testPubkeyA);
@@ -627,39 +563,53 @@ void main() {
       expect(mockApi.createGroupCalled, isTrue);
     });
 
-    testWidgets('filterUsersByKeyPackage clears lists when selectedUsers is empty', (tester) async {
-      mockApi.userHasKeyPackageMap[testPubkeyA] = true;
-
+    testWidgets('empty selectedUsers results in empty key package lists', (tester) async {
       late CreateGroupState state;
-      late CreateGroupActions actions;
 
       await mountHook(
         tester,
         () {
-          final result = useCreateGroup();
+          final result = useCreateGroup(const []);
           state = result.state;
-          actions = result.actions;
           return Container();
         },
       );
-
-      final users = [_createTestUser(testPubkeyA, name: 'Alice')];
-      actions.updateSelectedUsers(users);
-      await tester.pump();
-
-      await actions.filterUsersByKeyPackage();
-      await tester.pumpAndSettle();
-
-      expect(state.usersWithKeyPackage, hasLength(1));
-
-      actions.updateSelectedUsers([]);
-      await tester.pump();
-
-      await actions.filterUsersByKeyPackage();
       await tester.pumpAndSettle();
 
       expect(state.usersWithKeyPackage, isEmpty);
       expect(state.usersWithoutKeyPackage, isEmpty);
+    });
+
+    testWidgets('re-filters when selectedUsers changes', (tester) async {
+      mockApi.userHasKeyPackageMap[testPubkeyA] = true;
+      mockApi.userHasKeyPackageMap[testPubkeyB] = true;
+
+      late CreateGroupState state;
+      late ValueNotifier<List<User>> usersNotifier;
+
+      await mountHook(
+        tester,
+        () {
+          usersNotifier = useState<List<User>>(
+            [_createTestUser(testPubkeyA, name: 'Alice')],
+          );
+          final result = useCreateGroup(usersNotifier.value);
+          state = result.state;
+          return Container();
+        },
+      );
+      await tester.pumpAndSettle();
+
+      expect(state.usersWithKeyPackage, hasLength(1));
+      expect(state.usersWithKeyPackage.first.pubkey, testPubkeyA);
+
+      usersNotifier.value = [
+        _createTestUser(testPubkeyA, name: 'Alice'),
+        _createTestUser(testPubkeyB, name: 'Bob'),
+      ];
+      await tester.pumpAndSettle();
+
+      expect(state.usersWithKeyPackage, hasLength(2));
     });
   });
 }

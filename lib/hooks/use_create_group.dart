@@ -19,7 +19,6 @@ typedef CreateGroupState = ({
   String groupName,
   String groupDescription,
   String? selectedImagePath,
-  List<User> selectedUsers,
   List<User> usersWithKeyPackage,
   List<User> usersWithoutKeyPackage,
   bool isCreating,
@@ -30,20 +29,19 @@ typedef CreateGroupState = ({
 
 typedef CreateGroupActions = ({
   void Function(String?) updateSelectedImagePath,
-  void Function(List<User>) updateSelectedUsers,
-  Future<void> Function() filterUsersByKeyPackage,
   Future<groups_api.Group?> Function(String accountPubkey) createGroup,
   void Function() clearError,
   void Function() reset,
 });
 
-({CreateGroupState state, CreateGroupActions actions}) useCreateGroup() {
+({CreateGroupState state, CreateGroupActions actions}) useCreateGroup(
+  List<User> selectedUsers,
+) {
   final groupNameController = useTextEditingController();
   final groupDescriptionController = useTextEditingController();
   final groupName = useState('');
   final groupDescription = useState('');
   final selectedImagePath = useState<String?>(null);
-  final selectedUsers = useState<List<User>>([]);
   final usersWithKeyPackage = useState<List<User>>([]);
   final usersWithoutKeyPackage = useState<List<User>>([]);
   final isCreating = useState(false);
@@ -78,45 +76,50 @@ typedef CreateGroupActions = ({
     };
   }, [groupNameController, groupDescriptionController]);
 
-  Future<void> filterUsersByKeyPackage() async {
-    if (selectedUsers.value.isEmpty) {
-      usersWithKeyPackage.value = [];
-      usersWithoutKeyPackage.value = [];
-      return;
-    }
+  useEffect(() {
+    Future<void> filterUsers() async {
+      if (selectedUsers.isEmpty) {
+        usersWithKeyPackage.value = [];
+        usersWithoutKeyPackage.value = [];
+        return;
+      }
 
-    isFilteringUsers.value = true;
-    error.value = null;
+      isFilteringUsers.value = true;
+      error.value = null;
 
-    final withKeyPackage = <User>[];
-    final withoutKeyPackage = <User>[];
+      final withKeyPackage = <User>[];
+      final withoutKeyPackage = <User>[];
 
-    for (final user in selectedUsers.value) {
-      try {
-        final hasKeyPackage = await userHasKeyPackage(
-          pubkey: user.pubkey,
-          blockingDataSync: true,
-        );
+      for (final user in selectedUsers) {
+        try {
+          final hasKp = await userHasKeyPackage(
+            pubkey: user.pubkey,
+            blockingDataSync: true,
+          );
 
-        if (hasKeyPackage) {
-          withKeyPackage.add(user);
-        } else {
+          if (hasKp) {
+            withKeyPackage.add(user);
+          } else {
+            withoutKeyPackage.add(user);
+          }
+        } catch (e) {
+          _logger.warning(
+            'Failed to check key package for ${user.pubkey}: $e',
+          );
           withoutKeyPackage.add(user);
         }
-      } catch (e) {
-        _logger.warning(
-          'Failed to check key package for ${user.pubkey}: $e',
-        );
-        withoutKeyPackage.add(user);
       }
+
+      if (!isMountedRef.value) return;
+
+      usersWithKeyPackage.value = withKeyPackage;
+      usersWithoutKeyPackage.value = withoutKeyPackage;
+      isFilteringUsers.value = false;
     }
 
-    if (!isMountedRef.value) return;
-
-    usersWithKeyPackage.value = withKeyPackage;
-    usersWithoutKeyPackage.value = withoutKeyPackage;
-    isFilteringUsers.value = false;
-  }
+    filterUsers();
+    return null;
+  }, [selectedUsers]);
 
   Future<groups_api.Group?> createGroup(String accountPubkey) async {
     if (groupName.value.trim().isEmpty) {
@@ -193,11 +196,6 @@ typedef CreateGroupActions = ({
     error.value = null;
   }
 
-  void updateSelectedUsers(List<User> users) {
-    selectedUsers.value = users;
-    error.value = null;
-  }
-
   void clearError() {
     error.value = null;
   }
@@ -206,7 +204,6 @@ typedef CreateGroupActions = ({
     groupNameController.clear();
     groupDescriptionController.clear();
     selectedImagePath.value = null;
-    selectedUsers.value = [];
     usersWithKeyPackage.value = [];
     usersWithoutKeyPackage.value = [];
     isCreating.value = false;
@@ -222,7 +219,6 @@ typedef CreateGroupActions = ({
       groupName: groupName.value,
       groupDescription: groupDescription.value,
       selectedImagePath: selectedImagePath.value,
-      selectedUsers: selectedUsers.value,
       usersWithKeyPackage: usersWithKeyPackage.value,
       usersWithoutKeyPackage: usersWithoutKeyPackage.value,
       isCreating: isCreating.value,
@@ -232,8 +228,6 @@ typedef CreateGroupActions = ({
     ),
     actions: (
       updateSelectedImagePath: updateSelectedImagePath,
-      updateSelectedUsers: updateSelectedUsers,
-      filterUsersByKeyPackage: filterUsersByKeyPackage,
       createGroup: createGroup,
       clearError: clearError,
       reset: reset,
