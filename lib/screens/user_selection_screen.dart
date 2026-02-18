@@ -47,6 +47,7 @@ class UserSelectionScreen extends HookConsumerWidget {
           child: WnSlate(
             header: WnSlateNavigationHeader(
               title: context.l10n.newGroupChat,
+              type: WnSlateNavigationType.back,
               onNavigate: () => Routes.goBack(context),
             ),
             footer: Padding(

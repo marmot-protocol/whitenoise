@@ -76,6 +76,7 @@ class SetUpGroupScreen extends HookConsumerWidget {
           child: WnSlate(
             header: WnSlateNavigationHeader(
               title: context.l10n.setUpGroup,
+              type: WnSlateNavigationType.back,
               onNavigate: () => Routes.goBack(context),
             ),
             systemNotice: noticeMessage != null

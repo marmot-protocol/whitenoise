@@ -43,6 +43,7 @@ class UserSearchScreen extends HookConsumerWidget {
           child: WnSlate(
             header: WnSlateNavigationHeader(
               title: context.l10n.startNewChat,
+              type: WnSlateNavigationType.back,
               onNavigate: () => Routes.goBack(context),
             ),
             child: Column(

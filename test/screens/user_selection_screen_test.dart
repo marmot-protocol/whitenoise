@@ -189,15 +189,15 @@ void main() {
       expect(find.text('Set up group'), findsOneWidget);
     });
 
-    testWidgets('tapping close button navigates back', (tester) async {
+    testWidgets('tapping back button navigates back', (tester) async {
       await pumpUserSelectionScreen(tester);
 
       expect(find.byType(WnSlateNavigationHeader), findsOneWidget);
 
-      final closeButton = find.byKey(const Key('slate_close_button'));
-      expect(closeButton, findsOneWidget);
+      final backButton = find.byKey(const Key('slate_back_button'));
+      expect(backButton, findsOneWidget);
 
-      await tester.tap(closeButton);
+      await tester.tap(backButton);
       await tester.pumpAndSettle();
 
       expect(find.byType(WnSlateNavigationHeader), findsNothing);

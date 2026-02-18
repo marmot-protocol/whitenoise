@@ -121,9 +121,9 @@ void main() {
       expect(find.text('New group chat'), findsAtLeast(1));
     });
 
-    testWidgets('tapping close icon goes back', (tester) async {
+    testWidgets('tapping back button goes back', (tester) async {
       await pumpUserSearchScreen(tester);
-      await tester.tap(find.byKey(const Key('slate_close_button')));
+      await tester.tap(find.byKey(const Key('slate_back_button')));
       await tester.pumpAndSettle();
       expect(find.byType(ChatListScreen), findsOneWidget);
     });
