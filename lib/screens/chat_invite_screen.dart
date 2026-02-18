@@ -12,6 +12,7 @@ import 'package:whitenoise/providers/notification_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart' as account_groups_api;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/chat_scroll_down_button.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
@@ -69,6 +70,14 @@ class ChatInviteScreen extends HookConsumerWidget {
           accountPubkey: pubkey,
           mlsGroupId: mlsGroupId,
         );
+        if (chatMessages.latestMessageId != null) {
+          account_groups_api
+              .markMessageRead(
+                accountPubkey: pubkey,
+                messageId: chatMessages.latestMessageId!,
+              )
+              .ignore();
+        }
         if (context.mounted) {
           Routes.goToChat(context, mlsGroupId);
         }
@@ -162,23 +171,9 @@ class ChatInviteScreen extends HookConsumerWidget {
                         ),
                       ),
                     )
-                  : ListView.builder(
-                      reverse: true,
-                      padding: EdgeInsets.symmetric(vertical: 8.h),
-                      itemCount: chatMessages.messageCount,
-                      itemBuilder: (context, index) {
-                        final message = chatMessages.getMessage(index);
-                        final isOwnMessage = message.pubkey == pubkey;
-                        final replyPreview = message.isReply
-                            ? chatMessages.getReplyPreview(message.replyToId)
-                            : null;
-                        return WnMessageBubble(
-                          message: message,
-                          isOwnMessage: isOwnMessage,
-                          currentUserPubkey: pubkey,
-                          replyPreview: replyPreview,
-                        );
-                      },
+                  : _InviteMessageList(
+                      chatMessages: chatMessages,
+                      pubkey: pubkey,
                     ),
             ),
             WnSlate(
@@ -208,6 +203,78 @@ class ChatInviteScreen extends HookConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _InviteMessageList extends HookWidget {
+  const _InviteMessageList({
+    required this.chatMessages,
+    required this.pubkey,
+  });
+
+  final ChatMessagesResult chatMessages;
+  final String pubkey;
+
+  @override
+  Widget build(BuildContext context) {
+    final scrollController = useScrollController();
+    final hasMoreBelow = useState(false);
+
+    useEffect(() {
+      void updateHasMoreBelow() {
+        if (!scrollController.hasClients) return;
+        final position = scrollController.position;
+        hasMoreBelow.value = position.pixels < position.maxScrollExtent - 50;
+      }
+
+      scrollController.addListener(updateHasMoreBelow);
+      WidgetsBinding.instance.addPostFrameCallback((_) => updateHasMoreBelow());
+      return () => scrollController.removeListener(updateHasMoreBelow);
+    }, [scrollController]);
+
+    void scrollToBottom() {
+      scrollController.animateTo(
+        scrollController.position.maxScrollExtent,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeOutCubic,
+      );
+    }
+
+    return Stack(
+      children: [
+        ListView.builder(
+          controller: scrollController,
+          padding: EdgeInsets.symmetric(vertical: 8.h),
+          itemCount: chatMessages.messageCount,
+          itemBuilder: (context, index) {
+            final reversedIndex = chatMessages.messageCount - 1 - index;
+            final message = chatMessages.getMessage(reversedIndex);
+            final isOwnMessage = message.pubkey == pubkey;
+            final replyPreview = message.isReply
+                ? chatMessages.getReplyPreview(message.replyToId)
+                : null;
+            return WnMessageBubble(
+              message: message,
+              isOwnMessage: isOwnMessage,
+              currentUserPubkey: pubkey,
+              replyPreview: replyPreview,
+            );
+          },
+        ),
+        if (hasMoreBelow.value)
+          Positioned(
+            bottom: 8.h,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: ChatScrollDownButton(
+                show: true,
+                onTap: scrollToBottom,
+              ),
+            ),
+          ),
+      ],
     );
   }
 }
