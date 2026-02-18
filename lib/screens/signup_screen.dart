@@ -40,7 +40,7 @@ class SignupScreen extends HookConsumerWidget {
         config: Config(
           length: 2,
           dictionaries: [adjectives, animals],
-          seperator: ' ',
+          separator: ' ',
           style: Style.capital,
         ),
       );
