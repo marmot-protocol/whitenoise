@@ -118,6 +118,12 @@ jobs:
         echo "percentage=$COVERAGE" >> "$GITHUB_OUTPUT"
         echo "Current coverage: $COVERAGE%"
 
+    - name: Install lcov (cached)
+      uses: awalsh128/cache-apt-pkgs-action@v1
+      with:
+        packages: lcov
+        version: 1.0
+
     - name: Generate coverage summary and HTML report
       run: |
         mkdir -p coverage
@@ -132,11 +138,6 @@ jobs:
           echo "Lines hit: $LINES_HIT"
           echo "Lines found: $TOTAL_LINES"
         } > coverage/summary.txt
-
-        if ! command -v genhtml >/dev/null 2>&1; then
-          sudo apt-get update
-          sudo apt-get install -y lcov
-        fi
 
         genhtml coverage/lcov.info --output-directory coverage/html
 
