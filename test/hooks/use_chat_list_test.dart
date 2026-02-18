@@ -6,12 +6,16 @@ import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import '../test_helpers.dart';
 
-ChatSummary _chatSummary(String id, DateTime createdAt) => ChatSummary(
+ChatSummary _chatSummary(
+  String id,
+  DateTime createdAt, {
+  bool pendingConfirmation = false,
+}) => ChatSummary(
   mlsGroupId: 'mls_$id',
   name: 'Chat $id',
   groupType: GroupType.group,
   createdAt: createdAt,
-  pendingConfirmation: false,
+  pendingConfirmation: pendingConfirmation,
   unreadCount: BigInt.zero,
 );
 
@@ -132,6 +136,50 @@ void main() {
 
         final ids = getResult().chats.map((c) => c.mlsGroupId).toList();
         expect(ids.first, 'mls_c2');
+      });
+
+      testWidgets('does not reorder pending confirmation chat', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([
+          _chatSummary('c1', DateTime(2024)),
+          _chatSummary('c2', DateTime(2024, 1, 2), pendingConfirmation: true),
+        ]);
+        await tester.pumpAndSettle();
+
+        final initialIds = getResult().chats.map((c) => c.mlsGroupId).toList();
+        expect(initialIds, ['mls_c1', 'mls_c2']);
+
+        _api.emitUpdate(
+          ChatListUpdateTrigger.newLastMessage,
+          _chatSummary('c2', DateTime(2024, 1, 3), pendingConfirmation: true),
+        );
+        await tester.pumpAndSettle();
+
+        final ids = getResult().chats.map((c) => c.mlsGroupId).toList();
+        expect(ids, ['mls_c1', 'mls_c2']);
+      });
+
+      testWidgets('updates data for pending confirmation chat', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([
+          _chatSummary('c1', DateTime(2024), pendingConfirmation: true),
+        ]);
+        await tester.pumpAndSettle();
+
+        final updatedChat = ChatSummary(
+          mlsGroupId: 'mls_c1',
+          name: 'Updated Pending Chat',
+          groupType: GroupType.group,
+          createdAt: DateTime(2024),
+          pendingConfirmation: true,
+          unreadCount: BigInt.zero,
+        );
+        _api.emitUpdate(ChatListUpdateTrigger.newLastMessage, updatedChat);
+        await tester.pumpAndSettle();
+
+        expect(getResult().chats.first.name, 'Updated Pending Chat');
       });
     });
 
