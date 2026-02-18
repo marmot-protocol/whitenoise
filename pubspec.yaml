@@ -59,6 +59,11 @@ dependencies:
   qr_flutter: ^4.1.0
   cached_network_image: ^3.4.1
   mobile_scanner: ^7.1.4
+  scroll_to_index: ^3.0.1
+  crypto: ^3.0.7
+  flutter_local_notifications: ^20.1.0
+  flutter_foreground_task: ^9.2.0
+  permission_handler: ^12.0.0
 
 dev_dependencies:
   flutter_test:
