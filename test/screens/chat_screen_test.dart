@@ -73,6 +73,7 @@ class _MockApi extends MockWnApi {
 
   @override
   void reset() {
+    super.reset();
     controller?.close();
     controller = null;
     initialMessages = [];
@@ -443,6 +444,7 @@ void main() {
           20,
           (i) => _message('m$i', DateTime(2024, 1, i + 1)),
         );
+        _api.lastReadMessageId = 'm19';
       });
 
       ScrollPosition getScrollPosition(WidgetTester tester) {
@@ -946,6 +948,8 @@ void main() {
             pubkey: _testPubkey,
           ),
         ];
+        // Mark newest message as read so chat starts at bottom
+        _api.lastReadMessageId = 'reply_msg';
         await pumpChatScreen(tester);
         await tester.pumpAndSettle();
 
@@ -1048,6 +1052,122 @@ void main() {
           final tags = _api.deletionCalls.first.tags!.cast<_MockTag>();
           expect(tags[0].vec, ['e', 'reaction_to_delete']);
         });
+      });
+    });
+
+    group('unread indicator', () {
+      setUp(() {
+        _api.initialMessages = List.generate(
+          20,
+          (i) => _message('m$i', DateTime(2024, 1, i + 1)),
+        );
+        _api.lastReadMessageId = 'm19';
+      });
+
+      Future<ScrollPosition> scrollUpAndReceiveMessage(WidgetTester tester) async {
+        await pumpChatScreen(tester);
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+
+        final position = Scrollable.of(tester.element(find.byType(WnMessageBubble).first)).position;
+        position.jumpTo(position.maxScrollExtent);
+        await tester.pumpAndSettle();
+
+        _api.emitMessage(_message('m_new', DateTime(2024, 2)));
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+        return position;
+      }
+
+      testWidgets('hidden when no messages', (tester) async {
+        _api.initialMessages = [];
+        _api.lastReadMessageId = null;
+        await pumpChatScreen(tester);
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('scroll_down_button')), findsNothing);
+      });
+
+      testWidgets('shows when scrolled up with unread messages', (tester) async {
+        await scrollUpAndReceiveMessage(tester);
+
+        expect(find.byKey(const Key('scroll_down_button')), findsOneWidget);
+      });
+
+      testWidgets('hidden when all messages are read', (tester) async {
+        await pumpChatScreen(tester);
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+
+        final position = Scrollable.of(tester.element(find.byType(WnMessageBubble).first)).position;
+        position.jumpTo(position.maxScrollExtent);
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('scroll_down_button')), findsNothing);
+      });
+
+      testWidgets('tapping scrolls to bottom', (tester) async {
+        final position = await scrollUpAndReceiveMessage(tester);
+        expect(position.pixels, greaterThan(0));
+
+        await tester.tap(find.byKey(const Key('scroll_down_button')));
+        await tester.pumpAndSettle();
+
+        expect(position.pixels, 0);
+      });
+    });
+
+    group('mark as read', () {
+      setUp(() {
+        _api.initialMessages = List.generate(
+          20,
+          (i) => _message('m$i', DateTime(2024, 1, i + 1)),
+        );
+        _api.lastReadMessageId = 'm19';
+      });
+
+      testWidgets('marks incoming message as read when at bottom', (tester) async {
+        await pumpChatScreen(tester);
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+
+        _api.emitMessage(_message('m_new', DateTime(2024, 2)));
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+
+        expect(_api.markedAsReadMessages, contains('m_new'));
+      });
+
+      testWidgets('does not mark message as read when scrolled up', (tester) async {
+        await pumpChatScreen(tester);
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+
+        final position = Scrollable.of(tester.element(find.byType(WnMessageBubble).first)).position;
+        position.jumpTo(position.maxScrollExtent);
+        await tester.pumpAndSettle();
+
+        _api.emitMessage(_message('m_new', DateTime(2024, 2)));
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+
+        expect(_api.markedAsReadMessages, isEmpty);
+      });
+
+      testWidgets('marks own message as read', (tester) async {
+        await pumpChatScreen(tester);
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+
+        final position = Scrollable.of(tester.element(find.byType(WnMessageBubble).first)).position;
+        position.jumpTo(position.maxScrollExtent);
+        await tester.pumpAndSettle();
+
+        _api.emitMessage(_message('m_own', DateTime(2024, 2), pubkey: _testPubkey));
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+
+        expect(_api.markedAsReadMessages, contains('m_own'));
       });
     });
   });

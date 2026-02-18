@@ -21,6 +21,7 @@ import 'package:whitenoise/services/message_service.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
+import 'package:whitenoise/widgets/chat_scroll_down_button.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_reply_preview.dart';
@@ -81,11 +82,21 @@ class ChatScreen extends HookConsumerWidget {
       noticeMessage.value = null;
     }
 
-    useChatScroll(
+    String? getMessageIdByIndex(int reversedIndex) {
+      if (reversedIndex < 0 || reversedIndex >= messageCount) return null;
+      return getMessage(reversedIndex).id;
+    }
+
+    final chatScroll = useChatScroll(
       scrollController: scrollController,
       focusNode: input.focusNode,
       latestMessageId: latestMessageId,
-      isLatestMessageOwn: latestMessagePubkey == pubkey,
+      latestMessagePubkey: latestMessagePubkey,
+      accountPubkey: pubkey,
+      groupId: groupId,
+      messageCount: messageCount,
+      getMessageId: getMessageIdByIndex,
+      getReversedIndex: getReversedMessageIndex,
     );
 
     Future<void> sendMessage(String message, ChatMessage? replyingTo) async {
@@ -142,39 +153,42 @@ class ChatScreen extends HookConsumerWidget {
         ),
       );
     } else {
-      messageListContent = ListView.builder(
-        controller: scrollController,
-        reverse: true,
-        padding: EdgeInsets.only(top: slateTopPadding + 8.h, bottom: 12.h),
-        itemCount: messageCount,
-        findChildIndexCallback: (key) {
-          if (key is ValueKey<String>) {
-            return getReversedMessageIndex(key.value);
-          }
-          return null;
-        },
-        itemBuilder: (context, index) {
-          final message = getMessage(index);
-          final isOwnMessage = message.pubkey == pubkey;
-          final replyPreview = message.isReply ? getReplyPreview(message.replyToId) : null;
+      messageListContent = Opacity(
+        opacity: chatScroll.isInitialPositionReady ? 1.0 : 0.0,
+        child: ListView.builder(
+          controller: scrollController,
+          reverse: true,
+          padding: EdgeInsets.only(top: slateTopPadding + 8.h, bottom: 12.h),
+          itemCount: messageCount,
+          findChildIndexCallback: (key) {
+            if (key is ValueKey<String>) {
+              return getReversedMessageIndex(key.value);
+            }
+            return null;
+          },
+          itemBuilder: (context, index) {
+            final message = getMessage(index);
+            final isOwnMessage = message.pubkey == pubkey;
+            final replyPreview = message.isReply ? getReplyPreview(message.replyToId) : null;
 
-          return AutoScrollTag(
-            key: ValueKey(message.id),
-            controller: scrollController,
-            index: index,
-            child: WnMessageBubble(
-              message: message,
-              isOwnMessage: isOwnMessage,
-              currentUserPubkey: pubkey,
-              onLongPress: () => showMessageMenu(message),
-              onReaction: (emoji) => toggleReaction(message, emoji),
-              replyPreview: replyPreview,
-              onReplyTap: replyPreview != null && !replyPreview.isNotFound
-                  ? () => scrollToMessageResult.scrollToMessage(replyPreview.messageId)
-                  : null,
-            ),
-          );
-        },
+            return AutoScrollTag(
+              key: ValueKey(message.id),
+              controller: scrollController,
+              index: index,
+              child: WnMessageBubble(
+                message: message,
+                isOwnMessage: isOwnMessage,
+                currentUserPubkey: pubkey,
+                onLongPress: () => showMessageMenu(message),
+                onReaction: (emoji) => toggleReaction(message, emoji),
+                replyPreview: replyPreview,
+                onReplyTap: replyPreview != null && !replyPreview.isNotFound
+                    ? () => scrollToMessageResult.scrollToMessage(replyPreview.messageId)
+                    : null,
+              ),
+            );
+          },
+        ),
       );
     }
 
@@ -227,6 +241,15 @@ class ChatScreen extends HookConsumerWidget {
                       ),
                     ),
                   ),
+                  if (chatScroll.isScrollDownButtonVisible)
+                    Positioned(
+                      bottom: 8.h,
+                      right: 16.w,
+                      child: ChatScrollDownButton(
+                        show: true,
+                        onTap: chatScroll.scrollToBottom,
+                      ),
+                    ),
                 ],
               ),
             ),
