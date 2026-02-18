@@ -996,4 +996,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get failedToRemoveAdmin => 'Yöneticilik kaldırılamadı. Lütfen tekrar deneyin.';
+
+  @override
+  String get groupUpdatedSuccessfully => 'Grup başarıyla güncellendi';
 }

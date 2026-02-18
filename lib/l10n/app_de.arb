@@ -291,5 +291,6 @@
   "removeAdminWarning": "Dieses Mitglied kann die Gruppe nicht mehr verwalten, keine Mitglieder hinzufügen oder entfernen und keine Gruppeneinstellungen ändern.",
   "failedToRemoveFromGroup": "Mitglied konnte nicht entfernt werden. Bitte erneut versuchen.",
   "failedToMakeAdmin": "Admin konnte nicht ernannt werden. Bitte erneut versuchen.",
-  "failedToRemoveAdmin": "Admin konnte nicht entfernt werden. Bitte erneut versuchen."
+  "failedToRemoveAdmin": "Admin konnte nicht entfernt werden. Bitte erneut versuchen.",
+  "groupUpdatedSuccessfully": "Gruppe erfolgreich aktualisiert"
 }

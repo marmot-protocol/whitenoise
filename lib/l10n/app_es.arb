@@ -291,5 +291,6 @@
   "removeAdminWarning": "Este miembro ya no podrá gestionar el grupo, añadir o eliminar miembros ni cambiar la configuración del grupo.",
   "failedToRemoveFromGroup": "No se pudo eliminar al miembro. Inténtalo de nuevo.",
   "failedToMakeAdmin": "No se pudo hacer admin. Inténtalo de nuevo.",
-  "failedToRemoveAdmin": "No se pudo quitar admin. Inténtalo de nuevo."
+  "failedToRemoveAdmin": "No se pudo quitar admin. Inténtalo de nuevo.",
+  "groupUpdatedSuccessfully": "Grupo actualizado correctamente"
 }

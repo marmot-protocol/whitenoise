@@ -223,7 +223,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(WnSystemNotice), findsOneWidget);
-      expect(find.text('Profile updated successfully'), findsOneWidget);
+      expect(find.text('Group updated successfully'), findsOneWidget);
     });
 
     testWidgets('shows error state when group fails to load', (tester) async {

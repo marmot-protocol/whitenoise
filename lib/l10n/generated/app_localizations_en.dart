@@ -995,4 +995,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToRemoveAdmin => 'Failed to remove admin. Please try again.';
+
+  @override
+  String get groupUpdatedSuccessfully => 'Group updated successfully';
 }

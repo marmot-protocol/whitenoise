@@ -1004,4 +1004,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get failedToRemoveAdmin => 'Não foi possível remover admin. Tente novamente.';
+
+  @override
+  String get groupUpdatedSuccessfully => 'Grupo atualizado com sucesso';
 }

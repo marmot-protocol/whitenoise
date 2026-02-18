@@ -1859,6 +1859,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to remove admin. Please try again.'**
   String get failedToRemoveAdmin;
+
+  /// System notice message when group settings are updated
+  ///
+  /// In en, this message translates to:
+  /// **'Group updated successfully'**
+  String get groupUpdatedSuccessfully;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

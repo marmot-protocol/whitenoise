@@ -1553,5 +1553,10 @@
   "failedToRemoveAdmin": "Failed to remove admin. Please try again.",
   "@failedToRemoveAdmin": {
     "description": "Error message when removing admin role fails"
+  },
+
+  "groupUpdatedSuccessfully": "Group updated successfully",
+  "@groupUpdatedSuccessfully": {
+    "description": "System notice message when group settings are updated"
   }
 }

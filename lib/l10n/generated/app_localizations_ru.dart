@@ -1022,4 +1022,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get failedToRemoveAdmin => 'Не удалось снять админа. Попробуйте снова.';
+
+  @override
+  String get groupUpdatedSuccessfully => 'Группа успешно обновлена';
 }

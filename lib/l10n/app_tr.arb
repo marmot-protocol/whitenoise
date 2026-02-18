@@ -292,5 +292,6 @@
   "groupDescriptionLabel": "Hakkında",
   "membersCount": "{count, plural, =1{1 Üye} other{{count} Üye}}",
   "adminBadge": "Yönetici",
-  "membersLabel": "Üyeler:"
+  "membersLabel": "Üyeler:",
+  "groupUpdatedSuccessfully": "Grup başarıyla güncellendi"
 }

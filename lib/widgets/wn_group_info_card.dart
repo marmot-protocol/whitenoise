@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:whitenoise/theme.dart';
-import 'package:whitenoise/widgets/wn_avatar.dart';
+import 'package:whitenoise/utils/avatar_color.dart';
+import 'package:whitenoise/widgets/wn_avatar.dart' show WnAvatar, WnAvatarSize;
 
 class WnGroupInfoCard extends StatelessWidget {
   const WnGroupInfoCard({

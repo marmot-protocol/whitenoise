@@ -66,7 +66,8 @@ GroupMembersState useGroupMembers({
         groupId: groupId,
         memberPubkeys: pubkeys,
       );
-      members.value = [...members.value, ...pubkeys];
+      final updated = {...members.value, ...pubkeys}.toList();
+      members.value = updated;
     } catch (e) {
       _logger.severe('Failed to add members: $e');
       error.value = 'Failed to add members';
@@ -102,7 +103,7 @@ GroupMembersState useGroupMembers({
     isActionLoading.value = true;
     error.value = null;
     try {
-      final updatedAdmins = [...admins.value, pubkey];
+      final updatedAdmins = {...admins.value, pubkey}.toList();
       await group.updateGroupData(
         accountPubkey: accountPubkey,
         groupData: groups_api.FlutterGroupDataUpdate(admins: updatedAdmins),

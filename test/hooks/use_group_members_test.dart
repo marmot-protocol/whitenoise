@@ -229,6 +229,17 @@ void main() {
         expect(getState().members, [testPubkeyA, testPubkeyB]);
       });
 
+      testWidgets('deduplicates when adding existing members', (tester) async {
+        _api.membersList = [testPubkeyA, testPubkeyB];
+        await pump(tester, accountPubkey: testPubkeyA, groupId: testGroupId);
+        await tester.pumpAndSettle();
+
+        await getState().addMembers([testPubkeyB, testPubkeyC]);
+        await tester.pump();
+
+        expect(getState().members, [testPubkeyA, testPubkeyB, testPubkeyC]);
+      });
+
       testWidgets('isActionLoading is true during add', (tester) async {
         _api.addMembersCompleter = Completer();
         await pump(tester, accountPubkey: testPubkeyA, groupId: testGroupId);
@@ -343,6 +354,18 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(getState().admins, [testPubkeyA]);
+
+        await getState().makeAdmin(testPubkeyB);
+        await tester.pump();
+
+        expect(getState().admins, [testPubkeyA, testPubkeyB]);
+      });
+
+      testWidgets('deduplicates when making existing admin', (tester) async {
+        _api.adminsList = [testPubkeyA, testPubkeyB];
+        _api.membersList = [testPubkeyA, testPubkeyB];
+        await pump(tester, accountPubkey: testPubkeyA, groupId: testGroupId);
+        await tester.pumpAndSettle();
 
         await getState().makeAdmin(testPubkeyB);
         await tester.pump();

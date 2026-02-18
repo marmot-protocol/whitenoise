@@ -122,7 +122,7 @@ class EditGroupScreen extends HookConsumerWidget {
                               ? () async {
                                   final success = await saveGroup();
                                   if (context.mounted && success) {
-                                    showNotice(context.l10n.profileUpdatedSuccessfully);
+                                    showNotice(context.l10n.groupUpdatedSuccessfully);
                                   }
                                 }
                               : null,
