@@ -1,9 +1,9 @@
 import 'dart:ui' show AppLifecycleState;
 
-import 'package:flutter/material.dart' show Key, Locale, MaterialApp, SizedBox, Widget;
+import 'package:flutter/material.dart' show Key, SizedBox;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:whitenoise/l10n/l10n.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:whitenoise/widgets/wn_scan_box.dart';
 import '../mocks/mock_scanner_controller.dart';
 import '../test_helpers.dart' show mountWidget;
@@ -14,18 +14,96 @@ void main() {
 
     setUp(() {
       mockController = setupMockScannerController();
+      setPermissionRequester(() async => PermissionStatus.granted);
     });
 
     tearDown(() {
       tearDownMockScannerController();
+      resetPermissionRequester();
     });
 
-    testWidgets('renders scanner container', (tester) async {
+    testWidgets('shows loading placeholder before permission resolves', (tester) async {
+      var resolvePermission = false;
+      setPermissionRequester(() async {
+        while (!resolvePermission) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+        return PermissionStatus.granted;
+      });
+
       await mountWidget(
         WnScanBox(onBarcodeDetected: (_) {}),
         tester,
       );
+
+      expect(find.byKey(const Key('scanner_placeholder')), findsOneWidget);
+
+      resolvePermission = true;
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump();
+    });
+
+    testWidgets('renders scanner container after permission granted', (tester) async {
+      await mountWidget(
+        WnScanBox(onBarcodeDetected: (_) {}),
+        tester,
+      );
+      await tester.pump();
+
       expect(find.byType(MobileScanner), findsOneWidget);
+    });
+
+    testWidgets('shows placeholder when permission is denied', (tester) async {
+      setPermissionRequester(() async => PermissionStatus.denied);
+
+      await mountWidget(
+        WnScanBox(onBarcodeDetected: (_) {}),
+        tester,
+      );
+      await tester.pump();
+
+      expect(find.byKey(const Key('scanner_placeholder')), findsOneWidget);
+      expect(find.byType(MobileScanner), findsNothing);
+    });
+
+    testWidgets('shows error UI when permission is denied', (tester) async {
+      setPermissionRequester(() async => PermissionStatus.denied);
+
+      await mountWidget(
+        WnScanBox(onBarcodeDetected: (_) {}),
+        tester,
+      );
+      await tester.pump();
+
+      expect(find.byKey(const Key('scanner_error_icon')), findsOneWidget);
+      expect(find.text('Camera permission denied'), findsOneWidget);
+      expect(
+        find.text('Please enable camera access in your device settings to scan QR codes.'),
+        findsOneWidget,
+      );
+      expect(find.byKey(const Key('open_settings_button')), findsOneWidget);
+    });
+
+    testWidgets('does not show error UI while loading', (tester) async {
+      var resolvePermission = false;
+      setPermissionRequester(() async {
+        while (!resolvePermission) {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+        }
+        return PermissionStatus.granted;
+      });
+
+      await mountWidget(
+        WnScanBox(onBarcodeDetected: (_) {}),
+        tester,
+      );
+
+      expect(find.byKey(const Key('scanner_placeholder')), findsOneWidget);
+      expect(find.byKey(const Key('scanner_error_icon')), findsNothing);
+
+      resolvePermission = true;
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.pump();
     });
 
     testWidgets('uses custom dimensions when provided', (tester) async {
@@ -37,6 +115,8 @@ void main() {
         ),
         tester,
       );
+      await tester.pump();
+
       final container = tester.getSize(find.byType(MobileScanner).first);
       expect(container.width, lessThanOrEqualTo(200));
       expect(container.height, lessThanOrEqualTo(300));
@@ -47,6 +127,8 @@ void main() {
         WnScanBox(onBarcodeDetected: (_) {}),
         tester,
       );
+      await tester.pump();
+
       expect(find.byKey(const Key('scan_button')), findsNothing);
     });
 
@@ -55,6 +137,7 @@ void main() {
         WnScanBox(onBarcodeDetected: (_) {}),
         tester,
       );
+      await tester.pump();
 
       final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
       expect(scanner.controller?.formats, contains(BarcodeFormat.qrCode));
@@ -65,6 +148,7 @@ void main() {
         WnScanBox(onBarcodeDetected: (_) {}),
         tester,
       );
+      await tester.pump();
 
       final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
       expect(scanner.controller?.autoStart, isFalse);
@@ -75,6 +159,7 @@ void main() {
         WnScanBox(onBarcodeDetected: (_) {}),
         tester,
       );
+      await tester.pump();
 
       expect(mockController.startCalled, isTrue);
     });
@@ -84,6 +169,7 @@ void main() {
         WnScanBox(onBarcodeDetected: (_) {}),
         tester,
       );
+      await tester.pump();
 
       expect(mockController.disposeCalled, isFalse);
 
@@ -101,6 +187,7 @@ void main() {
           WnScanBox(onBarcodeDetected: (value) => detectedValue = value),
           tester,
         );
+        await tester.pump();
 
         mockController.emitBarcode('npub1testvalue');
         await tester.pump();
@@ -117,6 +204,7 @@ void main() {
           WnScanBox(onBarcodeDetected: (value) => detectedValue = value),
           tester,
         );
+        await tester.pump();
 
         mockController.emitEmpty();
         await tester.pump();
@@ -131,6 +219,7 @@ void main() {
           WnScanBox(onBarcodeDetected: (value) => detectedValue = value),
           tester,
         );
+        await tester.pump();
 
         mockController.emitBarcodeWithEmptyValue();
         await tester.pump();
@@ -145,6 +234,7 @@ void main() {
           WnScanBox(onBarcodeDetected: (value) => detectedValue = value),
           tester,
         );
+        await tester.pump();
 
         mockController.emitBarcode('  npub1test  ');
         await tester.pump();
@@ -161,6 +251,7 @@ void main() {
           WnScanBox(onBarcodeDetected: (value) => detectedValues.add(value)),
           tester,
         );
+        await tester.pump();
 
         mockController.emitBarcode('first');
         await tester.pump();
@@ -179,6 +270,7 @@ void main() {
           WnScanBox(onBarcodeDetected: (value) => detectedValues.add(value)),
           tester,
         );
+        await tester.pump();
 
         mockController.emitBarcode('first');
         await tester.pump();
@@ -194,73 +286,32 @@ void main() {
     });
 
     group('lifecycle', () {
-      testWidgets('recreates scanner on resume when error occurred', (tester) async {
+      testWidgets('recreates scanner on resume', (tester) async {
         await mountWidget(
           WnScanBox(onBarcodeDetected: (_) {}),
           tester,
         );
-
-        final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
-        const error = MobileScannerException(
-          errorCode: MobileScannerErrorCode.genericError,
-        );
-        scanner.errorBuilder!(tester.element(find.byType(MobileScanner)), error);
         await tester.pump();
 
+        final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
         final initialKey = scanner.key;
 
         tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pump();
         await tester.pump();
 
         final newScanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
         expect(newScanner.key, isNot(equals(initialKey)));
       });
-
-      testWidgets('does not recreate scanner on resume when no error', (tester) async {
-        await mountWidget(
-          WnScanBox(onBarcodeDetected: (_) {}),
-          tester,
-        );
-
-        final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
-        final initialKey = scanner.key;
-
-        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
-        await tester.pump();
-
-        final newScanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
-        expect(newScanner.key, equals(initialKey));
-      });
     });
 
     group('error handling', () {
-      testWidgets('calls onError when error occurs', (tester) async {
-        MobileScannerException? receivedError;
-
-        await mountWidget(
-          WnScanBox(
-            onBarcodeDetected: (_) {},
-            onError: (error) => receivedError = error,
-          ),
-          tester,
-        );
-
-        final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
-        const error = MobileScannerException(
-          errorCode: MobileScannerErrorCode.genericError,
-        );
-
-        scanner.errorBuilder!(tester.element(find.byType(MobileScanner)), error);
-        await tester.pump();
-
-        expect(receivedError, error);
-      });
-
-      testWidgets('shows permission denied message when permission denied', (tester) async {
+      testWidgets('errorBuilder returns placeholder widget', (tester) async {
         await mountWidget(
           WnScanBox(onBarcodeDetected: (_) {}),
           tester,
         );
+        await tester.pump();
 
         final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
         final context = tester.element(find.byType(MobileScanner));
@@ -269,18 +320,37 @@ void main() {
         );
 
         final errorWidget = scanner.errorBuilder!(context, error);
-        await tester.pumpWidget(
-          _wrapWithLocalization(errorWidget),
-        );
-
-        expect(find.text('Camera permission denied'), findsOneWidget);
+        expect(errorWidget, isNotNull);
       });
 
-      testWidgets('shows generic error message for other errors', (tester) async {
+      testWidgets('shows permission denied message when permission is denied', (
+        tester,
+      ) async {
         await mountWidget(
           WnScanBox(onBarcodeDetected: (_) {}),
           tester,
         );
+        await tester.pump();
+
+        final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
+        final context = tester.element(find.byType(MobileScanner));
+        const error = MobileScannerException(
+          errorCode: MobileScannerErrorCode.permissionDenied,
+        );
+
+        scanner.errorBuilder!(context, error);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Camera permission denied'), findsOneWidget);
+        expect(find.byKey(const Key('open_settings_button')), findsOneWidget);
+      });
+
+      testWidgets('shows scanner error UI with retry after generic error', (tester) async {
+        await mountWidget(
+          WnScanBox(onBarcodeDetected: (_) {}),
+          tester,
+        );
+        await tester.pump();
 
         final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
         final context = tester.element(find.byType(MobileScanner));
@@ -288,22 +358,39 @@ void main() {
           errorCode: MobileScannerErrorCode.genericError,
         );
 
-        final errorWidget = scanner.errorBuilder!(context, error);
-        await tester.pumpWidget(
-          _wrapWithLocalization(errorWidget),
-        );
+        scanner.errorBuilder!(context, error);
+        await tester.pumpAndSettle();
 
-        expect(find.text('Something went wrong'), findsOneWidget);
+        expect(find.text('Scanner error'), findsOneWidget);
+        expect(find.byKey(const Key('retry_scanner_button')), findsOneWidget);
+      });
+    });
+
+    group('permission handling', () {
+      testWidgets('shows placeholder when permission is permanently denied', (tester) async {
+        setPermissionRequester(() async => PermissionStatus.permanentlyDenied);
+
+        await mountWidget(
+          WnScanBox(onBarcodeDetected: (_) {}),
+          tester,
+        );
+        await tester.pump();
+
+        expect(find.byKey(const Key('scanner_placeholder')), findsOneWidget);
+        expect(find.byType(MobileScanner), findsNothing);
+      });
+
+      testWidgets('shows scanner when permission is limited', (tester) async {
+        setPermissionRequester(() async => PermissionStatus.limited);
+
+        await mountWidget(
+          WnScanBox(onBarcodeDetected: (_) {}),
+          tester,
+        );
+        await tester.pump();
+
+        expect(find.byType(MobileScanner), findsOneWidget);
       });
     });
   });
-}
-
-MaterialApp _wrapWithLocalization(Widget child) {
-  return MaterialApp(
-    localizationsDelegates: AppLocalizations.localizationsDelegates,
-    supportedLocales: AppLocalizations.supportedLocales,
-    locale: const Locale('en'),
-    home: child,
-  );
 }
