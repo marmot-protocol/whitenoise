@@ -30,6 +30,14 @@ Future<AccountGroup> declineAccountGroup({
   mlsGroupId: mlsGroupId,
 );
 
+Future<AccountGroup> getAccountGroup({
+  required String accountPubkey,
+  required String mlsGroupId,
+}) => RustLib.instance.api.crateApiAccountGroupsGetAccountGroup(
+  accountPubkey: accountPubkey,
+  mlsGroupId: mlsGroupId,
+);
+
 /// Marks a message as read for the given account.
 ///
 /// Updates the `last_read_message_id` for the account-group pair containing

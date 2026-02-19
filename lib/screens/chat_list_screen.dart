@@ -19,7 +19,7 @@ import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 const _slateHeight = 80;
-const _searchAndFiltersHeight = 108;
+const _searchAndFiltersHeight = 68;
 
 class ChatListScreen extends HookConsumerWidget {
   const ChatListScreen({super.key});

@@ -1,5 +1,6 @@
 import 'package:emoji_picker_flutter/emoji_picker_flutter.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -118,6 +119,61 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(replyCalled, isTrue);
+      });
+    });
+
+    group('Copy button', () {
+      testWidgets('is always visible', (tester) async {
+        await mountWidget(
+          MessageActionsModal(
+            message: _createTestMessage(),
+            isOwnMessage: false,
+            onClose: () {},
+            onReaction: (_) {},
+            onEmojiPicker: () {},
+            currentUserPubkey: testPubkeyA,
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('copy_button')), findsOneWidget);
+      });
+
+      testWidgets('copies message content to clipboard when tapped', (tester) async {
+        String? clipboardContent;
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          (MethodCall methodCall) async {
+            if (methodCall.method == 'Clipboard.setData') {
+              final args = methodCall.arguments as Map<dynamic, dynamic>;
+              clipboardContent = args['text'] as String?;
+            }
+            return null;
+          },
+        );
+        addTearDown(() {
+          tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            SystemChannels.platform,
+            null,
+          );
+        });
+
+        await mountWidget(
+          MessageActionsModal(
+            message: _createTestMessage(content: 'Hello, world!'),
+            isOwnMessage: false,
+            onClose: () {},
+            onReaction: (_) {},
+            onEmojiPicker: () {},
+            currentUserPubkey: testPubkeyA,
+          ),
+          tester,
+        );
+
+        await tester.tap(find.byKey(const Key('copy_button')));
+        await tester.pumpAndSettle();
+
+        expect(clipboardContent, 'Hello, world!');
       });
     });
 
@@ -390,6 +446,51 @@ void main() {
 
       expect(find.text('Message actions'), findsOneWidget);
       expect(find.text('Test message content'), findsOneWidget);
+    });
+
+    testWidgets('copy button copies content and closes menu', (tester) async {
+      String? clipboardContent;
+      tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (MethodCall methodCall) async {
+          if (methodCall.method == 'Clipboard.setData') {
+            final args = methodCall.arguments as Map<dynamic, dynamic>;
+            clipboardContent = args['text'] as String?;
+          }
+          return null;
+        },
+      );
+      addTearDown(() {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      await mountShowTest(
+        tester,
+        builder: (context) => ElevatedButton(
+          onPressed: () => MessageActionsScreen.show(
+            context,
+            message: _createTestMessage(content: 'Copy this text'),
+            pubkey: testPubkeyA,
+            onAddReaction: (_) async {},
+            onRemoveReaction: (_) async {},
+          ),
+          child: const Text('Show Menu'),
+        ),
+      );
+
+      await tester.tap(find.text('Show Menu'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('copy_button')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('copy_button')));
+      await tester.pumpAndSettle();
+
+      expect(clipboardContent, 'Copy this text');
+      expect(find.text('Message actions'), findsNothing);
     });
 
     testWidgets('shows delete button for own message', (tester) async {

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/share_profile_screen.dart';
@@ -53,6 +54,11 @@ void main() {
 
   setUp(() {
     _mockApi.reset();
+    setPermissionRequester(() async => PermissionStatus.granted);
+  });
+
+  tearDown(() {
+    resetPermissionRequester();
   });
 
   Future<void> pumpScanNpubScreen(WidgetTester tester) async {
@@ -95,9 +101,9 @@ void main() {
     });
 
     group('navigation', () {
-      testWidgets('tapping close button returns to share profile screen', (tester) async {
+      testWidgets('tapping back button returns to share profile screen', (tester) async {
         await pumpScanNpubScreen(tester);
-        await tester.tap(find.byKey(const Key('slate_close_button')));
+        await tester.tap(find.byKey(const Key('slate_back_button')));
         await tester.pumpAndSettle();
         expect(find.byType(ShareProfileScreen), findsOneWidget);
       });

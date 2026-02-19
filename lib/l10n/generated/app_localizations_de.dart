@@ -408,6 +408,103 @@ class AppLocalizationsDe extends AppLocalizations {
   String get goBack => 'Zurück';
 
   @override
+  String get createGroup => 'Gruppe erstellen';
+
+  @override
+  String get newGroupChat => 'Neuer Gruppenchat';
+
+  @override
+  String get selectMembers => 'Mitglieder auswählen';
+
+  @override
+  String selectedCount(int count) {
+    return '$count ausgewählt';
+  }
+
+  @override
+  String get clearSelection => 'Löschen';
+
+  @override
+  String get continueButton => 'Weiter';
+
+  @override
+  String get setUpGroup => 'Gruppe einrichten';
+
+  @override
+  String get groupName => 'Gruppenname';
+
+  @override
+  String get groupNamePlaceholder => 'Gruppenname eingeben';
+
+  @override
+  String get groupDescription => 'Gruppenbeschreibung';
+
+  @override
+  String get description => 'Beschreibung';
+
+  @override
+  String get groupDescriptionPlaceholder => 'Wofür ist diese Gruppe?';
+
+  @override
+  String members(int count) {
+    return '$count Mitglieder';
+  }
+
+  @override
+  String invitingMembers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Mitglieder einladen:',
+      one: 'Mitglied einladen:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get usersWithoutKeyPackages =>
+      'Benutzer ohne Schlüsselpakete (können nicht hinzugefügt werden)';
+
+  @override
+  String usersNotOnWhiteNoise(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Diese Benutzer sind nicht auf White Noise',
+      one: 'Dieser Benutzer ist nicht auf White Noise',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String usersNotOnWhiteNoiseDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Diese Benutzer können nicht zur Gruppe hinzugefügt werden, da sie White Noise nicht installiert haben oder ihre Schlüsselpakete noch nicht veröffentlicht haben.',
+      one:
+          'Dieser Benutzer kann nicht zur Gruppe hinzugefügt werden, da White Noise nicht installiert ist oder das Schlüsselpaket noch nicht veröffentlicht wurde.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get uploadingImage => 'Bild wird hochgeladen...';
+
+  @override
+  String get creatingGroup => 'Gruppe wird erstellt...';
+
+  @override
+  String get groupNameRequired => 'Gruppenname ist erforderlich';
+
+  @override
+  String get noUsersWithKeyPackages => 'Keine Benutzer mit Schlüsselpaketen zum Hinzufügen';
+
+  @override
+  String get createGroupFailed => 'Gruppe erstellen fehlgeschlagen';
+
+  @override
   String get reportError => 'Fehler melden';
 
   @override
@@ -444,6 +541,9 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get reply => 'Antworten';
+
+  @override
+  String get copyMessage => 'Kopieren';
 
   @override
   String get delete => 'Löschen';
@@ -822,4 +922,116 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get loginPasteFailed => 'Einfügen aus der Zwischenablage fehlgeschlagen';
+
+  @override
+  String get openSettings => 'Einstellungen öffnen';
+
+  @override
+  String get scannerError => 'Scanner-Fehler';
+
+  @override
+  String get scannerErrorDescription =>
+      'Ein Fehler ist beim Scanner aufgetreten. Bitte versuchen Sie es erneut.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'Bitte aktivieren Sie den Kamerazugriff in Ihren Geräteeinstellungen, um QR-Codes zu scannen.';
+
+  @override
+  String get retry => 'Erneut versuchen';
+
+  @override
+  String get groupInformation => 'Gruppeninformationen';
+
+  @override
+  String get editGroup => 'Gruppe bearbeiten';
+
+  @override
+  String get editGroupAction => 'Gruppe bearbeiten';
+
+  @override
+  String get groupNameLabel => 'Name';
+
+  @override
+  String get groupDescriptionLabel => 'Über';
+
+  @override
+  String membersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Mitglieder',
+      one: '1 Mitglied',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminBadge => 'Admin';
+
+  @override
+  String get membersLabel => 'Mitglieder:';
+
+  @override
+  String get memberBadge => 'Mitglied';
+
+  @override
+  String get sendMessage => 'Nachricht senden';
+
+  @override
+  String get makeAdmin => 'Zum Admin machen';
+
+  @override
+  String get removeAdminRole => 'Admin entfernen';
+
+  @override
+  String get removeFromGroup => 'Aus Gruppe entfernen';
+
+  @override
+  String get removeFromGroupConfirmation => 'Aus Gruppe entfernen?';
+
+  @override
+  String get removeFromGroupWarning =>
+      'Dieses Mitglied wird aus der Gruppe entfernt und kann keine neuen Nachrichten mehr sehen.';
+
+  @override
+  String get makeAdminConfirmation => 'Zum Admin machen?';
+
+  @override
+  String get makeAdminWarning =>
+      'Dieses Mitglied kann die Gruppe verwalten, Mitglieder hinzufügen oder entfernen und Gruppeneinstellungen ändern.';
+
+  @override
+  String get removeAdminConfirmation => 'Admin entfernen?';
+
+  @override
+  String get removeAdminWarning =>
+      'Dieses Mitglied kann die Gruppe nicht mehr verwalten, keine Mitglieder hinzufügen oder entfernen und keine Gruppeneinstellungen ändern.';
+
+  @override
+  String get failedToRemoveFromGroup =>
+      'Mitglied konnte nicht entfernt werden. Bitte erneut versuchen.';
+
+  @override
+  String get failedToMakeAdmin => 'Admin konnte nicht ernannt werden. Bitte erneut versuchen.';
+
+  @override
+  String get failedToRemoveAdmin => 'Admin konnte nicht entfernt werden. Bitte erneut versuchen.';
+
+  @override
+  String get groupUpdatedSuccessfully => 'Gruppe erfolgreich aktualisiert';
+
+  @override
+  String get groupLoadError => 'Gruppe konnte nicht geladen werden. Bitte erneut versuchen.';
+
+  @override
+  String get groupSaveError => 'Gruppe konnte nicht gespeichert werden. Bitte erneut versuchen.';
+
+  @override
+  String get failedToFetchGroupMembers =>
+      'Gruppenmitglieder konnten nicht geladen werden. Bitte erneut versuchen.';
+
+  @override
+  String get failedToAddMembers =>
+      'Mitglieder konnten nicht hinzugefügt werden. Bitte erneut versuchen.';
 }

@@ -5,7 +5,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
     show AsyncData, ProviderContainer, ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise/main.dart' show WnApp, initializeAppContainer, kUnencryptedDatabaseError;
+import 'package:whitenoise/main.dart'
+    show WnApp, initializeAppContainer, kDataVersion, kDataVersionFile;
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/theme_provider.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
@@ -89,8 +90,6 @@ class _MockInitApi extends MockWnApi {
   String? createdConfigLogsDir;
   rust_api.WhitenoiseConfig? initializedConfig;
   int initCallCount = 0;
-  int failFirstNCalls = 0;
-  String failMessage = kUnencryptedDatabaseError;
 
   @override
   Future<rust_api.WhitenoiseConfig> crateApiCreateWhitenoiseConfig({
@@ -107,9 +106,6 @@ class _MockInitApi extends MockWnApi {
     required rust_api.WhitenoiseConfig config,
   }) async {
     initCallCount++;
-    if (initCallCount <= failFirstNCalls) {
-      throw Exception(failMessage);
-    }
     initializedConfig = config;
   }
 
@@ -120,8 +116,6 @@ class _MockInitApi extends MockWnApi {
     createdConfigLogsDir = null;
     initializedConfig = null;
     initCallCount = 0;
-    failFirstNCalls = 0;
-    failMessage = kUnencryptedDatabaseError;
   }
 }
 
@@ -192,11 +186,19 @@ void main() {
     setUp(() {
       pathProvider = _mockPathProvider();
       resetSecureStorage = _mockSecureStorage();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('plugins.flutter.io/shared_preferences'),
+        (call) async => <String, Object>{},
+      );
     });
 
     tearDown(() {
       pathProvider.reset();
       resetSecureStorage();
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('plugins.flutter.io/shared_preferences'),
+        null,
+      );
     });
 
     test('creates data directory', () async {
@@ -241,38 +243,61 @@ void main() {
       expect(container.read(authProvider), isA<AsyncData>());
     });
 
-    test('wipes env data directory and retries on unencrypted db error', () async {
-      mockApi.failFirstNCalls = 1;
-      final envDir = Directory('${pathProvider.tempDir.path}/whitenoise/data/dev');
-      final marker = File('${envDir.path}/whitenoise.sqlite');
-      await envDir.create(recursive: true);
+    test('writes version file on fresh install', () async {
+      await initializeAppContainer();
+
+      final versionFile = File('${pathProvider.tempDir.path}/whitenoise/data/$kDataVersionFile');
+      expect(versionFile.existsSync(), isTrue);
+      expect(versionFile.readAsStringSync().trim(), '$kDataVersion');
+    });
+
+    test('skips migration when version matches', () async {
+      final dataDir = Directory('${pathProvider.tempDir.path}/whitenoise/data');
+      await dataDir.create(recursive: true);
+      final versionFile = File('${dataDir.path}/$kDataVersionFile');
+      versionFile.writeAsStringSync('$kDataVersion');
+      final marker = File('${dataDir.path}/whitenoise.json');
       await marker.create();
 
+      await initializeAppContainer();
+
       expect(marker.existsSync(), isTrue);
+    });
 
-      final container = await initializeAppContainer();
+    test('wipes data directory when no version file exists', () async {
+      final dataDir = Directory('${pathProvider.tempDir.path}/whitenoise/data');
+      await dataDir.create(recursive: true);
+      final oldSecrets = File('${dataDir.path}/whitenoise.json');
+      final oldUuid = File('${dataDir.path}/whitenoise_uuid');
+      final oldDb = File('${dataDir.path}/release/whitenoise.sqlite');
+      await Directory('${dataDir.path}/release').create(recursive: true);
+      await oldSecrets.create();
+      await oldUuid.create();
+      await oldDb.create();
 
-      expect(container, isA<ProviderContainer>());
+      await initializeAppContainer();
+
+      expect(oldSecrets.existsSync(), isFalse);
+      expect(oldUuid.existsSync(), isFalse);
+      expect(oldDb.existsSync(), isFalse);
+      expect(dataDir.existsSync(), isTrue);
+      final versionFile = File('${dataDir.path}/$kDataVersionFile');
+      expect(versionFile.existsSync(), isTrue);
+      expect(versionFile.readAsStringSync().trim(), '$kDataVersion');
+    });
+
+    test('wipes data directory when version is outdated', () async {
+      final dataDir = Directory('${pathProvider.tempDir.path}/whitenoise/data');
+      await dataDir.create(recursive: true);
+      final versionFile = File('${dataDir.path}/$kDataVersionFile');
+      versionFile.writeAsStringSync('0');
+      final marker = File('${dataDir.path}/whitenoise.json');
+      await marker.create();
+
+      await initializeAppContainer();
+
       expect(marker.existsSync(), isFalse);
-      expect(mockApi.initCallCount, 2);
-    });
-
-    test('rethrows unencrypted db error when retry also fails', () async {
-      mockApi.failFirstNCalls = 2;
-
-      await expectLater(initializeAppContainer(), throwsException);
-    });
-
-    test('rethrows unrelated errors without wiping', () async {
-      mockApi.failFirstNCalls = 1;
-      mockApi.failMessage = 'network timeout';
-      final envDir = Directory('${pathProvider.tempDir.path}/whitenoise/data/dev');
-      final marker = File('${envDir.path}/whitenoise.sqlite');
-      await envDir.create(recursive: true);
-      await marker.create();
-
-      await expectLater(initializeAppContainer(), throwsException);
-      expect(marker.existsSync(), isTrue);
+      expect(versionFile.readAsStringSync().trim(), '$kDataVersion');
     });
   });
 }

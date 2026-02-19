@@ -1,10 +1,11 @@
-import 'dart:io' show Directory;
+import 'dart:io' show Directory, File, FileSystemException;
 
-import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show DeviceOrientation, SystemChrome;
+import 'package:flutter_foreground_task/flutter_foreground_task.dart' show FlutterForegroundTask;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart' show ScreenUtilInit;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart' show FlutterSecureStorage;
 import 'package:go_router/go_router.dart' show GoRouter;
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     show ConsumerStatefulWidget, ConsumerState, ProviderContainer, UncontrolledProviderScope;
@@ -19,7 +20,9 @@ import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/theme.dart';
 
-const kUnencryptedDatabaseError = 'database was created without encryption';
+// TODO: Remove migration gate and related code in the next release.
+const kDataVersion = 1;
+const kDataVersionFile = 'data_version';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -38,24 +41,44 @@ Future<ProviderContainer> initializeAppContainer() async {
   final logsDir = '${dir.path}/whitenoise/logs';
   await Directory(dataDir).create(recursive: true);
   await Directory(logsDir).create(recursive: true);
-  final config = await rust_api.createWhitenoiseConfig(dataDir: dataDir, logsDir: logsDir);
 
-  try {
-    await rust_api.initializeWhitenoise(config: config);
-  } catch (e) {
-    if (!e.toString().contains(kUnencryptedDatabaseError)) {
-      rethrow;
-    }
-    final envDir = Directory('$dataDir/${kDebugMode ? 'dev' : 'release'}');
-    if (envDir.existsSync()) {
-      await envDir.delete(recursive: true);
-    }
-    await rust_api.initializeWhitenoise(config: config);
-  }
+  await _migrateDataIfNeeded(dataDir);
+
+  final config = await rust_api.createWhitenoiseConfig(dataDir: dataDir, logsDir: logsDir);
+  await rust_api.initializeWhitenoise(config: config);
 
   final container = ProviderContainer();
   await container.read(authProvider.future);
   return container;
+}
+
+Future<void> _migrateDataIfNeeded(String dataDir) async {
+  final versionFile = File('$dataDir/$kDataVersionFile');
+  int? currentVersion;
+  try {
+    if (versionFile.existsSync()) {
+      currentVersion = int.tryParse(versionFile.readAsStringSync().trim());
+    }
+  } on FileSystemException {
+    // Corrupt or unreadable file — treat as no version.
+  }
+
+  if (currentVersion == kDataVersion) return;
+
+  final dataDirObj = Directory(dataDir);
+  if (dataDirObj.existsSync()) {
+    await dataDirObj.delete(recursive: true);
+    await dataDirObj.create(recursive: true);
+  }
+
+  // Read triggers the internal migration from EncryptedSharedPreferences to
+  // the new cipher storage. Then deleteAll clears everything including any
+  // keys the migration re-introduced from the old app.
+  const secureStorage = FlutterSecureStorage();
+  await secureStorage.readAll();
+  await secureStorage.deleteAll();
+  await FlutterForegroundTask.clearAllData();
+  versionFile.writeAsStringSync('$kDataVersion');
 }
 
 class WnApp extends ConsumerStatefulWidget {

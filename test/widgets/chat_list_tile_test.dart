@@ -161,7 +161,7 @@ void main() {
     group('subtitle', () {
       group('when pending', () {
         group('DM', () {
-          testWidgets('shows invite message', (tester) async {
+          testWidgets('shows invite message when no messages', (tester) async {
             await pumpTile(
               tester,
               _chatSummary(
@@ -172,6 +172,20 @@ void main() {
             final finder = find.byType(WnChatListItem);
             final item = tester.widget<WnChatListItem>(finder);
             expect(item.subtitle, 'Has invited you to a secure chat');
+          });
+
+          testWidgets('shows last message when messages exist', (tester) async {
+            await pumpTile(
+              tester,
+              _chatSummary(
+                groupType: GroupType.directMessage,
+                pendingConfirmation: true,
+                lastMessageContent: 'Hello from pending chat',
+              ),
+            );
+            final finder = find.byType(WnChatListItem);
+            final item = tester.widget<WnChatListItem>(finder);
+            expect(item.subtitle, 'Hello from pending chat');
           });
         });
 
@@ -247,6 +261,19 @@ void main() {
             final finder = find.byType(WnChatListItem);
             final item = tester.widget<WnChatListItem>(finder);
             expect(item.subtitle, 'You have been invited to a secure chat');
+          });
+
+          testWidgets('shows last message when messages exist', (tester) async {
+            await pumpTile(
+              tester,
+              _chatSummary(
+                pendingConfirmation: true,
+                lastMessageContent: 'Group message in pending chat',
+              ),
+            );
+            final finder = find.byType(WnChatListItem);
+            final item = tester.widget<WnChatListItem>(finder);
+            expect(item.subtitle, 'Group message in pending chat');
           });
         });
       });

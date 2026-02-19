@@ -12,6 +12,7 @@ import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_middle_ellipsis_text.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
+import 'package:whitenoise/widgets/wn_user_item.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
@@ -104,9 +105,25 @@ void main() {
       expect(find.byType(TextField), findsOneWidget);
     });
 
-    testWidgets('tapping close icon goes back', (tester) async {
+    testWidgets('displays new group chat menu item with icon', (tester) async {
       await pumpUserSearchScreen(tester);
-      await tester.tap(find.byKey(const Key('slate_close_button')));
+      expect(find.byKey(const Key('create_group_menu_item')), findsOneWidget);
+      expect(find.text('New group chat'), findsOneWidget);
+      expect(find.byKey(const Key('menu_item_icon')), findsOneWidget);
+    });
+
+    testWidgets('tapping new group chat menu item navigates to user selection', (tester) async {
+      await pumpUserSearchScreen(tester);
+
+      await tester.tap(find.byKey(const Key('create_group_menu_item')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('New group chat'), findsAtLeast(1));
+    });
+
+    testWidgets('tapping back button goes back', (tester) async {
+      await pumpUserSearchScreen(tester);
+      await tester.tap(find.byKey(const Key('slate_back_button')));
       await tester.pumpAndSettle();
       expect(find.byType(ChatListScreen), findsOneWidget);
     });
@@ -128,8 +145,9 @@ void main() {
         ];
       });
 
-      testWidgets('shows follows list', (tester) async {
+      testWidgets('shows follows list using WnUserItem', (tester) async {
         await pumpUserSearchScreen(tester);
+        expect(find.byType(WnUserItem), findsNWidgets(2));
         expect(find.text('Alice'), findsOneWidget);
         expect(find.text('Bob'), findsOneWidget);
       });
@@ -141,21 +159,20 @@ void main() {
 
       testWidgets('shows formatted npub as subtitle', (tester) async {
         await pumpUserSearchScreen(tester);
-        final ellipsisWidgets = tester
-            .widgetList<WnMiddleEllipsisText>(find.byType(WnMiddleEllipsisText))
+        final npubWidgets = tester
+            .widgetList<WnMiddleEllipsisText>(find.byKey(const Key('user_item_npub')))
             .toList();
-        final texts = ellipsisWidgets.map((w) => w.text).toList();
-        expect(texts.any((t) => t.startsWith('npub 1a1b')), isTrue);
-        expect(texts.any((t) => t.startsWith('npub 1b2c')), isTrue);
+        expect(npubWidgets.any((w) => w.text.startsWith('npub 1a1b')), isTrue);
+        expect(npubWidgets.any((w) => w.text.startsWith('npub 1b2c')), isTrue);
       });
 
       testWidgets('passes color derived from pubkey to each avatar', (tester) async {
         await pumpUserSearchScreen(tester);
 
-        final avatars = tester.widgetList<WnAvatar>(find.byType(WnAvatar)).toList();
-        expect(avatars.length, 2);
-        expect(avatars[0].color, AvatarColor.violet);
-        expect(avatars[1].color, AvatarColor.amber);
+        final userItems = tester.widgetList<WnUserItem>(find.byType(WnUserItem)).toList();
+        expect(userItems.length, 2);
+        expect(userItems[0].avatarColor, AvatarColor.violet);
+        expect(userItems[1].avatarColor, AvatarColor.amber);
       });
     });
 
@@ -207,14 +224,16 @@ void main() {
         ];
       });
 
-      testWidgets('shows formatted npub as both title and subtitle', (tester) async {
+      testWidgets('shows formatted npub as display name and subtitle', (tester) async {
         await pumpUserSearchScreen(tester);
 
-        final ellipsisWidgets = tester
-            .widgetList<WnMiddleEllipsisText>(find.byType(WnMiddleEllipsisText))
-            .toList();
-        final matching = ellipsisWidgets.where((w) => w.text.startsWith('npub 1c3d'));
-        expect(matching.length, 2);
+        final userItem = tester.widget<WnUserItem>(find.byType(WnUserItem));
+        expect(userItem.displayName, startsWith('npub 1c3d'));
+
+        final npubWidget = tester.widget<WnMiddleEllipsisText>(
+          find.byKey(const Key('user_item_npub')),
+        );
+        expect(npubWidget.text, startsWith('npub 1c3d'));
       });
     });
 

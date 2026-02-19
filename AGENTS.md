@@ -220,6 +220,7 @@ There are three categories of widgets with different naming rules:
 - Always extend `MockWnApi` from `test/mocks/mock_wn_api.dart` instead of implementing `RustLibApi` directly - this ensures consistent mock behavior and reuses common mock implementations
 - Prefer `find.byKey()` over `find.byIcon()` - add keys to icons in widgets and use `find.byKey(const Key('icon_name'))` in tests
 - Use valid 64-char hex strings for pubkeys in tests (see `test_helpers.dart` for examples), not dummy values like `'abc'` or `'test-pubkey'`
+- **Avoid `// coverage:ignore`** - Do not use `// coverage:ignore-line`, `// coverage:ignore-start`, or `// coverage:ignore-end` to bypass coverage requirements. Write tests for the code instead. The only acceptable exception is truly unreachable code (e.g., a `default` case in a switch that is exhaustive but required by the compiler).
 
 ## Development philosophy
 

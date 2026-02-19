@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
+import 'package:whitenoise/hooks/use_route_refresh.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' as groups_api;
 import 'package:whitenoise/src/rust/api/users.dart' as users_api;
 import 'package:whitenoise/utils/avatar_color.dart';
@@ -35,10 +36,18 @@ class ChatProfile {
   int get hashCode => Object.hash(displayName, pictureUrl, otherMemberPubkey, color);
 }
 
-AsyncSnapshot<ChatProfile> useChatProfile(String pubkey, String groupId) {
+AsyncSnapshot<ChatProfile> useChatProfile(
+  BuildContext context,
+  String pubkey,
+  String groupId,
+) {
+  final refreshKey = useState(0);
+
+  useRouteRefresh(context, () => refreshKey.value++);
+
   final future = useMemoized(
     () => _fetchChatProfile(pubkey, groupId),
-    [pubkey, groupId],
+    [pubkey, groupId, refreshKey.value],
   );
   return useFuture(future);
 }

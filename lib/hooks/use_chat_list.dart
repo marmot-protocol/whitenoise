@@ -27,8 +27,12 @@ ChatListResult useChatList(String pubkey) {
             case ChatListUpdateTrigger.newGroup:
               chatMap.value[id] = update.item;
             case ChatListUpdateTrigger.newLastMessage:
-              chatMap.value.remove(id);
-              chatMap.value[id] = update.item;
+              if (update.item.pendingConfirmation) {
+                chatMap.value[id] = update.item;
+              } else {
+                chatMap.value.remove(id);
+                chatMap.value[id] = update.item;
+              }
           }
           return chatMap.value;
         },

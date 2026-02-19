@@ -1,6 +1,8 @@
 import 'dart:async';
 
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
+import 'package:whitenoise/src/rust/api/account_groups.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/chat_list.dart';
 import 'package:whitenoise/src/rust/api/error.dart';
@@ -56,12 +58,51 @@ class MockWnApi implements RustLibApi {
   LoginResult? loginExternalSignerStartResult;
   bool registerExternalSignerCalled = false;
 
+  String? lastReadMessageId;
+  final List<String> markedAsReadMessages = [];
+  int getAccountGroupCallCount = 0;
+  bool shouldFailGetAccountGroup = false;
+
   @override
   Future<bool> crateApiUsersUserHasKeyPackage({
     required String pubkey,
     required bool blockingDataSync,
   }) async {
     return userHasKeyPackage;
+  }
+
+  @override
+  Future<AccountGroup> crateApiAccountGroupsGetAccountGroup({
+    required String accountPubkey,
+    required String mlsGroupId,
+  }) async {
+    getAccountGroupCallCount++;
+    if (shouldFailGetAccountGroup) {
+      throw Exception('Failed to fetch account group');
+    }
+    return AccountGroup(
+      accountPubkey: accountPubkey,
+      mlsGroupId: mlsGroupId,
+      lastReadMessageId: lastReadMessageId,
+      createdAt: PlatformInt64Util.from(0),
+      updatedAt: PlatformInt64Util.from(0),
+    );
+  }
+
+  @override
+  Future<AccountGroup> crateApiAccountGroupsMarkMessageRead({
+    required String accountPubkey,
+    required String messageId,
+  }) async {
+    markedAsReadMessages.add(messageId);
+    lastReadMessageId = messageId;
+    return AccountGroup(
+      accountPubkey: accountPubkey,
+      mlsGroupId: 'mock_group',
+      lastReadMessageId: messageId,
+      createdAt: PlatformInt64Util.from(0),
+      updatedAt: PlatformInt64Util.from(0),
+    );
   }
 
   @override
@@ -447,6 +488,10 @@ class MockWnApi implements RustLibApi {
     loginStartResult = null;
     loginExternalSignerStartResult = null;
     registerExternalSignerCalled = false;
+    lastReadMessageId = null;
+    markedAsReadMessages.clear();
+    getAccountGroupCallCount = 0;
+    shouldFailGetAccountGroup = false;
   }
 
   @override

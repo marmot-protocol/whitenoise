@@ -840,6 +840,138 @@ abstract class AppLocalizations {
   /// **'Go back'**
   String get goBack;
 
+  /// Create group button text
+  ///
+  /// In en, this message translates to:
+  /// **'Create group'**
+  String get createGroup;
+
+  /// Menu item text to start a new group chat
+  ///
+  /// In en, this message translates to:
+  /// **'New group chat'**
+  String get newGroupChat;
+
+  /// User selection screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Select Members'**
+  String get selectMembers;
+
+  /// Number of selected users
+  ///
+  /// In en, this message translates to:
+  /// **'{count} selected'**
+  String selectedCount(int count);
+
+  /// Clear selection button text
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get clearSelection;
+
+  /// Continue button text
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueButton;
+
+  /// Set up group screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Set up group'**
+  String get setUpGroup;
+
+  /// Group name label
+  ///
+  /// In en, this message translates to:
+  /// **'Group Name'**
+  String get groupName;
+
+  /// Group name input placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'Enter group name'**
+  String get groupNamePlaceholder;
+
+  /// Group description label
+  ///
+  /// In en, this message translates to:
+  /// **'Group Description'**
+  String get groupDescription;
+
+  /// Generic description label
+  ///
+  /// In en, this message translates to:
+  /// **'Description'**
+  String get description;
+
+  /// Group description input placeholder
+  ///
+  /// In en, this message translates to:
+  /// **'What is this group for?'**
+  String get groupDescriptionPlaceholder;
+
+  /// Number of members
+  ///
+  /// In en, this message translates to:
+  /// **'{count} members'**
+  String members(int count);
+
+  /// Label for inviting members in group setup
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Inviting member:} other{Inviting members:}}'**
+  String invitingMembers(int count);
+
+  /// Message for users without key packages
+  ///
+  /// In en, this message translates to:
+  /// **'Users without key packages (cannot be added)'**
+  String get usersWithoutKeyPackages;
+
+  /// Title for users without key packages
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This user is not on White Noise} other{These users are not on White Noise}}'**
+  String usersNotOnWhiteNoise(int count);
+
+  /// Description for users without key packages
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{This user cannot be added to the group because they don\'t have White Noise installed or haven\'t published their key package yet.} other{These users cannot be added to the group because they don\'t have White Noise installed or haven\'t published their key packages yet.}}'**
+  String usersNotOnWhiteNoiseDescription(int count);
+
+  /// Uploading image status
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading image...'**
+  String get uploadingImage;
+
+  /// Creating group status
+  ///
+  /// In en, this message translates to:
+  /// **'Creating group...'**
+  String get creatingGroup;
+
+  /// Error message when group name is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Group name is required'**
+  String get groupNameRequired;
+
+  /// Error message when no users have key packages
+  ///
+  /// In en, this message translates to:
+  /// **'No users with key packages to add'**
+  String get noUsersWithKeyPackages;
+
+  /// Error message when group creation fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create group'**
+  String get createGroupFailed;
+
   /// Report error button text
   ///
   /// In en, this message translates to:
@@ -911,6 +1043,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reply'**
   String get reply;
+
+  /// Copy message button text
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get copyMessage;
 
   /// Delete button text
   ///
@@ -1559,6 +1697,198 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to paste from clipboard'**
   String get loginPasteFailed;
+
+  /// Button text to open device settings
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// Generic scanner error message
+  ///
+  /// In en, this message translates to:
+  /// **'Scanner error'**
+  String get scannerError;
+
+  /// Description for generic scanner error
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong with the scanner. Please try again.'**
+  String get scannerErrorDescription;
+
+  /// Description for camera permission denied error
+  ///
+  /// In en, this message translates to:
+  /// **'Please enable camera access in your device settings to scan QR codes.'**
+  String get cameraPermissionDeniedDescription;
+
+  /// Retry button text
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get retry;
+
+  /// Group info screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Group Information'**
+  String get groupInformation;
+
+  /// Edit group screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Edit Group'**
+  String get editGroup;
+
+  /// Button text for editing a group in group info screen
+  ///
+  /// In en, this message translates to:
+  /// **'Edit group'**
+  String get editGroupAction;
+
+  /// Label for group name input
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get groupNameLabel;
+
+  /// Label for group description input
+  ///
+  /// In en, this message translates to:
+  /// **'About'**
+  String get groupDescriptionLabel;
+
+  /// Member count label for group info
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 Member} other{{count} Members}}'**
+  String membersCount(int count);
+
+  /// Badge label for admin users in group member list
+  ///
+  /// In en, this message translates to:
+  /// **'Admin'**
+  String get adminBadge;
+
+  /// Section label for group member list
+  ///
+  /// In en, this message translates to:
+  /// **'Members:'**
+  String get membersLabel;
+
+  /// Badge label for regular (non-admin) members in a group
+  ///
+  /// In en, this message translates to:
+  /// **'Member'**
+  String get memberBadge;
+
+  /// Action label to send a message to a user
+  ///
+  /// In en, this message translates to:
+  /// **'Send message'**
+  String get sendMessage;
+
+  /// Action label to make a group member an admin
+  ///
+  /// In en, this message translates to:
+  /// **'Make admin'**
+  String get makeAdmin;
+
+  /// Action label to remove admin role from a group member
+  ///
+  /// In en, this message translates to:
+  /// **'Remove admin'**
+  String get removeAdminRole;
+
+  /// Action label to remove a member from a group
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from group'**
+  String get removeFromGroup;
+
+  /// Confirmation dialog title for removing a member from group
+  ///
+  /// In en, this message translates to:
+  /// **'Remove from group?'**
+  String get removeFromGroupConfirmation;
+
+  /// Warning message for removing a member from group
+  ///
+  /// In en, this message translates to:
+  /// **'This member will be removed from the group and will no longer be able to see new messages.'**
+  String get removeFromGroupWarning;
+
+  /// Confirmation dialog title for making a member admin
+  ///
+  /// In en, this message translates to:
+  /// **'Make admin?'**
+  String get makeAdminConfirmation;
+
+  /// Warning message for making a member admin
+  ///
+  /// In en, this message translates to:
+  /// **'This member will be able to manage the group, add or remove members, and change group settings.'**
+  String get makeAdminWarning;
+
+  /// Confirmation dialog title for removing admin role
+  ///
+  /// In en, this message translates to:
+  /// **'Remove admin?'**
+  String get removeAdminConfirmation;
+
+  /// Warning message for removing admin role
+  ///
+  /// In en, this message translates to:
+  /// **'This member will no longer be able to manage the group, add or remove members, or change group settings.'**
+  String get removeAdminWarning;
+
+  /// Error message when removing a member from group fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to remove member. Please try again.'**
+  String get failedToRemoveFromGroup;
+
+  /// Error message when making a member admin fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to make admin. Please try again.'**
+  String get failedToMakeAdmin;
+
+  /// Error message when removing admin role fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to remove admin. Please try again.'**
+  String get failedToRemoveAdmin;
+
+  /// System notice message when group settings are updated
+  ///
+  /// In en, this message translates to:
+  /// **'Group updated successfully'**
+  String get groupUpdatedSuccessfully;
+
+  /// User-friendly error when group fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to load group. Please try again.'**
+  String get groupLoadError;
+
+  /// User-friendly error when group fails to save
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to save group. Please try again.'**
+  String get groupSaveError;
+
+  /// Error message when fetching group members fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load group members. Please try again.'**
+  String get failedToFetchGroupMembers;
+
+  /// Error message when adding members to group fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add members. Please try again.'**
+  String get failedToAddMembers;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

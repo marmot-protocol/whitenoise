@@ -69,6 +69,7 @@ class _MockApi extends MockWnApi {
 
   @override
   void reset() {
+    super.reset();
     controller?.close();
     controller = null;
     initialMessages = [];
@@ -296,6 +297,42 @@ void main() {
 
         expect(find.text('Message m2'), findsNothing);
       });
+
+      group('unread indicator', () {
+        testWidgets('hidden when messages fit on screen', (tester) async {
+          await pumpInviteScreen(tester);
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('scroll_down_button')), findsNothing);
+        });
+
+        group('when scrolled away from bottom', () {
+          setUp(() {
+            _api.initialMessages = List.generate(20, (i) => _message('m$i'));
+          });
+
+          testWidgets('shows indicator', (tester) async {
+            await pumpInviteScreen(tester);
+            final listFinder = find.byType(ListView);
+            await tester.drag(listFinder, const Offset(0, 500));
+            await tester.pumpAndSettle();
+
+            expect(find.byKey(const Key('scroll_down_button')), findsOneWidget);
+          });
+
+          testWidgets('tapping indicator scrolls to bottom', (tester) async {
+            await pumpInviteScreen(tester);
+            final listFinder = find.byType(ListView);
+            await tester.drag(listFinder, const Offset(0, 500));
+            await tester.pumpAndSettle();
+
+            await tester.tap(find.byKey(const Key('scroll_down_button')));
+            await tester.pumpAndSettle();
+
+            expect(find.byKey(const Key('scroll_down_button')), findsNothing);
+          });
+        });
+      });
     });
 
     group('message reception', () {
@@ -400,6 +437,25 @@ void main() {
 
         expect(find.byType(WnSystemNotice), findsOneWidget);
         expect(find.textContaining('Failed to accept'), findsOneWidget);
+      });
+
+      testWidgets('marks latest message as read', (tester) async {
+        _api.initialMessages = [_message('m1'), _message('m2')];
+        await pumpInviteScreen(tester);
+        _api.markedAsReadMessages.clear();
+        await tester.tap(find.text('Accept'));
+        await tester.pumpAndSettle();
+
+        expect(_api.markedAsReadMessages, contains('m2'));
+      });
+
+      testWidgets('does not mark as read when no messages', (tester) async {
+        await pumpInviteScreen(tester);
+        _api.markedAsReadMessages.clear();
+        await tester.tap(find.text('Accept'));
+        await tester.pumpAndSettle();
+
+        expect(_api.markedAsReadMessages, isEmpty);
       });
 
       testWidgets('dismisses notice after auto-hide duration', (tester) async {

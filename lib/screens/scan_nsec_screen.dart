@@ -15,10 +15,7 @@ class ScanNsecScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-
-    void onBarcodeDetected(String value) {
-      GoRouter.of(context).pop(value);
-    }
+    final l10n = context.l10n;
 
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
@@ -37,7 +34,7 @@ class ScanNsecScreen extends StatelessWidget {
               padding: EdgeInsets.only(top: 8.h, bottom: 34.h),
               child: WnSlate(
                 header: WnSlateNavigationHeader(
-                  title: context.l10n.scanNsec,
+                  title: l10n.scanNsec,
                   type: WnSlateNavigationType.back,
                   onNavigate: () => Routes.goBack(context),
                 ),
@@ -47,11 +44,13 @@ class ScanNsecScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Expanded(
-                        child: WnScanBox(onBarcodeDetected: onBarcodeDetected),
+                        child: WnScanBox(
+                          onBarcodeDetected: (value) => GoRouter.of(context).pop(value),
+                        ),
                       ),
                       Gap(12.h),
                       Text(
-                        context.l10n.scanNsecHint,
+                        l10n.scanNsecHint,
                         textAlign: TextAlign.center,
                         style: context.typographyScaled.medium14.copyWith(
                           color: colors.backgroundContentSecondary,

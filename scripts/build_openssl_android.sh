@@ -17,6 +17,38 @@ print_error() {
     echo -e "\033[1;31m$1\033[0m"
 }
 
+# Spinner for long-running commands
+# Usage: run_quiet "description" logfile command [args...]
+run_quiet() {
+    local desc="$1"
+    local logfile="$2"
+    shift 2
+
+    printf "  %-40s " "$desc"
+
+    # Run command in background with output redirected to log file
+    "$@" >> "$logfile" 2>&1 &
+    local pid=$!
+    local spin='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
+    local i=0
+    while kill -0 "$pid" 2>/dev/null; do
+        printf "\b%s" "${spin:i++%${#spin}:1}"
+        sleep 0.1
+    done
+    wait "$pid"
+    local exit_code=$?
+
+    if [ $exit_code -eq 0 ]; then
+        printf "\b\033[1;32m✓\033[0m\n"
+    else
+        printf "\b\033[1;31m✗\033[0m\n"
+        print_error "Command failed. Last 20 lines of log:"
+        tail -20 "$logfile"
+        print_error "Full log: $logfile"
+        exit 1
+    fi
+}
+
 # Configuration
 OPENSSL_VERSION="3.4.1"
 OPENSSL_SHA256="002a2d6b30b58bf4bea46c43bdd96365aaf8daa6c428782aa4feee06da197df3"
@@ -86,33 +118,40 @@ build_openssl_for_target() {
 
     # Clean and re-extract source for each target (OpenSSL doesn't support out-of-tree builds well)
     local build_src="$OPENSSL_BUILD_DIR/build-$rust_target"
+    local logfile="$OPENSSL_BUILD_DIR/$rust_target.log"
     rm -rf "$build_src"
+    : > "$logfile"
     cp -r "$OPENSSL_SRC_DIR" "$build_src"
     cd "$build_src"
 
     export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
     export PATH="$TOOLCHAIN/bin:$PATH"
 
-    ./Configure "$openssl_target" \
-        -D__ANDROID_API__=$ANDROID_API \
-        --prefix="$install_prefix" \
-        --openssldir="$install_prefix/ssl" \
-        no-shared \
-        no-tests \
-        no-ui-console \
-        no-stdio \
-        -fPIC
+    run_quiet "Configuring ($openssl_target)..." "$logfile" \
+        ./Configure "$openssl_target" \
+            -D__ANDROID_API__=$ANDROID_API \
+            --prefix="$install_prefix" \
+            --openssldir="$install_prefix/ssl" \
+            no-shared \
+            no-tests \
+            no-ui-console \
+            no-stdio \
+            -fPIC
 
-    make -j"$(nproc 2>/dev/null || sysctl -n hw.ncpu)" build_libs
-    make install_dev
+    run_quiet "Compiling..." "$logfile" \
+        make -j"$(nproc 2>/dev/null || sysctl -n hw.ncpu)" build_libs
+
+    run_quiet "Installing headers & libs..." "$logfile" \
+        make install_dev
 
     cd "$PROJECT_ROOT"
     rm -rf "$build_src"
 
     if [ -f "$install_prefix/lib/libcrypto.a" ]; then
-        print_success "Built OpenSSL for $rust_target"
+        print_success "  Built OpenSSL for $rust_target"
     else
         print_error "Failed to build OpenSSL for $rust_target"
+        print_error "Check log: $logfile"
         exit 1
     fi
 }
@@ -125,7 +164,7 @@ if [ ! -d "$OPENSSL_SRC_DIR" ]; then
 
     TARBALL="openssl-$OPENSSL_VERSION.tar.gz"
     if [ ! -f "$TARBALL" ]; then
-        curl -LO "https://github.com/openssl/openssl/releases/download/openssl-$OPENSSL_VERSION/$TARBALL"
+        curl -L --progress-bar -o "$TARBALL" "https://github.com/openssl/openssl/releases/download/openssl-$OPENSSL_VERSION/$TARBALL"
     fi
 
     print_step "Verifying tarball integrity"
