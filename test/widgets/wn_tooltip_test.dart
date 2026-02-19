@@ -4,7 +4,7 @@ import 'package:flutter/material.dart'
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/widgets/wn_tooltip.dart'
     show ArrowPainter, WnTooltip, WnTooltipPosition, WnTooltipTriggerMode;
-import '../test_helpers.dart' show mountWidget, setUpTestView;
+import '../test_helpers.dart' show mountWidget, setUpTestView, testDesignSize;
 
 void main() {
   group('WnTooltip tests', () {
@@ -726,7 +726,7 @@ void main() {
         expect(tooltipContent, findsOneWidget);
 
         final tooltipBox = tester.getRect(tooltipContent);
-        expect(tooltipBox.bottom, lessThanOrEqualTo(844));
+        expect(tooltipBox.bottom, lessThanOrEqualTo(testDesignSize.height));
       });
     });
 
