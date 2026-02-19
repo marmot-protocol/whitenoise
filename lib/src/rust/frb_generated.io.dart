@@ -340,6 +340,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64 dco_decode_isize(dynamic raw);
 
   @protected
+  KeyPackageStatus dco_decode_key_package_status(dynamic raw);
+
+  @protected
   List<Tag>
   dco_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
     dynamic raw,
@@ -822,6 +825,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   PlatformInt64 sse_decode_isize(SseDeserializer deserializer);
+
+  @protected
+  KeyPackageStatus sse_decode_key_package_status(SseDeserializer deserializer);
 
   @protected
   List<Tag>
@@ -1407,6 +1413,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_isize(PlatformInt64 self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_key_package_status(
+    KeyPackageStatus self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(

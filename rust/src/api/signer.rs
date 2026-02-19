@@ -149,7 +149,7 @@ impl NostrSigner for DartSigner {
 ///
 /// Call this on app startup when restoring an external signer account session.
 #[frb]
-pub fn register_external_signer(
+pub async fn register_external_signer(
     pubkey: String,
     sign_event: impl Fn(String) -> DartFnFuture<String> + Send + Sync + 'static,
     nip04_encrypt: impl Fn(String, String) -> DartFnFuture<String> + Send + Sync + 'static,
@@ -169,7 +169,7 @@ pub fn register_external_signer(
         nip44_decrypt,
     );
 
-    whitenoise.register_external_signer(pubkey, signer);
+    whitenoise.register_external_signer(pubkey, signer).await?;
     Ok(())
 }
 

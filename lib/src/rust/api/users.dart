@@ -11,7 +11,7 @@ import 'error.dart';
 import 'metadata.dart';
 import 'relays.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `fmt`, `fmt`, `from`
 
 Future<User> getUser({
   required String pubkey,
@@ -39,13 +39,19 @@ Future<List<Relay>> userRelays({
   blockingDataSync: blockingDataSync,
 );
 
-Future<bool> userHasKeyPackage({
+Future<KeyPackageStatus> userHasKeyPackage({
   required String pubkey,
   required bool blockingDataSync,
 }) => RustLib.instance.api.crateApiUsersUserHasKeyPackage(
   pubkey: pubkey,
   blockingDataSync: blockingDataSync,
 );
+
+enum KeyPackageStatus {
+  valid,
+  notFound,
+  incompatible,
+}
 
 class User {
   final String pubkey;

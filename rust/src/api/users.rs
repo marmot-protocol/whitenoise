@@ -3,7 +3,18 @@ use crate::api::{ApiError, metadata::FlutterMetadata};
 use chrono::{DateTime, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
-use whitenoise::{RelayType, User as WhitenoiseUser, UserSyncMode, Whitenoise};
+use whitenoise::{
+    KeyPackageStatus as WhitenoiseKeyPackageStatus, RelayType, User as WhitenoiseUser,
+    UserSyncMode, Whitenoise,
+};
+
+#[frb]
+#[derive(Debug, Clone)]
+pub enum KeyPackageStatus {
+    Valid,
+    NotFound,
+    Incompatible,
+}
 
 #[frb(non_opaque)]
 #[derive(Debug, Clone)]
@@ -83,7 +94,7 @@ pub async fn user_relays(
 pub async fn user_has_key_package(
     pubkey: String,
     blocking_data_sync: bool,
-) -> Result<bool, ApiError> {
+) -> Result<KeyPackageStatus, ApiError> {
     let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let sync_mode = if blocking_data_sync {
@@ -94,5 +105,9 @@ pub async fn user_has_key_package(
     let user = whitenoise
         .find_or_create_user_by_pubkey(&pubkey, sync_mode)
         .await?;
-    Ok(user.key_package_event(whitenoise).await?.is_some())
+    match user.key_package_status(whitenoise).await? {
+        WhitenoiseKeyPackageStatus::Valid(_) => Ok(KeyPackageStatus::Valid),
+        WhitenoiseKeyPackageStatus::NotFound => Ok(KeyPackageStatus::NotFound),
+        WhitenoiseKeyPackageStatus::Incompatible => Ok(KeyPackageStatus::Incompatible),
+    }
 }

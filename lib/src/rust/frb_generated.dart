@@ -456,7 +456,7 @@ abstract class RustLibApi extends BaseApi {
     required String serverUrl,
   });
 
-  Future<bool> crateApiUsersUserHasKeyPackage({
+  Future<KeyPackageStatus> crateApiUsersUserHasKeyPackage({
     required String pubkey,
     required bool blockingDataSync,
   });
@@ -3698,7 +3698,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
-  Future<bool> crateApiUsersUserHasKeyPackage({
+  Future<KeyPackageStatus> crateApiUsersUserHasKeyPackage({
     required String pubkey,
     required bool blockingDataSync,
   }) {
@@ -3716,7 +3716,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           );
         },
         codec: SseCodec(
-          decodeSuccessData: sse_decode_bool,
+          decodeSuccessData: sse_decode_key_package_status,
           decodeErrorData: sse_decode_api_error,
         ),
         constMeta: kCrateApiUsersUserHasKeyPackageConstMeta,
@@ -4608,6 +4608,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   PlatformInt64 dco_decode_isize(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dcoDecodeI64(raw);
+  }
+
+  @protected
+  KeyPackageStatus dco_decode_key_package_status(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return KeyPackageStatus.values[raw as int];
   }
 
   @protected
@@ -5967,6 +5973,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   PlatformInt64 sse_decode_isize(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getPlatformInt64();
+  }
+
+  @protected
+  KeyPackageStatus sse_decode_key_package_status(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    final inner = sse_decode_i_32(deserializer);
+    return KeyPackageStatus.values[inner];
   }
 
   @protected
@@ -7538,6 +7551,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_isize(PlatformInt64 self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putPlatformInt64(self);
+  }
+
+  @protected
+  void sse_encode_key_package_status(
+    KeyPackageStatus self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
   }
 
   @protected

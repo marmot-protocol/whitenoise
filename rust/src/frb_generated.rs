@@ -2677,7 +2677,7 @@ fn wire__crate__api__signer__register_external_signer_impl(
     rust_vec_len_: i32,
     data_len_: i32,
 ) {
-    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
             debug_name: "register_external_signer",
             port: Some(port_),
@@ -2714,18 +2714,22 @@ fn wire__crate__api__signer__register_external_signer_impl(
                     <flutter_rust_bridge::DartOpaque>::sse_decode(&mut deserializer),
                 );
             deserializer.end();
-            move |context| {
-                transform_result_sse::<_, crate::api::error::ApiError>((move || {
-                    let output_ok = crate::api::signer::register_external_signer(
-                        api_pubkey,
-                        api_sign_event,
-                        api_nip04_encrypt,
-                        api_nip04_decrypt,
-                        api_nip44_encrypt,
-                        api_nip44_decrypt,
-                    )?;
-                    Ok(output_ok)
-                })())
+            move |context| async move {
+                transform_result_sse::<_, crate::api::error::ApiError>(
+                    (move || async move {
+                        let output_ok = crate::api::signer::register_external_signer(
+                            api_pubkey,
+                            api_sign_event,
+                            api_nip04_encrypt,
+                            api_nip04_decrypt,
+                            api_nip44_encrypt,
+                            api_nip44_decrypt,
+                        )
+                        .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
             }
         },
     )
@@ -4702,6 +4706,19 @@ impl SseDecode for isize {
     }
 }
 
+impl SseDecode for crate::api::users::KeyPackageStatus {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::users::KeyPackageStatus::Valid,
+            1 => crate::api::users::KeyPackageStatus::NotFound,
+            2 => crate::api::users::KeyPackageStatus::Incompatible,
+            _ => unreachable!("Invalid variant for KeyPackageStatus: {}", inner),
+        };
+    }
+}
+
 impl SseDecode for Vec<Tag> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -6448,6 +6465,28 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::groups::GroupType>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::users::KeyPackageStatus {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Valid => 0.into_dart(),
+            Self::NotFound => 1.into_dart(),
+            Self::Incompatible => 2.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::users::KeyPackageStatus
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::users::KeyPackageStatus>
+    for crate::api::users::KeyPackageStatus
+{
+    fn into_into_dart(self) -> crate::api::users::KeyPackageStatus {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::accounts::LoginResult {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -7570,6 +7609,23 @@ impl SseEncode for isize {
             .cursor
             .write_i64::<NativeEndian>(self as _)
             .unwrap();
+    }
+}
+
+impl SseEncode for crate::api::users::KeyPackageStatus {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::users::KeyPackageStatus::Valid => 0,
+                crate::api::users::KeyPackageStatus::NotFound => 1,
+                crate::api::users::KeyPackageStatus::Incompatible => 2,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
     }
 }
 

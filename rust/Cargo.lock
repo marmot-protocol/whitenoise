@@ -243,7 +243,7 @@ dependencies = [
  "tokio",
  "tokio-rustls",
  "tokio-socks",
- "tokio-tungstenite 0.26.2",
+ "tokio-tungstenite",
  "url",
  "wasm-bindgen",
  "web-sys",
@@ -608,6 +608,15 @@ name = "clap_lex"
 version = "0.7.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c3e64b0cc0439b12df2fa678eae89a1c56a529fd067a9115f7827f1fffd22b32"
+
+[[package]]
+name = "cobs"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0fa961b519f0b462e3a3b4a34b64d119eeaca1d59af726fe450bbba07a9fc0a1"
+dependencies = [
+ "thiserror 2.0.18",
+]
 
 [[package]]
 name = "color_quant"
@@ -995,6 +1004,18 @@ dependencies = [
  "subtle",
  "zeroize",
 ]
+
+[[package]]
+name = "embedded-io"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ef1a6892d9eef45c8fa6b9e0086428a2cca8491aca8f787c534a3d6d0bcb3ced"
+
+[[package]]
+name = "embedded-io"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "edd0f118536f44f5ccd48bcb8b111bdc3de888b58c74639dfb034a357d0f206d"
 
 [[package]]
 name = "env_filter"
@@ -1607,17 +1628,6 @@ dependencies = [
 
 [[package]]
 name = "http"
-version = "0.2.12"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "601cbb57e577e2f5ef5be8e7b83f0f63994f25aa94d673e54a92d5c516d101f1"
-dependencies = [
- "bytes",
- "fnv",
- "itoa",
-]
-
-[[package]]
-name = "http"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3ba2a386d7f85a81f119ad7498ebe444d2e22c2af0b86b069416ace48b3311a"
@@ -1633,7 +1643,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1efedce1fb8e6913f23e0c92de8e62cd5b772a67e7b3946df930a62566c93184"
 dependencies = [
  "bytes",
- "http 1.4.0",
+ "http",
 ]
 
 [[package]]
@@ -1644,7 +1654,7 @@ checksum = "b021d93e26becf5dc7e1b75b1bed1fd93124b374ceb73f43d4d4eafec896a64a"
 dependencies = [
  "bytes",
  "futures-core",
- "http 1.4.0",
+ "http",
  "http-body",
  "pin-project-lite",
 ]
@@ -1665,7 +1675,7 @@ dependencies = [
  "bytes",
  "futures-channel",
  "futures-core",
- "http 1.4.0",
+ "http",
  "http-body",
  "httparse",
  "itoa",
@@ -1682,7 +1692,7 @@ version = "0.27.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3c93eb611681b207e1fe55d5a71ecf91572ec8a6705cdb6857f7d8d5242cf58"
 dependencies = [
- "http 1.4.0",
+ "http",
  "hyper",
  "hyper-util",
  "rustls",
@@ -1704,7 +1714,7 @@ dependencies = [
  "futures-channel",
  "futures-core",
  "futures-util",
- "http 1.4.0",
+ "http",
  "http-body",
  "hyper",
  "ipnet",
@@ -2392,8 +2402,8 @@ dependencies = [
 
 [[package]]
 name = "mdk-core"
-version = "0.5.3"
-source = "git+https://github.com/marmot-protocol/mdk?rev=5ef0c607e56cc20217ddde24b4b2f8e82f76b776#5ef0c607e56cc20217ddde24b4b2f8e82f76b776"
+version = "0.6.0"
+source = "git+https://github.com/marmot-protocol/mdk?rev=749976c9876b320ca0144b4e1d13310038a8595b#749976c9876b320ca0144b4e1d13310038a8595b"
 dependencies = [
  "blurhash",
  "chacha20poly1305",
@@ -2416,8 +2426,8 @@ dependencies = [
 
 [[package]]
 name = "mdk-sqlite-storage"
-version = "0.5.1"
-source = "git+https://github.com/marmot-protocol/mdk?rev=5ef0c607e56cc20217ddde24b4b2f8e82f76b776#5ef0c607e56cc20217ddde24b4b2f8e82f76b776"
+version = "0.6.0"
+source = "git+https://github.com/marmot-protocol/mdk?rev=749976c9876b320ca0144b4e1d13310038a8595b#749976c9876b320ca0144b4e1d13310038a8595b"
 dependencies = [
  "getrandom 0.3.4",
  "hex",
@@ -2437,12 +2447,13 @@ dependencies = [
 
 [[package]]
 name = "mdk-storage-traits"
-version = "0.5.1"
-source = "git+https://github.com/marmot-protocol/mdk?rev=5ef0c607e56cc20217ddde24b4b2f8e82f76b776#5ef0c607e56cc20217ddde24b4b2f8e82f76b776"
+version = "0.6.0"
+source = "git+https://github.com/marmot-protocol/mdk?rev=749976c9876b320ca0144b4e1d13310038a8595b#749976c9876b320ca0144b4e1d13310038a8595b"
 dependencies = [
  "nostr",
  "openmls",
  "openmls_traits",
+ "postcard",
  "serde",
  "serde_json",
  "thiserror 2.0.18",
@@ -3012,6 +3023,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f89776e4d69bb58bc6993e99ffa1d11f228b839984854c7daeb5d37f87cbe950"
 
 [[package]]
+name = "postcard"
+version = "1.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6764c3b5dd454e283a30e6dfe78e9b31096d9e32036b5d1eaac7a6119ccb9a24"
+dependencies = [
+ "cobs",
+ "embedded-io 0.4.0",
+ "embedded-io 0.6.1",
+ "serde",
+]
+
+[[package]]
 name = "potential_utf"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3347,7 +3370,7 @@ dependencies = [
  "base64",
  "bytes",
  "futures-core",
- "http 1.4.0",
+ "http",
  "http-body",
  "http-body-util",
  "hyper",
@@ -3386,7 +3409,7 @@ dependencies = [
  "bytes",
  "futures-core",
  "futures-util",
- "http 1.4.0",
+ "http",
  "http-body",
  "http-body-util",
  "hyper",
@@ -4380,18 +4403,6 @@ dependencies = [
 
 [[package]]
 name = "tokio-tungstenite"
-version = "0.20.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "212d5dcb2a1ce06d81107c3d0ffa3121fe974b73f068c8282cb1c32328113b6c"
-dependencies = [
- "futures-util",
- "log",
- "tokio",
- "tungstenite 0.20.1",
-]
-
-[[package]]
-name = "tokio-tungstenite"
 version = "0.26.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a9daff607c6d2bf6c16fd681ccb7eecc83e4e2cdc1ca067ffaadfca5de7f084"
@@ -4402,7 +4413,7 @@ dependencies = [
  "rustls-pki-types",
  "tokio",
  "tokio-rustls",
- "tungstenite 0.26.2",
+ "tungstenite",
  "webpki-roots 0.26.11",
 ]
 
@@ -4471,7 +4482,7 @@ dependencies = [
  "bitflags 2.10.0",
  "bytes",
  "futures-util",
- "http 1.4.0",
+ "http",
  "http-body",
  "iri-string",
  "pin-project-lite",
@@ -4574,32 +4585,13 @@ checksum = "e421abadd41a4225275504ea4d6566923418b7f05506fbc9c0fe86ba7396114b"
 
 [[package]]
 name = "tungstenite"
-version = "0.20.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9e3dac10fd62eaf6617d3a904ae222845979aec67c615d1c842b4002c7666fb9"
-dependencies = [
- "byteorder",
- "bytes",
- "data-encoding",
- "http 0.2.12",
- "httparse",
- "log",
- "rand 0.8.5",
- "sha1",
- "thiserror 1.0.69",
- "url",
- "utf-8",
-]
-
-[[package]]
-name = "tungstenite"
 version = "0.26.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "4793cb5e56680ecbb1d843515b23b6de9a75eb04b66643e256a396d43be33c13"
 dependencies = [
  "bytes",
  "data-encoding",
- "http 1.4.0",
+ "http",
  "httparse",
  "log",
  "rand 0.9.2",
@@ -4880,7 +4872,7 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "whitenoise"
 version = "0.1.0"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=3435fd9e3caa0d0aa995671b58d1f93eb65caf14#3435fd9e3caa0d0aa995671b58d1f93eb65caf14"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=bd18293#bd1829336dd9ced141218d8c0786f6a2123d7198"
 dependencies = [
  "android-native-keyring-store",
  "anyhow",
@@ -4916,7 +4908,6 @@ dependencies = [
  "tempfile",
  "thiserror 2.0.18",
  "tokio",
- "tokio-tungstenite 0.20.1",
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
