@@ -33,6 +33,14 @@ bool _isNameSearch(String searchQuery, String? hexPubkeyFromQuery) {
   return true;
 }
 
+bool _matchesNameQuery(User user, String query) {
+  final q = query.toLowerCase();
+  final meta = user.metadata;
+  return (meta.name?.toLowerCase().contains(q) ?? false) ||
+      (meta.displayName?.toLowerCase().contains(q) ?? false) ||
+      (meta.nip05?.toLowerCase().contains(q) ?? false);
+}
+
 int _matchQualityRank(user_search_api.MatchQuality quality) {
   return switch (quality) {
     user_search_api.MatchQuality.exact => 0,
@@ -118,6 +126,11 @@ UserSearchState useUserSearch({
       return npub != null && npub.startsWith(trimmedSearchQuery);
     }).toList();
   }, [trimmedSearchQuery, followNpubs, isPartialNpubSearch]);
+
+  final localNameMatches = useMemoized(() {
+    if (!isNameQuery || follows.isEmpty) return <User>[];
+    return follows.where((user) => _matchesNameQuery(user, trimmedSearchQuery)).toList();
+  }, [trimmedSearchQuery, follows, isNameQuery]);
 
   final nameSearchResults = useState(<User>[]);
   final isLoadingNameSearch = useState(false);
@@ -211,8 +224,11 @@ UserSearchState useUserSearch({
     users = matchingFollows;
     isLoading = isLoadingFollows;
   } else {
-    users = nameSearchResults.value;
-    isLoading = isLoadingNameSearch.value && nameSearchResults.value.isEmpty;
+    final bfsResults = nameSearchResults.value;
+    final bfsPubkeys = bfsResults.map((u) => u.pubkey).toSet();
+    final uniqueLocalMatches = localNameMatches.where((u) => !bfsPubkeys.contains(u.pubkey));
+    users = [...bfsResults, ...uniqueLocalMatches];
+    isLoading = isLoadingNameSearch.value && bfsResults.isEmpty && localNameMatches.isEmpty;
   }
 
   return (

@@ -688,6 +688,37 @@ void main() {
         expect(getState().isLoading, isFalse);
       });
 
+      testWidgets('returns local follow matches when BFS returns no results', (tester) async {
+        api.follows = [
+          _userFactory(testPubkeyA, displayName: 'Alice'),
+          _userFactory(testPubkeyB, displayName: 'Bob'),
+        ];
+
+        await pump(tester, searchQuery: 'alice');
+        await tester.pump(); // resolve follows future
+        await tester.pump(const Duration(milliseconds: 400)); // debounce
+        await tester.pump(); // trigger search
+
+        // BFS search completes with zero results
+        api.searchUsersController!.add(
+          UserSearchUpdate(
+            trigger: SearchUpdateTrigger.searchCompleted(
+              finalRadius: 2,
+              totalResults: BigInt.zero,
+            ),
+            newResults: const [],
+            totalResultCount: BigInt.zero,
+          ),
+        );
+        await tester.pump();
+
+        // Local follow "Alice" should still appear
+        expect(getState().users.length, 1);
+        expect(getState().users[0].pubkey, testPubkeyA);
+        expect(getState().users[0].metadata.displayName, 'Alice');
+        expect(getState().isLoading, isFalse);
+      });
+
       testWidgets('returns empty state for whitespace-only query', (tester) async {
         await pump(tester, searchQuery: '   ');
         await tester.pump();

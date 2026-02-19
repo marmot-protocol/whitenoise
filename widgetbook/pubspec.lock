@@ -1293,10 +1293,10 @@ packages:
     dependency: transitive
     description:
       name: unique_names_generator
-      sha256: "1faaa9ad393d3cde99de74f88e32c66f96d7bb9bd016e087725ceee834a88535"
+      sha256: "7fae54454369a80cd35aa82038426f8af595a58e63f21ece969d0352c5fd3fa6"
       url: "https://pub.dev"
     source: hosted
-    version: "1.1.0"
+    version: "3.0.0"
   url_launcher:
     dependency: "direct main"
     description:
