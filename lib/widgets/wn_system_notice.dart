@@ -257,11 +257,8 @@ class WnSystemNotice extends HookWidget {
   }
 
   WnIcons _getActionIcon() {
-    if (_isDismissible) return WnIcons.closeLarge;
     if (_isCollapsed) return WnIcons.chevronDown;
     if (_isExpanded) return WnIcons.chevronUp;
-    throw StateError(
-      '_getActionIcon called when shouldShowActionIcon is false',
-    );
+    return WnIcons.closeLarge;
   }
 }

@@ -223,6 +223,7 @@ class MessageActionsModal extends StatelessWidget {
               message: message,
               isOwnMessage: isOwnMessage,
               currentUserPubkey: currentUserPubkey,
+              maxWidth: double.infinity,
             ),
             SizedBox(height: 16.h),
             Row(

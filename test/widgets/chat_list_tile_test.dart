@@ -643,6 +643,42 @@ void main() {
 
         expect(refreshCalled, isFalse);
       });
+
+      testWidgets('tapping Mute dismisses menu without error', (tester) async {
+        await pumpTile(tester, _chatSummary(name: 'Test Chat'));
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('context_menu_action_mute')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(WnChatListContextMenu), findsNothing);
+      });
+
+      testWidgets('tapping Archive dismisses menu without error', (tester) async {
+        await pumpTile(tester, _chatSummary(name: 'Test Chat'));
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('context_menu_action_archive')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(WnChatListContextMenu), findsNothing);
+      });
+
+      testWidgets('tapping Delete dismisses menu without error', (tester) async {
+        await pumpTile(tester, _chatSummary(name: 'Test Chat'));
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('context_menu_action_delete')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(WnChatListContextMenu), findsNothing);
+      });
     });
   });
 }

@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_input.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
@@ -31,6 +33,32 @@ void main() {
       final result = (await mountHook(tester, useChatInput))();
 
       expect(result.focusNode, isNotNull);
+    });
+
+    testWidgets('hasFocus is false initially', (tester) async {
+      final result = (await mountHook(tester, useChatInput))();
+
+      expect(result.hasFocus, isFalse);
+    });
+
+    testWidgets('hasFocus is true when focus is requested', (tester) async {
+      setUpTestView(tester);
+      late ChatInputState state;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: HookBuilder(
+            builder: (context) {
+              state = useChatInput();
+              return Focus(focusNode: state.focusNode, child: const SizedBox());
+            },
+          ),
+        ),
+      );
+
+      state.focusNode.requestFocus();
+      await tester.pump();
+
+      expect(state.hasFocus, isTrue);
     });
 
     testWidgets('hasContent is false initially', (tester) async {

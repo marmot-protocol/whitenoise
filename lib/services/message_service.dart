@@ -181,10 +181,12 @@ class MessageService {
           'imeta',
           'url ${f.blossomUrl}',
           'm ${f.mimeType}',
-          'x ${f.originalFileHash}',
           'filename ${metadata?.originalFilename ?? ''}',
           'v mip04-v1',
         ];
+        if (f.originalFileHash != null) {
+          parts.add('x ${f.originalFileHash}');
+        }
         if (metadata?.blurhash != null) {
           parts.add('blurhash ${metadata!.blurhash}');
         }

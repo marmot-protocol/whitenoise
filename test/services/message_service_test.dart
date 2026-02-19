@@ -567,13 +567,14 @@ void main() {
       String blossomUrl = 'https://blossom.example.com/file.jpg',
       String mimeType = 'image/jpeg',
       String encryptedFileHash = 'abc123',
+      String? originalFileHash = 'original123',
       FileMetadata? fileMetadata,
     }) => MediaFile(
       id: id,
       mlsGroupId: testGroupId,
       accountPubkey: _testPubkey,
       filePath: '/path/to/file.jpg',
-      originalFileHash: 'original123',
+      originalFileHash: originalFileHash,
       encryptedFileHash: encryptedFileHash,
       mimeType: mimeType,
       mediaType: 'image',
@@ -760,6 +761,15 @@ void main() {
         expect(tags.length, 2);
         expect(tags[0].vec[0], 'imeta');
         expect(tags[1].vec[0], 'imeta');
+      });
+
+      test('omits x tag when originalFileHash is null', () async {
+        final media = createMediaFile(originalFileHash: null);
+
+        await service.sendMessage(content: 'With media', mediaFiles: [media]);
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags[0].vec.any((s) => s.startsWith('x ')), isFalse);
       });
 
       test('omits blurhash and dim when not available', () async {

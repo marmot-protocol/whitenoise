@@ -11,9 +11,9 @@ import 'package:whitenoise/screens/message_actions_screen.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
-import 'package:whitenoise/widgets/wn_reply_preview.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 import '../mocks/mock_wn_api.dart';
@@ -878,7 +878,7 @@ void main() {
 
         expect(find.text('Message m1'), findsWidgets);
         expect(find.text('Message m2'), findsOneWidget);
-        expect(find.byType(WnReplyPreview), findsOneWidget);
+        expect(find.byType(ChatMessageQuote), findsOneWidget);
       });
 
       testWidgets('tapping Reply in message actions shows reply preview in input', (tester) async {
@@ -886,14 +886,14 @@ void main() {
           _message('m1', DateTime(2024)),
         ];
         await pumpChatScreen(tester);
-        expect(find.byType(WnReplyPreview), findsNothing);
+        expect(find.byType(ChatMessageQuote), findsNothing);
 
         await tester.longPress(find.text('Message m1'));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('reply_button')));
         await tester.pumpAndSettle();
 
-        expect(find.byType(WnReplyPreview), findsOneWidget);
+        expect(find.byType(ChatMessageQuote), findsOneWidget);
         expect(find.text('Message m1'), findsWidgets);
       });
 
@@ -926,12 +926,12 @@ void main() {
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('reply_button')));
         await tester.pumpAndSettle();
-        expect(find.byType(WnReplyPreview), findsOneWidget);
+        expect(find.byType(ChatMessageQuote), findsOneWidget);
 
-        await tester.tap(find.byKey(const Key('cancel_reply_button')));
+        await tester.tap(find.byKey(const Key('cancel_quote_button')));
         await tester.pumpAndSettle();
 
-        expect(find.byType(WnReplyPreview), findsNothing);
+        expect(find.byType(ChatMessageQuote), findsNothing);
       });
 
       testWidgets('tapping reply preview scrolls to original message', (tester) async {
@@ -956,7 +956,7 @@ void main() {
         final position = Scrollable.of(tester.element(find.byType(WnMessageBubble).first)).position;
         expect(position.pixels, 0);
 
-        await tester.tap(find.byKey(const Key('reply_preview_tap_area')));
+        await tester.tap(find.byKey(const Key('message_quote_tap_area')));
         await tester.pumpAndSettle();
 
         expect(position.pixels, greaterThan(0));
@@ -1168,6 +1168,27 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(_api.markedAsReadMessages, contains('m_own'));
+      });
+    });
+    group('media attachment', () {
+      testWidgets('displays attach button always when no media attached', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.byKey(const Key('attach_button')), findsOneWidget);
+      });
+
+      testWidgets('unfocuses input when attach button is tapped', (tester) async {
+        await pumpChatScreen(tester);
+        await tester.tap(find.byType(TextField));
+        await tester.pumpAndSettle();
+
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.focusNode!.hasFocus, isTrue);
+
+        await tester.tap(find.byKey(const Key('attach_button')));
+        await tester.pumpAndSettle();
+
+        expect(textField.focusNode!.hasFocus, isFalse);
       });
     });
   });

@@ -6,25 +6,29 @@ import 'package:logging/logging.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:whitenoise/hooks/use_active_chat.dart';
 import 'package:whitenoise/hooks/use_chat_input.dart';
-import 'package:whitenoise/hooks/use_chat_messages.dart';
+import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData, useChatMessages;
 import 'package:whitenoise/hooks/use_chat_profile.dart';
 import 'package:whitenoise/hooks/use_chat_scroll.dart';
+import 'package:whitenoise/hooks/use_media_upload.dart';
 import 'package:whitenoise/hooks/use_scroll_to_message.dart';
 import 'package:whitenoise/l10n/l10n.dart';
-import 'package:whitenoise/models/reply_preview.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/active_chat_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
 import 'package:whitenoise/services/message_service.dart';
+import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
+import 'package:whitenoise/utils/metadata.dart';
+import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
+import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/chat_scroll_down_button.dart';
+import 'package:whitenoise/widgets/wn_chat_message_input.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
-import 'package:whitenoise/widgets/wn_reply_preview.dart';
 import 'package:whitenoise/widgets/wn_scroll_edge_effect.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_chat_header.dart';
@@ -51,7 +55,8 @@ class ChatScreen extends HookConsumerWidget {
       :isLoading,
       :latestMessageId,
       :latestMessagePubkey,
-      :getReplyPreview,
+      :getChatMessageQuote,
+      :getAuthorMetadata,
     ) = useChatMessages(
       groupId,
     );
@@ -61,6 +66,7 @@ class ChatScreen extends HookConsumerWidget {
     );
     final scrollController = scrollToMessageResult.scrollController;
     final input = useChatInput();
+    final mediaUpload = useMediaUpload(pubkey: pubkey, groupId: groupId);
     final messageService = useMemoized(
       () => MessageService(pubkey: pubkey, groupId: groupId),
       [pubkey, groupId],
@@ -99,13 +105,19 @@ class ChatScreen extends HookConsumerWidget {
       getReversedIndex: getReversedMessageIndex,
     );
 
-    Future<void> sendMessage(String message, ChatMessage? replyingTo) async {
-      await messageService.sendTextMessage(
+    Future<void> sendMessage(
+      String message,
+      ChatMessage? replyingTo,
+      List<MediaFile> mediaFiles,
+    ) async {
+      await messageService.sendMessage(
         content: message,
         replyToMessageId: replyingTo?.id,
         replyToMessagePubkey: replyingTo?.pubkey,
         replyToMessageKind: replyingTo?.kind,
+        mediaFiles: mediaFiles,
       );
+      mediaUpload.clearAll();
     }
 
     Future<void> toggleReaction(ChatMessage message, String emoji) {
@@ -169,7 +181,13 @@ class ChatScreen extends HookConsumerWidget {
           itemBuilder: (context, index) {
             final message = getMessage(index);
             final isOwnMessage = message.pubkey == pubkey;
-            final replyPreview = message.isReply ? getReplyPreview(message.replyToId) : null;
+            final replyPreview = message.isReply ? getChatMessageQuote(message.replyToId) : null;
+
+            final authorMetadata = getAuthorMetadata(message.pubkey);
+            final senderName = isOwnMessage
+                ? context.l10n.you
+                : presentName(authorMetadata) ?? context.l10n.unknownUser;
+            final senderPictureUrl = authorMetadata?.picture;
 
             return AutoScrollTag(
               key: ValueKey(message.id),
@@ -185,6 +203,8 @@ class ChatScreen extends HookConsumerWidget {
                 onReplyTap: replyPreview != null && !replyPreview.isNotFound
                     ? () => scrollToMessageResult.scrollToMessage(replyPreview.messageId)
                     : null,
+                senderName: senderName,
+                senderPictureUrl: senderPictureUrl,
               ),
             );
           },
@@ -257,10 +277,11 @@ class ChatScreen extends HookConsumerWidget {
               top: false,
               child: _ChatInput(
                 input: input,
+                mediaUpload: mediaUpload,
                 currentUserPubkey: pubkey,
                 onSend: sendMessage,
                 onError: showNotice,
-                getReplyPreview: getReplyPreview,
+                getChatMessageQuote: getChatMessageQuote,
               ),
             ),
           ],
@@ -273,28 +294,38 @@ class ChatScreen extends HookConsumerWidget {
 class _ChatInput extends StatelessWidget {
   const _ChatInput({
     required this.input,
+    required this.mediaUpload,
     required this.currentUserPubkey,
     required this.onSend,
     required this.onError,
-    required this.getReplyPreview,
+    required this.getChatMessageQuote,
   });
 
   final ChatInputState input;
+  final MediaUploadState mediaUpload;
   final String currentUserPubkey;
-  final Future<void> Function(String message, ChatMessage? replyingTo) onSend;
+  final Future<void> Function(
+    String message,
+    ChatMessage? replyingTo,
+    List<MediaFile> mediaFiles,
+  )
+  onSend;
   final void Function(String message) onError;
-  final ReplyPreview? Function(String? replyId) getReplyPreview;
+  final ChatMessageQuoteData? Function(String? replyId) getChatMessageQuote;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typography = context.typographyScaled;
+    final hasMedia = mediaUpload.items.isNotEmpty;
+    final showSend = input.hasContent || hasMedia;
+    final sendEnabled = input.hasContent || (hasMedia && mediaUpload.canSend);
 
     Future<void> handleSend() async {
       final text = input.controller.text.trim();
-      if (text.isEmpty) return;
+      if (text.isEmpty && !mediaUpload.canSend) return;
       try {
-        await onSend(text, input.replyingTo);
+        await onSend(text, input.replyingTo, mediaUpload.uploadedFiles);
         input.clear();
       } catch (e, st) {
         _logger.severe('Failed to send message', e, st);
@@ -304,6 +335,30 @@ class _ChatInput extends StatelessWidget {
       }
     }
 
+    Widget? buildAttachmentArea() {
+      final hasQuote = input.replyingTo != null;
+      if (!hasQuote && !hasMedia) return null;
+
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (hasQuote)
+            ChatMessageQuote(
+              data: getChatMessageQuote(input.replyingTo!.id)!,
+              currentUserPubkey: currentUserPubkey,
+              onCancel: input.cancelReply,
+            ),
+          if (hasQuote && hasMedia) SizedBox(height: 8.h),
+          if (hasMedia)
+            ChatMediaUploadPreview(
+              items: mediaUpload.items,
+              onRemove: mediaUpload.removeItem,
+            ),
+        ],
+      );
+    }
+
     return Container(
       padding: EdgeInsets.only(left: 12.w, right: 12.w, top: 2.h, bottom: 24.h),
       color: colors.backgroundPrimary,
@@ -311,82 +366,70 @@ class _ChatInput extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.end,
         children: [
           Expanded(
-            child: Container(
-              decoration: BoxDecoration(
-                color: colors.backgroundTertiary,
-                borderRadius: BorderRadius.circular(8.r),
-                border: Border.all(color: colors.borderTertiary),
+            child: WnChatMessageInput(
+              isFocused: input.hasFocus,
+              attachmentArea: buildAttachmentArea(),
+              leadingAction: GestureDetector(
+                key: const Key('attach_button'),
+                onTap: () {
+                  input.focusNode.unfocus();
+                  mediaUpload.pickImages();
+                },
+                child: WnIcon(
+                  WnIcons.addLarge,
+                  color: colors.backgroundContentSecondary,
+                  size: 20.sp,
+                ),
               ),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  if (input.replyingTo != null) ...[
-                    Padding(
-                      padding: EdgeInsets.fromLTRB(14.w, 8.h, 14.w, 0.h),
-                      child: WnReplyPreview(
-                        data: getReplyPreview(input.replyingTo!.id)!,
-                        currentUserPubkey: currentUserPubkey,
-                        onCancel: input.cancelReply,
-                      ),
-                    ),
-                  ],
-                  TextField(
-                    controller: input.controller,
-                    focusNode: input.focusNode,
-                    maxLines: 5,
-                    minLines: 1,
-                    textCapitalization: TextCapitalization.sentences,
-                    style: typography.medium14.copyWith(
-                      color: colors.backgroundContentPrimary,
-                    ),
-                    decoration: InputDecoration(
-                      hintText: context.l10n.messagePlaceholder,
-                      hintStyle: typography.medium14.copyWith(
-                        color: colors.backgroundContentTertiary,
-                      ),
-                      filled: true,
-                      fillColor: colors.backgroundTertiary,
-                      contentPadding: EdgeInsets.symmetric(
-                        horizontal: 14.w,
-                        vertical: 20.h,
-                      ),
-                      border: InputBorder.none,
-                      enabledBorder: InputBorder.none,
-                      focusedBorder: InputBorder.none,
-                    ),
+              inputField: TextField(
+                controller: input.controller,
+                focusNode: input.focusNode,
+                maxLines: 4,
+                minLines: 1,
+                textCapitalization: TextCapitalization.sentences,
+                style: typography.medium14.copyWith(
+                  color: colors.backgroundContentPrimary,
+                ),
+                decoration: InputDecoration(
+                  hintText: context.l10n.messagePlaceholder,
+                  hintStyle: typography.medium14.copyWith(
+                    color: colors.backgroundContentTertiary,
                   ),
-                ],
+                  filled: true,
+                  fillColor: Colors.transparent,
+                  contentPadding: EdgeInsets.symmetric(
+                    horizontal: 14.w,
+                    vertical: 20.h,
+                  ),
+                  border: InputBorder.none,
+                  enabledBorder: InputBorder.none,
+                  focusedBorder: InputBorder.none,
+                ),
               ),
-            ),
-          ),
-          AnimatedSize(
-            duration: const Duration(milliseconds: 150),
-            curve: Curves.easeOut,
-            child: input.hasContent
-                ? Padding(
-                    padding: EdgeInsets.only(left: 8.w),
-                    child: GestureDetector(
+              trailingAction: showSend
+                  ? GestureDetector(
                       key: const Key('send_button'),
-                      onTap: handleSend,
+                      onTap: sendEnabled ? handleSend : null,
                       child: Container(
-                        width: 44.w,
-                        height: 44.h,
+                        width: 40.w,
+                        height: 40.h,
                         decoration: BoxDecoration(
-                          color: colors.fillPrimary,
+                          color: sendEnabled ? colors.fillPrimary : colors.fillSecondary,
                           borderRadius: BorderRadius.circular(8.r),
                         ),
                         child: Center(
                           child: WnIcon(
                             WnIcons.arrowUp,
-                            color: colors.fillContentPrimary,
-                            size: 20.sp,
+                            color: sendEnabled
+                                ? colors.fillContentPrimary
+                                : colors.backgroundContentTertiary,
+                            size: 18.sp,
                           ),
                         ),
                       ),
-                    ),
-                  )
-                : const SizedBox.shrink(),
+                    )
+                  : null,
+            ),
           ),
         ],
       ),

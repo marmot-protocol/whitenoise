@@ -20,6 +20,8 @@ import 'package:whitenoise_widgetbook/components/chat_info_profile_card.dart'
     as _whitenoise_widgetbook_components_chat_info_profile_card;
 import 'package:whitenoise_widgetbook/components/chat_list_item.dart'
     as _whitenoise_widgetbook_components_chat_list_item;
+import 'package:whitenoise_widgetbook/components/chat_message_input.dart'
+    as _whitenoise_widgetbook_components_chat_message_input;
 import 'package:whitenoise_widgetbook/components/chat_status.dart'
     as _whitenoise_widgetbook_components_chat_status;
 import 'package:whitenoise_widgetbook/components/feedback.dart'
@@ -34,8 +36,14 @@ import 'package:whitenoise_widgetbook/components/key_package_card.dart'
     as _whitenoise_widgetbook_components_key_package_card;
 import 'package:whitenoise_widgetbook/components/list.dart'
     as _whitenoise_widgetbook_components_list;
+import 'package:whitenoise_widgetbook/components/media_preview.dart'
+    as _whitenoise_widgetbook_components_media_preview;
+import 'package:whitenoise_widgetbook/components/media_thumbnail.dart'
+    as _whitenoise_widgetbook_components_media_thumbnail;
 import 'package:whitenoise_widgetbook/components/menu.dart'
     as _whitenoise_widgetbook_components_menu;
+import 'package:whitenoise_widgetbook/components/message_media.dart'
+    as _whitenoise_widgetbook_components_message_media;
 import 'package:whitenoise_widgetbook/components/message_quote.dart'
     as _whitenoise_widgetbook_components_message_quote;
 import 'package:whitenoise_widgetbook/components/reaction.dart'
@@ -149,6 +157,16 @@ final directories = <_widgetbook.WidgetbookNode>[
         ],
       ),
       _widgetbook.WidgetbookComponent(
+        name: 'WnChatMessageInputStory',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Chat Message Input',
+            builder: _whitenoise_widgetbook_components_chat_message_input
+                .wnChatMessageInputShowcase,
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookComponent(
         name: 'WnChatStatusStory',
         useCases: [
           _widgetbook.WidgetbookUseCase(
@@ -236,6 +254,26 @@ final directories = <_widgetbook.WidgetbookNode>[
         ],
       ),
       _widgetbook.WidgetbookComponent(
+        name: 'WnMediaPreviewStory',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Media Preview',
+            builder: _whitenoise_widgetbook_components_media_preview
+                .wnMediaPreviewShowcase,
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookComponent(
+        name: 'WnMediaThumbnailStory',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Media Thumbnail',
+            builder: _whitenoise_widgetbook_components_media_thumbnail
+                .wnMediaThumbnailShowcase,
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookComponent(
         name: 'WnMenuItemStory',
         useCases: [
           _widgetbook.WidgetbookUseCase(
@@ -250,6 +288,16 @@ final directories = <_widgetbook.WidgetbookNode>[
           _widgetbook.WidgetbookUseCase(
             name: 'Menu Container',
             builder: _whitenoise_widgetbook_components_menu.wnMenuShowcase,
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookComponent(
+        name: 'WnMessageMediaStory',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Message Media',
+            builder: _whitenoise_widgetbook_components_message_media
+                .wnMessageMediaShowcase,
           ),
         ],
       ),

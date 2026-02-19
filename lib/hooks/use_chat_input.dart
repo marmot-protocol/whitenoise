@@ -5,6 +5,7 @@ import 'package:whitenoise/src/rust/api/messages.dart';
 typedef ChatInputState = ({
   TextEditingController controller,
   FocusNode focusNode,
+  bool hasFocus,
   bool hasContent,
   VoidCallback clear,
   ChatMessage? replyingTo,
@@ -16,6 +17,7 @@ ChatInputState useChatInput() {
   final controller = useTextEditingController();
   final focusNode = useFocusNode();
   final hasContent = useListenableSelector(controller, () => controller.text.isNotEmpty);
+  final hasFocus = useListenableSelector(focusNode, () => focusNode.hasFocus);
   final replyingTo = useState<ChatMessage?>(null);
 
   void setReplyingTo(ChatMessage message) {
@@ -34,6 +36,7 @@ ChatInputState useChatInput() {
   return (
     controller: controller,
     focusNode: focusNode,
+    hasFocus: hasFocus,
     hasContent: hasContent,
     clear: clear,
     replyingTo: replyingTo.value,

@@ -250,7 +250,6 @@ void main() {
 
       await tester.tap(find.byKey(const Key('retry_button')));
       await tester.pump();
-      // Should not crash
     });
 
     testWidgets('onZoomChanged is not called when callback is null', (tester) async {
@@ -265,7 +264,6 @@ void main() {
           height: 300,
           child: MediaImage(
             mediaFile: _mediaFile(filePath: tempFile.path),
-            // onZoomChanged is null
           ),
         ),
         tester,
@@ -277,7 +275,6 @@ void main() {
       );
       final controller = viewer.transformationController!;
 
-      // Should not crash even with null callback
       controller.value = Matrix4.identity()
         ..setEntry(0, 0, 2.0)
         ..setEntry(1, 1, 2.0);

@@ -252,7 +252,7 @@ class _InviteMessageList extends HookWidget {
             final message = chatMessages.getMessage(reversedIndex);
             final isOwnMessage = message.pubkey == pubkey;
             final replyPreview = message.isReply
-                ? chatMessages.getReplyPreview(message.replyToId)
+                ? chatMessages.getChatMessageQuote(message.replyToId)
                 : null;
             return WnMessageBubble(
               message: message,

@@ -14,9 +14,9 @@ import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
-import 'package:whitenoise/widgets/wn_reply_preview.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 import '../mocks/mock_wn_api.dart';
@@ -353,14 +353,14 @@ void main() {
         ];
         await pumpInviteScreen(tester);
 
-        expect(find.byType(WnReplyPreview), findsOneWidget);
+        expect(find.byType(ChatMessageQuote), findsOneWidget);
       });
 
       testWidgets('does not display reply preview for non-reply messages', (tester) async {
         _api.initialMessages = [_message('m1'), _message('m2')];
         await pumpInviteScreen(tester);
 
-        expect(find.byType(WnReplyPreview), findsNothing);
+        expect(find.byType(ChatMessageQuote), findsNothing);
       });
 
       testWidgets('displays author name in reply preview', (tester) async {
@@ -384,7 +384,7 @@ void main() {
         ];
         await pumpInviteScreen(tester);
 
-        final replyPreview = find.byType(WnReplyPreview);
+        final replyPreview = find.byType(ChatMessageQuote);
         expect(replyPreview, findsOneWidget);
         expect(
           find.descendant(of: replyPreview, matching: find.text('Original message content')),
@@ -396,7 +396,7 @@ void main() {
         _api.initialMessages = [_message('m2', isReply: true, replyToId: 'nonexistent')];
         await pumpInviteScreen(tester);
 
-        expect(find.byType(WnReplyPreview), findsOneWidget);
+        expect(find.byType(ChatMessageQuote), findsOneWidget);
         expect(find.text('Message not found'), findsOneWidget);
       });
 
@@ -407,7 +407,7 @@ void main() {
         ];
         await pumpInviteScreen(tester);
 
-        expect(find.byType(WnReplyPreview), findsOneWidget);
+        expect(find.byType(ChatMessageQuote), findsOneWidget);
         expect(find.text('Message not found'), findsOneWidget);
       });
     });
