@@ -189,7 +189,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(getState().isLoading, isFalse);
-        expect(getState().error, 'Failed to fetch group members');
+        expect(getState().error, 'failedToFetchGroupMembers');
       });
 
       testWidgets('returns empty lists initially', (tester) async {
@@ -262,12 +262,10 @@ void main() {
         await pump(tester, accountPubkey: testPubkeyA, groupId: testGroupId);
         await tester.pumpAndSettle();
 
-        try {
-          await getState().addMembers([testPubkeyB]);
-        } catch (_) {}
+        await getState().addMembers([testPubkeyB]);
         await tester.pump();
 
-        expect(getState().error, 'Failed to add members');
+        expect(getState().error, 'failedToAddMembers');
       });
     });
 
@@ -323,12 +321,10 @@ void main() {
         await pump(tester, accountPubkey: testPubkeyA, groupId: testGroupId);
         await tester.pumpAndSettle();
 
-        try {
-          await getState().removeMembers([testPubkeyB]);
-        } catch (_) {}
+        await getState().removeMembers([testPubkeyB]);
         await tester.pump();
 
-        expect(getState().error, 'Failed to remove members');
+        expect(getState().error, 'failedToRemoveFromGroup');
       });
     });
 
@@ -397,12 +393,10 @@ void main() {
         await pump(tester, accountPubkey: testPubkeyA, groupId: testGroupId);
         await tester.pumpAndSettle();
 
-        try {
-          await getState().makeAdmin(testPubkeyB);
-        } catch (_) {}
+        await getState().makeAdmin(testPubkeyB);
         await tester.pump();
 
-        expect(getState().error, 'Failed to make admin');
+        expect(getState().error, 'failedToMakeAdmin');
       });
     });
 
@@ -458,12 +452,10 @@ void main() {
         await pump(tester, accountPubkey: testPubkeyA, groupId: testGroupId);
         await tester.pumpAndSettle();
 
-        try {
-          await getState().removeAdmin(testPubkeyB);
-        } catch (_) {}
+        await getState().removeAdmin(testPubkeyB);
         await tester.pump();
 
-        expect(getState().error, 'Failed to remove admin');
+        expect(getState().error, 'failedToRemoveAdmin');
       });
     });
 
@@ -473,9 +465,7 @@ void main() {
         await pump(tester, accountPubkey: testPubkeyA, groupId: testGroupId);
         await tester.pumpAndSettle();
 
-        try {
-          await getState().addMembers([testPubkeyB]);
-        } catch (_) {}
+        await getState().addMembers([testPubkeyB]);
         await tester.pump();
 
         expect(getState().error, isNotNull);

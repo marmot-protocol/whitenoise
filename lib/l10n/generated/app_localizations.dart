@@ -1877,6 +1877,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unable to save group. Please try again.'**
   String get groupSaveError;
+
+  /// Error message when fetching group members fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load group members. Please try again.'**
+  String get failedToFetchGroupMembers;
+
+  /// Error message when adding members to group fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to add members. Please try again.'**
+  String get failedToAddMembers;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

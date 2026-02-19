@@ -11,10 +11,10 @@ typedef GroupMembersState = ({
   bool isActionLoading,
   String? error,
   void Function() clearError,
-  Future<void> Function(List<String> pubkeys) addMembers,
-  Future<void> Function(List<String> pubkeys) removeMembers,
-  Future<void> Function(String pubkey) makeAdmin,
-  Future<void> Function(String pubkey) removeAdmin,
+  Future<bool> Function(List<String> pubkeys) addMembers,
+  Future<bool> Function(List<String> pubkeys) removeMembers,
+  Future<bool> Function(String pubkey) makeAdmin,
+  Future<bool> Function(String pubkey) removeAdmin,
 });
 
 GroupMembersState useGroupMembers({
@@ -33,17 +33,17 @@ GroupMembersState useGroupMembers({
     Future<void> fetchMembersAndAdmins() async {
       isLoading.value = true;
       try {
-        final results = await Future.wait([
+        final (membersList, adminsList, group) = await (
           groups_api.groupMembers(pubkey: accountPubkey, groupId: groupId),
           groups_api.groupAdmins(pubkey: accountPubkey, groupId: groupId),
           groups_api.getGroup(accountPubkey: accountPubkey, groupId: groupId),
-        ]);
-        members.value = results[0] as List<String>;
-        admins.value = results[1] as List<String>;
-        groupRef.value = results[2] as groups_api.Group;
+        ).wait;
+        members.value = membersList;
+        admins.value = adminsList;
+        groupRef.value = group;
       } catch (e) {
         _logger.severe('Failed to fetch group members: $e');
-        error.value = 'Failed to fetch group members';
+        error.value = 'failedToFetchGroupMembers';
       } finally {
         isLoading.value = false;
       }
@@ -57,7 +57,7 @@ GroupMembersState useGroupMembers({
     error.value = null;
   }
 
-  Future<void> addMembers(List<String> pubkeys) async {
+  Future<bool> addMembers(List<String> pubkeys) async {
     isActionLoading.value = true;
     error.value = null;
     try {
@@ -68,16 +68,17 @@ GroupMembersState useGroupMembers({
       );
       final updated = {...members.value, ...pubkeys}.toList();
       members.value = updated;
+      return true;
     } catch (e) {
       _logger.severe('Failed to add members: $e');
-      error.value = 'Failed to add members';
-      rethrow;
+      error.value = 'failedToAddMembers';
+      return false;
     } finally {
       isActionLoading.value = false;
     }
   }
 
-  Future<void> removeMembers(List<String> pubkeys) async {
+  Future<bool> removeMembers(List<String> pubkeys) async {
     isActionLoading.value = true;
     error.value = null;
     try {
@@ -87,18 +88,19 @@ GroupMembersState useGroupMembers({
         memberPubkeys: pubkeys,
       );
       members.value = members.value.where((m) => !pubkeys.contains(m)).toList();
+      return true;
     } catch (e) {
       _logger.severe('Failed to remove members: $e');
-      error.value = 'Failed to remove members';
-      rethrow;
+      error.value = 'failedToRemoveFromGroup';
+      return false;
     } finally {
       isActionLoading.value = false;
     }
   }
 
-  Future<void> makeAdmin(String pubkey) async {
+  Future<bool> makeAdmin(String pubkey) async {
     final group = groupRef.value;
-    if (group == null) return;
+    if (group == null) return false;
 
     isActionLoading.value = true;
     error.value = null;
@@ -109,18 +111,19 @@ GroupMembersState useGroupMembers({
         groupData: groups_api.FlutterGroupDataUpdate(admins: updatedAdmins),
       );
       admins.value = updatedAdmins;
+      return true;
     } catch (e) {
       _logger.severe('Failed to make admin: $e');
-      error.value = 'Failed to make admin';
-      rethrow;
+      error.value = 'failedToMakeAdmin';
+      return false;
     } finally {
       isActionLoading.value = false;
     }
   }
 
-  Future<void> removeAdmin(String pubkey) async {
+  Future<bool> removeAdmin(String pubkey) async {
     final group = groupRef.value;
-    if (group == null) return;
+    if (group == null) return false;
 
     isActionLoading.value = true;
     error.value = null;
@@ -131,10 +134,11 @@ GroupMembersState useGroupMembers({
         groupData: groups_api.FlutterGroupDataUpdate(admins: updatedAdmins),
       );
       admins.value = updatedAdmins;
+      return true;
     } catch (e) {
       _logger.severe('Failed to remove admin: $e');
-      error.value = 'Failed to remove admin';
-      rethrow;
+      error.value = 'failedToRemoveAdmin';
+      return false;
     } finally {
       isActionLoading.value = false;
     }

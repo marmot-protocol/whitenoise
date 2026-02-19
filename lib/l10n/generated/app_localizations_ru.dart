@@ -1031,4 +1031,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get groupSaveError => 'Не удалось сохранить группу. Попробуйте снова.';
+
+  @override
+  String get failedToFetchGroupMembers =>
+      'Не удалось загрузить участников группы. Попробуйте снова.';
+
+  @override
+  String get failedToAddMembers => 'Не удалось добавить участников. Попробуйте снова.';
 }

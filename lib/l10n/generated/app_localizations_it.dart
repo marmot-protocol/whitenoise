@@ -1006,4 +1006,10 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get groupSaveError => 'Impossibile salvare il gruppo. Riprova.';
+
+  @override
+  String get failedToFetchGroupMembers => 'Impossibile caricare i membri del gruppo. Riprova.';
+
+  @override
+  String get failedToAddMembers => 'Impossibile aggiungere membri. Riprova.';
 }

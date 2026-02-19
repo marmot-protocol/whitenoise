@@ -1005,4 +1005,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get groupSaveError => 'Grup kaydedilemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get failedToFetchGroupMembers => 'Grup üyeleri yüklenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get failedToAddMembers => 'Üye eklenemedi. Lütfen tekrar deneyin.';
 }

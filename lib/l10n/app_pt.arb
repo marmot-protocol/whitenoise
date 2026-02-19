@@ -294,5 +294,7 @@
   "failedToRemoveAdmin": "Não foi possível remover admin. Tente novamente.",
   "groupUpdatedSuccessfully": "Grupo atualizado com sucesso",
   "groupLoadError": "Não foi possível carregar o grupo. Tente novamente.",
-  "groupSaveError": "Não foi possível salvar o grupo. Tente novamente."
+  "groupSaveError": "Não foi possível salvar o grupo. Tente novamente.",
+  "failedToFetchGroupMembers": "Não foi possível carregar os membros do grupo. Tente novamente.",
+  "failedToAddMembers": "Não foi possível adicionar membros. Tente novamente."
 }

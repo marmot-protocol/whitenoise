@@ -294,5 +294,7 @@
   "failedToRemoveAdmin": "Impossible de retirer admin. Veuillez réessayer.",
   "groupUpdatedSuccessfully": "Groupe mis à jour avec succès",
   "groupLoadError": "Impossible de charger le groupe. Veuillez réessayer.",
-  "groupSaveError": "Impossible de sauvegarder le groupe. Veuillez réessayer."
+  "groupSaveError": "Impossible de sauvegarder le groupe. Veuillez réessayer.",
+  "failedToFetchGroupMembers": "Impossible de charger les membres du groupe. Veuillez réessayer.",
+  "failedToAddMembers": "Impossible d'ajouter des membres. Veuillez réessayer."
 }

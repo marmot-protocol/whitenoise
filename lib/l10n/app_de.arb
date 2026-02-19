@@ -294,5 +294,7 @@
   "failedToRemoveAdmin": "Admin konnte nicht entfernt werden. Bitte erneut versuchen.",
   "groupUpdatedSuccessfully": "Gruppe erfolgreich aktualisiert",
   "groupLoadError": "Gruppe konnte nicht geladen werden. Bitte erneut versuchen.",
-  "groupSaveError": "Gruppe konnte nicht gespeichert werden. Bitte erneut versuchen."
+  "groupSaveError": "Gruppe konnte nicht gespeichert werden. Bitte erneut versuchen.",
+  "failedToFetchGroupMembers": "Gruppenmitglieder konnten nicht geladen werden. Bitte erneut versuchen.",
+  "failedToAddMembers": "Mitglieder konnten nicht hinzugefügt werden. Bitte erneut versuchen."
 }

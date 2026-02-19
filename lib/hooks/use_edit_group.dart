@@ -54,13 +54,12 @@ class EditGroupState {
     String? description,
     String? selectedImagePath,
     bool clearError = false,
-    bool clearCurrentGroup = false,
     bool clearSelectedImagePath = false,
   }) {
     return EditGroupState(
       loadingState: loadingState ?? this.loadingState,
       error: clearError ? null : (error ?? this.error),
-      currentGroup: clearCurrentGroup ? null : (currentGroup ?? this.currentGroup),
+      currentGroup: currentGroup ?? this.currentGroup,
       currentImagePath: currentImagePath ?? this.currentImagePath,
       name: name ?? this.name,
       description: description ?? this.description,
@@ -94,12 +93,10 @@ useEditGroup({
       clearError: true,
     );
     try {
-      final results = await Future.wait([
+      final (group, imagePath) = await (
         groups_api.getGroup(accountPubkey: accountPubkey, groupId: groupId),
         groups_api.getGroupImagePath(accountPubkey: accountPubkey, groupId: groupId),
-      ]);
-      final group = results[0] as groups_api.Group;
-      final imagePath = results[1] as String?;
+      ).wait;
       final name = group.name;
       final description = group.description;
       nameController.text = name;

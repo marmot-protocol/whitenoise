@@ -1563,5 +1563,15 @@
   "groupSaveError": "Unable to save group. Please try again.",
   "@groupSaveError": {
     "description": "User-friendly error when group fails to save"
+  },
+
+  "failedToFetchGroupMembers": "Failed to load group members. Please try again.",
+  "@failedToFetchGroupMembers": {
+    "description": "Error message when fetching group members fails"
+  },
+
+  "failedToAddMembers": "Failed to add members. Please try again.",
+  "@failedToAddMembers": {
+    "description": "Error message when adding members to group fails"
   }
 }

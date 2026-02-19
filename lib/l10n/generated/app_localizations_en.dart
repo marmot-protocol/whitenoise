@@ -1004,4 +1004,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get groupSaveError => 'Unable to save group. Please try again.';
+
+  @override
+  String get failedToFetchGroupMembers => 'Failed to load group members. Please try again.';
+
+  @override
+  String get failedToAddMembers => 'Failed to add members. Please try again.';
 }

@@ -295,5 +295,7 @@
   "membersLabel": "Üyeler:",
   "groupUpdatedSuccessfully": "Grup başarıyla güncellendi",
   "groupLoadError": "Grup yüklenemedi. Lütfen tekrar deneyin.",
-  "groupSaveError": "Grup kaydedilemedi. Lütfen tekrar deneyin."
+  "groupSaveError": "Grup kaydedilemedi. Lütfen tekrar deneyin.",
+  "failedToFetchGroupMembers": "Grup üyeleri yüklenemedi. Lütfen tekrar deneyin.",
+  "failedToAddMembers": "Üye eklenemedi. Lütfen tekrar deneyin."
 }

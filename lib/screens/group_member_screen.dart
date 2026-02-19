@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart' show useEffect;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -18,6 +19,17 @@ import 'package:whitenoise/widgets/wn_overlay.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart' show WnSystemNotice;
+
+String _groupMemberErrorL10n(String errorKey, AppLocalizations l10n) {
+  return switch (errorKey) {
+    'failedToFetchGroupMembers' => l10n.failedToFetchGroupMembers,
+    'failedToAddMembers' => l10n.failedToAddMembers,
+    'failedToRemoveFromGroup' => l10n.failedToRemoveFromGroup,
+    'failedToMakeAdmin' => l10n.failedToMakeAdmin,
+    'failedToRemoveAdmin' => l10n.failedToRemoveAdmin,
+    _ => l10n.somethingWentWrong,
+  };
+}
 
 class GroupMemberScreen extends HookConsumerWidget {
   const GroupMemberScreen({
@@ -45,57 +57,45 @@ class GroupMemberScreen extends HookConsumerWidget {
     final (:noticeMessage, :noticeType, :showErrorNotice, :showSuccessNotice, :dismissNotice) =
         useSystemNotice();
 
+    useEffect(() {
+      if (membersState.error != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) {
+            showErrorNotice(
+              _groupMemberErrorL10n(membersState.error!, context.l10n),
+            );
+          }
+        });
+        membersState.clearError();
+      }
+      return null;
+    }, [membersState.error]);
+
     final isCurrentUserAdmin = membersState.admins.contains(accountPubkey);
     final isMemberAdmin = membersState.admins.contains(memberPubkey);
     final displayName = presentName(metadata) ?? memberPubkey.substring(0, 8);
     final roleLabel = isMemberAdmin ? context.l10n.adminBadge : context.l10n.memberBadge;
 
     Future<void> handleMakeAdmin() async {
-      final result = await WnConfirmationSlate.show(
+      await WnConfirmationSlate.show(
         context: context,
         title: context.l10n.makeAdminConfirmation,
         message: context.l10n.makeAdminWarning,
         confirmText: context.l10n.makeAdmin,
         cancelText: context.l10n.cancel,
-        onConfirmAsync: () async {
-          try {
-            await membersState.makeAdmin(memberPubkey);
-            return true;
-          } catch (_) {
-            return false;
-          }
-        },
+        onConfirmAsync: () => membersState.makeAdmin(memberPubkey),
       );
-
-      if (!context.mounted || result == null) return;
-
-      if (!result) {
-        showErrorNotice(context.l10n.failedToMakeAdmin);
-      }
     }
 
     Future<void> handleRemoveAdmin() async {
-      final result = await WnConfirmationSlate.show(
+      await WnConfirmationSlate.show(
         context: context,
         title: context.l10n.removeAdminConfirmation,
         message: context.l10n.removeAdminWarning,
         confirmText: context.l10n.removeAdminRole,
         cancelText: context.l10n.cancel,
-        onConfirmAsync: () async {
-          try {
-            await membersState.removeAdmin(memberPubkey);
-            return true;
-          } catch (_) {
-            return false;
-          }
-        },
+        onConfirmAsync: () => membersState.removeAdmin(memberPubkey),
       );
-
-      if (!context.mounted || result == null) return;
-
-      if (!result) {
-        showErrorNotice(context.l10n.failedToRemoveAdmin);
-      }
     }
 
     Future<void> handleRemoveFromGroup() async {
@@ -106,22 +106,11 @@ class GroupMemberScreen extends HookConsumerWidget {
         confirmText: context.l10n.removeFromGroup,
         cancelText: context.l10n.cancel,
         isDestructive: true,
-        onConfirmAsync: () async {
-          try {
-            await membersState.removeMembers([memberPubkey]);
-            return true;
-          } catch (_) {
-            return false;
-          }
-        },
+        onConfirmAsync: () => membersState.removeMembers([memberPubkey]),
       );
 
-      if (!context.mounted || result == null) return;
-
-      if (result) {
+      if (context.mounted && result == true) {
         Routes.goBack(context);
-      } else {
-        showErrorNotice(context.l10n.failedToRemoveFromGroup);
       }
     }
 
