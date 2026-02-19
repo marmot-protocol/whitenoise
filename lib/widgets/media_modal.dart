@@ -57,7 +57,6 @@ class MediaModal extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
     final currentIndex = useState(initialIndex);
     final isFullscreen = useState(false);
     final isZoomed = useState(false);
@@ -99,24 +98,25 @@ class MediaModal extends HookWidget {
                       isFullscreen.value = !isFullscreen.value;
                     }
                   },
-                  child: Stack(
-                    fit: StackFit.expand,
+                  child: Column(
                     children: [
-                      PageView.builder(
-                        key: const Key('media_page_view'),
-                        controller: pageController,
-                        itemCount: mediaFiles.length,
-                        physics: isZoomed.value
-                            ? const NeverScrollableScrollPhysics()
-                            : const PageScrollPhysics(),
-                        onPageChanged: (index) => currentIndex.value = index,
-                        itemBuilder: (_, index) {
-                          return MediaImage(
-                            key: Key('media_image_$index'),
-                            mediaFile: mediaFiles[index],
-                            onZoomChanged: (zoomed) => isZoomed.value = zoomed,
-                          );
-                        },
+                      Expanded(
+                        child: PageView.builder(
+                          key: const Key('media_page_view'),
+                          controller: pageController,
+                          itemCount: mediaFiles.length,
+                          physics: isZoomed.value
+                              ? const NeverScrollableScrollPhysics()
+                              : const PageScrollPhysics(),
+                          onPageChanged: (index) => currentIndex.value = index,
+                          itemBuilder: (_, index) {
+                            return MediaImage(
+                              key: Key('media_image_$index'),
+                              mediaFile: mediaFiles[index],
+                              onZoomChanged: (zoomed) => isZoomed.value = zoomed,
+                            );
+                          },
+                        ),
                       ),
                       if (mediaFiles.length > 1)
                         _ThumbnailStrip(
@@ -124,7 +124,6 @@ class MediaModal extends HookWidget {
                           visible: showOverlays,
                           mediaFiles: mediaFiles,
                           currentIndex: currentIndex.value,
-                          colors: colors,
                           onThumbnailTap: (index) {
                             pageController.animateToPage(
                               index,
@@ -231,7 +230,6 @@ class _ThumbnailStrip extends StatelessWidget {
   final bool visible;
   final List<MediaFile> mediaFiles;
   final int currentIndex;
-  final SemanticColors colors;
   final ValueChanged<int> onThumbnailTap;
 
   const _ThumbnailStrip({
@@ -239,41 +237,19 @@ class _ThumbnailStrip extends StatelessWidget {
     required this.visible,
     required this.mediaFiles,
     required this.currentIndex,
-    required this.colors,
     required this.onThumbnailTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Positioned(
-      bottom: 0,
-      left: 0,
-      right: 0,
-      child: AnimatedOpacity(
-        duration: const Duration(milliseconds: 200),
-        opacity: visible ? 1.0 : 0.0,
-        child: IgnorePointer(
-          ignoring: !visible,
-          child: Container(
-            padding: EdgeInsets.only(
-              top: 16.h,
-              bottom: 16.h,
-            ),
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.bottomCenter,
-                end: Alignment.topCenter,
-                colors: [
-                  colors.overlayTertiary,
-                  Colors.transparent,
-                ],
-              ),
-            ),
-            child: SingleChildScrollView(
+    return AnimatedSize(
+      duration: const Duration(milliseconds: 200),
+      curve: Curves.easeInOut,
+      child: visible
+          ? SingleChildScrollView(
               scrollDirection: Axis.horizontal,
-              padding: EdgeInsets.symmetric(horizontal: 16.w),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: List.generate(mediaFiles.length, (index) {
                   return Padding(
                     padding: EdgeInsets.only(right: index < mediaFiles.length - 1 ? 8.w : 0),
@@ -286,10 +262,8 @@ class _ThumbnailStrip extends StatelessWidget {
                   );
                 }),
               ),
-            ),
-          ),
-        ),
-      ),
+            )
+          : const SizedBox.shrink(),
     );
   }
 }
