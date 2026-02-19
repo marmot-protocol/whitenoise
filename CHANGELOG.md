@@ -49,7 +49,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Copy message to clipboard from message actions [PR #317](https://github.com/marmot-protocol/whitenoise/pull/317)
 - Mark messages as read [PR #316](https://github.com/marmot-protocol/whitenoise/pull/316)
 - Images in chat [PR #249](https://github.com/marmot-protocol/whitenoise/pull/249)
-
+- Show last message sender name in chat list[PR #322](https://github.com/marmot-protocol/whitenoise/pull/322)
 ### Changed
 
 - Improve profile onboarding and account add flows: signup now pre-fills a generated display name with one-tap clear, and the "Add a new profile" slate is compact and bottom-anchored. [PR #313](https://github.com/marmot-protocol/whitenoise/pull/313)
