@@ -258,11 +258,24 @@ build-android-quiet:
 build-android-apk flavor:
     ./scripts/build_android.sh && flutter build apk --flavor {{flavor}}
 
+# Build a fat APK (all ABIs in one file)
 build-production-apk:
     ./scripts/build_android.sh && flutter build apk --flavor production
 
 build-staging-apk:
     ./scripts/build_android.sh && flutter build apk --flavor staging
+
+# Build per-ABI split APKs (separate .apk per architecture)
+build-split-apk flavor="production":
+    ./scripts/build_android.sh && flutter build apk --flavor {{flavor}} --split-per-abi
+
+# Build an Android App Bundle (per-ABI splitting handled by Play Store)
+build-aab flavor="production":
+    ./scripts/build_android.sh && flutter build appbundle --flavor {{flavor}}
+
+# Release builds
+build-release-apk: (build-split-apk "production")
+build-release-aab: (build-aab "production")
 
 when-apk: build-staging-apk
 
