@@ -76,68 +76,110 @@ class MediaModal extends HookWidget {
           SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 8.h),
-              child: WnSlate(
-                key: const Key('media_modal_slate'),
-                animateContent: false,
-                header: AnimatedSize(
-                  duration: const Duration(milliseconds: 200),
-                  curve: Curves.easeInOut,
-                  child: showOverlays
-                      ? _MediaModalHeader(
-                          senderName: senderName,
-                          senderPictureUrl: senderPictureUrl,
-                          senderPubkey: senderPubkey,
-                          timestamp: timestamp,
-                          onClose: () => Navigator.of(context).pop(),
-                        )
-                      : const SizedBox.shrink(),
-                ),
-                child: GestureDetector(
-                  onTap: () {
-                    if (!isZoomed.value) {
-                      isFullscreen.value = !isFullscreen.value;
-                    }
-                  },
-                  child: Column(
-                    children: [
-                      Expanded(
-                        child: PageView.builder(
-                          key: const Key('media_page_view'),
-                          controller: pageController,
-                          itemCount: mediaFiles.length,
-                          physics: isZoomed.value
-                              ? const NeverScrollableScrollPhysics()
-                              : const PageScrollPhysics(),
-                          onPageChanged: (index) => currentIndex.value = index,
-                          itemBuilder: (_, index) {
-                            return MediaImage(
-                              key: Key('media_image_$index'),
-                              mediaFile: mediaFiles[index],
-                              onZoomChanged: (zoomed) => isZoomed.value = zoomed,
-                            );
-                          },
-                        ),
-                      ),
-                      if (mediaFiles.length > 1)
-                        _ThumbnailStrip(
-                          key: const Key('media_thumbnail_strip'),
-                          visible: showOverlays,
-                          mediaFiles: mediaFiles,
-                          currentIndex: currentIndex.value,
-                          onThumbnailTap: (index) {
-                            pageController.animateToPage(
-                              index,
-                              duration: const Duration(milliseconds: 300),
-                              curve: Curves.easeInOut,
-                            );
-                          },
-                        ),
-                    ],
+              child: SizedBox(
+                height:
+                    MediaQuery.sizeOf(context).height -
+                    MediaQuery.paddingOf(context).top -
+                    MediaQuery.paddingOf(context).bottom -
+                    16.h,
+                child: WnSlate(
+                  key: const Key('media_modal_slate'),
+                  animateContent: false,
+                  header: AnimatedSize(
+                    duration: const Duration(milliseconds: 200),
+                    curve: Curves.easeInOut,
+                    child: showOverlays
+                        ? _MediaModalHeader(
+                            senderName: senderName,
+                            senderPictureUrl: senderPictureUrl,
+                            senderPubkey: senderPubkey,
+                            timestamp: timestamp,
+                            onClose: () => Navigator.of(context).pop(),
+                          )
+                        : const SizedBox.shrink(),
+                  ),
+                  child: _MediaContent(
+                    mediaFiles: mediaFiles,
+                    pageController: pageController,
+                    isZoomed: isZoomed.value,
+                    showOverlays: showOverlays,
+                    currentIndex: currentIndex.value,
+                    onTap: () {
+                      if (!isZoomed.value) isFullscreen.value = !isFullscreen.value;
+                    },
+                    onZoomChanged: (zoomed) => isZoomed.value = zoomed,
+                    onPageChanged: (index) => currentIndex.value = index,
+                    onThumbnailTap: (index) {
+                      pageController.animateToPage(
+                        index,
+                        duration: const Duration(milliseconds: 300),
+                        curve: Curves.easeInOut,
+                      );
+                    },
                   ),
                 ),
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MediaContent extends StatelessWidget {
+  final List<MediaFile> mediaFiles;
+  final PageController pageController;
+  final bool isZoomed;
+  final bool showOverlays;
+  final int currentIndex;
+  final VoidCallback onTap;
+  final ValueChanged<bool> onZoomChanged;
+  final ValueChanged<int> onPageChanged;
+  final ValueChanged<int> onThumbnailTap;
+
+  const _MediaContent({
+    required this.mediaFiles,
+    required this.pageController,
+    required this.isZoomed,
+    required this.showOverlays,
+    required this.currentIndex,
+    required this.onTap,
+    required this.onZoomChanged,
+    required this.onPageChanged,
+    required this.onThumbnailTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        children: [
+          Expanded(
+            child: PageView.builder(
+              key: const Key('media_page_view'),
+              controller: pageController,
+              itemCount: mediaFiles.length,
+              physics: isZoomed ? const NeverScrollableScrollPhysics() : const PageScrollPhysics(),
+              onPageChanged: onPageChanged,
+              itemBuilder: (_, index) {
+                return MediaImage(
+                  key: Key('media_image_$index'),
+                  mediaFile: mediaFiles[index],
+                  onZoomChanged: onZoomChanged,
+                );
+              },
+            ),
+          ),
+          if (mediaFiles.length > 1)
+            _ThumbnailStrip(
+              key: const Key('media_thumbnail_strip'),
+              visible: showOverlays,
+              mediaFiles: mediaFiles,
+              currentIndex: currentIndex,
+              onThumbnailTap: onThumbnailTap,
+            ),
         ],
       ),
     );
