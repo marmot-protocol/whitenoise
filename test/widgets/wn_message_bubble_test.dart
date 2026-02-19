@@ -32,7 +32,7 @@ ChatMessage _message({
   ReactionSummary reactions = const ReactionSummary(byEmoji: [], userReactions: []),
 }) => ChatMessage(
   id: 'msg1',
-  pubkey: 'pubkey',
+  pubkey: testPubkeyA,
   content: content,
   createdAt: DateTime(2024),
   tags: const [],
@@ -122,7 +122,11 @@ void main() {
       testWidgets('shows reactions when present', (tester) async {
         final reactions = ReactionSummary(
           byEmoji: [
-            EmojiReaction(emoji: '👍', count: BigInt.from(2), users: const ['u1', 'u2']),
+            EmojiReaction(
+              emoji: '👍',
+              count: BigInt.from(2),
+              users: const [testPubkeyC, testPubkeyD],
+            ),
           ],
           userReactions: const [],
         );
@@ -138,7 +142,7 @@ void main() {
       testWidgets('passes currentUserPubkey to reactions', (tester) async {
         final reactions = ReactionSummary(
           byEmoji: [
-            EmojiReaction(emoji: '👍', count: BigInt.one, users: const ['currentUser']),
+            EmojiReaction(emoji: '👍', count: BigInt.one, users: const [testPubkeyB]),
           ],
           userReactions: const [],
         );
@@ -146,19 +150,19 @@ void main() {
           WnMessageBubble(
             message: _message(reactions: reactions),
             isOwnMessage: false,
-            currentUserPubkey: 'currentUser',
+            currentUserPubkey: testPubkeyB,
           ),
           tester,
         );
 
         final reactionBubbles = tester.widget<WnMessageReactions>(find.byType(WnMessageReactions));
-        expect(reactionBubbles.currentUserPubkey, 'currentUser');
+        expect(reactionBubbles.currentUserPubkey, testPubkeyB);
       });
 
       testWidgets('passes onReaction to reactions', (tester) async {
         final reactions = ReactionSummary(
           byEmoji: [
-            EmojiReaction(emoji: '👍', count: BigInt.one, users: const ['other']),
+            EmojiReaction(emoji: '👍', count: BigInt.one, users: const [testPubkeyC]),
           ],
           userReactions: const [],
         );
@@ -167,7 +171,7 @@ void main() {
           WnMessageBubble(
             message: _message(reactions: reactions),
             isOwnMessage: false,
-            currentUserPubkey: 'currentUser',
+            currentUserPubkey: testPubkeyB,
             onReaction: (emoji) => tappedEmoji = emoji,
           ),
           tester,

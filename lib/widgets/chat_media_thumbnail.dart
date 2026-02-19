@@ -39,7 +39,7 @@ class ChatMediaThumbnail extends HookWidget {
     }, [status]);
 
     final blurhash = mediaFile.fileMetadata?.blurhash;
-    final thumbnailSize = size == WnMediaThumbnailSize.large ? 56.h : 44.h;
+    final thumbnailSize = size == WnMediaThumbnailSize.large ? 56.w : 44.w;
 
     final Widget content;
     if (status == MediaDownloadStatus.error) {
