@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_message_quote.dart';
 import '../test_helpers.dart';
 
@@ -121,6 +122,40 @@ void main() {
         );
 
         expect(find.byKey(const Key('quote_thumbnail')), findsNothing);
+      });
+    });
+
+    group('background color', () {
+      testWidgets('uses backgroundPrimary when onCancel is null (Message type)', (tester) async {
+        await mountWidget(
+          const WnMessageQuote(author: 'Alice', text: 'Hello'),
+          tester,
+        );
+
+        final container = tester.widget<Container>(
+          find.descendant(
+            of: find.byType(WnMessageQuote),
+            matching: find.byType(Container).first,
+          ),
+        );
+        final decoration = container.decoration as BoxDecoration;
+        expect(decoration.color, SemanticColors.light.backgroundPrimary);
+      });
+
+      testWidgets('uses backgroundTertiary when onCancel is provided (Input type)', (tester) async {
+        await mountWidget(
+          WnMessageQuote(author: 'Alice', text: 'Hello', onCancel: () {}),
+          tester,
+        );
+
+        final container = tester.widget<Container>(
+          find.descendant(
+            of: find.byType(WnMessageQuote),
+            matching: find.byType(Container).first,
+          ),
+        );
+        final decoration = container.decoration as BoxDecoration;
+        expect(decoration.color, SemanticColors.light.backgroundTertiary);
       });
     });
 

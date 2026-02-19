@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:whitenoise/models/reply_preview.dart';
 import 'package:whitenoise/services/user_service.dart';
+import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+
+typedef ChatMessageQuoteData = ({
+  String messageId,
+  String authorPubkey,
+  FlutterMetadata? authorMetadata,
+  String content,
+  MediaFile? mediaFile,
+  bool isNotFound,
+});
 
 typedef ChatMessagesResult = ({
   int messageCount,
@@ -12,7 +21,8 @@ typedef ChatMessagesResult = ({
   bool isLoading,
   String? latestMessageId,
   String? latestMessagePubkey,
-  ReplyPreview? Function(String? replyId) getReplyPreview,
+  ChatMessageQuoteData? Function(String? replyId) getChatMessageQuote,
+  FlutterMetadata? Function(String pubkey) getAuthorMetadata,
 });
 
 ChatMessagesResult useChatMessages(String groupId) {
@@ -118,7 +128,7 @@ ChatMessagesResult useChatMessages(String groupId) {
     return null;
   }
 
-  ReplyPreview? getReplyPreview(String? replyId) {
+  ChatMessageQuoteData? getChatMessageQuote(String? replyId) {
     if (replyId == null) return null;
     final message = getMessageById(replyId);
     if (message == null || message.isDeleted) {
@@ -127,6 +137,7 @@ ChatMessagesResult useChatMessages(String groupId) {
         authorPubkey: '',
         authorMetadata: null,
         content: '',
+        mediaFile: null,
         isNotFound: true,
       );
     }
@@ -135,6 +146,7 @@ ChatMessagesResult useChatMessages(String groupId) {
       authorPubkey: message.pubkey,
       authorMetadata: getAuthorMetadata(message.pubkey),
       content: message.content,
+      mediaFile: message.mediaAttachments.isNotEmpty ? message.mediaAttachments.first : null,
       isNotFound: false,
     );
   }
@@ -146,6 +158,7 @@ ChatMessagesResult useChatMessages(String groupId) {
     isLoading: isLoading,
     latestMessageId: snapshot.data?.latestMessageId,
     latestMessagePubkey: snapshot.data?.latestMessagePubkey,
-    getReplyPreview: getReplyPreview,
+    getChatMessageQuote: getChatMessageQuote,
+    getAuthorMetadata: getAuthorMetadata,
   );
 }

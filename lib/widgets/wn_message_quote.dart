@@ -31,7 +31,7 @@ class WnMessageQuote extends StatelessWidget {
       child: Container(
         padding: EdgeInsets.all(4.w),
         decoration: BoxDecoration(
-          color: colors.backgroundPrimary,
+          color: onCancel != null ? colors.backgroundTertiary : colors.backgroundPrimary,
           borderRadius: BorderRadius.circular(4.r),
         ),
         child: IntrinsicHeight(
