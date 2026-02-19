@@ -39,12 +39,51 @@ class _KeepAliveTaskHandler extends TaskHandler {
   @override
   void onNotificationDismissed() {}
 }
+
+class ForegroundTaskApi {
+  void initCommunicationPort() => FlutterForegroundTask.initCommunicationPort();
+
+  void init({
+    required AndroidNotificationOptions androidNotificationOptions,
+    required IOSNotificationOptions iosNotificationOptions,
+    required ForegroundTaskOptions foregroundTaskOptions,
+  }) => FlutterForegroundTask.init(
+    androidNotificationOptions: androidNotificationOptions,
+    iosNotificationOptions: iosNotificationOptions,
+    foregroundTaskOptions: foregroundTaskOptions,
+  );
+
+  Future<bool> get isRunningService => FlutterForegroundTask.isRunningService;
+
+  Future<ServiceRequestResult> startService({
+    required int serviceId,
+    required String notificationTitle,
+    required String notificationText,
+    required Function callback,
+  }) => FlutterForegroundTask.startService(
+    serviceId: serviceId,
+    notificationTitle: notificationTitle,
+    notificationText: notificationText,
+    callback: callback,
+  );
+
+  Future<ServiceRequestResult> stopService() => FlutterForegroundTask.stopService();
+
+  Future<bool> get isIgnoringBatteryOptimizations =>
+      FlutterForegroundTask.isIgnoringBatteryOptimizations;
+
+  Future<bool> requestIgnoreBatteryOptimization() =>
+      FlutterForegroundTask.requestIgnoreBatteryOptimization();
+}
 // coverage:ignore-end
 
 class ForegroundService {
-  ForegroundService({bool? enabled}) : _enabled = enabled ?? Platform.isAndroid;
+  ForegroundService({bool? enabled, ForegroundTaskApi? api})
+    : _enabled = enabled ?? Platform.isAndroid,
+      _api = api ?? ForegroundTaskApi(); // coverage:ignore-line
 
   final bool _enabled;
+  final ForegroundTaskApi _api;
   bool _initialized = false;
 
   static const _serviceId = 888;
@@ -55,10 +94,9 @@ class ForegroundService {
     if (!_enabled) return;
     if (_initialized) return;
 
-    // coverage:ignore-start
-    FlutterForegroundTask.initCommunicationPort();
+    _api.initCommunicationPort();
 
-    FlutterForegroundTask.init(
+    _api.init(
       androidNotificationOptions: AndroidNotificationOptions(
         channelId: _channelId,
         channelName: _channelName,
@@ -73,22 +111,21 @@ class ForegroundService {
 
     _initialized = true;
     _logger.info('ForegroundService initialized');
-    // coverage:ignore-end
   }
 
   Future<void> start() async {
     if (!_enabled) return;
-    // coverage:ignore-start
+
     if (!_initialized) {
       await initialize();
     }
 
-    if (await FlutterForegroundTask.isRunningService) {
+    if (await _api.isRunningService) {
       _logger.info('Foreground service already running');
       return;
     }
 
-    final result = await FlutterForegroundTask.startService(
+    final result = await _api.startService(
       serviceId: _serviceId,
       notificationTitle: 'White Noise',
       notificationText: 'Connected to relays',
@@ -100,34 +137,29 @@ class ForegroundService {
     } else {
       _logger.warning('Failed to start foreground service: $result');
     }
-    // coverage:ignore-end
   }
 
   Future<void> stop() async {
     if (!_enabled) return;
 
-    // coverage:ignore-start
-    final result = await FlutterForegroundTask.stopService();
+    final result = await _api.stopService();
     if (result is ServiceRequestSuccess) {
       _logger.info('Foreground service stopped');
     } else {
       _logger.warning('Failed to stop foreground service: $result');
     }
-    // coverage:ignore-end
   }
 
   Future<bool> get isRunning async {
     if (!_enabled) return false;
-    return FlutterForegroundTask.isRunningService; // coverage:ignore-line
+    return _api.isRunningService;
   }
 
   Future<void> requestBatteryOptimizationExemption() async {
     if (!_enabled) return;
 
-    // coverage:ignore-start
-    if (!await FlutterForegroundTask.isIgnoringBatteryOptimizations) {
-      await FlutterForegroundTask.requestIgnoreBatteryOptimization();
+    if (!await _api.isIgnoringBatteryOptimizations) {
+      await _api.requestIgnoreBatteryOptimization();
     }
-    // coverage:ignore-end
   }
 }

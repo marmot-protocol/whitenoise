@@ -1,5 +1,6 @@
 import 'package:logging/logging.dart';
 import 'package:whitenoise/constants/nostr_event_kinds.dart';
+import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' as messages_api;
 import 'package:whitenoise/src/rust/api/utils.dart' as utils_api;
 
@@ -10,6 +11,37 @@ class MessageService {
   final String groupId;
 
   const MessageService({required this.pubkey, required this.groupId});
+
+  Future<void> sendMessage({
+    required String content,
+    String? replyToMessageId,
+    String? replyToMessagePubkey,
+    int? replyToMessageKind,
+    List<MediaFile> mediaFiles = const [],
+  }) async {
+    _logger.info('Sending message to group $groupId');
+
+    final replyTags =
+        (replyToMessageId != null && replyToMessagePubkey != null && replyToMessageKind != null)
+        ? await _eventReferenceTags(
+            eventId: replyToMessageId,
+            eventPubkey: replyToMessagePubkey,
+            eventKind: replyToMessageKind,
+          )
+        : <messages_api.Tag>[];
+
+    final mediaTags = await _buildMediaTags(mediaFiles);
+    final allTags = [...replyTags, ...mediaTags];
+
+    await messages_api.sendMessageToGroup(
+      pubkey: pubkey,
+      groupId: groupId,
+      message: content,
+      kind: NostrEventKinds.chatMessage,
+      tags: allTags.isEmpty ? null : allTags,
+    );
+    _logger.info('Message sent successfully');
+  }
 
   Future<void> sendTextMessage({
     required String content,
@@ -139,5 +171,28 @@ class MessageService {
       utils_api.tagFromVec(vec: ['p', eventPubkey, '']),
       utils_api.tagFromVec(vec: ['k', eventKind.toString()]),
     ]);
+  }
+
+  Future<List<messages_api.Tag>> _buildMediaTags(List<MediaFile> files) {
+    return Future.wait(
+      files.map((f) {
+        final metadata = f.fileMetadata;
+        final parts = [
+          'imeta',
+          'url ${f.blossomUrl}',
+          'm ${f.mimeType}',
+          'x ${f.originalFileHash}',
+          'filename ${metadata?.originalFilename ?? ''}',
+          'v mip04-v1',
+        ];
+        if (metadata?.blurhash != null) {
+          parts.add('blurhash ${metadata!.blurhash}');
+        }
+        if (metadata?.dimensions != null) {
+          parts.add('dim ${metadata!.dimensions}');
+        }
+        return utils_api.tagFromVec(vec: parts);
+      }),
+    );
   }
 }

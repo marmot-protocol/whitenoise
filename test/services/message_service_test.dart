@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/services/message_service.dart';
+import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
@@ -557,6 +558,240 @@ void main() {
 
       final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
       expect(tags[2].vec, ['k', '42']);
+    });
+  });
+
+  group('sendMessage', () {
+    MediaFile createMediaFile({
+      String id = 'media1',
+      String blossomUrl = 'https://blossom.example.com/file.jpg',
+      String mimeType = 'image/jpeg',
+      String encryptedFileHash = 'abc123',
+      FileMetadata? fileMetadata,
+    }) => MediaFile(
+      id: id,
+      mlsGroupId: testGroupId,
+      accountPubkey: _testPubkey,
+      filePath: '/path/to/file.jpg',
+      originalFileHash: 'original123',
+      encryptedFileHash: encryptedFileHash,
+      mimeType: mimeType,
+      mediaType: 'image',
+      blossomUrl: blossomUrl,
+      nostrKey: 'nostr123',
+      fileMetadata: fileMetadata,
+      createdAt: DateTime(2024),
+    );
+
+    test('sends message once', () async {
+      await service.sendMessage(content: 'Hello');
+
+      expect(mockApi.sentMessages.length, 1);
+    });
+
+    test('calls API with pubkey from constructor', () async {
+      await service.sendMessage(content: 'Hello');
+
+      expect(mockApi.sentMessages.first.pubkey, _testPubkey);
+    });
+
+    test('calls API with groupId from constructor', () async {
+      await service.sendMessage(content: 'Hello');
+
+      expect(mockApi.sentMessages.first.groupId, 'group1');
+    });
+
+    test('calls API with message content', () async {
+      await service.sendMessage(content: 'Hello World');
+
+      expect(mockApi.sentMessages.first.message, 'Hello World');
+    });
+
+    test('calls API with text message kind (9)', () async {
+      await service.sendMessage(content: 'Hello');
+
+      expect(mockApi.sentMessages.first.kind, 9);
+    });
+
+    test('sends message without tags when no reply or media', () async {
+      await service.sendMessage(content: 'Hello');
+
+      expect(mockApi.sentMessages.first.tags, isNull);
+    });
+
+    group('with reply params', () {
+      const testReplyId = 'reply_msg_id';
+      const testReplyPubkey = testPubkeyB;
+      const testReplyKind = 9;
+
+      test('sends e tag with reply message id', () async {
+        await service.sendMessage(
+          content: 'Reply content',
+          replyToMessageId: testReplyId,
+          replyToMessagePubkey: testReplyPubkey,
+          replyToMessageKind: testReplyKind,
+        );
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags[0].vec, ['e', testReplyId]);
+      });
+
+      test('sends p tag with reply message pubkey', () async {
+        await service.sendMessage(
+          content: 'Reply content',
+          replyToMessageId: testReplyId,
+          replyToMessagePubkey: testReplyPubkey,
+          replyToMessageKind: testReplyKind,
+        );
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags[1].vec, ['p', testReplyPubkey, '']);
+      });
+
+      test('sends k tag with reply message kind', () async {
+        await service.sendMessage(
+          content: 'Reply content',
+          replyToMessageId: testReplyId,
+          replyToMessagePubkey: testReplyPubkey,
+          replyToMessageKind: testReplyKind,
+        );
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags[2].vec, ['k', testReplyKind.toString()]);
+      });
+    });
+
+    group('with media files', () {
+      test('sends imeta tag for single media file', () async {
+        final media = createMediaFile();
+
+        await service.sendMessage(content: 'With media', mediaFiles: [media]);
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags.length, 1);
+        expect(tags[0].vec[0], 'imeta');
+      });
+
+      test('includes url in imeta tag', () async {
+        final media = createMediaFile(blossomUrl: 'https://blossom.test/image.jpg');
+
+        await service.sendMessage(content: 'With media', mediaFiles: [media]);
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags[0].vec, contains('url https://blossom.test/image.jpg'));
+      });
+
+      test('includes mime type in imeta tag', () async {
+        final media = createMediaFile(mimeType: 'image/png');
+
+        await service.sendMessage(content: 'With media', mediaFiles: [media]);
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags[0].vec, contains('m image/png'));
+      });
+
+      test('includes original file hash in imeta tag', () async {
+        final media = createMediaFile();
+
+        await service.sendMessage(content: 'With media', mediaFiles: [media]);
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags[0].vec, contains('x original123'));
+      });
+
+      test('includes version tag in imeta tag', () async {
+        final media = createMediaFile();
+
+        await service.sendMessage(content: 'With media', mediaFiles: [media]);
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags[0].vec, contains('v mip04-v1'));
+      });
+
+      test('always includes filename in imeta tag', () async {
+        final media = createMediaFile();
+
+        await service.sendMessage(content: 'With media', mediaFiles: [media]);
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags[0].vec, contains('filename '));
+      });
+
+      test('includes filename when available', () async {
+        final media = createMediaFile(
+          fileMetadata: const FileMetadata(originalFilename: 'photo.jpg'),
+        );
+
+        await service.sendMessage(content: 'With media', mediaFiles: [media]);
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags[0].vec, contains('filename photo.jpg'));
+      });
+
+      test('includes blurhash when available', () async {
+        final media = createMediaFile(
+          fileMetadata: const FileMetadata(blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'),
+        );
+
+        await service.sendMessage(content: 'With media', mediaFiles: [media]);
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags[0].vec, contains('blurhash LEHV6nWB2yk8pyo0adR*.7kCMdnj'));
+      });
+
+      test('includes dimensions when available', () async {
+        final media = createMediaFile(
+          fileMetadata: const FileMetadata(dimensions: '1920x1080'),
+        );
+
+        await service.sendMessage(content: 'With media', mediaFiles: [media]);
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags[0].vec, contains('dim 1920x1080'));
+      });
+
+      test('sends multiple imeta tags for multiple media files', () async {
+        final media1 = createMediaFile(blossomUrl: 'https://a.com/1.jpg');
+        final media2 = createMediaFile(id: 'media2', blossomUrl: 'https://a.com/2.jpg');
+
+        await service.sendMessage(content: 'With media', mediaFiles: [media1, media2]);
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags.length, 2);
+        expect(tags[0].vec[0], 'imeta');
+        expect(tags[1].vec[0], 'imeta');
+      });
+
+      test('omits blurhash and dim when not available', () async {
+        final media = createMediaFile();
+
+        await service.sendMessage(content: 'With media', mediaFiles: [media]);
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags[0].vec.any((s) => s.startsWith('blurhash')), isFalse);
+        expect(tags[0].vec.any((s) => s.startsWith('dim')), isFalse);
+      });
+    });
+
+    group('with reply and media', () {
+      test('sends both reply tags and media tags', () async {
+        final media = createMediaFile();
+
+        await service.sendMessage(
+          content: 'Reply with media',
+          replyToMessageId: 'reply_id',
+          replyToMessagePubkey: testPubkeyB,
+          replyToMessageKind: 9,
+          mediaFiles: [media],
+        );
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags.length, 4);
+        expect(tags[0].vec[0], 'e');
+        expect(tags[1].vec[0], 'p');
+        expect(tags[2].vec[0], 'k');
+        expect(tags[3].vec[0], 'imeta');
+      });
     });
   });
 }
