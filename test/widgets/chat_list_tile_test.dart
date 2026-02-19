@@ -26,6 +26,7 @@ ChatSummary _chatSummary({
   bool pendingConfirmation = false,
   String? lastMessageContent,
   String? lastMessageAuthor,
+  String? lastMessageAuthorDisplayName,
   String? groupImagePath,
   String? groupImageUrl,
   String? welcomerPubkey,
@@ -49,6 +50,7 @@ ChatSummary _chatSummary({
           author:
               lastMessageAuthor ??
               '0000000000000000000000000000000000000000000000000000000000000000',
+          authorDisplayName: lastMessageAuthorDisplayName,
           content: lastMessageContent,
           createdAt: DateTime(2024),
           mediaAttachmentCount: BigInt.zero,
@@ -279,16 +281,15 @@ void main() {
       });
 
       testWidgets('shows last message content when available', (tester) async {
-        await pumpTile(
-          tester,
-          _chatSummary(lastMessageContent: 'Hello world'),
-        );
+        await pumpTile(tester, _chatSummary(lastMessageContent: 'Hello world'));
         final finder = find.byType(WnChatListItem);
         final item = tester.widget<WnChatListItem>(finder);
         expect(item.subtitle, 'Hello world');
       });
 
-      testWidgets('shows prefix "You: " when last message is from me', (tester) async {
+      testWidgets('shows prefix "You: " when last message is from me', (
+        tester,
+      ) async {
         await pumpTile(
           tester,
           _chatSummary(
@@ -301,6 +302,102 @@ void main() {
         final item = tester.widget<WnChatListItem>(finder);
         expect(item.prefixSubtitle, 'You: ');
         expect(item.subtitle, 'Hello world');
+      });
+
+      testWidgets(
+        'shows prefix "{name}: " for group chat messages from others',
+        (tester) async {
+          await pumpTile(
+            tester,
+            _chatSummary(
+              name: 'Dev Team',
+              lastMessageContent: 'Hello everyone',
+              lastMessageAuthor: testPubkeyB,
+              lastMessageAuthorDisplayName: 'Alice',
+            ),
+          );
+
+          final finder = find.byType(WnChatListItem);
+          final item = tester.widget<WnChatListItem>(finder);
+          expect(item.prefixSubtitle, 'Alice: ');
+          expect(item.subtitle, 'Hello everyone');
+        },
+      );
+
+      testWidgets('does not show name prefix for DM messages from others', (
+        tester,
+      ) async {
+        await pumpTile(
+          tester,
+          _chatSummary(
+            name: 'Alice',
+            groupType: GroupType.directMessage,
+            lastMessageContent: 'Hello',
+            lastMessageAuthor: testPubkeyB,
+            lastMessageAuthorDisplayName: 'Alice',
+          ),
+        );
+
+        final finder = find.byType(WnChatListItem);
+        final item = tester.widget<WnChatListItem>(finder);
+        expect(item.prefixSubtitle, isNull);
+        expect(item.subtitle, 'Hello');
+      });
+
+      testWidgets('does not show name prefix when authorDisplayName is null', (
+        tester,
+      ) async {
+        await pumpTile(
+          tester,
+          _chatSummary(
+            name: 'Dev Team',
+            lastMessageContent: 'Hello',
+            lastMessageAuthor: testPubkeyB,
+          ),
+        );
+
+        final finder = find.byType(WnChatListItem);
+        final item = tester.widget<WnChatListItem>(finder);
+        expect(item.prefixSubtitle, isNull);
+        expect(item.subtitle, 'Hello');
+      });
+
+      testWidgets('does not show name prefix when authorDisplayName is empty', (
+        tester,
+      ) async {
+        await pumpTile(
+          tester,
+          _chatSummary(
+            name: 'Dev Team',
+            lastMessageContent: 'Hello',
+            lastMessageAuthor: testPubkeyB,
+            lastMessageAuthorDisplayName: '',
+          ),
+        );
+
+        final finder = find.byType(WnChatListItem);
+        final item = tester.widget<WnChatListItem>(finder);
+        expect(item.prefixSubtitle, isNull);
+        expect(item.subtitle, 'Hello');
+      });
+
+      testWidgets('shows "You:" not sender name for own messages in groups', (
+        tester,
+      ) async {
+        await pumpTile(
+          tester,
+          _chatSummary(
+            name: 'Dev Team',
+            lastMessageContent: 'My message',
+            lastMessageAuthor: testPubkeyA,
+            lastMessageAuthorDisplayName: 'My Name',
+          ),
+        );
+
+        final finder = find.byType(WnChatListItem);
+        final item = tester.widget<WnChatListItem>(finder);
+        expect(item.prefixSubtitle, 'You: ');
+        expect(item.subtitle, 'My message');
       });
 
       testWidgets('shows empty string when no last message', (tester) async {

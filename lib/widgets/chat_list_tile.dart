@@ -106,8 +106,15 @@ class ChatListTile extends HookConsumerWidget {
     }
 
     String? prefixSubtitle;
-    if (!isPending && chatSummary.lastMessage?.author == myPubkey) {
-      prefixSubtitle = '${context.l10n.you}: ';
+    if (!isPending && chatSummary.lastMessage != null) {
+      if (chatSummary.lastMessage!.author == myPubkey) {
+        prefixSubtitle = '${context.l10n.you}: ';
+      } else if (!isDm) {
+        final authorName = chatSummary.lastMessage!.authorDisplayName;
+        if (authorName != null && authorName.isNotEmpty) {
+          prefixSubtitle = '$authorName: ';
+        }
+      }
     }
 
     final avatarColorKey = isDm
