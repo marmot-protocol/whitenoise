@@ -404,6 +404,103 @@ class AppLocalizationsIt extends AppLocalizations {
   String get goBack => 'Torna indietro';
 
   @override
+  String get createGroup => 'Crea gruppo';
+
+  @override
+  String get newGroupChat => 'Nuova chat di gruppo';
+
+  @override
+  String get selectMembers => 'Seleziona Membri';
+
+  @override
+  String selectedCount(int count) {
+    return '$count selezionati';
+  }
+
+  @override
+  String get clearSelection => 'Cancella';
+
+  @override
+  String get continueButton => 'Continua';
+
+  @override
+  String get setUpGroup => 'Configura gruppo';
+
+  @override
+  String get groupName => 'Nome del Gruppo';
+
+  @override
+  String get groupNamePlaceholder => 'Inserisci il nome del gruppo';
+
+  @override
+  String get groupDescription => 'Descrizione del Gruppo';
+
+  @override
+  String get description => 'Descrizione';
+
+  @override
+  String get groupDescriptionPlaceholder => 'A cosa serve questo gruppo?';
+
+  @override
+  String members(int count) {
+    return '$count membri';
+  }
+
+  @override
+  String invitingMembers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Invito di membri:',
+      one: 'Invito di membro:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get usersWithoutKeyPackages =>
+      'Utenti senza pacchetti di chiavi (non possono essere aggiunti)';
+
+  @override
+  String usersNotOnWhiteNoise(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Questi utenti non sono su White Noise',
+      one: 'Questo utente non è su White Noise',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String usersNotOnWhiteNoiseDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Questi utenti non possono essere aggiunti al gruppo perché non hanno White Noise installato o non hanno ancora pubblicato i loro pacchetti di chiavi.',
+      one:
+          'Questo utente non può essere aggiunto al gruppo perché non ha White Noise installato o non ha ancora pubblicato il suo pacchetto di chiavi.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get uploadingImage => 'Caricamento immagine...';
+
+  @override
+  String get creatingGroup => 'Creazione gruppo...';
+
+  @override
+  String get groupNameRequired => 'Il nome del gruppo è obbligatorio';
+
+  @override
+  String get noUsersWithKeyPackages => 'Nessun utente con pacchetti di chiavi da aggiungere';
+
+  @override
+  String get createGroupFailed => 'Creazione gruppo non riuscita';
+
+  @override
   String get reportError => 'Segnala errore';
 
   @override
@@ -440,6 +537,9 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get reply => 'Rispondi';
+
+  @override
+  String get copyMessage => 'Copia';
 
   @override
   String get delete => 'Elimina';
@@ -804,4 +904,112 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get loginPasteFailed => 'Impossibile incollare dagli appunti';
+
+  @override
+  String get openSettings => 'Apri impostazioni';
+
+  @override
+  String get scannerError => 'Errore scanner';
+
+  @override
+  String get scannerErrorDescription => 'Qualcosa è andato storto con lo scanner. Riprova.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'Abilita l\'accesso alla fotocamera nelle impostazioni del dispositivo per scansionare i codici QR.';
+
+  @override
+  String get retry => 'Riprova';
+
+  @override
+  String get groupInformation => 'Informazioni del gruppo';
+
+  @override
+  String get editGroup => 'Modifica gruppo';
+
+  @override
+  String get editGroupAction => 'Modifica gruppo';
+
+  @override
+  String get groupNameLabel => 'Nome';
+
+  @override
+  String get groupDescriptionLabel => 'Informazioni';
+
+  @override
+  String membersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Membri',
+      one: '1 Membro',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminBadge => 'Admin';
+
+  @override
+  String get membersLabel => 'Membri:';
+
+  @override
+  String get memberBadge => 'Membro';
+
+  @override
+  String get sendMessage => 'Invia messaggio';
+
+  @override
+  String get makeAdmin => 'Rendi admin';
+
+  @override
+  String get removeAdminRole => 'Rimuovi admin';
+
+  @override
+  String get removeFromGroup => 'Rimuovi dal gruppo';
+
+  @override
+  String get removeFromGroupConfirmation => 'Rimuovere dal gruppo?';
+
+  @override
+  String get removeFromGroupWarning =>
+      'Questo membro verrà rimosso dal gruppo e non potrà più vedere i nuovi messaggi.';
+
+  @override
+  String get makeAdminConfirmation => 'Rendere admin?';
+
+  @override
+  String get makeAdminWarning =>
+      'Questo membro potrà gestire il gruppo, aggiungere o rimuovere membri e modificare le impostazioni del gruppo.';
+
+  @override
+  String get removeAdminConfirmation => 'Rimuovere admin?';
+
+  @override
+  String get removeAdminWarning =>
+      'Questo membro non potrà più gestire il gruppo, aggiungere o rimuovere membri né modificare le impostazioni del gruppo.';
+
+  @override
+  String get failedToRemoveFromGroup => 'Impossibile rimuovere il membro. Riprova.';
+
+  @override
+  String get failedToMakeAdmin => 'Impossibile rendere admin. Riprova.';
+
+  @override
+  String get failedToRemoveAdmin => 'Impossibile rimuovere admin. Riprova.';
+
+  @override
+  String get groupUpdatedSuccessfully => 'Gruppo aggiornato con successo';
+
+  @override
+  String get groupLoadError => 'Impossibile caricare il gruppo. Riprova.';
+
+  @override
+  String get groupSaveError => 'Impossibile salvare il gruppo. Riprova.';
+
+  @override
+  String get failedToFetchGroupMembers => 'Impossibile caricare i membri del gruppo. Riprova.';
+
+  @override
+  String get failedToAddMembers => 'Impossibile aggiungere membri. Riprova.';
 }

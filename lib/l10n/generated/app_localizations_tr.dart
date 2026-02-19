@@ -403,6 +403,102 @@ class AppLocalizationsTr extends AppLocalizations {
   String get goBack => 'Geri dön';
 
   @override
+  String get createGroup => 'Grup oluştur';
+
+  @override
+  String get newGroupChat => 'Yeni grup sohbeti';
+
+  @override
+  String get selectMembers => 'Üye Seç';
+
+  @override
+  String selectedCount(int count) {
+    return '$count seçildi';
+  }
+
+  @override
+  String get clearSelection => 'Temizle';
+
+  @override
+  String get continueButton => 'Devam Et';
+
+  @override
+  String get setUpGroup => 'Grup oluştur';
+
+  @override
+  String get groupName => 'Grup Adı';
+
+  @override
+  String get groupNamePlaceholder => 'Grup adını girin';
+
+  @override
+  String get groupDescription => 'Grup Açıklaması';
+
+  @override
+  String get description => 'Açıklama';
+
+  @override
+  String get groupDescriptionPlaceholder => 'Bu grup ne için?';
+
+  @override
+  String members(int count) {
+    return '$count üye';
+  }
+
+  @override
+  String invitingMembers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Üyeler davet ediliyor:',
+      one: 'Üye davet ediliyor:',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get usersWithoutKeyPackages => 'Anahtar paketi olmayan kullanıcılar (eklenemez)';
+
+  @override
+  String usersNotOnWhiteNoise(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Bu kullanıcılar White Noise\'da değil',
+      one: 'Bu kullanıcı White Noise\'da değil',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String usersNotOnWhiteNoiseDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Bu kullanıcılar gruba eklenemez çünkü White Noise yüklü değil veya henüz anahtar paketlerini yayınlamamışlar.',
+      one:
+          'Bu kullanıcı gruba eklenemez çünkü White Noise yüklü değil veya henüz anahtar paketini yayınlamamış.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get uploadingImage => 'Resim yükleniyor...';
+
+  @override
+  String get creatingGroup => 'Grup oluşturuluyor...';
+
+  @override
+  String get groupNameRequired => 'Grup adı gerekli';
+
+  @override
+  String get noUsersWithKeyPackages => 'Eklenecek anahtar paketi olan kullanıcı yok';
+
+  @override
+  String get createGroupFailed => 'Grup oluşturma başarısız oldu';
+
+  @override
   String get reportError => 'Hata bildir';
 
   @override
@@ -439,6 +535,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get reply => 'Yanıtla';
+
+  @override
+  String get copyMessage => 'Kopyala';
 
   @override
   String get delete => 'Sil';
@@ -804,4 +903,112 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get loginPasteFailed => 'Panodan yapıştırma başarısız';
+
+  @override
+  String get openSettings => 'Ayarları aç';
+
+  @override
+  String get scannerError => 'Tarayıcı hatası';
+
+  @override
+  String get scannerErrorDescription => 'Tarayıcıda bir hata oluştu. Lütfen tekrar deneyin.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'QR kodlarını taramak için cihaz ayarlarınızda kamera erişimini etkinleştirin.';
+
+  @override
+  String get retry => 'Yeniden dene';
+
+  @override
+  String get groupInformation => 'Grup Bilgileri';
+
+  @override
+  String get editGroup => 'Grubu düzenle';
+
+  @override
+  String get editGroupAction => 'Grubu düzenle';
+
+  @override
+  String get groupNameLabel => 'Ad';
+
+  @override
+  String get groupDescriptionLabel => 'Hakkında';
+
+  @override
+  String membersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Üye',
+      one: '1 Üye',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminBadge => 'Yönetici';
+
+  @override
+  String get membersLabel => 'Üyeler:';
+
+  @override
+  String get memberBadge => 'Üye';
+
+  @override
+  String get sendMessage => 'Mesaj gönder';
+
+  @override
+  String get makeAdmin => 'Yönetici yap';
+
+  @override
+  String get removeAdminRole => 'Yöneticilikten çıkar';
+
+  @override
+  String get removeFromGroup => 'Gruptan çıkar';
+
+  @override
+  String get removeFromGroupConfirmation => 'Gruptan çıkarılsın mı?';
+
+  @override
+  String get removeFromGroupWarning =>
+      'Bu üye gruptan çıkarılacak ve artık yeni mesajları göremeyecek.';
+
+  @override
+  String get makeAdminConfirmation => 'Yönetici yapılsın mı?';
+
+  @override
+  String get makeAdminWarning =>
+      'Bu üye grubu yönetebilecek, üye ekleyip çıkarabilecek ve grup ayarlarını değiştirebilecek.';
+
+  @override
+  String get removeAdminConfirmation => 'Yöneticilik kaldırılsın mı?';
+
+  @override
+  String get removeAdminWarning =>
+      'Bu üye artık grubu yönetemeyecek, üye ekleyip çıkaramayacak veya grup ayarlarını değiştiremeyecek.';
+
+  @override
+  String get failedToRemoveFromGroup => 'Üye çıkarılamadı. Lütfen tekrar deneyin.';
+
+  @override
+  String get failedToMakeAdmin => 'Yönetici yapılamadı. Lütfen tekrar deneyin.';
+
+  @override
+  String get failedToRemoveAdmin => 'Yöneticilik kaldırılamadı. Lütfen tekrar deneyin.';
+
+  @override
+  String get groupUpdatedSuccessfully => 'Grup başarıyla güncellendi';
+
+  @override
+  String get groupLoadError => 'Grup yüklenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get groupSaveError => 'Grup kaydedilemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get failedToFetchGroupMembers => 'Grup üyeleri yüklenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get failedToAddMembers => 'Üye eklenemedi. Lütfen tekrar deneyin.';
 }

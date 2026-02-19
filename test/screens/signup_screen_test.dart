@@ -55,7 +55,10 @@ class _MockAuthNotifier extends AuthNotifier {
 void main() {
   setUpAll(() => RustLib.initMock(api: _MockApi()));
 
-  Future<void> pumpSignupScreen(WidgetTester tester, {List overrides = const []}) async {
+  Future<void> pumpSignupScreen(
+    WidgetTester tester, {
+    List overrides = const [],
+  }) async {
     await mountTestApp(tester, overrides: overrides);
     Routes.pushToSignup(tester.element(find.byType(Scaffold)));
     await tester.pumpAndSettle();
@@ -70,6 +73,41 @@ void main() {
     testWidgets('displays name input field', (tester) async {
       await pumpSignupScreen(tester);
       expect(find.text('Choose a name'), findsOneWidget);
+    });
+
+    testWidgets('prefills display name field with generated value', (
+      tester,
+    ) async {
+      await pumpSignupScreen(tester);
+
+      final nameField = tester.widget<TextField>(find.byType(TextField).first);
+      final generatedName = nameField.controller?.text ?? '';
+
+      expect(generatedName, isNotEmpty);
+      expect(generatedName, contains(' '));
+    });
+
+    testWidgets('allows replacing generated display name', (tester) async {
+      await pumpSignupScreen(tester);
+
+      await tester.enterText(find.byType(TextField).first, 'Custom Name');
+      await tester.pump();
+
+      final nameField = tester.widget<TextField>(find.byType(TextField).first);
+      expect(nameField.controller?.text, 'Custom Name');
+    });
+
+    testWidgets('clears display name when clear button is tapped', (tester) async {
+      await pumpSignupScreen(tester);
+
+      final nameFieldBefore = tester.widget<TextField>(find.byType(TextField).first);
+      expect(nameFieldBefore.controller?.text, isNotEmpty);
+
+      await tester.tap(find.byKey(const Key('signup_display_name_clear_button')));
+      await tester.pump();
+
+      final nameFieldAfter = tester.widget<TextField>(find.byType(TextField).first);
+      expect(nameFieldAfter.controller?.text, isEmpty);
     });
 
     testWidgets('displays bio input field', (tester) async {
@@ -102,7 +140,9 @@ void main() {
         expect(find.byType(HomeScreen), findsOneWidget);
       });
 
-      testWidgets('tapping outside slate returns to home screen', (tester) async {
+      testWidgets('tapping outside slate returns to home screen', (
+        tester,
+      ) async {
         await pumpSignupScreen(tester);
         // Tap on the left margin area where the background is exposed
         await tester.tapAt(const Offset(5, 400));
@@ -118,7 +158,9 @@ void main() {
         expect(find.byKey(const Key('learn_more_arrow')), findsOneWidget);
       });
 
-      testWidgets('tapping Learn more shows onboarding carousel', (tester) async {
+      testWidgets('tapping Learn more shows onboarding carousel', (
+        tester,
+      ) async {
         await pumpSignupScreen(tester);
         expect(find.byType(WnOnboardingCarousel), findsNothing);
 
@@ -151,7 +193,9 @@ void main() {
         expect(find.text('Setup profile'), findsOneWidget);
       });
 
-      testWidgets('tapping outside does not dismiss when carousel is visible', (tester) async {
+      testWidgets('tapping outside does not dismiss when carousel is visible', (
+        tester,
+      ) async {
         await pumpSignupScreen(tester);
         await tester.tap(find.byKey(const Key('learn_more_button')));
         await tester.pumpAndSettle();
@@ -195,50 +239,51 @@ void main() {
     });
 
     group('keyboard', () {
-      testWidgets(
-        'inputs remain visible when keyboard appears',
-        (tester) async {
-          tester.view.physicalSize = const Size(390, 550);
-          tester.view.devicePixelRatio = 1.0;
-          addTearDown(tester.view.reset);
+      testWidgets('inputs remain visible when keyboard appears', (
+        tester,
+      ) async {
+        tester.view.physicalSize = const Size(390, 550);
+        tester.view.devicePixelRatio = 1.0;
+        addTearDown(tester.view.reset);
 
-          await tester.pumpWidget(
-            ProviderScope(
-              child: ScreenUtilInit(
-                designSize: testDesignSize,
-                builder: (_, _) => Consumer(
-                  builder: (context, ref, _) {
-                    return MaterialApp.router(
-                      routerConfig: Routes.build(ref),
-                      locale: const Locale('en'),
-                      localizationsDelegates: AppLocalizations.localizationsDelegates,
-                      supportedLocales: AppLocalizations.supportedLocales,
-                    );
-                  },
-                ),
+        await tester.pumpWidget(
+          ProviderScope(
+            child: ScreenUtilInit(
+              designSize: testDesignSize,
+              builder: (_, _) => Consumer(
+                builder: (context, ref, _) {
+                  return MaterialApp.router(
+                    routerConfig: Routes.build(ref),
+                    locale: const Locale('en'),
+                    localizationsDelegates: AppLocalizations.localizationsDelegates,
+                    supportedLocales: AppLocalizations.supportedLocales,
+                  );
+                },
               ),
             ),
-          );
+          ),
+        );
 
-          Routes.pushToSignup(tester.element(find.byType(Scaffold)));
-          await tester.pumpAndSettle();
+        Routes.pushToSignup(tester.element(find.byType(Scaffold)));
+        await tester.pumpAndSettle();
 
-          expect(find.text('Choose a name'), findsOneWidget);
-          expect(find.text('Sign Up'), findsOneWidget);
+        expect(find.text('Choose a name'), findsOneWidget);
+        expect(find.text('Sign Up'), findsOneWidget);
 
-          tester.view.viewInsets = const FakeViewPadding(bottom: 300);
-          await tester.pump();
-          await tester.pump(const Duration(milliseconds: 400));
+        tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 400));
 
-          expect(find.text('Choose a name'), findsOneWidget);
+        expect(find.text('Choose a name'), findsOneWidget);
 
-          addTearDown(() => tester.view.resetViewInsets());
-        },
-      );
+        addTearDown(() => tester.view.resetViewInsets());
+      });
     });
 
     group('image picker', () {
-      testWidgets('shows system notice when image picker fails', (tester) async {
+      testWidgets('shows system notice when image picker fails', (
+        tester,
+      ) async {
         TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
           const MethodChannel('plugins.flutter.io/image_picker'),
           (MethodCall methodCall) async {
@@ -258,7 +303,10 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(WnSystemNotice), findsOneWidget);
-        expect(find.text('Failed to pick image. Please try again.'), findsOneWidget);
+        expect(
+          find.text('Failed to pick image. Please try again.'),
+          findsOneWidget,
+        );
       });
 
       testWidgets('dismisses notice after auto-hide duration', (tester) async {

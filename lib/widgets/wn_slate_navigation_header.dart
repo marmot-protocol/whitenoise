@@ -8,12 +8,14 @@ enum WnSlateNavigationType { close, back }
 class WnSlateNavigationHeader extends StatelessWidget {
   const WnSlateNavigationHeader({
     super.key,
-    required this.title,
+    this.title,
+    this.titleWidget,
     this.type = WnSlateNavigationType.close,
     this.onNavigate,
-  });
+  }) : assert(title != null || titleWidget != null, 'title or titleWidget is required');
 
-  final String title;
+  final String? title;
+  final Widget? titleWidget;
   final WnSlateNavigationType type;
   final VoidCallback? onNavigate;
 
@@ -42,13 +44,15 @@ class WnSlateNavigationHeader extends StatelessWidget {
                 right: hasLeadingAction ? 54.w : 0,
               ),
               child: Center(
-                child: Text(
-                  title,
-                  style: context.typographyScaled.semiBold16.copyWith(
-                    color: colors.backgroundContentPrimary,
-                  ),
-                  overflow: TextOverflow.ellipsis,
-                ),
+                child:
+                    titleWidget ??
+                    Text(
+                      title!,
+                      style: context.typographyScaled.semiBold16.copyWith(
+                        color: colors.backgroundContentPrimary,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                    ),
               ),
             ),
           ),

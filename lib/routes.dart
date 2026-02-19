@@ -16,7 +16,10 @@ import 'package:whitenoise/screens/chat_list_screen.dart' show ChatListScreen;
 import 'package:whitenoise/screens/chat_screen.dart' show ChatScreen;
 import 'package:whitenoise/screens/developer_settings_screen.dart' show DeveloperSettingsScreen;
 import 'package:whitenoise/screens/donate_screen.dart' show DonateScreen;
+import 'package:whitenoise/screens/edit_group_screen.dart' show EditGroupScreen;
 import 'package:whitenoise/screens/edit_profile_screen.dart' show EditProfileScreen;
+import 'package:whitenoise/screens/group_info_screen.dart' show GroupInfoScreen;
+import 'package:whitenoise/screens/group_member_screen.dart' show GroupMemberScreen;
 import 'package:whitenoise/screens/home_screen.dart' show HomeScreen;
 import 'package:whitenoise/screens/login_screen.dart' show LoginScreen;
 import 'package:whitenoise/screens/network_screen.dart' show NetworkScreen;
@@ -25,6 +28,7 @@ import 'package:whitenoise/screens/profile_keys_screen.dart' show ProfileKeysScr
 import 'package:whitenoise/screens/relay_resolution_screen.dart' show RelayResolutionScreen;
 import 'package:whitenoise/screens/scan_npub_screen.dart' show ScanNpubScreen;
 import 'package:whitenoise/screens/scan_nsec_screen.dart' show ScanNsecScreen;
+import 'package:whitenoise/screens/set_up_group_screen.dart' show SetUpGroupScreen;
 import 'package:whitenoise/screens/settings_screen.dart' show SettingsScreen;
 import 'package:whitenoise/screens/share_profile_screen.dart' show ShareProfileScreen;
 import 'package:whitenoise/screens/sign_out_screen.dart' show SignOutScreen;
@@ -32,8 +36,10 @@ import 'package:whitenoise/screens/signup_screen.dart' show SignupScreen;
 import 'package:whitenoise/screens/start_chat_screen.dart' show StartChatScreen;
 import 'package:whitenoise/screens/switch_profile_screen.dart' show SwitchProfileScreen;
 import 'package:whitenoise/screens/user_search_screen.dart' show UserSearchScreen;
+import 'package:whitenoise/screens/user_selection_screen.dart' show UserSelectionScreen;
 import 'package:whitenoise/screens/wip_screen.dart' show WipScreen;
 import 'package:whitenoise/src/rust/api/metadata.dart' show FlutterMetadata;
+import 'package:whitenoise/src/rust/api/users.dart' show User;
 import 'package:whitenoise/widgets/wn_slate_content_transition.dart' show WnSlateContentTransition;
 
 abstract final class Routes {
@@ -60,8 +66,13 @@ abstract final class Routes {
   static const _network = '/network';
   static const _relayResolution = '/relay-resolution';
   static const _userSearch = '/user-search';
+  static const _userSelection = '/user-selection';
+  static const _setUpGroup = '/set-up-group';
   static const _startChat = '/start-chat/:userPubkey';
   static const _chatInfo = '/chat-info/:userPubkey';
+  static const _groupInfo = '/group-info/:groupId';
+  static const _editGroup = '/edit-group/:groupId';
+  static const _groupMember = '/group-member/:groupId/:memberPubkey';
   static const _invite = '/invites/:mlsGroupId';
   static const _chat = '/chats/:groupId';
   static const _publicRoutes = {_home, _login, _scanNsec, _signup, _relayResolution};
@@ -238,6 +249,32 @@ abstract final class Routes {
           ),
         ),
         GoRoute(
+          path: _userSelection,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: const UserSelectionScreen(),
+          ),
+        ),
+        GoRoute(
+          name: 'setUpGroup',
+          path: _setUpGroup,
+          pageBuilder: (context, state) {
+            final selectedUsers = state.extra as List<User>?;
+            if (selectedUsers == null || selectedUsers.isEmpty) {
+              return _navigationTransition(
+                state: state,
+                child: const UserSelectionScreen(),
+              );
+            }
+            return _navigationTransition(
+              state: state,
+              child: SetUpGroupScreen(
+                selectedUsers: selectedUsers,
+              ),
+            );
+          },
+        ),
+        GoRoute(
           name: 'startChat',
           path: _startChat,
           pageBuilder: (context, state) => _navigationTransition(
@@ -255,6 +292,35 @@ abstract final class Routes {
             state: state,
             child: ChatInfoScreen(userPubkey: state.pathParameters['userPubkey']!),
             opaque: false,
+          ),
+        ),
+        GoRoute(
+          name: 'groupInfo',
+          path: _groupInfo,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: GroupInfoScreen(groupId: state.pathParameters['groupId']!),
+            opaque: false,
+          ),
+        ),
+        GoRoute(
+          name: 'groupMember',
+          path: _groupMember,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: GroupMemberScreen(
+              groupId: state.pathParameters['groupId']!,
+              memberPubkey: state.pathParameters['memberPubkey']!,
+            ),
+            opaque: false,
+          ),
+        ),
+        GoRoute(
+          name: 'editGroup',
+          path: _editGroup,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: EditGroupScreen(groupId: state.pathParameters['groupId']!),
           ),
         ),
         GoRoute(
@@ -395,6 +461,17 @@ abstract final class Routes {
     GoRouter.of(context).push(_userSearch);
   }
 
+  static void pushToUserSelection(BuildContext context) {
+    GoRouter.of(context).push(_userSelection);
+  }
+
+  static void pushToSetUpGroup(BuildContext context, List<User> selectedUsers) {
+    GoRouter.of(context).pushNamed(
+      'setUpGroup',
+      extra: selectedUsers,
+    );
+  }
+
   static void pushToInvite(BuildContext context, String mlsGroupId) {
     GoRouter.of(context).pushNamed('invite', pathParameters: {'mlsGroupId': mlsGroupId});
   }
@@ -419,6 +496,21 @@ abstract final class Routes {
 
   static void pushToNetwork(BuildContext context) {
     GoRouter.of(context).push(_network);
+  }
+
+  static void pushToGroupInfo(BuildContext context, String groupId) {
+    GoRouter.of(context).pushNamed('groupInfo', pathParameters: {'groupId': groupId});
+  }
+
+  static void pushToEditGroup(BuildContext context, String groupId) {
+    GoRouter.of(context).pushNamed('editGroup', pathParameters: {'groupId': groupId});
+  }
+
+  static void pushToGroupMember(BuildContext context, String groupId, String memberPubkey) {
+    GoRouter.of(context).pushNamed(
+      'groupMember',
+      pathParameters: {'groupId': groupId, 'memberPubkey': memberPubkey},
+    );
   }
 
   static void pushToChatInfo(BuildContext context, String userPubkey) {

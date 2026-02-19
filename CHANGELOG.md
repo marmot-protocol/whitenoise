@@ -43,9 +43,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Pass metadata to start chat screen for instant display [PR #234](https://github.com/marmot-protocol/whitenoise/pull/234)
 - Invite callout [PR #230](https://github.com/marmot-protocol/whitenoise/pull/230)
 - Show replies in invite screen [PR #232](https://github.com/marmot-protocol/whitenoise/pull/232)
+- Show last message for invites in chat list [#310](https://github.com/marmot-protocol/whitenoise/pull/310)
+- Create group [PR #288](https://github.com/marmot-protocol/whitenoise/pull/288)
+- Group info & management [PR #315](https://github.com/marmot-protocol/whitenoise/pull/315)
+- Copy message to clipboard from message actions [PR #317](https://github.com/marmot-protocol/whitenoise/pull/317)
 
 ### Changed
 
+- Improve profile onboarding and account add flows: signup now pre-fills a generated display name with one-tap clear, and the "Add a new profile" slate is compact and bottom-anchored. [PR #313](https://github.com/marmot-protocol/whitenoise/pull/313)
 - Redesign chat info as a non-opaque over-chat slate matching Figma: updated action layout, refined spacing, lighter overlay blur, and header name/avatar tap navigation to chat info. [PR #303](https://github.com/marmot-protocol/whitenoise/pull/303)
 - Redesign user list tile to match profile switcher pattern [PR #234](https://github.com/marmot-protocol/whitenoise/pull/234)
 - Sort follows list: users with metadata alphabetically first, then users without [PR #234](https://github.com/marmot-protocol/whitenoise/pull/234)
@@ -78,5 +83,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Ignore duplicate newMessage for accounts on same device [PR #244](https://github.com/marmot-protocol/whitenoise/pull/244)
 - Sanitize malformed UTF-16 in user metadata to prevent rendering crashes [PR #234](https://github.com/marmot-protocol/whitenoise/pull/234)
 - Lock app orientation to portrait mode [PR #235](https://github.com/marmot-protocol/whitenoise/pull/235)
+- Fix camera permission flow [PR #194](https://github.com/marmot-protocol/sloth/pull/194)
 
 ### Security

@@ -8,6 +8,7 @@ import 'package:whitenoise/screens/add_profile_screen.dart';
 import 'package:whitenoise/screens/login_screen.dart';
 import 'package:whitenoise/screens/signup_screen.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/wn_slate.dart';
 
 import '../mocks/mock_secure_storage.dart';
 import '../mocks/mock_wn_api.dart';
@@ -53,6 +54,26 @@ void main() {
     testWidgets('displays Sign Up button', (tester) async {
       await pumpAddProfileScreen(tester);
       expect(find.text('Sign Up'), findsOneWidget);
+    });
+
+    testWidgets('renders compact slate height for action-only content', (tester) async {
+      await pumpAddProfileScreen(tester);
+
+      final scaffoldSize = tester.getSize(find.byType(Scaffold));
+      final slateSize = tester.getSize(find.byType(WnSlate));
+
+      expect(slateSize.height, lessThan(scaffoldSize.height * 0.6));
+    });
+
+    testWidgets('anchors compact slate to bottom of screen', (tester) async {
+      await pumpAddProfileScreen(tester);
+
+      final scaffoldSize = tester.getSize(find.byType(Scaffold));
+      final slateTopLeft = tester.getTopLeft(find.byType(WnSlate));
+      final slateBottomRight = tester.getBottomRight(find.byType(WnSlate));
+
+      expect(slateTopLeft.dy, greaterThan(scaffoldSize.height * 0.2));
+      expect(scaffoldSize.height - slateBottomRight.dy, lessThanOrEqualTo(40));
     });
 
     testWidgets('tapping Login navigates to LoginScreen', (tester) async {

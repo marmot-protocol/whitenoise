@@ -1,9 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart'
-    show HookWidget, useAnimationController, useEffect, useState, useTextEditingController;
+    show
+        HookWidget,
+        useAnimationController,
+        useEffect,
+        useMemoized,
+        useState,
+        useTextEditingController;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart' show Gap;
 import 'package:hooks_riverpod/hooks_riverpod.dart' show HookConsumerWidget, WidgetRef;
+import 'package:unique_names_generator/unique_names_generator.dart';
 import 'package:whitenoise/hooks/use_image_picker.dart';
 import 'package:whitenoise/hooks/use_signup.dart' show useSignup;
 import 'package:whitenoise/l10n/l10n.dart';
@@ -12,6 +19,7 @@ import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart' show WnAvatar, WnAvatarSize;
 import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/widgets/wn_icon.dart' show WnIcons;
 import 'package:whitenoise/widgets/wn_input.dart' show WnInput;
 import 'package:whitenoise/widgets/wn_input_text_area.dart' show WnInputTextArea;
 import 'package:whitenoise/widgets/wn_onboarding_carousel.dart' show WnOnboardingCarousel;
@@ -27,12 +35,29 @@ class SignupScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
-    final displayNameController = useTextEditingController();
+    final generatedDisplayName = useMemoized(() {
+      final generator = UniqueNamesGenerator(
+        config: Config(
+          length: 2,
+          dictionaries: [adjectives, animals],
+          separator: ' ',
+          style: Style.capital,
+        ),
+      );
+      return generator.generate();
+    });
+    final displayNameController = useTextEditingController(
+      text: generatedDisplayName,
+    );
     final bioController = useTextEditingController();
     final (:state, :submit, :onImageSelected, :clearErrors) = useSignup(
       () => ref.read(authProvider.notifier).signup(),
     );
-    final (:pickImage, error: imagePickerError, clearError: clearImagePickerError) = useImagePicker(
+    final (
+      :pickImage,
+      error: imagePickerError,
+      clearError: clearImagePickerError,
+    ) = useImagePicker(
       onImageSelected: onImageSelected,
     );
     final noticeMessage = useState<String?>(null);
@@ -149,7 +174,12 @@ class SignupScreen extends HookConsumerWidget {
                                 : null,
                             child: SingleChildScrollView(
                               child: Padding(
-                                padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+                                padding: EdgeInsets.fromLTRB(
+                                  14.w,
+                                  0,
+                                  14.w,
+                                  14.h,
+                                ),
                                 child: Column(
                                   spacing: 16.h,
                                   mainAxisSize: MainAxisSize.min,
@@ -174,6 +204,14 @@ class SignupScreen extends HookConsumerWidget {
                                       controller: displayNameController,
                                       errorText: state.displayNameError,
                                       onChanged: (_) => clearErrors(),
+                                      inlineActionIcon: WnIcons.closeSmall,
+                                      inlineActionKey: const Key(
+                                        'signup_display_name_clear_button',
+                                      ),
+                                      inlineActionOnPressed: () {
+                                        displayNameController.clear();
+                                        clearErrors();
+                                      },
                                     ),
                                     WnInputTextArea(
                                       label: context.l10n.introduceYourself,
@@ -299,10 +337,7 @@ class _LearnMoreButton extends HookWidget {
 }
 
 class _BackToSignUpButton extends StatelessWidget {
-  const _BackToSignUpButton({
-    super.key,
-    required this.onTap,
-  });
+  const _BackToSignUpButton({super.key, required this.onTap});
 
   final VoidCallback onTap;
 

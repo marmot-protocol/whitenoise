@@ -59,6 +59,34 @@ void main() {
       });
     });
 
+    group('titleWidget', () {
+      testWidgets('renders titleWidget instead of title text', (tester) async {
+        await mountWidget(
+          WnSlateNavigationHeader(
+            titleWidget: const Text('Custom Widget Title'),
+            onNavigate: () {},
+          ),
+          tester,
+        );
+
+        expect(find.text('Custom Widget Title'), findsOneWidget);
+      });
+
+      testWidgets('titleWidget takes precedence over title', (tester) async {
+        await mountWidget(
+          WnSlateNavigationHeader(
+            title: 'String Title',
+            titleWidget: const Text('Widget Title'),
+            onNavigate: () {},
+          ),
+          tester,
+        );
+
+        expect(find.text('Widget Title'), findsOneWidget);
+        expect(find.text('String Title'), findsNothing);
+      });
+    });
+
     group('back type', () {
       testWidgets('renders back icon on left side when onNavigate provided', (tester) async {
         await mountWidget(

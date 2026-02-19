@@ -404,6 +404,103 @@ class AppLocalizationsFr extends AppLocalizations {
   String get goBack => 'Retour';
 
   @override
+  String get createGroup => 'Créer un groupe';
+
+  @override
+  String get newGroupChat => 'Nouvelle discussion de groupe';
+
+  @override
+  String get selectMembers => 'Sélectionner les Membres';
+
+  @override
+  String selectedCount(int count) {
+    return '$count sélectionnés';
+  }
+
+  @override
+  String get clearSelection => 'Effacer';
+
+  @override
+  String get continueButton => 'Continuer';
+
+  @override
+  String get setUpGroup => 'Configurer le groupe';
+
+  @override
+  String get groupName => 'Nom du Groupe';
+
+  @override
+  String get groupNamePlaceholder => 'Entrez le nom du groupe';
+
+  @override
+  String get groupDescription => 'Description du Groupe';
+
+  @override
+  String get description => 'Description';
+
+  @override
+  String get groupDescriptionPlaceholder => 'À quoi sert ce groupe ?';
+
+  @override
+  String members(int count) {
+    return '$count membres';
+  }
+
+  @override
+  String invitingMembers(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Invitation de membres :',
+      one: 'Invitation de membre :',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get usersWithoutKeyPackages =>
+      'Utilisateurs sans paquets de clés (ne peuvent pas être ajoutés)';
+
+  @override
+  String usersNotOnWhiteNoise(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Ces utilisateurs ne sont pas sur White Noise',
+      one: 'Cet utilisateur n\'est pas sur White Noise',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String usersNotOnWhiteNoiseDescription(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          'Ces utilisateurs ne peuvent pas être ajoutés au groupe car ils n\'ont pas White Noise installé ou n\'ont pas encore publié leurs paquets de clés.',
+      one:
+          'Cet utilisateur ne peut pas être ajouté au groupe car il n\'a pas White Noise installé ou n\'a pas encore publié son paquet de clés.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get uploadingImage => 'Téléchargement de l\'image...';
+
+  @override
+  String get creatingGroup => 'Création du groupe...';
+
+  @override
+  String get groupNameRequired => 'Le nom du groupe est requis';
+
+  @override
+  String get noUsersWithKeyPackages => 'Aucun utilisateur avec des paquets de clés à ajouter';
+
+  @override
+  String get createGroupFailed => 'Échec de la création du groupe';
+
+  @override
   String get reportError => 'Signaler une erreur';
 
   @override
@@ -440,6 +537,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get reply => 'Répondre';
+
+  @override
+  String get copyMessage => 'Copier';
 
   @override
   String get delete => 'Supprimer';
@@ -810,4 +910,114 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get loginPasteFailed => 'Échec du collage depuis le presse-papiers';
+
+  @override
+  String get openSettings => 'Ouvrir les paramètres';
+
+  @override
+  String get scannerError => 'Erreur du scanner';
+
+  @override
+  String get scannerErrorDescription =>
+      'Une erreur s\'est produite avec le scanner. Veuillez réessayer.';
+
+  @override
+  String get cameraPermissionDeniedDescription =>
+      'Veuillez activer l\'accès à la caméra dans les paramètres de votre appareil pour scanner les codes QR.';
+
+  @override
+  String get retry => 'Réessayer';
+
+  @override
+  String get groupInformation => 'Informations du groupe';
+
+  @override
+  String get editGroup => 'Modifier le groupe';
+
+  @override
+  String get editGroupAction => 'Modifier le groupe';
+
+  @override
+  String get groupNameLabel => 'Nom';
+
+  @override
+  String get groupDescriptionLabel => 'À propos';
+
+  @override
+  String membersCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Membres',
+      one: '1 Membre',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get adminBadge => 'Admin';
+
+  @override
+  String get membersLabel => 'Membres :';
+
+  @override
+  String get memberBadge => 'Membre';
+
+  @override
+  String get sendMessage => 'Envoyer un message';
+
+  @override
+  String get makeAdmin => 'Rendre admin';
+
+  @override
+  String get removeAdminRole => 'Retirer admin';
+
+  @override
+  String get removeFromGroup => 'Retirer du groupe';
+
+  @override
+  String get removeFromGroupConfirmation => 'Retirer du groupe ?';
+
+  @override
+  String get removeFromGroupWarning =>
+      'Ce membre sera retiré du groupe et ne pourra plus voir les nouveaux messages.';
+
+  @override
+  String get makeAdminConfirmation => 'Rendre admin ?';
+
+  @override
+  String get makeAdminWarning =>
+      'Ce membre pourra gérer le groupe, ajouter ou retirer des membres et modifier les paramètres du groupe.';
+
+  @override
+  String get removeAdminConfirmation => 'Retirer admin ?';
+
+  @override
+  String get removeAdminWarning =>
+      'Ce membre ne pourra plus gérer le groupe, ajouter ou retirer des membres ni modifier les paramètres du groupe.';
+
+  @override
+  String get failedToRemoveFromGroup => 'Impossible de retirer le membre. Veuillez réessayer.';
+
+  @override
+  String get failedToMakeAdmin => 'Impossible de rendre admin. Veuillez réessayer.';
+
+  @override
+  String get failedToRemoveAdmin => 'Impossible de retirer admin. Veuillez réessayer.';
+
+  @override
+  String get groupUpdatedSuccessfully => 'Groupe mis à jour avec succès';
+
+  @override
+  String get groupLoadError => 'Impossible de charger le groupe. Veuillez réessayer.';
+
+  @override
+  String get groupSaveError => 'Impossible de sauvegarder le groupe. Veuillez réessayer.';
+
+  @override
+  String get failedToFetchGroupMembers =>
+      'Impossible de charger les membres du groupe. Veuillez réessayer.';
+
+  @override
+  String get failedToAddMembers => 'Impossible d\'ajouter des membres. Veuillez réessayer.';
 }
