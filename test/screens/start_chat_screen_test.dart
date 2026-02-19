@@ -7,6 +7,7 @@ import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/src/rust/api/users.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
@@ -347,7 +348,7 @@ void main() {
 
     group('user without key packages', () {
       setUp(() {
-        _api.userHasKeyPackage = false;
+        _api.userHasKeyPackageStatus = KeyPackageStatus.notFound;
       });
 
       testWidgets('shows invite callout', (tester) async {

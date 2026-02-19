@@ -30,7 +30,7 @@ class _MockApi extends MockWnApi {
   String? createdGroupDescription;
   List<String>? createdMemberPubkeys;
   List<String>? createdAdminPubkeys;
-  final Map<String, bool> userHasKeyPackageMap = {};
+  final Map<String, KeyPackageStatus> userHasKeyPackageMap = {};
   bool shouldThrowOnUserHasKeyPackage = false;
   bool shouldThrowOnCreateGroup = false;
   bool shouldThrowOnUploadImage = false;
@@ -68,14 +68,16 @@ class _MockApi extends MockWnApi {
   }
 
   @override
-  Future<bool> crateApiUsersUserHasKeyPackage({
+  Future<KeyPackageStatus> crateApiUsersUserHasKeyPackage({
     required String pubkey,
     required bool blockingDataSync,
   }) {
     if (shouldThrowOnUserHasKeyPackage) {
       throw Exception('Failed to check key package');
     }
-    return Future.value(userHasKeyPackageMap[pubkey] ?? false);
+    return Future.value(
+      userHasKeyPackageMap[pubkey] ?? KeyPackageStatus.notFound,
+    );
   }
 
   @override
@@ -221,8 +223,8 @@ void main() {
     });
 
     testWidgets('filters users by key package on init', (tester) async {
-      mockApi.userHasKeyPackageMap[testPubkeyA] = true;
-      mockApi.userHasKeyPackageMap[testPubkeyB] = false;
+      mockApi.userHasKeyPackageMap[testPubkeyA] = KeyPackageStatus.valid;
+      mockApi.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.notFound;
 
       final users = [
         _createTestUser(testPubkeyA, name: 'Alice'),
@@ -295,8 +297,8 @@ void main() {
     });
 
     testWidgets('createGroup creates group successfully', (tester) async {
-      mockApi.userHasKeyPackageMap[testPubkeyB] = true;
-      mockApi.userHasKeyPackageMap[testPubkeyC] = true;
+      mockApi.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
+      mockApi.userHasKeyPackageMap[testPubkeyC] = KeyPackageStatus.valid;
 
       final users = [
         _createTestUser(testPubkeyB, name: 'Bob'),
@@ -358,7 +360,7 @@ void main() {
     });
 
     testWidgets('reset clears all state', (tester) async {
-      mockApi.userHasKeyPackageMap[testPubkeyB] = true;
+      mockApi.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
 
       final users = [_createTestUser(testPubkeyB, name: 'Bob')];
 
@@ -420,7 +422,7 @@ void main() {
     });
 
     testWidgets('createGroup with image path sets uploading state', (tester) async {
-      mockApi.userHasKeyPackageMap[testPubkeyB] = true;
+      mockApi.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
 
       final users = [_createTestUser(testPubkeyB, name: 'Bob')];
 
@@ -475,7 +477,7 @@ void main() {
     });
 
     testWidgets('createGroup handles errors and sets error state', (tester) async {
-      mockApi.userHasKeyPackageMap[testPubkeyB] = true;
+      mockApi.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
       mockApi.shouldThrowOnCreateGroup = true;
 
       final users = [_createTestUser(testPubkeyB, name: 'Bob')];
@@ -504,7 +506,7 @@ void main() {
     });
 
     testWidgets('createGroup with image upload success', (tester) async {
-      mockApi.userHasKeyPackageMap[testPubkeyB] = true;
+      mockApi.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
 
       final users = [_createTestUser(testPubkeyB, name: 'Bob')];
 
@@ -534,7 +536,7 @@ void main() {
     });
 
     testWidgets('createGroup handles image upload failure gracefully', (tester) async {
-      mockApi.userHasKeyPackageMap[testPubkeyB] = true;
+      mockApi.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
       mockApi.shouldThrowOnUploadImage = true;
 
       final users = [_createTestUser(testPubkeyB, name: 'Bob')];
@@ -581,8 +583,8 @@ void main() {
     });
 
     testWidgets('re-filters when selectedUsers changes', (tester) async {
-      mockApi.userHasKeyPackageMap[testPubkeyA] = true;
-      mockApi.userHasKeyPackageMap[testPubkeyB] = true;
+      mockApi.userHasKeyPackageMap[testPubkeyA] = KeyPackageStatus.valid;
+      mockApi.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
 
       late CreateGroupState state;
       late ValueNotifier<List<User>> usersNotifier;

@@ -3,18 +3,19 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_user_has_key_package.dart';
+import 'package:whitenoise/src/rust/api/users.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
 class _MockApi extends MockWnApi {
-  Completer<bool>? userHasKeyPackageCompleter;
-  bool nonBlockingResult = true;
-  bool blockingResult = true;
+  Completer<KeyPackageStatus>? userHasKeyPackageCompleter;
+  KeyPackageStatus nonBlockingResult = KeyPackageStatus.valid;
+  KeyPackageStatus blockingResult = KeyPackageStatus.valid;
   final userHasKeyPackageCalls = <({String pubkey, bool blocking})>[];
 
   @override
-  Future<bool> crateApiUsersUserHasKeyPackage({
+  Future<KeyPackageStatus> crateApiUsersUserHasKeyPackage({
     required String pubkey,
     required bool blockingDataSync,
   }) {
@@ -30,8 +31,8 @@ class _MockApi extends MockWnApi {
     super.reset();
     userHasKeyPackageCompleter = null;
     userHasKeyPackageCalls.clear();
-    nonBlockingResult = true;
-    blockingResult = true;
+    nonBlockingResult = KeyPackageStatus.valid;
+    blockingResult = KeyPackageStatus.valid;
   }
 }
 
@@ -49,35 +50,44 @@ void main() {
       expect(getSnapshot().connectionState, equals(ConnectionState.waiting));
     });
 
-    testWidgets('returns true when non-blocking returns true', (tester) async {
-      _api.nonBlockingResult = true;
+    testWidgets('returns valid when non-blocking returns valid', (tester) async {
+      _api.nonBlockingResult = KeyPackageStatus.valid;
       final getSnapshot = await mountHook(tester, () => useUserHasKeyPackage('pk1'));
       await tester.pump();
 
-      expect(getSnapshot().data, isTrue);
+      expect(getSnapshot().data, equals(KeyPackageStatus.valid));
       expect(_api.userHasKeyPackageCalls.length, 1);
       expect(_api.userHasKeyPackageCalls[0].blocking, isFalse);
     });
 
-    testWidgets('retries with blocking when non-blocking returns false', (tester) async {
-      _api.nonBlockingResult = false;
-      _api.blockingResult = true;
+    testWidgets('returns incompatible without retry', (tester) async {
+      _api.nonBlockingResult = KeyPackageStatus.incompatible;
       final getSnapshot = await mountHook(tester, () => useUserHasKeyPackage('pk1'));
       await tester.pump();
 
-      expect(getSnapshot().data, isTrue);
+      expect(getSnapshot().data, equals(KeyPackageStatus.incompatible));
+      expect(_api.userHasKeyPackageCalls.length, 1);
+    });
+
+    testWidgets('retries with blocking when non-blocking returns notFound', (tester) async {
+      _api.nonBlockingResult = KeyPackageStatus.notFound;
+      _api.blockingResult = KeyPackageStatus.valid;
+      final getSnapshot = await mountHook(tester, () => useUserHasKeyPackage('pk1'));
+      await tester.pump();
+
+      expect(getSnapshot().data, equals(KeyPackageStatus.valid));
       expect(_api.userHasKeyPackageCalls.length, 2);
       expect(_api.userHasKeyPackageCalls[0].blocking, isFalse);
       expect(_api.userHasKeyPackageCalls[1].blocking, isTrue);
     });
 
-    testWidgets('returns false when both non-blocking and blocking return false', (tester) async {
-      _api.nonBlockingResult = false;
-      _api.blockingResult = false;
+    testWidgets('returns notFound when both checks return notFound', (tester) async {
+      _api.nonBlockingResult = KeyPackageStatus.notFound;
+      _api.blockingResult = KeyPackageStatus.notFound;
       final getSnapshot = await mountHook(tester, () => useUserHasKeyPackage('pk1'));
       await tester.pump();
 
-      expect(getSnapshot().data, isFalse);
+      expect(getSnapshot().data, equals(KeyPackageStatus.notFound));
       expect(_api.userHasKeyPackageCalls.length, 2);
     });
 

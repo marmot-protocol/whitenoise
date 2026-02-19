@@ -44,7 +44,7 @@ User _userFactory(String pubkey, {String? displayName}) => User(
 class _MockApi extends MockWnApi {
   bool createGroupCalled = false;
   bool uploadImageCalled = false;
-  final Map<String, bool> userHasKeyPackageMap = {};
+  final Map<String, KeyPackageStatus> userHasKeyPackageMap = {};
   bool shouldDelayCreateGroup = false;
   bool shouldDelayUploadImage = false;
   bool shouldDelayUserHasKeyPackage = false;
@@ -78,14 +78,14 @@ class _MockApi extends MockWnApi {
   }
 
   @override
-  Future<bool> crateApiUsersUserHasKeyPackage({
+  Future<KeyPackageStatus> crateApiUsersUserHasKeyPackage({
     required String pubkey,
     required bool blockingDataSync,
   }) async {
     if (shouldDelayUserHasKeyPackage) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
-    return userHasKeyPackageMap[pubkey] ?? false;
+    return userHasKeyPackageMap[pubkey] ?? KeyPackageStatus.notFound;
   }
 
   @override
@@ -216,7 +216,7 @@ void main() {
     });
 
     testWidgets('create button is disabled when group name is empty', (tester) async {
-      _api.userHasKeyPackageMap[testPubkeyB] = true;
+      _api.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
 
       await pumpSetUpGroupScreen(tester, users);
@@ -226,8 +226,8 @@ void main() {
     });
 
     testWidgets('filters users by key package on init', (tester) async {
-      _api.userHasKeyPackageMap[testPubkeyB] = true;
-      _api.userHasKeyPackageMap[testPubkeyC] = false;
+      _api.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
+      _api.userHasKeyPackageMap[testPubkeyC] = KeyPackageStatus.notFound;
 
       final users = [
         _userFactory(testPubkeyB, displayName: 'Bob'),
@@ -241,8 +241,8 @@ void main() {
     });
 
     testWidgets('displays users without key packages message', (tester) async {
-      _api.userHasKeyPackageMap[testPubkeyB] = true;
-      _api.userHasKeyPackageMap[testPubkeyC] = false;
+      _api.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
+      _api.userHasKeyPackageMap[testPubkeyC] = KeyPackageStatus.notFound;
 
       final users = [
         _userFactory(testPubkeyB, displayName: 'Bob'),
@@ -255,7 +255,7 @@ void main() {
     });
 
     testWidgets('entering group name enables create button', (tester) async {
-      _api.userHasKeyPackageMap[testPubkeyB] = true;
+      _api.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
 
       await pumpSetUpGroupScreen(tester, users);
@@ -268,8 +268,8 @@ void main() {
     });
 
     testWidgets('displays member list with avatars', (tester) async {
-      _api.userHasKeyPackageMap[testPubkeyB] = true;
-      _api.userHasKeyPackageMap[testPubkeyC] = true;
+      _api.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
+      _api.userHasKeyPackageMap[testPubkeyC] = KeyPackageStatus.valid;
 
       final users = [
         _userFactory(testPubkeyB, displayName: 'Bob'),
@@ -284,8 +284,8 @@ void main() {
     });
 
     testWidgets('displays users without key packages with strikethrough', (tester) async {
-      _api.userHasKeyPackageMap[testPubkeyB] = true;
-      _api.userHasKeyPackageMap[testPubkeyC] = false;
+      _api.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
+      _api.userHasKeyPackageMap[testPubkeyC] = KeyPackageStatus.notFound;
 
       final users = [
         _userFactory(testPubkeyB, displayName: 'Bob'),
@@ -299,7 +299,7 @@ void main() {
     });
 
     testWidgets('displays user without display name using pubkey', (tester) async {
-      _api.userHasKeyPackageMap[testPubkeyB] = true;
+      _api.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
 
       final users = [
         User(
@@ -316,7 +316,7 @@ void main() {
     });
 
     testWidgets('displays user without display name in excluded list', (tester) async {
-      _api.userHasKeyPackageMap[testPubkeyB] = false;
+      _api.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.notFound;
 
       final users = [
         User(
@@ -333,7 +333,7 @@ void main() {
     });
 
     testWidgets('tapping create button calls createGroup', (tester) async {
-      _api.userHasKeyPackageMap[testPubkeyB] = true;
+      _api.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
 
       await pumpSetUpGroupScreen(tester, users);
@@ -360,7 +360,7 @@ void main() {
     });
 
     testWidgets('shows error notice when createGroup fails', (tester) async {
-      _api.userHasKeyPackageMap[testPubkeyB] = true;
+      _api.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
       _api.shouldThrowOnCreateGroup = true;
       final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
 

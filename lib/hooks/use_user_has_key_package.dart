@@ -2,14 +2,14 @@ import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:whitenoise/src/rust/api/users.dart' as users_api;
 
-AsyncSnapshot<bool> useUserHasKeyPackage(String pubkey) {
+AsyncSnapshot<users_api.KeyPackageStatus> useUserHasKeyPackage(String pubkey) {
   final future = useMemoized(
     () async {
-      final hasKeyPackage = await users_api.userHasKeyPackage(
+      final status = await users_api.userHasKeyPackage(
         pubkey: pubkey,
         blockingDataSync: false,
       );
-      if (hasKeyPackage) return true;
+      if (status != users_api.KeyPackageStatus.notFound) return status;
       return users_api.userHasKeyPackage(pubkey: pubkey, blockingDataSync: true);
     },
     [pubkey],

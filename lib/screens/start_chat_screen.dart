@@ -13,6 +13,7 @@ import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' as groups_api;
 import 'package:whitenoise/src/rust/api/metadata.dart' show FlutterMetadata;
+import 'package:whitenoise/src/rust/api/users.dart' show KeyPackageStatus;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
@@ -59,7 +60,7 @@ class StartChatScreen extends HookConsumerWidget {
         keyPackageSnapshot.connectionState == ConnectionState.waiting ||
         followState.isLoading;
     final isFollowing = followState.isFollowing;
-    final hasKeyPackage = keyPackageSnapshot.data ?? false;
+    final keyPackageStatus = keyPackageSnapshot.data;
 
     Future<void> startChat() async {
       isStartingChat.value = true;
@@ -147,7 +148,7 @@ class StartChatScreen extends HookConsumerWidget {
                               showErrorNotice(context.l10n.publicKeyCopyError),
                         ),
                         Gap(24.h),
-                        if (hasKeyPackage) ...[
+                        if (keyPackageStatus == KeyPackageStatus.valid) ...[
                           SizedBox(
                             width: double.infinity,
                             child: WnButton(

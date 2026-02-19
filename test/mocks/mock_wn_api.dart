@@ -46,7 +46,7 @@ class MockWnApi implements RustLibApi {
   Completer<List<Account>>? getAccountsCompleter;
 
   List<User> follows = [];
-  bool userHasKeyPackage = true;
+  KeyPackageStatus userHasKeyPackageStatus = KeyPackageStatus.valid;
   StreamController<UserSearchUpdate>? searchUsersController;
 
   bool deleteAllDataCalled = false;
@@ -64,11 +64,11 @@ class MockWnApi implements RustLibApi {
   bool shouldFailGetAccountGroup = false;
 
   @override
-  Future<bool> crateApiUsersUserHasKeyPackage({
+  Future<KeyPackageStatus> crateApiUsersUserHasKeyPackage({
     required String pubkey,
     required bool blockingDataSync,
   }) async {
-    return userHasKeyPackage;
+    return userHasKeyPackageStatus;
   }
 
   @override
@@ -478,7 +478,7 @@ class MockWnApi implements RustLibApi {
     accounts = [];
     follows = [];
     getAccountsCompleter = null;
-    userHasKeyPackage = true;
+    userHasKeyPackageStatus = KeyPackageStatus.valid;
     searchUsersController?.close();
     searchUsersController = null;
     deleteAllDataCalled = false;

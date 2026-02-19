@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' as groups_api;
-import 'package:whitenoise/src/rust/api/users.dart' show User, userHasKeyPackage;
+import 'package:whitenoise/src/rust/api/users.dart' show KeyPackageStatus, User, userHasKeyPackage;
 import 'package:whitenoise/src/rust/api/utils.dart' as rust_utils;
 
 final _logger = Logger('useCreateGroup');
@@ -97,7 +97,7 @@ typedef CreateGroupActions = ({
             blockingDataSync: true,
           );
 
-          if (hasKp) {
+          if (hasKp == KeyPackageStatus.valid) {
             withKeyPackage.add(user);
           } else {
             withoutKeyPackage.add(user);
