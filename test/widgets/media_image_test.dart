@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
-import 'package:whitenoise/widgets/wn_media_image.dart';
+import 'package:whitenoise/widgets/media_image.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
@@ -60,11 +61,11 @@ void main() {
   setUpAll(() => RustLib.initMock(api: _api));
   setUp(() => _api.resetDownload());
 
-  group('WnMediaImage', () {
+  group('MediaImage', () {
     testWidgets('shows blurhash placeholder while loading', (tester) async {
       _api.downloadCompleter = Completer<MediaFile>();
       await mountWidget(
-        WnMediaImage(
+        MediaImage(
           mediaFile: _mediaFile(blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'),
         ),
         tester,
@@ -78,7 +79,7 @@ void main() {
     testWidgets('shows error placeholder when download fails', (tester) async {
       _api.shouldFail = true;
       await mountWidget(
-        WnMediaImage(mediaFile: _mediaFile()),
+        MediaImage(mediaFile: _mediaFile()),
         tester,
       );
       await tester.pumpAndSettle();
@@ -89,7 +90,7 @@ void main() {
 
     testWidgets('shows error when originalFileHash is null', (tester) async {
       await mountWidget(
-        WnMediaImage(mediaFile: _mediaFile(originalFileHash: null)),
+        MediaImage(mediaFile: _mediaFile(originalFileHash: null)),
         tester,
       );
       await tester.pumpAndSettle();
@@ -104,7 +105,7 @@ void main() {
       addTearDown(() => tempDir.deleteSync(recursive: true));
 
       await mountWidget(
-        WnMediaImage(mediaFile: _mediaFile(filePath: tempFile.path)),
+        MediaImage(mediaFile: _mediaFile(filePath: tempFile.path)),
         tester,
       );
       await tester.pumpAndSettle();
@@ -122,7 +123,7 @@ void main() {
       addTearDown(() => tempDir.deleteSync(recursive: true));
 
       await mountWidget(
-        WnMediaImage(
+        MediaImage(
           mediaFile: _mediaFile(
             blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
           ),
@@ -155,14 +156,15 @@ void main() {
       _api.downloadCompleter = Completer<MediaFile>();
       var tapped = false;
       await mountWidget(
-        WnMediaImage(
+        MediaImage(
           mediaFile: _mediaFile(),
           onTap: () => tapped = true,
         ),
         tester,
       );
 
-      await tester.tap(find.byType(WnMediaImage));
+      await tester.tap(find.byType(MediaImage));
+      await tester.pump(kDoubleTapTimeout);
       expect(tapped, isTrue);
     });
 
@@ -171,7 +173,7 @@ void main() {
     ) async {
       _api.downloadCompleter = Completer<MediaFile>();
       await mountWidget(
-        WnMediaImage(
+        MediaImage(
           mediaFile: _mediaFile(
             blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
             dimensions: '1920x1080',
@@ -190,7 +192,7 @@ void main() {
     testWidgets('fills available space when dimensions not available', (tester) async {
       _api.downloadCompleter = Completer<MediaFile>();
       await mountWidget(
-        WnMediaImage(
+        MediaImage(
           mediaFile: _mediaFile(blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'),
         ),
         tester,
@@ -198,6 +200,88 @@ void main() {
 
       expect(find.byKey(const Key('media_image_loading')), findsOneWidget);
       expect(find.byType(AspectRatio), findsNothing);
+    });
+
+    testWidgets('calls onZoomChanged when zoom state changes', (tester) async {
+      final tempDir = Directory.systemTemp.createTempSync('media_zoom_test');
+      final tempFile = File('${tempDir.path}/test.png');
+      tempFile.writeAsBytesSync(_minimalPng);
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      bool? zoomedState;
+      await mountWidget(
+        SizedBox(
+          width: 300,
+          height: 300,
+          child: MediaImage(
+            mediaFile: _mediaFile(filePath: tempFile.path),
+            onZoomChanged: (zoomed) => zoomedState = zoomed,
+          ),
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      final viewer = tester.widget<InteractiveViewer>(
+        find.byKey(const Key('media_image_viewer')),
+      );
+      final controller = viewer.transformationController!;
+
+      controller.value = Matrix4.identity()
+        ..setEntry(0, 0, 2.0)
+        ..setEntry(1, 1, 2.0);
+      await tester.pump();
+
+      expect(zoomedState, isTrue);
+
+      controller.value = Matrix4.identity();
+      await tester.pump();
+
+      expect(zoomedState, isFalse);
+    });
+
+    testWidgets('tapping error placeholder with null retry still works', (tester) async {
+      _api.shouldFail = true;
+      await mountWidget(
+        MediaImage(mediaFile: _mediaFile()),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('retry_button')));
+      await tester.pump();
+      // Should not crash
+    });
+
+    testWidgets('onZoomChanged is not called when callback is null', (tester) async {
+      final tempDir = Directory.systemTemp.createTempSync('media_zoom_null_test');
+      final tempFile = File('${tempDir.path}/test.png');
+      tempFile.writeAsBytesSync(_minimalPng);
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      await mountWidget(
+        SizedBox(
+          width: 300,
+          height: 300,
+          child: MediaImage(
+            mediaFile: _mediaFile(filePath: tempFile.path),
+            // onZoomChanged is null
+          ),
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      final viewer = tester.widget<InteractiveViewer>(
+        find.byKey(const Key('media_image_viewer')),
+      );
+      final controller = viewer.transformationController!;
+
+      // Should not crash even with null callback
+      controller.value = Matrix4.identity()
+        ..setEntry(0, 0, 2.0)
+        ..setEntry(1, 1, 2.0);
+      await tester.pump();
     });
   });
 }

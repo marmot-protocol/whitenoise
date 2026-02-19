@@ -3,6 +3,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/models/reply_preview.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/chat_message_media.dart';
+import 'package:whitenoise/widgets/chat_message_quote.dart';
+import 'package:whitenoise/widgets/media_modal.dart';
 import 'package:whitenoise/widgets/wn_message_reactions.dart';
 import 'package:whitenoise/widgets/wn_reply_preview.dart';
 
@@ -26,6 +29,21 @@ class WnMessageBubble extends StatelessWidget {
     this.onReplyTap,
   });
 
+<<<<<<< HEAD
+=======
+  void _showMediaModal(BuildContext context, int index) {
+    MediaModal.show(
+      context: context,
+      mediaFiles: message.mediaAttachments,
+      initialIndex: index,
+      senderName: senderName,
+      senderPictureUrl: senderPictureUrl,
+      senderPubkey: message.pubkey,
+      timestamp: message.createdAt,
+    );
+  }
+
+>>>>>>> 5efba7e4 (fixup! feat: add media preview and modal widgets)
   @override
   Widget build(BuildContext context) {
     if (message.isDeleted) {

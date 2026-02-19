@@ -7,6 +7,10 @@ import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/widgets/wn_blurhash_placeholder.dart';
 import 'package:whitenoise/widgets/wn_media_error_placeholder.dart';
 
+const _doubleTapScale = 2.5;
+const _minScale = 1.0;
+const _maxScale = 4.0;
+
 double? _parseAspectRatio(String? dimensions) {
   if (dimensions == null) return null;
   final parts = dimensions.split('x');
@@ -17,12 +21,19 @@ double? _parseAspectRatio(String? dimensions) {
   return w / h;
 }
 
-class WnMediaImage extends HookWidget {
+Matrix4 _buildZoomMatrix(Offset focalPoint, double scale) {
+  return Matrix4.identity()
+    ..translateByDouble(focalPoint.dx, focalPoint.dy, 0, 1)
+    ..scaleByDouble(scale, scale, 1, 1)
+    ..translateByDouble(-focalPoint.dx, -focalPoint.dy, 0, 1);
+}
+
+class MediaImage extends HookWidget {
   final MediaFile mediaFile;
   final ValueChanged<bool>? onZoomChanged;
   final VoidCallback? onTap;
 
-  const WnMediaImage({
+  const MediaImage({
     super.key,
     required this.mediaFile,
     this.onZoomChanged,
@@ -34,6 +45,24 @@ class WnMediaImage extends HookWidget {
     final (:status, :localPath, :retry) = useMediaDownload(mediaFile: mediaFile);
     final transformationController = useMemoized(() => TransformationController());
     final isZoomed = useState(false);
+    final doubleTapPosition = useState<Offset?>(null);
+
+    final zoomAnimationController = useAnimationController(
+      duration: const Duration(milliseconds: 250),
+    );
+
+    final zoomAnimation = useState<Animation<Matrix4>?>(null);
+
+    useEffect(() {
+      void animationListener() {
+        if (zoomAnimation.value != null) {
+          transformationController.value = zoomAnimation.value!.value;
+        }
+      }
+
+      zoomAnimationController.addListener(animationListener);
+      return () => zoomAnimationController.removeListener(animationListener);
+    }, [zoomAnimationController]);
 
     useEffect(() {
       void listener() {
@@ -50,6 +79,30 @@ class WnMediaImage extends HookWidget {
     }, [transformationController]);
 
     useEffect(() => transformationController.dispose, [transformationController]);
+
+    void animateToMatrix(Matrix4 target) {
+      zoomAnimation.value =
+          Matrix4Tween(
+            begin: transformationController.value,
+            end: target,
+          ).animate(
+            CurvedAnimation(
+              parent: zoomAnimationController,
+              curve: Curves.easeOutCubic,
+            ),
+          );
+      zoomAnimationController.forward(from: 0);
+    }
+
+    void handleDoubleTap() {
+      final position = doubleTapPosition.value;
+      if (position == null) return;
+
+      final target = isZoomed.value
+          ? Matrix4.identity()
+          : _buildZoomMatrix(position, _doubleTapScale);
+      animateToMatrix(target);
+    }
 
     final blurhash = mediaFile.fileMetadata?.blurhash;
     final aspectRatio = _parseAspectRatio(mediaFile.fileMetadata?.dimensions);
@@ -80,6 +133,8 @@ class WnMediaImage extends HookWidget {
 
     return GestureDetector(
       onTap: onTap,
+      onDoubleTapDown: (details) => doubleTapPosition.value = details.localPosition,
+      onDoubleTap: handleDoubleTap,
       child: Stack(
         fit: StackFit.passthrough,
         children: [
@@ -105,8 +160,8 @@ class WnMediaImage extends HookWidget {
               child: InteractiveViewer(
                 key: const Key('media_image_viewer'),
                 transformationController: transformationController,
-                minScale: 1.0,
-                maxScale: 4.0,
+                minScale: _minScale,
+                maxScale: _maxScale,
                 child: Center(
                   child: Image.file(
                     File(localPath!),
