@@ -100,8 +100,7 @@ class WnSlate extends HookWidget {
     final content = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (systemNotice != null)
-          if (shrinkWrapContent) systemNotice! else Flexible(child: systemNotice!),
+        if (systemNotice != null) systemNotice!,
         if (header != null) header!,
         if (childWidget != null)
           if (shrinkWrapContent) childWidget else Flexible(child: childWidget),

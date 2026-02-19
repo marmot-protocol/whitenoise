@@ -98,6 +98,26 @@ void main() {
 
         expect(find.byType(WnSlate), findsOneWidget);
       });
+
+      group('without shrinkWrapContent', () {
+        testWidgets('child uses all available space left after system notice', (tester) async {
+          await mountWidget(
+            SizedBox(
+              height: 500.h,
+              child: const WnSlate(
+                systemNotice: SizedBox(height: 40, key: Key('system_notice')),
+                child: SizedBox.expand(key: Key('child')),
+              ),
+            ),
+            tester,
+          );
+
+          final noticeHeight = tester.getSize(find.byKey(const Key('system_notice'))).height;
+          final childHeight = tester.getSize(find.byKey(const Key('child'))).height;
+          expect(noticeHeight, 40);
+          expect(childHeight, greaterThanOrEqualTo(450));
+        });
+      });
     });
 
     group('footer', () {
