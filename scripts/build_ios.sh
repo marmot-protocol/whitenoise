@@ -35,6 +35,11 @@ if ! command -v xcodebuild &> /dev/null; then
     exit 1
 fi
 
+if ! command -v pod &> /dev/null; then
+    print_error "CocoaPods is not installed or not in PATH"
+    exit 1
+fi
+
 # Add iOS targets
 print_step "Adding iOS targets to Rust"
 rustup target add aarch64-apple-ios          # Physical devices (arm64)
