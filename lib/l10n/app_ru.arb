@@ -300,5 +300,10 @@
   "userNeedsUpdate": "Требуется обновление ключа",
   "userNeedsUpdateDescription": "Вы ещё не можете начать безопасный чат с {name}. Ему нужно обновить White Noise, чтобы безопасная переписка работала.",
   "unknownInviteToWhiteNoiseDescription": "Этот пользователь ещё не в White Noise. Поделитесь приложением, чтобы начать безопасный чат.",
-  "unknownUserNeedsUpdateDescription": "Вы ещё не можете начать безопасный чат с этим пользователем. Ему нужно обновить White Noise, чтобы безопасная переписка работала."
+  "unknownUserNeedsUpdateDescription": "Вы ещё не можете начать безопасный чат с этим пользователем. Ему нужно обновить White Noise, чтобы безопасная переписка работала.",
+  "addToAnotherGroup": "Добавить в другую группу",
+  "addToGroupConfirmation": "Добавить {userName} в {groupName}?",
+  "add": "Добавить",
+  "noGroupsAvailable": "Нет доступных групп",
+  "noAdminGroupsAvailable": "Вы ещё не являетесь администратором ни в одной группе. Создайте группу, чтобы добавить людей."
 }

@@ -864,6 +864,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get addToGroup => 'Añadir al grupo';
 
   @override
+  String get addToAnotherGroup => 'Añadir a otro grupo';
+
+  @override
   String get relayResolutionTitle => 'Configuración de relay';
 
   @override
@@ -1033,10 +1036,25 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String addToGroupConfirmation(String userName, String groupName) {
+    return '¿Añadir a $userName a $groupName?';
+  }
+
+  @override
   String get unknownInviteToWhiteNoiseDescription =>
       'Este usuario aún no está en White Noise. Comparte la app para iniciar un chat seguro.';
 
   @override
   String get unknownUserNeedsUpdateDescription =>
       'Aún no puedes iniciar un chat seguro con este usuario. Necesita actualizar White Noise antes de que funcione la mensajería segura.';
+
+  @override
+  String get add => 'Añadir';
+
+  @override
+  String get noGroupsAvailable => 'No hay grupos disponibles';
+
+  @override
+  String get noAdminGroupsAvailable =>
+      'Aún no eres admin en ningún grupo. Crea un grupo para añadir personas.';
 }

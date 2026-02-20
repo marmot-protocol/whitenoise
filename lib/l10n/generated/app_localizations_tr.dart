@@ -856,6 +856,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get addToGroup => 'Gruba ekle';
 
   @override
+  String get addToAnotherGroup => 'Başka bir gruba ekle';
+
+  @override
   String get relayResolutionTitle => 'Röle Ayarları';
 
   @override
@@ -1021,10 +1024,25 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String addToGroupConfirmation(String userName, String groupName) {
+    return '$userName kişisini $groupName grubuna eklensin mi?';
+  }
+
+  @override
   String get unknownInviteToWhiteNoiseDescription =>
       'Bu kullanıcı henüz White Noise\'da değil. Güvenli bir sohbet başlatmak için uygulamayı paylaşın.';
 
   @override
   String get unknownUserNeedsUpdateDescription =>
       'Bu kullanıcıyla henüz güvenli sohbet başlatamazsınız. Güvenli mesajlaşmanın çalışması için White Noise\'u güncellemesi gerekiyor.';
+
+  @override
+  String get add => 'Ekle';
+
+  @override
+  String get noGroupsAvailable => 'Kullanılabilir grup yok';
+
+  @override
+  String get noAdminGroupsAvailable =>
+      'Henüz hiçbir grupta yönetici değilsiniz. Kişi eklemek için bir grup oluşturun.';
 }

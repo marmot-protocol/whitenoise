@@ -265,7 +265,6 @@
   "loginErrorInternal": "Dahili bir hata oluştu. Lütfen tekrar deneyin.",
   "loginPasteNothingToPaste": "Yapıştırılacak bir şey yok",
   "loginPasteFailed": "Panodan yapıştırma başarısız",
-  "signerConnectionError": "Signer'a bağlanılamadı. Lütfen tekrar deneyin.",
   "openSettings": "Ayarları aç",
   "scannerError": "Tarayıcı hatası",
   "scannerErrorDescription": "Tarayıcıda bir hata oluştu. Lütfen tekrar deneyin.",
@@ -301,5 +300,10 @@
   "userNeedsUpdate": "Anahtar güncellemesi gerekli",
   "userNeedsUpdateDescription": "{name} ile henüz güvenli sohbet başlatamazsınız. Güvenli mesajlaşmanın çalışması için White Noise'u güncellemesi gerekiyor.",
   "unknownInviteToWhiteNoiseDescription": "Bu kullanıcı henüz White Noise'da değil. Güvenli bir sohbet başlatmak için uygulamayı paylaşın.",
-  "unknownUserNeedsUpdateDescription": "Bu kullanıcıyla henüz güvenli sohbet başlatamazsınız. Güvenli mesajlaşmanın çalışması için White Noise'u güncellemesi gerekiyor."
+  "unknownUserNeedsUpdateDescription": "Bu kullanıcıyla henüz güvenli sohbet başlatamazsınız. Güvenli mesajlaşmanın çalışması için White Noise'u güncellemesi gerekiyor.",
+  "addToAnotherGroup": "Başka bir gruba ekle",
+  "addToGroupConfirmation": "{userName} kişisini {groupName} grubuna eklensin mi?",
+  "add": "Ekle",
+  "noGroupsAvailable": "Kullanılabilir grup yok",
+  "noAdminGroupsAvailable": "Henüz hiçbir grupta yönetici değilsiniz. Kişi eklemek için bir grup oluşturun."
 }

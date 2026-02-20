@@ -1608,6 +1608,12 @@ abstract class AppLocalizations {
   /// **'Add to group'**
   String get addToGroup;
 
+  /// Action label to add this user to another group
+  ///
+  /// In en, this message translates to:
+  /// **'Add to another group'**
+  String get addToAnotherGroup;
+
   /// Title for the relay resolution screen
   ///
   /// In en, this message translates to:
@@ -1902,6 +1908,12 @@ abstract class AppLocalizations {
   /// **'You can\'t start a secure chat with {name} yet. They need to update White Noise before secure messaging works.'**
   String userNeedsUpdateDescription(String name);
 
+  /// Confirmation dialog message for adding user to group
+  ///
+  /// In en, this message translates to:
+  /// **'Add {userName} to {groupName}?'**
+  String addToGroupConfirmation(String userName, String groupName);
+
   /// Callout description when unknown user is not on White Noise
   ///
   /// In en, this message translates to:
@@ -1913,6 +1925,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can\'t start a secure chat with this user yet. They need to update White Noise before secure messaging works.'**
   String get unknownUserNeedsUpdateDescription;
+
+  /// Add button text
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// Message shown when user has no groups to add someone to
+  ///
+  /// In en, this message translates to:
+  /// **'No groups available'**
+  String get noGroupsAvailable;
+
+  /// Message shown when user has no groups where they are admin to add someone to
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re not an admin in any groups yet. Create a group to add people.'**
+  String get noAdminGroupsAvailable;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

@@ -300,5 +300,10 @@
   "userNeedsUpdate": "Schlüsselaktualisierung erforderlich",
   "userNeedsUpdateDescription": "Du kannst noch keinen sicheren Chat mit {name} starten. Die Person muss White Noise aktualisieren, bevor sichere Nachrichten funktionieren.",
   "unknownInviteToWhiteNoiseDescription": "Dieser Benutzer ist noch nicht bei White Noise. Teile die App, um einen sicheren Chat zu starten.",
-  "unknownUserNeedsUpdateDescription": "Du kannst noch keinen sicheren Chat mit diesem Benutzer starten. Die Person muss White Noise aktualisieren, bevor sichere Nachrichten funktionieren."
+  "unknownUserNeedsUpdateDescription": "Du kannst noch keinen sicheren Chat mit diesem Benutzer starten. Die Person muss White Noise aktualisieren, bevor sichere Nachrichten funktionieren.",
+  "addToAnotherGroup": "Zu einer anderen Gruppe hinzufügen",
+  "addToGroupConfirmation": "{userName} zu {groupName} hinzufügen?",
+  "add": "Hinzufügen",
+  "noGroupsAvailable": "Keine Gruppen verfügbar",
+  "noAdminGroupsAvailable": "Du bist noch in keiner Gruppe Admin. Erstelle eine Gruppe, um Personen hinzuzufügen."
 }

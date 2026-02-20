@@ -880,6 +880,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get addToGroup => 'Добавить в группу';
 
   @override
+  String get addToAnotherGroup => 'Добавить в другую группу';
+
+  @override
   String get relayResolutionTitle => 'Настройка реле';
 
   @override
@@ -1048,10 +1051,25 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String addToGroupConfirmation(String userName, String groupName) {
+    return 'Добавить $userName в $groupName?';
+  }
+
+  @override
   String get unknownInviteToWhiteNoiseDescription =>
       'Этот пользователь ещё не в White Noise. Поделитесь приложением, чтобы начать безопасный чат.';
 
   @override
   String get unknownUserNeedsUpdateDescription =>
       'Вы ещё не можете начать безопасный чат с этим пользователем. Ему нужно обновить White Noise, чтобы безопасная переписка работала.';
+
+  @override
+  String get add => 'Добавить';
+
+  @override
+  String get noGroupsAvailable => 'Нет доступных групп';
+
+  @override
+  String get noAdminGroupsAvailable =>
+      'Вы ещё не являетесь администратором ни в одной группе. Создайте группу, чтобы добавить людей.';
 }

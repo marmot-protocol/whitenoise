@@ -300,5 +300,10 @@
   "userNeedsUpdate": "Mise à jour de clé nécessaire",
   "userNeedsUpdateDescription": "Vous ne pouvez pas encore démarrer une discussion sécurisée avec {name}. Cette personne doit mettre à jour White Noise avant que la messagerie sécurisée ne fonctionne.",
   "unknownInviteToWhiteNoiseDescription": "Cet utilisateur n'est pas encore sur White Noise. Partagez l'application pour démarrer une discussion sécurisée.",
-  "unknownUserNeedsUpdateDescription": "Vous ne pouvez pas encore démarrer une discussion sécurisée avec cet utilisateur. Cette personne doit mettre à jour White Noise avant que la messagerie sécurisée ne fonctionne."
+  "unknownUserNeedsUpdateDescription": "Vous ne pouvez pas encore démarrer une discussion sécurisée avec cet utilisateur. Cette personne doit mettre à jour White Noise avant que la messagerie sécurisée ne fonctionne.",
+  "addToAnotherGroup": "Ajouter à un autre groupe",
+  "addToGroupConfirmation": "Ajouter {userName} à {groupName} ?",
+  "add": "Ajouter",
+  "noGroupsAvailable": "Aucun groupe disponible",
+  "noAdminGroupsAvailable": "Vous n'êtes encore admin dans aucun groupe. Créez un groupe pour ajouter des personnes."
 }
