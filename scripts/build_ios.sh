@@ -25,6 +25,11 @@ if ! command -v rustup &> /dev/null; then
     exit 1
 fi
 
+if ! command -v cargo &> /dev/null; then
+    print_error "Cargo is not installed or not in PATH"
+    exit 1
+fi
+
 if ! command -v xcodebuild &> /dev/null; then
     print_error "Xcode command line tools are not installed"
     exit 1
@@ -38,6 +43,10 @@ print_success "iOS targets added to Rust"
 
 # Build for each iOS architecture
 print_step "Building for iOS architectures"
+if ! test -d "rust"; then
+    print_error "rust directory not found"
+    exit 1
+fi
 cd rust
 
 print_step "Building for aarch64-apple-ios (physical devices)"
@@ -52,9 +61,13 @@ cd ..
 
 # Run pod install to ensure pods are up to date
 print_step "Installing CocoaPods dependencies"
-cd ios
-pod install --silent
-cd ..
+pushd ios > /dev/null || { print_error "Failed to enter ios directory"; exit 1; }
+if ! pod install --silent; then
+    print_error "pod install failed"
+    popd > /dev/null
+    exit 1
+fi
+popd > /dev/null
 
 print_success "All Rust libraries built for iOS"
 print_success "iOS build completed successfully!"
