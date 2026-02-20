@@ -18,6 +18,7 @@ import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_callout.dart';
+import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart' show WnSystemNotice;
@@ -165,14 +166,18 @@ class StartChatScreen extends HookConsumerWidget {
                           onPublicKeyCopyError: () =>
                               showErrorNotice(context.l10n.publicKeyCopyError),
                         ),
-                        Gap(24.h),
+                        Gap(8.h),
                         if (keyPackageStatus == KeyPackageStatus.valid) ...[
                           SizedBox(
                             width: double.infinity,
                             child: WnButton(
                               key: const Key('follow_button'),
-                              text: isFollowing ? context.l10n.unfollow : context.l10n.follow,
+                              text: isFollowing
+                                  ? context.l10n.removeAsContact
+                                  : context.l10n.addAsContact,
                               type: WnButtonType.outline,
+                              size: WnButtonSize.medium,
+                              trailingIcon: isFollowing ? WnIcons.userUnfollow : WnIcons.userFollow,
                               loading: followState.isActionLoading,
                               onPressed: handleFollowAction,
                             ),
@@ -181,8 +186,22 @@ class StartChatScreen extends HookConsumerWidget {
                           SizedBox(
                             width: double.infinity,
                             child: WnButton(
+                              key: const Key('add_to_group_button'),
+                              text: context.l10n.addToGroup,
+                              type: WnButtonType.outline,
+                              size: WnButtonSize.medium,
+                              trailingIcon: WnIcons.newGroupChat,
+                              onPressed: () => Routes.pushToAddToGroup(context, userPubkey),
+                            ),
+                          ),
+                          Gap(8.h),
+                          SizedBox(
+                            width: double.infinity,
+                            child: WnButton(
                               key: const Key('start_chat_button'),
-                              text: context.l10n.startChat,
+                              text: context.l10n.sendMessage,
+                              size: WnButtonSize.medium,
+                              trailingIcon: WnIcons.newChat,
                               loading: isStartingChat.value,
                               onPressed: startChat,
                             ),

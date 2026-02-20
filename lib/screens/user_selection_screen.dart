@@ -8,6 +8,7 @@ import 'package:whitenoise/hooks/use_user_selection.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/src/rust/api/users.dart' show User;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/formatting.dart' show formatPublicKey, npubFromHex;
 import 'package:whitenoise/utils/metadata.dart' show presentName;
@@ -22,7 +23,9 @@ import 'package:whitenoise/widgets/wn_user_bubble.dart';
 import 'package:whitenoise/widgets/wn_user_item.dart';
 
 class UserSelectionScreen extends HookConsumerWidget {
-  const UserSelectionScreen({super.key});
+  const UserSelectionScreen({super.key, this.initialUsers = const []});
+
+  final List<User> initialUsers;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -37,7 +40,7 @@ class UserSelectionScreen extends HookConsumerWidget {
       searchQuery: searchQuery.value,
     );
 
-    final selectionHook = useUserSelection();
+    final selectionHook = useUserSelection(initialUsers: initialUsers);
 
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
