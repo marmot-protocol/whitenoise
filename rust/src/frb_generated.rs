@@ -5075,6 +5075,8 @@ impl SseDecode for crate::api::media_files::MediaFile {
         let mut var_fileMetadata =
             <Option<crate::api::media_files::FileMetadata>>::sse_decode(deserializer);
         let mut var_createdAt = <chrono::DateTime<chrono::Utc>>::sse_decode(deserializer);
+        let mut var_nonce = <Option<String>>::sse_decode(deserializer);
+        let mut var_schemeVersion = <Option<String>>::sse_decode(deserializer);
         return crate::api::media_files::MediaFile {
             id: var_id,
             mls_group_id: var_mlsGroupId,
@@ -5088,6 +5090,8 @@ impl SseDecode for crate::api::media_files::MediaFile {
             nostr_key: var_nostrKey,
             file_metadata: var_fileMetadata,
             created_at: var_createdAt,
+            nonce: var_nonce,
+            scheme_version: var_schemeVersion,
         };
     }
 }
@@ -6636,6 +6640,8 @@ impl flutter_rust_bridge::IntoDart for crate::api::media_files::MediaFile {
             self.nostr_key.into_into_dart().into_dart(),
             self.file_metadata.into_into_dart().into_dart(),
             self.created_at.into_into_dart().into_dart(),
+            self.nonce.into_into_dart().into_dart(),
+            self.scheme_version.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -7940,6 +7946,8 @@ impl SseEncode for crate::api::media_files::MediaFile {
         <String>::sse_encode(self.nostr_key, serializer);
         <Option<crate::api::media_files::FileMetadata>>::sse_encode(self.file_metadata, serializer);
         <chrono::DateTime<chrono::Utc>>::sse_encode(self.created_at, serializer);
+        <Option<String>>::sse_encode(self.nonce, serializer);
+        <Option<String>>::sse_encode(self.scheme_version, serializer);
     }
 }
 

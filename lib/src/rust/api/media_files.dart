@@ -67,6 +67,8 @@ class MediaFile {
   final String nostrKey;
   final FileMetadata? fileMetadata;
   final DateTime createdAt;
+  final String? nonce;
+  final String? schemeVersion;
 
   const MediaFile({
     required this.id,
@@ -81,6 +83,8 @@ class MediaFile {
     required this.nostrKey,
     this.fileMetadata,
     required this.createdAt,
+    this.nonce,
+    this.schemeVersion,
   });
 
   @override
@@ -96,7 +100,9 @@ class MediaFile {
       blossomUrl.hashCode ^
       nostrKey.hashCode ^
       fileMetadata.hashCode ^
-      createdAt.hashCode;
+      createdAt.hashCode ^
+      nonce.hashCode ^
+      schemeVersion.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -114,5 +120,7 @@ class MediaFile {
           blossomUrl == other.blossomUrl &&
           nostrKey == other.nostrKey &&
           fileMetadata == other.fileMetadata &&
-          createdAt == other.createdAt;
+          createdAt == other.createdAt &&
+          nonce == other.nonce &&
+          schemeVersion == other.schemeVersion;
 }

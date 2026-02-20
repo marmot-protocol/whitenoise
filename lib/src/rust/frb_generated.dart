@@ -4809,7 +4809,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   MediaFile dco_decode_media_file(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 12) throw Exception('unexpected arr length: expect 12 but see ${arr.length}');
+    if (arr.length != 14) throw Exception('unexpected arr length: expect 14 but see ${arr.length}');
     return MediaFile(
       id: dco_decode_String(arr[0]),
       mlsGroupId: dco_decode_String(arr[1]),
@@ -4823,6 +4823,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       nostrKey: dco_decode_String(arr[9]),
       fileMetadata: dco_decode_opt_box_autoadd_file_metadata(arr[10]),
       createdAt: dco_decode_Chrono_Utc(arr[11]),
+      nonce: dco_decode_opt_String(arr[12]),
+      schemeVersion: dco_decode_opt_String(arr[13]),
     );
   }
 
@@ -6313,6 +6315,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       deserializer,
     );
     final var_createdAt = sse_decode_Chrono_Utc(deserializer);
+    final var_nonce = sse_decode_opt_String(deserializer);
+    final var_schemeVersion = sse_decode_opt_String(deserializer);
     return MediaFile(
       id: var_id,
       mlsGroupId: var_mlsGroupId,
@@ -6326,6 +6330,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       nostrKey: var_nostrKey,
       fileMetadata: var_fileMetadata,
       createdAt: var_createdAt,
+      nonce: var_nonce,
+      schemeVersion: var_schemeVersion,
     );
   }
 
@@ -7855,6 +7861,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_String(self.nostrKey, serializer);
     sse_encode_opt_box_autoadd_file_metadata(self.fileMetadata, serializer);
     sse_encode_Chrono_Utc(self.createdAt, serializer);
+    sse_encode_opt_String(self.nonce, serializer);
+    sse_encode_opt_String(self.schemeVersion, serializer);
   }
 
   @protected

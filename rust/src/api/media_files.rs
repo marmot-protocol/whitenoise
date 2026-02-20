@@ -38,6 +38,8 @@ pub struct MediaFile {
     pub nostr_key: String,
     pub file_metadata: Option<FileMetadata>,
     pub created_at: DateTime<Utc>,
+    pub nonce: Option<String>,
+    pub scheme_version: Option<String>,
 }
 
 impl From<WhitenoiseMediaFile> for MediaFile {
@@ -55,6 +57,8 @@ impl From<WhitenoiseMediaFile> for MediaFile {
             nostr_key: media_file.nostr_key.unwrap_or_default(),
             file_metadata: media_file.file_metadata.map(|metadata| metadata.into()),
             created_at: media_file.created_at,
+            nonce: media_file.nonce,
+            scheme_version: media_file.scheme_version,
         }
     }
 }
