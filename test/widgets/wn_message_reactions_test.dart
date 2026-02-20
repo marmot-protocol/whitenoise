@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
+import 'package:whitenoise/widgets/wn_message_bubble.dart' show MessageDirection;
 import 'package:whitenoise/widgets/wn_message_reactions.dart';
 import '../test_helpers.dart';
 
@@ -8,7 +9,10 @@ void main() {
   group('WnMessageReactions', () {
     testWidgets('renders nothing when reactions are empty', (tester) async {
       await mountWidget(
-        const WnMessageReactions(reactions: [], isOwnMessage: false),
+        const WnMessageReactions(
+          reactions: [],
+          direction: MessageDirection.incoming,
+        ),
         tester,
       );
 
@@ -21,7 +25,7 @@ void main() {
           reactions: [
             EmojiReaction(emoji: '👍', count: BigInt.one, users: const ['user1']),
           ],
-          isOwnMessage: false,
+          direction: MessageDirection.incoming,
         ),
         tester,
       );
@@ -35,7 +39,7 @@ void main() {
           reactions: [
             EmojiReaction(emoji: '👍', count: BigInt.from(3), users: const ['u1', 'u2', 'u3']),
           ],
-          isOwnMessage: false,
+          direction: MessageDirection.incoming,
         ),
         tester,
       );
@@ -50,7 +54,7 @@ void main() {
           reactions: [
             EmojiReaction(emoji: '👍', count: BigInt.one, users: const ['user1']),
           ],
-          isOwnMessage: false,
+          direction: MessageDirection.incoming,
         ),
         tester,
       );
@@ -65,7 +69,7 @@ void main() {
           reactions: [
             EmojiReaction(emoji: '👍', count: BigInt.from(150), users: const []),
           ],
-          isOwnMessage: false,
+          direction: MessageDirection.incoming,
         ),
         tester,
       );
@@ -80,7 +84,7 @@ void main() {
             EmojiReaction(emoji: '👍', count: BigInt.from(2), users: const ['u1', 'u2']),
             EmojiReaction(emoji: '❤️', count: BigInt.one, users: const ['u3']),
           ],
-          isOwnMessage: false,
+          direction: MessageDirection.incoming,
         ),
         tester,
       );
@@ -98,7 +102,7 @@ void main() {
             EmojiReaction(emoji: '😂', count: BigInt.one, users: const ['u3']),
             EmojiReaction(emoji: '🔥', count: BigInt.one, users: const ['u4']),
           ],
-          isOwnMessage: false,
+          direction: MessageDirection.incoming,
         ),
         tester,
       );
@@ -118,12 +122,28 @@ void main() {
             EmojiReaction(emoji: '❤️', count: BigInt.one, users: const ['u2']),
             EmojiReaction(emoji: '😂', count: BigInt.one, users: const ['u3']),
           ],
-          isOwnMessage: false,
+          direction: MessageDirection.incoming,
         ),
         tester,
       );
 
       expect(find.text('...'), findsNothing);
+    });
+
+    group('outgoing direction', () {
+      testWidgets('renders reaction pill with outgoing styling', (tester) async {
+        await mountWidget(
+          WnMessageReactions(
+            reactions: [
+              EmojiReaction(emoji: '👍', count: BigInt.one, users: const ['u1']),
+            ],
+            direction: MessageDirection.outgoing,
+          ),
+          tester,
+        );
+
+        expect(find.text('👍'), findsOneWidget);
+      });
     });
 
     group('onReaction', () {
@@ -134,7 +154,7 @@ void main() {
             reactions: [
               EmojiReaction(emoji: '👍', count: BigInt.one, users: const ['other_user']),
             ],
-            isOwnMessage: false,
+            direction: MessageDirection.incoming,
             currentUserPubkey: 'current_user',
             onReaction: (emoji) => tappedEmoji = emoji,
           ),
@@ -156,7 +176,7 @@ void main() {
             reactions: [
               EmojiReaction(emoji: '👍', count: BigInt.one, users: const ['current_user']),
             ],
-            isOwnMessage: false,
+            direction: MessageDirection.incoming,
             currentUserPubkey: 'current_user',
             onReaction: (emoji) => tappedEmoji = emoji,
           ),
@@ -175,7 +195,7 @@ void main() {
             reactions: [
               EmojiReaction(emoji: '👍', count: BigInt.one, users: const ['other_user']),
             ],
-            isOwnMessage: false,
+            direction: MessageDirection.incoming,
             currentUserPubkey: 'current_user',
           ),
           tester,
@@ -192,7 +212,7 @@ void main() {
             reactions: [
               EmojiReaction(emoji: '👍', count: BigInt.one, users: const ['other_user']),
             ],
-            isOwnMessage: false,
+            direction: MessageDirection.incoming,
             onReaction: (emoji) => tappedEmoji = emoji,
           ),
           tester,

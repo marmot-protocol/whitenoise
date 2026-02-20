@@ -2,22 +2,25 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show EmojiReaction;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/wn_message_bubble.dart' show MessageDirection;
 
 class WnMessageReactions extends StatelessWidget {
   static const int maxVisibleReactions = 3;
 
   final List<EmojiReaction> reactions;
   final String? currentUserPubkey;
-  final bool isOwnMessage;
+  final MessageDirection direction;
   final void Function(String emoji)? onReaction;
 
   const WnMessageReactions({
     super.key,
     required this.reactions,
-    required this.isOwnMessage,
+    required this.direction,
     this.currentUserPubkey,
     this.onReaction,
   });
+
+  bool get _isOutgoing => direction == MessageDirection.outgoing;
 
   @override
   Widget build(BuildContext context) {
@@ -27,8 +30,8 @@ class WnMessageReactions extends StatelessWidget {
 
     final colors = context.colors;
     final typography = context.typographyScaled;
-    final bubbleColor = isOwnMessage ? colors.fillPrimary : colors.fillSecondary;
-    final textColor = isOwnMessage ? colors.fillContentPrimary : colors.fillContentSecondary;
+    final bubbleColor = _isOutgoing ? colors.fillPrimary : colors.backgroundTertiary;
+    final textColor = _isOutgoing ? colors.fillContentPrimary : colors.backgroundContentPrimary;
     final visibleReactions = reactions.take(maxVisibleReactions).toList();
     final hasOverflow = reactions.length > maxVisibleReactions;
 

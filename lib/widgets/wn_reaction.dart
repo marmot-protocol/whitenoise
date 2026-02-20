@@ -53,15 +53,9 @@ class WnReaction extends HookWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          SizedBox(
-            width: 16.w,
-            height: 16.h,
-            child: Center(
-              child: Text(
-                emoji,
-                style: TextStyle(fontSize: 16.sp, height: 1),
-              ),
-            ),
+          Text(
+            emoji,
+            style: TextStyle(fontSize: 16.sp, height: 1),
           ),
           if (showCount) ...[
             Gap(2.w),
