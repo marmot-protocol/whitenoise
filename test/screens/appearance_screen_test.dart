@@ -163,6 +163,32 @@ void main() {
       await pumpAppearanceScreen(tester);
       expect(find.byKey(const Key('dropdown_icon')), findsNWidgets(2));
     });
+
+    testWidgets('opening language dropdown closes theme dropdown', (tester) async {
+      await pumpAppearanceScreen(tester);
+
+      await tester.tap(find.byType(WnDropdownSelector<ThemeMode>));
+      await tester.pumpAndSettle();
+      expect(find.text('Light'), findsOneWidget);
+
+      await tester.tap(find.byType(WnDropdownSelector<LocaleSetting>));
+      await tester.pumpAndSettle();
+      expect(find.text('English'), findsOneWidget);
+      expect(find.text('Light'), findsNothing);
+    });
+
+    testWidgets('opening theme dropdown closes language dropdown', (tester) async {
+      await pumpAppearanceScreen(tester);
+
+      await tester.tap(find.byType(WnDropdownSelector<LocaleSetting>));
+      await tester.pumpAndSettle();
+      expect(find.text('English'), findsOneWidget);
+
+      await tester.tap(find.byType(WnDropdownSelector<ThemeMode>));
+      await tester.pumpAndSettle();
+      expect(find.text('Light'), findsOneWidget);
+      expect(find.text('English'), findsNothing);
+    });
   });
 
   group('Language Dropdown', () {

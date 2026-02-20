@@ -6,6 +6,10 @@ import '../test_helpers.dart';
 void main() {
   group('WnSlateContentTransition', () {
     group('static properties', () {
+      test('duration is 200ms', () {
+        expect(WnSlateContentTransition.duration, const Duration(milliseconds: 200));
+      });
+
       test('curve is easeInOutCubicEmphasized', () {
         expect(WnSlateContentTransition.curve, Curves.easeInOutCubicEmphasized);
       });

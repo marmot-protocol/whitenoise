@@ -128,7 +128,7 @@ class WnDropdownSelector<T> extends HookWidget {
         animationController.reverse();
       }
       if (isDisabled && controller != null && controller.isOpen(effectiveKey)) {
-        controller.close();
+        WidgetsBinding.instance.addPostFrameCallback((_) => controller.close());
       }
       return null;
     }, [isDisabled]);
