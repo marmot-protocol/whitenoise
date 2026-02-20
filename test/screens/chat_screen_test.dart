@@ -323,6 +323,13 @@ void main() {
         expect(find.byType(ChatListScreen), findsOneWidget);
       });
 
+      testWidgets('OS back navigates to chat list', (tester) async {
+        await pumpChatScreen(tester);
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+        expect(find.byType(ChatListScreen), findsOneWidget);
+      });
+
       testWidgets('avatar navigates to group info screen for group chat', (tester) async {
         await pumpChatScreen(tester);
         await tester.tap(find.byKey(const Key('header_avatar_tap_area')));

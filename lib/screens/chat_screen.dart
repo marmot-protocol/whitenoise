@@ -217,79 +217,85 @@ class ChatScreen extends HookConsumerWidget {
       );
     }
 
-    return GestureDetector(
-      onTap: () => FocusScope.of(context).unfocus(),
-      child: Scaffold(
-        backgroundColor: colors.backgroundPrimary,
-        body: Column(
-          children: [
-            Expanded(
-              child: Stack(
-                children: [
-                  messageListContent,
-                  WnScrollEdgeEffect.canvasTop(
-                    color: colors.backgroundPrimary,
-                    height: slateTopPadding,
-                  ),
-                  WnScrollEdgeEffect.canvasBottom(
-                    color: colors.backgroundPrimary,
-                    height: 20.h,
-                  ),
-                  if (noticeMessage.value != null)
-                    Positioned(
-                      top: safeAreaTop,
-                      left: 0,
-                      right: 0,
-                      child: WnSystemNotice(
-                        key: ValueKey(noticeMessage.value),
-                        title: noticeMessage.value!,
-                        type: WnSystemNoticeType.error,
-                        onDismiss: dismissNotice,
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, _) {
+        if (!didPop) Routes.goToChatList(context);
+      },
+      child: GestureDetector(
+        onTap: () => FocusScope.of(context).unfocus(),
+        child: Scaffold(
+          backgroundColor: colors.backgroundPrimary,
+          body: Column(
+            children: [
+              Expanded(
+                child: Stack(
+                  children: [
+                    messageListContent,
+                    WnScrollEdgeEffect.canvasTop(
+                      color: colors.backgroundPrimary,
+                      height: slateTopPadding,
+                    ),
+                    WnScrollEdgeEffect.canvasBottom(
+                      color: colors.backgroundPrimary,
+                      height: 20.h,
+                    ),
+                    if (noticeMessage.value != null)
+                      Positioned(
+                        top: safeAreaTop,
+                        left: 0,
+                        right: 0,
+                        child: WnSystemNotice(
+                          key: ValueKey(noticeMessage.value),
+                          title: noticeMessage.value!,
+                          type: WnSystemNoticeType.error,
+                          onDismiss: dismissNotice,
+                        ),
+                      ),
+                    SafeArea(
+                      bottom: false,
+                      child: WnSlate(
+                        header: WnSlateChatHeader(
+                          displayName: chatProfile.data?.displayName ?? '',
+                          avatarColor: chatProfile.data?.color ?? AvatarColor.neutral,
+                          pictureUrl: chatProfile.data?.pictureUrl,
+                          onBack: () => Routes.goToChatList(context),
+                          onAvatarTap: () {
+                            final otherPubkey = chatProfile.data?.otherMemberPubkey;
+                            if (otherPubkey != null) {
+                              Routes.pushToChatInfo(context, otherPubkey);
+                            } else {
+                              Routes.pushToGroupInfo(context, groupId);
+                            }
+                          },
+                        ),
                       ),
                     ),
-                  SafeArea(
-                    bottom: false,
-                    child: WnSlate(
-                      header: WnSlateChatHeader(
-                        displayName: chatProfile.data?.displayName ?? '',
-                        avatarColor: chatProfile.data?.color ?? AvatarColor.neutral,
-                        pictureUrl: chatProfile.data?.pictureUrl,
-                        onBack: () => Routes.goToChatList(context),
-                        onAvatarTap: () {
-                          final otherPubkey = chatProfile.data?.otherMemberPubkey;
-                          if (otherPubkey != null) {
-                            Routes.pushToChatInfo(context, otherPubkey);
-                          } else {
-                            Routes.pushToGroupInfo(context, groupId);
-                          }
-                        },
+                    if (chatScroll.isScrollDownButtonVisible)
+                      Positioned(
+                        bottom: 8.h,
+                        right: 16.w,
+                        child: ChatScrollDownButton(
+                          show: true,
+                          onTap: chatScroll.scrollToBottom,
+                        ),
                       ),
-                    ),
-                  ),
-                  if (chatScroll.isScrollDownButtonVisible)
-                    Positioned(
-                      bottom: 8.h,
-                      right: 16.w,
-                      child: ChatScrollDownButton(
-                        show: true,
-                        onTap: chatScroll.scrollToBottom,
-                      ),
-                    ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            SafeArea(
-              top: false,
-              child: _ChatInput(
-                input: input,
-                mediaUpload: mediaUpload,
-                currentUserPubkey: pubkey,
-                onSend: sendMessage,
-                onError: showNotice,
-                getChatMessageQuote: getChatMessageQuote,
+              SafeArea(
+                top: false,
+                child: _ChatInput(
+                  input: input,
+                  mediaUpload: mediaUpload,
+                  currentUserPubkey: pubkey,
+                  onSend: sendMessage,
+                  onError: showNotice,
+                  getChatMessageQuote: getChatMessageQuote,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
