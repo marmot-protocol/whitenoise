@@ -36,7 +36,7 @@ android {
         create("staging") {
             dimension = "environment"
             applicationIdSuffix = ".staging"
-            resValue("string", "app_name", "White Noise staging")
+            resValue("string", "app_name", "WN Staging")
         }
         create("production") {
             dimension = "environment"

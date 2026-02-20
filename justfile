@@ -247,7 +247,7 @@ fix:
     dart fix --apply
 
 # ==============================================================================
-# BUILDING
+# BUILDING - ANDROID
 # ==============================================================================
 build-android:
     ./scripts/build_android.sh
@@ -279,6 +279,30 @@ build-release-aab: (build-aab "production")
 
 when-apk: build-staging-apk
 
+# ==============================================================================
+# BUILDING - iOS
+# ==============================================================================
+
+# Build Rust native libraries for iOS (device + simulator)
+build-ios:
+    ./scripts/build_ios.sh
+
+# Build Rust native libraries for iOS (quiet, for agents/CI)
+build-ios-quiet:
+    @./scripts/build_ios.sh > /dev/null 2>&1 && echo "✅ iOS build complete" || { echo "❌ iOS build failed"; false; }
+
+# Build a production IPA
+build-production-ipa:
+    ./scripts/build_ios.sh && flutter build ipa --flavor production --export-method development
+
+# Build a staging IPA
+build-staging-ipa:
+    ./scripts/build_ios.sh && flutter build ipa --flavor staging --export-method development
+
+# ==============================================================================
+# RUN
+# ==============================================================================
+
 # Run the app on a connected device (staging flavor by default)
 run flavor="staging":
     flutter run --flavor {{flavor}}
@@ -286,6 +310,13 @@ run flavor="staging":
 # Run the app on a connected device (production flavor)
 run-production:
     flutter run --flavor production
+
+# Build Rust libs and install on connected iOS device
+# Usage: just install-ios <device> [flavor] [extra flags]
+# Example: just install-ios "JG 16e Test"
+# Example: just install-ios "JG 16e Test" production --release
+install-ios device flavor="staging" *FLAGS="":
+    ./scripts/build_ios.sh && flutter run --flavor {{flavor}} -d "{{device}}" {{FLAGS}}
 # ==============================================================================
 # HELPER RECIPES
 # ==============================================================================
