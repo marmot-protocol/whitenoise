@@ -353,7 +353,6 @@ void main() {
 
       testWidgets('shows invite callout', (tester) async {
         await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
-        expect(find.byKey(const Key('user_not_on_whitenoise')), findsOneWidget);
         expect(find.text('Invite to White Noise'), findsOneWidget);
       });
 
@@ -392,11 +391,70 @@ void main() {
           );
         });
 
-        testWidgets('uses Unknown user when no metadata names', (tester) async {
+        testWidgets('uses generic message when no metadata names', (tester) async {
           await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
           expect(
             find.text(
-              "Unknown user isn't on White Noise yet. Share the app to start a secure chat.",
+              "This user isn't on White Noise yet. Share the app to start a secure chat.",
+            ),
+            findsOneWidget,
+          );
+        });
+      });
+    });
+
+    group('user with incompatible key packages', () {
+      setUp(() {
+        _api.userHasKeyPackageStatus = KeyPackageStatus.incompatible;
+      });
+
+      testWidgets('shows user needs update callout', (tester) async {
+        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        expect(find.text('Key update needed'), findsOneWidget);
+      });
+
+      testWidgets('does not show follow button', (tester) async {
+        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        expect(find.byKey(const Key('follow_button')), findsNothing);
+      });
+
+      testWidgets('does not show start chat button', (tester) async {
+        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        expect(find.byKey(const Key('start_chat_button')), findsNothing);
+      });
+
+      group('invite callout description', () {
+        testWidgets('uses displayName when available', (tester) async {
+          _api.metadata = const FlutterMetadata(
+            displayName: 'Alice',
+            name: 'alice_nostr',
+            custom: {},
+          );
+          await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+          expect(
+            find.text(
+              "You can't start a secure chat with Alice yet. They need to update White Noise before secure messaging works.",
+            ),
+            findsOneWidget,
+          );
+        });
+
+        testWidgets('uses name when displayName is absent', (tester) async {
+          _api.metadata = const FlutterMetadata(name: 'bob_nostr', custom: {});
+          await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+          expect(
+            find.text(
+              "You can't start a secure chat with bob_nostr yet. They need to update White Noise before secure messaging works.",
+            ),
+            findsOneWidget,
+          );
+        });
+
+        testWidgets('uses generic message when no metadata names', (tester) async {
+          await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+          expect(
+            find.text(
+              "You can't start a secure chat with this user yet. They need to update White Noise before secure messaging works.",
             ),
             findsOneWidget,
           );

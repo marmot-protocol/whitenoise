@@ -1573,5 +1573,30 @@
   "failedToAddMembers": "Failed to add members. Please try again.",
   "@failedToAddMembers": {
     "description": "Error message when adding members to group fails"
+  },
+
+  "userNeedsUpdate": "Key update needed",
+  "@userNeedsUpdate": {
+    "description": "Callout title when user needs to update their whitenoise app"
+  },
+
+  "userNeedsUpdateDescription": "You can't start a secure chat with {name} yet. They need to update White Noise before secure messaging works.",
+  "@userNeedsUpdateDescription": {
+    "description": "Callout description when user needs to update their whitenoise app",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+
+  "unknownInviteToWhiteNoiseDescription": "This user isn't on White Noise yet. Share the app to start a secure chat.",
+  "@unknownInviteToWhiteNoiseDescription": {
+    "description": "Callout description when unknown user is not on White Noise"
+  },
+
+  "unknownUserNeedsUpdateDescription": "You can't start a secure chat with this user yet. They need to update White Noise before secure messaging works.",
+  "@unknownUserNeedsUpdateDescription": {
+    "description": "Callout description when user needs to update their whitenoise app and we don't know the user name"
   }
 }

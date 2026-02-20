@@ -1020,4 +1020,20 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get failedToAddMembers => 'Impossible d\'ajouter des membres. Veuillez réessayer.';
+
+  @override
+  String get userNeedsUpdate => 'Mise à jour de clé nécessaire';
+
+  @override
+  String userNeedsUpdateDescription(String name) {
+    return 'Vous ne pouvez pas encore démarrer une discussion sécurisée avec $name. Cette personne doit mettre à jour White Noise avant que la messagerie sécurisée ne fonctionne.';
+  }
+
+  @override
+  String get unknownInviteToWhiteNoiseDescription =>
+      'Cet utilisateur n\'est pas encore sur White Noise. Partagez l\'application pour démarrer une discussion sécurisée.';
+
+  @override
+  String get unknownUserNeedsUpdateDescription =>
+      'Vous ne pouvez pas encore démarrer une discussion sécurisée avec cet utilisateur. Cette personne doit mettre à jour White Noise avant que la messagerie sécurisée ne fonctionne.';
 }

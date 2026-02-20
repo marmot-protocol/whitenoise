@@ -1020,4 +1020,20 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get failedToAddMembers => 'Não foi possível adicionar membros. Tente novamente.';
+
+  @override
+  String get userNeedsUpdate => 'Atualização de chave necessária';
+
+  @override
+  String userNeedsUpdateDescription(String name) {
+    return 'Você ainda não pode iniciar uma conversa segura com $name. A pessoa precisa atualizar o White Noise antes que as mensagens seguras funcionem.';
+  }
+
+  @override
+  String get unknownInviteToWhiteNoiseDescription =>
+      'Este usuário ainda não está no White Noise. Compartilhe o app para iniciar uma conversa segura.';
+
+  @override
+  String get unknownUserNeedsUpdateDescription =>
+      'Você ainda não pode iniciar uma conversa segura com este usuário. A pessoa precisa atualizar o White Noise antes que as mensagens seguras funcionem.';
 }

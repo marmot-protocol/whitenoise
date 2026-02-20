@@ -1038,4 +1038,20 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get failedToAddMembers => 'Не удалось добавить участников. Попробуйте снова.';
+
+  @override
+  String get userNeedsUpdate => 'Требуется обновление ключа';
+
+  @override
+  String userNeedsUpdateDescription(String name) {
+    return 'Вы ещё не можете начать безопасный чат с $name. Ему нужно обновить White Noise, чтобы безопасная переписка работала.';
+  }
+
+  @override
+  String get unknownInviteToWhiteNoiseDescription =>
+      'Этот пользователь ещё не в White Noise. Поделитесь приложением, чтобы начать безопасный чат.';
+
+  @override
+  String get unknownUserNeedsUpdateDescription =>
+      'Вы ещё не можете начать безопасный чат с этим пользователем. Ему нужно обновить White Noise, чтобы безопасная переписка работала.';
 }

@@ -100,6 +100,24 @@ class StartChatScreen extends HookConsumerWidget {
       }
     }
 
+    ({String title, String description}) calloutTitleAndDescription() {
+      final name = presentName(metadata);
+      if (keyPackageStatus == KeyPackageStatus.incompatible) {
+        return (
+          title: context.l10n.userNeedsUpdate,
+          description: name != null
+              ? context.l10n.userNeedsUpdateDescription(name)
+              : context.l10n.unknownUserNeedsUpdateDescription,
+        );
+      }
+      return (
+        title: context.l10n.inviteToWhiteNoise,
+        description: name != null
+            ? context.l10n.inviteToWhiteNoiseDescription(name)
+            : context.l10n.unknownInviteToWhiteNoiseDescription,
+      );
+    }
+
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: GestureDetector(
@@ -169,15 +187,16 @@ class StartChatScreen extends HookConsumerWidget {
                               onPressed: startChat,
                             ),
                           ),
-                        ] else
-                          WnCallout(
-                            key: const Key('user_not_on_whitenoise'),
-                            title: context.l10n.inviteToWhiteNoise,
-                            description: context.l10n.inviteToWhiteNoiseDescription(
-                              presentName(metadata) ?? context.l10n.unknownUser,
-                            ),
-                            type: CalloutType.info,
-                          ),
+                        ] else ...[
+                          () {
+                            final callout = calloutTitleAndDescription();
+                            return WnCallout(
+                              title: callout.title,
+                              description: callout.description,
+                              type: CalloutType.info,
+                            );
+                          }(),
+                        ],
                       ],
                     ],
                   ),

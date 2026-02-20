@@ -296,5 +296,9 @@
   "groupLoadError": "Impossible de charger le groupe. Veuillez réessayer.",
   "groupSaveError": "Impossible de sauvegarder le groupe. Veuillez réessayer.",
   "failedToFetchGroupMembers": "Impossible de charger les membres du groupe. Veuillez réessayer.",
-  "failedToAddMembers": "Impossible d'ajouter des membres. Veuillez réessayer."
+  "failedToAddMembers": "Impossible d'ajouter des membres. Veuillez réessayer.",
+  "userNeedsUpdate": "Mise à jour de clé nécessaire",
+  "userNeedsUpdateDescription": "Vous ne pouvez pas encore démarrer une discussion sécurisée avec {name}. Cette personne doit mettre à jour White Noise avant que la messagerie sécurisée ne fonctionne.",
+  "unknownInviteToWhiteNoiseDescription": "Cet utilisateur n'est pas encore sur White Noise. Partagez l'application pour démarrer une discussion sécurisée.",
+  "unknownUserNeedsUpdateDescription": "Vous ne pouvez pas encore démarrer une discussion sécurisée avec cet utilisateur. Cette personne doit mettre à jour White Noise avant que la messagerie sécurisée ne fonctionne."
 }

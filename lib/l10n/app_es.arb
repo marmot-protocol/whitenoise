@@ -296,5 +296,9 @@
   "groupLoadError": "No se pudo cargar el grupo. Inténtalo de nuevo.",
   "groupSaveError": "No se pudo guardar el grupo. Inténtalo de nuevo.",
   "failedToFetchGroupMembers": "No se pudieron cargar los miembros del grupo. Inténtalo de nuevo.",
-  "failedToAddMembers": "No se pudieron añadir miembros. Inténtalo de nuevo."
+  "failedToAddMembers": "No se pudieron añadir miembros. Inténtalo de nuevo.",
+  "userNeedsUpdate": "Actualización de clave necesaria",
+  "userNeedsUpdateDescription": "Aún no puedes iniciar un chat seguro con {name}. Necesita actualizar White Noise antes de que funcione la mensajería segura.",
+  "unknownInviteToWhiteNoiseDescription": "Este usuario aún no está en White Noise. Comparte la app para iniciar un chat seguro.",
+  "unknownUserNeedsUpdateDescription": "Aún no puedes iniciar un chat seguro con este usuario. Necesita actualizar White Noise antes de que funcione la mensajería segura."
 }

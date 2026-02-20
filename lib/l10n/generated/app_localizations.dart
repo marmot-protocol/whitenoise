@@ -1889,6 +1889,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to add members. Please try again.'**
   String get failedToAddMembers;
+
+  /// Callout title when user needs to update their whitenoise app
+  ///
+  /// In en, this message translates to:
+  /// **'Key update needed'**
+  String get userNeedsUpdate;
+
+  /// Callout description when user needs to update their whitenoise app
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t start a secure chat with {name} yet. They need to update White Noise before secure messaging works.'**
+  String userNeedsUpdateDescription(String name);
+
+  /// Callout description when unknown user is not on White Noise
+  ///
+  /// In en, this message translates to:
+  /// **'This user isn\'t on White Noise yet. Share the app to start a secure chat.'**
+  String get unknownInviteToWhiteNoiseDescription;
+
+  /// Callout description when user needs to update their whitenoise app and we don't know the user name
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t start a secure chat with this user yet. They need to update White Noise before secure messaging works.'**
+  String get unknownUserNeedsUpdateDescription;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

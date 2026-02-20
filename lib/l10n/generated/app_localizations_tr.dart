@@ -1011,4 +1011,20 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get failedToAddMembers => 'Üye eklenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get userNeedsUpdate => 'Anahtar güncellemesi gerekli';
+
+  @override
+  String userNeedsUpdateDescription(String name) {
+    return '$name ile henüz güvenli sohbet başlatamazsınız. Güvenli mesajlaşmanın çalışması için White Noise\'u güncellemesi gerekiyor.';
+  }
+
+  @override
+  String get unknownInviteToWhiteNoiseDescription =>
+      'Bu kullanıcı henüz White Noise\'da değil. Güvenli bir sohbet başlatmak için uygulamayı paylaşın.';
+
+  @override
+  String get unknownUserNeedsUpdateDescription =>
+      'Bu kullanıcıyla henüz güvenli sohbet başlatamazsınız. Güvenli mesajlaşmanın çalışması için White Noise\'u güncellemesi gerekiyor.';
 }

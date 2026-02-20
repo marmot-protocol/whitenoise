@@ -297,5 +297,9 @@
   "groupLoadError": "Grup yüklenemedi. Lütfen tekrar deneyin.",
   "groupSaveError": "Grup kaydedilemedi. Lütfen tekrar deneyin.",
   "failedToFetchGroupMembers": "Grup üyeleri yüklenemedi. Lütfen tekrar deneyin.",
-  "failedToAddMembers": "Üye eklenemedi. Lütfen tekrar deneyin."
+  "failedToAddMembers": "Üye eklenemedi. Lütfen tekrar deneyin.",
+  "userNeedsUpdate": "Anahtar güncellemesi gerekli",
+  "userNeedsUpdateDescription": "{name} ile henüz güvenli sohbet başlatamazsınız. Güvenli mesajlaşmanın çalışması için White Noise'u güncellemesi gerekiyor.",
+  "unknownInviteToWhiteNoiseDescription": "Bu kullanıcı henüz White Noise'da değil. Güvenli bir sohbet başlatmak için uygulamayı paylaşın.",
+  "unknownUserNeedsUpdateDescription": "Bu kullanıcıyla henüz güvenli sohbet başlatamazsınız. Güvenli mesajlaşmanın çalışması için White Noise'u güncellemesi gerekiyor."
 }

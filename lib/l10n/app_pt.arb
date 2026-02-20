@@ -296,5 +296,9 @@
   "groupLoadError": "Não foi possível carregar o grupo. Tente novamente.",
   "groupSaveError": "Não foi possível salvar o grupo. Tente novamente.",
   "failedToFetchGroupMembers": "Não foi possível carregar os membros do grupo. Tente novamente.",
-  "failedToAddMembers": "Não foi possível adicionar membros. Tente novamente."
+  "failedToAddMembers": "Não foi possível adicionar membros. Tente novamente.",
+  "userNeedsUpdate": "Atualização de chave necessária",
+  "userNeedsUpdateDescription": "Você ainda não pode iniciar uma conversa segura com {name}. A pessoa precisa atualizar o White Noise antes que as mensagens seguras funcionem.",
+  "unknownInviteToWhiteNoiseDescription": "Este usuário ainda não está no White Noise. Compartilhe o app para iniciar uma conversa segura.",
+  "unknownUserNeedsUpdateDescription": "Você ainda não pode iniciar uma conversa segura com este usuário. A pessoa precisa atualizar o White Noise antes que as mensagens seguras funcionem."
 }
