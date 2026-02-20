@@ -5,6 +5,40 @@ import 'package:gap/gap.dart' show Gap;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 
+class WnDropdownController extends ChangeNotifier {
+  String? _openItemKey;
+
+  String? get openItemKey => _openItemKey;
+
+  void open(String key) {
+    if (_openItemKey != key) {
+      _openItemKey = key;
+      notifyListeners();
+    }
+  }
+
+  void close() {
+    if (_openItemKey != null) {
+      _openItemKey = null;
+      notifyListeners();
+    }
+  }
+
+  bool isOpen(String key) => _openItemKey == key;
+}
+
+class WnDropdownScope extends InheritedNotifier<WnDropdownController> {
+  const WnDropdownScope({
+    super.key,
+    required WnDropdownController controller,
+    required super.child,
+  }) : super(notifier: controller);
+
+  static WnDropdownController? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<WnDropdownScope>()?.notifier;
+  }
+}
+
 class WnDropdownOption<T> {
   const WnDropdownOption({
     required this.value,
@@ -51,7 +85,15 @@ class WnDropdownSelector<T> extends HookWidget {
     final itemHeight = size == WnDropdownSize.small ? 44.h : 48.h;
     const maxVisibleItems = 5;
 
-    final isOpen = useState(false);
+    final controller = WnDropdownScope.maybeOf(context);
+    final widgetKey = key;
+    final effectiveKey = useMemoized(() {
+      if (widgetKey is ValueKey) return widgetKey.value.toString();
+      if (widgetKey != null) return widgetKey.toString();
+      return label;
+    }, [widgetKey, label]);
+
+    final localIsOpen = useState(false);
     final isPressed = useState(false);
 
     final animationController = useAnimationController(
@@ -63,10 +105,30 @@ class WnDropdownSelector<T> extends HookWidget {
       [animationController],
     );
 
+    final isOpen = controller != null ? controller.isOpen(effectiveKey) : localIsOpen.value;
+
     useEffect(() {
-      if (isDisabled && isOpen.value) {
-        isOpen.value = false;
+      if (controller == null) return null;
+      void onControllerChanged() {
+        final nowOpen = controller.isOpen(effectiveKey);
+        if (nowOpen) {
+          animationController.forward();
+        } else {
+          animationController.reverse();
+        }
+      }
+
+      controller.addListener(onControllerChanged);
+      return () => controller.removeListener(onControllerChanged);
+    }, [controller, effectiveKey]);
+
+    useEffect(() {
+      if (isDisabled && localIsOpen.value) {
+        localIsOpen.value = false;
         animationController.reverse();
+      }
+      if (isDisabled && controller != null && controller.isOpen(effectiveKey)) {
+        WidgetsBinding.instance.addPostFrameCallback((_) => controller.close());
       }
       return null;
     }, [isDisabled]);
@@ -82,19 +144,31 @@ class WnDropdownSelector<T> extends HookWidget {
     void toggleDropdown() {
       if (isDisabled) return;
 
-      isOpen.value = !isOpen.value;
-      if (isOpen.value) {
-        animationController.forward();
+      if (controller != null) {
+        if (controller.isOpen(effectiveKey)) {
+          controller.close();
+        } else {
+          controller.open(effectiveKey);
+        }
       } else {
-        animationController.reverse();
+        localIsOpen.value = !localIsOpen.value;
+        if (localIsOpen.value) {
+          animationController.forward();
+        } else {
+          animationController.reverse();
+        }
       }
     }
 
     void selectOption(T optionValue) {
       if (isDisabled) return;
 
-      isOpen.value = false;
-      animationController.reverse();
+      if (controller != null) {
+        controller.close();
+      } else {
+        localIsOpen.value = false;
+        animationController.reverse();
+      }
       onChanged(optionValue);
     }
 
@@ -104,7 +178,7 @@ class WnDropdownSelector<T> extends HookWidget {
         ? colors.borderDestructivePrimary
         : isPressed.value
         ? colors.borderSecondary
-        : isOpen.value
+        : isOpen
         ? colors.borderPrimary
         : colors.borderTertiary;
 
@@ -177,7 +251,7 @@ class WnDropdownSelector<T> extends HookWidget {
                             ),
                           ),
                           _DropdownIconButton(
-                            isOpen: isOpen.value,
+                            isOpen: isOpen,
                             iconColor: iconColor,
                             size: size,
                           ),

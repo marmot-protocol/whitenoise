@@ -12,7 +12,7 @@ class WnSlateContentTransition extends StatefulWidget {
   final Widget child;
   final Animation<double>? routeAnimation;
 
-  static const Duration duration = Duration(milliseconds: 250);
+  static const Duration duration = Duration(milliseconds: 200);
   static const Curve curve = Curves.easeInOutCubicEmphasized;
   static Curve get reverseCurve => Curves.easeInOutCubicEmphasized.flipped;
   static const double maxBlurSigma = 4.0;

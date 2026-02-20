@@ -52,6 +52,7 @@ class ChatScreen extends HookConsumerWidget {
       :messageCount,
       :getMessage,
       :getReversedMessageIndex,
+      :getMessageById,
       :isLoading,
       :latestMessageId,
       :latestMessagePubkey,
@@ -65,8 +66,12 @@ class ChatScreen extends HookConsumerWidget {
       getReversedMessageIndex: getReversedMessageIndex,
     );
     final scrollController = scrollToMessageResult.scrollController;
-    final input = useChatInput();
     final mediaUpload = useMediaUpload(pubkey: pubkey, groupId: groupId);
+    final input = useChatInput(
+      pubkey: pubkey,
+      groupId: groupId,
+      findMessage: getMessageById,
+    );
     final messageService = useMemoized(
       () => MessageService(pubkey: pubkey, groupId: groupId),
       [pubkey, groupId],

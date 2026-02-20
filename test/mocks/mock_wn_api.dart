@@ -5,8 +5,10 @@ import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/api/account_groups.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/chat_list.dart';
+import 'package:whitenoise/src/rust/api/drafts.dart';
 import 'package:whitenoise/src/rust/api/error.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
+import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/user_search.dart';
@@ -62,6 +64,14 @@ class MockWnApi implements RustLibApi {
   final List<String> markedAsReadMessages = [];
   int getAccountGroupCallCount = 0;
   bool shouldFailGetAccountGroup = false;
+
+  Draft? loadDraftResult;
+  Completer<Draft?>? loadDraftCompleter;
+  int loadDraftCallCount = 0;
+  int saveDraftCallCount = 0;
+  String? lastSavedDraftContent;
+  String? lastSavedDraftReplyToId;
+  int deleteDraftCallCount = 0;
 
   @override
   Future<KeyPackageStatus> crateApiUsersUserHasKeyPackage({
@@ -469,6 +479,46 @@ class MockWnApi implements RustLibApi {
     registerExternalSignerCalled = true;
   }
 
+  @override
+  Future<Draft?> crateApiDraftsLoadDraft({
+    required String pubkey,
+    required String groupId,
+  }) async {
+    loadDraftCallCount++;
+    if (loadDraftCompleter != null) return loadDraftCompleter!.future;
+    return loadDraftResult;
+  }
+
+  @override
+  Future<Draft> crateApiDraftsSaveDraft({
+    required String pubkey,
+    required String groupId,
+    required String content,
+    String? replyToId,
+    required List<MediaFile> mediaAttachments,
+  }) async {
+    saveDraftCallCount++;
+    lastSavedDraftContent = content;
+    lastSavedDraftReplyToId = replyToId;
+    return Draft(
+      accountPubkey: pubkey,
+      mlsGroupId: groupId,
+      content: content,
+      replyToId: replyToId,
+      mediaAttachments: const [],
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+  }
+
+  @override
+  Future<void> crateApiDraftsDeleteDraft({
+    required String pubkey,
+    required String groupId,
+  }) async {
+    deleteDraftCallCount++;
+  }
+
   void reset() {
     currentThemeMode = 'system';
     currentLanguage = 'system';
@@ -492,6 +542,13 @@ class MockWnApi implements RustLibApi {
     markedAsReadMessages.clear();
     getAccountGroupCallCount = 0;
     shouldFailGetAccountGroup = false;
+    loadDraftResult = null;
+    loadDraftCompleter = null;
+    loadDraftCallCount = 0;
+    saveDraftCallCount = 0;
+    lastSavedDraftContent = null;
+    lastSavedDraftReplyToId = null;
+    deleteDraftCallCount = 0;
   }
 
   @override

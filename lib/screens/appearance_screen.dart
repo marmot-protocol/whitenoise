@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:whitenoise/hooks/use_dropdown_controller.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/providers/theme_provider.dart';
@@ -18,6 +19,7 @@ class AppearanceScreen extends HookConsumerWidget {
     final colors = context.colors;
     final currentThemeMode = ref.watch(themeProvider).value ?? ThemeMode.system;
     final currentLocaleSetting = ref.watch(localeProvider).value ?? const SystemLocale();
+    final dropdownController = useDropdownController();
 
     final themeOptions = [
       WnDropdownOption(value: ThemeMode.system, label: context.l10n.themeSystem),
@@ -51,23 +53,28 @@ class AppearanceScreen extends HookConsumerWidget {
             ),
             child: Padding(
               padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-              child: Column(
-                spacing: 24.h,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  WnDropdownSelector<ThemeMode>(
-                    label: context.l10n.theme,
-                    options: themeOptions,
-                    value: currentThemeMode,
-                    onChanged: (mode) => ref.read(themeProvider.notifier).setThemeMode(mode),
-                  ),
-                  WnDropdownSelector<LocaleSetting>(
-                    label: context.l10n.language,
-                    options: languageOptions,
-                    value: currentLocaleSetting,
-                    onChanged: (setting) => ref.read(localeProvider.notifier).setLocale(setting),
-                  ),
-                ],
+              child: WnDropdownScope(
+                controller: dropdownController,
+                child: Column(
+                  spacing: 24.h,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    WnDropdownSelector<ThemeMode>(
+                      key: const Key('theme_dropdown'),
+                      label: context.l10n.theme,
+                      options: themeOptions,
+                      value: currentThemeMode,
+                      onChanged: (mode) => ref.read(themeProvider.notifier).setThemeMode(mode),
+                    ),
+                    WnDropdownSelector<LocaleSetting>(
+                      key: const Key('language_dropdown'),
+                      label: context.l10n.language,
+                      options: languageOptions,
+                      value: currentLocaleSetting,
+                      onChanged: (setting) => ref.read(localeProvider.notifier).setLocale(setting),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

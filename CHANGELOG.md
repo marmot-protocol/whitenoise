@@ -51,7 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Images in chat [PR #249](https://github.com/marmot-protocol/whitenoise/pull/249)
 - Show last message sender name in chat list [PR #322](https://github.com/marmot-protocol/whitenoise/pull/322)
 - Add to group from group member screen and start chat screen [PR #323](https://github.com/marmot-protocol/whitenoise/pull/323)
-- Invite to White Noise [PR (#328)](https://github.com/marmot-protocol/whitenoise/pull/328)
+- Text drafts [PR #328](https://github.com/marmot-protocol/whitenoise/pull/328)
+- Invite to White Noise [PR (#354)](https://github.com/marmot-protocol/whitenoise/pull/354)
 
 ### Changed
 

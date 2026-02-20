@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/widgets/wn_dropdown_selector.dart';
 
 import '../test_helpers.dart';
+
+void _noop(dynamic _) {}
 
 void main() {
   group('WnDropdownSelector', () {
@@ -561,6 +564,274 @@ void main() {
     });
   });
 
+  group('WnDropdownController', () {
+    test('openItemKey is null initially', () {
+      final controller = WnDropdownController();
+      expect(controller.openItemKey, isNull);
+      controller.dispose();
+    });
+
+    test('open sets openItemKey and isOpen returns true', () {
+      final controller = WnDropdownController();
+      controller.open('key-1');
+      expect(controller.openItemKey, 'key-1');
+      expect(controller.isOpen('key-1'), isTrue);
+      expect(controller.isOpen('key-2'), isFalse);
+      controller.dispose();
+    });
+
+    test('opening a new key closes the previous one', () {
+      final controller = WnDropdownController();
+      controller.open('key-1');
+      controller.open('key-2');
+      expect(controller.isOpen('key-1'), isFalse);
+      expect(controller.isOpen('key-2'), isTrue);
+      controller.dispose();
+    });
+
+    test('close sets openItemKey to null', () {
+      final controller = WnDropdownController();
+      controller.open('key-1');
+      controller.close();
+      expect(controller.openItemKey, isNull);
+      expect(controller.isOpen('key-1'), isFalse);
+      controller.dispose();
+    });
+
+    test('close does nothing when nothing is open', () {
+      final controller = WnDropdownController();
+      var notifyCount = 0;
+      controller.addListener(() => notifyCount++);
+      controller.close();
+      expect(notifyCount, 0);
+      expect(controller.openItemKey, isNull);
+      controller.dispose();
+    });
+
+    test('open does not notify if already open with same key', () {
+      final controller = WnDropdownController();
+      var notifyCount = 0;
+      controller.addListener(() => notifyCount++);
+      controller.open('key-1');
+      expect(notifyCount, 1);
+      controller.open('key-1');
+      expect(notifyCount, 1);
+      controller.dispose();
+    });
+  });
+
+  group('WnDropdownSelector with WnDropdownScope (additional coverage)', () {
+    testWidgets('tapping open dropdown header closes it via controller', (tester) async {
+      setUpTestView(tester);
+      final controller = WnDropdownController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: WnDropdownScope(
+              controller: controller,
+              child: const WnDropdownSelector<String>(
+                key: Key('dd'),
+                label: 'Test',
+                options: [
+                  WnDropdownOption(value: 'a', label: 'Option A'),
+                  WnDropdownOption(value: 'b', label: 'Option B'),
+                ],
+                value: 'a',
+                onChanged: _noop,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Option A'));
+      await tester.pumpAndSettle();
+      expect(find.text('Option B'), findsOneWidget);
+
+      await tester.tap(find.text('Option A').first);
+      await tester.pumpAndSettle();
+      expect(find.text('Option B'), findsNothing);
+
+      controller.dispose();
+    });
+
+    testWidgets('selecting option via controller calls onChanged and closes', (tester) async {
+      setUpTestView(tester);
+      String? selected;
+      final controller = WnDropdownController();
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: WnDropdownScope(
+              controller: controller,
+              child: WnDropdownSelector<String>(
+                key: const Key('dd'),
+                label: 'Test',
+                options: const [
+                  WnDropdownOption(value: 'a', label: 'Option A'),
+                  WnDropdownOption(value: 'b', label: 'Option B'),
+                ],
+                value: 'a',
+                onChanged: (v) => selected = v,
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Option A'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Option B'));
+      await tester.pumpAndSettle();
+
+      expect(selected, 'b');
+      expect(find.text('Option B'), findsNothing);
+
+      controller.dispose();
+    });
+
+    testWidgets('closes via controller when disabled while open', (tester) async {
+      setUpTestView(tester);
+      bool isDisabled = false;
+      final controller = WnDropdownController();
+
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: testDesignSize,
+          builder: (_, _) => MaterialApp(
+            home: StatefulBuilder(
+              builder: (context, setState) {
+                return Scaffold(
+                  body: WnDropdownScope(
+                    controller: controller,
+                    child: Column(
+                      children: [
+                        WnDropdownSelector<String>(
+                          key: const Key('dd'),
+                          label: 'Test',
+                          options: const [
+                            WnDropdownOption(value: 'a', label: 'Option A'),
+                            WnDropdownOption(value: 'b', label: 'Option B'),
+                          ],
+                          value: 'a',
+                          onChanged: _noop,
+                          isDisabled: isDisabled,
+                        ),
+                        ElevatedButton(
+                          key: const Key('disable_btn'),
+                          onPressed: () => setState(() => isDisabled = true),
+                          child: const Text('Disable'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              },
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Option A'));
+      await tester.pumpAndSettle();
+      expect(find.text('Option B'), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('disable_btn')));
+      await tester.pumpAndSettle();
+      expect(find.text('Option B'), findsNothing);
+
+      controller.dispose();
+    });
+
+    testWidgets('uses label as effectiveKey when no widget key is set', (tester) async {
+      setUpTestView(tester);
+      final controller = WnDropdownController();
+
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: testDesignSize,
+          builder: (_, _) => MaterialApp(
+            home: Scaffold(
+              body: WnDropdownScope(
+                controller: controller,
+                child: const Column(
+                  children: [
+                    WnDropdownSelector<String>(
+                      label: 'First',
+                      options: [
+                        WnDropdownOption(value: 'a', label: 'Option A'),
+                        WnDropdownOption(value: 'b', label: 'Option B'),
+                      ],
+                      value: 'a',
+                      onChanged: _noop,
+                    ),
+                    WnDropdownSelector<String>(
+                      label: 'Second',
+                      options: [
+                        WnDropdownOption(value: 'x', label: 'Option X'),
+                        WnDropdownOption(value: 'y', label: 'Option Y'),
+                      ],
+                      value: 'x',
+                      onChanged: _noop,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Option A'));
+      await tester.pumpAndSettle();
+      expect(controller.openItemKey, 'First');
+
+      await tester.tap(find.text('Option X'));
+      await tester.pumpAndSettle();
+      expect(controller.openItemKey, 'Second');
+      expect(find.text('Option B'), findsNothing);
+
+      controller.dispose();
+    });
+
+    testWidgets('uses toString of non-ValueKey widget key as effectiveKey', (tester) async {
+      setUpTestView(tester);
+      final controller = WnDropdownController();
+      final objectKey = const ObjectKey('my-object');
+
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: testDesignSize,
+          builder: (_, _) => MaterialApp(
+            home: Scaffold(
+              body: WnDropdownScope(
+                controller: controller,
+                child: WnDropdownSelector<String>(
+                  key: objectKey,
+                  label: 'Test',
+                  options: const [
+                    WnDropdownOption(value: 'a', label: 'Option A'),
+                    WnDropdownOption(value: 'b', label: 'Option B'),
+                  ],
+                  value: 'a',
+                  onChanged: _noop,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Option A'));
+      await tester.pumpAndSettle();
+      expect(controller.openItemKey, objectKey.toString());
+
+      controller.dispose();
+    });
+  });
+
   group('WnDropdownOption', () {
     test('stores value and label correctly', () {
       const option = WnDropdownOption(value: 42, label: 'Forty Two');
@@ -673,6 +944,101 @@ void main() {
 
       await gesture.up();
       await tester.pumpAndSettle();
+    });
+  });
+
+  group('WnDropdownSelector exclusive open (WnDropdownScope)', () {
+    testWidgets('opening second dropdown closes first when using WnDropdownScope', (tester) async {
+      setUpTestView(tester);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: WnDropdownScope(
+              controller: WnDropdownController(),
+              child: const Column(
+                children: [
+                  WnDropdownSelector<String>(
+                    key: Key('dropdown_1'),
+                    label: 'First',
+                    options: [
+                      WnDropdownOption(value: 'a', label: 'Option A'),
+                      WnDropdownOption(value: 'b', label: 'Option B'),
+                    ],
+                    value: 'a',
+                    onChanged: _noop,
+                  ),
+                  WnDropdownSelector<String>(
+                    key: Key('dropdown_2'),
+                    label: 'Second',
+                    options: [
+                      WnDropdownOption(value: 'x', label: 'Option X'),
+                      WnDropdownOption(value: 'y', label: 'Option Y'),
+                    ],
+                    value: 'x',
+                    onChanged: _noop,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Option A'));
+      await tester.pumpAndSettle();
+      expect(find.text('Option B'), findsOneWidget);
+
+      await tester.tap(find.text('Option X'));
+      await tester.pumpAndSettle();
+      expect(find.text('Option Y'), findsOneWidget);
+      expect(find.text('Option B'), findsNothing);
+    });
+
+    testWidgets('without WnDropdownScope both dropdowns can be open simultaneously', (
+      tester,
+    ) async {
+      setUpTestView(tester);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: [
+                WnDropdownSelector<String>(
+                  key: Key('dropdown_1'),
+                  label: 'First',
+                  options: [
+                    WnDropdownOption(value: 'a', label: 'Option A'),
+                    WnDropdownOption(value: 'b', label: 'Option B'),
+                  ],
+                  value: 'a',
+                  onChanged: _noop,
+                ),
+                WnDropdownSelector<String>(
+                  key: Key('dropdown_2'),
+                  label: 'Second',
+                  options: [
+                    WnDropdownOption(value: 'x', label: 'Option X'),
+                    WnDropdownOption(value: 'y', label: 'Option Y'),
+                  ],
+                  value: 'x',
+                  onChanged: _noop,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Option A'));
+      await tester.pumpAndSettle();
+      expect(find.text('Option B'), findsOneWidget);
+
+      await tester.tap(find.text('Option X'));
+      await tester.pumpAndSettle();
+      expect(find.text('Option Y'), findsOneWidget);
+      expect(find.text('Option B'), findsOneWidget);
     });
   });
 
