@@ -428,6 +428,13 @@ void main() {
 
         expect(shareCalls.length, 1);
         expect(shareCalls[0].method, 'share');
+
+        // Verify the invite message text is included in the share call arguments
+        final args = shareCalls[0].arguments as Map<dynamic, dynamic>;
+        expect(
+          args['text'],
+          contains('whitenoise.chat'),
+        );
       });
 
       group('invite callout description', () {

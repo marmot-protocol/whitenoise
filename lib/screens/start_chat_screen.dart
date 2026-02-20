@@ -225,11 +225,17 @@ class StartChatScreen extends HookConsumerWidget {
                                 key: const Key('invite_button'),
                                 text: context.l10n.share,
                                 size: WnButtonSize.medium,
-                                onPressed: () => SharePlus.instance.share(
-                                  ShareParams(
-                                    text: context.l10n.inviteMessage,
-                                  ),
-                                ),
+                                onPressed: () async {
+                                  try {
+                                    await SharePlus.instance.share(
+                                      ShareParams(
+                                        text: context.l10n.inviteMessage,
+                                      ),
+                                    );
+                                  } catch (e) {
+                                    _logger.severe('Failed to share invite: $e');
+                                  }
+                                },
                               ),
                             ),
                           ],
