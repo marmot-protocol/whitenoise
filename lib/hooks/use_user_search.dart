@@ -14,8 +14,7 @@ final _logger = Logger('useUserSearch');
 
 const _nameSearchDebounceMs = 400;
 const _nameSearchBatchMs = 300;
-const _nameSearchRadiusStart = 0;
-const _nameSearchRadiusEnd = 2;
+const _nameSearchRadiusRounds = [(0, 2), (3, 3), (4, 4)];
 const _followsRefreshInterval = Duration(seconds: 5);
 
 bool _isPartialNpubQuery(String searchQuery, String? hexPubkeyFromQuery) {
@@ -149,6 +148,9 @@ UserSearchState useUserSearch({
     isSearchingNames.value = true;
     final results = <String, user_search_api.UserSearchResult>{};
     var hasPendingFlush = false;
+    var cancelled = false;
+    Timer? batchTimer;
+    StreamSubscription<user_search_api.UserSearchUpdate>? activeSubscription;
 
     void flushResults() {
       final sorted = results.values.toList()
@@ -160,53 +162,75 @@ UserSearchState useUserSearch({
       hasPendingFlush = false;
     }
 
-    Timer? batchTimer;
+    void completeRound(Completer<void> completer) {
+      batchTimer?.cancel();
+      flushResults();
+      activeSubscription?.cancel();
+      if (!completer.isCompleted) completer.complete();
+    }
 
-    final subscription = user_search_api
-        .searchUsers(
-          accountPubkey: accountPubkey,
-          query: debouncedQuery,
-          radiusStart: _nameSearchRadiusStart,
-          radiusEnd: _nameSearchRadiusEnd,
-        )
-        .listen(
-          (update) {
-            for (final result in update.newResults) {
-              final existing = results[result.pubkey];
-              if (existing == null ||
-                  _matchQualityRank(result.matchQuality) <
-                      _matchQualityRank(existing.matchQuality)) {
-                results[result.pubkey] = result;
-              }
-            }
+    Future<void> runRounds() async {
+      for (final (radiusStart, radiusEnd) in _nameSearchRadiusRounds) {
+        if (cancelled) return;
 
-            final isComplete =
-                update.trigger is user_search_api.SearchUpdateTrigger_SearchCompleted;
-            if (isComplete) {
-              batchTimer?.cancel();
-              flushResults();
-              isSearchingNames.value = false;
-            } else if (!hasPendingFlush) {
-              hasPendingFlush = true;
-              batchTimer = Timer(const Duration(milliseconds: _nameSearchBatchMs), flushResults);
-            }
-          },
-          onDone: () {
-            batchTimer?.cancel();
-            flushResults();
-            isSearchingNames.value = false;
-          },
-          onError: (Object error, StackTrace stack) {
-            _logger.severe('Name search failed for "$debouncedQuery"', error, stack);
-            batchTimer?.cancel();
-            isLoadingNameSearch.value = false;
-            isSearchingNames.value = false;
-          },
-        );
+        final completer = Completer<void>();
+
+        activeSubscription = user_search_api
+            .searchUsers(
+              accountPubkey: accountPubkey,
+              query: debouncedQuery,
+              radiusStart: radiusStart,
+              radiusEnd: radiusEnd,
+            )
+            .listen(
+              (update) {
+                for (final result in update.newResults) {
+                  final existing = results[result.pubkey];
+                  if (existing == null ||
+                      _matchQualityRank(result.matchQuality) <
+                          _matchQualityRank(existing.matchQuality)) {
+                    results[result.pubkey] = result;
+                  }
+                }
+
+                final isComplete =
+                    update.trigger is user_search_api.SearchUpdateTrigger_SearchCompleted;
+                if (isComplete) {
+                  completeRound(completer);
+                } else if (!hasPendingFlush) {
+                  hasPendingFlush = true;
+                  batchTimer = Timer(
+                    const Duration(milliseconds: _nameSearchBatchMs),
+                    flushResults,
+                  );
+                }
+              },
+              onDone: () => completeRound(completer),
+              onError: (Object error, StackTrace stack) {
+                _logger.severe('Name search failed for "$debouncedQuery"', error, stack);
+                batchTimer?.cancel();
+                activeSubscription?.cancel();
+                isLoadingNameSearch.value = false;
+                isSearchingNames.value = false;
+                if (!completer.isCompleted) completer.complete();
+                cancelled = true;
+              },
+            );
+
+        await completer.future;
+      }
+
+      if (!cancelled) {
+        isSearchingNames.value = false;
+      }
+    }
+
+    runRounds();
 
     return () {
+      cancelled = true;
       batchTimer?.cancel();
-      subscription.cancel();
+      activeSubscription?.cancel();
     };
   }, [debouncedQuery, accountPubkey]);
 

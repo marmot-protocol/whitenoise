@@ -48,7 +48,8 @@ class _MockApi extends MockWnApi {
   Completer<User>? userCompleter;
   final userCalls = <({String pubkey, bool blocking})>[];
   final followsCalls = <String>[];
-  final searchUsersCalls = <({String query, String accountPubkey})>[];
+  final searchUsersCalls =
+      <({String query, String accountPubkey, int radiusStart, int radiusEnd})>[];
 
   @override
   Future<List<User>> crateApiAccountsAccountFollows({required String pubkey}) {
@@ -86,7 +87,12 @@ class _MockApi extends MockWnApi {
     required int radiusStart,
     required int radiusEnd,
   }) {
-    searchUsersCalls.add((query: query, accountPubkey: accountPubkey));
+    searchUsersCalls.add((
+      query: query,
+      accountPubkey: accountPubkey,
+      radiusStart: radiusStart,
+      radiusEnd: radiusEnd,
+    ));
     return super.crateApiUserSearchSearchUsers(
       accountPubkey: accountPubkey,
       query: query,
@@ -622,13 +628,14 @@ void main() {
         expect(getState().users.length, 1);
       });
 
-      testWidgets('isSearching becomes false when stream completes', (tester) async {
+      testWidgets('isSearching becomes false when all rounds complete', (tester) async {
         await pump(tester, searchQuery: 'alice');
         await tester.pump(const Duration(milliseconds: 400));
         await tester.pump();
 
         expect(getState().isSearching, isTrue);
 
+        // Complete round 1 (0,2)
         api.searchUsersController!.add(
           UserSearchUpdate(
             trigger: SearchUpdateTrigger.searchCompleted(
@@ -640,7 +647,34 @@ void main() {
           ),
         );
         await tester.pump();
+        expect(getState().isSearching, isTrue);
 
+        // Complete round 2 (3,3)
+        api.searchUsersController!.add(
+          UserSearchUpdate(
+            trigger: SearchUpdateTrigger.searchCompleted(
+              finalRadius: 3,
+              totalResults: BigInt.one,
+            ),
+            newResults: const [],
+            totalResultCount: BigInt.one,
+          ),
+        );
+        await tester.pump();
+        expect(getState().isSearching, isTrue);
+
+        // Complete round 3 (4,4)
+        api.searchUsersController!.add(
+          UserSearchUpdate(
+            trigger: SearchUpdateTrigger.searchCompleted(
+              finalRadius: 4,
+              totalResults: BigInt.one,
+            ),
+            newResults: const [],
+            totalResultCount: BigInt.one,
+          ),
+        );
+        await tester.pump();
         expect(getState().isSearching, isFalse);
       });
 
@@ -651,7 +685,7 @@ void main() {
         expect(getState().isSearching, isFalse);
       });
 
-      testWidgets('flushes results and stops searching when stream closes', (tester) async {
+      testWidgets('flushes results when stream closes and advances to next round', (tester) async {
         await pump(tester, searchQuery: 'alice');
         await tester.pump(const Duration(milliseconds: 400));
         await tester.pump();
@@ -670,8 +704,10 @@ void main() {
         await tester.pump();
 
         expect(getState().users.length, 1);
-        expect(getState().isSearching, isFalse);
         expect(getState().isLoading, isFalse);
+        // Still searching - moved to next radius round
+        expect(getState().isSearching, isTrue);
+        expect(api.searchUsersCalls.length, 2);
       });
 
       testWidgets('stops searching on stream error', (tester) async {
@@ -717,6 +753,124 @@ void main() {
         expect(getState().users[0].pubkey, testPubkeyA);
         expect(getState().users[0].metadata.displayName, 'Alice');
         expect(getState().isLoading, isFalse);
+      });
+
+      testWidgets('progressively searches radius (0,2), (3,3), (4,4)', (tester) async {
+        await pump(tester, searchQuery: 'alice');
+        await tester.pump(const Duration(milliseconds: 400));
+        await tester.pump();
+
+        expect(api.searchUsersCalls.length, 1);
+        expect(api.searchUsersCalls[0].radiusStart, 0);
+        expect(api.searchUsersCalls[0].radiusEnd, 2);
+
+        // Complete round 1
+        api.searchUsersController!.add(
+          UserSearchUpdate(
+            trigger: SearchUpdateTrigger.searchCompleted(
+              finalRadius: 2,
+              totalResults: BigInt.one,
+            ),
+            newResults: [_searchResultFactory(testPubkeyA, displayName: 'Alice')],
+            totalResultCount: BigInt.one,
+          ),
+        );
+        await tester.pump();
+
+        expect(api.searchUsersCalls.length, 2);
+        expect(api.searchUsersCalls[1].radiusStart, 3);
+        expect(api.searchUsersCalls[1].radiusEnd, 3);
+
+        // Complete round 2
+        api.searchUsersController!.add(
+          UserSearchUpdate(
+            trigger: SearchUpdateTrigger.searchCompleted(
+              finalRadius: 3,
+              totalResults: BigInt.zero,
+            ),
+            newResults: const [],
+            totalResultCount: BigInt.one,
+          ),
+        );
+        await tester.pump();
+
+        expect(api.searchUsersCalls.length, 3);
+        expect(api.searchUsersCalls[2].radiusStart, 4);
+        expect(api.searchUsersCalls[2].radiusEnd, 4);
+
+        // Complete round 3
+        api.searchUsersController!.add(
+          UserSearchUpdate(
+            trigger: SearchUpdateTrigger.searchCompleted(
+              finalRadius: 4,
+              totalResults: BigInt.zero,
+            ),
+            newResults: const [],
+            totalResultCount: BigInt.one,
+          ),
+        );
+        await tester.pump();
+
+        // No more rounds after (4,4)
+        expect(api.searchUsersCalls.length, 3);
+        expect(getState().isSearching, isFalse);
+        expect(getState().users.length, 1);
+      });
+
+      testWidgets('accumulates results across radius rounds', (tester) async {
+        await pump(tester, searchQuery: 'test');
+        await tester.pump(const Duration(milliseconds: 400));
+        await tester.pump();
+
+        // Round 1 finds user A
+        api.searchUsersController!.add(
+          UserSearchUpdate(
+            trigger: SearchUpdateTrigger.searchCompleted(
+              finalRadius: 2,
+              totalResults: BigInt.one,
+            ),
+            newResults: [_searchResultFactory(testPubkeyA, displayName: 'TestA')],
+            totalResultCount: BigInt.one,
+          ),
+        );
+        await tester.pump();
+        expect(getState().users.length, 1);
+
+        // Round 2 finds user B
+        api.searchUsersController!.add(
+          UserSearchUpdate(
+            trigger: SearchUpdateTrigger.searchCompleted(
+              finalRadius: 3,
+              totalResults: BigInt.one,
+            ),
+            newResults: [
+              _searchResultFactory(
+                testPubkeyB,
+                displayName: 'TestB',
+                matchQuality: MatchQuality.prefix,
+              ),
+            ],
+            totalResultCount: BigInt.two,
+          ),
+        );
+        await tester.pump();
+        expect(getState().users.length, 2);
+
+        // Complete round 3 with no new results
+        api.searchUsersController!.add(
+          UserSearchUpdate(
+            trigger: SearchUpdateTrigger.searchCompleted(
+              finalRadius: 4,
+              totalResults: BigInt.zero,
+            ),
+            newResults: const [],
+            totalResultCount: BigInt.two,
+          ),
+        );
+        await tester.pump();
+
+        expect(getState().users.length, 2);
+        expect(getState().isSearching, isFalse);
       });
 
       testWidgets('returns empty state for whitespace-only query', (tester) async {
