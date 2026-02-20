@@ -2,6 +2,7 @@ use crate::api::{error::ApiError, group_id_from_string, group_id_to_string};
 use chrono::{DateTime, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
+use std::path::PathBuf;
 use whitenoise::{
     FileMetadata as WhitenoiseFileMetadata, MediaFile as WhitenoiseMediaFile, Whitenoise,
 };
@@ -16,6 +17,16 @@ pub struct FileMetadata {
 
 impl From<WhitenoiseFileMetadata> for FileMetadata {
     fn from(metadata: WhitenoiseFileMetadata) -> Self {
+        Self {
+            original_filename: metadata.original_filename,
+            dimensions: metadata.dimensions,
+            blurhash: metadata.blurhash,
+        }
+    }
+}
+
+impl From<FileMetadata> for WhitenoiseFileMetadata {
+    fn from(metadata: FileMetadata) -> Self {
         Self {
             original_filename: metadata.original_filename,
             dimensions: metadata.dimensions,
@@ -56,6 +67,45 @@ impl From<WhitenoiseMediaFile> for MediaFile {
             file_metadata: media_file.file_metadata.map(|metadata| metadata.into()),
             created_at: media_file.created_at,
         }
+    }
+}
+
+impl TryFrom<MediaFile> for WhitenoiseMediaFile {
+    type Error = ApiError;
+
+    fn try_from(mf: MediaFile) -> Result<Self, Self::Error> {
+        let id = mf.id.parse::<i64>().ok().filter(|&v| v > 0);
+        let original_file_hash = mf
+            .original_file_hash
+            .map(|h| hex::decode(&h).map_err(ApiError::from))
+            .transpose()?;
+
+        Ok(Self {
+            id,
+            account_pubkey: PublicKey::parse(&mf.account_pubkey)?,
+            mls_group_id: group_id_from_string(&mf.mls_group_id)?,
+            file_path: PathBuf::from(mf.file_path),
+            original_file_hash,
+            encrypted_file_hash: hex::decode(&mf.encrypted_file_hash)?,
+            mime_type: mf.mime_type,
+            media_type: mf.media_type,
+            // Not exposed in the bridge type; the canonical values live
+            // in the media_files table and are unaffected by this snapshot.
+            nonce: None,
+            scheme_version: None,
+            blossom_url: if mf.blossom_url.is_empty() {
+                None
+            } else {
+                Some(mf.blossom_url)
+            },
+            nostr_key: if mf.nostr_key.is_empty() {
+                None
+            } else {
+                Some(mf.nostr_key)
+            },
+            file_metadata: mf.file_metadata.map(|fm| fm.into()),
+            created_at: mf.created_at,
+        })
     }
 }
 

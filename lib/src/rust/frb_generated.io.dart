@@ -13,6 +13,7 @@ import 'api.dart';
 import 'api/account_groups.dart';
 import 'api/accounts.dart';
 import 'api/chat_list.dart';
+import 'api/drafts.dart';
 import 'api/error.dart';
 import 'api/groups.dart';
 import 'api/media_files.dart';
@@ -260,6 +261,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ChatMessageSummary dco_decode_box_autoadd_chat_message_summary(dynamic raw);
 
   @protected
+  Draft dco_decode_box_autoadd_draft(dynamic raw);
+
+  @protected
   FileMetadata dco_decode_box_autoadd_file_metadata(dynamic raw);
 
   @protected
@@ -302,6 +306,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ChatSummary dco_decode_chat_summary(dynamic raw);
+
+  @protected
+  Draft dco_decode_draft(dynamic raw);
 
   @protected
   EmojiReaction dco_decode_emoji_reaction(dynamic raw);
@@ -448,6 +455,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ChatMessageSummary? dco_decode_opt_box_autoadd_chat_message_summary(
     dynamic raw,
   );
+
+  @protected
+  Draft? dco_decode_opt_box_autoadd_draft(dynamic raw);
 
   @protected
   FileMetadata? dco_decode_opt_box_autoadd_file_metadata(dynamic raw);
@@ -729,6 +739,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  Draft sse_decode_box_autoadd_draft(SseDeserializer deserializer);
+
+  @protected
   FileMetadata sse_decode_box_autoadd_file_metadata(
     SseDeserializer deserializer,
   );
@@ -787,6 +800,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ChatSummary sse_decode_chat_summary(SseDeserializer deserializer);
+
+  @protected
+  Draft sse_decode_draft(SseDeserializer deserializer);
 
   @protected
   EmojiReaction sse_decode_emoji_reaction(SseDeserializer deserializer);
@@ -959,6 +975,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ChatMessageSummary? sse_decode_opt_box_autoadd_chat_message_summary(
     SseDeserializer deserializer,
   );
+
+  @protected
+  Draft? sse_decode_opt_box_autoadd_draft(SseDeserializer deserializer);
 
   @protected
   FileMetadata? sse_decode_opt_box_autoadd_file_metadata(
@@ -1295,6 +1314,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_draft(Draft self, SseSerializer serializer);
+
+  @protected
   void sse_encode_box_autoadd_file_metadata(
     FileMetadata self,
     SseSerializer serializer,
@@ -1368,6 +1390,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_chat_summary(ChatSummary self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_draft(Draft self, SseSerializer serializer);
 
   @protected
   void sse_encode_emoji_reaction(EmojiReaction self, SseSerializer serializer);
@@ -1584,6 +1609,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     ChatMessageSummary? self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_opt_box_autoadd_draft(Draft? self, SseSerializer serializer);
 
   @protected
   void sse_encode_opt_box_autoadd_file_metadata(

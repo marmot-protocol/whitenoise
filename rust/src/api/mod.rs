@@ -58,6 +58,7 @@ pub fn create_whitenoise_config(data_dir: String, logs_dir: String) -> Whitenois
 pub mod account_groups;
 pub mod accounts;
 pub mod chat_list;
+pub mod drafts;
 pub mod error;
 pub mod groups;
 pub mod media_files;
@@ -74,6 +75,7 @@ pub mod utils;
 pub use account_groups::*;
 pub use accounts::*;
 pub use chat_list::*;
+pub use drafts::*;
 pub use error::*;
 pub use groups::*;
 pub use media_files::*;
