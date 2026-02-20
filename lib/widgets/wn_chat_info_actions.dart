@@ -25,7 +25,7 @@ class WnChatInfoActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final contactLabel = isFollowing ? context.l10n.unfollow : context.l10n.follow;
+    final contactLabel = isFollowing ? context.l10n.removeAsContact : context.l10n.addAsContact;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -38,7 +38,7 @@ class WnChatInfoActions extends StatelessWidget {
           trailingIcon: WnIcons.search,
           onPressed: onSearchTap,
         ),
-        Gap(24.h),
+        Gap(8.h),
         if (!isOwnProfile) ...[
           WnButton(
             key: const Key('contact_button'),
