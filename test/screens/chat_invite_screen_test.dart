@@ -295,7 +295,7 @@ void main() {
         _api.initialMessages = [_message('m1'), _message('m2', isDeleted: true)];
         await pumpInviteScreen(tester);
 
-        expect(find.text('Message m2'), findsNothing);
+        expect(find.textContaining('Message m2'), findsNothing);
       });
 
       group('unread indicator', () {
@@ -341,7 +341,7 @@ void main() {
         _api.emitMessage(_message('new_msg'));
         await tester.pumpAndSettle();
 
-        expect(find.text('Message new_msg'), findsOneWidget);
+        expect(find.textContaining('Message new_msg'), findsOneWidget);
       });
     });
 

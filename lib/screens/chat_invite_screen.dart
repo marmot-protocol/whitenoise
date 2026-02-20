@@ -14,10 +14,11 @@ import 'package:whitenoise/providers/notification_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart' as account_groups_api;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/bubble_grouping.dart';
+import 'package:whitenoise/widgets/chat_message_bubble.dart';
 import 'package:whitenoise/widgets/chat_scroll_down_button.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
-import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_chat_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
@@ -176,6 +177,7 @@ class ChatInviteScreen extends HookConsumerWidget {
                   : _InviteMessageList(
                       chatMessages: chatMessages,
                       pubkey: pubkey,
+                      isGroupChat: chatProfile.data?.otherMemberPubkey == null,
                     ),
             ),
             WnSlate(
@@ -213,10 +215,12 @@ class _InviteMessageList extends HookWidget {
   const _InviteMessageList({
     required this.chatMessages,
     required this.pubkey,
+    required this.isGroupChat,
   });
 
   final ChatMessagesResult chatMessages;
   final String pubkey;
+  final bool isGroupChat;
 
   @override
   Widget build(BuildContext context) {
@@ -247,7 +251,7 @@ class _InviteMessageList extends HookWidget {
       children: [
         ListView.builder(
           controller: scrollController,
-          padding: EdgeInsets.symmetric(vertical: 8.h),
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
           itemCount: chatMessages.messageCount,
           itemBuilder: (context, index) {
             final reversedIndex = chatMessages.messageCount - 1 - index;
@@ -256,11 +260,24 @@ class _InviteMessageList extends HookWidget {
             final replyPreview = message.isReply
                 ? chatMessages.getChatMessageQuote(message.replyToId)
                 : null;
-            return WnMessageBubble(
+            final nextMessage = reversedIndex > 0
+                ? chatMessages.getMessage(reversedIndex - 1)
+                : null;
+            final showAvatar = shouldShowAvatar(
+              current: message,
+              next: nextMessage,
+              isOwnMessage: isOwnMessage,
+              isGroupChat: isGroupChat,
+            );
+            final showTail = shouldShowTail(current: message, next: nextMessage);
+            return ChatMessageBubble(
               message: message,
               isOwnMessage: isOwnMessage,
               currentUserPubkey: pubkey,
               replyPreview: replyPreview,
+              showAvatar: showAvatar,
+              showTail: showTail,
+              isGroupChat: isGroupChat,
             );
           },
         ),

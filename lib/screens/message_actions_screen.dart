@@ -6,12 +6,12 @@ import 'package:gap/gap.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/bubble_grouping.dart' show shouldShowAvatar;
+import 'package:whitenoise/widgets/chat_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_emoji_picker.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
-import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
-import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 class MessageActionsScreen extends HookWidget {
@@ -23,6 +23,9 @@ class MessageActionsScreen extends HookWidget {
     required this.onRemoveReaction,
     this.onDelete,
     this.onReply,
+    this.senderName,
+    this.senderPictureUrl,
+    this.isGroupChat = false,
   });
 
   final ChatMessage message;
@@ -31,6 +34,9 @@ class MessageActionsScreen extends HookWidget {
   final Future<void> Function(String reactionId) onRemoveReaction;
   final Future<void> Function()? onDelete;
   final void Function(ChatMessage message)? onReply;
+  final String? senderName;
+  final String? senderPictureUrl;
+  final bool isGroupChat;
 
   static Future<void> show(
     BuildContext context, {
@@ -40,6 +46,9 @@ class MessageActionsScreen extends HookWidget {
     required Future<void> Function(String reactionId) onRemoveReaction,
     Future<void> Function()? onDelete,
     void Function(ChatMessage message)? onReply,
+    String? senderName,
+    String? senderPictureUrl,
+    bool isGroupChat = false,
   }) {
     final colors = context.colors;
 
@@ -56,6 +65,9 @@ class MessageActionsScreen extends HookWidget {
             onRemoveReaction: onRemoveReaction,
             onDelete: onDelete,
             onReply: onReply,
+            senderName: senderName,
+            senderPictureUrl: senderPictureUrl,
+            isGroupChat: isGroupChat,
           );
         },
         transitionsBuilder: (_, animation, _, child) {
@@ -141,7 +153,6 @@ class MessageActionsScreen extends HookWidget {
                   MessageActionsModal(
                     message: message,
                     isOwnMessage: isOwnMessage,
-                    onClose: () => Navigator.of(context).pop(),
                     currentUserPubkey: pubkey,
                     onDelete: (isOwnMessage && onDelete != null) ? handleDelete : null,
                     onReaction: handleReaction,
@@ -153,6 +164,9 @@ class MessageActionsScreen extends HookWidget {
                             Navigator.of(context).pop();
                           }
                         : null,
+                    senderName: senderName,
+                    senderPictureUrl: senderPictureUrl,
+                    isGroupChat: isGroupChat,
                   ),
                 ],
               ),
@@ -174,33 +188,38 @@ class MessageActionsModal extends StatelessWidget {
     super.key,
     required this.message,
     required this.isOwnMessage,
-    required this.onClose,
     required this.onReaction,
     required this.onEmojiPicker,
     required this.currentUserPubkey,
     this.onDelete,
     this.selectedEmojis = const {},
     this.onReply,
+    this.senderName,
+    this.senderPictureUrl,
+    this.isGroupChat = false,
   });
 
   final ChatMessage message;
   final bool isOwnMessage;
-  final VoidCallback onClose;
   final void Function(String emoji) onReaction;
   final VoidCallback onEmojiPicker;
   final String currentUserPubkey;
   final VoidCallback? onDelete;
   final Set<String> selectedEmojis;
   final VoidCallback? onReply;
+  final String? senderName;
+  final String? senderPictureUrl;
+  final bool isGroupChat;
 
   static const List<String> reactions = [
     '❤',
+    '😀',
     '👍',
     '👎',
-    '😂',
-    '🚀',
-    '😢',
+    '🤣',
     '🔥',
+    '🦥',
+    '😌',
   ];
 
   @override
@@ -208,22 +227,25 @@ class MessageActionsModal extends StatelessWidget {
     final colors = context.colors;
 
     return WnSlate(
-      header: WnSlateNavigationHeader(
-        title: context.l10n.messageActions,
-        onNavigate: onClose,
-      ),
       child: Padding(
-        padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.w),
+        padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 14.h),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            SizedBox(height: 12.h),
-            WnMessageBubble(
+            ChatMessageBubble(
               message: message,
               isOwnMessage: isOwnMessage,
               currentUserPubkey: currentUserPubkey,
-              maxWidth: double.infinity,
+              showAvatar: shouldShowAvatar(
+                current: message,
+                next: null,
+                isOwnMessage: isOwnMessage,
+                isGroupChat: isGroupChat,
+              ),
+              senderName: senderName,
+              senderPictureUrl: senderPictureUrl,
+              isGroupChat: isGroupChat,
             ),
             SizedBox(height: 16.h),
             Row(

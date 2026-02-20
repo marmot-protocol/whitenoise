@@ -22,14 +22,15 @@ import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
+import 'package:whitenoise/utils/bubble_grouping.dart';
 import 'package:whitenoise/utils/chat_messages_search.dart';
 import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
+import 'package:whitenoise/widgets/chat_message_bubble.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/chat_scroll_down_button.dart';
 import 'package:whitenoise/widgets/wn_chat_message_input.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
-import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_scroll_edge_effect.dart';
 import 'package:whitenoise/widgets/wn_search_field.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
@@ -147,6 +148,12 @@ class ChatScreen extends HookConsumerWidget {
 
     Future<void> showMessageMenu(ChatMessage message) async {
       FocusScope.of(context).unfocus();
+      final isGroupChat = chatProfile.data?.otherMemberPubkey == null;
+      final authorMetadata = getAuthorMetadata(message.pubkey);
+      final senderName = message.pubkey == pubkey
+          ? context.l10n.you
+          : presentName(authorMetadata) ?? context.l10n.unknownUser;
+      final senderPictureUrl = authorMetadata?.picture;
       await MessageActionsScreen.show(
         context,
         message: message,
@@ -166,6 +173,9 @@ class ChatScreen extends HookConsumerWidget {
           reactionPubkey: pubkey,
         ),
         onReply: (msg) => input.setReplyingTo(msg),
+        senderName: senderName,
+        senderPictureUrl: senderPictureUrl,
+        isGroupChat: isGroupChat,
       );
       if (context.mounted) FocusManager.instance.primaryFocus?.unfocus();
     }
@@ -204,7 +214,7 @@ class ChatScreen extends HookConsumerWidget {
         child: ListView.builder(
           controller: scrollController,
           reverse: true,
-          padding: EdgeInsets.only(top: slateTopPadding + 8.h, bottom: 12.h),
+          padding: EdgeInsets.fromLTRB(10.w, slateTopPadding + 8.h, 10.w, 12.h),
           itemCount: displayCount,
           findChildIndexCallback: displayMessages == null
               ? (key) {
@@ -225,11 +235,21 @@ class ChatScreen extends HookConsumerWidget {
                 : presentName(authorMetadata) ?? context.l10n.unknownUser;
             final senderPictureUrl = authorMetadata?.picture;
 
+            final nextMessage = index > 0 ? getMessage(index - 1) : null;
+            final isGroupChat = chatProfile.data?.otherMemberPubkey == null;
+            final showAvatar = shouldShowAvatar(
+              current: message,
+              next: nextMessage,
+              isOwnMessage: isOwnMessage,
+              isGroupChat: isGroupChat,
+            );
+            final showTail = shouldShowTail(current: message, next: nextMessage);
+
             return AutoScrollTag(
               key: ValueKey(message.id),
               controller: scrollController,
               index: index,
-              child: WnMessageBubble(
+              child: ChatMessageBubble(
                 message: message,
                 isOwnMessage: isOwnMessage,
                 currentUserPubkey: pubkey,
@@ -241,6 +261,9 @@ class ChatScreen extends HookConsumerWidget {
                     : null,
                 senderName: senderName,
                 senderPictureUrl: senderPictureUrl,
+                showAvatar: showAvatar,
+                showTail: showTail,
+                isGroupChat: isGroupChat,
               ),
             );
           },

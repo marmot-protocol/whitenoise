@@ -39,7 +39,6 @@ void main() {
         MessageActionsModal(
           message: _createTestMessage(content: 'Test message'),
           isOwnMessage: false,
-          onClose: () {},
           onReaction: (_) {},
           onEmojiPicker: () {},
           currentUserPubkey: testPubkeyA,
@@ -47,15 +46,14 @@ void main() {
         tester,
       );
 
-      expect(find.text('Test message'), findsOneWidget);
+      expect(find.textContaining('Test message'), findsOneWidget);
     });
 
-    testWidgets('displays header', (tester) async {
+    testWidgets('does not show a header title', (tester) async {
       await mountWidget(
         MessageActionsModal(
           message: _createTestMessage(),
           isOwnMessage: false,
-          onClose: () {},
           onReaction: (_) {},
           onEmojiPicker: () {},
           currentUserPubkey: testPubkeyA,
@@ -63,7 +61,22 @@ void main() {
         tester,
       );
 
-      expect(find.text('Message actions'), findsOneWidget);
+      expect(find.text('Message actions'), findsNothing);
+    });
+
+    testWidgets('does not show a close button', (tester) async {
+      await mountWidget(
+        MessageActionsModal(
+          message: _createTestMessage(),
+          isOwnMessage: false,
+          onReaction: (_) {},
+          onEmojiPicker: () {},
+          currentUserPubkey: testPubkeyA,
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('slate_close_button')), findsNothing);
     });
 
     group('Reply button', () {
@@ -72,7 +85,6 @@ void main() {
           MessageActionsModal(
             message: _createTestMessage(),
             isOwnMessage: false,
-            onClose: () {},
             onReaction: (_) {},
             onEmojiPicker: () {},
             currentUserPubkey: testPubkeyA,
@@ -89,7 +101,6 @@ void main() {
           MessageActionsModal(
             message: _createTestMessage(),
             isOwnMessage: false,
-            onClose: () {},
             onReaction: (_) {},
             onEmojiPicker: () {},
             currentUserPubkey: testPubkeyA,
@@ -106,7 +117,6 @@ void main() {
           MessageActionsModal(
             message: _createTestMessage(),
             isOwnMessage: false,
-            onClose: () {},
             onReaction: (_) {},
             onEmojiPicker: () {},
             currentUserPubkey: testPubkeyA,
@@ -128,7 +138,6 @@ void main() {
           MessageActionsModal(
             message: _createTestMessage(),
             isOwnMessage: false,
-            onClose: () {},
             onReaction: (_) {},
             onEmojiPicker: () {},
             currentUserPubkey: testPubkeyA,
@@ -162,7 +171,6 @@ void main() {
           MessageActionsModal(
             message: _createTestMessage(content: 'Hello, world!'),
             isOwnMessage: false,
-            onClose: () {},
             onReaction: (_) {},
             onEmojiPicker: () {},
             currentUserPubkey: testPubkeyA,
@@ -183,7 +191,6 @@ void main() {
           MessageActionsModal(
             message: _createTestMessage(),
             isOwnMessage: true,
-            onClose: () {},
             onReaction: (_) {},
             onEmojiPicker: () {},
             currentUserPubkey: testPubkeyA,
@@ -200,7 +207,6 @@ void main() {
           MessageActionsModal(
             message: _createTestMessage(),
             isOwnMessage: false,
-            onClose: () {},
             onReaction: (_) {},
             onEmojiPicker: () {},
             currentUserPubkey: testPubkeyA,
@@ -217,7 +223,6 @@ void main() {
           MessageActionsModal(
             message: _createTestMessage(),
             isOwnMessage: true,
-            onClose: () {},
             onReaction: (_) {},
             onEmojiPicker: () {},
             currentUserPubkey: testPubkeyA,
@@ -233,35 +238,12 @@ void main() {
       });
     });
 
-    group('close button', () {
-      testWidgets('calls onClose when tapped', (tester) async {
-        var closeCalled = false;
-        await mountWidget(
-          MessageActionsModal(
-            message: _createTestMessage(),
-            isOwnMessage: false,
-            onClose: () => closeCalled = true,
-            onReaction: (_) {},
-            onEmojiPicker: () {},
-            currentUserPubkey: testPubkeyA,
-          ),
-          tester,
-        );
-
-        await tester.tap(find.byKey(const Key('slate_close_button')));
-        await tester.pumpAndSettle();
-
-        expect(closeCalled, isTrue);
-      });
-    });
-
     group('reactions', () {
       testWidgets('displays all reaction buttons', (tester) async {
         await mountWidget(
           MessageActionsModal(
             message: _createTestMessage(),
             isOwnMessage: false,
-            onClose: () {},
             onReaction: (_) {},
             onEmojiPicker: () {},
             currentUserPubkey: testPubkeyA,
@@ -279,7 +261,6 @@ void main() {
           MessageActionsModal(
             message: _createTestMessage(),
             isOwnMessage: false,
-            onClose: () {},
             onReaction: (_) {},
             onEmojiPicker: () {},
             currentUserPubkey: testPubkeyA,
@@ -298,7 +279,6 @@ void main() {
           MessageActionsModal(
             message: _createTestMessage(),
             isOwnMessage: false,
-            onClose: () {},
             onReaction: (emoji) => receivedEmoji = emoji,
             onEmojiPicker: () {},
             currentUserPubkey: testPubkeyA,
@@ -306,10 +286,10 @@ void main() {
           tester,
         );
 
-        await tester.tap(find.text('🚀'));
+        await tester.tap(find.text('🤣'));
         await tester.pumpAndSettle();
 
-        expect(receivedEmoji, '🚀');
+        expect(receivedEmoji, '🤣');
       });
 
       testWidgets('selected emoji shows filled background', (tester) async {
@@ -317,11 +297,10 @@ void main() {
           MessageActionsModal(
             message: _createTestMessage(),
             isOwnMessage: false,
-            onClose: () {},
             onReaction: (_) {},
             onEmojiPicker: () {},
             currentUserPubkey: testPubkeyA,
-            selectedEmojis: const {'❤', '🚀'},
+            selectedEmojis: const {'❤', '🤣'},
           ),
           tester,
         );
@@ -345,7 +324,6 @@ void main() {
           MessageActionsModal(
             message: _createTestMessage(),
             isOwnMessage: false,
-            onClose: () {},
             onReaction: (_) {},
             onEmojiPicker: () => emojiPickerCalled = true,
             currentUserPubkey: testPubkeyA,
@@ -366,7 +344,6 @@ void main() {
           MessageActionsModal(
             message: _createTestMessage(),
             isOwnMessage: true,
-            onClose: () {},
             onReaction: (_) {},
             onEmojiPicker: () {},
             currentUserPubkey: testPubkeyA,
@@ -387,7 +364,6 @@ void main() {
           MessageActionsModal(
             message: _createTestMessage(),
             isOwnMessage: false,
-            onClose: () {},
             onReaction: (_) {},
             onEmojiPicker: () {},
             currentUserPubkey: testPubkeyA,
@@ -444,8 +420,7 @@ void main() {
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Message actions'), findsOneWidget);
-      expect(find.text('Test message content'), findsOneWidget);
+      expect(find.textContaining('Test message content'), findsOneWidget);
     });
 
     testWidgets('copy button copies content and closes menu', (tester) async {
@@ -490,7 +465,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(clipboardContent, 'Copy this text');
-      expect(find.text('Message actions'), findsNothing);
+      expect(find.text('Copy this text'), findsNothing);
     });
 
     testWidgets('shows delete button for own message', (tester) async {
@@ -560,32 +535,6 @@ void main() {
       expect(find.byKey(const Key('delete_button')), findsNothing);
     });
 
-    testWidgets('close button dismisses the menu', (tester) async {
-      await mountShowTest(
-        tester,
-        builder: (context) => ElevatedButton(
-          onPressed: () => MessageActionsScreen.show(
-            context,
-            message: _createTestMessage(),
-            pubkey: testPubkeyA,
-            onAddReaction: (_) async {},
-            onRemoveReaction: (_) async {},
-          ),
-          child: const Text('Show Menu'),
-        ),
-      );
-
-      await tester.tap(find.text('Show Menu'));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Message actions'), findsOneWidget);
-
-      await tester.tap(find.byKey(const Key('slate_close_button')));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Message actions'), findsNothing);
-    });
-
     testWidgets('tapping outside dismisses the menu', (tester) async {
       await mountShowTest(
         tester,
@@ -604,12 +553,12 @@ void main() {
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Message actions'), findsOneWidget);
+      expect(find.textContaining('Test message content'), findsOneWidget);
 
       await tester.tapAt(const Offset(10, 10));
       await tester.pumpAndSettle();
 
-      expect(find.text('Message actions'), findsNothing);
+      expect(find.textContaining('Test message content'), findsNothing);
     });
 
     testWidgets('calls onDelete and closes menu when delete button is tapped', (tester) async {
@@ -636,13 +585,13 @@ void main() {
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Message actions'), findsOneWidget);
+      expect(find.textContaining('Test message content'), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('delete_button')));
       await tester.pumpAndSettle();
 
       expect(deleteCalled, isTrue);
-      expect(find.text('Message actions'), findsNothing);
+      expect(find.textContaining('Test message content'), findsNothing);
     });
 
     testWidgets('aligns message preview right for own message', (tester) async {
@@ -717,14 +666,12 @@ void main() {
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Message actions'), findsOneWidget);
-
       await tester.tap(find.byKey(const Key('delete_button')));
       await tester.pumpAndSettle();
 
       expect(find.byType(WnSystemNotice), findsOneWidget);
       expect(find.text('Failed to delete message. Please try again.'), findsOneWidget);
-      expect(find.text('Message actions'), findsOneWidget);
+      expect(find.textContaining('Test message content'), findsOneWidget);
     });
 
     testWidgets('calls onAddReaction and closes menu when reaction button is tapped', (
@@ -751,13 +698,13 @@ void main() {
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Message actions'), findsOneWidget);
+      expect(find.textContaining('Test message content'), findsOneWidget);
 
       await tester.tap(find.text('❤'));
       await tester.pumpAndSettle();
 
       expect(receivedEmoji, '❤');
-      expect(find.text('Message actions'), findsNothing);
+      expect(find.textContaining('Test message content'), findsNothing);
     });
 
     testWidgets('shows system notice when add reaction fails', (tester) async {
@@ -780,14 +727,14 @@ void main() {
       await tester.tap(find.text('Show Menu'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Message actions'), findsOneWidget);
+      expect(find.textContaining('Test message content'), findsOneWidget);
 
       await tester.tap(find.text('❤'));
       await tester.pumpAndSettle();
 
       expect(find.byType(WnSystemNotice), findsOneWidget);
       expect(find.text('Failed to send reaction. Please try again.'), findsOneWidget);
-      expect(find.text('Message actions'), findsOneWidget);
+      expect(find.textContaining('Test message content'), findsOneWidget);
     });
 
     testWidgets('highlights emojis user has already reacted with', (tester) async {
@@ -882,7 +829,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(removedReactionId, 'reaction-to-remove');
-      expect(find.text('Message actions'), findsNothing);
+      expect(find.textContaining('Test message content'), findsNothing);
     });
 
     testWidgets('shows system notice when remove reaction fails', (tester) async {
@@ -928,7 +875,7 @@ void main() {
 
       expect(find.byType(WnSystemNotice), findsOneWidget);
       expect(find.text('Failed to remove reaction. Please try again.'), findsOneWidget);
-      expect(find.text('Message actions'), findsOneWidget);
+      expect(find.textContaining('Test message content'), findsOneWidget);
     });
 
     testWidgets('dismisses notice after auto-hide duration', (tester) async {
@@ -1025,7 +972,7 @@ void main() {
         await openEmojiPicker(tester);
         await tester.pumpAndSettle();
 
-        expect(find.text('Message actions'), findsOneWidget);
+        expect(find.textContaining('Test message content'), findsOneWidget);
       });
 
       testWidgets('selecting emoji invokes onAddReaction and closes screen', (tester) async {
@@ -1043,7 +990,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(reactionCapturedEmoji, '😀');
-        expect(find.text('Message actions'), findsNothing);
+        expect(find.textContaining('Test message content'), findsNothing);
         expect(find.byKey(const Key('emoji_picker_close_button')), findsNothing);
       });
     });

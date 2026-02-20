@@ -301,7 +301,7 @@ void main() {
         ];
         await pumpChatScreen(tester);
 
-        expect(find.text('Message m1'), findsOneWidget);
+        expect(find.textContaining('Message m1'), findsOneWidget);
       });
 
       testWidgets('does not display deleted message text', (tester) async {
@@ -311,7 +311,97 @@ void main() {
         ];
         await pumpChatScreen(tester);
 
-        expect(find.text('Message m2'), findsNothing);
+        expect(find.textContaining('Message m2'), findsNothing);
+      });
+    });
+
+    group('bubble grouping', () {
+      Finder avatarsInBubbles() => find.descendant(
+        of: find.byType(WnMessageBubble),
+        matching: find.byType(WnAvatar),
+      );
+
+      testWidgets('same sender <5 min apart: only older message shows avatar', (tester) async {
+        final base = DateTime(2024, 1, 1, 12);
+        _api.initialMessages = [
+          _message('m1', base),
+          _message('m2', base.add(const Duration(minutes: 2))),
+        ];
+        await pumpChatScreen(tester);
+
+        expect(avatarsInBubbles(), findsOneWidget);
+      });
+
+      testWidgets('same sender >=5 min apart: both messages show avatar', (tester) async {
+        final base = DateTime(2024, 1, 1, 12);
+        _api.initialMessages = [
+          _message('m1', base),
+          _message('m2', base.add(const Duration(minutes: 5))),
+        ];
+        await pumpChatScreen(tester);
+
+        expect(avatarsInBubbles(), findsNWidgets(2));
+      });
+
+      testWidgets('different senders: both messages show avatar', (tester) async {
+        final base = DateTime(2024, 1, 1, 12);
+        _api.initialMessages = [
+          _message('m1', base),
+          _message('m2', base.add(const Duration(minutes: 1)), pubkey: testPubkeyC),
+        ];
+        await pumpChatScreen(tester);
+
+        expect(avatarsInBubbles(), findsNWidgets(2));
+      });
+
+      testWidgets('own messages never show avatar', (tester) async {
+        final base = DateTime(2024, 1, 1, 12);
+        _api.initialMessages = [
+          _message('m1', base, pubkey: _testPubkey),
+          _message('m2', base.add(const Duration(minutes: 10)), pubkey: _testPubkey),
+        ];
+        await pumpChatScreen(tester);
+
+        expect(avatarsInBubbles(), findsNothing);
+      });
+
+      testWidgets('single incoming message shows avatar', (tester) async {
+        _api.initialMessages = [
+          _message('m1', DateTime(2024)),
+        ];
+        await pumpChatScreen(tester);
+
+        expect(avatarsInBubbles(), findsOneWidget);
+      });
+
+      testWidgets('same sender <5 min apart: only older message has tail', (tester) async {
+        final base = DateTime(2024, 1, 1, 12);
+        _api.initialMessages = [
+          _message('m1', base),
+          _message('m2', base.add(const Duration(minutes: 2))),
+        ];
+        await pumpChatScreen(tester);
+
+        final tails = find.descendant(
+          of: find.byType(WnMessageBubble),
+          matching: find.byType(CustomPaint),
+        );
+        expect(tails, findsOneWidget);
+      });
+
+      testWidgets('same sender >=5 min apart: both messages have tail', (tester) async {
+        final base = DateTime(2024, 1, 1, 12);
+        _api.initialMessages = [
+          _message('m1', base),
+          _message('m2', base.add(const Duration(minutes: 5))),
+        ];
+        await pumpChatScreen(tester);
+
+        final tails = find.descendant(
+          of: find.byType(WnMessageBubble),
+          matching: find.byType(CustomPaint),
+        );
+        expect(tails, findsNWidgets(2));
       });
     });
 
@@ -428,7 +518,7 @@ void main() {
         _api.emitMessage(_message('new_msg', DateTime.now()));
         await tester.pumpAndSettle();
 
-        expect(find.text('Message new_msg'), findsOneWidget);
+        expect(find.textContaining('Message new_msg'), findsOneWidget);
       });
     });
 
@@ -524,7 +614,7 @@ void main() {
 
     group('message actions', () {
       Future<void> longPressMessage(WidgetTester tester, String messageId) async {
-        final messageFinder = find.text('Message $messageId');
+        final messageFinder = find.textContaining('Message $messageId');
         await tester.longPress(messageFinder);
         await tester.pumpAndSettle();
       }
@@ -562,7 +652,7 @@ void main() {
         expect(find.text('Delete'), findsNothing);
       });
 
-      testWidgets('closes when close button is tapped', (tester) async {
+      testWidgets('closes when tapping outside', (tester) async {
         _api.initialMessages = [
           _message('m1', DateTime(2024)),
         ];
@@ -570,7 +660,7 @@ void main() {
 
         await longPressMessage(tester, 'm1');
 
-        await tester.tap(find.byKey(const Key('slate_close_button')));
+        await tester.tapAt(const Offset(10, 10));
         await tester.pumpAndSettle();
 
         expect(find.byType(MessageActionsScreen), findsNothing);
@@ -606,7 +696,7 @@ void main() {
         await longPressMessage(tester, 'm1');
         expect(textField.focusNode!.hasFocus, isFalse);
 
-        await tester.tap(find.byKey(const Key('slate_close_button')));
+        await tester.tapAt(const Offset(10, 10));
         await tester.pumpAndSettle();
 
         expect(find.byType(MessageActionsScreen), findsNothing);
@@ -734,10 +824,10 @@ void main() {
 
           await longPressMessage(tester, 'm1');
 
-          await tester.tap(find.text('🚀'));
+          await tester.tap(find.text('🤣'));
           await tester.pumpAndSettle();
 
-          expect(_api.reactionCalls.first.message, '🚀');
+          expect(_api.reactionCalls.first.message, '🤣');
         });
 
         testWidgets('sends reaction to correct group', (tester) async {
@@ -884,8 +974,8 @@ void main() {
         ];
         await pumpChatScreen(tester);
 
-        expect(find.text('Message m1'), findsWidgets);
-        expect(find.text('Message m2'), findsOneWidget);
+        expect(find.textContaining('Message m1'), findsWidgets);
+        expect(find.textContaining('Message m2'), findsOneWidget);
         expect(find.byType(ChatMessageQuote), findsOneWidget);
       });
 
@@ -896,13 +986,13 @@ void main() {
         await pumpChatScreen(tester);
         expect(find.byType(ChatMessageQuote), findsNothing);
 
-        await tester.longPress(find.text('Message m1'));
+        await tester.longPress(find.textContaining('Message m1'));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('reply_button')));
         await tester.pumpAndSettle();
 
         expect(find.byType(ChatMessageQuote), findsOneWidget);
-        expect(find.text('Message m1'), findsWidgets);
+        expect(find.textContaining('Message m1'), findsWidgets);
       });
 
       testWidgets('sending while replying includes reply reference in send', (tester) async {
@@ -910,7 +1000,7 @@ void main() {
           _message('m1', DateTime(2024)),
         ];
         await pumpChatScreen(tester);
-        await tester.longPress(find.text('Message m1'));
+        await tester.longPress(find.textContaining('Message m1'));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('reply_button')));
         await tester.pumpAndSettle();
@@ -930,7 +1020,7 @@ void main() {
           _message('m1', DateTime(2024)),
         ];
         await pumpChatScreen(tester);
-        await tester.longPress(find.text('Message m1'));
+        await tester.longPress(find.textContaining('Message m1'));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('reply_button')));
         await tester.pumpAndSettle();
