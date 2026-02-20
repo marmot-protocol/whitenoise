@@ -54,13 +54,19 @@ void main() {
     ];
   });
 
-  Future<void> pumpUserSelectionScreen(WidgetTester tester) async {
+  Future<void> pumpUserSelectionScreen(
+    WidgetTester tester, {
+    List<User> initialUsers = const [],
+  }) async {
     await mountTestApp(
       tester,
       overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
     );
     await tester.pumpAndSettle();
-    Routes.pushToUserSelection(tester.element(find.byType(Scaffold)));
+    Routes.pushToUserSelection(
+      tester.element(find.byType(Scaffold)),
+      initialUsers: initialUsers,
+    );
     await tester.pumpAndSettle();
   }
 
@@ -211,6 +217,42 @@ void main() {
 
       await tester.tap(scanButton.first);
       await tester.pumpAndSettle();
+    });
+
+    group('with initialUsers', () {
+      testWidgets('pre-selects initial users as bubbles', (tester) async {
+        final initialUsers = [_userFactory(testPubkeyB, displayName: 'Bob')];
+        await pumpUserSelectionScreen(tester, initialUsers: initialUsers);
+
+        expect(find.byType(WnUserBubble), findsOneWidget);
+        expect(find.byKey(const Key('selected_users_bubbles')), findsOneWidget);
+      });
+
+      testWidgets('continue button is enabled when initial users provided', (tester) async {
+        final initialUsers = [_userFactory(testPubkeyB, displayName: 'Bob')];
+        await pumpUserSelectionScreen(tester, initialUsers: initialUsers);
+
+        final button = tester.widget<WnButton>(find.widgetWithText(WnButton, 'Continue'));
+        expect(button.onPressed, isNotNull);
+      });
+
+      testWidgets('initial user bubble can be deselected', (tester) async {
+        final initialUsers = [_userFactory(testPubkeyB, displayName: 'Bob')];
+        await pumpUserSelectionScreen(tester, initialUsers: initialUsers);
+
+        expect(find.byType(WnUserBubble), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('bubble_$testPubkeyB')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(WnUserBubble), findsNothing);
+      });
+
+      testWidgets('without initialUsers shows no pre-selected bubbles', (tester) async {
+        await pumpUserSelectionScreen(tester);
+
+        expect(find.byType(WnUserBubble), findsNothing);
+      });
     });
   });
 }

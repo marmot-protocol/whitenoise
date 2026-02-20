@@ -27,6 +27,7 @@ class _MockApi extends MockWnApi {
   Completer<Group>? createGroupCompleter;
   Group? createdGroup;
   Exception? createGroupError;
+  List<Group> groupsList = [];
   final createGroupCalls =
       <
         ({
@@ -106,6 +107,11 @@ class _MockApi extends MockWnApi {
   }
 
   @override
+  Future<List<Group>> crateApiGroupsActiveGroups({required String pubkey}) async {
+    return groupsList;
+  }
+
+  @override
   void reset() {
     super.reset();
     metadata = const FlutterMetadata(custom: {});
@@ -118,6 +124,7 @@ class _MockApi extends MockWnApi {
     followCompleter = null;
     followError = null;
     followingPubkeys.clear();
+    groupsList = [];
   }
 }
 
@@ -190,7 +197,7 @@ void main() {
     testWidgets('displays start chat button', (tester) async {
       await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
       expect(find.byKey(const Key('start_chat_button')), findsOneWidget);
-      expect(find.text('Start a chat'), findsOneWidget);
+      expect(find.text('Send message'), findsOneWidget);
     });
 
     group('with metadata', () {
@@ -234,15 +241,15 @@ void main() {
     });
 
     group('follow button', () {
-      testWidgets('shows Follow for non-followed user', (tester) async {
+      testWidgets('shows Add as contact for non-followed user', (tester) async {
         await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
-        expect(find.text('Follow'), findsOneWidget);
+        expect(find.text('Add as contact'), findsOneWidget);
       });
 
-      testWidgets('shows Unfollow for followed user', (tester) async {
+      testWidgets('shows Remove as contact for followed user', (tester) async {
         _api.followingPubkeys.add(_otherPubkey);
         await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
-        expect(find.text('Unfollow'), findsOneWidget);
+        expect(find.text('Remove as contact'), findsOneWidget);
       });
 
       testWidgets('calls follow API when tapped', (tester) async {
@@ -287,6 +294,32 @@ void main() {
 
         expect(find.byType(WnSystemNotice), findsOneWidget);
         expect(find.text('Failed to update follow status. Please try again.'), findsOneWidget);
+      });
+    });
+
+    group('add to group button', () {
+      testWidgets('displays add to group button', (tester) async {
+        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        expect(find.byKey(const Key('add_to_group_button')), findsOneWidget);
+        expect(find.text('Add to group'), findsOneWidget);
+      });
+
+      testWidgets('does not show add to group button when user has no key package', (
+        tester,
+      ) async {
+        _api.userHasKeyPackageStatus = KeyPackageStatus.notFound;
+        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        expect(find.byKey(const Key('add_to_group_button')), findsNothing);
+      });
+
+      testWidgets('tapping add to group button navigates to add to group screen', (
+        tester,
+      ) async {
+        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await tester.tap(find.byKey(const Key('add_to_group_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Add to group'), findsWidgets);
       });
     });
 

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +13,7 @@ import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_overlay.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 import '../mocks/mock_clipboard.dart' show clearClipboardMock, mockClipboard, mockClipboardFailing;
 import '../mocks/mock_wn_api.dart';
@@ -25,6 +28,7 @@ class _MockApi extends MockWnApi {
   List<String> adminsList = [];
   Group? groupToReturn;
   final Map<String, FlutterMetadata> metadataMap = {};
+  List<Group> groupsList = [];
 
   final removeMemberCalls = <({String pubkey, String groupId, List<String> memberPubkeys})>[];
   Exception? removeMemberError;
@@ -32,6 +36,18 @@ class _MockApi extends MockWnApi {
   final updateGroupDataCalls =
       <({Group group, String accountPubkey, FlutterGroupDataUpdate data})>[];
   Exception? updateGroupDataError;
+
+  final createGroupCalls =
+      <({String creatorPubkey, List<String> memberPubkeys, GroupType groupType})>[];
+  Group? createdGroup;
+  Exception? createGroupError;
+  Completer<Group>? createGroupCompleter;
+
+  final followCalls = <({String account, String target})>[];
+  final unfollowCalls = <({String account, String target})>[];
+  Exception? followError;
+  Completer<void>? followCompleter;
+  final Set<String> followingPubkeys = {};
 
   @override
   Future<List<String>> crateApiGroupsGroupMembers({
@@ -104,6 +120,65 @@ class _MockApi extends MockWnApi {
   }
 
   @override
+  Future<Group> crateApiGroupsCreateGroup({
+    required String creatorPubkey,
+    required List<String> memberPubkeys,
+    required List<String> adminPubkeys,
+    required String groupName,
+    required String groupDescription,
+    required GroupType groupType,
+  }) async {
+    createGroupCalls.add((
+      creatorPubkey: creatorPubkey,
+      memberPubkeys: memberPubkeys,
+      groupType: groupType,
+    ));
+    if (createGroupCompleter != null) return createGroupCompleter!.future;
+    if (createGroupError != null) throw createGroupError!;
+    return createdGroup ??
+        Group(
+          mlsGroupId: testGroupId,
+          nostrGroupId: testNostrGroupId,
+          name: '',
+          description: '',
+          adminPubkeys: const [],
+          epoch: BigInt.zero,
+          state: GroupState.active,
+        );
+  }
+
+  @override
+  Future<void> crateApiAccountsFollowUser({
+    required String accountPubkey,
+    required String userToFollowPubkey,
+  }) async {
+    followCalls.add((account: accountPubkey, target: userToFollowPubkey));
+    if (followCompleter != null) await followCompleter!.future;
+    if (followError != null) throw followError!;
+  }
+
+  @override
+  Future<void> crateApiAccountsUnfollowUser({
+    required String accountPubkey,
+    required String userToUnfollowPubkey,
+  }) async {
+    unfollowCalls.add((account: accountPubkey, target: userToUnfollowPubkey));
+  }
+
+  @override
+  Future<bool> crateApiAccountsIsFollowingUser({
+    required String accountPubkey,
+    required String userPubkey,
+  }) async {
+    return followingPubkeys.contains(userPubkey);
+  }
+
+  @override
+  Future<List<Group>> crateApiGroupsActiveGroups({required String pubkey}) async {
+    return groupsList;
+  }
+
+  @override
   void reset() {
     super.reset();
     membersList = [];
@@ -114,6 +189,16 @@ class _MockApi extends MockWnApi {
     removeMemberError = null;
     updateGroupDataCalls.clear();
     updateGroupDataError = null;
+    createGroupCalls.clear();
+    createdGroup = null;
+    createGroupError = null;
+    createGroupCompleter = null;
+    followCalls.clear();
+    unfollowCalls.clear();
+    followError = null;
+    followCompleter = null;
+    followingPubkeys.clear();
+    groupsList = [];
   }
 }
 
@@ -435,6 +520,169 @@ void main() {
 
       expect(find.text('Bob - Member'), findsOneWidget);
       expect(_api.removeMemberCalls, isEmpty);
+    });
+
+    group('send message button', () {
+      testWidgets('displays send message button for other member', (tester) async {
+        _api.adminsList = [_testPubkey];
+        await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+        expect(find.byKey(const Key('send_message_button')), findsOneWidget);
+        expect(find.text('Send message'), findsOneWidget);
+      });
+
+      testWidgets('does not display send message button for own profile', (tester) async {
+        _api.adminsList = [_testPubkey];
+        await pumpGroupMemberScreen(tester, memberPubkey: _testPubkey);
+
+        expect(find.byKey(const Key('send_message_button')), findsNothing);
+      });
+
+      testWidgets('calls createGroup API when tapped', (tester) async {
+        _api.adminsList = [_testPubkey];
+        await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+        await tester.tap(find.byKey(const Key('send_message_button')));
+        await tester.pumpAndSettle();
+
+        expect(_api.createGroupCalls.length, 1);
+        expect(_api.createGroupCalls[0].creatorPubkey, _testPubkey);
+        expect(_api.createGroupCalls[0].memberPubkeys, [_memberPubkey]);
+        expect(_api.createGroupCalls[0].groupType, GroupType.directMessage);
+      });
+
+      testWidgets('shows loading state during send message', (tester) async {
+        _api.adminsList = [_testPubkey];
+        _api.createGroupCompleter = Completer();
+        await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+        await tester.tap(find.byKey(const Key('send_message_button')));
+        await tester.pump();
+
+        final buttons = tester.widgetList<WnButton>(find.byType(WnButton)).toList();
+        final sendButton = buttons.firstWhere((b) => b.key == const Key('send_message_button'));
+        expect(sendButton.loading, isTrue);
+      });
+
+      testWidgets('shows error notice when send message fails', (tester) async {
+        _api.adminsList = [_testPubkey];
+        _api.createGroupError = Exception('Network error');
+        await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+        await tester.tap(find.byKey(const Key('send_message_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(WnSystemNotice), findsOneWidget);
+        expect(find.text('Failed to start chat. Please try again.'), findsOneWidget);
+      });
+    });
+
+    group('follow button', () {
+      testWidgets('displays Add as contact button for non-followed member', (tester) async {
+        _api.adminsList = [_testPubkey];
+        await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+        expect(find.byKey(const Key('follow_button')), findsOneWidget);
+        expect(find.text('Add as contact'), findsOneWidget);
+      });
+
+      testWidgets('displays Remove as contact button for followed member', (tester) async {
+        _api.adminsList = [_testPubkey];
+        _api.followingPubkeys.add(_memberPubkey);
+        await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+        expect(find.text('Remove as contact'), findsOneWidget);
+      });
+
+      testWidgets('calls follow API when Add as contact is tapped', (tester) async {
+        _api.adminsList = [_testPubkey];
+        await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+        await tester.tap(find.byKey(const Key('follow_button')));
+        await tester.pumpAndSettle();
+
+        expect(_api.followCalls.length, 1);
+        expect(_api.followCalls[0].account, _testPubkey);
+        expect(_api.followCalls[0].target, _memberPubkey);
+      });
+
+      testWidgets('calls unfollow API when Remove as contact is tapped', (tester) async {
+        _api.adminsList = [_testPubkey];
+        _api.followingPubkeys.add(_memberPubkey);
+        await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+        await tester.tap(find.byKey(const Key('follow_button')));
+        await tester.pumpAndSettle();
+
+        expect(_api.unfollowCalls.length, 1);
+        expect(_api.unfollowCalls[0].account, _testPubkey);
+        expect(_api.unfollowCalls[0].target, _memberPubkey);
+      });
+
+      testWidgets('shows loading state during follow action', (tester) async {
+        _api.adminsList = [_testPubkey];
+        _api.followCompleter = Completer();
+        await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+        await tester.tap(find.byKey(const Key('follow_button')));
+        await tester.pump();
+
+        final buttons = tester.widgetList<WnButton>(find.byType(WnButton)).toList();
+        final followButton = buttons.firstWhere((b) => b.key == const Key('follow_button'));
+        expect(followButton.loading, isTrue);
+      });
+
+      testWidgets('shows error notice when follow action fails', (tester) async {
+        _api.adminsList = [_testPubkey];
+        _api.followError = Exception('Network error');
+        await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+        await tester.tap(find.byKey(const Key('follow_button')));
+        await tester.pump();
+        await tester.pump();
+
+        expect(find.byType(WnSystemNotice), findsOneWidget);
+        expect(find.text('Failed to update follow status. Please try again.'), findsOneWidget);
+      });
+    });
+
+    group('add to another group button', () {
+      testWidgets('displays add to another group button for other member', (tester) async {
+        _api.adminsList = [_testPubkey];
+        await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+        expect(find.byKey(const Key('add_to_another_group_button')), findsOneWidget);
+        expect(find.text('Add to another group'), findsOneWidget);
+      });
+
+      testWidgets('does not display add to another group button for own profile', (tester) async {
+        _api.adminsList = [_testPubkey];
+        await pumpGroupMemberScreen(tester, memberPubkey: _testPubkey);
+
+        expect(find.byKey(const Key('add_to_another_group_button')), findsNothing);
+      });
+
+      testWidgets('tapping add to another group button navigates to add to group screen', (
+        tester,
+      ) async {
+        _api.adminsList = [_testPubkey];
+        await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+        await tester.tap(find.byKey(const Key('add_to_another_group_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Add to group'), findsWidgets);
+      });
+    });
+
+    group('unknown error key', () {
+      testWidgets('shows somethingWentWrong for unknown error key', (tester) async {
+        _api.adminsList = [_testPubkey];
+        await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey, settle: false);
+
+        _api.removeMemberError = Exception('unknown_error_key');
+        await tester.pumpAndSettle();
+      });
     });
   });
 }
