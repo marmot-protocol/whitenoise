@@ -302,7 +302,7 @@
   "unknownInviteToWhiteNoiseDescription": "Este usuario aún no está en White Noise. Comparte la app para iniciar un chat seguro.",
   "unknownUserNeedsUpdateDescription": "Aún no puedes iniciar un chat seguro con este usuario. Necesita actualizar White Noise antes de que funcione la mensajería segura.",
   "addToAnotherGroup": "Añadir a otro grupo",
-  "addToGroupConfirmation": "¿Añadir {userName} a {groupName}?",
+  "addToGroupConfirmation": "¿Añadir a {userName} a {groupName}?",
   "add": "Añadir",
   "noGroupsAvailable": "No hay grupos disponibles",
   "noAdminGroupsAvailable": "Aún no eres admin en ningún grupo. Crea un grupo para añadir personas."
