@@ -9,6 +9,7 @@ import 'package:whitenoise/providers/active_chat_provider.dart' show activeChatP
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
 import 'package:whitenoise/providers/is_adding_account_provider.dart' show isAddingAccountProvider;
 import 'package:whitenoise/screens/add_profile_screen.dart' show AddProfileScreen;
+import 'package:whitenoise/screens/add_to_group_screen.dart' show AddToGroupScreen;
 import 'package:whitenoise/screens/appearance_screen.dart' show AppearanceScreen;
 import 'package:whitenoise/screens/chat_info_screen.dart' show ChatInfoScreen;
 import 'package:whitenoise/screens/chat_invite_screen.dart' show ChatInviteScreen;
@@ -68,6 +69,7 @@ abstract final class Routes {
   static const _userSearch = '/user-search';
   static const _userSelection = '/user-selection';
   static const _setUpGroup = '/set-up-group';
+  static const _addToGroup = '/add-to-group/:userPubkey';
   static const _startChat = '/start-chat/:userPubkey';
   static const _chatInfo = '/chat-info/:userPubkey';
   static const _groupInfo = '/group-info/:groupId';
@@ -250,10 +252,13 @@ abstract final class Routes {
         ),
         GoRoute(
           path: _userSelection,
-          pageBuilder: (context, state) => _navigationTransition(
-            state: state,
-            child: const UserSelectionScreen(),
-          ),
+          pageBuilder: (context, state) {
+            final initialUsers = state.extra as List<User>? ?? const [];
+            return _navigationTransition(
+              state: state,
+              child: UserSelectionScreen(initialUsers: initialUsers),
+            );
+          },
         ),
         GoRoute(
           name: 'setUpGroup',
@@ -273,6 +278,16 @@ abstract final class Routes {
               ),
             );
           },
+        ),
+        GoRoute(
+          name: 'addToGroup',
+          path: _addToGroup,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: AddToGroupScreen(
+              userPubkey: state.pathParameters['userPubkey']!,
+            ),
+          ),
         ),
         GoRoute(
           name: 'startChat',
@@ -461,8 +476,8 @@ abstract final class Routes {
     GoRouter.of(context).push(_userSearch);
   }
 
-  static void pushToUserSelection(BuildContext context) {
-    GoRouter.of(context).push(_userSelection);
+  static void pushToUserSelection(BuildContext context, {List<User> initialUsers = const []}) {
+    GoRouter.of(context).push(_userSelection, extra: initialUsers.isEmpty ? null : initialUsers);
   }
 
   static void pushToSetUpGroup(BuildContext context, List<User> selectedUsers) {
@@ -515,6 +530,13 @@ abstract final class Routes {
 
   static void pushToChatInfo(BuildContext context, String userPubkey) {
     GoRouter.of(context).pushNamed('chatInfo', pathParameters: {'userPubkey': userPubkey});
+  }
+
+  static void pushToAddToGroup(BuildContext context, String userPubkey) {
+    GoRouter.of(context).pushNamed(
+      'addToGroup',
+      pathParameters: {'userPubkey': userPubkey},
+    );
   }
 
   static void pushToStartChat(
