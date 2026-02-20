@@ -163,25 +163,6 @@ class ChatListTile extends HookConsumerWidget {
               }
             },
           ),
-          WnChatListContextMenuAction(
-            id: 'mute',
-            label: l10n.mute,
-            icon: WnIcons.notification,
-            onTap: () {},
-          ),
-          WnChatListContextMenuAction(
-            id: 'archive',
-            label: l10n.archive,
-            icon: WnIcons.archive,
-            onTap: () {},
-          ),
-          WnChatListContextMenuAction(
-            id: 'delete',
-            label: l10n.delete,
-            icon: WnIcons.trashCan,
-            isDestructive: true,
-            onTap: () {},
-          ),
         ],
       );
     }

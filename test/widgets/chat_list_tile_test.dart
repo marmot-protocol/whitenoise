@@ -591,18 +591,6 @@ void main() {
         expect(find.byType(WnChatListContextMenu), findsOneWidget);
       });
 
-      testWidgets('context menu shows Pin, Mute, Archive, Delete actions', (tester) async {
-        await pumpTile(tester, _chatSummary(name: 'Test Chat'));
-
-        await tester.longPress(find.byType(WnChatListItem));
-        await tester.pumpAndSettle();
-
-        expect(find.text('Pin'), findsOneWidget);
-        expect(find.text('Mute'), findsOneWidget);
-        expect(find.text('Archive'), findsOneWidget);
-        expect(find.text('Delete'), findsOneWidget);
-      });
-
       testWidgets('pending chat has no onLongPress handler', (tester) async {
         await pumpTile(tester, _chatSummary(pendingConfirmation: true));
 
@@ -739,42 +727,6 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(refreshCalled, isFalse);
-      });
-
-      testWidgets('tapping Mute dismisses menu without error', (tester) async {
-        await pumpTile(tester, _chatSummary(name: 'Test Chat'));
-
-        await tester.longPress(find.byType(WnChatListItem));
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.byKey(const Key('context_menu_action_mute')));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(WnChatListContextMenu), findsNothing);
-      });
-
-      testWidgets('tapping Archive dismisses menu without error', (tester) async {
-        await pumpTile(tester, _chatSummary(name: 'Test Chat'));
-
-        await tester.longPress(find.byType(WnChatListItem));
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.byKey(const Key('context_menu_action_archive')));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(WnChatListContextMenu), findsNothing);
-      });
-
-      testWidgets('tapping Delete dismisses menu without error', (tester) async {
-        await pumpTile(tester, _chatSummary(name: 'Test Chat'));
-
-        await tester.longPress(find.byType(WnChatListItem));
-        await tester.pumpAndSettle();
-
-        await tester.tap(find.byKey(const Key('context_menu_action_delete')));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(WnChatListContextMenu), findsNothing);
       });
     });
   });
