@@ -4,6 +4,8 @@ import 'package:whitenoise/widgets/wn_dropdown_selector.dart';
 
 import '../test_helpers.dart';
 
+void _noop(dynamic _) {}
+
 void main() {
   group('WnDropdownSelector', () {
     testWidgets('displays label', (tester) async {
@@ -673,6 +675,101 @@ void main() {
 
       await gesture.up();
       await tester.pumpAndSettle();
+    });
+  });
+
+  group('WnDropdownSelector exclusive open (WnDropdownScope)', () {
+    testWidgets('opening second dropdown closes first when using WnDropdownScope', (tester) async {
+      setUpTestView(tester);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: WnDropdownScope(
+              controller: WnDropdownController(),
+              child: const Column(
+                children: [
+                  WnDropdownSelector<String>(
+                    key: Key('dropdown_1'),
+                    label: 'First',
+                    options: [
+                      WnDropdownOption(value: 'a', label: 'Option A'),
+                      WnDropdownOption(value: 'b', label: 'Option B'),
+                    ],
+                    value: 'a',
+                    onChanged: _noop,
+                  ),
+                  WnDropdownSelector<String>(
+                    key: Key('dropdown_2'),
+                    label: 'Second',
+                    options: [
+                      WnDropdownOption(value: 'x', label: 'Option X'),
+                      WnDropdownOption(value: 'y', label: 'Option Y'),
+                    ],
+                    value: 'x',
+                    onChanged: _noop,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Option A'));
+      await tester.pumpAndSettle();
+      expect(find.text('Option B'), findsOneWidget);
+
+      await tester.tap(find.text('Option X'));
+      await tester.pumpAndSettle();
+      expect(find.text('Option Y'), findsOneWidget);
+      expect(find.text('Option B'), findsNothing);
+    });
+
+    testWidgets('without WnDropdownScope both dropdowns can be open simultaneously', (
+      tester,
+    ) async {
+      setUpTestView(tester);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: [
+                WnDropdownSelector<String>(
+                  key: Key('dropdown_1'),
+                  label: 'First',
+                  options: [
+                    WnDropdownOption(value: 'a', label: 'Option A'),
+                    WnDropdownOption(value: 'b', label: 'Option B'),
+                  ],
+                  value: 'a',
+                  onChanged: _noop,
+                ),
+                WnDropdownSelector<String>(
+                  key: Key('dropdown_2'),
+                  label: 'Second',
+                  options: [
+                    WnDropdownOption(value: 'x', label: 'Option X'),
+                    WnDropdownOption(value: 'y', label: 'Option Y'),
+                  ],
+                  value: 'x',
+                  onChanged: _noop,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Option A'));
+      await tester.pumpAndSettle();
+      expect(find.text('Option B'), findsOneWidget);
+
+      await tester.tap(find.text('Option X'));
+      await tester.pumpAndSettle();
+      expect(find.text('Option Y'), findsOneWidget);
+      expect(find.text('Option B'), findsOneWidget);
     });
   });
 

@@ -1037,7 +1037,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String addToGroupConfirmation(String userName, String groupName) {
-    return '¿Añadir a $userName a $groupName?';
+    return '¿Añadir $userName a $groupName?';
   }
 
   @override
