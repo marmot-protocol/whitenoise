@@ -506,6 +506,47 @@ void main() {
       });
     });
 
+    group('getMessageById', () {
+      testWidgets('returns null before any snapshot', (tester) async {
+        final getResult = await _pump(tester, 'group1');
+
+        expect(getResult().getMessageById('m1'), isNull);
+      });
+
+      testWidgets('returns null for unknown id', (tester) async {
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([_message('m1', DateTime(2024))]);
+        await tester.pump();
+
+        expect(getResult().getMessageById('unknown'), isNull);
+      });
+
+      testWidgets('returns message by id after snapshot', (tester) async {
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([
+          _message('m1', DateTime(2024), content: 'hello'),
+          _message('m2', DateTime(2024, 1, 2)),
+        ]);
+        await tester.pump();
+
+        expect(getResult().getMessageById('m1')?.content, 'hello');
+      });
+
+      testWidgets('returns updated message after update event', (tester) async {
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([_message('m1', DateTime(2024), content: 'original')]);
+        await tester.pumpAndSettle();
+
+        _api.emitNewMessage(_message('m1', DateTime(2024), content: 'updated'));
+        await tester.pumpAndSettle();
+
+        expect(getResult().getMessageById('m1')?.content, 'updated');
+      });
+    });
+
     group('getChatMessageQuote', () {
       testWidgets('returns null when replyId is null', (tester) async {
         final getResult = await _pump(tester, 'group1');
