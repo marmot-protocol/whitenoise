@@ -157,6 +157,23 @@ void main() {
       expect(find.byKey(const Key('main_uploading_overlay')), findsOneWidget);
     });
 
+    testWidgets('Image.file errorBuilder shows icon placeholder', (tester) async {
+      await mountWidget(
+        ChatMediaUploadPreview(
+          items: [createItem(filePath: testImageFile.path)],
+          onRemove: (_) {},
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      final image = tester.widget<Image>(find.byType(Image).first);
+      final context = tester.element(find.byType(Image).first);
+      final fallback = image.errorBuilder!(context, Object(), StackTrace.empty);
+
+      expect(fallback.key, const Key('image_tile_error_fallback'));
+    });
+
     testWidgets('adjusts selectedIndex when items are removed', (tester) async {
       var currentItems = [
         createItem(filePath: testImageFile.path),

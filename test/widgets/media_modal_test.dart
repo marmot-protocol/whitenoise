@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/media_image.dart';
 import 'package:whitenoise/widgets/media_modal.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_overlay.dart';
@@ -290,6 +291,60 @@ void main() {
 
       final avatar = tester.widget<WnAvatar>(find.byType(WnAvatar));
       expect(avatar.color, AvatarColor.neutral);
+    });
+
+    testWidgets('tapping content toggles fullscreen and hides header', (tester) async {
+      await mountWidget(
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => MediaModal.show(
+              context: context,
+              mediaFiles: [_mediaFile('1')],
+              senderName: 'Alice',
+            ),
+            child: const Text('Open'),
+          ),
+        ),
+        tester,
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('media_modal_sender_name')), findsOneWidget);
+
+      final tapArea = tester.widget<GestureDetector>(
+        find.byKey(const Key('media_content_tap_area')),
+      );
+      tapArea.onTap?.call();
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('media_modal_sender_name')), findsNothing);
+    });
+
+    testWidgets('page view uses NeverScrollableScrollPhysics when zoomed', (tester) async {
+      await mountWidget(
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => MediaModal.show(
+              context: context,
+              mediaFiles: [_mediaFile('1'), _mediaFile('2')],
+            ),
+            child: const Text('Open'),
+          ),
+        ),
+        tester,
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      final mediaImage = tester.widget<MediaImage>(find.byKey(const Key('media_image_0')));
+      mediaImage.onZoomChanged?.call(true);
+      await tester.pump();
+
+      final pageView = tester.widget<PageView>(find.byKey(const Key('media_page_view')));
+      expect(pageView.physics, isA<NeverScrollableScrollPhysics>());
     });
   });
 }

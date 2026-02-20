@@ -92,6 +92,7 @@ class _MediaPreviewWithOverlay extends StatelessWidget {
       File(item.filePath),
       fit: BoxFit.cover,
       errorBuilder: (_, _, _) => Container(
+        key: const Key('image_tile_error_fallback'),
         color: colors.fillSecondary,
         child: Center(
           child: WnIcon(

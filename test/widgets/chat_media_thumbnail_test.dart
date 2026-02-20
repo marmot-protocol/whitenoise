@@ -209,6 +209,25 @@ void main() {
       );
       expect(container.constraints?.maxWidth, 56.0);
     });
+
+    testWidgets('Image.file errorBuilder shows fallback blurhash', (tester) async {
+      final tempDir = Directory.systemTemp.createTempSync('thumbnail_error_fallback_test');
+      final tempFile = File('${tempDir.path}/test.png');
+      tempFile.writeAsBytesSync(_minimalPng);
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      await mountWidget(
+        ChatMediaThumbnail(mediaFile: _mediaFile(filePath: tempFile.path)),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      final image = tester.widget<Image>(find.byKey(const Key('thumbnail_image')));
+      final context = tester.element(find.byKey(const Key('thumbnail_image')));
+      final fallback = image.errorBuilder!(context, Object(), StackTrace.empty);
+
+      expect(fallback.key, const Key('thumbnail_error_fallback'));
+    });
   });
 }
 

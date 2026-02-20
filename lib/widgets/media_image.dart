@@ -125,7 +125,7 @@ class MediaImage extends HookWidget {
         onTap: onTap,
         child: WnMediaErrorPlaceholder(
           key: const Key('media_image_error'),
-          onRetry: retry ?? () {},
+          onRetry: retry!,
           blurhash: blurhash,
         ),
       );

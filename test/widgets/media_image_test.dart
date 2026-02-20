@@ -280,6 +280,112 @@ void main() {
         ..setEntry(1, 1, 2.0);
       await tester.pump();
     });
+
+    testWidgets('double-tap zooms in', (tester) async {
+      final tempDir = Directory.systemTemp.createTempSync('media_doubletap_test');
+      final tempFile = File('${tempDir.path}/test.png');
+      tempFile.writeAsBytesSync(_minimalPng);
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      await mountWidget(
+        SizedBox(
+          width: 300,
+          height: 300,
+          child: MediaImage(mediaFile: _mediaFile(filePath: tempFile.path)),
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('media_image_viewer')));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tap(find.byKey(const Key('media_image_viewer')));
+      await tester.pumpAndSettle();
+
+      final viewer = tester.widget<InteractiveViewer>(
+        find.byKey(const Key('media_image_viewer')),
+      );
+      expect(viewer.transformationController!.value.getMaxScaleOnAxis(), greaterThan(1.0));
+    });
+
+    testWidgets('double-tap when zoomed resets to identity', (tester) async {
+      final tempDir = Directory.systemTemp.createTempSync('media_doubletap_reset_test');
+      final tempFile = File('${tempDir.path}/test.png');
+      tempFile.writeAsBytesSync(_minimalPng);
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      await mountWidget(
+        SizedBox(
+          width: 300,
+          height: 300,
+          child: MediaImage(mediaFile: _mediaFile(filePath: tempFile.path)),
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      // First double-tap: zoom in
+      await tester.tap(find.byKey(const Key('media_image_viewer')));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tap(find.byKey(const Key('media_image_viewer')));
+      await tester.pumpAndSettle();
+
+      // Second double-tap: zoom out
+      await tester.tap(find.byKey(const Key('media_image_viewer')));
+      await tester.pump(const Duration(milliseconds: 50));
+      await tester.tap(find.byKey(const Key('media_image_viewer')));
+      await tester.pumpAndSettle();
+
+      final viewer = tester.widget<InteractiveViewer>(
+        find.byKey(const Key('media_image_viewer')),
+      );
+      expect(viewer.transformationController!.value.getMaxScaleOnAxis(), closeTo(1.0, 0.01));
+    });
+
+    testWidgets('onTap called on error state', (tester) async {
+      _api.shouldFail = true;
+      var tapped = false;
+      await mountWidget(
+        MediaImage(
+          mediaFile: _mediaFile(),
+          onTap: () => tapped = true,
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      final errorDetector = tester.widget<GestureDetector>(
+        find
+            .ancestor(
+              of: find.byKey(const Key('media_image_error')),
+              matching: find.byType(GestureDetector),
+            )
+            .first,
+      );
+      errorDetector.onTap?.call();
+      await tester.pump();
+
+      expect(tapped, isTrue);
+    });
+
+    testWidgets('Image.file errorBuilder shows fallback placeholder', (tester) async {
+      final tempDir = Directory.systemTemp.createTempSync('media_error_fallback_test');
+      final tempFile = File('${tempDir.path}/test.png');
+      tempFile.writeAsBytesSync(_minimalPng);
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      await mountWidget(
+        MediaImage(mediaFile: _mediaFile(filePath: tempFile.path)),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      final image = tester.widget<Image>(find.byKey(const Key('media_image_file')));
+      final context = tester.element(find.byKey(const Key('media_image_file')));
+      final fallback = image.errorBuilder!(context, Object(), StackTrace.empty);
+
+      expect(fallback.key, const Key('media_image_error_fallback'));
+    });
   });
 }
 

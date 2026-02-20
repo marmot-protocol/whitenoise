@@ -50,7 +50,7 @@ class _ChatMessageMediaTile extends HookWidget {
         borderRadius: BorderRadius.circular(4.r),
         child: WnMediaErrorPlaceholder(
           key: const Key('error_placeholder'),
-          onRetry: retry ?? () {},
+          onRetry: retry!,
           blurhash: mediaFile.fileMetadata?.blurhash,
         ),
       );
