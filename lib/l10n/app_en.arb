@@ -961,6 +961,19 @@
     "description": "Unfollow button text"
   },
 
+  "chatSearchMatchCount": "{current} of {total, plural, =1{1 match} other{{total} matches}}",
+  "@chatSearchMatchCount": {
+    "description": "Search match count indicator, e.g. '1 of 3 matches'",
+    "placeholders": {
+      "current": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
+    }
+  },
+
   "failedToStartChat": "Failed to start chat. Please try again.",
   "@failedToStartChat": {
     "description": "Error when starting chat fails"

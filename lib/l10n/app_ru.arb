@@ -176,6 +176,7 @@
   "profile": "Профиль",
   "follow": "Подписаться",
   "unfollow": "Отписаться",
+  "chatSearchMatchCount": "{current} из {total, plural, =1{1 совпадение} few{{total} совпадения} other{{total} совпадений}}",
   "failedToStartChat": "Не удалось начать чат. Попробуйте снова.",
   "inviteToWhiteNoise": "Пригласить в White Noise",
   "inviteToWhiteNoiseDescription": "{name} ещё не в White Noise. Поделитесь приложением, чтобы начать безопасный чат.",

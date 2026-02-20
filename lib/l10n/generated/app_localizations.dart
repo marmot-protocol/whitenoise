@@ -1164,6 +1164,12 @@ abstract class AppLocalizations {
   /// **'Unfollow'**
   String get unfollow;
 
+  /// Search match count indicator, e.g. '1 of 3 matches'
+  ///
+  /// In en, this message translates to:
+  /// **'{current} of {total, plural, =1{1 match} other{{total} matches}}'**
+  String chatSearchMatchCount(int current, int total);
+
   /// Error when starting chat fails
   ///
   /// In en, this message translates to:

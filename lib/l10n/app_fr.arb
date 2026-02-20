@@ -176,6 +176,7 @@
   "profile": "Profil",
   "follow": "Suivre",
   "unfollow": "Ne plus suivre",
+  "chatSearchMatchCount": "{current} sur {total, plural, =1{1 résultat} other{{total} résultats}}",
   "failedToStartChat": "Échec du démarrage de la discussion. Veuillez réessayer.",
   "inviteToWhiteNoise": "Inviter sur White Noise",
   "inviteToWhiteNoiseDescription": "{name} n'est pas encore sur White Noise. Partagez l'application pour démarrer une discussion sécurisée.",

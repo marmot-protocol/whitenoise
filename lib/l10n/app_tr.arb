@@ -176,6 +176,7 @@
   "profile": "Profil",
   "follow": "Takip et",
   "unfollow": "Takibi bırak",
+  "chatSearchMatchCount": "{current} / {total, plural, =1{1 sonuç} other{{total} sonuç}}",
   "failedToStartChat": "Sohbet başlatılamadı. Lütfen tekrar deneyin.",
   "inviteToWhiteNoise": "White Noise'a Davet Et",
   "inviteToWhiteNoiseDescription": "{name} henüz White Noise'da değil. Güvenli bir sohbet başlatmak için uygulamayı paylaşın.",

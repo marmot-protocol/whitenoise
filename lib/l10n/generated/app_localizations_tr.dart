@@ -623,6 +623,17 @@ class AppLocalizationsTr extends AppLocalizations {
   String get unfollow => 'Takibi bırak';
 
   @override
+  String chatSearchMatchCount(int current, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total sonuç',
+      one: '1 sonuç',
+    );
+    return '$current / $_temp0';
+  }
+
+  @override
   String get failedToStartChat => 'Sohbet başlatılamadı. Lütfen tekrar deneyin.';
 
   @override

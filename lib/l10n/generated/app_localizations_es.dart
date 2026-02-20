@@ -628,6 +628,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get unfollow => 'Dejar de seguir';
 
   @override
+  String chatSearchMatchCount(int current, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total coincidencias',
+      one: '1 coincidencia',
+    );
+    return '$current de $_temp0';
+  }
+
+  @override
   String get failedToStartChat => 'Error al iniciar el chat. Por favor, inténtalo de nuevo.';
 
   @override

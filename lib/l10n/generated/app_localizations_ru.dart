@@ -647,6 +647,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get unfollow => 'Отписаться';
 
   @override
+  String chatSearchMatchCount(int current, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total совпадений',
+      few: '$total совпадения',
+      one: '1 совпадение',
+    );
+    return '$current из $_temp0';
+  }
+
+  @override
   String get failedToStartChat => 'Не удалось начать чат. Попробуйте снова.';
 
   @override

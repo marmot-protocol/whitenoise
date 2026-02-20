@@ -176,6 +176,7 @@
   "profile": "Perfil",
   "follow": "Seguir",
   "unfollow": "Dejar de seguir",
+  "chatSearchMatchCount": "{current} de {total, plural, =1{1 coincidencia} other{{total} coincidencias}}",
   "failedToStartChat": "Error al iniciar el chat. Por favor, inténtalo de nuevo.",
   "inviteToWhiteNoise": "Invitar a White Noise",
   "inviteToWhiteNoiseDescription": "{name} aún no está en White Noise. Comparte la app para iniciar un chat seguro.",

@@ -623,6 +623,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unfollow => 'Unfollow';
 
   @override
+  String chatSearchMatchCount(int current, int total) {
+    String _temp0 = intl.Intl.pluralLogic(
+      total,
+      locale: localeName,
+      other: '$total matches',
+      one: '1 match',
+    );
+    return '$current of $_temp0';
+  }
+
+  @override
   String get failedToStartChat => 'Failed to start chat. Please try again.';
 
   @override
