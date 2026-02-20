@@ -1287,7 +1287,7 @@ void main() {
 
       testWidgets('navigation bar appears when search query is not empty', (tester) async {
         _api.initialMessages = [
-          _message('m1', DateTime(2024, 1)),
+          _message('m1', DateTime(2024)),
           _message('m2', DateTime(2024, 2)),
         ];
         await openSearch(tester);
@@ -1297,7 +1297,7 @@ void main() {
       });
 
       testWidgets('shows no results when query has no matches', (tester) async {
-        _api.initialMessages = [_message('m1', DateTime(2024, 1))];
+        _api.initialMessages = [_message('m1', DateTime(2024))];
         await openSearch(tester);
         await tester.enterText(find.byKey(const Key('chat_search_field')), 'zzznomatch');
         await tester.pumpAndSettle();
@@ -1306,7 +1306,7 @@ void main() {
       });
 
       testWidgets('shows singular match count for one result', (tester) async {
-        _api.initialMessages = [_message('m1', DateTime(2024, 1))];
+        _api.initialMessages = [_message('m1', DateTime(2024))];
         await openSearch(tester);
         await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message m1');
         await tester.pumpAndSettle();
@@ -1316,7 +1316,7 @@ void main() {
 
       testWidgets('shows plural match count for multiple results', (tester) async {
         _api.initialMessages = [
-          _message('m1', DateTime(2024, 1)),
+          _message('m1', DateTime(2024)),
           _message('m2', DateTime(2024, 2)),
         ];
         await openSearch(tester);
@@ -1328,7 +1328,7 @@ void main() {
 
       testWidgets('shows prev and next navigation buttons', (tester) async {
         _api.initialMessages = [
-          _message('m1', DateTime(2024, 1)),
+          _message('m1', DateTime(2024)),
           _message('m2', DateTime(2024, 2)),
         ];
         await openSearch(tester);
@@ -1340,7 +1340,7 @@ void main() {
 
       testWidgets('tapping next button advances match index', (tester) async {
         _api.initialMessages = [
-          _message('m1', DateTime(2024, 1)),
+          _message('m1', DateTime(2024)),
           _message('m2', DateTime(2024, 2)),
         ];
         await openSearch(tester);
@@ -1355,7 +1355,7 @@ void main() {
 
       testWidgets('tapping prev button goes to previous match', (tester) async {
         _api.initialMessages = [
-          _message('m1', DateTime(2024, 1)),
+          _message('m1', DateTime(2024)),
           _message('m2', DateTime(2024, 2)),
         ];
         await openSearch(tester);
@@ -1381,7 +1381,7 @@ void main() {
 
       testWidgets('match index resets when query changes', (tester) async {
         _api.initialMessages = [
-          _message('m1', DateTime(2024, 1)),
+          _message('m1', DateTime(2024)),
           _message('m2', DateTime(2024, 2)),
         ];
         await openSearch(tester);
