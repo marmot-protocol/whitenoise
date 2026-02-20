@@ -1256,5 +1256,154 @@ void main() {
         expect(textField.focusNode!.hasFocus, isFalse);
       });
     });
+
+    group('message search', () {
+      Future<void> openSearch(WidgetTester tester) async {
+        _api.isDm = true;
+        _api.groupMembers = [_testPubkey, testPubkeyC];
+        await pumpChatScreen(tester);
+        await tester.tap(find.byKey(const Key('header_avatar_tap_area')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('search_button')));
+        await tester.pumpAndSettle();
+      }
+
+      testWidgets('search bar is hidden by default', (tester) async {
+        await pumpChatScreen(tester);
+        expect(find.byKey(const Key('chat_search_bar')), findsNothing);
+        expect(find.byKey(const Key('chat_search_field')), findsNothing);
+      });
+
+      testWidgets('search bar appears after tapping search in chat info', (tester) async {
+        await openSearch(tester);
+        expect(find.byKey(const Key('chat_search_bar')), findsOneWidget);
+        expect(find.byKey(const Key('chat_search_field')), findsOneWidget);
+      });
+
+      testWidgets('navigation bar is hidden when search query is empty', (tester) async {
+        await openSearch(tester);
+        expect(find.byKey(const Key('chat_search_navigation')), findsNothing);
+      });
+
+      testWidgets('navigation bar appears when search query is not empty', (tester) async {
+        _api.initialMessages = [
+          _message('m1', DateTime(2024)),
+          _message('m2', DateTime(2024, 2)),
+        ];
+        await openSearch(tester);
+        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('chat_search_navigation')), findsOneWidget);
+      });
+
+      testWidgets('shows no results when query has no matches', (tester) async {
+        _api.initialMessages = [_message('m1', DateTime(2024))];
+        await openSearch(tester);
+        await tester.enterText(find.byKey(const Key('chat_search_field')), 'zzznomatch');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('chat_search_match_count')), findsOneWidget);
+        expect(find.text('No results'), findsOneWidget);
+      });
+
+      testWidgets('shows singular match count for one result', (tester) async {
+        _api.initialMessages = [_message('m1', DateTime(2024))];
+        await openSearch(tester);
+        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message m1');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('chat_search_match_count')), findsOneWidget);
+        expect(find.text('1 of 1 match'), findsOneWidget);
+      });
+
+      testWidgets('shows plural match count for multiple results', (tester) async {
+        _api.initialMessages = [
+          _message('m1', DateTime(2024)),
+          _message('m2', DateTime(2024, 2)),
+        ];
+        await openSearch(tester);
+        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('chat_search_match_count')), findsOneWidget);
+        expect(find.text('1 of 2 matches'), findsOneWidget);
+      });
+
+      testWidgets('shows prev and next navigation buttons', (tester) async {
+        _api.initialMessages = [
+          _message('m1', DateTime(2024)),
+          _message('m2', DateTime(2024, 2)),
+        ];
+        await openSearch(tester);
+        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('chat_search_prev_button')), findsOneWidget);
+        expect(find.byKey(const Key('chat_search_next_button')), findsOneWidget);
+      });
+
+      testWidgets('tapping next button advances match index', (tester) async {
+        _api.initialMessages = [
+          _message('m1', DateTime(2024)),
+          _message('m2', DateTime(2024, 2)),
+        ];
+        await openSearch(tester);
+        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
+        await tester.pumpAndSettle();
+        expect(find.text('1 of 2 matches'), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('chat_search_next_button')));
+        await tester.pumpAndSettle();
+        expect(find.text('2 of 2 matches'), findsOneWidget);
+      });
+
+      testWidgets('tapping prev button goes to previous match', (tester) async {
+        _api.initialMessages = [
+          _message('m1', DateTime(2024)),
+          _message('m2', DateTime(2024, 2)),
+        ];
+        await openSearch(tester);
+        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('chat_search_next_button')));
+        await tester.pumpAndSettle();
+        expect(find.text('2 of 2 matches'), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('chat_search_prev_button')));
+        await tester.pumpAndSettle();
+        expect(find.text('1 of 2 matches'), findsOneWidget);
+      });
+
+      testWidgets('does not show no messages text when search is active with no results', (
+        tester,
+      ) async {
+        await openSearch(tester);
+        await tester.enterText(find.byKey(const Key('chat_search_field')), 'zzznomatch');
+        await tester.pumpAndSettle();
+        expect(find.text('No messages yet'), findsNothing);
+      });
+
+      testWidgets('closing search hides search bar', (tester) async {
+        await openSearch(tester);
+        expect(find.byKey(const Key('chat_search_bar')), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('back_button')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('chat_search_bar')), findsNothing);
+      });
+
+      testWidgets('match index resets when query changes', (tester) async {
+        _api.initialMessages = [
+          _message('m1', DateTime(2024)),
+          _message('m2', DateTime(2024, 2)),
+        ];
+        await openSearch(tester);
+        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('chat_search_next_button')));
+        await tester.pumpAndSettle();
+        expect(find.text('2 of 2 matches'), findsOneWidget);
+
+        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message m1');
+        await tester.pumpAndSettle();
+        expect(find.text('1 of 1 match'), findsOneWidget);
+      });
+    });
   });
 }

@@ -47,14 +47,14 @@ void main() {
       expect(find.byKey(const Key('add_to_group_button')), findsOneWidget);
     });
 
-    testWidgets('shows follow label when not following', (tester) async {
+    testWidgets('shows add as contact label when not following', (tester) async {
       await pumpActions(tester, isOwnProfile: false);
-      expect(find.text('Follow'), findsOneWidget);
+      expect(find.text('Add as contact'), findsOneWidget);
     });
 
-    testWidgets('shows unfollow label when following', (tester) async {
+    testWidgets('shows remove as contact label when following', (tester) async {
       await pumpActions(tester, isOwnProfile: false, isFollowing: true);
-      expect(find.text('Unfollow'), findsOneWidget);
+      expect(find.text('Remove as contact'), findsOneWidget);
     });
 
     testWidgets('shows loading on contact button', (tester) async {

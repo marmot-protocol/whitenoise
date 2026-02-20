@@ -22,6 +22,7 @@ import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
+import 'package:whitenoise/utils/chat_messages_search.dart';
 import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
@@ -30,6 +31,7 @@ import 'package:whitenoise/widgets/wn_chat_message_input.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_scroll_edge_effect.dart';
+import 'package:whitenoise/widgets/wn_search_field.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_chat_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
@@ -37,6 +39,7 @@ import 'package:whitenoise/widgets/wn_system_notice.dart';
 final _logger = Logger('ChatScreen');
 
 const _slateHeight = 80.0;
+const _searchBarHeight = 80.0;
 
 class ChatScreen extends HookConsumerWidget {
   final String groupId;
@@ -84,6 +87,9 @@ class ChatScreen extends HookConsumerWidget {
     );
 
     final noticeMessage = useState<String?>(null);
+    final isSearchActive = useState(false);
+    final searchQuery = useState('');
+    final searchController = useTextEditingController();
 
     void showNotice(String message) {
       noticeMessage.value = message;
@@ -91,6 +97,16 @@ class ChatScreen extends HookConsumerWidget {
 
     void dismissNotice() {
       noticeMessage.value = null;
+    }
+
+    void openSearch() {
+      isSearchActive.value = true;
+    }
+
+    void closeSearch() {
+      isSearchActive.value = false;
+      searchQuery.value = '';
+      searchController.clear();
     }
 
     String? getMessageIdByIndex(int reversedIndex) {
@@ -155,14 +171,27 @@ class ChatScreen extends HookConsumerWidget {
     }
 
     final safeAreaTop = MediaQuery.of(context).padding.top;
-    final slateTopPadding = safeAreaTop + _slateHeight.h;
+    final searchBarHeight = isSearchActive.value ? _searchBarHeight.h : 0.0;
+    final slateTopPadding = safeAreaTop + _slateHeight.h + searchBarHeight;
+
+    final allMessages = List.generate(messageCount, getMessage);
+    final displayMessages = isSearchActive.value
+        ? filterMessagesBySearch(allMessages, searchQuery.value)
+        : null;
+    final displayCount = displayMessages?.length ?? messageCount;
+    final currentMatchIndex = useState(0);
+
+    useEffect(() {
+      currentMatchIndex.value = 0;
+      return null;
+    }, [searchQuery.value]);
 
     Widget messageListContent;
     if (isLoading) {
       messageListContent = Center(
         child: CircularProgressIndicator(color: colors.backgroundContentPrimary),
       );
-    } else if (messageCount == 0) {
+    } else if (displayCount == 0 && !isSearchActive.value) {
       messageListContent = Center(
         child: Text(
           context.l10n.noMessagesYet,
@@ -176,15 +205,17 @@ class ChatScreen extends HookConsumerWidget {
           controller: scrollController,
           reverse: true,
           padding: EdgeInsets.only(top: slateTopPadding + 8.h, bottom: 12.h),
-          itemCount: messageCount,
-          findChildIndexCallback: (key) {
-            if (key is ValueKey<String>) {
-              return getReversedMessageIndex(key.value);
-            }
-            return null;
-          },
+          itemCount: displayCount,
+          findChildIndexCallback: displayMessages == null
+              ? (key) {
+                  if (key is ValueKey<String>) {
+                    return getReversedMessageIndex(key.value);
+                  }
+                  return null;
+                }
+              : null,
           itemBuilder: (context, index) {
-            final message = getMessage(index);
+            final message = displayMessages != null ? displayMessages[index] : getMessage(index);
             final isOwnMessage = message.pubkey == pubkey;
             final replyPreview = message.isReply ? getChatMessageQuote(message.replyToId) : null;
 
@@ -254,21 +285,107 @@ class ChatScreen extends HookConsumerWidget {
                       ),
                     SafeArea(
                       bottom: false,
-                      child: WnSlate(
-                        header: WnSlateChatHeader(
-                          displayName: chatProfile.data?.displayName ?? '',
-                          avatarColor: chatProfile.data?.color ?? AvatarColor.neutral,
-                          pictureUrl: chatProfile.data?.pictureUrl,
-                          onBack: () => Routes.goToChatList(context),
-                          onAvatarTap: () {
-                            final otherPubkey = chatProfile.data?.otherMemberPubkey;
-                            if (otherPubkey != null) {
-                              Routes.pushToChatInfo(context, otherPubkey);
-                            } else {
-                              Routes.pushToGroupInfo(context, groupId);
-                            }
-                          },
-                        ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          WnSlate(
+                            header: WnSlateChatHeader(
+                              displayName: chatProfile.data?.displayName ?? '',
+                              avatarColor: chatProfile.data?.color ?? AvatarColor.neutral,
+                              pictureUrl: chatProfile.data?.pictureUrl,
+                              onBack: isSearchActive.value
+                                  ? closeSearch
+                                  : () => Routes.goToChatList(context),
+                              onAvatarTap: () async {
+                                final otherPubkey = chatProfile.data?.otherMemberPubkey;
+                                if (otherPubkey != null) {
+                                  final result = await Routes.pushToChatInfo(context, otherPubkey);
+                                  if (result == true) openSearch();
+                                } else {
+                                  Routes.pushToGroupInfo(context, groupId);
+                                }
+                              },
+                            ),
+                          ),
+                          if (isSearchActive.value) ...[
+                            Padding(
+                              key: const Key('chat_search_bar'),
+                              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
+                              child: WnSearchField(
+                                key: const Key('chat_search_field'),
+                                placeholder: context.l10n.search,
+                                controller: searchController,
+                                autofocus: true,
+                                onChanged: (value) => searchQuery.value = value,
+                              ),
+                            ),
+                            if (searchQuery.value.isNotEmpty)
+                              Padding(
+                                key: const Key('chat_search_navigation'),
+                                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 8.h),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    IconButton(
+                                      key: const Key('chat_search_prev_button'),
+                                      onPressed: displayCount == 0
+                                          ? null
+                                          : () {
+                                              final next =
+                                                  (currentMatchIndex.value - 1 + displayCount) %
+                                                  displayCount;
+                                              currentMatchIndex.value = next;
+                                              scrollController.scrollToIndex(
+                                                displayCount - 1 - next,
+                                                preferPosition: AutoScrollPosition.middle,
+                                              );
+                                            },
+                                      icon: WnIcon(
+                                        WnIcons.chevronUp,
+                                        size: 18.sp,
+                                        color: displayCount == 0
+                                            ? colors.backgroundContentTertiary
+                                            : colors.backgroundContentSecondary,
+                                      ),
+                                    ),
+                                    Text(
+                                      displayCount == 0
+                                          ? context.l10n.noResults
+                                          : context.l10n.chatSearchMatchCount(
+                                              currentMatchIndex.value + 1,
+                                              displayCount,
+                                            ),
+                                      key: const Key('chat_search_match_count'),
+                                      style: typography.medium14.copyWith(
+                                        color: colors.backgroundContentSecondary,
+                                      ),
+                                    ),
+                                    IconButton(
+                                      key: const Key('chat_search_next_button'),
+                                      onPressed: displayCount == 0
+                                          ? null
+                                          : () {
+                                              final next =
+                                                  (currentMatchIndex.value + 1) % displayCount;
+                                              currentMatchIndex.value = next;
+                                              scrollController.scrollToIndex(
+                                                displayCount - 1 - next,
+                                                preferPosition: AutoScrollPosition.middle,
+                                              );
+                                            },
+                                      icon: WnIcon(
+                                        WnIcons.chevronDown,
+                                        size: 18.sp,
+                                        color: displayCount == 0
+                                            ? colors.backgroundContentTertiary
+                                            : colors.backgroundContentSecondary,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                          ],
+                        ],
                       ),
                     ),
                     if (chatScroll.isScrollDownButtonVisible)

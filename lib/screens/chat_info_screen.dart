@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_follow_actions.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
@@ -93,8 +94,8 @@ class ChatInfoScreen extends HookConsumerWidget {
                               isFollowing: isFollowing,
                               isFollowLoading: followState.isActionLoading,
                               onFollowTap: handleFollowAction,
-                              onSearchTap: () => Routes.pushToWip(context),
-                              onAddToGroupTap: () => Routes.pushToWip(context),
+                              onSearchTap: () => GoRouter.of(context).pop(true),
+                              onAddToGroupTap: () => Routes.pushToAddToGroup(context, userPubkey),
                             ),
                           ],
                         ),

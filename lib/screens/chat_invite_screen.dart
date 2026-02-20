@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -57,7 +59,7 @@ class ChatInviteScreen extends HookConsumerWidget {
     void handleAvatarTap() {
       final otherPubkey = chatProfile.data?.otherMemberPubkey;
       if (otherPubkey != null) {
-        Routes.pushToChatInfo(context, otherPubkey);
+        unawaited(Routes.pushToChatInfo(context, otherPubkey));
       } else {
         Routes.pushToWip(context);
       }

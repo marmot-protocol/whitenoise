@@ -109,7 +109,7 @@ void main() {
       overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
     );
     await tester.pumpAndSettle();
-    Routes.pushToChatInfo(tester.element(find.byType(Scaffold)), userPubkey);
+    unawaited(Routes.pushToChatInfo(tester.element(find.byType(Scaffold)), userPubkey));
     if (settle) {
       await tester.pumpAndSettle();
     } else {
@@ -171,15 +171,15 @@ void main() {
       expect(find.text('I love Nostr!'), findsNothing);
     });
 
-    testWidgets('shows follow for non-followed user', (tester) async {
+    testWidgets('shows add as contact for non-followed user', (tester) async {
       await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-      expect(find.text('Follow'), findsOneWidget);
+      expect(find.text('Add as contact'), findsOneWidget);
     });
 
-    testWidgets('shows unfollow for followed user', (tester) async {
+    testWidgets('shows remove as contact for followed user', (tester) async {
       _api.followingPubkeys.add(_otherPubkey);
       await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
-      expect(find.text('Unfollow'), findsOneWidget);
+      expect(find.text('Remove as contact'), findsOneWidget);
     });
 
     testWidgets('calls follow API when follow is tapped', (tester) async {
@@ -289,13 +289,13 @@ void main() {
       expect(find.byType(WnSystemNotice), findsNothing);
     });
 
-    testWidgets('navigates to wip screen when search is pressed', (tester) async {
+    testWidgets('pops screen when search is pressed', (tester) async {
       await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
 
       await tester.tap(find.byKey(const Key('search_button')));
       await tester.pumpAndSettle();
 
-      expect(find.text('We\'re working on this'), findsOneWidget);
+      expect(find.text('Chat Information'), findsNothing);
     });
 
     testWidgets('does not show mute action', (tester) async {
@@ -305,13 +305,13 @@ void main() {
       expect(find.text('Mute'), findsNothing);
     });
 
-    testWidgets('navigates to wip screen when add to group is pressed', (tester) async {
+    testWidgets('navigates to add to group screen when add to group is pressed', (tester) async {
       await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
 
       await tester.tap(find.byKey(const Key('add_to_group_button')));
       await tester.pumpAndSettle();
 
-      expect(find.text('We\'re working on this'), findsOneWidget);
+      expect(find.text('Add to group'), findsWidgets);
     });
 
     testWidgets('navigates back when close button is pressed', (tester) async {
