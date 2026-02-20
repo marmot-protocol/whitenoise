@@ -109,7 +109,7 @@ void main() {
       overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
     );
     await tester.pumpAndSettle();
-    Routes.pushToChatInfo(tester.element(find.byType(Scaffold)), userPubkey);
+    unawaited(Routes.pushToChatInfo(tester.element(find.byType(Scaffold)), userPubkey));
     if (settle) {
       await tester.pumpAndSettle();
     } else {
