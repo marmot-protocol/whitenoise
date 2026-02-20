@@ -8,6 +8,7 @@ import 'package:whitenoise/screens/chat_info_screen.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/group_info_screen.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
+import 'package:whitenoise/src/rust/api/drafts.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -960,6 +961,63 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(position.pixels, greaterThan(0));
+      });
+    });
+
+    group('draft restoration', () {
+      Future<void> pumpChatScreenWithDraftSettle(WidgetTester tester) async {
+        await pumpChatScreen(tester);
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 100)));
+        await tester.pumpAndSettle();
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 100)));
+        await tester.pumpAndSettle();
+      }
+
+      group('with draft content', () {
+        setUp(() {
+          _api.loadDraftResult = Draft(
+            accountPubkey: _testPubkey,
+            mlsGroupId: _testGroupId,
+            content: 'unsent message',
+            mediaAttachments: const [],
+            createdAt: DateTime(2024),
+            updatedAt: DateTime(2024),
+          );
+        });
+
+        testWidgets('restores content into input field', (tester) async {
+          await pumpChatScreenWithDraftSettle(tester);
+
+          final textField = tester.widget<TextField>(find.byType(TextField));
+          expect(textField.controller!.text, 'unsent message');
+        });
+
+        testWidgets('shows send button after restoring content', (tester) async {
+          await pumpChatScreenWithDraftSettle(tester);
+
+          expect(find.byKey(const Key('send_button')), findsOneWidget);
+        });
+      });
+
+      group('when draft reply message not in list', () {
+        setUp(() {
+          _api.initialMessages = [];
+          _api.loadDraftResult = Draft(
+            accountPubkey: _testPubkey,
+            mlsGroupId: _testGroupId,
+            content: 'draft',
+            replyToId: 'missing-id',
+            mediaAttachments: const [],
+            createdAt: DateTime(2024),
+            updatedAt: DateTime(2024),
+          );
+        });
+
+        testWidgets('does not show reply preview', (tester) async {
+          await pumpChatScreenWithDraftSettle(tester);
+
+          expect(find.byType(ChatMessageQuote), findsNothing);
+        });
       });
     });
 
