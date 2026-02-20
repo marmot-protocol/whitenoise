@@ -51,7 +51,9 @@ GroupsState useGroups({
 
   useEffect(() {
     fetchGroups();
-    return null;
+    return () {
+      requestToken.value++;
+    };
   }, [accountPubkey, refreshKey]);
 
   void clearError() {

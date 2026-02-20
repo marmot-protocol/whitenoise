@@ -159,7 +159,8 @@ void main() {
       await tester.tap(find.byKey(const Key('group_$testGroupId')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Add to group'), findsWidgets);
+      expect(find.byKey(const Key('confirm_button')), findsOneWidget);
+      expect(find.byKey(const Key('cancel_button')), findsOneWidget);
     });
 
     testWidgets('calls addMembersToGroup API when confirmed', (tester) async {
