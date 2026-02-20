@@ -86,6 +86,11 @@
     "description": "Hint text on onboarding screen"
   },
 
+  "share": "Share",
+  "@share": {
+    "description": "Generic share text"
+  },
+
   "shareYourProfile": "Share your profile",
   "@shareYourProfile": {
     "description": "Button text to share profile"
@@ -979,6 +984,11 @@
         "type": "String"
       }
     }
+  },
+
+  "inviteMessage": "Join me on White Noise. No phone number. No surveillance. Just real privacy. Download it here: https://www.whitenoise.chat/download",
+  "@inviteMessage": {
+    "description": "Text shared with users who haven't installed White Noise yet"
   },
 
   "failedToUpdateFollow": "Failed to update follow status. Please try again.",

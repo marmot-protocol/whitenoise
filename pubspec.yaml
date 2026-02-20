@@ -66,6 +66,7 @@ dependencies:
   permission_handler: ^12.0.0
   unique_names_generator: ^3.0.0
   flutter_blurhash: ^0.9.1
+  share_plus: ^12.0.1
 
 dev_dependencies:
   flutter_test:

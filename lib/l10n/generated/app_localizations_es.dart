@@ -61,6 +61,9 @@ class AppLocalizationsEs extends AppLocalizations {
       'Inicia una conversación añadiendo amigos o compartiendo tu perfil.';
 
   @override
+  String get share => 'Compartir';
+
+  @override
   String get shareYourProfile => 'Compartir tu perfil';
 
   @override
@@ -639,6 +642,10 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get inviteMessage =>
+      'Únete a mí en White Noise. Sin número de teléfono. Sin vigilancia. Solo privacidad real. Descárgalo aquí: https://www.whitenoise.chat/download';
+
+  @override
   String get failedToUpdateFollow =>
       'Error al actualizar el estado de seguimiento. Por favor, inténtalo de nuevo.';
 
@@ -1037,7 +1044,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String addToGroupConfirmation(String userName, String groupName) {
-    return '¿Añadir a $userName a $groupName?';
+    return '¿Añadir $userName a $groupName?';
   }
 
   @override

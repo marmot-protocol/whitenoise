@@ -49,8 +49,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Copy message to clipboard from message actions [PR #317](https://github.com/marmot-protocol/whitenoise/pull/317)
 - Mark messages as read [PR #316](https://github.com/marmot-protocol/whitenoise/pull/316)
 - Images in chat [PR #249](https://github.com/marmot-protocol/whitenoise/pull/249)
-- Show last message sender name in chat list[PR #322](https://github.com/marmot-protocol/whitenoise/pull/322)
+- Show last message sender name in chat list [PR #322](https://github.com/marmot-protocol/whitenoise/pull/322)
 - Add to group from group member screen and start chat screen [PR #323](https://github.com/marmot-protocol/whitenoise/pull/323)
+- Invite to White Noise [PR (#328)](https://github.com/marmot-protocol/whitenoise/pull/328)
+
 ### Changed
 
 - Rename "Follow"/"Unfollow" buttons to "Add as contact"/"Remove as contact" [PR #323](https://github.com/marmot-protocol/whitenoise/pull/323)

@@ -210,6 +210,12 @@ abstract class AppLocalizations {
   /// **'Start a conversation by adding friends or sharing your profile.'**
   String get startConversationHint;
 
+  /// Generic share text
+  ///
+  /// In en, this message translates to:
+  /// **'Share'**
+  String get share;
+
   /// Button text to share profile
   ///
   /// In en, this message translates to:
@@ -1181,6 +1187,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{name} isn\'t on White Noise yet. Share the app to start a secure chat.'**
   String inviteToWhiteNoiseDescription(String name);
+
+  /// Text shared with users who haven't installed White Noise yet
+  ///
+  /// In en, this message translates to:
+  /// **'Join me on White Noise. No phone number. No surveillance. Just real privacy. Download it here: https://www.whitenoise.chat/download'**
+  String get inviteMessage;
 
   /// Error when follow or unfollow action fails
   ///

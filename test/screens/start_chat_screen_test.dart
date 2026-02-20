@@ -200,6 +200,11 @@ void main() {
       expect(find.text('Send message'), findsOneWidget);
     });
 
+    testWidgets('does not show invite button when user has valid key package', (tester) async {
+      await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+      expect(find.byKey(const Key('invite_button')), findsNothing);
+    });
+
     group('with metadata', () {
       setUp(() {
         _api.metadata = const FlutterMetadata(
@@ -399,6 +404,17 @@ void main() {
         expect(find.byKey(const Key('start_chat_button')), findsNothing);
       });
 
+      testWidgets('shows invite button', (tester) async {
+        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        expect(find.byKey(const Key('invite_button')), findsOneWidget);
+      });
+
+      testWidgets('invite button shows correct label', (tester) async {
+        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        final button = tester.widget<WnButton>(find.byKey(const Key('invite_button')));
+        expect(button.text, 'Share');
+      });
+
       group('invite callout description', () {
         testWidgets('uses displayName when available', (tester) async {
           _api.metadata = const FlutterMetadata(
@@ -454,6 +470,11 @@ void main() {
       testWidgets('does not show start chat button', (tester) async {
         await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
         expect(find.byKey(const Key('start_chat_button')), findsNothing);
+      });
+
+      testWidgets('does not show invite button', (tester) async {
+        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        expect(find.byKey(const Key('invite_button')), findsNothing);
       });
 
       group('invite callout description', () {

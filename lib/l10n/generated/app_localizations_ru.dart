@@ -61,6 +61,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'Начните разговор, добавив друзей или поделившись своим профилем.';
 
   @override
+  String get share => 'Поделиться';
+
+  @override
   String get shareYourProfile => 'Поделиться профилем';
 
   @override
@@ -656,6 +659,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String inviteToWhiteNoiseDescription(String name) {
     return '$name ещё не в White Noise. Поделитесь приложением, чтобы начать безопасный чат.';
   }
+
+  @override
+  String get inviteMessage =>
+      'Присоединяйтесь ко мне в White Noise. Без номера телефона. Без слежки. Только настоящая приватность. Скачайте здесь: https://www.whitenoise.chat/download';
 
   @override
   String get failedToUpdateFollow => 'Не удалось обновить статус подписки. Попробуйте снова.';

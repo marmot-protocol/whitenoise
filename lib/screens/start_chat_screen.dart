@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:whitenoise/hooks/use_follow_actions.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_user_has_key_package.dart';
@@ -215,6 +216,23 @@ class StartChatScreen extends HookConsumerWidget {
                               type: CalloutType.info,
                             );
                           }(),
+                          if (keyPackageStatus == KeyPackageStatus.notFound ||
+                              keyPackageStatus == null) ...[
+                            Gap(8.h),
+                            SizedBox(
+                              width: double.infinity,
+                              child: WnButton(
+                                key: const Key('invite_button'),
+                                text: context.l10n.share,
+                                size: WnButtonSize.medium,
+                                onPressed: () => SharePlus.instance.share(
+                                  ShareParams(
+                                    text: context.l10n.inviteMessage,
+                                  )
+                                ),
+                              ),
+                            ),
+                          ],
                         ],
                       ],
                     ],

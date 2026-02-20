@@ -61,6 +61,9 @@ class AppLocalizationsPt extends AppLocalizations {
       'Inicie uma conversa adicionando amigos ou compartilhando seu perfil.';
 
   @override
+  String get share => 'Compartilhar';
+
+  @override
   String get shareYourProfile => 'Compartilhar seu perfil';
 
   @override
@@ -635,6 +638,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String inviteToWhiteNoiseDescription(String name) {
     return '$name ainda não está no White Noise. Compartilhe o app para iniciar uma conversa segura.';
   }
+
+  @override
+  String get inviteMessage =>
+      'Junte-se a mim no White Noise. Sem número de telefone. Sem vigilância. Apenas privacidade real. Baixe aqui: https://www.whitenoise.chat/download';
 
   @override
   String get failedToUpdateFollow =>

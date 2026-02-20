@@ -61,6 +61,9 @@ class AppLocalizationsTr extends AppLocalizations {
       'Arkadaş ekleyerek veya profilinizi paylaşarak bir sohbet başlatın.';
 
   @override
+  String get share => 'Paylaş';
+
+  @override
   String get shareYourProfile => 'Profilini paylaş';
 
   @override
@@ -632,6 +635,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String inviteToWhiteNoiseDescription(String name) {
     return '$name henüz White Noise\'da değil. Güvenli bir sohbet başlatmak için uygulamayı paylaşın.';
   }
+
+  @override
+  String get inviteMessage =>
+      'White Noise\'da bana katıl. Telefon numarası yok. Gözetim yok. Sadece gerçek gizlilik. Buradan indir: https://www.whitenoise.chat/download';
 
   @override
   String get failedToUpdateFollow => 'Takip durumu güncellenemedi. Lütfen tekrar deneyin.';
