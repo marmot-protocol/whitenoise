@@ -417,8 +417,8 @@ void main() {
       });
 
       testWidgets('tapping invite button calls SharePlus.instance.share with invite message', (
-          tester,
-          ) async {
+        tester,
+      ) async {
         final shareCalls = mockSharePlus();
         addTearDown(clearSharePlusMock);
         await pumpStartChatScreen(tester, userPubkey: _otherPubkey);

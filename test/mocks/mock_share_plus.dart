@@ -7,16 +7,20 @@ List<MethodCall> _shareCalls = [];
 
 List<MethodCall> mockSharePlus() {
   _shareCalls = [];
-  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-      .setMockMethodCallHandler(_sharePlusChannel, (call) async {
-    _shareCalls.add(call);
-    return null;
-  });
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+    _sharePlusChannel,
+    (call) async {
+      _shareCalls.add(call);
+      return null;
+    },
+  );
   return _shareCalls;
 }
 
 void clearSharePlusMock() {
-  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-      .setMockMethodCallHandler(_sharePlusChannel, null);
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+    _sharePlusChannel,
+    null,
+  );
   _shareCalls = [];
 }
