@@ -50,7 +50,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Mark messages as read [PR #316](https://github.com/marmot-protocol/whitenoise/pull/316)
 - Images in chat [PR #249](https://github.com/marmot-protocol/whitenoise/pull/249)
 - Show last message sender name in chat list[PR #322](https://github.com/marmot-protocol/whitenoise/pull/322)
+- Add to group from group member screen and start chat screen [PR #323](https://github.com/marmot-protocol/whitenoise/pull/323)
 ### Changed
+
+- Rename "Follow"/"Unfollow" buttons to "Add as contact"/"Remove as contact" [PR #323](https://github.com/marmot-protocol/whitenoise/pull/323)
 
 - Improve profile onboarding and account add flows: signup now pre-fills a generated display name with one-tap clear, and the "Add a new profile" slate is compact and bottom-anchored. [PR #313](https://github.com/marmot-protocol/whitenoise/pull/313)
 - Redesign chat info as a non-opaque over-chat slate matching Figma: updated action layout, refined spacing, lighter overlay blur, and header name/avatar tap navigation to chat info. [PR #303](https://github.com/marmot-protocol/whitenoise/pull/303)
