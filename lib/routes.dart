@@ -528,8 +528,10 @@ abstract final class Routes {
     );
   }
 
-  static void pushToChatInfo(BuildContext context, String userPubkey) {
-    GoRouter.of(context).pushNamed('chatInfo', pathParameters: {'userPubkey': userPubkey});
+  static Future<bool?> pushToChatInfo(BuildContext context, String userPubkey) {
+    return GoRouter.of(
+      context,
+    ).pushNamed<bool>('chatInfo', pathParameters: {'userPubkey': userPubkey});
   }
 
   static void pushToAddToGroup(BuildContext context, String userPubkey) {
