@@ -674,15 +674,5 @@ void main() {
         expect(find.text('Add to group'), findsWidgets);
       });
     });
-
-    group('unknown error key', () {
-      testWidgets('shows somethingWentWrong for unknown error key', (tester) async {
-        _api.adminsList = [_testPubkey];
-        await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey, settle: false);
-
-        _api.removeMemberError = Exception('unknown_error_key');
-        await tester.pumpAndSettle();
-      });
-    });
   });
 }

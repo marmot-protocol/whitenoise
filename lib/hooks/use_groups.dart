@@ -19,8 +19,10 @@ GroupsState useGroups({
   final groups = useState<List<groups_api.Group>>([]);
   final isLoading = useState(true);
   final error = useState<String?>(null);
+  final requestToken = useRef(0);
 
   Future<void> fetchGroups() async {
+    final token = ++requestToken.value;
     isLoading.value = true;
     error.value = null;
     try {
@@ -34,12 +36,16 @@ GroupsState useGroups({
         }
       }
 
+      if (token != requestToken.value) return;
       groups.value = nonDirectMessageGroups;
     } catch (e) {
+      if (token != requestToken.value) return;
       _logger.severe('Failed to fetch groups: $e');
       error.value = 'groupLoadError';
     } finally {
-      isLoading.value = false;
+      if (token == requestToken.value) {
+        isLoading.value = false;
+      }
     }
   }
 

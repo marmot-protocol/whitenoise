@@ -93,6 +93,7 @@ void main() {
   setUp(() => _api.reset());
 
   Future<void> pumpAddToGroupScreen(WidgetTester tester) async {
+    setUpTestView(tester);
     await mountTestApp(
       tester,
       overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
@@ -145,7 +146,7 @@ void main() {
       expect(find.text('Non-Admin Group'), findsNothing);
     });
 
-    testWidgets('shows loading indicator while fetching groups', (tester) async {
+    testWidgets('does not show loading indicator after groups are fetched', (tester) async {
       await pumpAddToGroupScreen(tester);
 
       expect(find.byType(CircularProgressIndicator), findsNothing);
