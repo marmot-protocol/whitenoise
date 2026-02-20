@@ -1370,6 +1370,15 @@ void main() {
         expect(find.text('1 of 2 matches'), findsOneWidget);
       });
 
+      testWidgets('does not show no messages text when search is active with no results', (
+        tester,
+      ) async {
+        await openSearch(tester);
+        await tester.enterText(find.byKey(const Key('chat_search_field')), 'zzznomatch');
+        await tester.pumpAndSettle();
+        expect(find.text('No messages yet'), findsNothing);
+      });
+
       testWidgets('closing search hides search bar', (tester) async {
         await openSearch(tester);
         expect(find.byKey(const Key('chat_search_bar')), findsOneWidget);

@@ -191,7 +191,7 @@ class ChatScreen extends HookConsumerWidget {
       messageListContent = Center(
         child: CircularProgressIndicator(color: colors.backgroundContentPrimary),
       );
-    } else if (displayCount == 0) {
+    } else if (displayCount == 0 && !isSearchActive.value) {
       messageListContent = Center(
         child: Text(
           context.l10n.noMessagesYet,
