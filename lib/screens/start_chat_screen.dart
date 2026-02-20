@@ -228,7 +228,7 @@ class StartChatScreen extends HookConsumerWidget {
                                 onPressed: () => SharePlus.instance.share(
                                   ShareParams(
                                     text: context.l10n.inviteMessage,
-                                  )
+                                  ),
                                 ),
                               ),
                             ),
