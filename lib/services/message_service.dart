@@ -30,7 +30,7 @@ class MessageService {
           )
         : <messages_api.Tag>[];
 
-    final mediaTags = await _buildMediaTags(mediaFiles);
+    final mediaTags = await _buildMediaTags(mediaFiles: mediaFiles);
     final allTags = [...replyTags, ...mediaTags];
 
     await messages_api.sendMessageToGroup(
@@ -173,28 +173,40 @@ class MessageService {
     ]);
   }
 
-  Future<List<messages_api.Tag>> _buildMediaTags(List<MediaFile> files) {
+  Future<List<messages_api.Tag>> _buildMediaTags({
+    required List<MediaFile> mediaFiles,
+  }) {
     return Future.wait(
-      files.map((f) {
-        final metadata = f.fileMetadata;
-        final parts = [
-          'imeta',
-          'url ${f.blossomUrl}',
-          'm ${f.mimeType}',
-          'filename ${metadata?.originalFilename ?? ''}',
-          'v mip04-v1',
-        ];
-        if (f.originalFileHash != null) {
-          parts.add('x ${f.originalFileHash}');
-        }
-        if (metadata?.blurhash != null) {
-          parts.add('blurhash ${metadata!.blurhash}');
-        }
-        if (metadata?.dimensions != null) {
-          parts.add('dim ${metadata!.dimensions}');
-        }
-        return utils_api.tagFromVec(vec: parts);
-      }),
+      mediaFiles.map((file) => _buildMediaTag(mediaFile: file)),
     );
+  }
+
+  // MIP-04: https://github.com/marmot-protocol/marmot/blob/master/04.md
+  Future<messages_api.Tag> _buildMediaTag({
+    required MediaFile mediaFile,
+  }) async {
+    final metadata = mediaFile.fileMetadata;
+    final tags = [
+      'imeta',
+      'url ${mediaFile.blossomUrl}',
+      'm ${mediaFile.mimeType}',
+      'filename ${metadata?.originalFilename ?? ''}',
+    ];
+    if (mediaFile.originalFileHash != null) {
+      tags.add('x ${mediaFile.originalFileHash}');
+    }
+    if (metadata?.blurhash != null) {
+      tags.add('blurhash ${metadata?.blurhash}');
+    }
+    if (metadata?.dimensions != null) {
+      tags.add('dim ${metadata?.dimensions}');
+    }
+    if (mediaFile.nonce != null) {
+      tags.add('n ${mediaFile.nonce!}');
+    }
+    if (mediaFile.schemeVersion != null) {
+      tags.add('v ${mediaFile.schemeVersion}');
+    }
+    return await utils_api.tagFromVec(vec: tags);
   }
 }

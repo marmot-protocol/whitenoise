@@ -569,6 +569,8 @@ void main() {
       String encryptedFileHash = 'abc123',
       String? originalFileHash = 'original123',
       FileMetadata? fileMetadata,
+      String? nonce,
+      String? schemeVersion,
     }) => MediaFile(
       id: id,
       mlsGroupId: testGroupId,
@@ -582,6 +584,8 @@ void main() {
       nostrKey: 'nostr123',
       fileMetadata: fileMetadata,
       createdAt: DateTime(2024),
+      nonce: nonce,
+      schemeVersion: schemeVersion,
     );
 
     test('sends message once', () async {
@@ -700,13 +704,13 @@ void main() {
         expect(tags[0].vec, contains('x original123'));
       });
 
-      test('includes version tag in imeta tag', () async {
-        final media = createMediaFile();
+      test('includes version tag in imeta tag when available', () async {
+        final media = createMediaFile(schemeVersion: 'mip04-v2');
 
         await service.sendMessage(content: 'With media', mediaFiles: [media]);
 
         final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
-        expect(tags[0].vec, contains('v mip04-v1'));
+        expect(tags[0].vec, contains('v mip04-v2'));
       });
 
       test('always includes filename in imeta tag', () async {
@@ -749,6 +753,24 @@ void main() {
 
         final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
         expect(tags[0].vec, contains('dim 1920x1080'));
+      });
+
+      test('includes nonce when available', () async {
+        final media = createMediaFile(nonce: 'nonce123');
+
+        await service.sendMessage(content: 'With media', mediaFiles: [media]);
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags[0].vec, contains('n nonce123'));
+      });
+
+      test('omits nonce when not available', () async {
+        final media = createMediaFile();
+
+        await service.sendMessage(content: 'With media', mediaFiles: [media]);
+
+        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
+        expect(tags[0].vec.any((s) => s.startsWith('n ')), isFalse);
       });
 
       test('sends multiple imeta tags for multiple media files', () async {
