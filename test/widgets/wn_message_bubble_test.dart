@@ -1,113 +1,87 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
-import 'package:whitenoise/src/rust/api/media_files.dart';
-import 'package:whitenoise/src/rust/api/messages.dart';
-import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
-import 'package:whitenoise/widgets/chat_message_media.dart';
-import 'package:whitenoise/widgets/chat_message_quote.dart';
+import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
-import 'package:whitenoise/widgets/wn_message_reactions.dart';
+import 'package:whitenoise/widgets/wn_reaction.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
-ChatMessageQuoteData _replyPreview({
-  String messageId = 'original-msg',
-  String authorPubkey = testPubkeyB,
-  FlutterMetadata? authorMetadata,
-  String content = 'Original message content',
-  MediaFile? mediaFile,
-  bool isNotFound = false,
-}) => (
-  messageId: messageId,
-  authorPubkey: authorPubkey,
-  authorMetadata:
-      authorMetadata ??
-      const FlutterMetadata(displayName: 'Original Author', name: 'author', custom: {}),
-  content: content,
-  mediaFile: mediaFile,
-  isNotFound: isNotFound,
-);
+const _avatarKey = Key('test_avatar');
 
-MediaFile _mediaFile(String id) => MediaFile(
-  id: id,
-  mlsGroupId: testGroupId,
-  accountPubkey: testPubkeyA,
-  filePath: '/test/path/$id.jpg',
-  originalFileHash: 'hash$id',
-  encryptedFileHash: 'encrypted$id',
-  mimeType: 'image/jpeg',
-  mediaType: 'image',
-  blossomUrl: 'https://example.com/$id',
-  nostrKey: 'nostr$id',
-  createdAt: DateTime(2024),
-);
-
-ChatMessage _message({
-  String content = 'Hello world',
-  bool isDeleted = false,
-  bool isReply = false,
-  String? replyToId,
-  ReactionSummary reactions = const ReactionSummary(byEmoji: [], userReactions: []),
-  List<MediaFile> mediaAttachments = const [],
-}) => ChatMessage(
-  id: 'msg1',
-  pubkey: testPubkeyA,
-  content: content,
-  createdAt: DateTime(2024),
-  tags: const [],
-  isReply: isReply,
-  replyToId: replyToId,
-  isDeleted: isDeleted,
-  contentTokens: const [],
-  reactions: reactions,
-  mediaAttachments: mediaAttachments,
-  kind: 9,
+Finder _findTail() => find.descendant(
+  of: find.byType(WnMessageBubble),
+  matching: find.byType(CustomPaint),
 );
 
 void main() {
   setUpAll(() => RustLib.initMock(api: MockWnApi()));
 
   group('WnMessageBubble', () {
-    testWidgets('displays message content', (tester) async {
+    testWidgets('displays content text', (tester) async {
       await mountWidget(
-        WnMessageBubble(message: _message(content: 'Test message'), isOwnMessage: false),
+        const WnMessageBubble(
+          direction: MessageDirection.incoming,
+          isDeleted: false,
+          content: 'Test message',
+        ),
         tester,
       );
 
       expect(find.text('Test message'), findsOneWidget);
     });
 
-    group('own message', () {
+    testWidgets('does not display text when content is null', (tester) async {
+      await mountWidget(
+        const WnMessageBubble(direction: MessageDirection.incoming, isDeleted: false),
+        tester,
+      );
+
+      expect(find.byType(Text), findsNothing);
+    });
+
+    testWidgets('does not display text when content is empty', (tester) async {
+      await mountWidget(
+        const WnMessageBubble(
+          direction: MessageDirection.incoming,
+          isDeleted: false,
+          content: '',
+        ),
+        tester,
+      );
+
+      expect(find.byType(Text), findsNothing);
+    });
+
+    group('outgoing message', () {
       testWidgets('aligns to the right', (tester) async {
         await mountWidget(
-          WnMessageBubble(message: _message(), isOwnMessage: true),
+          const WnMessageBubble(direction: MessageDirection.outgoing, isDeleted: false),
           tester,
         );
 
-        final align = tester.widget<Align>(find.byType(Align));
+        final align = tester.widget<Align>(find.byType(Align).first);
         expect(align.alignment, Alignment.centerRight);
       });
     });
 
-    group('other user message', () {
+    group('incoming message', () {
       testWidgets('aligns to the left', (tester) async {
         await mountWidget(
-          WnMessageBubble(message: _message(), isOwnMessage: false),
+          const WnMessageBubble(direction: MessageDirection.incoming, isDeleted: false),
           tester,
         );
 
-        final align = tester.widget<Align>(find.byType(Align));
+        final align = tester.widget<Align>(find.byType(Align).first);
         expect(align.alignment, Alignment.centerLeft);
       });
     });
 
     group('deleted message', () {
-      testWidgets('renders nothing', (tester) async {
+      testWidgets('renders nothing when deleted', (tester) async {
         await mountWidget(
-          WnMessageBubble(message: _message(isDeleted: true), isOwnMessage: false),
+          const WnMessageBubble(direction: MessageDirection.incoming, isDeleted: true),
           tester,
         );
 
@@ -120,8 +94,8 @@ void main() {
         var called = false;
         await mountWidget(
           WnMessageBubble(
-            message: _message(),
-            isOwnMessage: false,
+            direction: MessageDirection.incoming,
+            isDeleted: false,
             onLongPress: () => called = true,
           ),
           tester,
@@ -136,66 +110,78 @@ void main() {
     group('reactions', () {
       testWidgets('does not show reactions when empty', (tester) async {
         await mountWidget(
-          WnMessageBubble(message: _message(), isOwnMessage: false),
+          const WnMessageBubble(direction: MessageDirection.incoming, isDeleted: false),
           tester,
         );
 
-        expect(find.byType(WnMessageReactions), findsNothing);
+        expect(find.byType(WnReaction), findsNothing);
       });
 
-      testWidgets('shows reactions when present', (tester) async {
-        final reactions = ReactionSummary(
-          byEmoji: [
-            EmojiReaction(
-              emoji: '👍',
-              count: BigInt.from(2),
-              users: const [testPubkeyC, testPubkeyD],
-            ),
-          ],
-          userReactions: const [],
-        );
-        await mountWidget(
-          WnMessageBubble(message: _message(reactions: reactions), isOwnMessage: false),
-          tester,
-        );
-
-        expect(find.byType(WnMessageReactions), findsOneWidget);
-        expect(find.text('👍'), findsOneWidget);
-      });
-
-      testWidgets('passes currentUserPubkey to reactions', (tester) async {
-        final reactions = ReactionSummary(
-          byEmoji: [
-            EmojiReaction(emoji: '👍', count: BigInt.one, users: const [testPubkeyB]),
-          ],
-          userReactions: const [],
-        );
+      testWidgets('shows one WnReaction per reaction', (tester) async {
+        final reactions = [
+          EmojiReaction(emoji: '👍', count: BigInt.from(2), users: const [testPubkeyC]),
+          EmojiReaction(emoji: '❤️', count: BigInt.one, users: const [testPubkeyD]),
+        ];
         await mountWidget(
           WnMessageBubble(
-            message: _message(reactions: reactions),
-            isOwnMessage: false,
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            reactions: reactions,
+          ),
+          tester,
+        );
+
+        expect(find.byType(WnReaction), findsNWidgets(2));
+        expect(find.text('👍'), findsOneWidget);
+        expect(find.text('❤️'), findsOneWidget);
+      });
+
+      testWidgets('marks reaction as selected when currentUserPubkey is in users', (tester) async {
+        final reactions = [
+          EmojiReaction(emoji: '👍', count: BigInt.one, users: const [testPubkeyB]),
+        ];
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            reactions: reactions,
             currentUserPubkey: testPubkeyB,
           ),
           tester,
         );
 
-        final reactionBubbles = tester.widget<WnMessageReactions>(find.byType(WnMessageReactions));
-        expect(reactionBubbles.currentUserPubkey, testPubkeyB);
+        final widget = tester.widget<WnReaction>(find.byType(WnReaction));
+        expect(widget.isSelected, isTrue);
       });
 
-      testWidgets('passes onReaction to reactions', (tester) async {
-        final reactions = ReactionSummary(
-          byEmoji: [
-            EmojiReaction(emoji: '👍', count: BigInt.one, users: const [testPubkeyC]),
-          ],
-          userReactions: const [],
+      testWidgets('reaction is not selected when currentUserPubkey not in users', (tester) async {
+        final reactions = [
+          EmojiReaction(emoji: '👍', count: BigInt.one, users: const [testPubkeyC]),
+        ];
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            reactions: reactions,
+            currentUserPubkey: testPubkeyB,
+          ),
+          tester,
         );
+
+        final widget = tester.widget<WnReaction>(find.byType(WnReaction));
+        expect(widget.isSelected, isFalse);
+      });
+
+      testWidgets('tapping reaction calls onReaction with emoji', (tester) async {
+        final reactions = [
+          EmojiReaction(emoji: '👍', count: BigInt.one, users: const [testPubkeyC]),
+        ];
         String? tappedEmoji;
         await mountWidget(
           WnMessageBubble(
-            message: _message(reactions: reactions),
-            isOwnMessage: false,
-            currentUserPubkey: testPubkeyB,
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            reactions: reactions,
             onReaction: (emoji) => tappedEmoji = emoji,
           ),
           tester,
@@ -206,243 +192,688 @@ void main() {
 
         expect(tappedEmoji, '👍');
       });
+
+      testWidgets('uses outgoing type for outgoing direction', (tester) async {
+        final reactions = [
+          EmojiReaction(emoji: '👍', count: BigInt.one, users: const []),
+        ];
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            reactions: reactions,
+          ),
+          tester,
+        );
+
+        final widget = tester.widget<WnReaction>(find.byType(WnReaction));
+        expect(widget.type, WnReactionType.outgoing);
+      });
+
+      testWidgets('uses incoming type for incoming direction', (tester) async {
+        final reactions = [
+          EmojiReaction(emoji: '👍', count: BigInt.one, users: const []),
+        ];
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            reactions: reactions,
+          ),
+          tester,
+        );
+
+        final widget = tester.widget<WnReaction>(find.byType(WnReaction));
+        expect(widget.type, WnReactionType.incoming);
+      });
     });
 
-    group('reply preview', () {
-      testWidgets('shows reply preview when replyPreview is provided', (tester) async {
+    group('replyContent', () {
+      testWidgets('shows reply widget when replyContent is provided', (tester) async {
         await mountWidget(
-          WnMessageBubble(
-            message: _message(isReply: true, replyToId: 'original-msg'),
-            isOwnMessage: false,
-            replyPreview: _replyPreview(),
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            replyContent: Text('reply widget'),
           ),
           tester,
         );
 
-        expect(find.byType(ChatMessageQuote), findsOneWidget);
-        expect(find.text('Original Author'), findsOneWidget);
-        expect(find.text('Original message content'), findsOneWidget);
+        expect(find.text('reply widget'), findsOneWidget);
       });
 
-      testWidgets('hides reply preview when replyPreview is null', (tester) async {
+      testWidgets('does not show reply area when replyContent is null', (tester) async {
         await mountWidget(
-          WnMessageBubble(
-            message: _message(isReply: true, replyToId: 'original-msg'),
-            isOwnMessage: false,
-          ),
-          tester,
-        );
-
-        expect(find.byType(ChatMessageQuote), findsNothing);
-      });
-
-      testWidgets('hides reply preview when replyPreview is null even with isReply', (
-        tester,
-      ) async {
-        await mountWidget(
-          WnMessageBubble(
-            message: _message(),
-            isOwnMessage: false,
-          ),
-          tester,
-        );
-
-        expect(find.byType(ChatMessageQuote), findsNothing);
-      });
-
-      testWidgets('shows reply preview with author from metadata', (tester) async {
-        await mountWidget(
-          WnMessageBubble(
-            message: _message(isReply: true, replyToId: 'original-msg'),
-            isOwnMessage: false,
-            replyPreview: _replyPreview(
-              authorMetadata: const FlutterMetadata(
-                displayName: 'Custom Author',
-                name: 'custom',
-                custom: {},
-              ),
-            ),
-          ),
-          tester,
-        );
-
-        expect(find.byType(ChatMessageQuote), findsOneWidget);
-        expect(find.text('Custom Author'), findsOneWidget);
-      });
-
-      testWidgets('reply preview does not have cancel button', (tester) async {
-        await mountWidget(
-          WnMessageBubble(
-            message: _message(isReply: true, replyToId: 'original-msg'),
-            isOwnMessage: false,
-            replyPreview: _replyPreview(),
-          ),
+          const WnMessageBubble(direction: MessageDirection.incoming, isDeleted: false),
           tester,
         );
 
         expect(find.byKey(const Key('cancel_quote_button')), findsNothing);
       });
+    });
 
-      testWidgets('passes onReplyTap to ChatMessageQuote', (tester) async {
-        var tapCalled = false;
+    group('mediaContent', () {
+      testWidgets('shows media widget when mediaContent is provided', (tester) async {
         await mountWidget(
-          WnMessageBubble(
-            message: _message(isReply: true, replyToId: 'original-msg'),
-            isOwnMessage: false,
-            replyPreview: _replyPreview(),
-            onReplyTap: () => tapCalled = true,
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            mediaContent: SizedBox(key: Key('media_widget'), width: 100, height: 100),
           ),
           tester,
         );
 
-        await tester.tap(find.byKey(const Key('message_quote_tap_area')));
-        await tester.pumpAndSettle();
-
-        expect(tapCalled, isTrue);
+        expect(find.byKey(const Key('media_widget')), findsOneWidget);
       });
 
-      testWidgets('no tap area when onReplyTap is null', (tester) async {
+      testWidgets('does not show media area when mediaContent is null', (tester) async {
         await mountWidget(
-          WnMessageBubble(
-            message: _message(isReply: true, replyToId: 'original-msg'),
-            isOwnMessage: false,
-            replyPreview: _replyPreview(),
+          const WnMessageBubble(direction: MessageDirection.incoming, isDeleted: false),
+          tester,
+        );
+
+        expect(find.byKey(const Key('media_widget')), findsNothing);
+      });
+
+      testWidgets('shows both media and content text when both provided', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Caption',
+            mediaContent: SizedBox(key: Key('media_widget'), width: 100, height: 100),
           ),
           tester,
         );
 
-        expect(find.byKey(const Key('message_quote_tap_area')), findsNothing);
+        expect(find.byKey(const Key('media_widget')), findsOneWidget);
+        expect(find.text('Caption'), findsOneWidget);
+      });
+
+      testWidgets('does not show text when content is empty but media present', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: '',
+            mediaContent: SizedBox(key: Key('media_widget'), width: 100, height: 100),
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('media_widget')), findsOneWidget);
+        expect(find.text(''), findsNothing);
       });
     });
 
-    group('maxWidth', () {
+    group('max bubble width', () {
+      // Viewport = 390px, column = viewport − 20px = 370px, max = 80% of 370 = 296px.
+      const expectedMaxWidth = (390 - 20) * 0.8;
+
       Finder findBubbleConstrainedBox() => find.descendant(
         of: find.byType(WnMessageBubble),
         matching: find.byType(ConstrainedBox),
       );
 
-      testWidgets('defaults to 3/4 of screen width', (tester) async {
+      testWidgets('is 80% of (viewport − 20px)', (tester) async {
         await mountWidget(
-          WnMessageBubble(message: _message(), isOwnMessage: false),
+          const WnMessageBubble(direction: MessageDirection.incoming, isDeleted: false),
           tester,
         );
 
         final constrainedBox = tester.widget<ConstrainedBox>(
           findBubbleConstrainedBox().first,
         );
-        expect(constrainedBox.constraints.maxWidth, 390 * 0.75);
-      });
-
-      testWidgets('uses explicit maxWidth when provided', (tester) async {
-        await mountWidget(
-          WnMessageBubble(message: _message(), isOwnMessage: false, maxWidth: 200),
-          tester,
-        );
-
-        final constrainedBox = tester.widget<ConstrainedBox>(
-          findBubbleConstrainedBox().first,
-        );
-        expect(constrainedBox.constraints.maxWidth, 200);
-      });
-
-      testWidgets('allows full width when maxWidth is infinity', (tester) async {
-        await mountWidget(
-          WnMessageBubble(
-            message: _message(),
-            isOwnMessage: false,
-            maxWidth: double.infinity,
-          ),
-          tester,
-        );
-
-        final constrainedBox = tester.widget<ConstrainedBox>(
-          findBubbleConstrainedBox().first,
-        );
-        expect(constrainedBox.constraints.maxWidth, double.infinity);
+        expect(constrainedBox.constraints.maxWidth, expectedMaxWidth);
       });
     });
 
-    group('media attachments', () {
-      testWidgets('shows media grid when mediaAttachments is not empty', (tester) async {
+    group('timestamp', () {
+      testWidgets('renders timestamp string when provided with text', (tester) async {
         await mountWidget(
-          WnMessageBubble(
-            message: _message(mediaAttachments: [_mediaFile('1')]),
-            isOwnMessage: false,
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+            timestamp: '12:29',
           ),
           tester,
         );
 
-        expect(find.byKey(const Key('message_media')), findsOneWidget);
-        expect(find.byType(ChatMessageMedia), findsOneWidget);
+        expect(find.text('12:29'), findsOneWidget);
       });
 
-      testWidgets('does not show media grid when mediaAttachments is empty', (tester) async {
+      testWidgets('renders timestamp standalone when no text content', (tester) async {
         await mountWidget(
-          WnMessageBubble(message: _message(), isOwnMessage: false),
-          tester,
-        );
-
-        expect(find.byKey(const Key('message_media')), findsNothing);
-        expect(find.byType(ChatMessageMedia), findsNothing);
-      });
-
-      testWidgets('shows both media and text when both present', (tester) async {
-        await mountWidget(
-          WnMessageBubble(
-            message: _message(
-              content: 'Caption text',
-              mediaAttachments: [_mediaFile('1')],
-            ),
-            isOwnMessage: false,
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            timestamp: '12:29',
           ),
           tester,
         );
 
-        expect(find.byType(ChatMessageMedia), findsOneWidget);
-        expect(find.text('Caption text'), findsOneWidget);
+        expect(find.text('12:29'), findsOneWidget);
       });
 
-      testWidgets('hides message text when content is empty', (tester) async {
+      testWidgets('no timestamp rendered when not provided', (tester) async {
         await mountWidget(
-          WnMessageBubble(
-            message: _message(
-              content: '',
-              mediaAttachments: [_mediaFile('1')],
-            ),
-            isOwnMessage: false,
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
           ),
           tester,
         );
 
-        expect(find.byType(ChatMessageMedia), findsOneWidget);
-        expect(find.text(''), findsNothing);
+        expect(find.text('12:29'), findsNothing);
       });
+    });
 
-      testWidgets('media grid has onMediaTap callback configured', (tester) async {
+    group('chat status', () {
+      testWidgets('shows status icon for outgoing bubble with timestamp', (tester) async {
         await mountWidget(
-          WnMessageBubble(
-            message: _message(mediaAttachments: [_mediaFile('1')]),
-            isOwnMessage: false,
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            content: 'Hello',
+            timestamp: '12:00',
           ),
           tester,
         );
 
-        final mediaGrid = tester.widget<ChatMessageMedia>(find.byType(ChatMessageMedia));
-        expect(mediaGrid.onMediaTap, isNotNull);
+        expect(find.byKey(const Key('chat_status_icon')), findsOneWidget);
+        expect(find.byType(WnChatStatus), findsOneWidget);
       });
 
-      testWidgets('accepts senderName and senderPictureUrl', (tester) async {
+      testWidgets('status icon appears to the right of the timestamp text', (tester) async {
         await mountWidget(
-          WnMessageBubble(
-            message: _message(mediaAttachments: [_mediaFile('1')]),
-            isOwnMessage: false,
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            content: 'Hello',
+            timestamp: '12:00',
+          ),
+          tester,
+        );
+
+        final timestampPos = tester.getTopRight(find.text('12:00'));
+        final statusPos = tester.getTopLeft(find.byKey(const Key('chat_status_icon')));
+        expect(statusPos.dx, greaterThan(timestampPos.dx));
+      });
+
+      testWidgets('does not show status icon for incoming bubble with timestamp', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+            timestamp: '12:00',
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('chat_status_icon')), findsNothing);
+        expect(find.byType(WnChatStatus), findsNothing);
+      });
+
+      testWidgets('does not show status icon for outgoing bubble without timestamp', (
+        tester,
+      ) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('chat_status_icon')), findsNothing);
+        expect(find.byType(WnChatStatus), findsNothing);
+      });
+
+      testWidgets('shows status icon for outgoing with timestamp only', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            timestamp: '12:00',
+          ),
+          tester,
+        );
+
+        expect(find.byType(WnChatStatus), findsOneWidget);
+      });
+
+      testWidgets('does not show status icon for incoming with timestamp only', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            timestamp: '12:00',
+          ),
+          tester,
+        );
+
+        expect(find.byType(WnChatStatus), findsNothing);
+      });
+    });
+
+    group('leadingVariant', () {
+      testWidgets('none variant applies no left indent', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        final padding = tester.widget<Padding>(
+          find.descendant(of: find.byType(WnMessageBubble), matching: find.byType(Padding)).first,
+        );
+        expect(padding.padding.resolve(TextDirection.ltr).left, 0.0);
+      });
+
+      testWidgets('tail variant applies tail-overhang left indent', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+            leadingVariant: BubbleLeadingVariant.tail,
+          ),
+          tester,
+        );
+
+        final padding = tester.widget<Padding>(
+          find.descendant(of: find.byType(WnMessageBubble), matching: find.byType(Padding)).first,
+        );
+        expect(padding.padding.resolve(TextDirection.ltr).left, greaterThan(0));
+      });
+
+      testWidgets('avatar variant applies larger left indent than tail', (tester) async {
+        late double tailIndent;
+        late double avatarIndent;
+
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+            leadingVariant: BubbleLeadingVariant.tail,
+          ),
+          tester,
+        );
+        tailIndent = tester
+            .widget<Padding>(
+              find
+                  .descendant(of: find.byType(WnMessageBubble), matching: find.byType(Padding))
+                  .first,
+            )
+            .padding
+            .resolve(TextDirection.ltr)
+            .left;
+
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+            leadingVariant: BubbleLeadingVariant.avatar,
+          ),
+          tester,
+        );
+        avatarIndent = tester
+            .widget<Padding>(
+              find
+                  .descendant(of: find.byType(WnMessageBubble), matching: find.byType(Padding))
+                  .first,
+            )
+            .padding
+            .resolve(TextDirection.ltr)
+            .left;
+
+        expect(avatarIndent, greaterThan(tailIndent));
+      });
+    });
+
+    group('bottom spacing', () {
+      Finder findOuterPadding() => find.descendant(
+        of: find.byType(WnMessageBubble),
+        matching: find.byType(Padding),
+      );
+
+      testWidgets('applies 12h bottom margin when showTail is true', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            showTail: true,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        final outer = tester.widget<Padding>(findOuterPadding().first);
+        expect(outer.padding.resolve(TextDirection.ltr).bottom, greaterThan(0));
+      });
+
+      testWidgets('applies smaller bottom margin when showTail is false', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        final outer = tester.widget<Padding>(findOuterPadding().first);
+        expect(outer.padding.resolve(TextDirection.ltr).bottom, greaterThan(0));
+      });
+
+      testWidgets('tailed bubble has larger bottom margin than tailless', (tester) async {
+        double bottomWithTail = 0;
+        double bottomWithoutTail = 0;
+
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            showTail: true,
+            content: 'Hello',
+          ),
+          tester,
+        );
+        bottomWithTail = tester
+            .widget<Padding>(findOuterPadding().first)
+            .padding
+            .resolve(TextDirection.ltr)
+            .bottom;
+
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+          ),
+          tester,
+        );
+        bottomWithoutTail = tester
+            .widget<Padding>(findOuterPadding().first)
+            .padding
+            .resolve(TextDirection.ltr)
+            .bottom;
+
+        expect(bottomWithTail, greaterThan(bottomWithoutTail));
+      });
+    });
+
+    group('tail', () {
+      testWidgets('renders tail for incoming when showTail is true', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            showTail: true,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        expect(_findTail(), findsOneWidget);
+      });
+
+      testWidgets('renders tail for outgoing when showTail is true', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            showTail: true,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        expect(_findTail(), findsOneWidget);
+      });
+
+      testWidgets('does not render tail when showTail is false', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        expect(_findTail(), findsNothing);
+      });
+      testWidgets('incoming with tail squares bottom-left corner', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            showTail: true,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        final container = tester.widget<Container>(
+          find.descendant(of: find.byType(WnMessageBubble), matching: find.byType(Container)).first,
+        );
+        final radius = (container.decoration! as BoxDecoration).borderRadius! as BorderRadius;
+        expect(radius.bottomLeft, Radius.zero);
+        expect(radius.bottomRight, isNot(Radius.zero));
+        expect(radius.topLeft, isNot(Radius.zero));
+        expect(radius.topRight, isNot(Radius.zero));
+      });
+
+      testWidgets('outgoing with tail squares bottom-right corner', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            showTail: true,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        final container = tester.widget<Container>(
+          find.descendant(of: find.byType(WnMessageBubble), matching: find.byType(Container)).first,
+        );
+        final radius = (container.decoration! as BoxDecoration).borderRadius! as BorderRadius;
+        expect(radius.bottomRight, Radius.zero);
+        expect(radius.bottomLeft, isNot(Radius.zero));
+        expect(radius.topLeft, isNot(Radius.zero));
+        expect(radius.topRight, isNot(Radius.zero));
+      });
+
+      testWidgets('no tail keeps all corners rounded', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        final container = tester.widget<Container>(
+          find.descendant(of: find.byType(WnMessageBubble), matching: find.byType(Container)).first,
+        );
+        final radius = (container.decoration! as BoxDecoration).borderRadius! as BorderRadius;
+        expect(radius.bottomLeft, isNot(Radius.zero));
+        expect(radius.bottomRight, isNot(Radius.zero));
+        expect(radius.topLeft, isNot(Radius.zero));
+        expect(radius.topRight, isNot(Radius.zero));
+      });
+
+      testWidgets('does not render tail when deleted', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: true,
+            showTail: true,
+          ),
+          tester,
+        );
+
+        expect(_findTail(), findsNothing);
+      });
+
+      testWidgets('outgoing with tail has right overhang padding', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            showTail: true,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        final padding = tester.widget<Padding>(
+          find.ancestor(of: find.byType(IntrinsicWidth), matching: find.byType(Padding)).first,
+        );
+        expect(padding.padding.resolve(TextDirection.ltr).right, greaterThan(0));
+      });
+
+      testWidgets('outgoing without tail has no right overhang padding', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        final padding = tester.widget<Padding>(
+          find.ancestor(of: find.byType(IntrinsicWidth), matching: find.byType(Padding)).first,
+        );
+        expect(padding.padding.resolve(TextDirection.ltr).right, 0.0);
+      });
+    });
+
+    group('avatar and sender name', () {
+      testWidgets('renders avatar widget for incoming with avatar', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+            avatar: SizedBox(key: _avatarKey, width: 36, height: 36),
+          ),
+          tester,
+        );
+
+        expect(find.byKey(_avatarKey), findsOneWidget);
+      });
+
+      testWidgets('does not render avatar for outgoing even if avatar provided', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            content: 'Hello',
+            avatar: SizedBox(key: _avatarKey, width: 36, height: 36),
+          ),
+          tester,
+        );
+
+        expect(find.byKey(_avatarKey), findsNothing);
+      });
+
+      testWidgets('renders sender name when provided for incoming', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+            senderName: 'Trent Reznor',
+          ),
+          tester,
+        );
+
+        expect(find.text('Trent Reznor'), findsOneWidget);
+      });
+
+      testWidgets('does not render sender name for outgoing', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            content: 'Hello',
+            senderName: 'Trent Reznor',
+          ),
+          tester,
+        );
+
+        expect(find.text('Trent Reznor'), findsNothing);
+      });
+
+      testWidgets('does not render sender name when null', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('bubble_avatar_row')), findsNothing);
+      });
+
+      testWidgets('wraps in Row when avatar is provided for incoming', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+            avatar: SizedBox(key: _avatarKey, width: 36, height: 36),
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('bubble_avatar_row')), findsOneWidget);
+      });
+
+      testWidgets('no Row wrapper when no avatar', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('bubble_avatar_row')), findsNothing);
+      });
+
+      testWidgets('applies senderNameColor to sender name text', (tester) async {
+        const nameColor = Color(0xFFFF0000);
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
             senderName: 'Alice',
-            senderPictureUrl: 'https://example.com/avatar.jpg',
+            senderNameColor: nameColor,
           ),
           tester,
         );
 
-        expect(find.byType(ChatMessageMedia), findsOneWidget);
+        final nameText = tester.widget<Text>(find.text('Alice'));
+        expect(nameText.style?.color, nameColor);
       });
     });
   });
