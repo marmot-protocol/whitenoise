@@ -151,7 +151,9 @@ void main() {
       expect(cancelNotificationsCalls, ['group123']);
     });
 
-    testWidgets('clears active chat on unmount', (tester) async {
+    testWidgets('does not clear active chat on unmount to prevent navigation race condition', (
+      tester,
+    ) async {
       await mountHook(tester, () {
         useActiveChat(
           groupId: 'group123',
@@ -169,7 +171,7 @@ void main() {
       await tester.pump();
 
       expect(setActiveChatCalls, isEmpty);
-      expect(clearActiveChatCallCount, 1);
+      expect(clearActiveChatCallCount, 0);
     });
   });
 }

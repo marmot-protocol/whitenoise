@@ -14,7 +14,7 @@ void useActiveChat({
       setActiveChat(groupId);
       cancelGroupNotifications(groupId);
     });
-    return () => Future.microtask(clearActiveChat);
+    return null;
   }, [groupId]);
 
   useOnAppLifecycleStateChange((previous, current) {
