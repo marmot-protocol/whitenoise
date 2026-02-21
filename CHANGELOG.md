@@ -95,5 +95,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Sanitize malformed UTF-16 in user metadata to prevent rendering crashes [PR #234](https://github.com/marmot-protocol/whitenoise/pull/234)
 - Lock app orientation to portrait mode [PR #235](https://github.com/marmot-protocol/whitenoise/pull/235)
 - Fix camera permission flow [PR #194](https://github.com/marmot-protocol/sloth/pull/194)
+- Fix notifications arriving on foreground after accepting invite [PR #361](https://github.com/marmot-protocol/whitenoise/pull/361)
 
 ### Security
