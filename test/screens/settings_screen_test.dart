@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/appearance_screen.dart';
@@ -57,6 +58,13 @@ void main() {
   setUpAll(() {
     mockApi = _MockApi();
     RustLib.initMock(api: mockApi);
+    PackageInfo.setMockInitialValues(
+      appName: 'Whitenoise',
+      packageName: 'com.example.whitenoise',
+      version: '1.2.3',
+      buildNumber: '42',
+      buildSignature: '',
+    );
   });
 
   setUp(() {
@@ -205,6 +213,14 @@ void main() {
 
       final avatar = tester.widget<WnAvatar>(find.byType(WnAvatar));
       expect(avatar.color, AvatarColor.cyan);
+    });
+
+    testWidgets('displays app version at the bottom', (tester) async {
+      await pumpSettingsScreen(tester);
+      await tester.pump();
+
+      expect(find.byKey(const Key('app_version_text')), findsOneWidget);
+      expect(find.text('v1.2.3'), findsOneWidget);
     });
   });
 }

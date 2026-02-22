@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:whitenoise/hooks/use_app_version.dart';
 import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
@@ -26,6 +27,7 @@ class SettingsScreen extends HookConsumerWidget {
     final typography = context.typographyScaled;
     final pubkey = ref.watch(authProvider).value;
     final metadataSnapshot = useUserMetadata(context, pubkey);
+    final versionSnapshot = useAppVersion();
 
     if (pubkey == null) {
       return const SizedBox.shrink();
@@ -163,6 +165,18 @@ class SettingsScreen extends HookConsumerWidget {
                       ),
                     ],
                   ),
+                  if (versionSnapshot.hasData)
+                    SizedBox(
+                      width: double.infinity,
+                      child: Text(
+                        key: const Key('app_version_text'),
+                        'v${versionSnapshot.data}',
+                        textAlign: TextAlign.center,
+                        style: typography.medium12.copyWith(
+                          color: colors.backgroundContentSecondary,
+                        ),
+                      ),
+                    ),
                 ],
               ),
             ),
