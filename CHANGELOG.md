@@ -55,6 +55,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Search messages in chat with match navigation [PR #355](https://github.com/marmot-protocol/whitenoise/pull/355)
 - Add to group button in chat info screen navigates to add to group screen [PR #355](https://github.com/marmot-protocol/whitenoise/pull/355)
 - Invite to White Noise [PR #354](https://github.com/marmot-protocol/whitenoise/pull/354)
+- Add missing translations for switch profile screen [PR #368](https://github.com/marmot-protocol/whitenoise/pull/368)
 
 ### Changed
 
