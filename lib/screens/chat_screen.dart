@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -91,6 +92,7 @@ class ChatScreen extends HookConsumerWidget {
     final isSearchActive = useState(false);
     final searchQuery = useState('');
     final searchController = useTextEditingController();
+    final inputAreaHeight = useState(0.0);
 
     void showNotice(String message) {
       noticeMessage.value = message;
@@ -181,8 +183,10 @@ class ChatScreen extends HookConsumerWidget {
     }
 
     final safeAreaTop = MediaQuery.of(context).padding.top;
+    final safeAreaBottom = MediaQuery.of(context).padding.bottom;
     final searchBarHeight = isSearchActive.value ? _searchBarHeight.h : 0.0;
     final slateTopPadding = safeAreaTop + _slateHeight.h + searchBarHeight;
+    final listBottomPadding = inputAreaHeight.value + safeAreaBottom + 12.h;
 
     final allMessages = List.generate(messageCount, getMessage);
     final displayMessages = isSearchActive.value
@@ -214,7 +218,7 @@ class ChatScreen extends HookConsumerWidget {
         child: ListView.builder(
           controller: scrollController,
           reverse: true,
-          padding: EdgeInsets.fromLTRB(10.w, slateTopPadding + 8.h, 10.w, 12.h),
+          padding: EdgeInsets.fromLTRB(10.w, slateTopPadding + 8.h, 10.w, listBottomPadding),
           itemCount: displayCount,
           findChildIndexCallback: displayMessages == null
               ? (key) {
@@ -280,160 +284,165 @@ class ChatScreen extends HookConsumerWidget {
         onTap: () => FocusScope.of(context).unfocus(),
         child: Scaffold(
           backgroundColor: colors.backgroundPrimary,
-          body: Column(
+          body: Stack(
             children: [
-              Expanded(
-                child: Stack(
+              messageListContent,
+              WnScrollEdgeEffect.canvasTop(
+                color: colors.backgroundPrimary,
+                height: slateTopPadding,
+              ),
+              WnScrollEdgeEffect.canvasBottom(
+                color: colors.backgroundPrimary,
+                height: inputAreaHeight.value + safeAreaBottom + 48.h,
+              ),
+              if (noticeMessage.value != null)
+                Positioned(
+                  top: safeAreaTop,
+                  left: 0,
+                  right: 0,
+                  child: WnSystemNotice(
+                    key: ValueKey(noticeMessage.value),
+                    title: noticeMessage.value!,
+                    type: WnSystemNoticeType.error,
+                    onDismiss: dismissNotice,
+                  ),
+                ),
+              SafeArea(
+                bottom: false,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
-                    messageListContent,
-                    WnScrollEdgeEffect.canvasTop(
-                      color: colors.backgroundPrimary,
-                      height: slateTopPadding,
+                    WnSlate(
+                      header: WnSlateChatHeader(
+                        displayName: chatProfile.data?.displayName ?? '',
+                        avatarColor: chatProfile.data?.color ?? AvatarColor.neutral,
+                        pictureUrl: chatProfile.data?.pictureUrl,
+                        onBack: isSearchActive.value
+                            ? closeSearch
+                            : () => Routes.goToChatList(context),
+                        onAvatarTap: () async {
+                          final otherPubkey = chatProfile.data?.otherMemberPubkey;
+                          if (otherPubkey != null) {
+                            final result = await Routes.pushToChatInfo(context, otherPubkey);
+                            if (result == true) openSearch();
+                          } else {
+                            Routes.pushToGroupInfo(context, groupId);
+                          }
+                        },
+                      ),
                     ),
-                    WnScrollEdgeEffect.canvasBottom(
-                      color: colors.backgroundPrimary,
-                      height: 20.h,
-                    ),
-                    if (noticeMessage.value != null)
-                      Positioned(
-                        top: safeAreaTop,
-                        left: 0,
-                        right: 0,
-                        child: WnSystemNotice(
-                          key: ValueKey(noticeMessage.value),
-                          title: noticeMessage.value!,
-                          type: WnSystemNoticeType.error,
-                          onDismiss: dismissNotice,
+                    if (isSearchActive.value) ...[
+                      Padding(
+                        key: const Key('chat_search_bar'),
+                        padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
+                        child: WnSearchField(
+                          key: const Key('chat_search_field'),
+                          placeholder: context.l10n.search,
+                          controller: searchController,
+                          autofocus: true,
+                          onChanged: (value) => searchQuery.value = value,
                         ),
                       ),
-                    SafeArea(
-                      bottom: false,
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          WnSlate(
-                            header: WnSlateChatHeader(
-                              displayName: chatProfile.data?.displayName ?? '',
-                              avatarColor: chatProfile.data?.color ?? AvatarColor.neutral,
-                              pictureUrl: chatProfile.data?.pictureUrl,
-                              onBack: isSearchActive.value
-                                  ? closeSearch
-                                  : () => Routes.goToChatList(context),
-                              onAvatarTap: () async {
-                                final otherPubkey = chatProfile.data?.otherMemberPubkey;
-                                if (otherPubkey != null) {
-                                  final result = await Routes.pushToChatInfo(context, otherPubkey);
-                                  if (result == true) openSearch();
-                                } else {
-                                  Routes.pushToGroupInfo(context, groupId);
-                                }
-                              },
-                            ),
-                          ),
-                          if (isSearchActive.value) ...[
-                            Padding(
-                              key: const Key('chat_search_bar'),
-                              padding: EdgeInsets.fromLTRB(16.w, 16.h, 16.w, 0),
-                              child: WnSearchField(
-                                key: const Key('chat_search_field'),
-                                placeholder: context.l10n.search,
-                                controller: searchController,
-                                autofocus: true,
-                                onChanged: (value) => searchQuery.value = value,
-                              ),
-                            ),
-                            if (searchQuery.value.isNotEmpty)
-                              Padding(
-                                key: const Key('chat_search_navigation'),
-                                padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 8.h),
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    IconButton(
-                                      key: const Key('chat_search_prev_button'),
-                                      onPressed: displayCount == 0
-                                          ? null
-                                          : () {
-                                              final next =
-                                                  (currentMatchIndex.value - 1 + displayCount) %
-                                                  displayCount;
-                                              currentMatchIndex.value = next;
-                                              scrollController.scrollToIndex(
-                                                displayCount - 1 - next,
-                                                preferPosition: AutoScrollPosition.middle,
-                                              );
-                                            },
-                                      icon: WnIcon(
-                                        WnIcons.chevronUp,
-                                        size: 18.sp,
-                                        color: displayCount == 0
-                                            ? colors.backgroundContentTertiary
-                                            : colors.backgroundContentSecondary,
-                                      ),
-                                    ),
-                                    Text(
-                                      displayCount == 0
-                                          ? context.l10n.noResults
-                                          : context.l10n.chatSearchMatchCount(
-                                              currentMatchIndex.value + 1,
-                                              displayCount,
-                                            ),
-                                      key: const Key('chat_search_match_count'),
-                                      style: typography.medium14.copyWith(
-                                        color: colors.backgroundContentSecondary,
-                                      ),
-                                    ),
-                                    IconButton(
-                                      key: const Key('chat_search_next_button'),
-                                      onPressed: displayCount == 0
-                                          ? null
-                                          : () {
-                                              final next =
-                                                  (currentMatchIndex.value + 1) % displayCount;
-                                              currentMatchIndex.value = next;
-                                              scrollController.scrollToIndex(
-                                                displayCount - 1 - next,
-                                                preferPosition: AutoScrollPosition.middle,
-                                              );
-                                            },
-                                      icon: WnIcon(
-                                        WnIcons.chevronDown,
-                                        size: 18.sp,
-                                        color: displayCount == 0
-                                            ? colors.backgroundContentTertiary
-                                            : colors.backgroundContentSecondary,
-                                      ),
-                                    ),
-                                  ],
+                      if (searchQuery.value.isNotEmpty)
+                        Padding(
+                          key: const Key('chat_search_navigation'),
+                          padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 8.h),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              IconButton(
+                                key: const Key('chat_search_prev_button'),
+                                onPressed: displayCount == 0
+                                    ? null
+                                    : () {
+                                        final next =
+                                            (currentMatchIndex.value - 1 + displayCount) %
+                                            displayCount;
+                                        currentMatchIndex.value = next;
+                                        scrollController.scrollToIndex(
+                                          displayCount - 1 - next,
+                                          preferPosition: AutoScrollPosition.middle,
+                                        );
+                                      },
+                                icon: WnIcon(
+                                  WnIcons.chevronUp,
+                                  size: 18.sp,
+                                  color: displayCount == 0
+                                      ? colors.backgroundContentTertiary
+                                      : colors.backgroundContentSecondary,
                                 ),
                               ),
-                          ],
-                        ],
-                      ),
-                    ),
-                    if (chatScroll.isScrollDownButtonVisible)
-                      Positioned(
-                        bottom: 8.h,
-                        right: 16.w,
-                        child: ChatScrollDownButton(
-                          show: true,
-                          onTap: chatScroll.scrollToBottom,
+                              Text(
+                                displayCount == 0
+                                    ? context.l10n.noResults
+                                    : context.l10n.chatSearchMatchCount(
+                                        currentMatchIndex.value + 1,
+                                        displayCount,
+                                      ),
+                                key: const Key('chat_search_match_count'),
+                                style: typography.medium14.copyWith(
+                                  color: colors.backgroundContentSecondary,
+                                ),
+                              ),
+                              IconButton(
+                                key: const Key('chat_search_next_button'),
+                                onPressed: displayCount == 0
+                                    ? null
+                                    : () {
+                                        final next = (currentMatchIndex.value + 1) % displayCount;
+                                        currentMatchIndex.value = next;
+                                        scrollController.scrollToIndex(
+                                          displayCount - 1 - next,
+                                          preferPosition: AutoScrollPosition.middle,
+                                        );
+                                      },
+                                icon: WnIcon(
+                                  WnIcons.chevronDown,
+                                  size: 18.sp,
+                                  color: displayCount == 0
+                                      ? colors.backgroundContentTertiary
+                                      : colors.backgroundContentSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
+                    ],
                   ],
                 ),
               ),
-              SafeArea(
-                top: false,
-                child: _ChatInput(
-                  input: input,
-                  mediaUpload: mediaUpload,
-                  currentUserPubkey: pubkey,
-                  onSend: sendMessage,
-                  onError: showNotice,
-                  getChatMessageQuote: getChatMessageQuote,
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: SafeArea(
+                  top: false,
+                  child: _SizeReporter(
+                    onSizeChanged: (size) => inputAreaHeight.value = size.height,
+                    child: _ChatInput(
+                      input: input,
+                      mediaUpload: mediaUpload,
+                      currentUserPubkey: pubkey,
+                      onSend: sendMessage,
+                      onError: showNotice,
+                      getChatMessageQuote: getChatMessageQuote,
+                    ),
+                  ),
                 ),
               ),
+              WnScrollEdgeEffect.canvasBottom(
+                color: colors.backgroundPrimary,
+                height: safeAreaBottom,
+              ),
+              if (chatScroll.isScrollDownButtonVisible)
+                Positioned(
+                  bottom: inputAreaHeight.value + safeAreaBottom + 8.h,
+                  right: 16.w,
+                  child: ChatScrollDownButton(
+                    show: true,
+                    onTap: chatScroll.scrollToBottom,
+                  ),
+                ),
             ],
           ),
         ),
@@ -510,80 +519,80 @@ class _ChatInput extends StatelessWidget {
       );
     }
 
-    return Container(
-      padding: EdgeInsets.only(left: 12.w, right: 12.w, top: 2.h, bottom: 24.h),
-      color: colors.backgroundPrimary,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          Expanded(
-            child: WnChatMessageInput(
-              isFocused: input.hasFocus,
-              attachmentArea: buildAttachmentArea(),
-              leadingAction: GestureDetector(
-                key: const Key('attach_button'),
-                onTap: () {
-                  input.focusNode.unfocus();
-                  mediaUpload.pickImages();
-                },
-                child: WnIcon(
-                  WnIcons.addLarge,
-                  color: colors.backgroundContentSecondary,
-                  size: 20.sp,
-                ),
-              ),
-              inputField: TextField(
-                controller: input.controller,
-                focusNode: input.focusNode,
-                maxLines: 4,
-                minLines: 1,
-                textCapitalization: TextCapitalization.sentences,
-                style: typography.medium14.copyWith(
-                  color: colors.backgroundContentPrimary,
-                ),
-                decoration: InputDecoration(
-                  hintText: context.l10n.messagePlaceholder,
-                  hintStyle: typography.medium14.copyWith(
-                    color: colors.backgroundContentTertiary,
-                  ),
-                  filled: true,
-                  fillColor: Colors.transparent,
-                  contentPadding: EdgeInsets.symmetric(
-                    horizontal: 14.w,
-                    vertical: 20.h,
-                  ),
-                  border: InputBorder.none,
-                  enabledBorder: InputBorder.none,
-                  focusedBorder: InputBorder.none,
-                ),
-              ),
-              trailingAction: showSend
-                  ? GestureDetector(
-                      key: const Key('send_button'),
-                      onTap: sendEnabled ? handleSend : null,
-                      child: Container(
-                        width: 40.w,
-                        height: 40.h,
-                        decoration: BoxDecoration(
-                          color: sendEnabled ? colors.fillPrimary : colors.fillSecondary,
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        child: Center(
-                          child: WnIcon(
-                            WnIcons.arrowUp,
-                            color: sendEnabled
-                                ? colors.fillContentPrimary
-                                : colors.backgroundContentTertiary,
-                            size: 18.sp,
-                          ),
-                        ),
-                      ),
-                    )
-                  : null,
+    final inputStyle = typography.medium14.copyWith(color: colors.backgroundContentPrimary);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
+      child: WnChatMessageInput(
+        isFocused: input.hasFocus,
+        attachmentArea: buildAttachmentArea(),
+        controller: input.controller,
+        inputStyle: inputStyle,
+        onAddTap: () {
+          input.focusNode.unfocus();
+          mediaUpload.pickImages();
+        },
+        inputField: TextField(
+          controller: input.controller,
+          focusNode: input.focusNode,
+          maxLines: 4,
+          minLines: 1,
+          textCapitalization: TextCapitalization.sentences,
+          cursorColor: colors.backgroundContentPrimary,
+          style: inputStyle,
+          decoration: InputDecoration(
+            hintText: context.l10n.messagePlaceholder,
+            hintStyle: typography.medium14.copyWith(
+              color: colors.backgroundContentSecondary,
             ),
+            filled: true,
+            fillColor: Colors.transparent,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 8.w,
+              vertical: 8.h,
+            ),
+            border: InputBorder.none,
+            enabledBorder: InputBorder.none,
+            focusedBorder: InputBorder.none,
           ),
-        ],
+        ),
+        onSend: showSend ? handleSend : null,
+        sendEnabled: sendEnabled,
       ),
     );
+  }
+}
+
+class _SizeReporter extends SingleChildRenderObjectWidget {
+  final ValueChanged<Size> onSizeChanged;
+
+  const _SizeReporter({required this.onSizeChanged, required super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _SizeReporterRenderObject(onSizeChanged);
+  }
+
+  @override
+  void updateRenderObject(BuildContext context, _SizeReporterRenderObject renderObject) {
+    renderObject.onSizeChanged = onSizeChanged;
+  }
+}
+
+class _SizeReporterRenderObject extends RenderProxyBox {
+  _SizeReporterRenderObject(this.onSizeChanged);
+
+  ValueChanged<Size> onSizeChanged;
+  Size? _previousSize;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    if (size != _previousSize) {
+      _previousSize = size;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        onSizeChanged(size);
+      });
+    }
   }
 }

@@ -1329,7 +1329,7 @@ void main() {
       testWidgets('displays attach button always when no media attached', (tester) async {
         await pumpChatScreen(tester);
 
-        expect(find.byKey(const Key('attach_button')), findsOneWidget);
+        expect(find.byKey(const Key('add_button')), findsOneWidget);
       });
 
       testWidgets('unfocuses input when attach button is tapped', (tester) async {
@@ -1340,7 +1340,7 @@ void main() {
         final textField = tester.widget<TextField>(find.byType(TextField));
         expect(textField.focusNode!.hasFocus, isTrue);
 
-        await tester.tap(find.byKey(const Key('attach_button')));
+        await tester.tap(find.byKey(const Key('add_button')));
         await tester.pumpAndSettle();
 
         expect(textField.focusNode!.hasFocus, isFalse);
