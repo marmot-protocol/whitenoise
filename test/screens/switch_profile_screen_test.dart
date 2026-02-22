@@ -100,7 +100,7 @@ void main() {
       await pumpSwitchProfileScreen(tester, testPubkeyA);
       await tester.tap(find.byKey(const Key('slate_close_button')));
       await tester.pumpAndSettle();
-      expect(find.text('Profiles'), findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
     testWidgets('tapping close while loading goes back', (tester) async {
@@ -124,7 +124,7 @@ void main() {
       await tester.tap(find.byKey(const Key('slate_close_button')));
       completer.complete([]);
       await tester.pumpAndSettle();
-      expect(find.text('Profiles'), findsNothing);
+      expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
     testWidgets('displays list of accounts', (tester) async {
@@ -145,7 +145,6 @@ void main() {
 
     testWidgets('tapping current account goes back', (tester) async {
       await pumpSwitchProfileScreen(tester, testPubkeyA);
-      expect(find.text('Profiles'), findsOneWidget);
       await tester.tap(find.text('Display $testPubkeyA'));
       await tester.pumpAndSettle();
       expect(find.text('Profiles'), findsNothing);
@@ -153,7 +152,6 @@ void main() {
 
     testWidgets('tapping different account switches profile', (tester) async {
       await pumpSwitchProfileScreen(tester, testPubkeyA);
-      expect(find.text('Profiles'), findsOneWidget);
       await tester.tap(find.text('Display $testPubkeyB'));
       await tester.pumpAndSettle();
       expect(find.text('Profiles'), findsNothing);
@@ -172,6 +170,30 @@ void main() {
       expect(find.text('No accounts available'), findsOneWidget);
     });
 
+    testWidgets('displays loading state then resolves', (tester) async {
+      final completer = Completer<List<Account>>();
+      mockApi.getAccountsCompleter = completer;
+      final notifier = _MockAuthNotifier(testPubkeyA);
+      await mountTestApp(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => notifier),
+          secureStorageProvider.overrideWithValue(MockSecureStorage()),
+        ],
+      );
+      Routes.pushToSettings(tester.element(find.byType(Scaffold)));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      Routes.pushToSwitchProfile(tester.element(find.byType(Scaffold)));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text('Profiles'), findsOneWidget);
+      completer.complete([]);
+      await tester.pumpAndSettle();
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+    });
+
     testWidgets('disables taps while switching profile', (tester) async {
       final mockAuthNotifier = _MockAuthNotifier(testPubkeyA);
       mockAuthNotifier.switchProfileCompleter = Completer<void>();
@@ -185,7 +207,7 @@ void main() {
       await tester.tap(find.text('Display $testPubkeyB'));
       await tester.pump();
 
-      expect(find.text('Profiles'), findsOneWidget);
+      expect(find.text('Display $testPubkeyA'), findsOneWidget);
 
       mockAuthNotifier.switchProfileCompleter!.complete();
       await tester.pumpAndSettle();

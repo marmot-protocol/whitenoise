@@ -1063,4 +1063,13 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get noAdminGroupsAvailable =>
       'Henüz hiçbir grupta yönetici değilsiniz. Kişi eklemek için bir grup oluşturun.';
+
+  @override
+  String get profilesTitle => 'Profiller';
+
+  @override
+  String get noAccountsAvailable => 'Kullanılabilir hesap yok';
+
+  @override
+  String get connectAnotherProfile => 'Başka Profil Bağla';
 }

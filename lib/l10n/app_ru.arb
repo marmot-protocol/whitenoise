@@ -308,5 +308,8 @@
   "addToGroupConfirmation": "Добавить {userName} в {groupName}?",
   "add": "Добавить",
   "noGroupsAvailable": "Нет доступных групп",
-  "noAdminGroupsAvailable": "Вы ещё не являетесь администратором ни в одной группе. Создайте группу, чтобы добавить людей."
+  "noAdminGroupsAvailable": "Вы ещё не являетесь администратором ни в одной группе. Создайте группу, чтобы добавить людей.",
+  "profilesTitle": "Профили",
+  "noAccountsAvailable": "Нет доступных аккаунтов",
+  "connectAnotherProfile": "Подключить другой профиль"
 }

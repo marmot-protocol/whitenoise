@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_accounts.dart';
 import 'package:whitenoise/hooks/use_user_metadata.dart';
+import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
@@ -31,7 +32,7 @@ class SwitchProfileScreen extends HookConsumerWidget {
             padding: EdgeInsets.symmetric(vertical: 16.h),
             child: WnSlate(
               header: WnSlateNavigationHeader(
-                title: 'Profiles',
+                title: context.l10n.profilesTitle,
                 onNavigate: () => Routes.goBack(context),
               ),
               child: Padding(
@@ -64,7 +65,7 @@ class SwitchProfileScreen extends HookConsumerWidget {
           padding: EdgeInsets.symmetric(vertical: 16.h),
           child: WnSlate(
             header: WnSlateNavigationHeader(
-              title: 'Profiles',
+              title: context.l10n.profilesTitle,
               onNavigate: () => Routes.goBack(context),
             ),
             child: Padding(
@@ -88,7 +89,7 @@ class SwitchProfileScreen extends HookConsumerWidget {
                     child: accountsList.isEmpty
                         ? Center(
                             child: Text(
-                              'No accounts available',
+                              context.l10n.noAccountsAvailable,
                               style: typography.medium16.copyWith(
                                 color: colors.backgroundContentSecondary,
                               ),
@@ -115,7 +116,7 @@ class SwitchProfileScreen extends HookConsumerWidget {
                   SizedBox(
                     width: double.infinity,
                     child: WnButton(
-                      text: 'Connect Another Profile',
+                      text: context.l10n.connectAnotherProfile,
                       onPressed: () => Routes.pushToAddProfile(context),
                     ),
                   ),

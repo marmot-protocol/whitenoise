@@ -1062,4 +1062,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noAdminGroupsAvailable =>
       'You\'re not an admin in any groups yet. Create a group to add people.';
+
+  @override
+  String get profilesTitle => 'Profiles';
+
+  @override
+  String get noAccountsAvailable => 'No accounts available';
+
+  @override
+  String get connectAnotherProfile => 'Connect Another Profile';
 }

@@ -308,5 +308,8 @@
   "addToGroupConfirmation": "Adicionar {userName} a {groupName}?",
   "add": "Adicionar",
   "noGroupsAvailable": "Nenhum grupo disponível",
-  "noAdminGroupsAvailable": "Você ainda não é admin em nenhum grupo. Crie um grupo para adicionar pessoas."
+  "noAdminGroupsAvailable": "Você ainda não é admin em nenhum grupo. Crie um grupo para adicionar pessoas.",
+  "profilesTitle": "Perfis",
+  "noAccountsAvailable": "Nenhuma conta disponível",
+  "connectAnotherProfile": "Conectar outro perfil"
 }

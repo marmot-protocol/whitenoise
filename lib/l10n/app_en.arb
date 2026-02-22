@@ -1656,5 +1656,20 @@
   "noAdminGroupsAvailable": "You're not an admin in any groups yet. Create a group to add people.",
   "@noAdminGroupsAvailable": {
     "description": "Message shown when user has no groups where they are admin to add someone to"
+  },
+
+  "profilesTitle": "Profiles",
+  "@profilesTitle": {
+    "description": "Title for the switch profile screen"
+  },
+
+  "noAccountsAvailable": "No accounts available",
+  "@noAccountsAvailable": {
+    "description": "Message shown when there are no accounts to switch to"
+  },
+
+  "connectAnotherProfile": "Connect Another Profile",
+  "@connectAnotherProfile": {
+    "description": "Button text to connect another profile/account"
   }
 }

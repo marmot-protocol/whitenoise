@@ -1091,4 +1091,13 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get noAdminGroupsAvailable =>
       'Вы ещё не являетесь администратором ни в одной группе. Создайте группу, чтобы добавить людей.';
+
+  @override
+  String get profilesTitle => 'Профили';
+
+  @override
+  String get noAccountsAvailable => 'Нет доступных аккаунтов';
+
+  @override
+  String get connectAnotherProfile => 'Подключить другой профиль';
 }

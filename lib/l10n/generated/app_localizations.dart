@@ -1961,6 +1961,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You\'re not an admin in any groups yet. Create a group to add people.'**
   String get noAdminGroupsAvailable;
+
+  /// Title for the switch profile screen
+  ///
+  /// In en, this message translates to:
+  /// **'Profiles'**
+  String get profilesTitle;
+
+  /// Message shown when there are no accounts to switch to
+  ///
+  /// In en, this message translates to:
+  /// **'No accounts available'**
+  String get noAccountsAvailable;
+
+  /// Button text to connect another profile/account
+  ///
+  /// In en, this message translates to:
+  /// **'Connect Another Profile'**
+  String get connectAnotherProfile;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

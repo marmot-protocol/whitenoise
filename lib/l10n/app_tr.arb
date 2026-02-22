@@ -308,5 +308,8 @@
   "addToGroupConfirmation": "{userName} kişisini {groupName} grubuna eklensin mi?",
   "add": "Ekle",
   "noGroupsAvailable": "Kullanılabilir grup yok",
-  "noAdminGroupsAvailable": "Henüz hiçbir grupta yönetici değilsiniz. Kişi eklemek için bir grup oluşturun."
+  "noAdminGroupsAvailable": "Henüz hiçbir grupta yönetici değilsiniz. Kişi eklemek için bir grup oluşturun.",
+  "profilesTitle": "Profiller",
+  "noAccountsAvailable": "Kullanılabilir hesap yok",
+  "connectAnotherProfile": "Başka Profil Bağla"
 }
