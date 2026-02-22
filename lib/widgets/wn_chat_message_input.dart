@@ -1,21 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/wn_icon.dart';
 
 class WnChatMessageInput extends StatelessWidget {
   const WnChatMessageInput({
     super.key,
     this.attachmentArea,
     required this.inputField,
-    this.leadingAction,
-    this.trailingAction,
+    required this.controller,
+    required this.inputStyle,
+    required this.onAddTap,
+    this.onSend,
+    this.sendEnabled = false,
     this.isFocused = false,
   });
 
   final Widget? attachmentArea;
   final Widget inputField;
-  final Widget? leadingAction;
-  final Widget? trailingAction;
+  final TextEditingController controller;
+  final TextStyle inputStyle;
+  final VoidCallback onAddTap;
+  final VoidCallback? onSend;
+  final bool sendEnabled;
   final bool isFocused;
 
   @override
@@ -28,7 +35,7 @@ class WnChatMessageInput extends StatelessWidget {
         color: colors.backgroundPrimary,
         borderRadius: BorderRadius.circular(8.r),
         border: Border.all(
-          color: isFocused ? colors.borderPrimary : colors.borderTertiary,
+          color: isFocused ? colors.borderPrimary : colors.borderSecondary,
         ),
       ),
       child: Column(
@@ -43,8 +50,11 @@ class WnChatMessageInput extends StatelessWidget {
             ),
           _InputRow(
             inputField: inputField,
-            leadingAction: leadingAction,
-            trailingAction: trailingAction,
+            controller: controller,
+            inputStyle: inputStyle,
+            onAddTap: onAddTap,
+            onSend: onSend,
+            sendEnabled: sendEnabled,
           ),
         ],
       ),
@@ -55,38 +65,121 @@ class WnChatMessageInput extends StatelessWidget {
 class _InputRow extends StatelessWidget {
   const _InputRow({
     required this.inputField,
-    this.leadingAction,
-    this.trailingAction,
+    required this.controller,
+    required this.inputStyle,
+    required this.onAddTap,
+    this.onSend,
+    this.sendEnabled = false,
   });
 
   final Widget inputField;
-  final Widget? leadingAction;
-  final Widget? trailingAction;
+  final TextEditingController controller;
+  final TextStyle inputStyle;
+  final VoidCallback onAddTap;
+  final VoidCallback? onSend;
+  final bool sendEnabled;
+
+  static double get _inputContentPaddingH => 8.w;
+
+  bool _isMultiline(BoxConstraints constraints) {
+    final buttonWidth = 32.w + 8.w;
+    final sendWidth = onSend != null ? 40.h + 8.w : 0.0;
+    final horizontalPadding = 16.w;
+    final inputPadding = _inputContentPaddingH * 2;
+    final availableWidth =
+        constraints.maxWidth - buttonWidth - sendWidth - horizontalPadding - inputPadding;
+
+    final textPainter = TextPainter(
+      text: TextSpan(text: controller.text, style: inputStyle),
+      maxLines: 1,
+      textDirection: TextDirection.ltr,
+    );
+    try {
+      textPainter.layout(maxWidth: availableWidth > 0 ? availableWidth : 0);
+      return textPainter.didExceedMaxLines;
+    } finally {
+      textPainter.dispose();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.all(4.w),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
-        children: [
-          if (leadingAction != null)
-            Padding(
-              key: const Key('leading_action'),
-              padding: EdgeInsets.only(left: 8.w, bottom: 16.h),
-              child: leadingAction!,
-            ),
-          Expanded(
-            child: inputField,
+    final colors = context.colors;
+
+    final addButton = GestureDetector(
+      key: const Key('add_button'),
+      onTap: onAddTap,
+      child: SizedBox(
+        width: 32.w,
+        height: 40.h,
+        child: Center(
+          child: WnIcon(
+            WnIcons.addLarge,
+            color: colors.backgroundContentSecondary,
+            size: 20.h,
           ),
-          if (trailingAction != null)
-            Padding(
-              key: const Key('trailing_action'),
-              padding: EdgeInsets.only(right: 4.w, bottom: 6.h),
-              child: trailingAction!,
-            ),
-        ],
+        ),
       ),
+    );
+
+    final sendButton = onSend != null
+        ? GestureDetector(
+            key: const Key('send_button'),
+            onTap: sendEnabled ? onSend : null,
+            child: Container(
+              width: 40.h,
+              height: 40.h,
+              decoration: BoxDecoration(
+                color: sendEnabled ? colors.fillPrimary : colors.fillSecondary,
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+              child: Center(
+                child: WnIcon(
+                  WnIcons.arrowUp,
+                  color: sendEnabled ? colors.fillContentPrimary : colors.backgroundContentTertiary,
+                  size: 18.h,
+                ),
+              ),
+            ),
+          )
+        : null;
+
+    return ValueListenableBuilder<TextEditingValue>(
+      valueListenable: controller,
+      builder: (context, _, _) {
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            final multiline = _isMultiline(constraints);
+
+            final row = Row(
+              spacing: 8.w,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Align(
+                  alignment: multiline ? Alignment.topCenter : Alignment.center,
+                  child: addButton,
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: _inputContentPaddingH),
+                    child: inputField,
+                  ),
+                ),
+                if (sendButton != null)
+                  Align(
+                    alignment: multiline ? Alignment.bottomCenter : Alignment.center,
+                    child: sendButton,
+                  ),
+              ],
+            );
+
+            return Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 8.h),
+              child: IntrinsicHeight(child: row),
+            );
+          },
+        );
+      },
     );
   }
 }

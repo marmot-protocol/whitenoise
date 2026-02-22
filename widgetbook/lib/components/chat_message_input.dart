@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:whitenoise/theme.dart';
-import 'package:whitenoise/widgets/wn_icon.dart';
-import 'package:whitenoise/widgets/wn_input_field_button.dart';
 import 'package:whitenoise/widgets/wn_chat_message_input.dart';
 import 'package:whitenoise/widgets/wn_message_quote.dart';
 import 'package:widgetbook/widgetbook.dart';
@@ -47,7 +45,7 @@ Widget wnChatMessageInputShowcase(BuildContext context) {
         _buildSection(
           context,
           'All Variants',
-          'Message Input Container provides a styled frame for chat input with optional slots.',
+          'Chat message input with built-in add and send buttons.',
           [
             const _InputExample(
               label: 'Empty (unfocused)',
@@ -65,12 +63,12 @@ Widget wnChatMessageInputShowcase(BuildContext context) {
               ),
             ),
             const _InputExample(
-              label: 'With leading action',
-              child: _InputWithLeading(),
+              label: 'With send enabled',
+              child: _InputWithSendEnabled(),
             ),
             const _InputExample(
-              label: 'With trailing action',
-              child: _InputWithTrailing(),
+              label: 'With send disabled',
+              child: _InputWithSendDisabled(),
             ),
             const _InputExample(
               label: 'With attachment (quote)',
@@ -154,13 +152,13 @@ class _InteractiveMessageInputContainer extends StatelessWidget {
       initialValue: false,
     );
 
-    final showLeadingAction = context.knobs.boolean(
-      label: 'Show Leading Action',
+    final showSend = context.knobs.boolean(
+      label: 'Show Send Button',
       initialValue: true,
     );
 
-    final showTrailingAction = context.knobs.boolean(
-      label: 'Show Trailing Action',
+    final sendEnabled = context.knobs.boolean(
+      label: 'Send Enabled',
       initialValue: true,
     );
 
@@ -170,10 +168,13 @@ class _InteractiveMessageInputContainer extends StatelessWidget {
     );
 
     final colors = context.colors;
+    final controller = TextEditingController();
 
     return ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 400),
       child: WnChatMessageInput(
+        controller: controller,
+        inputStyle: TextStyle(color: colors.backgroundContentPrimary),
         isFocused: isFocused,
         attachmentArea: showAttachment
             ? WnMessageQuote(
@@ -182,14 +183,9 @@ class _InteractiveMessageInputContainer extends StatelessWidget {
                 onCancel: () {},
               )
             : null,
-        leadingAction: showLeadingAction
-            ? WnIcon(
-                WnIcons.addLarge,
-                color: colors.backgroundContentSecondary,
-                size: 20,
-              )
-            : null,
+        onAddTap: () {},
         inputField: TextField(
+          controller: controller,
           decoration: InputDecoration(
             hintText: 'Message',
             hintStyle: TextStyle(color: colors.backgroundContentTertiary),
@@ -200,13 +196,8 @@ class _InteractiveMessageInputContainer extends StatelessWidget {
             ),
           ),
         ),
-        trailingAction: showTrailingAction
-            ? WnInputFieldButton(
-                icon: WnIcons.arrowUp,
-                onPressed: () {},
-                buttonSize: WnInputFieldButtonSize.size40,
-              )
-            : null,
+        onSend: showSend ? () {} : null,
+        sendEnabled: sendEnabled,
       ),
     );
   }
@@ -221,13 +212,17 @@ class _BasicInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final controller = initialText != null
+        ? TextEditingController(text: initialText)
+        : TextEditingController();
 
     return WnChatMessageInput(
+      controller: controller,
+      inputStyle: TextStyle(color: colors.backgroundContentPrimary),
       isFocused: isFocused,
+      onAddTap: () {},
       inputField: TextField(
-        controller: initialText != null
-            ? TextEditingController(text: initialText)
-            : null,
+        controller: controller,
         decoration: InputDecoration(
           hintText: 'Message',
           hintStyle: TextStyle(color: colors.backgroundContentTertiary),
@@ -242,20 +237,20 @@ class _BasicInput extends StatelessWidget {
   }
 }
 
-class _InputWithLeading extends StatelessWidget {
-  const _InputWithLeading();
+class _InputWithSendEnabled extends StatelessWidget {
+  const _InputWithSendEnabled();
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final controller = TextEditingController(text: 'Hello!');
 
     return WnChatMessageInput(
-      leadingAction: WnIcon(
-        WnIcons.addLarge,
-        color: colors.backgroundContentSecondary,
-        size: 20,
-      ),
+      controller: controller,
+      inputStyle: TextStyle(color: colors.backgroundContentPrimary),
+      onAddTap: () {},
       inputField: TextField(
+        controller: controller,
         decoration: InputDecoration(
           hintText: 'Message',
           hintStyle: TextStyle(color: colors.backgroundContentTertiary),
@@ -266,20 +261,26 @@ class _InputWithLeading extends StatelessWidget {
           ),
         ),
       ),
+      onSend: () {},
+      sendEnabled: true,
     );
   }
 }
 
-class _InputWithTrailing extends StatelessWidget {
-  const _InputWithTrailing();
+class _InputWithSendDisabled extends StatelessWidget {
+  const _InputWithSendDisabled();
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final controller = TextEditingController();
 
     return WnChatMessageInput(
+      controller: controller,
+      inputStyle: TextStyle(color: colors.backgroundContentPrimary),
+      onAddTap: () {},
       inputField: TextField(
-        controller: TextEditingController(text: 'Hello!'),
+        controller: controller,
         decoration: InputDecoration(
           hintText: 'Message',
           hintStyle: TextStyle(color: colors.backgroundContentTertiary),
@@ -290,11 +291,8 @@ class _InputWithTrailing extends StatelessWidget {
           ),
         ),
       ),
-      trailingAction: WnInputFieldButton(
-        icon: WnIcons.arrowUp,
-        onPressed: () {},
-        buttonSize: WnInputFieldButtonSize.size40,
-      ),
+      onSend: () {},
+      sendEnabled: false,
     );
   }
 }
@@ -305,14 +303,19 @@ class _InputWithQuote extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final controller = TextEditingController();
 
     return WnChatMessageInput(
+      controller: controller,
+      inputStyle: TextStyle(color: colors.backgroundContentPrimary),
+      onAddTap: () {},
       attachmentArea: WnMessageQuote(
         author: 'Bob',
         text: 'Check out this cool feature!',
         onCancel: () {},
       ),
       inputField: TextField(
+        controller: controller,
         decoration: InputDecoration(
           hintText: 'Message',
           hintStyle: TextStyle(color: colors.backgroundContentTertiary),
@@ -333,21 +336,20 @@ class _FullInput extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final controller = TextEditingController(text: 'Thanks for the reminder!');
 
     return WnChatMessageInput(
+      controller: controller,
+      inputStyle: TextStyle(color: colors.backgroundContentPrimary),
       isFocused: true,
       attachmentArea: WnMessageQuote(
         author: 'Alice',
         text: 'This is a reply to your message about the project deadline.',
         onCancel: () {},
       ),
-      leadingAction: WnIcon(
-        WnIcons.addLarge,
-        color: colors.backgroundContentSecondary,
-        size: 20,
-      ),
+      onAddTap: () {},
       inputField: TextField(
-        controller: TextEditingController(text: 'Thanks for the reminder!'),
+        controller: controller,
         decoration: InputDecoration(
           hintText: 'Message',
           hintStyle: TextStyle(color: colors.backgroundContentTertiary),
@@ -358,11 +360,8 @@ class _FullInput extends StatelessWidget {
           ),
         ),
       ),
-      trailingAction: WnInputFieldButton(
-        icon: WnIcons.arrowUp,
-        onPressed: () {},
-        buttonSize: WnInputFieldButtonSize.size40,
-      ),
+      onSend: () {},
+      sendEnabled: true,
     );
   }
 }
