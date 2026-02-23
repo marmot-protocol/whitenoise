@@ -226,6 +226,49 @@ void main() {
         final widget = tester.widget<WnReaction>(find.byType(WnReaction));
         expect(widget.type, WnReactionType.incoming);
       });
+
+      testWidgets('renders reactions in stable alphabetical order regardless of input order', (
+        tester,
+      ) async {
+        final reactions = [
+          EmojiReaction(emoji: '🔥', count: BigInt.one, users: const []),
+          EmojiReaction(emoji: '❤️', count: BigInt.one, users: const []),
+          EmojiReaction(emoji: '👍', count: BigInt.one, users: const []),
+        ];
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            reactions: reactions,
+          ),
+          tester,
+        );
+
+        final widgets = tester.widgetList<WnReaction>(find.byType(WnReaction)).toList();
+        final emojis = widgets.map((w) => w.emoji).toList();
+        final expectedEmojis = ['❤️', '👍', '🔥'];
+        expect(emojis, equals(expectedEmojis));
+      });
+
+      testWidgets('assigns ValueKey with emoji to each WnReaction for stable reconciliation', (
+        tester,
+      ) async {
+        final reactions = [
+          EmojiReaction(emoji: '👍', count: BigInt.one, users: const []),
+          EmojiReaction(emoji: '❤️', count: BigInt.from(2), users: const []),
+        ];
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            reactions: reactions,
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const ValueKey('👍')), findsOneWidget);
+        expect(find.byKey(const ValueKey('❤️')), findsOneWidget);
+      });
     });
 
     group('replyContent', () {

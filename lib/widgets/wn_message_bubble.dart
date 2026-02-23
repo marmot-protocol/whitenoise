@@ -279,8 +279,11 @@ class WnMessageBubble extends StatelessWidget {
                             spacing: 4.w,
                             runSpacing: 4.h,
                             children: [
-                              for (final reaction in reactions)
+                              for (final reaction
+                                  in (reactions.toList()
+                                    ..sort((a, b) => a.emoji.compareTo(b.emoji))))
                                 WnReaction(
+                                  key: ValueKey(reaction.emoji),
                                   emoji: reaction.emoji,
                                   count: reaction.count.toInt(),
                                   type: reactionType,
