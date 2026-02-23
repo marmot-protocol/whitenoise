@@ -1,0 +1,34 @@
+repository: https://github.com/marmot-protocol/whitenoise
+description: |
+    **White Noise: The Identity-Free Messenger for Private, Censorship-Resistant Communication**
+
+    In a world where every message is tracked, White Noise offers a refuge. Built on the decentralized Nostr network and fortified with cutting-edge MLS encryption, it's the first messenger that's *truly* private, fast, and scalable—no phone numbers, no emails, and no central authority.
+
+    **Why You Need It:**
+    - Private by Design: End-to-end encryption with forward secrecy and post-compromise security—your messages stay hidden, even if keys leak.
+    - No Censorship. Ever. Thousands of independent relays keep conversations flowing, no matter the pressure. Run your own or use trusted nodes.
+    - Identity Freedom: Choose anonymity, a pseudonym, or your real name. Your data, your rules.
+    - Scale Without Limits: From one-on-one chats to groups with thousands, White Noise stays fast, secure, and seamless.
+    - Open Source & Community-Driven: Built transparently for trust and security. Everyone can inspect the code, verify claims, and contribute improvements. No backdoors, no corporate control, just a free, open tool for everyone.
+summary: A truly secure and private messenger that's lightning fast, infinitely scalable, and identity-free.
+tags:
+    - privacy
+    - security
+    - android
+    - messenger
+    - cryptography
+    - freedom-tech
+    - MLS
+    - E2EE
+license: AGPL-3.0-only
+website: https://whitenoise.chat
+icon: assets/zapstore/zapstore-icon.png
+images:
+    - assets/zapstore/zapstore-1.png
+    - assets/zapstore/zapstore-2.png
+    - assets/zapstore/zapstore-3.png
+    - assets/zapstore/zapstore-4.png
+release_notes: CHANGELOG.md
+changelog: CHANGELOG.md
+metadata_sources:
+    - github

@@ -9,6 +9,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [0.3.0] - 2026-02-23
+
+### Added
+
 - Theme setup [PR #1](https://github.com/marmot-protocol/sloth/pull/1)
 - CI github action [PR #2](https://github.com/marmot-protocol/sloth/pull/2)
 - Dependabot action [PR #3](https://github.com/marmot-protocol/sloth/pull/3)
