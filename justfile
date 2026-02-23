@@ -291,12 +291,16 @@ build-ios:
 build-ios-quiet:
     @./scripts/build_ios.sh > /dev/null 2>&1 && echo "✅ iOS build complete" || { echo "❌ iOS build failed"; false; }
 
-# Build a production IPA
+# Build a production IPA for App Store Connect submission
 build-production-ipa:
-    ./scripts/build_ios.sh && flutter build ipa --flavor production --export-method development
+    ./scripts/build_ios.sh && flutter build ipa --flavor production --export-method app-store
 
-# Build a staging IPA
+# Build a staging IPA for App Store Connect submission
 build-staging-ipa:
+    ./scripts/build_ios.sh && flutter build ipa --flavor staging --export-method app-store
+
+# Build a staging IPA for local device installation (development signing)
+build-staging-ipa-dev:
     ./scripts/build_ios.sh && flutter build ipa --flavor staging --export-method development
 
 # ==============================================================================
