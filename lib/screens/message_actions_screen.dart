@@ -219,7 +219,6 @@ class MessageActionsModal extends StatelessWidget {
     '🤣',
     '🔥',
     '🦥',
-    '😌',
   ];
 
   @override
@@ -249,26 +248,28 @@ class MessageActionsModal extends StatelessWidget {
             ),
             SizedBox(height: 16.h),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 ...reactions.map(
-                  (emoji) => _ReactionButton(
-                    key: Key('reaction_$emoji'),
-                    colors: colors,
-                    emoji: emoji,
-                    isSelected: selectedEmojis.contains(emoji),
-                    onTap: () => onReaction(emoji),
+                  (emoji) => Expanded(
+                    child: _ReactionButton(
+                      key: Key('reaction_$emoji'),
+                      colors: colors,
+                      emoji: emoji,
+                      isSelected: selectedEmojis.contains(emoji),
+                      onTap: () => onReaction(emoji),
+                    ),
                   ),
                 ),
-                GestureDetector(
-                  key: const Key('emoji_picker_button'),
-                  onTap: onEmojiPicker,
-                  child: Container(
-                    padding: EdgeInsets.all(8.w),
-                    child: WnIcon(
-                      WnIcons.addEmoji,
-                      color: colors.backgroundContentPrimary,
-                      size: 20.sp,
+                Expanded(
+                  child: GestureDetector(
+                    key: const Key('emoji_picker_button'),
+                    onTap: onEmojiPicker,
+                    child: Center(
+                      child: WnIcon(
+                        WnIcons.addEmoji,
+                        color: colors.backgroundContentPrimary,
+                        size: 20.sp,
+                      ),
                     ),
                   ),
                 ),
@@ -332,17 +333,19 @@ class _ReactionButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(8.w),
-        decoration: isSelected
-            ? BoxDecoration(
-                color: colors.fillTertiaryActive,
-                borderRadius: BorderRadius.circular(8.r),
-              )
-            : null,
-        child: Text(
-          emoji,
-          style: context.typographyScaled.medium20,
+      child: Center(
+        child: Container(
+          padding: EdgeInsets.all(8.w),
+          decoration: isSelected
+              ? BoxDecoration(
+                  color: colors.fillTertiaryActive,
+                  borderRadius: BorderRadius.circular(8.r),
+                )
+              : null,
+          child: Text(
+            emoji,
+            style: context.typographyScaled.medium20,
+          ),
         ),
       ),
     );
