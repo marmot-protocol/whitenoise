@@ -279,6 +279,19 @@ build-release-aab: (build-aab "production")
 
 when-apk: build-staging-apk
 
+# Build versioned release artifacts for all platforms (APKs + IPA) into build/releases/
+# Produces split APKs with .sha256 sidecar files, an IPA (macOS only), and build_info.txt
+build-release:
+    ./scripts/build_release.sh
+
+# Android-only release artifacts
+build-release-android:
+    ./scripts/build_release.sh --android
+
+# iOS-only release artifacts (macOS only)
+build-release-ios:
+    ./scripts/build_release.sh --ios
+
 # ==============================================================================
 # BUILDING - iOS
 # ==============================================================================
