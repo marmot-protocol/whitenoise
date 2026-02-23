@@ -86,6 +86,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fix emoji overflow on message actions screen [PR #375](https://github.com/marmot-protocol/whitenoise/pull/375)
 - Fix app crashes on upgrade from older versions by wiping incompatible data before Rust initialization [PR #312](https://github.com/marmot-protocol/whitenoise/pull/312)
 - Disable foreground task plugin receivers to prevent crashes on package update [PR #312](https://github.com/marmot-protocol/whitenoise/pull/312)
 - Adds internet permission in android manifest [PR #7](https://github.com/marmot-protocol/sloth/pull/7)
