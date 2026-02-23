@@ -1603,6 +1603,11 @@
     "description": "Error message when adding members to group fails"
   },
 
+  "groupImageUploadFailed": "Group created, but the image failed to upload.",
+  "@groupImageUploadFailed": {
+    "description": "Warning message when group is created successfully but image upload fails"
+  },
+
   "userNeedsUpdate": "Key update needed",
   "@userNeedsUpdate": {
     "description": "Callout title when user needs to update their whitenoise app"

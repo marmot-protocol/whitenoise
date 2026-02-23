@@ -49,9 +49,14 @@ class SetUpGroupScreen extends HookConsumerWidget {
         useSystemNotice();
 
     Future<void> handleCreateGroup() async {
-      final group = await createGroupHook.actions.createGroup(accountPubkey);
+      final (:group, :imageUploadFailed) = await createGroupHook.actions.createGroup(accountPubkey);
       if (!context.mounted) return;
       if (group != null) {
+        if (imageUploadFailed) {
+          showErrorNotice(context.l10n.groupImageUploadFailed);
+          await Future<void>.delayed(const Duration(seconds: 2));
+          if (!context.mounted) return;
+        }
         Routes.goToChat(context, group.mlsGroupId);
       } else {
         showErrorNotice(context.l10n.createGroupFailed);

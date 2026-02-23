@@ -27,9 +27,11 @@ typedef CreateGroupState = ({
   bool isFilteringUsers,
 });
 
+typedef CreateGroupResult = ({groups_api.Group? group, bool imageUploadFailed});
+
 typedef CreateGroupActions = ({
   void Function(String?) updateSelectedImagePath,
-  Future<groups_api.Group?> Function(String accountPubkey) createGroup,
+  Future<CreateGroupResult> Function(String accountPubkey) createGroup,
   void Function() clearError,
   void Function() reset,
 });
@@ -121,15 +123,15 @@ typedef CreateGroupActions = ({
     return null;
   }, [selectedUsers]);
 
-  Future<groups_api.Group?> createGroup(String accountPubkey) async {
+  Future<CreateGroupResult> createGroup(String accountPubkey) async {
     if (groupName.value.trim().isEmpty) {
       error.value = CreateGroupError.groupNameRequired;
-      return null;
+      return (group: null, imageUploadFailed: false);
     }
 
     if (usersWithKeyPackage.value.isEmpty) {
       error.value = CreateGroupError.noUsersWithKeyPackages;
-      return null;
+      return (group: null, imageUploadFailed: false);
     }
 
     isCreating.value = true;
@@ -148,7 +150,7 @@ typedef CreateGroupActions = ({
       );
 
       if (selectedImagePath.value != null && selectedImagePath.value!.isNotEmpty) {
-        if (!isMountedRef.value) return group;
+        if (!isMountedRef.value) return (group: group, imageUploadFailed: false);
         isUploadingImage.value = true;
         try {
           final serverUrl = await rust_utils.getDefaultBlossomServerUrl();
@@ -159,7 +161,7 @@ typedef CreateGroupActions = ({
             serverUrl: serverUrl,
           );
 
-          if (!isMountedRef.value) return group;
+          if (!isMountedRef.value) return (group: group, imageUploadFailed: false);
 
           await group.updateGroupData(
             accountPubkey: accountPubkey,
@@ -171,6 +173,7 @@ typedef CreateGroupActions = ({
           );
         } catch (e, st) {
           _logger.warning('Failed to upload group image', e, st);
+          return (group: group, imageUploadFailed: true);
         } finally {
           if (isMountedRef.value) {
             isUploadingImage.value = false;
@@ -178,12 +181,12 @@ typedef CreateGroupActions = ({
         }
       }
 
-      return group;
+      return (group: group, imageUploadFailed: false);
     } catch (e, st) {
       _logger.severe('createGroup failed', e, st);
-      if (!isMountedRef.value) return null;
+      if (!isMountedRef.value) return (group: null, imageUploadFailed: false);
       error.value = CreateGroupError.createGroupFailed;
-      return null;
+      return (group: null, imageUploadFailed: false);
     } finally {
       if (isMountedRef.value) {
         isCreating.value = false;

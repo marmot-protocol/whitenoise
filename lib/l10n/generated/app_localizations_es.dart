@@ -1046,6 +1046,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get failedToAddMembers => 'No se pudieron añadir miembros. Inténtalo de nuevo.';
 
   @override
+  String get groupImageUploadFailed => 'Group created, but the image failed to upload.';
+
+  @override
   String get userNeedsUpdate => 'Actualización de clave necesaria';
 
   @override

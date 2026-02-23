@@ -243,7 +243,23 @@ void main() {
       await tester.tap(find.text('Save'));
       await tester.pumpAndSettle();
 
+      expect(find.byType(WnSystemNotice), findsOneWidget);
       expect(find.text('Unable to save group. Please try again.'), findsOneWidget);
+    });
+
+    testWidgets('save and cancel buttons remain visible after save failure', (tester) async {
+      _api.updateGroupDataError = Exception('Save failed');
+      await pumpEditGroupScreen(tester);
+
+      await tester.enterText(find.byType(WnInput).last, 'New Name');
+      await tester.pump();
+
+      await tester.tap(find.text('Save'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Unable to save group. Please try again.'), findsOneWidget);
+      expect(find.widgetWithText(WnButton, 'Save'), findsOneWidget);
+      expect(find.widgetWithText(WnButton, 'Cancel'), findsOneWidget);
     });
 
     testWidgets('shows image picker error as system notice', (tester) async {

@@ -263,10 +263,11 @@ void main() {
         },
       );
 
-      final group = await actions.createGroup(testPubkeyA);
+      final (:group, :imageUploadFailed) = await actions.createGroup(testPubkeyA);
       await tester.pump();
 
       expect(group, isNull);
+      expect(imageUploadFailed, isFalse);
       expect(state.error, CreateGroupError.groupNameRequired);
       expect(mockApi.createGroupCalled, isFalse);
     });
@@ -288,10 +289,11 @@ void main() {
       state.groupNameController.text = 'Test Group';
       await tester.pump();
 
-      final group = await actions.createGroup(testPubkeyA);
+      final (:group, :imageUploadFailed) = await actions.createGroup(testPubkeyA);
       await tester.pump();
 
       expect(group, isNull);
+      expect(imageUploadFailed, isFalse);
       expect(state.error, CreateGroupError.noUsersWithKeyPackages);
       expect(mockApi.createGroupCalled, isFalse);
     });
@@ -322,11 +324,12 @@ void main() {
       state.groupDescriptionController.text = 'Test Description';
       await tester.pumpAndSettle();
 
-      final group = await actions.createGroup(testPubkeyA);
+      final (:group, :imageUploadFailed) = await actions.createGroup(testPubkeyA);
       await tester.pumpAndSettle();
 
       expect(group, isNotNull);
       expect(group!.mlsGroupId, testGroupId);
+      expect(imageUploadFailed, isFalse);
       expect(mockApi.createGroupCalled, isTrue);
       expect(mockApi.createdGroupName, 'Test Group');
       expect(mockApi.createdGroupDescription, 'Test Description');
@@ -498,10 +501,11 @@ void main() {
       state.groupNameController.text = 'Test Group';
       await tester.pumpAndSettle();
 
-      final group = await actions.createGroup(testPubkeyA);
+      final (:group, :imageUploadFailed) = await actions.createGroup(testPubkeyA);
       await tester.pump();
 
       expect(group, isNull);
+      expect(imageUploadFailed, isFalse);
       expect(state.error, CreateGroupError.createGroupFailed);
     });
 
@@ -527,10 +531,11 @@ void main() {
       actions.updateSelectedImagePath('/path/to/image.jpg');
       await tester.pumpAndSettle();
 
-      final group = await actions.createGroup(testPubkeyA);
+      final (:group, :imageUploadFailed) = await actions.createGroup(testPubkeyA);
       await tester.pumpAndSettle();
 
       expect(group, isNotNull);
+      expect(imageUploadFailed, isFalse);
       expect(state.isUploadingImage, isFalse);
       expect(mockApi.createGroupCalled, isTrue);
     });
@@ -558,10 +563,11 @@ void main() {
       actions.updateSelectedImagePath('/path/to/image.jpg');
       await tester.pumpAndSettle();
 
-      final group = await actions.createGroup(testPubkeyA);
+      final (:group, :imageUploadFailed) = await actions.createGroup(testPubkeyA);
       await tester.pumpAndSettle();
 
       expect(group, isNotNull);
+      expect(imageUploadFailed, isTrue);
       expect(mockApi.createGroupCalled, isTrue);
     });
 

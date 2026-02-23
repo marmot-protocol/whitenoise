@@ -95,7 +95,8 @@ class EditGroupScreen extends HookConsumerWidget {
                     onDismiss: dismissNotice,
                   )
                 : null,
-            footer: state.loadingState != EditGroupLoadingState.loading && state.error == null
+            footer:
+                state.loadingState != EditGroupLoadingState.loading && state.currentGroup != null
                 ? Padding(
                     padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
                     child: Column(
@@ -121,8 +122,15 @@ class EditGroupScreen extends HookConsumerWidget {
                                   state.loadingState != EditGroupLoadingState.saving
                               ? () async {
                                   final success = await saveGroup();
-                                  if (context.mounted && success) {
-                                    showNotice(context.l10n.groupUpdatedSuccessfully);
+                                  if (context.mounted) {
+                                    if (success) {
+                                      showNotice(context.l10n.groupUpdatedSuccessfully);
+                                    } else {
+                                      showNotice(
+                                        context.l10n.groupSaveError,
+                                        type: WnSystemNoticeType.error,
+                                      );
+                                    }
                                   }
                                 }
                               : null,
@@ -132,16 +140,13 @@ class EditGroupScreen extends HookConsumerWidget {
                     ),
                   )
                 : null,
-            child: state.error != null
+            child: state.error != null && state.currentGroup == null
                 ? Builder(
                     builder: (context) {
-                      _logger.warning('Group error: ${state.error}');
-                      final message = state.currentGroup == null
-                          ? context.l10n.groupLoadError
-                          : context.l10n.groupSaveError;
+                      _logger.warning('Group load error: ${state.error}');
                       return Center(
                         child: Text(
-                          message,
+                          context.l10n.groupLoadError,
                           style: context.typographyScaled.medium14.copyWith(
                             color: colors.fillDestructive,
                           ),

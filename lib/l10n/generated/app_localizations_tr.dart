@@ -1034,6 +1034,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get failedToAddMembers => 'Üye eklenemedi. Lütfen tekrar deneyin.';
 
   @override
+  String get groupImageUploadFailed => 'Group created, but the image failed to upload.';
+
+  @override
   String get userNeedsUpdate => 'Anahtar güncellemesi gerekli';
 
   @override

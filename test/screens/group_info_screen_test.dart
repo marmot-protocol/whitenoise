@@ -12,6 +12,7 @@ import 'package:whitenoise/widgets/wn_group_info_card.dart';
 import 'package:whitenoise/widgets/wn_overlay.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 import 'package:whitenoise/widgets/wn_user_item.dart';
 
 import '../mocks/mock_wn_api.dart';
@@ -25,12 +26,14 @@ class _MockApi extends MockWnApi {
   Group? groupToReturn;
   String? imagePathToReturn;
   final Map<String, FlutterMetadata> metadataMap = {};
+  bool shouldThrowOnGroupMembers = false;
 
   @override
   Future<List<String>> crateApiGroupsGroupMembers({
     required String pubkey,
     required String groupId,
   }) async {
+    if (shouldThrowOnGroupMembers) throw Exception('Failed to load members');
     return membersList;
   }
 
@@ -39,6 +42,7 @@ class _MockApi extends MockWnApi {
     required String pubkey,
     required String groupId,
   }) async {
+    if (shouldThrowOnGroupMembers) throw Exception('Failed to load admins');
     return adminsList;
   }
 
@@ -84,6 +88,7 @@ class _MockApi extends MockWnApi {
     groupToReturn = null;
     imagePathToReturn = null;
     metadataMap.clear();
+    shouldThrowOnGroupMembers = false;
   }
 }
 
@@ -274,6 +279,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Group Information'), findsNothing);
+    });
+
+    testWidgets('shows error notice when member list fails to load', (tester) async {
+      _api.shouldThrowOnGroupMembers = true;
+      await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(find.text('Failed to load group members. Please try again.'), findsOneWidget);
     });
   });
 }

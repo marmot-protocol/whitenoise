@@ -49,6 +49,7 @@ class _MockApi extends MockWnApi {
   bool shouldDelayUploadImage = false;
   bool shouldDelayUserHasKeyPackage = false;
   bool shouldThrowOnCreateGroup = false;
+  bool shouldThrowOnUploadImage = false;
 
   @override
   Future<Group> crateApiGroupsCreateGroup({
@@ -101,6 +102,7 @@ class _MockApi extends MockWnApi {
     required String serverUrl,
   }) async {
     uploadImageCalled = true;
+    if (shouldThrowOnUploadImage) throw Exception('Upload failed');
     if (shouldDelayUploadImage) {
       await Future.delayed(const Duration(milliseconds: 100));
     }
@@ -148,6 +150,7 @@ void main() {
     _api.shouldDelayUploadImage = false;
     _api.shouldDelayUserHasKeyPackage = false;
     _api.shouldThrowOnCreateGroup = false;
+    _api.shouldThrowOnUploadImage = false;
     _mockImagePicker = _MockImagePickerPlatform();
     ImagePickerPlatform.instance = _mockImagePicker;
   });
@@ -389,6 +392,34 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(WnSlateNavigationHeader), findsNothing);
+    });
+
+    testWidgets('shows error notice when image upload fails after group creation', (tester) async {
+      _api.userHasKeyPackageMap[testPubkeyB] = KeyPackageStatus.valid;
+      _api.shouldThrowOnUploadImage = true;
+      _mockImagePicker.imageToReturn = XFile('/fake/path/image.jpg');
+      final users = [_userFactory(testPubkeyB, displayName: 'Bob')];
+
+      await pumpSetUpGroupScreen(tester, users);
+
+      await tester.tap(find.byKey(const Key('edit_group_image_icon')));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.widgetWithText(WnInput, 'Enter group name'), 'My Group');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.widgetWithText(WnButton, 'Create group'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(
+        find.text('Group created, but the image failed to upload.'),
+        findsOneWidget,
+      );
+
+      await tester.pump(const Duration(seconds: 3));
+      await tester.pumpAndSettle();
     });
   });
 }

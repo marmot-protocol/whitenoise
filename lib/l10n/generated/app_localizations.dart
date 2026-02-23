@@ -1914,6 +1914,12 @@ abstract class AppLocalizations {
   /// **'Failed to add members. Please try again.'**
   String get failedToAddMembers;
 
+  /// Warning message when group is created successfully but image upload fails
+  ///
+  /// In en, this message translates to:
+  /// **'Group created, but the image failed to upload.'**
+  String get groupImageUploadFailed;
+
   /// Callout title when user needs to update their whitenoise app
   ///
   /// In en, this message translates to:

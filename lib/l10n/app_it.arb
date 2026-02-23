@@ -311,5 +311,6 @@
   "noAdminGroupsAvailable": "Non sei ancora admin in nessun gruppo. Crea un gruppo per aggiungere persone.",
   "profilesTitle": "Profili",
   "noAccountsAvailable": "Nessun account disponibile",
-  "connectAnotherProfile": "Collega un altro profilo"
+  "connectAnotherProfile": "Collega un altro profilo",
+  "groupImageUploadFailed": "Group created, but the image failed to upload."
 }

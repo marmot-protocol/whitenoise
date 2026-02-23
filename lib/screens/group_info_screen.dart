@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart' show useFuture, useMemoized, useState;
+import 'package:flutter_hooks/flutter_hooks.dart' show useEffect, useFuture, useMemoized, useState;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_group_members.dart';
 import 'package:whitenoise/hooks/use_route_refresh.dart';
+import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
@@ -19,6 +20,7 @@ import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_overlay.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 import 'package:whitenoise/widgets/wn_user_item.dart';
 
 class GroupInfoScreen extends HookConsumerWidget {
@@ -41,6 +43,21 @@ class GroupInfoScreen extends HookConsumerWidget {
       groupId: groupId,
       refreshKey: refreshKey.value,
     );
+
+    final (:noticeMessage, :noticeType, :showErrorNotice, :showSuccessNotice, :dismissNotice) =
+        useSystemNotice();
+
+    useEffect(() {
+      if (membersState.error != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) {
+            showErrorNotice(context.l10n.failedToFetchGroupMembers);
+          }
+        });
+        membersState.clearError();
+      }
+      return null;
+    }, [membersState.error]);
 
     final groupFuture = useMemoized(
       () => groups_api.getGroup(accountPubkey: accountPubkey, groupId: groupId),
@@ -71,6 +88,14 @@ class GroupInfoScreen extends HookConsumerWidget {
                   title: context.l10n.groupInformation,
                   onNavigate: () => Routes.goBack(context),
                 ),
+                systemNotice: noticeMessage != null
+                    ? WnSystemNotice(
+                        key: ValueKey(noticeMessage),
+                        title: noticeMessage,
+                        type: noticeType,
+                        onDismiss: dismissNotice,
+                      )
+                    : null,
                 child: Padding(
                   padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
                   child: Column(
