@@ -312,5 +312,5 @@
   "profilesTitle": "Profiller",
   "noAccountsAvailable": "Kullanılabilir hesap yok",
   "connectAnotherProfile": "Başka Profil Bağla",
-  "groupImageUploadFailed": "Group created, but the image failed to upload."
+  "groupImageUploadFailed": "Grup oluşturuldu, ancak görsel yüklenemedi."
 }

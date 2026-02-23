@@ -312,5 +312,5 @@
   "profilesTitle": "Perfiles",
   "noAccountsAvailable": "No hay cuentas disponibles",
   "connectAnotherProfile": "Conectar otro perfil",
-  "groupImageUploadFailed": "Group created, but the image failed to upload."
+  "groupImageUploadFailed": "Grupo creado, pero la imagen no se pudo subir."
 }
