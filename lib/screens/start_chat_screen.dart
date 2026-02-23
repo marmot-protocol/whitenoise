@@ -1,18 +1,17 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:whitenoise/hooks/use_follow_actions.dart';
+import 'package:whitenoise/hooks/use_start_dm.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_user_has_key_package.dart';
 import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
-import 'package:whitenoise/src/rust/api/groups.dart' as groups_api;
 import 'package:whitenoise/src/rust/api/metadata.dart' show FlutterMetadata;
 import 'package:whitenoise/src/rust/api/users.dart' show KeyPackageStatus;
 import 'package:whitenoise/theme.dart';
@@ -40,7 +39,6 @@ class StartChatScreen extends HookConsumerWidget {
 
     final metadataSnapshot = useUserMetadata(context, userPubkey);
     final keyPackageSnapshot = useUserHasKeyPackage(userPubkey);
-    final isStartingChat = useState(false);
     final (
       :noticeMessage,
       :noticeType,
@@ -54,6 +52,11 @@ class StartChatScreen extends HookConsumerWidget {
       userPubkey: userPubkey,
     );
 
+    final dmState = useStartDm(
+      accountPubkey: accountPubkey,
+      peerPubkey: userPubkey,
+    );
+
     final fetchedMetadata = metadataSnapshot.data;
     final hasContent = fetchedMetadata != null && presentName(fetchedMetadata) != null;
     final metadata = hasContent ? fetchedMetadata : (initialMetadata ?? fetchedMetadata);
@@ -65,29 +68,15 @@ class StartChatScreen extends HookConsumerWidget {
     final keyPackageStatus = keyPackageSnapshot.data;
 
     Future<void> startChat() async {
-      isStartingChat.value = true;
-
       try {
-        final group = await groups_api.createGroup(
-          creatorPubkey: accountPubkey,
-          memberPubkeys: [userPubkey],
-          adminPubkeys: [accountPubkey],
-          groupName: '',
-          groupDescription: '',
-          groupType: groups_api.GroupType.directMessage,
-        );
-
+        final groupId = await dmState.startDm();
         if (context.mounted) {
-          Routes.goToChat(context, group.mlsGroupId);
+          Routes.goToChat(context, groupId);
         }
       } catch (e) {
         _logger.severe('Failed to start chat: $e');
         if (context.mounted) {
           showErrorNotice(context.l10n.failedToStartChat);
-        }
-      } finally {
-        if (context.mounted) {
-          isStartingChat.value = false;
         }
       }
     }
@@ -203,7 +192,7 @@ class StartChatScreen extends HookConsumerWidget {
                               text: context.l10n.sendMessage,
                               size: WnButtonSize.medium,
                               trailingIcon: WnIcons.newChat,
-                              loading: isStartingChat.value,
+                              loading: dmState.isLoading,
                               onPressed: startChat,
                             ),
                           ),

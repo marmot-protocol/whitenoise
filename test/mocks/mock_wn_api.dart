@@ -216,6 +216,21 @@ class MockWnApi implements RustLibApi {
   }
 
   @override
+  Future<List<ChatSummary>> crateApiChatListGetChatList({
+    required String accountPubkey,
+  }) async {
+    return [];
+  }
+
+  @override
+  Future<String?> crateApiAccountGroupsGetDmGroupWithPeer({
+    required String accountPubkey,
+    required String peerPubkey,
+  }) async {
+    return null;
+  }
+
+  @override
   Stream<ChatListStreamItem> crateApiChatListSubscribeToChatList({
     required String accountPubkey,
   }) {

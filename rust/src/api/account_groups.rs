@@ -129,6 +129,19 @@ pub async fn get_account_group(
     Ok(ag.into())
 }
 
+#[frb]
+pub async fn get_dm_group_with_peer(
+    account_pubkey: String,
+    peer_pubkey: String,
+) -> Result<Option<String>, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let peer = PublicKey::parse(&peer_pubkey)?;
+    let group_id = whitenoise.get_dm_group_with_peer(&account, &peer).await?;
+    Ok(group_id.map(|id| group_id_to_string(&id)))
+}
+
 /// Marks a message as read for the given account.
 ///
 /// Updates the `last_read_message_id` for the account-group pair containing

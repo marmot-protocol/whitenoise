@@ -38,6 +38,14 @@ Future<AccountGroup> getAccountGroup({
   mlsGroupId: mlsGroupId,
 );
 
+Future<String?> getDmGroupWithPeer({
+  required String accountPubkey,
+  required String peerPubkey,
+}) => RustLib.instance.api.crateApiAccountGroupsGetDmGroupWithPeer(
+  accountPubkey: accountPubkey,
+  peerPubkey: peerPubkey,
+);
+
 /// Marks a message as read for the given account.
 ///
 /// Updates the `last_read_message_id` for the account-group pair containing

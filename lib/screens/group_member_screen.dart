@@ -6,12 +6,12 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/hooks/use_follow_actions.dart';
 import 'package:whitenoise/hooks/use_group_members.dart';
+import 'package:whitenoise/hooks/use_start_dm.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
-import 'package:whitenoise/src/rust/api/groups.dart' as groups_api;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/metadata.dart' show presentName;
 import 'package:whitenoise/widgets/wn_button.dart';
@@ -67,7 +67,10 @@ class GroupMemberScreen extends HookConsumerWidget {
       userPubkey: memberPubkey,
     );
 
-    final isSendingMessage = useState(false);
+    final dmState = useStartDm(
+      accountPubkey: accountPubkey,
+      peerPubkey: memberPubkey,
+    );
 
     useEffect(() {
       if (membersState.error != null) {
@@ -89,27 +92,15 @@ class GroupMemberScreen extends HookConsumerWidget {
     final roleLabel = isMemberAdmin ? context.l10n.adminBadge : context.l10n.memberBadge;
 
     Future<void> handleSendMessage() async {
-      isSendingMessage.value = true;
       try {
-        final group = await groups_api.createGroup(
-          creatorPubkey: accountPubkey,
-          memberPubkeys: [memberPubkey],
-          adminPubkeys: [accountPubkey],
-          groupName: '',
-          groupDescription: '',
-          groupType: groups_api.GroupType.directMessage,
-        );
+        final groupId = await dmState.startDm();
         if (context.mounted) {
-          Routes.goToChat(context, group.mlsGroupId);
+          Routes.goToChat(context, groupId);
         }
       } catch (e) {
         _logger.severe('Failed to start chat: $e');
         if (context.mounted) {
           showErrorNotice(context.l10n.failedToStartChat);
-        }
-      } finally {
-        if (context.mounted) {
-          isSendingMessage.value = false;
         }
       }
     }
@@ -229,7 +220,7 @@ class GroupMemberScreen extends HookConsumerWidget {
                               type: WnButtonType.outline,
                               size: WnButtonSize.medium,
                               trailingIcon: WnIcons.newChat,
-                              loading: isSendingMessage.value,
+                              loading: dmState.isLoading,
                               onPressed: handleSendMessage,
                             ),
                           ),
