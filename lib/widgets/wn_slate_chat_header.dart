@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_icon_button.dart';
 
 class WnSlateChatHeader extends StatelessWidget {
   const WnSlateChatHeader({
@@ -31,15 +32,10 @@ class WnSlateChatHeader extends StatelessWidget {
       child: Row(
         spacing: 8.w,
         children: [
-          IconButton(
+          WnIconButton(
             key: const Key('back_button'),
             onPressed: onBack,
-            icon: WnIcon(
-              WnIcons.chevronLeft,
-              color: colors.backgroundContentSecondary,
-              size: 24.w,
-            ),
-            tooltip: 'Back',
+            icon: WnIcons.chevronLeft,
           ),
           GestureDetector(
             key: const Key('header_avatar_tap_area'),

@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart' show Gap;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_icon_button.dart';
 import 'package:whitenoise/widgets/wn_input.dart';
 import 'package:whitenoise/widgets/wn_input_field_button.dart';
 
@@ -83,21 +84,10 @@ class WnInputPassword extends HookWidget {
             ),
           ),
           if (labelHelpIcon != null)
-            GestureDetector(
+            WnIconButton(
               key: const Key('label_help_icon'),
-              behavior: HitTestBehavior.opaque,
-              onTap: labelHelpIcon,
-              child: SizedBox(
-                width: 18.w,
-                height: 18.h,
-                child: Center(
-                  child: WnIcon(
-                    WnIcons.help,
-                    size: 14.w,
-                    color: colors.backgroundContentPrimary,
-                  ),
-                ),
-              ),
+              icon: WnIcons.help,
+              onPressed: labelHelpIcon,
             ),
         ],
       ),

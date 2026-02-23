@@ -32,6 +32,7 @@ import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/chat_scroll_down_button.dart';
 import 'package:whitenoise/widgets/wn_chat_message_input.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_icon_button.dart';
 import 'package:whitenoise/widgets/wn_scroll_edge_effect.dart';
 import 'package:whitenoise/widgets/wn_search_field.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
@@ -350,7 +351,7 @@ class ChatScreen extends HookConsumerWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              IconButton(
+                              WnIconButton(
                                 key: const Key('chat_search_prev_button'),
                                 onPressed: displayCount == 0
                                     ? null
@@ -364,13 +365,7 @@ class ChatScreen extends HookConsumerWidget {
                                           preferPosition: AutoScrollPosition.middle,
                                         );
                                       },
-                                icon: WnIcon(
-                                  WnIcons.chevronUp,
-                                  size: 18.sp,
-                                  color: displayCount == 0
-                                      ? colors.backgroundContentTertiary
-                                      : colors.backgroundContentSecondary,
-                                ),
+                                icon: WnIcons.chevronUp,
                               ),
                               Text(
                                 displayCount == 0
@@ -384,7 +379,7 @@ class ChatScreen extends HookConsumerWidget {
                                   color: colors.backgroundContentSecondary,
                                 ),
                               ),
-                              IconButton(
+                              WnIconButton(
                                 key: const Key('chat_search_next_button'),
                                 onPressed: displayCount == 0
                                     ? null
@@ -396,13 +391,7 @@ class ChatScreen extends HookConsumerWidget {
                                           preferPosition: AutoScrollPosition.middle,
                                         );
                                       },
-                                icon: WnIcon(
-                                  WnIcons.chevronDown,
-                                  size: 18.sp,
-                                  color: displayCount == 0
-                                      ? colors.backgroundContentTertiary
-                                      : colors.backgroundContentSecondary,
-                                ),
+                                icon: WnIcons.chevronDown,
                               ),
                             ],
                           ),

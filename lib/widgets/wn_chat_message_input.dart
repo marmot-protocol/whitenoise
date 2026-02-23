@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_icon_button.dart';
+import 'package:whitenoise/widgets/wn_input_field_button.dart';
 
 class WnChatMessageInput extends StatelessWidget {
   const WnChatMessageInput({
@@ -104,43 +106,21 @@ class _InputRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
-
-    final addButton = GestureDetector(
+    final addButton = WnInputFieldButton(
       key: const Key('add_button'),
-      onTap: onAddTap,
-      child: SizedBox(
-        width: 32.w,
-        height: 40.h,
-        child: Center(
-          child: WnIcon(
-            WnIcons.addLarge,
-            color: colors.backgroundContentSecondary,
-            size: 20.h,
-          ),
-        ),
-      ),
+      icon: WnIcons.addLarge,
+      onPressed: onAddTap,
+      buttonSize: WnInputFieldButtonSize.size40,
+      filled: false,
     );
 
     final sendButton = onSend != null
-        ? GestureDetector(
+        ? WnIconButton(
             key: const Key('send_button'),
-            onTap: sendEnabled ? onSend : null,
-            child: Container(
-              width: 40.h,
-              height: 40.h,
-              decoration: BoxDecoration(
-                color: sendEnabled ? colors.fillPrimary : colors.fillSecondary,
-                borderRadius: BorderRadius.circular(8.r),
-              ),
-              child: Center(
-                child: WnIcon(
-                  WnIcons.arrowUp,
-                  color: sendEnabled ? colors.fillContentPrimary : colors.backgroundContentTertiary,
-                  size: 18.h,
-                ),
-              ),
-            ),
+            icon: WnIcons.arrowUp,
+            onPressed: sendEnabled ? onSend : null,
+            type: WnIconButtonType.primary,
+            disabled: !sendEnabled,
           )
         : null;
 

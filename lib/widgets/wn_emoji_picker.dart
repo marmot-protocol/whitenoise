@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_icon_button.dart';
 
 class WnEmojiPicker extends StatelessWidget {
   const WnEmojiPicker({
@@ -36,13 +37,10 @@ class WnEmojiPicker extends StatelessWidget {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
-                GestureDetector(
+                WnIconButton(
                   key: const Key('emoji_picker_close_button'),
-                  onTap: onClose,
-                  child: WnIcon(
-                    WnIcons.closeLarge,
-                    color: colors.backgroundContentSecondary,
-                  ),
+                  icon: WnIcons.closeLarge,
+                  onPressed: onClose,
                 ),
               ],
             ),

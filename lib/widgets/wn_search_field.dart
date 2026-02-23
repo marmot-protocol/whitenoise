@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_input_field_button.dart';
 
 class WnSearchField extends StatelessWidget {
   const WnSearchField({
@@ -42,16 +43,14 @@ class WnSearchField extends StatelessWidget {
         ),
       );
     } else if (onScan != null) {
-      suffixWidget = GestureDetector(
-        key: const Key('scan_button'),
-        onTap: onScan,
-        child: Padding(
-          padding: EdgeInsets.only(right: 14.w),
-          child: WnIcon(
-            WnIcons.scan,
-            size: 20.sp,
-            color: colors.backgroundContentTertiary,
-          ),
+      suffixWidget = Padding(
+        padding: EdgeInsets.only(right: 14.w),
+        child: WnInputFieldButton(
+          key: const Key('scan_button'),
+          icon: WnIcons.scan,
+          onPressed: onScan!,
+          buttonSize: WnInputFieldButtonSize.size36,
+          filled: false,
         ),
       );
     } else {

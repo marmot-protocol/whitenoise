@@ -11,6 +11,7 @@ import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_add_relay_bottom_sheet.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_icon_button.dart';
 import 'package:whitenoise/widgets/wn_list.dart';
 import 'package:whitenoise/widgets/wn_list_item.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
@@ -57,7 +58,7 @@ class NetworkScreen extends HookConsumerWidget {
                   child: Text(
                     title,
                     style: typography.semiBold16.copyWith(
-                      color: colors.backgroundContentTertiary,
+                      color: colors.backgroundContentSecondary,
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -71,7 +72,7 @@ class NetworkScreen extends HookConsumerWidget {
                     child: WnIcon(
                       WnIcons.information,
                       key: infoIconKey,
-                      color: colors.backgroundContentTertiary,
+                      color: colors.backgroundContentSecondary,
                       size: 18.w,
                     ),
                   ),
@@ -79,18 +80,10 @@ class NetworkScreen extends HookConsumerWidget {
               ],
             ),
           ),
-          GestureDetector(
-            onTap: onAdd,
-            behavior: HitTestBehavior.opaque,
-            child: Padding(
-              padding: EdgeInsets.all(4.w),
-              child: WnIcon(
-                WnIcons.addCircle,
-                key: addIconKey,
-                color: colors.backgroundContentPrimary,
-                size: 23.w,
-              ),
-            ),
+          WnIconButton(
+            key: addIconKey,
+            icon: WnIcons.addCircle,
+            onPressed: onAdd,
           ),
         ],
       );

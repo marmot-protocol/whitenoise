@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_icon_button.dart';
 
 enum CalloutType {
   neutral,
@@ -66,20 +67,10 @@ class WnCallout extends StatelessWidget {
                 ),
               ),
               if (onDismiss != null)
-                GestureDetector(
+                WnIconButton(
                   key: const Key('callout_dismiss'),
-                  onTap: onDismiss,
-                  child: SizedBox(
-                    width: 36.w,
-                    height: 36.w,
-                    child: Center(
-                      child: WnIcon(
-                        WnIcons.closeLarge,
-                        size: 20.w,
-                        color: colors.backgroundContentPrimary,
-                      ),
-                    ),
-                  ),
+                  icon: WnIcons.closeLarge,
+                  onPressed: onDismiss,
                 ),
             ],
           ),

@@ -28,6 +28,8 @@ import 'package:whitenoise_widgetbook/components/feedback.dart'
     as _whitenoise_widgetbook_components_feedback;
 import 'package:whitenoise_widgetbook/components/filter_chip.dart'
     as _whitenoise_widgetbook_components_filter_chip;
+import 'package:whitenoise_widgetbook/components/icon_button.dart'
+    as _whitenoise_widgetbook_components_icon_button;
 import 'package:whitenoise_widgetbook/components/icons.dart'
     as _whitenoise_widgetbook_components_icons;
 import 'package:whitenoise_widgetbook/components/inputs.dart'
@@ -105,6 +107,16 @@ final directories = <_widgetbook.WidgetbookNode>[
           _widgetbook.WidgetbookUseCase(
             name: 'Button',
             builder: _whitenoise_widgetbook_components_buttons.wnButtonShowcase,
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookComponent(
+        name: 'WnIconButton',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Icon Button',
+            builder: _whitenoise_widgetbook_components_icon_button
+                .wnIconButtonShowcase,
           ),
         ],
       ),
