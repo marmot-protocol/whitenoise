@@ -28,6 +28,7 @@ class ChatListHeader extends HookConsumerWidget {
       action: WnIconButton(
         key: const Key('chat_add_button'),
         icon: WnIcons.newChat,
+        size: WnIconButtonSize.size56,
         onPressed: () => Routes.pushToUserSearch(context),
       ),
     );

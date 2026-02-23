@@ -45,7 +45,7 @@ class WnSlateAvatarHeader extends StatelessWidget {
           if (action != null)
             Container(
               height: 80.h,
-              padding: EdgeInsets.only(left: 16.w, right: 24.w),
+              padding: EdgeInsets.only(left: 16.w, right: 12.w),
               alignment: Alignment.centerRight,
               child: action!,
             ),
