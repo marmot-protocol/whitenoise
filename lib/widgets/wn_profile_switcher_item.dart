@@ -68,6 +68,7 @@ class WnProfileSwitcherItem extends StatelessWidget {
                       style: typography.medium16.copyWith(
                         color: colors.backgroundContentPrimary,
                       ),
+                      snapToWords: true,
                     ),
                   Gap(4.h),
                   WnMiddleEllipsisText(
@@ -75,6 +76,7 @@ class WnProfileSwitcherItem extends StatelessWidget {
                     style: typography.medium12.copyWith(
                       color: colors.backgroundContentSecondary,
                     ),
+                    snapToWords: true,
                   ),
                 ],
               ),

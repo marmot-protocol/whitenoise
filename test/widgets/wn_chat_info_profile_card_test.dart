@@ -86,6 +86,12 @@ void main() {
       expect(copyCard.textToCopy, testNpubA);
     });
 
+    testWidgets('uses snapToWords for ellipsis', (tester) async {
+      await pumpCard(tester);
+      final copyCard = tester.widget<WnCopyCard>(find.byType(WnCopyCard));
+      expect(copyCard.snapToWords, isTrue);
+    });
+
     testWidgets('does not render nip05 and about text', (tester) async {
       await pumpCard(
         tester,

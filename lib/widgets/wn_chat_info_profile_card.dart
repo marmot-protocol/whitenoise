@@ -60,6 +60,7 @@ class WnChatInfoProfileCard extends StatelessWidget {
             textToCopy: npub,
             onCopySuccess: onPublicKeyCopied,
             onCopyError: onPublicKeyCopyError,
+            snapToWords: true,
           ),
         ],
       ],

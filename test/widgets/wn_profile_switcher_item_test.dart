@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/widgets/wn_middle_ellipsis_text.dart';
 import 'package:whitenoise/widgets/wn_profile_switcher_item.dart';
 
 import '../test_helpers.dart';
@@ -169,6 +170,36 @@ void main() {
         ),
       );
       expect(textWidget.overflow, TextOverflow.ellipsis);
+    });
+
+    group('snapToWords', () {
+      testWidgets('pubkey fallback name uses snapToWords', (tester) async {
+        await mountWidget(
+          WnProfileSwitcherItem(pubkey: testPubkeyA, onTap: () {}),
+          tester,
+        );
+
+        final allEllipsis = tester.widgetList<WnMiddleEllipsisText>(
+          find.byType(WnMiddleEllipsisText),
+        );
+        expect(allEllipsis.every((w) => w.snapToWords), isTrue);
+      });
+
+      testWidgets('secondary pubkey uses snapToWords', (tester) async {
+        await mountWidget(
+          WnProfileSwitcherItem(
+            pubkey: testPubkeyA,
+            displayName: 'Alice',
+            onTap: () {},
+          ),
+          tester,
+        );
+
+        final ellipsis = tester.widget<WnMiddleEllipsisText>(
+          find.byType(WnMiddleEllipsisText),
+        );
+        expect(ellipsis.snapToWords, isTrue);
+      });
     });
   });
 }

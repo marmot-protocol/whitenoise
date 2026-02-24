@@ -60,7 +60,9 @@ void main() {
         secureStorageProvider.overrideWithValue(MockSecureStorage()),
       ],
     );
-    Routes.pushToShareProfile(tester.element(find.byType(Scaffold)));
+    await tester.pumpAndSettle();
+    final context = tester.element(find.byType(Scaffold));
+    Routes.pushToShareProfile(context);
     await tester.pumpAndSettle();
   }
 
@@ -140,6 +142,12 @@ void main() {
       expect(find.text('Public key copied to clipboard'), findsNothing);
     });
 
+    testWidgets('uses snapToWords for ellipsis', (tester) async {
+      await pumpShareProfileScreen(tester);
+      final copyCard = tester.widget<WnCopyCard>(find.byType(WnCopyCard));
+      expect(copyCard.snapToWords, isTrue);
+    });
+
     testWidgets('hides copy card when npub conversion fails', (tester) async {
       _mockApi.shouldFailNpubConversion = true;
       await pumpShareProfileScreen(tester);
@@ -163,7 +171,9 @@ void main() {
           secureStorageProvider.overrideWithValue(MockSecureStorage()),
         ],
       );
-      Routes.pushToShareProfile(tester.element(find.byType(Scaffold)));
+      await tester.pumpAndSettle();
+      final context = tester.element(find.byType(Scaffold));
+      Routes.pushToShareProfile(context);
       await tester.pumpAndSettle();
 
       final avatar = tester.widget<WnAvatar>(find.byType(WnAvatar));
@@ -174,6 +184,7 @@ void main() {
       await pumpShareProfileScreen(tester);
       final copyCard = tester.widget<WnCopyCard>(find.byType(WnCopyCard));
       expect(copyCard.textToDisplay, testNpubAFormatted);
+      expect(copyCard.snapToWords, isTrue);
     });
 
     testWidgets('displays scan QR code button', (tester) async {
