@@ -994,5 +994,35 @@ void main() {
         expect(find.byKey(const Key('emoji_picker_close_button')), findsNothing);
       });
     });
+
+    testWidgets('defers onReply to post-frame callback', (tester) async {
+      ChatMessage? repliedMessage;
+
+      await mountShowTest(
+        tester,
+        builder: (context) => ElevatedButton(
+          onPressed: () => MessageActionsScreen.show(
+            context,
+            message: _createTestMessage(),
+            pubkey: testPubkeyA,
+            onAddReaction: (_) async {},
+            onRemoveReaction: (_) async {},
+            onReply: (message) {
+              repliedMessage = message;
+            },
+          ),
+          child: const Text('Show Menu'),
+        ),
+      );
+
+      await tester.tap(find.text('Show Menu'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('reply_button')));
+      expect(repliedMessage, isNull);
+
+      await tester.pump();
+      expect(repliedMessage, isNotNull);
+    });
   });
 }

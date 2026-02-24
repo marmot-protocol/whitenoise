@@ -160,8 +160,10 @@ class MessageActionsScreen extends HookWidget {
                     selectedEmojis: selectedEmojis,
                     onReply: onReply != null
                         ? () {
-                            onReply!(message);
                             Navigator.of(context).pop();
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              onReply!(message);
+                            });
                           }
                         : null,
                     senderName: senderName,

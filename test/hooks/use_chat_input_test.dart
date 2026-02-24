@@ -160,6 +160,16 @@ void main() {
         expect(getResult().replyingTo, equals(message));
       });
 
+      testWidgets('setReplyingTo requests focus', (tester) async {
+        final getResult = await _mountInputWithFocus(tester);
+        final message = _createTestMessage();
+
+        getResult().setReplyingTo(message);
+        await tester.pump();
+
+        expect(getResult().hasFocus, isTrue);
+      });
+
       testWidgets('cancelReply clears the reply state', (tester) async {
         final getResult = await _mountInput(tester);
         final message = _createTestMessage();
