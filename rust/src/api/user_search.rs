@@ -59,11 +59,6 @@ pub enum SearchUpdateTrigger {
         radius: u8,
         total_pubkeys_searched: u64,
     },
-    RadiusCapped {
-        radius: u8,
-        cap: u64,
-        actual: u64,
-    },
     RadiusTimeout {
         radius: u8,
     },
@@ -87,15 +82,6 @@ impl From<WnSearchUpdateTrigger> for SearchUpdateTrigger {
             } => Self::RadiusCompleted {
                 radius,
                 total_pubkeys_searched: total_pubkeys_searched as u64,
-            },
-            WnSearchUpdateTrigger::RadiusCapped {
-                radius,
-                cap,
-                actual,
-            } => Self::RadiusCapped {
-                radius,
-                cap: cap as u64,
-                actual: actual as u64,
             },
             WnSearchUpdateTrigger::RadiusTimeout { radius } => Self::RadiusTimeout { radius },
             WnSearchUpdateTrigger::SearchCompleted {
@@ -272,24 +258,6 @@ mod tests {
             SearchUpdateTrigger::RadiusCompleted {
                 radius: 1,
                 total_pubkeys_searched: 500,
-            }
-        ));
-    }
-
-    #[test]
-    fn search_update_trigger_conversion_radius_capped() {
-        let trigger: SearchUpdateTrigger = WnSearchUpdateTrigger::RadiusCapped {
-            radius: 3,
-            cap: 10_000,
-            actual: 25_000,
-        }
-        .into();
-        assert!(matches!(
-            trigger,
-            SearchUpdateTrigger::RadiusCapped {
-                radius: 3,
-                cap: 10_000,
-                actual: 25_000,
             }
         ));
     }

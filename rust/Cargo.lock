@@ -5136,7 +5136,7 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "whitenoise"
 version = "0.1.0"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=ad7a6e68dbb9501d5d09ab950012bc4418da0cec#ad7a6e68dbb9501d5d09ab950012bc4418da0cec"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=5f22722a1cb707498f73d65cc93752075f926482#5f22722a1cb707498f73d65cc93752075f926482"
 dependencies = [
  "android-native-keyring-store",
  "anyhow",
@@ -5152,6 +5152,7 @@ dependencies = [
  "futures",
  "hex",
  "image 0.24.9",
+ "indexmap",
  "infer",
  "keyring-core",
  "lightning-invoice",

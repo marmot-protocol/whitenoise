@@ -5227,21 +5227,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           totalPubkeysSearched: dco_decode_u_64(raw[2]),
         );
       case 3:
-        return SearchUpdateTrigger_RadiusCapped(
-          radius: dco_decode_u_8(raw[1]),
-          cap: dco_decode_u_64(raw[2]),
-          actual: dco_decode_u_64(raw[3]),
-        );
-      case 4:
         return SearchUpdateTrigger_RadiusTimeout(
           radius: dco_decode_u_8(raw[1]),
         );
-      case 5:
+      case 4:
         return SearchUpdateTrigger_SearchCompleted(
           finalRadius: dco_decode_u_8(raw[1]),
           totalResults: dco_decode_u_64(raw[2]),
         );
-      case 6:
+      case 5:
         return SearchUpdateTrigger_Error(
           message: dco_decode_String(raw[1]),
         );
@@ -6852,24 +6846,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         );
       case 3:
         final var_radius = sse_decode_u_8(deserializer);
-        final var_cap = sse_decode_u_64(deserializer);
-        final var_actual = sse_decode_u_64(deserializer);
-        return SearchUpdateTrigger_RadiusCapped(
-          radius: var_radius,
-          cap: var_cap,
-          actual: var_actual,
-        );
-      case 4:
-        final var_radius = sse_decode_u_8(deserializer);
         return SearchUpdateTrigger_RadiusTimeout(radius: var_radius);
-      case 5:
+      case 4:
         final var_finalRadius = sse_decode_u_8(deserializer);
         final var_totalResults = sse_decode_u_64(deserializer);
         return SearchUpdateTrigger_SearchCompleted(
           finalRadius: var_finalRadius,
           totalResults: var_totalResults,
         );
-      case 6:
+      case 5:
         final var_message = sse_decode_String(deserializer);
         return SearchUpdateTrigger_Error(message: var_message);
       default:
@@ -8380,27 +8365,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         sse_encode_i_32(2, serializer);
         sse_encode_u_8(radius, serializer);
         sse_encode_u_64(totalPubkeysSearched, serializer);
-      case SearchUpdateTrigger_RadiusCapped(
-        radius: final radius,
-        cap: final cap,
-        actual: final actual,
-      ):
-        sse_encode_i_32(3, serializer);
-        sse_encode_u_8(radius, serializer);
-        sse_encode_u_64(cap, serializer);
-        sse_encode_u_64(actual, serializer);
       case SearchUpdateTrigger_RadiusTimeout(radius: final radius):
-        sse_encode_i_32(4, serializer);
+        sse_encode_i_32(3, serializer);
         sse_encode_u_8(radius, serializer);
       case SearchUpdateTrigger_SearchCompleted(
         finalRadius: final finalRadius,
         totalResults: final totalResults,
       ):
-        sse_encode_i_32(5, serializer);
+        sse_encode_i_32(4, serializer);
         sse_encode_u_8(finalRadius, serializer);
         sse_encode_u_64(totalResults, serializer);
       case SearchUpdateTrigger_Error(message: final message):
-        sse_encode_i_32(6, serializer);
+        sse_encode_i_32(5, serializer);
         sse_encode_String(message, serializer);
     }
   }

@@ -5592,21 +5592,11 @@ impl SseDecode for crate::api::user_search::SearchUpdateTrigger {
             }
             3 => {
                 let mut var_radius = <u8>::sse_decode(deserializer);
-                let mut var_cap = <u64>::sse_decode(deserializer);
-                let mut var_actual = <u64>::sse_decode(deserializer);
-                return crate::api::user_search::SearchUpdateTrigger::RadiusCapped {
-                    radius: var_radius,
-                    cap: var_cap,
-                    actual: var_actual,
-                };
-            }
-            4 => {
-                let mut var_radius = <u8>::sse_decode(deserializer);
                 return crate::api::user_search::SearchUpdateTrigger::RadiusTimeout {
                     radius: var_radius,
                 };
             }
-            5 => {
+            4 => {
                 let mut var_finalRadius = <u8>::sse_decode(deserializer);
                 let mut var_totalResults = <u64>::sse_decode(deserializer);
                 return crate::api::user_search::SearchUpdateTrigger::SearchCompleted {
@@ -5614,7 +5604,7 @@ impl SseDecode for crate::api::user_search::SearchUpdateTrigger {
                     total_results: var_totalResults,
                 };
             }
-            6 => {
+            5 => {
                 let mut var_message = <String>::sse_decode(deserializer);
                 return crate::api::user_search::SearchUpdateTrigger::Error {
                     message: var_message,
@@ -7088,31 +7078,20 @@ impl flutter_rust_bridge::IntoDart for crate::api::user_search::SearchUpdateTrig
                 total_pubkeys_searched.into_into_dart().into_dart(),
             ]
             .into_dart(),
-            crate::api::user_search::SearchUpdateTrigger::RadiusCapped {
-                radius,
-                cap,
-                actual,
-            } => [
-                3.into_dart(),
-                radius.into_into_dart().into_dart(),
-                cap.into_into_dart().into_dart(),
-                actual.into_into_dart().into_dart(),
-            ]
-            .into_dart(),
             crate::api::user_search::SearchUpdateTrigger::RadiusTimeout { radius } => {
-                [4.into_dart(), radius.into_into_dart().into_dart()].into_dart()
+                [3.into_dart(), radius.into_into_dart().into_dart()].into_dart()
             }
             crate::api::user_search::SearchUpdateTrigger::SearchCompleted {
                 final_radius,
                 total_results,
             } => [
-                5.into_dart(),
+                4.into_dart(),
                 final_radius.into_into_dart().into_dart(),
                 total_results.into_into_dart().into_dart(),
             ]
             .into_dart(),
             crate::api::user_search::SearchUpdateTrigger::Error { message } => {
-                [6.into_dart(), message.into_into_dart().into_dart()].into_dart()
+                [5.into_dart(), message.into_into_dart().into_dart()].into_dart()
             }
             _ => {
                 unimplemented!("");
@@ -8437,30 +8416,20 @@ impl SseEncode for crate::api::user_search::SearchUpdateTrigger {
                 <u8>::sse_encode(radius, serializer);
                 <u64>::sse_encode(total_pubkeys_searched, serializer);
             }
-            crate::api::user_search::SearchUpdateTrigger::RadiusCapped {
-                radius,
-                cap,
-                actual,
-            } => {
-                <i32>::sse_encode(3, serializer);
-                <u8>::sse_encode(radius, serializer);
-                <u64>::sse_encode(cap, serializer);
-                <u64>::sse_encode(actual, serializer);
-            }
             crate::api::user_search::SearchUpdateTrigger::RadiusTimeout { radius } => {
-                <i32>::sse_encode(4, serializer);
+                <i32>::sse_encode(3, serializer);
                 <u8>::sse_encode(radius, serializer);
             }
             crate::api::user_search::SearchUpdateTrigger::SearchCompleted {
                 final_radius,
                 total_results,
             } => {
-                <i32>::sse_encode(5, serializer);
+                <i32>::sse_encode(4, serializer);
                 <u8>::sse_encode(final_radius, serializer);
                 <u64>::sse_encode(total_results, serializer);
             }
             crate::api::user_search::SearchUpdateTrigger::Error { message } => {
-                <i32>::sse_encode(6, serializer);
+                <i32>::sse_encode(5, serializer);
                 <String>::sse_encode(message, serializer);
             }
             _ => {

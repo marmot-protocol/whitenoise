@@ -51,11 +51,6 @@ sealed class SearchUpdateTrigger with _$SearchUpdateTrigger {
     required int radius,
     required BigInt totalPubkeysSearched,
   }) = SearchUpdateTrigger_RadiusCompleted;
-  const factory SearchUpdateTrigger.radiusCapped({
-    required int radius,
-    required BigInt cap,
-    required BigInt actual,
-  }) = SearchUpdateTrigger_RadiusCapped;
   const factory SearchUpdateTrigger.radiusTimeout({
     required int radius,
   }) = SearchUpdateTrigger_RadiusTimeout;

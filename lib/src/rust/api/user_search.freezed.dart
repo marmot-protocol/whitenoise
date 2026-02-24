@@ -55,14 +55,13 @@ extension SearchUpdateTriggerPatterns on SearchUpdateTrigger {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( SearchUpdateTrigger_RadiusStarted value)?  radiusStarted,TResult Function( SearchUpdateTrigger_ResultsFound value)?  resultsFound,TResult Function( SearchUpdateTrigger_RadiusCompleted value)?  radiusCompleted,TResult Function( SearchUpdateTrigger_RadiusCapped value)?  radiusCapped,TResult Function( SearchUpdateTrigger_RadiusTimeout value)?  radiusTimeout,TResult Function( SearchUpdateTrigger_SearchCompleted value)?  searchCompleted,TResult Function( SearchUpdateTrigger_Error value)?  error,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( SearchUpdateTrigger_RadiusStarted value)?  radiusStarted,TResult Function( SearchUpdateTrigger_ResultsFound value)?  resultsFound,TResult Function( SearchUpdateTrigger_RadiusCompleted value)?  radiusCompleted,TResult Function( SearchUpdateTrigger_RadiusTimeout value)?  radiusTimeout,TResult Function( SearchUpdateTrigger_SearchCompleted value)?  searchCompleted,TResult Function( SearchUpdateTrigger_Error value)?  error,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case SearchUpdateTrigger_RadiusStarted() when radiusStarted != null:
 return radiusStarted(_that);case SearchUpdateTrigger_ResultsFound() when resultsFound != null:
 return resultsFound(_that);case SearchUpdateTrigger_RadiusCompleted() when radiusCompleted != null:
-return radiusCompleted(_that);case SearchUpdateTrigger_RadiusCapped() when radiusCapped != null:
-return radiusCapped(_that);case SearchUpdateTrigger_RadiusTimeout() when radiusTimeout != null:
+return radiusCompleted(_that);case SearchUpdateTrigger_RadiusTimeout() when radiusTimeout != null:
 return radiusTimeout(_that);case SearchUpdateTrigger_SearchCompleted() when searchCompleted != null:
 return searchCompleted(_that);case SearchUpdateTrigger_Error() when error != null:
 return error(_that);case _:
@@ -83,14 +82,13 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( SearchUpdateTrigger_RadiusStarted value)  radiusStarted,required TResult Function( SearchUpdateTrigger_ResultsFound value)  resultsFound,required TResult Function( SearchUpdateTrigger_RadiusCompleted value)  radiusCompleted,required TResult Function( SearchUpdateTrigger_RadiusCapped value)  radiusCapped,required TResult Function( SearchUpdateTrigger_RadiusTimeout value)  radiusTimeout,required TResult Function( SearchUpdateTrigger_SearchCompleted value)  searchCompleted,required TResult Function( SearchUpdateTrigger_Error value)  error,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( SearchUpdateTrigger_RadiusStarted value)  radiusStarted,required TResult Function( SearchUpdateTrigger_ResultsFound value)  resultsFound,required TResult Function( SearchUpdateTrigger_RadiusCompleted value)  radiusCompleted,required TResult Function( SearchUpdateTrigger_RadiusTimeout value)  radiusTimeout,required TResult Function( SearchUpdateTrigger_SearchCompleted value)  searchCompleted,required TResult Function( SearchUpdateTrigger_Error value)  error,}){
 final _that = this;
 switch (_that) {
 case SearchUpdateTrigger_RadiusStarted():
 return radiusStarted(_that);case SearchUpdateTrigger_ResultsFound():
 return resultsFound(_that);case SearchUpdateTrigger_RadiusCompleted():
-return radiusCompleted(_that);case SearchUpdateTrigger_RadiusCapped():
-return radiusCapped(_that);case SearchUpdateTrigger_RadiusTimeout():
+return radiusCompleted(_that);case SearchUpdateTrigger_RadiusTimeout():
 return radiusTimeout(_that);case SearchUpdateTrigger_SearchCompleted():
 return searchCompleted(_that);case SearchUpdateTrigger_Error():
 return error(_that);}
@@ -107,14 +105,13 @@ return error(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( SearchUpdateTrigger_RadiusStarted value)?  radiusStarted,TResult? Function( SearchUpdateTrigger_ResultsFound value)?  resultsFound,TResult? Function( SearchUpdateTrigger_RadiusCompleted value)?  radiusCompleted,TResult? Function( SearchUpdateTrigger_RadiusCapped value)?  radiusCapped,TResult? Function( SearchUpdateTrigger_RadiusTimeout value)?  radiusTimeout,TResult? Function( SearchUpdateTrigger_SearchCompleted value)?  searchCompleted,TResult? Function( SearchUpdateTrigger_Error value)?  error,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( SearchUpdateTrigger_RadiusStarted value)?  radiusStarted,TResult? Function( SearchUpdateTrigger_ResultsFound value)?  resultsFound,TResult? Function( SearchUpdateTrigger_RadiusCompleted value)?  radiusCompleted,TResult? Function( SearchUpdateTrigger_RadiusTimeout value)?  radiusTimeout,TResult? Function( SearchUpdateTrigger_SearchCompleted value)?  searchCompleted,TResult? Function( SearchUpdateTrigger_Error value)?  error,}){
 final _that = this;
 switch (_that) {
 case SearchUpdateTrigger_RadiusStarted() when radiusStarted != null:
 return radiusStarted(_that);case SearchUpdateTrigger_ResultsFound() when resultsFound != null:
 return resultsFound(_that);case SearchUpdateTrigger_RadiusCompleted() when radiusCompleted != null:
-return radiusCompleted(_that);case SearchUpdateTrigger_RadiusCapped() when radiusCapped != null:
-return radiusCapped(_that);case SearchUpdateTrigger_RadiusTimeout() when radiusTimeout != null:
+return radiusCompleted(_that);case SearchUpdateTrigger_RadiusTimeout() when radiusTimeout != null:
 return radiusTimeout(_that);case SearchUpdateTrigger_SearchCompleted() when searchCompleted != null:
 return searchCompleted(_that);case SearchUpdateTrigger_Error() when error != null:
 return error(_that);case _:
@@ -134,13 +131,12 @@ return error(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int radius)?  radiusStarted,TResult Function()?  resultsFound,TResult Function( int radius,  BigInt totalPubkeysSearched)?  radiusCompleted,TResult Function( int radius,  BigInt cap,  BigInt actual)?  radiusCapped,TResult Function( int radius)?  radiusTimeout,TResult Function( int finalRadius,  BigInt totalResults)?  searchCompleted,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int radius)?  radiusStarted,TResult Function()?  resultsFound,TResult Function( int radius,  BigInt totalPubkeysSearched)?  radiusCompleted,TResult Function( int radius)?  radiusTimeout,TResult Function( int finalRadius,  BigInt totalResults)?  searchCompleted,TResult Function( String message)?  error,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case SearchUpdateTrigger_RadiusStarted() when radiusStarted != null:
 return radiusStarted(_that.radius);case SearchUpdateTrigger_ResultsFound() when resultsFound != null:
 return resultsFound();case SearchUpdateTrigger_RadiusCompleted() when radiusCompleted != null:
-return radiusCompleted(_that.radius,_that.totalPubkeysSearched);case SearchUpdateTrigger_RadiusCapped() when radiusCapped != null:
-return radiusCapped(_that.radius,_that.cap,_that.actual);case SearchUpdateTrigger_RadiusTimeout() when radiusTimeout != null:
+return radiusCompleted(_that.radius,_that.totalPubkeysSearched);case SearchUpdateTrigger_RadiusTimeout() when radiusTimeout != null:
 return radiusTimeout(_that.radius);case SearchUpdateTrigger_SearchCompleted() when searchCompleted != null:
 return searchCompleted(_that.finalRadius,_that.totalResults);case SearchUpdateTrigger_Error() when error != null:
 return error(_that.message);case _:
@@ -161,13 +157,12 @@ return error(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int radius)  radiusStarted,required TResult Function()  resultsFound,required TResult Function( int radius,  BigInt totalPubkeysSearched)  radiusCompleted,required TResult Function( int radius,  BigInt cap,  BigInt actual)  radiusCapped,required TResult Function( int radius)  radiusTimeout,required TResult Function( int finalRadius,  BigInt totalResults)  searchCompleted,required TResult Function( String message)  error,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int radius)  radiusStarted,required TResult Function()  resultsFound,required TResult Function( int radius,  BigInt totalPubkeysSearched)  radiusCompleted,required TResult Function( int radius)  radiusTimeout,required TResult Function( int finalRadius,  BigInt totalResults)  searchCompleted,required TResult Function( String message)  error,}) {final _that = this;
 switch (_that) {
 case SearchUpdateTrigger_RadiusStarted():
 return radiusStarted(_that.radius);case SearchUpdateTrigger_ResultsFound():
 return resultsFound();case SearchUpdateTrigger_RadiusCompleted():
-return radiusCompleted(_that.radius,_that.totalPubkeysSearched);case SearchUpdateTrigger_RadiusCapped():
-return radiusCapped(_that.radius,_that.cap,_that.actual);case SearchUpdateTrigger_RadiusTimeout():
+return radiusCompleted(_that.radius,_that.totalPubkeysSearched);case SearchUpdateTrigger_RadiusTimeout():
 return radiusTimeout(_that.radius);case SearchUpdateTrigger_SearchCompleted():
 return searchCompleted(_that.finalRadius,_that.totalResults);case SearchUpdateTrigger_Error():
 return error(_that.message);}
@@ -184,13 +179,12 @@ return error(_that.message);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int radius)?  radiusStarted,TResult? Function()?  resultsFound,TResult? Function( int radius,  BigInt totalPubkeysSearched)?  radiusCompleted,TResult? Function( int radius,  BigInt cap,  BigInt actual)?  radiusCapped,TResult? Function( int radius)?  radiusTimeout,TResult? Function( int finalRadius,  BigInt totalResults)?  searchCompleted,TResult? Function( String message)?  error,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int radius)?  radiusStarted,TResult? Function()?  resultsFound,TResult? Function( int radius,  BigInt totalPubkeysSearched)?  radiusCompleted,TResult? Function( int radius)?  radiusTimeout,TResult? Function( int finalRadius,  BigInt totalResults)?  searchCompleted,TResult? Function( String message)?  error,}) {final _that = this;
 switch (_that) {
 case SearchUpdateTrigger_RadiusStarted() when radiusStarted != null:
 return radiusStarted(_that.radius);case SearchUpdateTrigger_ResultsFound() when resultsFound != null:
 return resultsFound();case SearchUpdateTrigger_RadiusCompleted() when radiusCompleted != null:
-return radiusCompleted(_that.radius,_that.totalPubkeysSearched);case SearchUpdateTrigger_RadiusCapped() when radiusCapped != null:
-return radiusCapped(_that.radius,_that.cap,_that.actual);case SearchUpdateTrigger_RadiusTimeout() when radiusTimeout != null:
+return radiusCompleted(_that.radius,_that.totalPubkeysSearched);case SearchUpdateTrigger_RadiusTimeout() when radiusTimeout != null:
 return radiusTimeout(_that.radius);case SearchUpdateTrigger_SearchCompleted() when searchCompleted != null:
 return searchCompleted(_that.finalRadius,_that.totalResults);case SearchUpdateTrigger_Error() when error != null:
 return error(_that.message);case _:
@@ -360,76 +354,6 @@ class _$SearchUpdateTrigger_RadiusCompletedCopyWithImpl<$Res>
   return _then(SearchUpdateTrigger_RadiusCompleted(
 radius: null == radius ? _self.radius : radius // ignore: cast_nullable_to_non_nullable
 as int,totalPubkeysSearched: null == totalPubkeysSearched ? _self.totalPubkeysSearched : totalPubkeysSearched // ignore: cast_nullable_to_non_nullable
-as BigInt,
-  ));
-}
-
-
-}
-
-/// @nodoc
-
-
-class SearchUpdateTrigger_RadiusCapped extends SearchUpdateTrigger {
-  const SearchUpdateTrigger_RadiusCapped({required this.radius, required this.cap, required this.actual}): super._();
-  
-
- final  int radius;
- final  BigInt cap;
- final  BigInt actual;
-
-/// Create a copy of SearchUpdateTrigger
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$SearchUpdateTrigger_RadiusCappedCopyWith<SearchUpdateTrigger_RadiusCapped> get copyWith => _$SearchUpdateTrigger_RadiusCappedCopyWithImpl<SearchUpdateTrigger_RadiusCapped>(this, _$identity);
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SearchUpdateTrigger_RadiusCapped&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.cap, cap) || other.cap == cap)&&(identical(other.actual, actual) || other.actual == actual));
-}
-
-
-@override
-int get hashCode => Object.hash(runtimeType,radius,cap,actual);
-
-@override
-String toString() {
-  return 'SearchUpdateTrigger.radiusCapped(radius: $radius, cap: $cap, actual: $actual)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $SearchUpdateTrigger_RadiusCappedCopyWith<$Res> implements $SearchUpdateTriggerCopyWith<$Res> {
-  factory $SearchUpdateTrigger_RadiusCappedCopyWith(SearchUpdateTrigger_RadiusCapped value, $Res Function(SearchUpdateTrigger_RadiusCapped) _then) = _$SearchUpdateTrigger_RadiusCappedCopyWithImpl;
-@useResult
-$Res call({
- int radius, BigInt cap, BigInt actual
-});
-
-
-
-
-}
-/// @nodoc
-class _$SearchUpdateTrigger_RadiusCappedCopyWithImpl<$Res>
-    implements $SearchUpdateTrigger_RadiusCappedCopyWith<$Res> {
-  _$SearchUpdateTrigger_RadiusCappedCopyWithImpl(this._self, this._then);
-
-  final SearchUpdateTrigger_RadiusCapped _self;
-  final $Res Function(SearchUpdateTrigger_RadiusCapped) _then;
-
-/// Create a copy of SearchUpdateTrigger
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? radius = null,Object? cap = null,Object? actual = null,}) {
-  return _then(SearchUpdateTrigger_RadiusCapped(
-radius: null == radius ? _self.radius : radius // ignore: cast_nullable_to_non_nullable
-as int,cap: null == cap ? _self.cap : cap // ignore: cast_nullable_to_non_nullable
-as BigInt,actual: null == actual ? _self.actual : actual // ignore: cast_nullable_to_non_nullable
 as BigInt,
   ));
 }
