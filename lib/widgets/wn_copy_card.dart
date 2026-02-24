@@ -12,12 +12,14 @@ class WnCopyCard extends StatelessWidget {
     required this.textToCopy,
     this.onCopySuccess,
     this.onCopyError,
+    this.snapToWords = false,
   });
 
   final String textToDisplay;
   final String textToCopy;
   final VoidCallback? onCopySuccess;
   final VoidCallback? onCopyError;
+  final bool snapToWords;
 
   void _handleTap(BuildContext context) async {
     try {
@@ -66,6 +68,7 @@ class WnCopyCard extends StatelessWidget {
                   text: textToDisplay,
                   style: style,
                   maxLines: 2,
+                  snapToWords: snapToWords,
                 ),
               ),
               WnIcon(
