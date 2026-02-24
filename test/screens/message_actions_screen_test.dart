@@ -4,18 +4,36 @@ import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
+import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
+
 import '../test_helpers.dart';
+
+ChatMessageQuoteData _replyPreview({
+  String messageId = 'original-msg',
+  String authorPubkey = testPubkeyB,
+  String content = 'Original message content',
+}) => (
+  messageId: messageId,
+  authorPubkey: authorPubkey,
+  authorMetadata: const FlutterMetadata(displayName: 'Original Author', name: 'author', custom: {}),
+  content: content,
+  mediaFile: null,
+  isNotFound: false,
+);
 
 ChatMessage _createTestMessage({
   String id = 'msg-1',
   String pubkey = testPubkeyA,
   String content = 'Test message content',
   ReactionSummary? reactions,
+  bool isReply = false,
+  String? replyToId,
 }) {
   return ChatMessage(
     id: id,
@@ -23,7 +41,8 @@ ChatMessage _createTestMessage({
     content: content,
     createdAt: DateTime.now(),
     tags: const [],
-    isReply: false,
+    isReply: isReply,
+    replyToId: replyToId,
     isDeleted: false,
     contentTokens: const [],
     reactions: reactions ?? const ReactionSummary(byEmoji: [], userReactions: []),
@@ -77,6 +96,62 @@ void main() {
       );
 
       expect(find.byKey(const Key('slate_close_button')), findsNothing);
+    });
+
+    group('Reply preview', () {
+      testWidgets(
+        'shows reply preview when message is a reply and getChatMessageQuote is provided',
+        (tester) async {
+          final replyData = _replyPreview(content: 'Quoted message');
+          await mountWidget(
+            MessageActionsModal(
+              message: _createTestMessage(isReply: true, replyToId: 'original-msg'),
+              isOwnMessage: false,
+              onReaction: (_) {},
+              onEmojiPicker: () {},
+              currentUserPubkey: testPubkeyA,
+              getChatMessageQuote: (_) => replyData,
+            ),
+            tester,
+          );
+
+          expect(find.text('Quoted message'), findsOneWidget);
+          expect(find.text('Original Author'), findsOneWidget);
+        },
+      );
+
+      testWidgets('does not show reply preview when message is not a reply', (tester) async {
+        await mountWidget(
+          MessageActionsModal(
+            message: _createTestMessage(),
+            isOwnMessage: false,
+            onReaction: (_) {},
+            onEmojiPicker: () {},
+            currentUserPubkey: testPubkeyA,
+            getChatMessageQuote: (_) => _replyPreview(),
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('quote_bar')), findsNothing);
+      });
+
+      testWidgets('does not show reply preview when getChatMessageQuote is not provided', (
+        tester,
+      ) async {
+        await mountWidget(
+          MessageActionsModal(
+            message: _createTestMessage(isReply: true, replyToId: 'original-msg'),
+            isOwnMessage: false,
+            onReaction: (_) {},
+            onEmojiPicker: () {},
+            currentUserPubkey: testPubkeyA,
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('quote_bar')), findsNothing);
+      });
     });
 
     group('Reply button', () {

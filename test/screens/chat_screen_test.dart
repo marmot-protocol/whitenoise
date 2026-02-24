@@ -16,6 +16,7 @@ import 'package:whitenoise/src/rust/api/drafts.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
+import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
@@ -89,6 +90,7 @@ class _MockApi extends MockWnApi {
   bool isDm = false;
   List<String> groupMembers = [];
   Completer<MediaFile>? uploadCompleter;
+  Map<String, FlutterMetadata>? metadataByPubkey;
 
   @override
   void reset() {
@@ -108,6 +110,7 @@ class _MockApi extends MockWnApi {
     isDm = false;
     groupMembers = [];
     uploadCompleter = null;
+    metadataByPubkey = null;
   }
 
   @override
@@ -168,6 +171,20 @@ class _MockApi extends MockWnApi {
       );
     });
     return controller!.stream;
+  }
+
+  @override
+  Future<FlutterMetadata> crateApiUsersUserMetadata({
+    required bool blockingDataSync,
+    required String pubkey,
+  }) async {
+    if (metadataByPubkey != null && metadataByPubkey!.containsKey(pubkey)) {
+      return metadataByPubkey![pubkey]!;
+    }
+    return super.crateApiUsersUserMetadata(
+      blockingDataSync: blockingDataSync,
+      pubkey: pubkey,
+    );
   }
 
   @override
@@ -1010,6 +1027,47 @@ void main() {
           expect(find.text('Failed to remove reaction. Please try again.'), findsOneWidget);
           expect(find.byType(MessageActionsScreen), findsOneWidget);
         });
+      });
+
+      testWidgets('shows reply preview for reply message', (tester) async {
+        _api.initialMessages = [
+          _message('m1', DateTime(2024)),
+          _message('m2', DateTime(2024, 1, 2), isReply: true, replyToId: 'm1'),
+        ];
+        await pumpChatScreen(tester);
+        await longPressMessage(tester, 'm2');
+
+        expect(
+          find.descendant(
+            of: find.byType(MessageActionsScreen),
+            matching: find.byType(ChatMessageQuote),
+          ),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('shows sender picture in avatar', (tester) async {
+        _api.metadataByPubkey = {
+          testPubkeyB: const FlutterMetadata(
+            name: 'Sender',
+            displayName: 'Sender',
+            picture: 'https://example.com/avatar.jpg',
+            custom: {},
+          ),
+        };
+        _api.initialMessages = [
+          _message('m1', DateTime(2024)),
+        ];
+        await pumpChatScreen(tester);
+        await longPressMessage(tester, 'm1');
+
+        final avatar = tester.widget<WnAvatar>(
+          find.descendant(
+            of: find.byType(MessageActionsScreen),
+            matching: find.byType(WnAvatar),
+          ),
+        );
+        expect(avatar.pictureUrl, 'https://example.com/avatar.jpg');
       });
     });
 

@@ -196,6 +196,7 @@ class ChatScreen extends HookConsumerWidget {
         ),
         onReply: (msg) => input.setReplyingTo(msg),
         senderName: senderName,
+        getChatMessageQuote: getChatMessageQuote,
         senderPictureUrl: senderPictureUrl,
         isGroupChat: isGroupChat,
       );
