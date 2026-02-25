@@ -14,6 +14,7 @@ import 'package:whitenoise/screens/appearance_screen.dart' show AppearanceScreen
 import 'package:whitenoise/screens/chat_info_screen.dart' show ChatInfoScreen;
 import 'package:whitenoise/screens/chat_invite_screen.dart' show ChatInviteScreen;
 import 'package:whitenoise/screens/chat_list_screen.dart' show ChatListScreen;
+import 'package:whitenoise/screens/chat_raw_debug_screen.dart' show ChatRawDebugScreen;
 import 'package:whitenoise/screens/chat_screen.dart' show ChatScreen;
 import 'package:whitenoise/screens/developer_settings_screen.dart' show DeveloperSettingsScreen;
 import 'package:whitenoise/screens/donate_screen.dart' show DonateScreen;
@@ -77,6 +78,7 @@ abstract final class Routes {
   static const _groupMember = '/group-member/:groupId/:memberPubkey';
   static const _invite = '/invites/:mlsGroupId';
   static const _chat = '/chats/:groupId';
+  static const _chatRawDebug = '/chats/:groupId/debug';
   static const _publicRoutes = {_home, _login, _scanNsec, _signup, _relayResolution};
 
   static GoRouter build(WidgetRef ref) {
@@ -354,6 +356,14 @@ abstract final class Routes {
             child: ChatScreen(groupId: state.pathParameters['groupId']!),
           ),
         ),
+        GoRoute(
+          name: 'chatRawDebug',
+          path: _chatRawDebug,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: ChatRawDebugScreen(groupId: state.pathParameters['groupId']!),
+          ),
+        ),
       ],
     );
   }
@@ -551,5 +561,9 @@ abstract final class Routes {
       pathParameters: {'userPubkey': userPubkey},
       extra: metadata,
     );
+  }
+
+  static void pushToChatRawDebug(BuildContext context, String groupId) {
+    GoRouter.of(context).pushNamed('chatRawDebug', pathParameters: {'groupId': groupId});
   }
 }

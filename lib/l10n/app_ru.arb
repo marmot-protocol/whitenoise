@@ -312,5 +312,11 @@
   "profilesTitle": "Профили",
   "noAccountsAvailable": "Нет доступных аккаунтов",
   "connectAnotherProfile": "Подключить другой профиль",
-  "groupImageUploadFailed": "Группа создана, но загрузка изображения не удалась."
+  "groupImageUploadFailed": "Группа создана, но загрузка изображения не удалась.",
+  "rawDebugView": "Raw debug view",
+  "rawDebugViewDescription": "Show raw message data in chat",
+  "rawDebugViewTitle": "Raw Debug View",
+  "rawDebugViewGroupId": "Group ID",
+  "rawDebugViewMessageCount": "{count} messages",
+  "rawDebugViewCopied": "Copied to clipboard"
 }

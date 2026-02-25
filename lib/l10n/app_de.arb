@@ -312,5 +312,11 @@
   "profilesTitle": "Profile",
   "noAccountsAvailable": "Keine Konten verfügbar",
   "connectAnotherProfile": "Weiteres Profil verbinden",
-  "groupImageUploadFailed": "Gruppe erstellt, aber das Hochladen des Bildes ist fehlgeschlagen."
+  "groupImageUploadFailed": "Gruppe erstellt, aber das Hochladen des Bildes ist fehlgeschlagen.",
+  "rawDebugView": "Raw debug view",
+  "rawDebugViewDescription": "Show raw message data in chat",
+  "rawDebugViewTitle": "Raw Debug View",
+  "rawDebugViewGroupId": "Group ID",
+  "rawDebugViewMessageCount": "{count} messages",
+  "rawDebugViewCopied": "Copied to clipboard"
 }

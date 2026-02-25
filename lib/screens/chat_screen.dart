@@ -15,6 +15,7 @@ import 'package:whitenoise/hooks/use_scroll_to_message.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/active_chat_provider.dart';
+import 'package:whitenoise/providers/debug_view_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
@@ -22,6 +23,7 @@ import 'package:whitenoise/services/message_service.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/app_flavor.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart';
 import 'package:whitenoise/utils/chat_messages_search.dart';
@@ -88,6 +90,8 @@ class ChatScreen extends HookConsumerWidget {
       clearActiveChat: ref.read(activeChatProvider.notifier).clear,
       cancelGroupNotifications: ref.read(notificationServiceProvider).cancelForGroup,
     );
+
+    final debugViewEnabled = isStaging && (ref.watch(debugViewProvider).value ?? false);
 
     final noticeMessage = useState<String?>(null);
     final isSearchActive = useState(false);
@@ -330,6 +334,13 @@ class ChatScreen extends HookConsumerWidget {
                             Routes.pushToGroupInfo(context, groupId);
                           }
                         },
+                        trailingWidget: debugViewEnabled
+                            ? WnIconButton(
+                                key: const Key('chat_raw_debug_button'),
+                                icon: WnIcons.dataUsage,
+                                onPressed: () => Routes.pushToChatRawDebug(context, groupId),
+                              )
+                            : null,
                       ),
                     ),
                     if (isSearchActive.value) ...[

@@ -1985,6 +1985,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connect Another Profile'**
   String get connectAnotherProfile;
+
+  /// Toggle label for raw message debug view in developer settings
+  ///
+  /// In en, this message translates to:
+  /// **'Raw debug view'**
+  String get rawDebugView;
+
+  /// Subtitle for the raw debug view toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show raw message data in chat'**
+  String get rawDebugViewDescription;
+
+  /// Screen title for the raw message debug screen
+  ///
+  /// In en, this message translates to:
+  /// **'Raw Debug View'**
+  String get rawDebugViewTitle;
+
+  /// Label for group ID in raw debug view
+  ///
+  /// In en, this message translates to:
+  /// **'Group ID'**
+  String get rawDebugViewGroupId;
+
+  /// Message count shown in raw debug view
+  ///
+  /// In en, this message translates to:
+  /// **'{count} messages'**
+  String rawDebugViewMessageCount(int count);
+
+  /// Snackbar text after copying a raw message
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get rawDebugViewCopied;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

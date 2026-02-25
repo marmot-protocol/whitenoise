@@ -18,7 +18,9 @@ import 'package:whitenoise/providers/theme_provider.dart' show themeProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:logging/logging.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/app_flavor.dart';
 
 // TODO: Remove migration gate and related code in the next release.
 const kDataVersion = 1;
@@ -26,6 +28,12 @@ const kDataVersionFile = 'data_version';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (isStaging) {
+    Logger.root.level = Level.ALL;
+    Logger.root.onRecord.listen((record) {
+      debugPrint('${record.level.name}: ${record.loggerName}: ${record.message}');
+    });
+  }
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

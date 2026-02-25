@@ -1676,5 +1676,40 @@
   "connectAnotherProfile": "Connect Another Profile",
   "@connectAnotherProfile": {
     "description": "Button text to connect another profile/account"
+  },
+
+  "rawDebugView": "Raw debug view",
+  "@rawDebugView": {
+    "description": "Toggle label for raw message debug view in developer settings"
+  },
+
+  "rawDebugViewDescription": "Show raw message data in chat",
+  "@rawDebugViewDescription": {
+    "description": "Subtitle for the raw debug view toggle"
+  },
+
+  "rawDebugViewTitle": "Raw Debug View",
+  "@rawDebugViewTitle": {
+    "description": "Screen title for the raw message debug screen"
+  },
+
+  "rawDebugViewGroupId": "Group ID",
+  "@rawDebugViewGroupId": {
+    "description": "Label for group ID in raw debug view"
+  },
+
+  "rawDebugViewMessageCount": "{count} messages",
+  "@rawDebugViewMessageCount": {
+    "description": "Message count shown in raw debug view",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "rawDebugViewCopied": "Copied to clipboard",
+  "@rawDebugViewCopied": {
+    "description": "Snackbar text after copying a raw message"
   }
 }

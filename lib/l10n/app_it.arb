@@ -312,5 +312,11 @@
   "profilesTitle": "Profili",
   "noAccountsAvailable": "Nessun account disponibile",
   "connectAnotherProfile": "Collega un altro profilo",
-  "groupImageUploadFailed": "Gruppo creato, ma il caricamento dell'immagine è fallito."
+  "groupImageUploadFailed": "Gruppo creato, ma il caricamento dell'immagine è fallito.",
+  "rawDebugView": "Raw debug view",
+  "rawDebugViewDescription": "Show raw message data in chat",
+  "rawDebugViewTitle": "Raw Debug View",
+  "rawDebugViewGroupId": "Group ID",
+  "rawDebugViewMessageCount": "{count} messages",
+  "rawDebugViewCopied": "Copied to clipboard"
 }

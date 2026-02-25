@@ -1084,4 +1084,24 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get connectAnotherProfile => 'Connecter un autre profil';
+
+  @override
+  String get rawDebugView => 'Raw debug view';
+
+  @override
+  String get rawDebugViewDescription => 'Show raw message data in chat';
+
+  @override
+  String get rawDebugViewTitle => 'Raw Debug View';
+
+  @override
+  String get rawDebugViewGroupId => 'Group ID';
+
+  @override
+  String rawDebugViewMessageCount(int count) {
+    return '$count messages';
+  }
+
+  @override
+  String get rawDebugViewCopied => 'Copied to clipboard';
 }

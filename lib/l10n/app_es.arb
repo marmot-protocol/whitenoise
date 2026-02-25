@@ -312,5 +312,11 @@
   "profilesTitle": "Perfiles",
   "noAccountsAvailable": "No hay cuentas disponibles",
   "connectAnotherProfile": "Conectar otro perfil",
-  "groupImageUploadFailed": "Grupo creado, pero la imagen no se pudo subir."
+  "groupImageUploadFailed": "Grupo creado, pero la imagen no se pudo subir.",
+  "rawDebugView": "Raw debug view",
+  "rawDebugViewDescription": "Show raw message data in chat",
+  "rawDebugViewTitle": "Raw Debug View",
+  "rawDebugViewGroupId": "Group ID",
+  "rawDebugViewMessageCount": "{count} messages",
+  "rawDebugViewCopied": "Copied to clipboard"
 }

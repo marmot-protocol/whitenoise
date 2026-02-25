@@ -312,5 +312,11 @@
   "profilesTitle": "Profiller",
   "noAccountsAvailable": "Kullanılabilir hesap yok",
   "connectAnotherProfile": "Başka Profil Bağla",
-  "groupImageUploadFailed": "Grup oluşturuldu, ancak görsel yüklenemedi."
+  "groupImageUploadFailed": "Grup oluşturuldu, ancak görsel yüklenemedi.",
+  "rawDebugView": "Raw debug view",
+  "rawDebugViewDescription": "Show raw message data in chat",
+  "rawDebugViewTitle": "Raw Debug View",
+  "rawDebugViewGroupId": "Group ID",
+  "rawDebugViewMessageCount": "{count} messages",
+  "rawDebugViewCopied": "Copied to clipboard"
 }
