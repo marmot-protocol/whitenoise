@@ -32,7 +32,9 @@ class ChatRawDebugScreen extends HookConsumerWidget {
       :latestMessagePubkey,
       :getChatMessageQuote,
       :getAuthorMetadata,
-    ) = useChatMessages(groupId);
+    ) = useChatMessages(
+      groupId,
+    );
 
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
@@ -79,8 +81,7 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                                   itemCount: messageCount,
                                   itemBuilder: (context, index) {
                                     final message = getMessage(index);
-                                    final authorMetadata =
-                                        getAuthorMetadata(message.pubkey);
+                                    final authorMetadata = getAuthorMetadata(message.pubkey);
                                     return Padding(
                                       padding: EdgeInsets.only(bottom: 8.h),
                                       child: _RawMessageCard(
