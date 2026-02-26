@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## Unreleased
 
 ### Added
+- Show reply preview in message actions, add author color in reply preview in input, swipe to reply [PR #389](https://github.com/marmot-protocol/whitenoise/pull/389)
 
 ### Changed
 - Changed reaction emoji sorting [PR #391](https://github.com/marmot-protocol/whitenoise/pull/391)
@@ -18,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Fixed
+- Fix focus on reply [PR #389](https://github.com/marmot-protocol/whitenoise/pull/389)
 - Fix npubs middle ellipsis by adding snap to words option [PR #388](https://github.com/marmot-protocol/whitenoise/pull/388)
 - Fix onboarding carousel text appearing cut off [PR #404](https://github.com/marmot-protocol/whitenoise/pull/404)
 - Fix media modal blurhash issue [PR #397](https://github.com/marmot-protocol/whitenoise/pull/397)
