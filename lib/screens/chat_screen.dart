@@ -170,7 +170,7 @@ class ChatScreen extends HookConsumerWidget {
 
     Future<void> showMessageMenu(ChatMessage message) async {
       FocusScope.of(context).unfocus();
-      final isGroupChat = chatProfile.data?.otherMemberPubkey == null;
+      final isGroupChat = chatProfile.data?.isDm != true;
       final authorMetadata = getAuthorMetadata(message.pubkey);
       final senderName = message.pubkey == pubkey
           ? context.l10n.you
@@ -261,7 +261,7 @@ class ChatScreen extends HookConsumerWidget {
             final senderPictureUrl = authorMetadata?.picture;
 
             final nextMessage = index > 0 ? getMessage(index - 1) : null;
-            final isGroupChat = chatProfile.data?.otherMemberPubkey == null;
+            final isGroupChat = chatProfile.data?.isDm != true;
             final showAvatar = shouldShowAvatar(
               current: message,
               next: nextMessage,
@@ -280,6 +280,7 @@ class ChatScreen extends HookConsumerWidget {
                 currentUserPubkey: pubkey,
                 onLongPress: () => showMessageMenu(message),
                 onReaction: (emoji) => toggleReaction(message, emoji),
+                onHorizontalDragEnd: () => input.setReplyingTo(message),
                 replyPreview: replyPreview,
                 onReplyTap: replyPreview != null && !replyPreview.isNotFound
                     ? () => scrollToMessageResult.scrollToMessage(replyPreview.messageId)
@@ -439,6 +440,7 @@ class ChatScreen extends HookConsumerWidget {
                       input: input,
                       mediaUpload: mediaUpload,
                       currentUserPubkey: pubkey,
+                      isGroupChat: chatProfile.data?.isDm != true,
                       onSend: sendMessage,
                       onError: showNotice,
                       getChatMessageQuote: getChatMessageQuote,
@@ -472,6 +474,7 @@ class _ChatInput extends StatelessWidget {
     required this.input,
     required this.mediaUpload,
     required this.currentUserPubkey,
+    required this.isGroupChat,
     required this.onSend,
     required this.onError,
     required this.getChatMessageQuote,
@@ -480,6 +483,7 @@ class _ChatInput extends StatelessWidget {
   final ChatInputState input;
   final MediaUploadState mediaUpload;
   final String currentUserPubkey;
+  final bool isGroupChat;
   final Future<void> Function(
     String message,
     ChatMessage? replyingTo,
@@ -523,17 +527,24 @@ class _ChatInput extends StatelessWidget {
       final hasQuote = input.replyingTo != null;
       if (!hasQuote && !hasMedia) return null;
 
+      final quoteData = hasQuote ? getChatMessageQuote(input.replyingTo!.id) : null;
+      final shouldRenderQuote = hasQuote && quoteData != null && !quoteData.isNotFound;
+      final replyAuthorColor = isGroupChat && shouldRenderQuote
+          ? AvatarColor.fromPubkey(quoteData.authorPubkey).toColorSet(context.colors).content
+          : null;
+
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (hasQuote)
+          if (shouldRenderQuote)
             ChatMessageQuote(
-              data: getChatMessageQuote(input.replyingTo!.id)!,
+              data: quoteData,
               currentUserPubkey: currentUserPubkey,
               onCancel: input.cancelReply,
+              authorColor: replyAuthorColor,
             ),
-          if (hasQuote && hasMedia) SizedBox(height: 8.h),
+          if (shouldRenderQuote && hasMedia) SizedBox(height: 8.h),
           if (hasMedia)
             ChatMediaUploadPreview(
               items: mediaUpload.items,

@@ -380,5 +380,23 @@ void main() {
         expect(find.byKey(const Key('quote_thumbnail')), findsNothing);
       });
     });
+
+    group('authorColor', () {
+      testWidgets('passes authorColor to WnMessageQuote', (tester) async {
+        const customColor = Colors.purple;
+        await mountWidget(
+          ChatMessageQuote(
+            data: _quoteData(
+              authorMetadata: const FlutterMetadata(name: 'Test Author', custom: {}),
+            ),
+            authorColor: customColor,
+          ),
+          tester,
+        );
+
+        final textWidget = tester.widget<Text>(find.text('Test Author'));
+        expect(textWidget.style?.color, customColor);
+      });
+    });
   });
 }

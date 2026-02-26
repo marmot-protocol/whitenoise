@@ -17,6 +17,7 @@ class ChatMessageBubble extends StatelessWidget {
   final void Function(String emoji)? onReaction;
   final ChatMessageQuoteData? replyPreview;
   final VoidCallback? onReplyTap;
+  final VoidCallback? onHorizontalDragEnd;
   final String? senderName;
   final String? senderPictureUrl;
   final bool showAvatar;
@@ -32,6 +33,7 @@ class ChatMessageBubble extends StatelessWidget {
     this.onReaction,
     this.replyPreview,
     this.onReplyTap,
+    this.onHorizontalDragEnd,
     this.senderName,
     this.senderPictureUrl,
     this.showAvatar = false,
@@ -63,6 +65,10 @@ class ChatMessageBubble extends StatelessWidget {
     final avatarColor = AvatarColor.fromPubkey(message.pubkey);
     final colorSet = avatarColor.toColorSet(context.colors);
 
+    final replyAuthorColor = isGroupChat && replyPreview != null && !replyPreview!.isNotFound
+        ? AvatarColor.fromPubkey(replyPreview!.authorPubkey).toColorSet(context.colors).content
+        : null;
+
     return WnMessageBubble(
       direction: isOwnMessage ? MessageDirection.outgoing : MessageDirection.incoming,
       isDeleted: message.isDeleted,
@@ -80,6 +86,7 @@ class ChatMessageBubble extends StatelessWidget {
               data: replyPreview!,
               currentUserPubkey: currentUserPubkey,
               onTap: onReplyTap,
+              authorColor: replyAuthorColor,
             )
           : null,
       timestamp: showTail ? _formatTime(message.createdAt) : null,
@@ -87,6 +94,7 @@ class ChatMessageBubble extends StatelessWidget {
       currentUserPubkey: currentUserPubkey,
       onLongPress: onLongPress,
       onReaction: onReaction,
+      onHorizontalDragEnd: onHorizontalDragEnd,
       avatar: !isOwnMessage && showAvatar
           ? WnAvatar(
               pictureUrl: senderPictureUrl,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/theme.dart';
@@ -124,6 +125,169 @@ double _timestampReservedWidth(String timestamp, TextStyle tsStyle, bool isOutgo
   }
 }
 
+const _swipeReplyThreshold = 50.0;
+
+class _SwipeableBubble extends HookWidget {
+  const _SwipeableBubble({
+    required this.child,
+    required this.onSwipeReply,
+  });
+
+  final Widget child;
+  final VoidCallback onSwipeReply;
+
+  @override
+  Widget build(BuildContext context) {
+    final dragDistance = useRef(0.0);
+    final hasTriggered = useRef(false);
+
+    void handleDragStart(DragStartDetails details) {
+      dragDistance.value = 0;
+      hasTriggered.value = false;
+    }
+
+    void handleDragUpdate(DragUpdateDetails details) {
+      if (hasTriggered.value) return;
+      if (details.delta.dx > 0) {
+        dragDistance.value += details.delta.dx;
+      }
+      if (dragDistance.value >= _swipeReplyThreshold) {
+        hasTriggered.value = true;
+        onSwipeReply();
+      }
+    }
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onHorizontalDragStart: handleDragStart,
+      onHorizontalDragUpdate: handleDragUpdate,
+      child: child,
+    );
+  }
+}
+
+class _BubbleContent extends StatelessWidget {
+  const _BubbleContent({
+    required this.bubbleColor,
+    required this.borderRadius,
+    required this.hasSenderName,
+    required this.senderName,
+    required this.senderNameColor,
+    required this.replyContent,
+    required this.mediaContent,
+    required this.hasText,
+    required this.hasTimestamp,
+    required this.content,
+    required this.timestamp,
+    required this.textStyle,
+    required this.tsStyle,
+    required this.isOutgoing,
+    required this.hasReactions,
+    required this.reactions,
+    required this.reactionType,
+    required this.currentUserPubkey,
+    required this.onReaction,
+  });
+
+  final Color bubbleColor;
+  final BorderRadius borderRadius;
+  final bool hasSenderName;
+  final String? senderName;
+  final Color? senderNameColor;
+  final Widget? replyContent;
+  final Widget? mediaContent;
+  final bool hasText;
+  final bool hasTimestamp;
+  final String? content;
+  final String? timestamp;
+  final TextStyle textStyle;
+  final TextStyle tsStyle;
+  final bool isOutgoing;
+  final bool hasReactions;
+  final List<EmojiReaction> reactions;
+  final WnReactionType reactionType;
+  final String? currentUserPubkey;
+  final void Function(String emoji)? onReaction;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Container(
+      padding: EdgeInsets.only(
+        left: 10.w,
+        right: 10.w,
+        top: 10.h,
+        bottom: 12.h,
+      ),
+      decoration: BoxDecoration(color: bubbleColor, borderRadius: borderRadius),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          if (hasSenderName) ...[
+            Text(
+              senderName!,
+              style: context.typographyScaled.semiBold12.copyWith(
+                color: senderNameColor ?? colors.backgroundContentTertiary,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+            SizedBox(height: 8.h),
+          ],
+          if (replyContent != null) ...[replyContent!, SizedBox(height: 8.h)],
+          if (mediaContent != null) ...[
+            mediaContent!,
+            if (hasText || hasTimestamp) SizedBox(height: 8.h),
+          ],
+          if (hasText && hasTimestamp)
+            _TextWithTimestamp(
+              content: content!,
+              timestamp: timestamp!,
+              textStyle: textStyle,
+              tsStyle: tsStyle,
+              isOutgoing: isOutgoing,
+            )
+          else if (hasText)
+            Text(content!, style: textStyle)
+          else if (hasTimestamp) ...[
+            SizedBox(height: 2.h),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(timestamp!, style: tsStyle),
+                if (isOutgoing) ...[
+                  SizedBox(width: _chatStatusGap.w),
+                  const WnChatStatus(status: ChatStatusType.sent),
+                ],
+              ],
+            ),
+          ],
+          if (hasReactions) ...[
+            SizedBox(height: 8.h),
+            Wrap(
+              spacing: 4.w,
+              runSpacing: 4.h,
+              children: [
+                for (final reaction in reactions)
+                  WnReaction(
+                    key: ValueKey(reaction.emoji),
+                    emoji: reaction.emoji,
+                    count: reaction.count.toInt(),
+                    type: reactionType,
+                    isSelected: reaction.users.contains(currentUserPubkey),
+                    onTap: onReaction != null ? () => onReaction!(reaction.emoji) : null,
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
 class WnMessageBubble extends StatelessWidget {
   final MessageDirection direction;
   final bool isDeleted;
@@ -136,6 +300,7 @@ class WnMessageBubble extends StatelessWidget {
   final String? currentUserPubkey;
   final VoidCallback? onLongPress;
   final void Function(String emoji)? onReaction;
+  final VoidCallback? onHorizontalDragEnd;
   final Widget? avatar;
   final String? senderName;
   final Color? senderNameColor;
@@ -154,6 +319,7 @@ class WnMessageBubble extends StatelessWidget {
     this.currentUserPubkey,
     this.onLongPress,
     this.onReaction,
+    this.onHorizontalDragEnd,
     this.avatar,
     this.senderName,
     this.senderNameColor,
@@ -197,6 +363,32 @@ class WnMessageBubble extends StatelessWidget {
     final textStyle = context.typographyScaled.medium14.copyWith(color: textColor);
     final tsStyle = context.typographyScaled.medium12.copyWith(color: timestampColor);
 
+    final bubbleContent = _BubbleContent(
+      bubbleColor: bubbleColor,
+      borderRadius: _bubbleBorderRadius(
+        isOutgoing: _isOutgoing,
+        showTail: showTail,
+        r: radius,
+      ),
+      hasSenderName: hasSenderName,
+      senderName: senderName,
+      senderNameColor: senderNameColor,
+      replyContent: replyContent,
+      mediaContent: mediaContent,
+      hasText: hasText,
+      hasTimestamp: hasTimestamp,
+      content: content,
+      timestamp: timestamp,
+      textStyle: textStyle,
+      tsStyle: tsStyle,
+      isOutgoing: _isOutgoing,
+      hasReactions: hasReactions,
+      reactions: reactions,
+      reactionType: reactionType,
+      currentUserPubkey: currentUserPubkey,
+      onReaction: onReaction,
+    );
+
     final bubble = Align(
       alignment: _isOutgoing ? Alignment.centerRight : Alignment.centerLeft,
       child: ConstrainedBox(
@@ -210,93 +402,21 @@ class WnMessageBubble extends StatelessWidget {
             child: Stack(
               clipBehavior: Clip.none,
               children: [
-                GestureDetector(
-                  onLongPress: onLongPress,
-                  child: Container(
-                    padding: EdgeInsets.only(
-                      left: 10.w,
-                      right: 10.w,
-                      top: 10.h,
-                      bottom: 12.h,
+                if (onHorizontalDragEnd != null)
+                  _SwipeableBubble(
+                    onSwipeReply: onHorizontalDragEnd!,
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.opaque,
+                      onLongPress: onLongPress,
+                      child: bubbleContent,
                     ),
-                    decoration: BoxDecoration(
-                      color: bubbleColor,
-                      borderRadius: _bubbleBorderRadius(
-                        isOutgoing: _isOutgoing,
-                        showTail: showTail,
-                        r: radius,
-                      ),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        if (hasSenderName) ...[
-                          Text(
-                            senderName!,
-                            style: context.typographyScaled.semiBold12.copyWith(
-                              color: senderNameColor ?? colors.backgroundContentTertiary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          SizedBox(height: 8.h),
-                        ],
-                        if (replyContent != null) ...[
-                          replyContent!,
-                          SizedBox(height: 8.h),
-                        ],
-                        if (mediaContent != null) ...[
-                          mediaContent!,
-                          if (hasText || hasTimestamp) SizedBox(height: 8.h),
-                        ],
-                        if (hasText && hasTimestamp)
-                          _TextWithTimestamp(
-                            content: content!,
-                            timestamp: timestamp!,
-                            textStyle: textStyle,
-                            tsStyle: tsStyle,
-                            isOutgoing: _isOutgoing,
-                          )
-                        else if (hasText)
-                          Text(content!, style: textStyle)
-                        else if (hasTimestamp) ...[
-                          SizedBox(height: 2.h),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              Text(timestamp!, style: tsStyle),
-                              if (_isOutgoing) ...[
-                                SizedBox(width: _chatStatusGap.w),
-                                const WnChatStatus(status: ChatStatusType.sent),
-                              ],
-                            ],
-                          ),
-                        ],
-                        if (hasReactions) ...[
-                          SizedBox(height: 8.h),
-                          Wrap(
-                            spacing: 4.w,
-                            runSpacing: 4.h,
-                            children: [
-                              for (final reaction in reactions)
-                                WnReaction(
-                                  key: ValueKey(reaction.emoji),
-                                  emoji: reaction.emoji,
-                                  count: reaction.count.toInt(),
-                                  type: reactionType,
-                                  isSelected: reaction.users.contains(currentUserPubkey),
-                                  onTap: onReaction != null
-                                      ? () => onReaction!(reaction.emoji)
-                                      : null,
-                                ),
-                            ],
-                          ),
-                        ],
-                      ],
-                    ),
+                  )
+                else
+                  GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onLongPress: onLongPress,
+                    child: bubbleContent,
                   ),
-                ),
                 if (showTail)
                   Positioned(
                     bottom: 0,

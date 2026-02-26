@@ -14,10 +14,13 @@ class ChatProfile {
   final String? pictureUrl;
   final String? otherMemberPubkey;
   final AvatarColor color;
+  final bool isDm;
 
   const ChatProfile({
     required this.displayName,
     required this.color,
+    required this.isDm,
+
     this.pictureUrl,
     this.otherMemberPubkey,
   });
@@ -30,10 +33,17 @@ class ChatProfile {
           displayName == other.displayName &&
           pictureUrl == other.pictureUrl &&
           otherMemberPubkey == other.otherMemberPubkey &&
-          color == other.color;
+          color == other.color &&
+          isDm == other.isDm;
 
   @override
-  int get hashCode => Object.hash(displayName, pictureUrl, otherMemberPubkey, color);
+  int get hashCode => Object.hash(
+    displayName,
+    pictureUrl,
+    otherMemberPubkey,
+    color,
+    isDm,
+  );
 }
 
 AsyncSnapshot<ChatProfile> useChatProfile(
@@ -82,6 +92,7 @@ Future<ChatProfile> _fetchGroupProfile(groups_api.Group group, String pubkey) as
     displayName: group.name.isEmpty ? 'Unknown group' : group.name,
     pictureUrl: imagePath,
     color: AvatarColor.fromPubkey(group.mlsGroupId),
+    isDm: false,
   );
 }
 
@@ -100,7 +111,11 @@ Future<ChatProfile> _fetchDmProfile(
 
   if (otherMemberPubkey == null) {
     _logger.warning('No other member found in DM group');
-    return ChatProfile(displayName: 'Unknown User', color: AvatarColor.fromPubkey(groupId));
+    return ChatProfile(
+      displayName: 'Unknown User',
+      color: AvatarColor.fromPubkey(groupId),
+      isDm: true,
+    );
   }
 
   final metadata = await users_api.userMetadata(
@@ -113,5 +128,6 @@ Future<ChatProfile> _fetchDmProfile(
     pictureUrl: metadata.picture,
     otherMemberPubkey: otherMemberPubkey,
     color: AvatarColor.fromPubkey(otherMemberPubkey),
+    isDm: true,
   );
 }

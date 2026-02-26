@@ -12,6 +12,7 @@ class WnMessageQuote extends StatelessWidget {
     this.onCancel,
     this.onTap,
     this.image,
+    this.authorColor,
   });
 
   final String author;
@@ -19,6 +20,7 @@ class WnMessageQuote extends StatelessWidget {
   final VoidCallback? onCancel;
   final VoidCallback? onTap;
   final ImageProvider? image;
+  final Color? authorColor;
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +58,7 @@ class WnMessageQuote extends StatelessWidget {
                       Text(
                         author,
                         style: typography.semiBold12.copyWith(
-                          color: colors.backgroundContentTertiary,
+                          color: authorColor ?? colors.backgroundContentTertiary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,

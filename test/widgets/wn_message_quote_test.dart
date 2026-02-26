@@ -205,5 +205,22 @@ void main() {
         expect(tapCalled, isFalse);
       });
     });
+
+    group('authorColor', () {
+      testWidgets('uses custom authorColor when provided', (tester) async {
+        const customColor = Colors.purple;
+        await mountWidget(
+          const WnMessageQuote(
+            author: 'Alice',
+            text: 'Hello',
+            authorColor: customColor,
+          ),
+          tester,
+        );
+
+        final textWidget = tester.widget<Text>(find.text('Alice'));
+        expect(textWidget.style?.color, customColor);
+      });
+    });
   });
 }

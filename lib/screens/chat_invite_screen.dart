@@ -177,7 +177,7 @@ class ChatInviteScreen extends HookConsumerWidget {
                   : _InviteMessageList(
                       chatMessages: chatMessages,
                       pubkey: pubkey,
-                      isGroupChat: chatProfile.data?.otherMemberPubkey == null,
+                      isGroupChat: chatProfile.data?.isDm == false,
                     ),
             ),
             WnSlate(

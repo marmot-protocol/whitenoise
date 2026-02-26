@@ -1084,6 +1084,20 @@ void main() {
         expect(find.byType(ChatMessageQuote), findsOneWidget);
       });
 
+      testWidgets('swiping message bubble shows reply preview in input', (tester) async {
+        _api.initialMessages = [
+          _message('m1', DateTime(2024)),
+        ];
+        await pumpChatScreen(tester);
+        expect(find.byType(ChatMessageQuote), findsNothing);
+
+        await tester.fling(find.textContaining('Message m1'), const Offset(500, 0), 1000);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ChatMessageQuote), findsOneWidget);
+        expect(find.textContaining('Message m1'), findsWidgets);
+      });
+
       testWidgets('tapping Reply in message actions shows reply preview in input', (tester) async {
         _api.initialMessages = [
           _message('m1', DateTime(2024)),
@@ -1132,6 +1146,25 @@ void main() {
         expect(find.byType(ChatMessageQuote), findsOneWidget);
 
         await tester.tap(find.byKey(const Key('cancel_quote_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ChatMessageQuote), findsNothing);
+      });
+
+      testWidgets('hides reply preview when replied message is deleted', (tester) async {
+        _api.initialMessages = [
+          _message('m1', DateTime(2024)),
+        ];
+        await pumpChatScreen(tester);
+
+        await tester.longPress(find.textContaining('Message m1'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('reply_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ChatMessageQuote), findsOneWidget);
+
+        _api.emitMessage(_message('m1', DateTime(2024), isDeleted: true));
         await tester.pumpAndSettle();
 
         expect(find.byType(ChatMessageQuote), findsNothing);
