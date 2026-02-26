@@ -47,6 +47,12 @@ void main() {
       expect(copyCard.textToDisplay, testNpubAFormatted);
     });
 
+    testWidgets('uses snapToWords for ellipsis', (tester) async {
+      await pumpCard(tester);
+      final copyCard = tester.widget<WnCopyCard>(find.byType(WnCopyCard));
+      expect(copyCard.snapToWords, isTrue);
+    });
+
     group('copy to clipboard', () {
       tearDown(clearClipboardMock);
       testWidgets('npub can be copied', (tester) async {

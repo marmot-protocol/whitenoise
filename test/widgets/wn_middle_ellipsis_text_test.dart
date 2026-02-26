@@ -15,6 +15,7 @@ void main() {
       int maxLines = 1,
       int suffixLength = 8,
       TextStyle? style,
+      bool snapToWords = false,
     }) async {
       await mountWidget(
         SizedBox(
@@ -24,6 +25,7 @@ void main() {
             maxLines: maxLines,
             suffixLength: suffixLength,
             style: style,
+            snapToWords: snapToWords,
           ),
         ),
         tester,
@@ -87,6 +89,30 @@ void main() {
         );
         final textWidget = tester.widget<Text>(find.byType(Text));
         expect(textWidget.data!.endsWith(last4Chars), isTrue);
+      });
+    });
+
+    group('snapToWords', () {
+      testWidgets('defaults to false', (tester) async {
+        await pump(tester, text: 'word1 word2', width: 100);
+        final ellipsis = tester.widget<WnMiddleEllipsisText>(find.byType(WnMiddleEllipsisText));
+        expect(ellipsis.snapToWords, isFalse);
+      });
+
+      testWidgets('cuts mid-word without snapToWords', (tester) async {
+        const text = 'alpha bravo charlie delta echo foxtrot golf hotel';
+        await pump(tester, text: text, width: 280, suffixLength: 5);
+        final displayed = tester.widget<Text>(find.byType(Text)).data!;
+
+        expect(displayed, 'alpha bra ... hotel');
+      });
+
+      testWidgets('preserves prefix for space-free strings', (tester) async {
+        await pump(tester, text: longText, width: 200, snapToWords: true);
+        final displayed = tester.widget<Text>(find.byType(Text)).data!;
+
+        expect(displayed.contains('...'), isTrue);
+        expect(displayed, isNot(' ... $last8Chars'));
       });
     });
 

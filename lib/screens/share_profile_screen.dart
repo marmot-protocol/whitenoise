@@ -90,6 +90,7 @@ class ShareProfileScreen extends HookConsumerWidget {
                                 onCopyError: () => showErrorNotice(
                                   context.l10n.publicKeyCopyError,
                                 ),
+                                snapToWords: true,
                               ),
                             ),
                             Gap(36.h),

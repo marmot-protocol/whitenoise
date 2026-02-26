@@ -71,6 +71,7 @@ class WnUserProfileCard extends StatelessWidget {
             textToCopy: npub,
             onCopySuccess: () => onPublicKeyCopied?.call(),
             onCopyError: () => onPublicKeyCopyError?.call(),
+            snapToWords: true,
           ),
         ],
       ],

@@ -9,12 +9,14 @@ class WnMiddleEllipsisText extends StatelessWidget {
     this.style,
     this.maxLines = 1,
     this.suffixLength = 8,
+    this.snapToWords = false,
   }) : assert(suffixLength >= 0);
 
   final String text;
   final TextStyle? style;
   final int maxLines;
   final int suffixLength;
+  final bool snapToWords;
 
   bool _fitsInMaxLines(
     String candidate,
@@ -49,29 +51,40 @@ class WnMiddleEllipsisText extends StatelessWidget {
     final suffix = text.length > effectiveSuffixLength
         ? text.substring(text.length - effectiveSuffixLength)
         : '';
-    final maxPrefixEnd = text.length - effectiveSuffixLength - 1;
 
-    if (maxPrefixEnd <= 0) return '$_ellipsis$suffix';
+    final maxPrefixLength = text.length - effectiveSuffixLength;
+    if (maxPrefixLength <= 0) return '$_ellipsis$suffix';
 
-    var lowPrefixEnd = 0;
-    var highPrefixEnd = maxPrefixEnd;
+    var low = 0;
+    var high = maxPrefixLength;
     var bestPrefix = '';
 
-    while (lowPrefixEnd <= highPrefixEnd) {
-      final midPrefixEnd = (lowPrefixEnd + highPrefixEnd) ~/ 2;
-      final prefix = text.substring(0, midPrefixEnd);
+    while (low <= high) {
+      final mid = (low + high) ~/ 2;
+      final prefix = mid > 0 ? text.substring(0, mid) : '';
       final candidate = '$prefix$_ellipsis$suffix';
 
       if (_fitsInMaxLines(candidate, maxWidth, effectiveStyle, textScaler, textDirection)) {
         bestPrefix = prefix;
-        lowPrefixEnd = midPrefixEnd + 1;
+        low = mid + 1;
       } else {
-        highPrefixEnd = midPrefixEnd - 1;
+        high = mid - 1;
       }
     }
 
-    final result = bestPrefix.isEmpty ? '$_ellipsis$suffix' : '$bestPrefix$_ellipsis$suffix';
-    return result;
+    if (snapToWords && bestPrefix.isNotEmpty) {
+      final nextCharIsSpace = bestPrefix.length < text.length && text[bestPrefix.length] == ' ';
+      final endsWithSpace = bestPrefix.endsWith(' ');
+
+      if (!endsWithSpace && !nextCharIsSpace) {
+        final lastSpaceIndex = bestPrefix.lastIndexOf(' ');
+        if (lastSpaceIndex != -1) {
+          bestPrefix = bestPrefix.substring(0, lastSpaceIndex + 1);
+        }
+      }
+    }
+
+    return bestPrefix.isEmpty ? '$_ellipsis$suffix' : '$bestPrefix$_ellipsis$suffix';
   }
 
   @override

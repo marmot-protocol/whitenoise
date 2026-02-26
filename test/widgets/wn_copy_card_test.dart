@@ -32,6 +32,30 @@ void main() {
       expect(textWidget.maxLines, 2);
     });
 
+    group('snapToWords', () {
+      testWidgets('defaults to false', (tester) async {
+        await mountWidget(
+          const WnCopyCard(textToDisplay: testNpubA, textToCopy: testNpubA),
+          tester,
+        );
+        final ellipsis = tester.widget<WnMiddleEllipsisText>(
+          find.byType(WnMiddleEllipsisText),
+        );
+        expect(ellipsis.snapToWords, isFalse);
+      });
+
+      testWidgets('forwards true to WnMiddleEllipsisText', (tester) async {
+        await mountWidget(
+          const WnCopyCard(textToDisplay: testNpubA, textToCopy: testNpubA, snapToWords: true),
+          tester,
+        );
+        final ellipsis = tester.widget<WnMiddleEllipsisText>(
+          find.byType(WnMiddleEllipsisText),
+        );
+        expect(ellipsis.snapToWords, isTrue);
+      });
+    });
+
     group('copy functionality', () {
       late String? Function() getClipboard;
 

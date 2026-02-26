@@ -149,6 +149,22 @@ void main() {
         expect(ellipsisText.maxLines, 2);
       });
 
+      testWidgets('npub uses snapToWords', (tester) async {
+        await mountWidget(
+          const WnUserItem(
+            displayName: 'Alice',
+            npub: testNpubAFormatted,
+            size: WnUserItemSize.medium,
+          ),
+          tester,
+        );
+
+        final ellipsisText = tester.widget<WnMiddleEllipsisText>(
+          find.byType(WnMiddleEllipsisText),
+        );
+        expect(ellipsisText.snapToWords, isTrue);
+      });
+
       testWidgets('hides npub when not provided', (tester) async {
         await mountWidget(
           const WnUserItem(

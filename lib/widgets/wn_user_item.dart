@@ -215,6 +215,7 @@ class _MediumBigLayout extends StatelessWidget {
                             color: colors.backgroundContentSecondary,
                           ),
                           maxLines: 2,
+                          snapToWords: true,
                         ),
                       ],
                     ],
