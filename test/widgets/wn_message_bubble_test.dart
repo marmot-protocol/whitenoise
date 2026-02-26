@@ -227,7 +227,7 @@ void main() {
         expect(widget.type, WnReactionType.incoming);
       });
 
-      testWidgets('renders reactions in stable alphabetical order regardless of input order', (
+      testWidgets('renders reactions in order sent by rust crate', (
         tester,
       ) async {
         final reactions = [
@@ -246,7 +246,7 @@ void main() {
 
         final widgets = tester.widgetList<WnReaction>(find.byType(WnReaction)).toList();
         final emojis = widgets.map((w) => w.emoji).toList();
-        final expectedEmojis = ['❤️', '👍', '🔥'];
+        final expectedEmojis = ['🔥', '❤️', '👍'];
         expect(emojis, equals(expectedEmojis));
       });
 
