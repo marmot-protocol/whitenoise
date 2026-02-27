@@ -126,6 +126,14 @@ impl From<anyhow::Error> for ApiError {
     }
 }
 
+impl From<std::io::Error> for ApiError {
+    fn from(error: std::io::Error) -> Self {
+        Self::Other {
+            message: error.to_string(),
+        }
+    }
+}
+
 impl ApiError {
     /// Get a user-friendly error type name
     pub fn error_type(&self) -> String {

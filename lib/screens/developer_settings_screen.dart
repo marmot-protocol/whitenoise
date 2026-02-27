@@ -113,6 +113,13 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                     ),
                     const WnSeparator(),
                     SizedBox(height: 8.h),
+                    _ViewLogsRow(
+                      label: context.l10n.appLogsViewLogs,
+                      description: context.l10n.appLogsViewLogsDescription,
+                      onTap: () => Routes.pushToAppLogs(context),
+                    ),
+                    const WnSeparator(),
+                    SizedBox(height: 8.h),
                   ],
                   _ActionButtons(
                     isLoading: state.isLoading,
@@ -270,6 +277,58 @@ class _KeyPackagesList extends HookWidget {
             if (canScrollDown.value)
               WnScrollEdgeEffect.slateBottom(color: colors.backgroundSecondary),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ViewLogsRow extends StatelessWidget {
+  const _ViewLogsRow({
+    required this.label,
+    required this.description,
+    required this.onTap,
+  });
+
+  final String label;
+  final String description;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+
+    return GestureDetector(
+      key: const Key('view_logs_row'),
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: SizedBox(
+        height: 56.h,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: typography.medium16.copyWith(
+                  color: colors.backgroundContentPrimary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                description,
+                style: typography.medium12.copyWith(
+                  color: colors.backgroundContentSecondary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
         ),
       ),
     );

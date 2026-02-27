@@ -43,7 +43,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 424286752;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -346389310;
 
 // Section: executor
 
@@ -3479,6 +3479,48 @@ fn wire__crate__api__notifications__subscribe_to_notifications_impl(
         },
     )
 }
+fn wire__crate__api__logs__subscribe_to_rust_logs_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "subscribe_to_rust_logs",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_logs_base_dir = <String>::sse_decode(&mut deserializer);
+            let api_sink =
+                <StreamSink<String, flutter_rust_bridge::for_generated::SseCodec>>::sse_decode(
+                    &mut deserializer,
+                );
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::error::ApiError>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::logs::subscribe_to_rust_logs(api_logs_base_dir, api_sink)
+                                .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__utils__tag_from_vec_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -4373,6 +4415,14 @@ impl SseDecode
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut inner = <usize>::sse_decode(deserializer);
         return decode_rust_opaque_moi(inner);
+    }
+}
+
+impl SseDecode for StreamSink<String, flutter_rust_bridge::for_generated::SseCodec> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <String>::sse_decode(deserializer);
+        return StreamSink::deserialize(inner);
     }
 }
 
@@ -6029,31 +6079,34 @@ fn pde_ffi_dispatcher_primary_impl(
             rust_vec_len,
             data_len,
         ),
-        88 => wire__crate__api__utils__tag_from_vec_impl(port, ptr, rust_vec_len, data_len),
-        93 => wire__crate__api__accounts__unfollow_user_impl(port, ptr, rust_vec_len, data_len),
-        94 => wire__crate__api__accounts__update_account_metadata_impl(
+        88 => {
+            wire__crate__api__logs__subscribe_to_rust_logs_impl(port, ptr, rust_vec_len, data_len)
+        }
+        89 => wire__crate__api__utils__tag_from_vec_impl(port, ptr, rust_vec_len, data_len),
+        94 => wire__crate__api__accounts__unfollow_user_impl(port, ptr, rust_vec_len, data_len),
+        95 => wire__crate__api__accounts__update_account_metadata_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        95 => wire__crate__api__update_language_impl(port, ptr, rust_vec_len, data_len),
-        96 => wire__crate__api__update_theme_mode_impl(port, ptr, rust_vec_len, data_len),
-        97 => wire__crate__api__accounts__upload_account_profile_picture_impl(
+        96 => wire__crate__api__update_language_impl(port, ptr, rust_vec_len, data_len),
+        97 => wire__crate__api__update_theme_mode_impl(port, ptr, rust_vec_len, data_len),
+        98 => wire__crate__api__accounts__upload_account_profile_picture_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        98 => {
+        99 => {
             wire__crate__api__media_files__upload_chat_media_impl(port, ptr, rust_vec_len, data_len)
         }
-        99 => wire__crate__api__groups__upload_group_image_impl(port, ptr, rust_vec_len, data_len),
-        100 => {
+        100 => wire__crate__api__groups__upload_group_image_impl(port, ptr, rust_vec_len, data_len),
+        101 => {
             wire__crate__api__users__user_has_key_package_impl(port, ptr, rust_vec_len, data_len)
         }
-        101 => wire__crate__api__users__user_metadata_impl(port, ptr, rust_vec_len, data_len),
-        102 => wire__crate__api__users__user_relays_impl(port, ptr, rust_vec_len, data_len),
+        102 => wire__crate__api__users__user_metadata_impl(port, ptr, rust_vec_len, data_len),
+        103 => wire__crate__api__users__user_relays_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -6078,10 +6131,10 @@ fn pde_ffi_dispatcher_sync_impl(
         59 => wire__crate__api__utils__language_to_string_impl(ptr, rust_vec_len, data_len),
         60 => wire__crate__api__utils__language_turkish_impl(ptr, rust_vec_len, data_len),
         71 => wire__crate__api__utils__npub_from_hex_pubkey_impl(ptr, rust_vec_len, data_len),
-        89 => wire__crate__api__utils__theme_mode_dark_impl(ptr, rust_vec_len, data_len),
-        90 => wire__crate__api__utils__theme_mode_light_impl(ptr, rust_vec_len, data_len),
-        91 => wire__crate__api__utils__theme_mode_system_impl(ptr, rust_vec_len, data_len),
-        92 => wire__crate__api__utils__theme_mode_to_string_impl(ptr, rust_vec_len, data_len),
+        90 => wire__crate__api__utils__theme_mode_dark_impl(ptr, rust_vec_len, data_len),
+        91 => wire__crate__api__utils__theme_mode_light_impl(ptr, rust_vec_len, data_len),
+        92 => wire__crate__api__utils__theme_mode_system_impl(ptr, rust_vec_len, data_len),
+        93 => wire__crate__api__utils__theme_mode_to_string_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -7469,6 +7522,13 @@ impl SseEncode
         let (ptr, size) = self.sse_encode_raw();
         <usize>::sse_encode(ptr, serializer);
         <i32>::sse_encode(size, serializer);
+    }
+}
+
+impl SseEncode for StreamSink<String, flutter_rust_bridge::for_generated::SseCodec> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        unimplemented!("")
     }
 }
 

@@ -2021,6 +2021,72 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Copied to clipboard'**
   String get rawDebugViewCopied;
+
+  /// Screen title for the in-app log viewer
+  ///
+  /// In en, this message translates to:
+  /// **'App Logs'**
+  String get appLogsTitle;
+
+  /// Label for the view logs button in developer settings
+  ///
+  /// In en, this message translates to:
+  /// **'View logs'**
+  String get appLogsViewLogs;
+
+  /// Subtitle for the view logs button
+  ///
+  /// In en, this message translates to:
+  /// **'View all Logger output in app'**
+  String get appLogsViewLogsDescription;
+
+  /// Button to clear logs
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get appLogsClear;
+
+  /// Shown when log list is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No logs yet'**
+  String get appLogsEmpty;
+
+  /// Placeholder for log search field
+  ///
+  /// In en, this message translates to:
+  /// **'Search logs...'**
+  String get appLogsSearchPlaceholder;
+
+  /// Placeholder for adding include/exclude filter
+  ///
+  /// In en, this message translates to:
+  /// **'Add filter pattern'**
+  String get appLogsAddPatternPlaceholder;
+
+  /// Button to add exclude filter (hide matching logs)
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore'**
+  String get appLogsIgnore;
+
+  /// Button to add include filter (show only matching logs)
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get appLogsShow;
+
+  /// Button to clear all filter rules
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get appLogsClearFilters;
+
+  /// Shown/filtered count when filters active
+  ///
+  /// In en, this message translates to:
+  /// **'{shown} of {total}'**
+  String appLogsFilteredCount(int shown, int total);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

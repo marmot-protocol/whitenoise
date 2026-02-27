@@ -16,6 +16,7 @@ import 'api/chat_list.dart';
 import 'api/drafts.dart';
 import 'api/error.dart';
 import 'api/groups.dart';
+import 'api/logs.dart';
 import 'api/media_files.dart';
 import 'api/messages.dart';
 import 'api/metadata.dart';
@@ -212,6 +213,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ThemeMode dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerThemeMode(
     dynamic raw,
   );
+
+  @protected
+  RustStreamSink<String> dco_decode_StreamSink_String_Sse(dynamic raw);
 
   @protected
   RustStreamSink<ChatListStreamItem> dco_decode_StreamSink_chat_list_stream_item_Sse(dynamic raw);
@@ -678,6 +682,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ThemeMode sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerThemeMode(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  RustStreamSink<String> sse_decode_StreamSink_String_Sse(
     SseDeserializer deserializer,
   );
 
@@ -1241,6 +1250,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerThemeMode(
     ThemeMode self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_StreamSink_String_Sse(
+    RustStreamSink<String> self,
     SseSerializer serializer,
   );
 

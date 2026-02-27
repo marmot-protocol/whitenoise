@@ -16,6 +16,7 @@ import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/active_chat_provider.dart';
 import 'package:whitenoise/providers/debug_view_provider.dart';
+import 'package:whitenoise/providers/message_debug_log_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
@@ -56,6 +57,7 @@ class ChatScreen extends HookConsumerWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final pubkey = ref.watch(accountPubkeyProvider);
+    final debugLog = ref.read(messageDebugLogProvider.notifier);
     final (
       :messageCount,
       :getMessage,
@@ -68,6 +70,7 @@ class ChatScreen extends HookConsumerWidget {
       :getAuthorMetadata,
     ) = useChatMessages(
       groupId,
+      debugLog: debugLog,
     );
     final chatProfile = useChatProfile(context, pubkey, groupId);
     final scrollToMessageResult = useScrollToMessage(
@@ -139,14 +142,26 @@ class ChatScreen extends HookConsumerWidget {
       ChatMessage? replyingTo,
       List<MediaFile> mediaFiles,
     ) async {
-      await messageService.sendMessage(
-        content: message,
-        replyToMessageId: replyingTo?.id,
-        replyToMessagePubkey: replyingTo?.pubkey,
-        replyToMessageKind: replyingTo?.kind,
-        mediaFiles: mediaFiles,
+      debugLog.logStarted(
+        groupId: groupId,
+        contentLen: message.length,
+        mediaCount: mediaFiles.length,
+        replyToId: replyingTo?.id,
       );
-      mediaUpload.clearAll();
+      try {
+        await messageService.sendMessage(
+          content: message,
+          replyToMessageId: replyingTo?.id,
+          replyToMessagePubkey: replyingTo?.pubkey,
+          replyToMessageKind: replyingTo?.kind,
+          mediaFiles: mediaFiles,
+        );
+        debugLog.logOk(groupId: groupId, resultId: '');
+        mediaUpload.clearAll();
+      } catch (e, st) {
+        debugLog.logFailed(groupId: groupId, error: e, stackTrace: st);
+        rethrow;
+      }
     }
 
     Future<void> toggleReaction(ChatMessage message, String emoji) {
@@ -483,12 +498,20 @@ class _ChatInput extends StatelessWidget {
 
     Future<void> handleSend() async {
       final text = input.controller.text.trim();
-      if (text.isEmpty && !mediaUpload.canSend) return;
+      final hasMedia = mediaUpload.canSend;
+      _logger.info(
+        'handleSend textLen=${text.length} hasMedia=$hasMedia replyTo=${input.replyingTo?.id}',
+      );
+      if (text.isEmpty && !hasMedia) {
+        _logger.info('handleSend early return: empty text and no sendable media');
+        return;
+      }
       try {
         await onSend(text, input.replyingTo, mediaUpload.uploadedFiles);
         input.clear();
+        _logger.info('handleSend completed, input cleared');
       } catch (e, st) {
-        _logger.severe('Failed to send message', e, st);
+        _logger.severe('handleSend FAILED', e, st);
         if (context.mounted) {
           onError(context.l10n.failedToSendMessage);
         }

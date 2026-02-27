@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart';
 import 'package:whitenoise/l10n/l10n.dart';
+import 'package:whitenoise/providers/message_debug_log_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
@@ -22,6 +23,7 @@ class ChatRawDebugScreen extends HookConsumerWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
 
+    final debugLog = ref.read(messageDebugLogProvider.notifier);
     final (
       :messageCount,
       :getMessage,
@@ -34,6 +36,7 @@ class ChatRawDebugScreen extends HookConsumerWidget {
       :getAuthorMetadata,
     ) = useChatMessages(
       groupId,
+      debugLog: debugLog,
     );
 
     return Scaffold(
@@ -54,46 +57,60 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                       color: colors.backgroundContentPrimary,
                     ),
                   )
-                : Padding(
-                    padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 12.h),
-                        _DebugHeader(
-                          groupId: groupId,
-                          messageCount: messageCount,
-                          latestMessageId: latestMessageId,
-                          latestMessagePubkey: latestMessagePubkey,
+                : ListView.builder(
+                    padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 14.h),
+                    itemCount: messageCount + 4,
+                    itemBuilder: (context, index) {
+                      if (index == 0) {
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
+                          child: _DebugHeader(
+                            groupId: groupId,
+                            messageCount: messageCount,
+                            latestMessageId: latestMessageId,
+                            latestMessagePubkey: latestMessagePubkey,
+                          ),
+                        );
+                      }
+                      if (index == 1) {
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
+                          child: _SendLogSection(groupId: groupId),
+                        );
+                      }
+                      if (index == 2) {
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
+                          child: _StreamLogSection(groupId: groupId),
+                        );
+                      }
+                      if (index == 3 && messageCount == 0) {
+                        return Center(
+                          child: Padding(
+                            padding: EdgeInsets.only(top: 32.h),
+                            child: Text(
+                              context.l10n.rawDebugViewMessageCount(0),
+                              style: typography.medium14.copyWith(
+                                color: colors.backgroundContentTertiary,
+                              ),
+                            ),
+                          ),
+                        );
+                      }
+                      final messageIndex = index - 3;
+                      if (messageIndex < 0 || messageIndex >= messageCount) {
+                        return const SizedBox.shrink();
+                      }
+                      final message = getMessage(messageIndex);
+                      final authorMetadata = getAuthorMetadata(message.pubkey);
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 8.h),
+                        child: _RawMessageCard(
+                          message: message,
+                          authorMetadata: authorMetadata,
                         ),
-                        SizedBox(height: 12.h),
-                        Expanded(
-                          child: messageCount == 0
-                              ? Center(
-                                  child: Text(
-                                    context.l10n.rawDebugViewMessageCount(0),
-                                    style: typography.medium14.copyWith(
-                                      color: colors.backgroundContentTertiary,
-                                    ),
-                                  ),
-                                )
-                              : ListView.builder(
-                                  itemCount: messageCount,
-                                  itemBuilder: (context, index) {
-                                    final message = getMessage(index);
-                                    final authorMetadata = getAuthorMetadata(message.pubkey);
-                                    return Padding(
-                                      padding: EdgeInsets.only(bottom: 8.h),
-                                      child: _RawMessageCard(
-                                        message: message,
-                                        authorMetadata: authorMetadata,
-                                      ),
-                                    );
-                                  },
-                                ),
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
           ),
         ),
@@ -170,6 +187,221 @@ class _DebugHeader extends StatelessWidget {
         ),
       ),
     );
+  }
+}
+
+class _SendLogSection extends ConsumerWidget {
+  const _SendLogSection({required this.groupId});
+
+  final String groupId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+    final state = ref.watch(messageDebugLogProvider);
+    final forGroup = state.sendLog.where((e) => e.groupId == groupId).toList();
+
+    if (forGroup.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(10.w),
+        decoration: BoxDecoration(
+          color: colors.backgroundSecondary,
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Text(
+          'send_log: (no attempts for this group)',
+          style: typography.medium10.copyWith(
+            color: colors.backgroundContentTertiary,
+            fontFamily: 'monospace',
+          ),
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: () async {
+        final text = forGroup.map(_formatSendLogEntry).join('\n\n');
+        await Clipboard.setData(ClipboardData(text: text));
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.l10n.rawDebugViewCopied),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(10.w),
+        decoration: BoxDecoration(
+          color: colors.backgroundSecondary,
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'send_log (${forGroup.length} entries, tap to copy):',
+              style: typography.semiBold10.copyWith(
+                color: colors.backgroundContentSecondary,
+                fontFamily: 'monospace',
+              ),
+            ),
+            SizedBox(height: 6.h),
+            ...forGroup
+                .take(10)
+                .map(
+                  (e) => Padding(
+                    padding: EdgeInsets.only(bottom: 4.h),
+                    child: SelectableText(
+                      _formatSendLogEntry(e),
+                      style: typography.medium10.copyWith(
+                        color: _statusColor(colors, e.status),
+                        fontFamily: 'monospace',
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _statusColor(SemanticColors colors, MessageSendStatus status) {
+    return switch (status) {
+      MessageSendStatus.started => colors.backgroundContentSecondary,
+      MessageSendStatus.ok => colors.backgroundContentPrimary,
+      MessageSendStatus.failed => colors.fillDestructive,
+    };
+  }
+
+  String _formatSendLogEntry(MessageSendLogEntry e) {
+    final time = e.timestamp.toIso8601String();
+    final statusStr = e.status.name.toUpperCase();
+    final parts = <String>['$time $statusStr'];
+    if (e.contentLen != null) parts.add('len=${e.contentLen}');
+    if (e.mediaCount != null && e.mediaCount! > 0) parts.add('media=${e.mediaCount}');
+    if (e.replyToId != null) parts.add('replyTo=${e.replyToId}');
+    if (e.resultId != null && e.resultId!.isNotEmpty) parts.add('id=${e.resultId}');
+    if (e.error != null) parts.add('error=${e.error}');
+    if (e.stackTrace != null) {
+      parts.add('stack=${e.stackTrace.toString().split('\n').take(2).join(' ')}');
+    }
+    return parts.join(' ');
+  }
+}
+
+class _StreamLogSection extends ConsumerWidget {
+  const _StreamLogSection({required this.groupId});
+
+  final String groupId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+    final state = ref.watch(messageDebugLogProvider);
+    final forGroup = state.streamLog.where((e) => e.groupId == groupId).toList();
+
+    if (forGroup.isEmpty) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(10.w),
+        decoration: BoxDecoration(
+          color: colors.backgroundSecondary,
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Text(
+          'stream_log: (no events for this group)',
+          style: typography.medium10.copyWith(
+            color: colors.backgroundContentTertiary,
+            fontFamily: 'monospace',
+          ),
+        ),
+      );
+    }
+
+    return GestureDetector(
+      onTap: () async {
+        final text = forGroup.map(_formatStreamEvent).join('\n');
+        await Clipboard.setData(ClipboardData(text: text));
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.l10n.rawDebugViewCopied),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(10.w),
+        decoration: BoxDecoration(
+          color: colors.backgroundSecondary,
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'stream_log (${forGroup.length} events, tap to copy):',
+              style: typography.semiBold10.copyWith(
+                color: colors.backgroundContentSecondary,
+                fontFamily: 'monospace',
+              ),
+            ),
+            SizedBox(height: 6.h),
+            ...forGroup
+                .take(20)
+                .map(
+                  (e) => Padding(
+                    padding: EdgeInsets.only(bottom: 4.h),
+                    child: SelectableText(
+                      _formatStreamEvent(e),
+                      style: typography.medium10.copyWith(
+                        color: _eventColor(colors, e.eventType),
+                        fontFamily: 'monospace',
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Color _eventColor(SemanticColors colors, MessageStreamEventType eventType) {
+    return switch (eventType) {
+      MessageStreamEventType.connected => colors.backgroundContentPrimary,
+      MessageStreamEventType.snapshot => colors.backgroundContentPrimary,
+      MessageStreamEventType.update => colors.backgroundContentSecondary,
+      MessageStreamEventType.lagged => colors.fillDestructive,
+      MessageStreamEventType.streamError => colors.fillDestructive,
+      MessageStreamEventType.disconnected => colors.backgroundContentTertiary,
+    };
+  }
+
+  String _formatStreamEvent(MessageStreamEventEntry e) {
+    final time = e.timestamp.toIso8601String();
+    final typeName = e.eventType.name.toUpperCase();
+    final parts = <String>['$time $typeName'];
+    if (e.messageCount != null) parts.add('count=${e.messageCount}');
+    if (e.trigger != null) parts.add('trigger=${e.trigger}');
+    if (e.messageId != null) {
+      final shortId = e.messageId!.length > 8 ? '${e.messageId!.substring(0, 8)}…' : e.messageId!;
+      parts.add('msgId=$shortId');
+    }
+    if (e.laggedCount != null) parts.add('lagged=${e.laggedCount}');
+    if (e.error != null) parts.add('error=${e.error}');
+    return parts.join(' ');
   }
 }
 

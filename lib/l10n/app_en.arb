@@ -1711,5 +1711,54 @@
   "rawDebugViewCopied": "Copied to clipboard",
   "@rawDebugViewCopied": {
     "description": "Snackbar text after copying a raw message"
+  },
+
+  "appLogsTitle": "App Logs",
+  "@appLogsTitle": {
+    "description": "Screen title for the in-app log viewer"
+  },
+  "appLogsViewLogs": "View logs",
+  "@appLogsViewLogs": {
+    "description": "Label for the view logs button in developer settings"
+  },
+  "appLogsViewLogsDescription": "View all Logger output in app",
+  "@appLogsViewLogsDescription": {
+    "description": "Subtitle for the view logs button"
+  },
+  "appLogsClear": "Clear",
+  "@appLogsClear": {
+    "description": "Button to clear logs"
+  },
+  "appLogsEmpty": "No logs yet",
+  "@appLogsEmpty": {
+    "description": "Shown when log list is empty"
+  },
+  "appLogsSearchPlaceholder": "Search logs...",
+  "@appLogsSearchPlaceholder": {
+    "description": "Placeholder for log search field"
+  },
+  "appLogsAddPatternPlaceholder": "Add filter pattern",
+  "@appLogsAddPatternPlaceholder": {
+    "description": "Placeholder for adding include/exclude filter"
+  },
+  "appLogsIgnore": "Ignore",
+  "@appLogsIgnore": {
+    "description": "Button to add exclude filter (hide matching logs)"
+  },
+  "appLogsShow": "Show",
+  "@appLogsShow": {
+    "description": "Button to add include filter (show only matching logs)"
+  },
+  "appLogsClearFilters": "Clear filters",
+  "@appLogsClearFilters": {
+    "description": "Button to clear all filter rules"
+  },
+  "appLogsFilteredCount": "{shown} of {total}",
+  "@appLogsFilteredCount": {
+    "description": "Shown/filtered count when filters active",
+    "placeholders": {
+      "shown": {"type": "int"},
+      "total": {"type": "int"}
+    }
   }
 }

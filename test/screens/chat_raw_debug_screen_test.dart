@@ -2,8 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise/providers/auth_provider.dart';
-import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/screens/chat_raw_debug_screen.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
@@ -11,7 +10,6 @@ import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
 const _testGroupId = testGroupId;
-const _testPubkey = testPubkeyA;
 
 ChatMessage _message(
   String id,
@@ -57,11 +55,6 @@ class _MockApi extends MockWnApi {
   }
 }
 
-class _MockAuthNotifier extends AuthNotifier {
-  @override
-  Future<String?> build() async => _testPubkey;
-}
-
 final _api = _MockApi();
 
 void main() {
@@ -69,14 +62,9 @@ void main() {
   setUp(() => _api.reset());
 
   Future<void> pumpDebugScreen(WidgetTester tester) async {
-    await mountTestApp(
+    await mountWidget(
+      ChatRawDebugScreen(groupId: _testGroupId),
       tester,
-      overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
-    );
-    await tester.pumpAndSettle();
-    Routes.pushToChatRawDebug(
-      tester.element(find.byType(Scaffold)),
-      _testGroupId,
     );
     await tester.pumpAndSettle();
   }

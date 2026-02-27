@@ -1077,22 +1077,63 @@ class AppLocalizationsTr extends AppLocalizations {
   String get connectAnotherProfile => 'Başka Profil Bağla';
 
   @override
-  String get rawDebugView => 'Raw debug view';
+  String get rawDebugView => 'Ham hata ayıklama görünümü';
 
   @override
-  String get rawDebugViewDescription => 'Show raw message data in chat';
+  String get rawDebugViewDescription => 'Sohbette ham mesaj verilerini göster';
 
   @override
-  String get rawDebugViewTitle => 'Raw Debug View';
+  String get rawDebugViewTitle => 'Ham Hata Ayıklama Görünümü';
 
   @override
-  String get rawDebugViewGroupId => 'Group ID';
+  String get rawDebugViewGroupId => 'Grup Kimliği';
 
   @override
   String rawDebugViewMessageCount(int count) {
-    return '$count messages';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mesaj',
+      one: '1 mesaj',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get rawDebugViewCopied => 'Copied to clipboard';
+  String get rawDebugViewCopied => 'Panoya kopyalandı';
+
+  @override
+  String get appLogsTitle => 'App Logs';
+
+  @override
+  String get appLogsViewLogs => 'View logs';
+
+  @override
+  String get appLogsViewLogsDescription => 'View all Logger output in app';
+
+  @override
+  String get appLogsClear => 'Clear';
+
+  @override
+  String get appLogsEmpty => 'No logs yet';
+
+  @override
+  String get appLogsSearchPlaceholder => 'Search logs...';
+
+  @override
+  String get appLogsAddPatternPlaceholder => 'Add filter pattern';
+
+  @override
+  String get appLogsIgnore => 'Ignore';
+
+  @override
+  String get appLogsShow => 'Show';
+
+  @override
+  String get appLogsClearFilters => 'Clear filters';
+
+  @override
+  String appLogsFilteredCount(int shown, int total) {
+    return '$shown of $total';
+  }
 }

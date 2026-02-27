@@ -1094,4 +1094,39 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get rawDebugViewCopied => 'Copied to clipboard';
+
+  @override
+  String get appLogsTitle => 'App Logs';
+
+  @override
+  String get appLogsViewLogs => 'View logs';
+
+  @override
+  String get appLogsViewLogsDescription => 'View all Logger output in app';
+
+  @override
+  String get appLogsClear => 'Clear';
+
+  @override
+  String get appLogsEmpty => 'No logs yet';
+
+  @override
+  String get appLogsSearchPlaceholder => 'Search logs...';
+
+  @override
+  String get appLogsAddPatternPlaceholder => 'Add filter pattern';
+
+  @override
+  String get appLogsIgnore => 'Ignore';
+
+  @override
+  String get appLogsShow => 'Show';
+
+  @override
+  String get appLogsClearFilters => 'Clear filters';
+
+  @override
+  String appLogsFilteredCount(int shown, int total) {
+    return '$shown of $total';
+  }
 }

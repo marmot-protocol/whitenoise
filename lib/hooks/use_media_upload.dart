@@ -3,7 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:logging/logging.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
+
+final _logger = Logger('useMediaUpload');
 
 enum MediaUploadStatus { uploading, uploaded, error }
 
@@ -54,11 +57,16 @@ MediaUploadState useMediaUpload({
   }
 
   Future<void> performUpload(String filePath) async {
+    _logger.info('performUpload START filePath=$filePath groupId=$groupId');
     try {
       final file = await upload(
         accountPubkey: pubkey,
         groupId: groupId,
         filePath: filePath,
+      );
+      _logger.info(
+        'performUpload OK filePath=$filePath blossomUrl=${file.blossomUrl} '
+        'mimeType=${file.mimeType} mediaType=${file.mediaType}',
       );
       items.value = updateItem(
         items.value,
@@ -70,7 +78,8 @@ MediaUploadState useMediaUpload({
           retry: null,
         ),
       );
-    } catch (_) {
+    } catch (e, st) {
+      _logger.severe('performUpload FAILED filePath=$filePath groupId=$groupId', e, st);
       items.value = updateItem(
         items.value,
         filePath,
@@ -79,6 +88,7 @@ MediaUploadState useMediaUpload({
           status: MediaUploadStatus.error,
           file: null,
           retry: () {
+            _logger.info('performUpload retry filePath=$filePath');
             items.value = updateItem(
               items.value,
               filePath,
@@ -97,16 +107,27 @@ MediaUploadState useMediaUpload({
   }
 
   Future<void> pickImages() async {
+    _logger.info('pickImages groupId=$groupId');
     final pickedFiles = await picker.pickMultiImage(
       maxWidth: 1920,
       maxHeight: 1920,
       imageQuality: 85,
     );
-    if (pickedFiles.isEmpty) return;
+    if (pickedFiles.isEmpty) {
+      _logger.info('pickImages no files selected');
+      return;
+    }
 
     final existingPaths = items.value.map((item) => item.filePath).toSet();
     final uniqueFiles = pickedFiles.where((xFile) => !existingPaths.contains(xFile.path)).toList();
-    if (uniqueFiles.isEmpty) return;
+    if (uniqueFiles.isEmpty) {
+      _logger.info('pickImages all ${pickedFiles.length} files already queued, skipping');
+      return;
+    }
+
+    _logger.info(
+      'pickImages picked=${pickedFiles.length} unique=${uniqueFiles.length} groupId=$groupId',
+    );
 
     final newItems = uniqueFiles.map((xFile) {
       return (

@@ -1101,22 +1101,63 @@ class AppLocalizationsDe extends AppLocalizations {
   String get connectAnotherProfile => 'Weiteres Profil verbinden';
 
   @override
-  String get rawDebugView => 'Raw debug view';
+  String get rawDebugView => 'Rohe Debug-Ansicht';
 
   @override
-  String get rawDebugViewDescription => 'Show raw message data in chat';
+  String get rawDebugViewDescription => 'Rohe Nachrichtendaten im Chat anzeigen';
 
   @override
-  String get rawDebugViewTitle => 'Raw Debug View';
+  String get rawDebugViewTitle => 'Rohe Debug-Ansicht';
 
   @override
-  String get rawDebugViewGroupId => 'Group ID';
+  String get rawDebugViewGroupId => 'Gruppen-ID';
 
   @override
   String rawDebugViewMessageCount(int count) {
-    return '$count messages';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Nachrichten',
+      one: '1 Nachricht',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get rawDebugViewCopied => 'Copied to clipboard';
+  String get rawDebugViewCopied => 'In die Zwischenablage kopiert';
+
+  @override
+  String get appLogsTitle => 'App-Logs';
+
+  @override
+  String get appLogsViewLogs => 'Logs anzeigen';
+
+  @override
+  String get appLogsViewLogsDescription => 'Alle Logger-Ausgaben in der App anzeigen';
+
+  @override
+  String get appLogsClear => 'Löschen';
+
+  @override
+  String get appLogsEmpty => 'Noch keine Logs';
+
+  @override
+  String get appLogsSearchPlaceholder => 'Logs durchsuchen...';
+
+  @override
+  String get appLogsAddPatternPlaceholder => 'Filter hinzufügen';
+
+  @override
+  String get appLogsIgnore => 'Ignorieren';
+
+  @override
+  String get appLogsShow => 'Anzeigen';
+
+  @override
+  String get appLogsClearFilters => 'Filter löschen';
+
+  @override
+  String appLogsFilteredCount(int shown, int total) {
+    return '$shown von $total';
+  }
 }

@@ -1089,22 +1089,63 @@ class AppLocalizationsEs extends AppLocalizations {
   String get connectAnotherProfile => 'Conectar otro perfil';
 
   @override
-  String get rawDebugView => 'Raw debug view';
+  String get rawDebugView => 'Vista de depuración sin procesar';
 
   @override
-  String get rawDebugViewDescription => 'Show raw message data in chat';
+  String get rawDebugViewDescription => 'Mostrar datos de mensajes sin procesar en el chat';
 
   @override
-  String get rawDebugViewTitle => 'Raw Debug View';
+  String get rawDebugViewTitle => 'Vista de Depuración Sin Procesar';
 
   @override
-  String get rawDebugViewGroupId => 'Group ID';
+  String get rawDebugViewGroupId => 'ID del Grupo';
 
   @override
   String rawDebugViewMessageCount(int count) {
-    return '$count messages';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mensajes',
+      one: '1 mensaje',
+    );
+    return '$_temp0';
   }
 
   @override
-  String get rawDebugViewCopied => 'Copied to clipboard';
+  String get rawDebugViewCopied => 'Copiado al portapapeles';
+
+  @override
+  String get appLogsTitle => 'App Logs';
+
+  @override
+  String get appLogsViewLogs => 'View logs';
+
+  @override
+  String get appLogsViewLogsDescription => 'View all Logger output in app';
+
+  @override
+  String get appLogsClear => 'Clear';
+
+  @override
+  String get appLogsEmpty => 'No logs yet';
+
+  @override
+  String get appLogsSearchPlaceholder => 'Search logs...';
+
+  @override
+  String get appLogsAddPatternPlaceholder => 'Add filter pattern';
+
+  @override
+  String get appLogsIgnore => 'Ignore';
+
+  @override
+  String get appLogsShow => 'Show';
+
+  @override
+  String get appLogsClearFilters => 'Clear filters';
+
+  @override
+  String appLogsFilteredCount(int shown, int total) {
+    return '$shown of $total';
+  }
 }
