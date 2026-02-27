@@ -136,7 +136,8 @@ class LoginScreen extends HookConsumerWidget {
         children: [
           SafeArea(
             child: Padding(
-              padding: EdgeInsets.only(bottom: 160.h),
+              key: const Key('login_carousel_padding'),
+              padding: EdgeInsets.only(bottom: isAndroidSignerAvailable ? 228.h : 160.h),
               child: const WnOnboardingCarousel(),
             ),
           ),
