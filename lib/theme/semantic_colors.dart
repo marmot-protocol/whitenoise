@@ -27,8 +27,11 @@ class _NeutralColors {
   static const Color neutral150 = Color(0xFFEDEDEE);
   static const Color neutral200 = Color(0xFFE5E5E5);
   static const Color neutral250 = Color(0xFFDCDCDD);
+  static const Color neutral300 = Color(0xFFD4D4D4);
   static const Color neutral400 = Color(0xFFA3A3A3);
+  static const Color neutral450 = Color(0xFF8B8B8B);
   static const Color neutral500 = Color(0xFF737373);
+  static const Color neutral650 = Color(0xFF494949);
   static const Color neutral700 = Color(0xFF404040);
   static const Color neutral800 = Color(0xFF262626);
   static const Color neutral850 = Color(0xFF1E1E1F);
@@ -522,6 +525,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
   final Color fillDestructive;
   final Color fillDestructiveHover;
   final Color fillDestructiveActive;
+  final Color fillDisabled;
+  final Color fillContentDisabled;
   final Color fillContentPrimary;
   final Color fillContentSecondary;
   final Color fillContentTertiary;
@@ -572,6 +577,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     required this.fillDestructive,
     required this.fillDestructiveHover,
     required this.fillDestructiveActive,
+    required this.fillDisabled,
+    required this.fillContentDisabled,
     required this.fillContentPrimary,
     required this.fillContentSecondary,
     required this.fillContentTertiary,
@@ -623,6 +630,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     fillDestructive: _RedColors.red600,
     fillDestructiveHover: _RedColors.red500,
     fillDestructiveActive: _RedColors.red500,
+    fillDisabled: _NeutralColors.neutral300,
+    fillContentDisabled: _NeutralColors.neutral450,
     fillContentPrimary: _BaseColors.white,
     fillContentSecondary: _NeutralColors.neutral950,
     fillContentTertiary: _NeutralColors.neutral500,
@@ -674,6 +683,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     fillDestructive: _RedColors.red600,
     fillDestructiveHover: _RedColors.red500,
     fillDestructiveActive: _RedColors.red500,
+    fillDisabled: _NeutralColors.neutral650,
+    fillContentDisabled: _NeutralColors.neutral400,
     fillContentPrimary: _NeutralColors.neutral950,
     fillContentSecondary: _BaseColors.white,
     fillContentTertiary: _NeutralColors.neutral400,
@@ -726,6 +737,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     Color? fillDestructive,
     Color? fillDestructiveHover,
     Color? fillDestructiveActive,
+    Color? fillDisabled,
+    Color? fillContentDisabled,
     Color? fillContentPrimary,
     Color? fillContentSecondary,
     Color? fillContentTertiary,
@@ -778,6 +791,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
       fillDestructive: fillDestructive ?? this.fillDestructive,
       fillDestructiveHover: fillDestructiveHover ?? this.fillDestructiveHover,
       fillDestructiveActive: fillDestructiveActive ?? this.fillDestructiveActive,
+      fillDisabled: fillDisabled ?? this.fillDisabled,
+      fillContentDisabled: fillContentDisabled ?? this.fillContentDisabled,
       fillContentPrimary: fillContentPrimary ?? this.fillContentPrimary,
       fillContentSecondary: fillContentSecondary ?? this.fillContentSecondary,
       fillContentTertiary: fillContentTertiary ?? this.fillContentTertiary,
@@ -857,6 +872,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
       fillDestructive: Color.lerp(fillDestructive, other.fillDestructive, t)!,
       fillDestructiveHover: Color.lerp(fillDestructiveHover, other.fillDestructiveHover, t)!,
       fillDestructiveActive: Color.lerp(fillDestructiveActive, other.fillDestructiveActive, t)!,
+      fillDisabled: Color.lerp(fillDisabled, other.fillDisabled, t)!,
+      fillContentDisabled: Color.lerp(fillContentDisabled, other.fillContentDisabled, t)!,
       fillContentPrimary: Color.lerp(fillContentPrimary, other.fillContentPrimary, t)!,
       fillContentSecondary: Color.lerp(fillContentSecondary, other.fillContentSecondary, t)!,
       fillContentTertiary: Color.lerp(fillContentTertiary, other.fillContentTertiary, t)!,

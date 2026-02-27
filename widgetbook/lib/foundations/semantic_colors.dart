@@ -141,6 +141,9 @@ Widget allColors(BuildContext context) {
             lightColor: light.fillTertiaryActive,
             darkColor: dark.fillTertiaryActive,
           ),
+        ]),
+        const SizedBox(height: 12),
+        _buildColorSection('', [
           _ColorPairItem(
             semanticName: 'Fill Quaternary',
             lightColor: light.fillQuaternary,
@@ -156,6 +159,9 @@ Widget allColors(BuildContext context) {
             lightColor: light.fillQuaternaryActive,
             darkColor: dark.fillQuaternaryActive,
           ),
+        ]),
+        const SizedBox(height: 12),
+        _buildColorSection('', [
           _ColorPairItem(
             semanticName: 'Fill Destructive',
             lightColor: light.fillDestructive,
@@ -170,6 +176,14 @@ Widget allColors(BuildContext context) {
             semanticName: 'Fill Destructive Active',
             lightColor: light.fillDestructiveActive,
             darkColor: dark.fillDestructiveActive,
+          ),
+        ]),
+        const SizedBox(height: 12),
+        _buildColorSection('', [
+          _ColorPairItem(
+            semanticName: 'Fill Disabled',
+            lightColor: light.fillDisabled,
+            darkColor: dark.fillDisabled,
           ),
         ]),
         const SizedBox(height: 24),
@@ -196,6 +210,11 @@ Widget allColors(BuildContext context) {
               semanticName: 'Fill Content Quaternary',
               lightColor: light.fillContentQuaternary,
               darkColor: dark.fillContentQuaternary,
+            ),
+            _ColorPairItem(
+              semanticName: 'Fill Content Disabled',
+              lightColor: light.fillContentDisabled,
+              darkColor: dark.fillContentDisabled,
             ),
           ],
           description:
