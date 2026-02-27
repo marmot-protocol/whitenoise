@@ -1,6 +1,6 @@
-import 'package:flutter/material.dart'
-    show Key, Row, SizedBox, Text, TextOverflow, UnconstrainedBox;
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/theme/semantic_colors.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import '../test_helpers.dart' show mountWidget;
@@ -573,6 +573,252 @@ void main() {
         await mountWidget(widget, tester);
         await tester.tap(find.byType(WnButton));
         expect(onPressedCalled, isFalse);
+      });
+    });
+
+    group('button colors', () {
+      final colors = SemanticColors.light;
+
+      Color resolveBackground(ButtonStyle style, {bool disabled = false}) {
+        return style.backgroundColor!.resolve(disabled ? {WidgetState.disabled} : {})!;
+      }
+
+      Color resolveForeground(ButtonStyle style, {bool disabled = false}) {
+        return style.foregroundColor!.resolve(disabled ? {WidgetState.disabled} : {})!;
+      }
+
+      group('primary', () {
+        testWidgets('enabled background uses fillPrimary', (WidgetTester tester) async {
+          await mountWidget(WnButton(text: 'Test', onPressed: () {}), tester);
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(resolveBackground(button.style!), equals(colors.fillPrimary));
+        });
+
+        testWidgets('enabled foreground uses fillContentPrimary', (WidgetTester tester) async {
+          await mountWidget(WnButton(text: 'Test', onPressed: () {}), tester);
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(resolveForeground(button.style!), equals(colors.fillContentPrimary));
+        });
+
+        testWidgets('disabled background uses fillDisabled', (WidgetTester tester) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, disabled: true),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(resolveBackground(button.style!, disabled: true), equals(colors.fillDisabled));
+        });
+
+        testWidgets('disabled foreground uses fillContentDisabled', (WidgetTester tester) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, disabled: true),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(
+            resolveForeground(button.style!, disabled: true),
+            equals(colors.fillContentDisabled),
+          );
+        });
+      });
+
+      group('outline', () {
+        testWidgets('enabled background uses fillSecondary', (WidgetTester tester) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, type: WnButtonType.outline),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(resolveBackground(button.style!), equals(colors.fillSecondary));
+        });
+
+        testWidgets('enabled foreground uses fillContentSecondary', (WidgetTester tester) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, type: WnButtonType.outline),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(resolveForeground(button.style!), equals(colors.fillContentSecondary));
+        });
+
+        testWidgets('disabled background uses fillSecondary with alpha', (
+          WidgetTester tester,
+        ) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, type: WnButtonType.outline, disabled: true),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(
+            resolveBackground(button.style!, disabled: true),
+            equals(colors.fillSecondary.withValues(alpha: 0.25)),
+          );
+        });
+
+        testWidgets('disabled foreground uses fillContentSecondary with alpha', (
+          WidgetTester tester,
+        ) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, type: WnButtonType.outline, disabled: true),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(
+            resolveForeground(button.style!, disabled: true),
+            equals(colors.fillContentSecondary.withValues(alpha: 0.25)),
+          );
+        });
+      });
+
+      group('ghost', () {
+        testWidgets('enabled background uses fillTertiary', (WidgetTester tester) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, type: WnButtonType.ghost),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(resolveBackground(button.style!), equals(colors.fillTertiary));
+        });
+
+        testWidgets('enabled foreground uses fillContentTertiary', (WidgetTester tester) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, type: WnButtonType.ghost),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(resolveForeground(button.style!), equals(colors.fillContentTertiary));
+        });
+
+        testWidgets('disabled background uses fillTertiary with alpha', (
+          WidgetTester tester,
+        ) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, type: WnButtonType.ghost, disabled: true),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(
+            resolveBackground(button.style!, disabled: true),
+            equals(colors.fillTertiary.withValues(alpha: 0.25)),
+          );
+        });
+
+        testWidgets('disabled foreground uses fillContentTertiary with alpha', (
+          WidgetTester tester,
+        ) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, type: WnButtonType.ghost, disabled: true),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(
+            resolveForeground(button.style!, disabled: true),
+            equals(colors.fillContentTertiary.withValues(alpha: 0.25)),
+          );
+        });
+      });
+
+      group('overlay', () {
+        testWidgets('enabled background uses fillQuaternary', (WidgetTester tester) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, type: WnButtonType.overlay),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(resolveBackground(button.style!), equals(colors.fillQuaternary));
+        });
+
+        testWidgets('enabled foreground uses fillContentQuaternary', (
+          WidgetTester tester,
+        ) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, type: WnButtonType.overlay),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(resolveForeground(button.style!), equals(colors.fillContentQuaternary));
+        });
+
+        testWidgets('disabled background uses fillQuaternary with alpha', (
+          WidgetTester tester,
+        ) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, type: WnButtonType.overlay, disabled: true),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(
+            resolveBackground(button.style!, disabled: true),
+            equals(colors.fillQuaternary.withValues(alpha: 0.25)),
+          );
+        });
+
+        testWidgets('disabled foreground uses fillContentQuaternary with alpha', (
+          WidgetTester tester,
+        ) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, type: WnButtonType.overlay, disabled: true),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(
+            resolveForeground(button.style!, disabled: true),
+            equals(colors.fillContentQuaternary.withValues(alpha: 0.25)),
+          );
+        });
+      });
+
+      group('destructive', () {
+        testWidgets('enabled background uses fillDestructive', (WidgetTester tester) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, type: WnButtonType.destructive),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(resolveBackground(button.style!), equals(colors.fillDestructive));
+        });
+
+        testWidgets('enabled foreground uses fillContentQuaternary', (
+          WidgetTester tester,
+        ) async {
+          await mountWidget(
+            WnButton(text: 'Test', onPressed: () {}, type: WnButtonType.destructive),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(resolveForeground(button.style!), equals(colors.fillContentQuaternary));
+        });
+
+        testWidgets('disabled background uses fillDisabled', (WidgetTester tester) async {
+          await mountWidget(
+            WnButton(
+              text: 'Test',
+              onPressed: () {},
+              type: WnButtonType.destructive,
+              disabled: true,
+            ),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(resolveBackground(button.style!, disabled: true), equals(colors.fillDisabled));
+        });
+
+        testWidgets('disabled foreground uses fillContentDisabled', (WidgetTester tester) async {
+          await mountWidget(
+            WnButton(
+              text: 'Test',
+              onPressed: () {},
+              type: WnButtonType.destructive,
+              disabled: true,
+            ),
+            tester,
+          );
+          final button = tester.widget<FilledButton>(find.byType(FilledButton));
+          expect(
+            resolveForeground(button.style!, disabled: true),
+            equals(colors.fillContentDisabled),
+          );
+        });
       });
     });
   });

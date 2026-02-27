@@ -47,15 +47,19 @@ class WnButton extends StatelessWidget {
       backgroundColor: colors.fillPrimary,
       overlayColor: colors.fillPrimaryHover,
       contentColor: colors.fillContentPrimary,
+      disabledBackgroundColor: colors.fillDisabled,
+      disabledContentColor: colors.fillContentDisabled,
       borderSide: BorderSide.none,
     );
   }
 
   Widget _buildOutlineButton(SemanticColors colors) {
     return _buildButton(
-      backgroundColor: colors.fillQuaternary,
-      overlayColor: colors.fillQuaternaryHover,
+      backgroundColor: colors.fillSecondary,
+      overlayColor: colors.fillSecondaryHover,
       contentColor: colors.fillContentSecondary,
+      disabledBackgroundColor: colors.fillSecondary.withValues(alpha: 0.25),
+      disabledContentColor: colors.fillContentSecondary.withValues(alpha: 0.25),
       borderSide: BorderSide(color: colors.borderTertiary),
     );
   }
@@ -64,7 +68,9 @@ class WnButton extends StatelessWidget {
     return _buildButton(
       backgroundColor: colors.fillTertiary,
       overlayColor: colors.fillTertiaryHover,
-      contentColor: colors.fillContentSecondary,
+      contentColor: colors.fillContentTertiary,
+      disabledBackgroundColor: colors.fillTertiary.withValues(alpha: 0.25),
+      disabledContentColor: colors.fillContentTertiary.withValues(alpha: 0.25),
       borderSide: BorderSide.none,
     );
   }
@@ -73,7 +79,9 @@ class WnButton extends StatelessWidget {
     return _buildButton(
       backgroundColor: colors.fillQuaternary,
       overlayColor: colors.fillQuaternaryHover,
-      contentColor: colors.backgroundContentPrimary,
+      contentColor: colors.fillContentQuaternary,
+      disabledBackgroundColor: colors.fillQuaternary.withValues(alpha: 0.25),
+      disabledContentColor: colors.fillContentQuaternary.withValues(alpha: 0.25),
       borderSide: BorderSide.none,
     );
   }
@@ -83,6 +91,8 @@ class WnButton extends StatelessWidget {
       backgroundColor: colors.fillDestructive,
       overlayColor: colors.fillDestructiveHover,
       contentColor: colors.fillContentQuaternary,
+      disabledBackgroundColor: colors.fillDisabled,
+      disabledContentColor: colors.fillContentDisabled,
       borderSide: BorderSide.none,
     );
   }
@@ -91,6 +101,8 @@ class WnButton extends StatelessWidget {
     required Color backgroundColor,
     required Color overlayColor,
     required Color contentColor,
+    required Color disabledBackgroundColor,
+    required Color disabledContentColor,
     required BorderSide borderSide,
   }) {
     final verticalPadding = _getVerticalPadding();
@@ -100,20 +112,33 @@ class WnButton extends StatelessWidget {
     final fontSize = _getFontSize();
     final iconPadding = (size == WnButtonSize.small || size == WnButtonSize.xsmall) ? 4.w : 8.w;
 
+    final isDisabled = loading || disabled || onPressed == null;
+    final activeContentColor = isDisabled ? disabledContentColor : contentColor;
+
     final Widget button = FilledButton(
-      onPressed: (loading || disabled) ? null : onPressed,
-      style: FilledButton.styleFrom(
-        padding: EdgeInsets.symmetric(vertical: verticalPadding, horizontal: horizontalPadding),
-        backgroundColor: backgroundColor,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(borderRadius),
-          side: borderSide,
+      onPressed: isDisabled ? null : onPressed,
+      style: ButtonStyle(
+        padding: WidgetStatePropertyAll(
+          EdgeInsets.symmetric(vertical: verticalPadding, horizontal: horizontalPadding),
         ),
-        overlayColor: overlayColor,
+        backgroundColor: WidgetStateProperty.resolveWith(
+          (states) =>
+              states.contains(WidgetState.disabled) ? disabledBackgroundColor : backgroundColor,
+        ),
+        foregroundColor: WidgetStateProperty.resolveWith(
+          (states) => states.contains(WidgetState.disabled) ? disabledContentColor : contentColor,
+        ),
+        overlayColor: WidgetStatePropertyAll(overlayColor),
+        shape: WidgetStatePropertyAll(
+          RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borderRadius),
+            side: borderSide,
+          ),
+        ),
       ),
       child: loading
-          ? _buildLoadingIndicator(contentColor)
-          : _buildContent(contentColor, iconSize, fontSize, iconPadding),
+          ? _buildLoadingIndicator(activeContentColor)
+          : _buildContent(activeContentColor, iconSize, fontSize, iconPadding),
     );
 
     return button;
