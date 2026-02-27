@@ -121,7 +121,6 @@ for row in $(echo "$PR_RUNS_JSON" | jq -c '.workflow_runs[]'); do
 
   pr_run_id=$(echo "$row" | jq -r '.id')
   pr_head_sha=$(echo "$row" | jq -r '.head_sha')
-  pr_run_url=$(echo "$row" | jq -r '.html_url')
   pr_run_date=$(echo "$row" | jq -r '.updated_at')
 
   # Get PR number from the run's pull_requests array
@@ -145,6 +144,7 @@ for row in $(echo "$PR_RUNS_JSON" | jq -c '.workflow_runs[]'); do
   pr_title=$(echo "$pr_json" | jq -r '.title // "Unknown"')
   pr_author=$(echo "$pr_json" | jq -r '.user.login // "unknown"')
   pr_state=$(echo "$pr_json" | jq -r '.state // "unknown"')
+  merged_at=$(echo "$pr_json" | jq -r '.merged_at // empty')
   pr_url="https://github.com/$REPO/pull/$pr_number"
 
   # Get artifact info for this run
@@ -174,9 +174,12 @@ for row in $(echo "$PR_RUNS_JSON" | jq -c '.workflow_runs[]'); do
   if [[ "$pr_state" == "open" ]]; then
     state_badge="OPEN"
     state_color="var(--nes-green)"
-  else
+  elif [[ -n "$merged_at" ]]; then
     state_badge="MERGED"
     state_color="var(--nes-blue)"
+  else
+    state_badge="CLOSED"
+    state_color="var(--nes-red)"
   fi
 
   echo "  PR #$pr_number: $pr_title (by $pr_author, $pr_short_sha)"
