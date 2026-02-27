@@ -22,18 +22,21 @@ jobs:
     - name: Checkout contributors list
       uses: actions/checkout@v4
       with:
+        ref: ${{ github.event.pull_request.base.sha }}
         sparse-checkout: .github/apk-contributors
         sparse-checkout-cone-mode: false
 
     - name: Check contributor membership
       id: check
+      env:
+        PR_AUTHOR: ${{ github.event.pull_request.user.login }}
       run: |
-        if grep -qxF "${{ github.actor }}" .github/apk-contributors; then
+        if grep -qxF "$PR_AUTHOR" .github/apk-contributors; then
           echo "is-member=true" >> "$GITHUB_OUTPUT"
-          echo "✅ ${{ github.actor }} is an APK contributor"
+          echo "✅ ${PR_AUTHOR} is an APK contributor"
         else
           echo "is-member=false" >> "$GITHUB_OUTPUT"
-          echo "⏭️ ${{ github.actor }} is not an APK contributor — skipping APK build"
+          echo "⏭️ ${PR_AUTHOR} is not an APK contributor — skipping APK build"
         fi
 
   build-apk:

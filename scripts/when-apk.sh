@@ -114,10 +114,12 @@ PR_BUILDS_HTML=""
 PR_COUNT=0
 
 # Iterate through runs, extract PR info from each
-for row in $(echo "$PR_RUNS_JSON" | jq -c '.workflow_runs[]'); do
+while IFS= read -r row; do
   if [[ "$PR_COUNT" -ge "$MAX_PR_BUILDS" ]]; then
     break
   fi
+
+  unset pr_artifacts_json
 
   pr_run_id=$(echo "$row" | jq -r '.id')
   pr_head_sha=$(echo "$row" | jq -r '.head_sha')
@@ -158,7 +160,6 @@ for row in $(echo "$PR_RUNS_JSON" | jq -c '.workflow_runs[]'); do
 
   if [[ -z "$pr_artifact_id" || "$pr_artifact_expired" == "true" ]]; then
     echo "  Skipping PR #$pr_number — artifact missing or expired"
-    unset pr_artifacts_json
     continue
   fi
 
@@ -220,8 +221,7 @@ for row in $(echo "$PR_RUNS_JSON" | jq -c '.workflow_runs[]'); do
     </div>"
 
   PR_COUNT=$((PR_COUNT + 1))
-  unset pr_artifacts_json
-done
+done < <(echo "$PR_RUNS_JSON" | jq -c '.workflow_runs[]')
 
 echo "  Found $PR_COUNT PR builds"
 
