@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/media_image.dart';
+import 'package:whitenoise/widgets/wn_blurhash_placeholder.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
@@ -152,6 +153,36 @@ void main() {
       expect(completedFade.opacity.value, equals(1.0));
     });
 
+    group('when image exists locally', () {
+      testWidgets('shows image immediately without fade/blurhash', (
+        tester,
+      ) async {
+        final tempDir = Directory.systemTemp.createTempSync('media_image_sync_test');
+        final tempFile = File('${tempDir.path}/test.png');
+        tempFile.writeAsBytesSync(_minimalPng);
+        addTearDown(() => tempDir.deleteSync(recursive: true));
+
+        _api.downloadCompleter = null;
+
+        await mountWidget(
+          MediaImage(
+            mediaFile: _mediaFile(
+              filePath: tempFile.path,
+              blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+            ),
+          ),
+          tester,
+        );
+        await tester.pump();
+        expect(find.byKey(const Key('media_image_loading')), findsNothing);
+        expect(find.byKey(const Key('media_image_viewer')), findsOneWidget);
+        final fadeTransition = tester.widget<FadeTransition>(
+          find.byKey(const Key('fade_transition')),
+        );
+        expect(fadeTransition.opacity.value, equals(1.0));
+      });
+    });
+
     testWidgets('calls onTap callback', (tester) async {
       _api.downloadCompleter = Completer<MediaFile>();
       var tapped = false;
@@ -200,6 +231,33 @@ void main() {
 
       expect(find.byKey(const Key('media_image_loading')), findsOneWidget);
       expect(find.byType(AspectRatio), findsNothing);
+    });
+
+    testWidgets('does not constrain image viewer to aspect ratio', (tester) async {
+      final tempDir = Directory.systemTemp.createTempSync('media_aspect_test');
+      final tempFile = File('${tempDir.path}/test.png');
+      tempFile.writeAsBytesSync(_minimalPng);
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      await mountWidget(
+        MediaImage(
+          mediaFile: _mediaFile(
+            filePath: tempFile.path,
+            dimensions: '1920x1080',
+          ),
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('media_image_viewer')), findsOneWidget);
+      final viewerFinder = find.byKey(const Key('media_image_viewer'));
+      final aspectRatioFinder = find.ancestor(
+        of: viewerFinder,
+        matching: find.byType(AspectRatio),
+      );
+
+      expect(aspectRatioFinder, findsNothing);
     });
 
     testWidgets('calls onZoomChanged when zoom state changes', (tester) async {
@@ -324,13 +382,11 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // First double-tap: zoom in
       await tester.tap(find.byKey(const Key('media_image_viewer')));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tap(find.byKey(const Key('media_image_viewer')));
       await tester.pumpAndSettle();
 
-      // Second double-tap: zoom out
       await tester.tap(find.byKey(const Key('media_image_viewer')));
       await tester.pump(const Duration(milliseconds: 50));
       await tester.tap(find.byKey(const Key('media_image_viewer')));
@@ -368,6 +424,31 @@ void main() {
       expect(tapped, isTrue);
     });
 
+    testWidgets('blurhash placeholder is removed after fade completes', (tester) async {
+      _api.downloadCompleter = Completer<MediaFile>();
+      final tempDir = Directory.systemTemp.createTempSync('media_blurhash_gone_test');
+      final tempFile = File('${tempDir.path}/test.png');
+      tempFile.writeAsBytesSync(_minimalPng);
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      await mountWidget(
+        MediaImage(
+          mediaFile: _mediaFile(
+            blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+          ),
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('media_image_loading')), findsOneWidget);
+
+      _api.downloadCompleter!.complete(_mediaFile(filePath: tempFile.path));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('media_image_loading')), findsNothing);
+      expect(find.byKey(const Key('media_image_viewer')), findsOneWidget);
+    });
+
     testWidgets('Image.file errorBuilder shows fallback placeholder', (tester) async {
       final tempDir = Directory.systemTemp.createTempSync('media_error_fallback_test');
       final tempFile = File('${tempDir.path}/test.png');
@@ -385,6 +466,79 @@ void main() {
       final fallback = image.errorBuilder!(context, Object(), StackTrace.empty);
 
       expect(fallback.key, const Key('media_image_error_fallback'));
+    });
+    testWidgets('error blurhash placeholder shows with aspect ratio', (
+      tester,
+    ) async {
+      final tempDir = Directory.systemTemp.createTempSync(
+        'media_error_aspect_test',
+      );
+      final tempFile = File('${tempDir.path}/test.png');
+      tempFile.writeAsBytesSync(_minimalPng);
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      await mountWidget(
+        MediaImage(
+          mediaFile: _mediaFile(
+            filePath: tempFile.path,
+            dimensions: '400x200',
+          ),
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      final image = tester.widget<Image>(
+        find.byKey(const Key('media_image_file')),
+      );
+      final context = tester.element(find.byKey(const Key('media_image_file')));
+      final fallback = image.errorBuilder!(context, Object(), StackTrace.empty);
+      final aspectRatioWidget = fallback as AspectRatio;
+      expect(aspectRatioWidget.aspectRatio, 2);
+      expect(aspectRatioWidget.child, isA<WnBlurhashPlaceholder>());
+    });
+
+    testWidgets('blurhash reappears when fade is interrupted by status change', (
+      tester,
+    ) async {
+      final tempDir = Directory.systemTemp.createTempSync('media_dismissed_test');
+      final tempFile = File('${tempDir.path}/test.png');
+      tempFile.writeAsBytesSync(_minimalPng);
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+      _api.downloadCompleter = Completer<MediaFile>();
+      MediaFile currentMediaFile = _mediaFile(
+        blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+      );
+      late StateSetter setStateCallback;
+
+      await mountWidget(
+        StatefulBuilder(
+          builder: (context, setState) {
+            setStateCallback = setState;
+            return MediaImage(mediaFile: currentMediaFile);
+          },
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('media_image_loading')), findsOneWidget);
+      _api.downloadCompleter!.complete(_mediaFile(filePath: tempFile.path));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 50));
+      final fadeTransition = tester.widget<FadeTransition>(
+        find.byKey(const Key('fade_transition')),
+      );
+      expect(fadeTransition.opacity.value, lessThan(1.0));
+      expect(fadeTransition.opacity.value, greaterThan(0.0));
+      _api.downloadCompleter = Completer<MediaFile>();
+      setStateCallback(() {
+        currentMediaFile = _mediaFile(
+          id: 'media2',
+          blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+        );
+      });
+      await tester.pump();
+      expect(find.byKey(const Key('media_image_loading')), findsOneWidget);
     });
   });
 }

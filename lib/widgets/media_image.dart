@@ -105,15 +105,34 @@ class MediaImage extends HookWidget {
     }
 
     final blurhash = mediaFile.fileMetadata?.blurhash;
-    final aspectRatio = _parseAspectRatio(mediaFile.fileMetadata?.dimensions);
+    final dimensions = mediaFile.fileMetadata?.dimensions;
+    final aspectRatio = _parseAspectRatio(dimensions);
 
     final fadeController = useAnimationController(
       duration: const Duration(milliseconds: 300),
+      initialValue: status == MediaDownloadStatus.success ? 1.0 : 0.0,
     );
+
+    final showBlurhash = useState(status != MediaDownloadStatus.success);
+
+    useEffect(() {
+      void statusListener(AnimationStatus status) {
+        if (status == AnimationStatus.completed) {
+          showBlurhash.value = false;
+        } else if (status == AnimationStatus.dismissed) {
+          showBlurhash.value = true;
+        }
+      }
+
+      fadeController.addStatusListener(statusListener);
+      return () => fadeController.removeStatusListener(statusListener);
+    }, [fadeController]);
 
     useEffect(() {
       if (status == MediaDownloadStatus.success) {
-        fadeController.forward();
+        if (fadeController.value < 1.0) {
+          fadeController.forward();
+        }
       } else {
         fadeController.reset();
       }
@@ -138,45 +157,76 @@ class MediaImage extends HookWidget {
       child: Stack(
         fit: StackFit.passthrough,
         children: [
-          if (aspectRatio != null)
-            Center(
-              child: AspectRatio(
-                aspectRatio: aspectRatio,
-                child: WnBlurhashPlaceholder(
-                  key: const Key('media_image_loading'),
-                  blurhash: blurhash,
-                ),
-              ),
-            )
-          else
-            WnBlurhashPlaceholder(
-              key: const Key('media_image_loading'),
-              blurhash: blurhash,
-            ),
-          if (status == MediaDownloadStatus.success)
-            FadeTransition(
-              key: const Key('fade_transition'),
-              opacity: fadeController,
-              child: InteractiveViewer(
-                key: const Key('media_image_viewer'),
-                transformationController: transformationController,
-                minScale: _minScale,
-                maxScale: _maxScale,
-                child: Center(
-                  child: Image.file(
-                    File(localPath!),
-                    key: const Key('media_image_file'),
-                    fit: BoxFit.contain,
-                    errorBuilder: (_, _, _) => WnBlurhashPlaceholder(
-                      key: const Key('media_image_error_fallback'),
-                      blurhash: blurhash,
-                    ),
+          if (showBlurhash.value)
+            if (aspectRatio != null)
+              Center(
+                child: AspectRatio(
+                  aspectRatio: aspectRatio,
+                  child: WnBlurhashPlaceholder(
+                    key: const Key('media_image_loading'),
+                    blurhash: blurhash,
                   ),
                 ),
+              )
+            else
+              WnBlurhashPlaceholder(
+                key: const Key('media_image_loading'),
+                blurhash: blurhash,
+                width: double.infinity,
+                height: double.infinity,
               ),
+          if (status == MediaDownloadStatus.success)
+            _buildLoadedImage(
+              aspectRatio: aspectRatio,
+              blurhash: blurhash,
+              fadeController: fadeController,
+              transformationController: transformationController,
+              localPath: localPath!,
             ),
         ],
       ),
     );
+  }
+
+  static Widget _buildLoadedImage({
+    required double? aspectRatio,
+    required String? blurhash,
+    required AnimationController fadeController,
+    required TransformationController transformationController,
+    required String localPath,
+  }) {
+    final loadedImage = FadeTransition(
+      key: const Key('fade_transition'),
+      opacity: fadeController,
+      child: InteractiveViewer(
+        key: const Key('media_image_viewer'),
+        transformationController: transformationController,
+        minScale: _minScale,
+        maxScale: _maxScale,
+        child: Center(
+          child: Image.file(
+            File(localPath),
+            key: const Key('media_image_file'),
+            fit: BoxFit.contain,
+            width: double.infinity,
+            height: double.infinity,
+            errorBuilder: (_, _, _) => aspectRatio != null
+                ? AspectRatio(
+                    aspectRatio: aspectRatio,
+                    child: WnBlurhashPlaceholder(
+                      key: const Key('media_image_error_fallback'),
+                      blurhash: blurhash,
+                    ),
+                  )
+                : WnBlurhashPlaceholder(
+                    key: const Key('media_image_error_fallback'),
+                    blurhash: blurhash,
+                  ),
+          ),
+        ),
+      ),
+    );
+
+    return loadedImage;
   }
 }
