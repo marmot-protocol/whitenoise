@@ -7,6 +7,8 @@ import 'package:whitenoise/providers/app_log_provider.dart' show appLogStore;
 import 'package:whitenoise/src/rust/api/logs.dart' as logs_api;
 import 'package:whitenoise/utils/app_flavor.dart';
 
+final _logger = Logger('rustLogListener');
+
 /// Subscribes to Rust log file and forwards each line to appLogStore.
 /// Only active in staging builds.
 final rustLogListenerProvider = Provider.autoDispose<void>((ref) {
@@ -20,13 +22,19 @@ final rustLogListenerProvider = Provider.autoDispose<void>((ref) {
     subscription?.cancel();
   });
 
-  _startListening().then((sub) {
-    if (disposed) {
-      sub.cancel();
-    } else {
-      subscription = sub;
-    }
-  });
+  unawaited(
+    _startListening()
+        .then((sub) {
+          if (disposed) {
+            sub.cancel();
+          } else {
+            subscription = sub;
+          }
+        })
+        .catchError((Object e, StackTrace st) {
+          _logger.severe('failed to start rust log listener', e, st);
+        }),
+  );
 });
 
 Future<StreamSubscription<String>> _startListening() async {

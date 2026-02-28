@@ -299,10 +299,9 @@ class _DeveloperSettingsViewLogsRow extends StatelessWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
 
-    return GestureDetector(
+    return InkWell(
       key: const Key('view_logs_row'),
       onTap: onTap,
-      behavior: HitTestBehavior.opaque,
       child: SizedBox(
         height: 56.h,
         child: Padding(
@@ -353,10 +352,9 @@ class _DeveloperSettingsDebugViewToggle extends StatelessWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
 
-    return GestureDetector(
+    return InkWell(
       key: const Key('debug_view_toggle_row'),
       onTap: () => onChanged(!enabled),
-      behavior: HitTestBehavior.opaque,
       child: SizedBox(
         height: 56.h,
         child: Row(

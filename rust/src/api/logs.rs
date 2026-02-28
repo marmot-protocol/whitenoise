@@ -35,13 +35,20 @@ pub async fn subscribe_to_rust_logs(
     let mut file = loop {
         match File::open(&path).await {
             Ok(f) => break f,
-            Err(e) => {
+            Err(e) if e.kind() == std::io::ErrorKind::NotFound => {
                 let msg =
                     format!("subscribe_to_rust_logs: waiting for log file path={path:?} err={e}");
                 if sink.add(msg).is_err() {
                     return Ok(());
                 }
                 tokio::time::sleep(Duration::from_secs(2)).await;
+            }
+            Err(e) => {
+                let msg = format!(
+                    "subscribe_to_rust_logs: fatal error opening log file path={path:?} err={e}"
+                );
+                let _ = sink.add(msg);
+                return Ok(());
             }
         }
     };
