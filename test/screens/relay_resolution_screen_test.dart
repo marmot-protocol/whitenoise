@@ -377,6 +377,13 @@ void main() {
         await tester.pump(const Duration(milliseconds: 600));
         expect(find.text('Invalid relay URL'), findsOneWidget);
       });
+
+      testWidgets('shows validation error for invalid scheme', (tester) async {
+        await pumpRelayResolutionScreen(tester);
+        await tester.enterText(find.byType(TextField), 'https://relay.example.com');
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(find.text('URL must start with wss:// or ws://'), findsOneWidget);
+      });
     });
 
     group('back button', () {

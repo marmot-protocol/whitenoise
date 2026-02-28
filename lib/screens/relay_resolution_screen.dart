@@ -6,6 +6,7 @@ import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/relay_url_validation.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_input.dart' show WnInput;
 import 'package:whitenoise/widgets/wn_onboarding_carousel.dart' show WnOnboardingCarousel;
@@ -140,7 +141,13 @@ class RelayResolutionScreen extends HookConsumerWidget {
                         label: context.l10n.relayResolutionRelayLabel,
                         placeholder: context.l10n.relayResolutionRelayPlaceholder,
                         controller: relayUrlController,
-                        errorText: relayResolutionState.validationError,
+                        errorText: relayResolutionState.validationError == null
+                            ? null
+                            : switch (relayResolutionState.validationError!) {
+                                RelayValidationError.invalidScheme =>
+                                  context.l10n.invalidRelayUrlScheme,
+                                RelayValidationError.invalidUrl => context.l10n.invalidRelayUrl,
+                              },
                         onChanged: (_) => clearError(),
                         textInputAction: TextInputAction.done,
                       ),

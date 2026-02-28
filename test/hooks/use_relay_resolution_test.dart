@@ -7,6 +7,7 @@ import 'package:whitenoise/hooks/use_relay_resolution.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart'
     show LoginResult, LoginStatus, Account, AccountType;
 import 'package:whitenoise/src/rust/api/error.dart';
+import 'package:whitenoise/utils/relay_url_validation.dart' show RelayValidationError;
 import '../test_helpers.dart';
 
 LoginResult _completeLoginResult() => LoginResult(
@@ -325,7 +326,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 600));
 
         expect(capturedIsRelayUrlValid, false);
-        expect(capturedState.validationError, isNotNull);
+        expect(capturedState.validationError, RelayValidationError.invalidUrl);
       });
 
       testWidgets('clears validationError for valid URL', (tester) async {
@@ -350,7 +351,7 @@ void main() {
         await tester.enterText(find.byType(TextField), 'wss://invalid');
         await tester.pump(const Duration(milliseconds: 600));
 
-        expect(capturedState.validationError, isNotNull);
+        expect(capturedState.validationError, RelayValidationError.invalidUrl);
 
         await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
         await tester.pump(const Duration(milliseconds: 600));
@@ -417,7 +418,7 @@ void main() {
           await tester.pump(const Duration(milliseconds: 600));
 
           expect(capturedIsRelayUrlValid, false);
-          expect(capturedState.validationError, isNotNull);
+          expect(capturedState.validationError, RelayValidationError.invalidUrl);
 
           await tester.enterText(find.byType(TextField), 'wss://');
           await tester.pump(const Duration(milliseconds: 600));
@@ -426,6 +427,31 @@ void main() {
           expect(capturedState.validationError, isNull);
         },
       );
+
+      testWidgets('sets invalidScheme error for https:// URL', (tester) async {
+        late RelayResolutionState capturedState;
+
+        final widget = _buildTestWidget(
+          onBuild:
+              (
+                controller,
+                state,
+                isRelayUrlValid,
+                publishDefaults,
+                tryCustomRelay,
+                cancel,
+                clearError,
+              ) {
+                capturedState = state;
+              },
+        );
+        await mountWidget(widget, tester);
+
+        await tester.enterText(find.byType(TextField), 'https://relay.example.com');
+        await tester.pump(const Duration(milliseconds: 600));
+
+        expect(capturedState.validationError, RelayValidationError.invalidScheme);
+      });
     });
 
     group('publishDefaults', () {
