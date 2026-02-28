@@ -300,9 +300,10 @@
   "groupSaveError": "Не удалось сохранить группу. Попробуйте снова.",
   "failedToFetchGroupMembers": "Не удалось загрузить участников группы. Попробуйте снова.",
   "failedToAddMembers": "Не удалось добавить участников. Попробуйте снова.",
-  "userNeedsUpdate": "Требуется обновление ключа",
-  "userNeedsUpdateDescription": "Вы ещё не можете начать безопасный чат с {name}. Ему нужно обновить White Noise, чтобы безопасная переписка работала.",
+  "updateNeeded": "{name} нужно обновление",
+  "updateNeededDescription": "Вы ещё не можете начать безопасный чат с {name}. Ему нужно обновить White Noise, чтобы безопасная переписка работала.",
   "unknownInviteToWhiteNoiseDescription": "Этот пользователь ещё не в White Noise. Поделитесь приложением, чтобы начать безопасный чат.",
+  "unknownUserNeedsUpdate": "Пользователю нужно обновление",
   "unknownUserNeedsUpdateDescription": "Вы ещё не можете начать безопасный чат с этим пользователем. Ему нужно обновить White Noise, чтобы безопасная переписка работала.",
   "addToAnotherGroup": "Добавить в другую группу",
   "addToGroupConfirmation": "Добавить {userName} в {groupName}?",
@@ -312,5 +313,7 @@
   "profilesTitle": "Профили",
   "noAccountsAvailable": "Нет доступных аккаунтов",
   "connectAnotherProfile": "Подключить другой профиль",
-  "groupImageUploadFailed": "Группа создана, но загрузка изображения не удалась."
+  "groupImageUploadFailed": "Группа создана, но загрузка изображения не удалась.",
+  "invalidRelayUrlScheme": "URL должен начинаться с wss:// или ws://",
+  "invalidRelayUrl": "Неверный URL реле"
 }

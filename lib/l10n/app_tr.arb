@@ -300,9 +300,10 @@
   "groupSaveError": "Grup kaydedilemedi. Lütfen tekrar deneyin.",
   "failedToFetchGroupMembers": "Grup üyeleri yüklenemedi. Lütfen tekrar deneyin.",
   "failedToAddMembers": "Üye eklenemedi. Lütfen tekrar deneyin.",
-  "userNeedsUpdate": "Anahtar güncellemesi gerekli",
-  "userNeedsUpdateDescription": "{name} ile henüz güvenli sohbet başlatamazsınız. Güvenli mesajlaşmanın çalışması için White Noise'u güncellemesi gerekiyor.",
+  "updateNeeded": "{name} güncelleme yapmalı",
+  "updateNeededDescription": "{name} ile henüz güvenli sohbet başlatamazsınız. Güvenli mesajlaşmanın çalışması için White Noise'u güncellemesi gerekiyor.",
   "unknownInviteToWhiteNoiseDescription": "Bu kullanıcı henüz White Noise'da değil. Güvenli bir sohbet başlatmak için uygulamayı paylaşın.",
+  "unknownUserNeedsUpdate": "Kullanıcı güncelleme yapmalı",
   "unknownUserNeedsUpdateDescription": "Bu kullanıcıyla henüz güvenli sohbet başlatamazsınız. Güvenli mesajlaşmanın çalışması için White Noise'u güncellemesi gerekiyor.",
   "addToAnotherGroup": "Başka bir gruba ekle",
   "addToGroupConfirmation": "{userName} kişisini {groupName} grubuna eklensin mi?",
@@ -312,5 +313,7 @@
   "profilesTitle": "Profiller",
   "noAccountsAvailable": "Kullanılabilir hesap yok",
   "connectAnotherProfile": "Başka Profil Bağla",
-  "groupImageUploadFailed": "Grup oluşturuldu, ancak görsel yüklenemedi."
+  "groupImageUploadFailed": "Grup oluşturuldu, ancak görsel yüklenemedi.",
+  "invalidRelayUrlScheme": "URL wss:// veya ws:// ile başlamalıdır",
+  "invalidRelayUrl": "Geçersiz röle URL'si"
 }

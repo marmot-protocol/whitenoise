@@ -1061,10 +1061,12 @@ class AppLocalizationsDe extends AppLocalizations {
       'Gruppe erstellt, aber das Hochladen des Bildes ist fehlgeschlagen.';
 
   @override
-  String get userNeedsUpdate => 'Schlüsselaktualisierung erforderlich';
+  String updateNeeded(String name) {
+    return '$name muss aktualisieren';
+  }
 
   @override
-  String userNeedsUpdateDescription(String name) {
+  String updateNeededDescription(String name) {
     return 'Du kannst noch keinen sicheren Chat mit $name starten. Die Person muss White Noise aktualisieren, bevor sichere Nachrichten funktionieren.';
   }
 
@@ -1076,6 +1078,9 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get unknownInviteToWhiteNoiseDescription =>
       'Dieser Benutzer ist noch nicht bei White Noise. Teile die App, um einen sicheren Chat zu starten.';
+
+  @override
+  String get unknownUserNeedsUpdate => 'Benutzer muss aktualisieren';
 
   @override
   String get unknownUserNeedsUpdateDescription =>
@@ -1099,4 +1104,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get connectAnotherProfile => 'Weiteres Profil verbinden';
+
+  @override
+  String get invalidRelayUrlScheme => 'Die URL muss mit wss:// oder ws:// beginnen';
+
+  @override
+  String get invalidRelayUrl => 'Ungültige Relay-URL';
 }

@@ -885,27 +885,27 @@ class AppLocalizationsEs extends AppLocalizations {
   String get addToAnotherGroup => 'Añadir a otro grupo';
 
   @override
-  String get relayResolutionTitle => 'Configuración de relay';
+  String get relayResolutionTitle => 'Configuración de relé';
 
   @override
   String get relayResolutionDescription =>
-      'No pudimos encontrar tus listas de relays en la red. Puedes proporcionar un relay donde estén publicadas tus listas o usar nuestros relays predeterminados para comenzar.';
+      'No pudimos encontrar tus listas de relés en la red. Puedes proporcionar un relé donde estén publicadas tus listas o usar nuestros relés predeterminados para comenzar.';
 
   @override
-  String get relayResolutionUseDefaults => 'Usar relays predeterminados';
+  String get relayResolutionUseDefaults => 'Usar relés predeterminados';
 
   @override
-  String get relayResolutionTryRelay => 'Buscar relay';
+  String get relayResolutionTryRelay => 'Buscar relé';
 
   @override
-  String get relayResolutionRelayPlaceholder => 'wss://relay.example.com';
+  String get relayResolutionRelayPlaceholder => 'wss://rele.ejemplo.com';
 
   @override
-  String get relayResolutionRelayLabel => 'URL del relay';
+  String get relayResolutionRelayLabel => 'URL del relé';
 
   @override
   String get relayResolutionNotFound =>
-      'No se encontraron listas de relays en este relay. Prueba con otro o usa los predeterminados.';
+      'No se encontraron listas de relés en este relé. Prueba con otro o usa los predeterminados.';
 
   @override
   String get loginErrorInvalidKey =>
@@ -913,7 +913,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get loginErrorNoRelayConnections =>
-      'No se pudo conectar a ningún relay. Verifica tu conexión e inténtalo de nuevo.';
+      'No se pudo conectar a ningún relé. Verifica tu conexión e inténtalo de nuevo.';
 
   @override
   String get loginErrorTimeout => 'La conexión ha expirado. Inténtalo de nuevo.';
@@ -1049,10 +1049,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get groupImageUploadFailed => 'Grupo creado, pero la imagen no se pudo subir.';
 
   @override
-  String get userNeedsUpdate => 'Actualización de clave necesaria';
+  String updateNeeded(String name) {
+    return '$name necesita actualizar';
+  }
 
   @override
-  String userNeedsUpdateDescription(String name) {
+  String updateNeededDescription(String name) {
     return 'Aún no puedes iniciar un chat seguro con $name. Necesita actualizar White Noise antes de que funcione la mensajería segura.';
   }
 
@@ -1064,6 +1066,9 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get unknownInviteToWhiteNoiseDescription =>
       'Este usuario aún no está en White Noise. Comparte la app para iniciar un chat seguro.';
+
+  @override
+  String get unknownUserNeedsUpdate => 'El usuario necesita actualizar';
 
   @override
   String get unknownUserNeedsUpdateDescription =>
@@ -1087,4 +1092,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get connectAnotherProfile => 'Conectar otro perfil';
+
+  @override
+  String get invalidRelayUrlScheme => 'La URL debe comenzar con wss:// o ws://';
+
+  @override
+  String get invalidRelayUrl => 'URL de relé inválida';
 }

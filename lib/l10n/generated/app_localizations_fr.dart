@@ -1046,10 +1046,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get groupImageUploadFailed => 'Groupe créé, mais le téléchargement de l\'image a échoué.';
 
   @override
-  String get userNeedsUpdate => 'Mise à jour de clé nécessaire';
+  String updateNeeded(String name) {
+    return '$name doit mettre à jour';
+  }
 
   @override
-  String userNeedsUpdateDescription(String name) {
+  String updateNeededDescription(String name) {
     return 'Vous ne pouvez pas encore démarrer une discussion sécurisée avec $name. Cette personne doit mettre à jour White Noise avant que la messagerie sécurisée ne fonctionne.';
   }
 
@@ -1061,6 +1063,9 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get unknownInviteToWhiteNoiseDescription =>
       'Cet utilisateur n\'est pas encore sur White Noise. Partagez l\'application pour démarrer une discussion sécurisée.';
+
+  @override
+  String get unknownUserNeedsUpdate => 'L\'utilisateur doit mettre à jour';
 
   @override
   String get unknownUserNeedsUpdateDescription =>
@@ -1084,4 +1089,10 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get connectAnotherProfile => 'Connecter un autre profil';
+
+  @override
+  String get invalidRelayUrlScheme => 'L\'URL doit commencer par wss:// ou ws://';
+
+  @override
+  String get invalidRelayUrl => 'URL de relais invalide';
 }

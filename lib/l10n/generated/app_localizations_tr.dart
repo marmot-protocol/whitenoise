@@ -1037,10 +1037,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get groupImageUploadFailed => 'Grup oluşturuldu, ancak görsel yüklenemedi.';
 
   @override
-  String get userNeedsUpdate => 'Anahtar güncellemesi gerekli';
+  String updateNeeded(String name) {
+    return '$name güncelleme yapmalı';
+  }
 
   @override
-  String userNeedsUpdateDescription(String name) {
+  String updateNeededDescription(String name) {
     return '$name ile henüz güvenli sohbet başlatamazsınız. Güvenli mesajlaşmanın çalışması için White Noise\'u güncellemesi gerekiyor.';
   }
 
@@ -1052,6 +1054,9 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get unknownInviteToWhiteNoiseDescription =>
       'Bu kullanıcı henüz White Noise\'da değil. Güvenli bir sohbet başlatmak için uygulamayı paylaşın.';
+
+  @override
+  String get unknownUserNeedsUpdate => 'Kullanıcı güncelleme yapmalı';
 
   @override
   String get unknownUserNeedsUpdateDescription =>
@@ -1075,4 +1080,10 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get connectAnotherProfile => 'Başka Profil Bağla';
+
+  @override
+  String get invalidRelayUrlScheme => 'URL wss:// veya ws:// ile başlamalıdır';
+
+  @override
+  String get invalidRelayUrl => 'Geçersiz röle URL\'si';
 }

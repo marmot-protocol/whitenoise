@@ -1608,13 +1608,18 @@
     "description": "Warning message when group is created successfully but image upload fails"
   },
 
-  "userNeedsUpdate": "Key update needed",
-  "@userNeedsUpdate": {
-    "description": "Callout title when user needs to update their whitenoise app"
+  "updateNeeded": "{name} needs update",
+  "@updateNeeded": {
+    "description": "Callout title when user needs to update their whitenoise app",
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
   },
 
-  "userNeedsUpdateDescription": "You can't start a secure chat with {name} yet. They need to update White Noise before secure messaging works.",
-  "@userNeedsUpdateDescription": {
+  "updateNeededDescription": "You can't start a secure chat with {name} yet. They need to update White Noise before secure messaging works.",
+  "@updateNeededDescription": {
     "description": "Callout description when user needs to update their whitenoise app",
     "placeholders": {
       "name": {
@@ -1643,7 +1648,13 @@
     "description": "Callout description when unknown user is not on White Noise"
   },
 
+  "unknownUserNeedsUpdate": "Update required",
+  "@unknownUserNeedsUpdate": {
+    "description": "Callout title when user needs to update their whitenoise app and we don't know the user name"
+  },
+
   "unknownUserNeedsUpdateDescription": "You can't start a secure chat with this user yet. They need to update White Noise before secure messaging works.",
+
   "@unknownUserNeedsUpdateDescription": {
     "description": "Callout description when user needs to update their whitenoise app and we don't know the user name"
   },
@@ -1676,5 +1687,15 @@
   "connectAnotherProfile": "Connect Another Profile",
   "@connectAnotherProfile": {
     "description": "Button text to connect another profile/account"
+  },
+
+  "invalidRelayUrlScheme": "URL must start with wss:// or ws://",
+  "@invalidRelayUrlScheme": {
+    "description": "Error message when relay URL doesn't start with wss:// or ws://"
+  },
+
+  "invalidRelayUrl": "Invalid relay URL",
+  "@invalidRelayUrl": {
+    "description": "Error message when relay URL is invalid"
   }
 }

@@ -300,9 +300,10 @@
   "groupSaveError": "Gruppe konnte nicht gespeichert werden. Bitte erneut versuchen.",
   "failedToFetchGroupMembers": "Gruppenmitglieder konnten nicht geladen werden. Bitte erneut versuchen.",
   "failedToAddMembers": "Mitglieder konnten nicht hinzugefügt werden. Bitte erneut versuchen.",
-  "userNeedsUpdate": "Schlüsselaktualisierung erforderlich",
-  "userNeedsUpdateDescription": "Du kannst noch keinen sicheren Chat mit {name} starten. Die Person muss White Noise aktualisieren, bevor sichere Nachrichten funktionieren.",
+  "updateNeeded": "{name} muss aktualisieren",
+  "updateNeededDescription": "Du kannst noch keinen sicheren Chat mit {name} starten. Die Person muss White Noise aktualisieren, bevor sichere Nachrichten funktionieren.",
   "unknownInviteToWhiteNoiseDescription": "Dieser Benutzer ist noch nicht bei White Noise. Teile die App, um einen sicheren Chat zu starten.",
+  "unknownUserNeedsUpdate": "Benutzer muss aktualisieren",
   "unknownUserNeedsUpdateDescription": "Du kannst noch keinen sicheren Chat mit diesem Benutzer starten. Die Person muss White Noise aktualisieren, bevor sichere Nachrichten funktionieren.",
   "addToAnotherGroup": "Zu einer anderen Gruppe hinzufügen",
   "addToGroupConfirmation": "{userName} zu {groupName} hinzufügen?",
@@ -312,5 +313,7 @@
   "profilesTitle": "Profile",
   "noAccountsAvailable": "Keine Konten verfügbar",
   "connectAnotherProfile": "Weiteres Profil verbinden",
-  "groupImageUploadFailed": "Gruppe erstellt, aber das Hochladen des Bildes ist fehlgeschlagen."
+  "groupImageUploadFailed": "Gruppe erstellt, aber das Hochladen des Bildes ist fehlgeschlagen.",
+  "invalidRelayUrlScheme": "Die URL muss mit wss:// oder ws:// beginnen",
+  "invalidRelayUrl": "Ungültige Relay-URL"
 }

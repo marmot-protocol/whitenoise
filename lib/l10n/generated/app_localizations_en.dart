@@ -1036,10 +1036,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get groupImageUploadFailed => 'Group created, but the image failed to upload.';
 
   @override
-  String get userNeedsUpdate => 'Key update needed';
+  String updateNeeded(String name) {
+    return '$name needs update';
+  }
 
   @override
-  String userNeedsUpdateDescription(String name) {
+  String updateNeededDescription(String name) {
     return 'You can\'t start a secure chat with $name yet. They need to update White Noise before secure messaging works.';
   }
 
@@ -1051,6 +1053,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get unknownInviteToWhiteNoiseDescription =>
       'This user isn\'t on White Noise yet. Share the app to start a secure chat.';
+
+  @override
+  String get unknownUserNeedsUpdate => 'Update required';
 
   @override
   String get unknownUserNeedsUpdateDescription =>
@@ -1074,4 +1079,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get connectAnotherProfile => 'Connect Another Profile';
+
+  @override
+  String get invalidRelayUrlScheme => 'URL must start with wss:// or ws://';
+
+  @override
+  String get invalidRelayUrl => 'Invalid relay URL';
 }

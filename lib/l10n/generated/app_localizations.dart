@@ -1923,14 +1923,14 @@ abstract class AppLocalizations {
   /// Callout title when user needs to update their whitenoise app
   ///
   /// In en, this message translates to:
-  /// **'Key update needed'**
-  String get userNeedsUpdate;
+  /// **'{name} needs update'**
+  String updateNeeded(String name);
 
   /// Callout description when user needs to update their whitenoise app
   ///
   /// In en, this message translates to:
   /// **'You can\'t start a secure chat with {name} yet. They need to update White Noise before secure messaging works.'**
-  String userNeedsUpdateDescription(String name);
+  String updateNeededDescription(String name);
 
   /// Confirmation dialog message for adding user to group
   ///
@@ -1943,6 +1943,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This user isn\'t on White Noise yet. Share the app to start a secure chat.'**
   String get unknownInviteToWhiteNoiseDescription;
+
+  /// Callout title when user needs to update their whitenoise app and we don't know the user name
+  ///
+  /// In en, this message translates to:
+  /// **'Update required'**
+  String get unknownUserNeedsUpdate;
 
   /// Callout description when user needs to update their whitenoise app and we don't know the user name
   ///
@@ -1985,6 +1991,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Connect Another Profile'**
   String get connectAnotherProfile;
+
+  /// Error message when relay URL doesn't start with wss:// or ws://
+  ///
+  /// In en, this message translates to:
+  /// **'URL must start with wss:// or ws://'**
+  String get invalidRelayUrlScheme;
+
+  /// Error message when relay URL is invalid
+  ///
+  /// In en, this message translates to:
+  /// **'Invalid relay URL'**
+  String get invalidRelayUrl;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

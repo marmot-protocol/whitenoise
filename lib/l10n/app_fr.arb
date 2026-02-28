@@ -300,9 +300,10 @@
   "groupSaveError": "Impossible de sauvegarder le groupe. Veuillez réessayer.",
   "failedToFetchGroupMembers": "Impossible de charger les membres du groupe. Veuillez réessayer.",
   "failedToAddMembers": "Impossible d'ajouter des membres. Veuillez réessayer.",
-  "userNeedsUpdate": "Mise à jour de clé nécessaire",
-  "userNeedsUpdateDescription": "Vous ne pouvez pas encore démarrer une discussion sécurisée avec {name}. Cette personne doit mettre à jour White Noise avant que la messagerie sécurisée ne fonctionne.",
+  "updateNeeded": "{name} doit mettre à jour",
+  "updateNeededDescription": "Vous ne pouvez pas encore démarrer une discussion sécurisée avec {name}. Cette personne doit mettre à jour White Noise avant que la messagerie sécurisée ne fonctionne.",
   "unknownInviteToWhiteNoiseDescription": "Cet utilisateur n'est pas encore sur White Noise. Partagez l'application pour démarrer une discussion sécurisée.",
+  "unknownUserNeedsUpdate": "L'utilisateur doit mettre à jour",
   "unknownUserNeedsUpdateDescription": "Vous ne pouvez pas encore démarrer une discussion sécurisée avec cet utilisateur. Cette personne doit mettre à jour White Noise avant que la messagerie sécurisée ne fonctionne.",
   "addToAnotherGroup": "Ajouter à un autre groupe",
   "addToGroupConfirmation": "Ajouter {userName} à {groupName} ?",
@@ -312,5 +313,7 @@
   "profilesTitle": "Profils",
   "noAccountsAvailable": "Aucun compte disponible",
   "connectAnotherProfile": "Connecter un autre profil",
-  "groupImageUploadFailed": "Groupe créé, mais le téléchargement de l'image a échoué."
+  "groupImageUploadFailed": "Groupe créé, mais le téléchargement de l'image a échoué.",
+  "invalidRelayUrlScheme": "L'URL doit commencer par wss:// ou ws://",
+  "invalidRelayUrl": "URL de relais invalide"
 }
