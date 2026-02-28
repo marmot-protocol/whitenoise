@@ -19,6 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fix profile picture appearing in DMs by passing isDm through route [PR #405](https://github.com/marmot-protocol/whitenoise/pull/405)
 - Fix npubs middle ellipsis by adding snap to words option [PR #388](https://github.com/marmot-protocol/whitenoise/pull/388)
 
 ### Security
