@@ -1104,37 +1104,37 @@ class AppLocalizationsIt extends AppLocalizations {
   String get rawDebugViewCopied => 'Copiato negli appunti';
 
   @override
-  String get appLogsTitle => 'App Logs';
+  String get appLogsTitle => 'Registri dell\'app';
 
   @override
-  String get appLogsViewLogs => 'View logs';
+  String get appLogsViewLogs => 'Visualizza registri';
 
   @override
-  String get appLogsViewLogsDescription => 'View all Logger output in app';
+  String get appLogsViewLogsDescription => 'Visualizza tutti gli output del Logger nell\'app';
 
   @override
-  String get appLogsClear => 'Clear';
+  String get appLogsClear => 'Cancella';
 
   @override
-  String get appLogsEmpty => 'No logs yet';
+  String get appLogsEmpty => 'Nessun registro ancora';
 
   @override
-  String get appLogsSearchPlaceholder => 'Search logs...';
+  String get appLogsSearchPlaceholder => 'Cerca nei registri...';
 
   @override
-  String get appLogsAddPatternPlaceholder => 'Add filter pattern';
+  String get appLogsAddPatternPlaceholder => 'Aggiungi filtro';
 
   @override
-  String get appLogsIgnore => 'Ignore';
+  String get appLogsIgnore => 'Ignora';
 
   @override
-  String get appLogsShow => 'Show';
+  String get appLogsShow => 'Mostra';
 
   @override
-  String get appLogsClearFilters => 'Clear filters';
+  String get appLogsClearFilters => 'Cancella filtri';
 
   @override
   String appLogsFilteredCount(int shown, int total) {
-    return '$shown of $total';
+    return '$shown di $total';
   }
 }

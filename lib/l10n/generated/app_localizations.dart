@@ -2013,7 +2013,7 @@ abstract class AppLocalizations {
   /// Message count shown in raw debug view
   ///
   /// In en, this message translates to:
-  /// **'{count} messages'**
+  /// **'{count, plural, =0{No messages} =1{1 message} other{{count} messages}}'**
   String rawDebugViewMessageCount(int count);
 
   /// Snackbar text after copying a raw message

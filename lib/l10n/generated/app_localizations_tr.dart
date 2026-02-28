@@ -1103,37 +1103,37 @@ class AppLocalizationsTr extends AppLocalizations {
   String get rawDebugViewCopied => 'Panoya kopyalandı';
 
   @override
-  String get appLogsTitle => 'App Logs';
+  String get appLogsTitle => 'Uygulama Günlükleri';
 
   @override
-  String get appLogsViewLogs => 'View logs';
+  String get appLogsViewLogs => 'Günlüklere bak';
 
   @override
-  String get appLogsViewLogsDescription => 'View all Logger output in app';
+  String get appLogsViewLogsDescription => 'Uygulamadaki tüm Logger çıktısını görüntüle';
 
   @override
-  String get appLogsClear => 'Clear';
+  String get appLogsClear => 'Temizle';
 
   @override
-  String get appLogsEmpty => 'No logs yet';
+  String get appLogsEmpty => 'Henüz günlük yok';
 
   @override
-  String get appLogsSearchPlaceholder => 'Search logs...';
+  String get appLogsSearchPlaceholder => 'Günlüklerde ara...';
 
   @override
-  String get appLogsAddPatternPlaceholder => 'Add filter pattern';
+  String get appLogsAddPatternPlaceholder => 'Filtre kalıbı ekle';
 
   @override
-  String get appLogsIgnore => 'Ignore';
+  String get appLogsIgnore => 'Yoksay';
 
   @override
-  String get appLogsShow => 'Show';
+  String get appLogsShow => 'Göster';
 
   @override
-  String get appLogsClearFilters => 'Clear filters';
+  String get appLogsClearFilters => 'Filtreleri temizle';
 
   @override
   String appLogsFilteredCount(int shown, int total) {
-    return '$shown of $total';
+    return '$shown / $total';
   }
 }

@@ -1112,37 +1112,38 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rawDebugViewCopied => 'Copié dans le presse-papiers';
 
   @override
-  String get appLogsTitle => 'App Logs';
+  String get appLogsTitle => 'Journaux de l\'application';
 
   @override
-  String get appLogsViewLogs => 'View logs';
+  String get appLogsViewLogs => 'Voir les journaux';
 
   @override
-  String get appLogsViewLogsDescription => 'View all Logger output in app';
+  String get appLogsViewLogsDescription =>
+      'Afficher toutes les sorties du journal de l\'application';
 
   @override
-  String get appLogsClear => 'Clear';
+  String get appLogsClear => 'Effacer';
 
   @override
-  String get appLogsEmpty => 'No logs yet';
+  String get appLogsEmpty => 'Aucun journal pour le moment';
 
   @override
-  String get appLogsSearchPlaceholder => 'Search logs...';
+  String get appLogsSearchPlaceholder => 'Rechercher dans les journaux...';
 
   @override
-  String get appLogsAddPatternPlaceholder => 'Add filter pattern';
+  String get appLogsAddPatternPlaceholder => 'Ajouter un filtre';
 
   @override
-  String get appLogsIgnore => 'Ignore';
+  String get appLogsIgnore => 'Ignorer';
 
   @override
-  String get appLogsShow => 'Show';
+  String get appLogsShow => 'Afficher';
 
   @override
-  String get appLogsClearFilters => 'Clear filters';
+  String get appLogsClearFilters => 'Effacer les filtres';
 
   @override
   String appLogsFilteredCount(int shown, int total) {
-    return '$shown of $total';
+    return '$shown sur $total';
   }
 }

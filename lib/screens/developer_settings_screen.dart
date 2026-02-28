@@ -105,7 +105,7 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                 children: [
                   SizedBox(height: 16.h),
                   if (isStaging) ...[
-                    _DebugViewToggle(
+                    _DeveloperSettingsDebugViewToggle(
                       label: context.l10n.rawDebugView,
                       description: context.l10n.rawDebugViewDescription,
                       enabled: debugViewEnabled,
@@ -113,7 +113,7 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                     ),
                     const WnSeparator(),
                     SizedBox(height: 8.h),
-                    _ViewLogsRow(
+                    _DeveloperSettingsViewLogsRow(
                       label: context.l10n.appLogsViewLogs,
                       description: context.l10n.appLogsViewLogsDescription,
                       onTap: () => Routes.pushToAppLogs(context),
@@ -121,7 +121,7 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                     const WnSeparator(),
                     SizedBox(height: 8.h),
                   ],
-                  _ActionButtons(
+                  _DeveloperSettingsActionButtons(
                     isLoading: state.isLoading,
                     onPublish: () => handleAction(publish),
                     onFetch: () => handleAction(fetch),
@@ -152,7 +152,7 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                               color: colors.backgroundContentPrimary,
                             ),
                           )
-                        : _KeyPackagesList(
+                        : _DeveloperSettingsKeyPackagesList(
                             packages: state.packages,
                             onDelete: handleDelete,
                             disabled: state.isLoading,
@@ -168,8 +168,8 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
   }
 }
 
-class _ActionButtons extends StatelessWidget {
-  const _ActionButtons({
+class _DeveloperSettingsActionButtons extends StatelessWidget {
+  const _DeveloperSettingsActionButtons({
     required this.isLoading,
     required this.onPublish,
     required this.onFetch,
@@ -210,8 +210,8 @@ class _ActionButtons extends StatelessWidget {
   }
 }
 
-class _KeyPackagesList extends HookWidget {
-  const _KeyPackagesList({
+class _DeveloperSettingsKeyPackagesList extends HookWidget {
+  const _DeveloperSettingsKeyPackagesList({
     required this.packages,
     required this.onDelete,
     required this.disabled,
@@ -283,8 +283,8 @@ class _KeyPackagesList extends HookWidget {
   }
 }
 
-class _ViewLogsRow extends StatelessWidget {
-  const _ViewLogsRow({
+class _DeveloperSettingsViewLogsRow extends StatelessWidget {
+  const _DeveloperSettingsViewLogsRow({
     required this.label,
     required this.description,
     required this.onTap,
@@ -335,8 +335,8 @@ class _ViewLogsRow extends StatelessWidget {
   }
 }
 
-class _DebugViewToggle extends StatelessWidget {
-  const _DebugViewToggle({
+class _DeveloperSettingsDebugViewToggle extends StatelessWidget {
+  const _DeveloperSettingsDebugViewToggle({
     required this.label,
     required this.description,
     required this.enabled,

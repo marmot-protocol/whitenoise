@@ -63,7 +63,7 @@ void main() {
 
   Future<void> pumpDebugScreen(WidgetTester tester) async {
     await mountWidget(
-      ChatRawDebugScreen(groupId: _testGroupId),
+      const ChatRawDebugScreen(groupId: _testGroupId),
       tester,
     );
     await tester.pumpAndSettle();

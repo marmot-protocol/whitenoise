@@ -1698,7 +1698,7 @@
     "description": "Label for group ID in raw debug view"
   },
 
-  "rawDebugViewMessageCount": "{count} messages",
+  "rawDebugViewMessageCount": "{count, plural, =0{No messages} =1{1 message} other{{count} messages}}",
   "@rawDebugViewMessageCount": {
     "description": "Message count shown in raw debug view",
     "placeholders": {

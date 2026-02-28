@@ -13,23 +13,29 @@ final rustLogListenerProvider = Provider.autoDispose<void>((ref) {
   if (!isStaging) return;
 
   StreamSubscription<String>? subscription;
+  var disposed = false;
 
   ref.onDispose(() {
+    disposed = true;
     subscription?.cancel();
   });
 
-  _startListening((sub) {
-    subscription = sub;
+  _startListening().then((sub) {
+    if (disposed) {
+      sub.cancel();
+    } else {
+      subscription = sub;
+    }
   });
 });
 
-Future<void> _startListening(void Function(StreamSubscription<String>) onSubscription) async {
+Future<StreamSubscription<String>> _startListening() async {
   final dir = await getApplicationDocumentsDirectory();
   final logsBaseDir = '${dir.path}/whitenoise/logs';
 
   final stream = logs_api.subscribeToRustLogs(logsBaseDir: logsBaseDir);
 
-  final subscription = stream.listen(
+  return stream.listen(
     (line) {
       final record = LogRecord(
         Level.INFO,
@@ -51,6 +57,4 @@ Future<void> _startListening(void Function(StreamSubscription<String>) onSubscri
     onDone: () {},
     cancelOnError: false,
   );
-
-  onSubscription(subscription);
 }

@@ -32,16 +32,19 @@ pub async fn subscribe_to_rust_logs(
 ) -> Result<(), ApiError> {
     let path = rust_log_path(&logs_base_dir);
 
-    let file = match File::open(&path).await {
-        Ok(f) => f,
-        Err(e) => {
-            let msg = format!("subscribe_to_rust_logs: log file not found path={path:?} err={e}");
-            let _ = sink.add(msg);
-            return Ok(());
+    let mut file = loop {
+        match File::open(&path).await {
+            Ok(f) => break f,
+            Err(e) => {
+                let msg =
+                    format!("subscribe_to_rust_logs: waiting for log file path={path:?} err={e}");
+                if sink.add(msg).is_err() {
+                    return Ok(());
+                }
+                tokio::time::sleep(Duration::from_secs(2)).await;
+            }
         }
     };
-
-    let mut file = file;
     file.seek(std::io::SeekFrom::End(0)).await?;
 
     let mut reader = BufReader::new(file);

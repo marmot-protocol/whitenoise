@@ -1133,37 +1133,37 @@ class AppLocalizationsRu extends AppLocalizations {
   String get rawDebugViewCopied => 'Скопировано в буфер обмена';
 
   @override
-  String get appLogsTitle => 'App Logs';
+  String get appLogsTitle => 'Журналы приложения';
 
   @override
-  String get appLogsViewLogs => 'View logs';
+  String get appLogsViewLogs => 'Просмотреть логи';
 
   @override
-  String get appLogsViewLogsDescription => 'View all Logger output in app';
+  String get appLogsViewLogsDescription => 'Просмотреть все записи Logger в приложении';
 
   @override
-  String get appLogsClear => 'Clear';
+  String get appLogsClear => 'Очистить';
 
   @override
-  String get appLogsEmpty => 'No logs yet';
+  String get appLogsEmpty => 'Пока нет записей';
 
   @override
-  String get appLogsSearchPlaceholder => 'Search logs...';
+  String get appLogsSearchPlaceholder => 'Поиск по логам...';
 
   @override
-  String get appLogsAddPatternPlaceholder => 'Add filter pattern';
+  String get appLogsAddPatternPlaceholder => 'Добавить шаблон фильтра';
 
   @override
-  String get appLogsIgnore => 'Ignore';
+  String get appLogsIgnore => 'Игнорировать';
 
   @override
-  String get appLogsShow => 'Show';
+  String get appLogsShow => 'Показать';
 
   @override
-  String get appLogsClearFilters => 'Clear filters';
+  String get appLogsClearFilters => 'Сбросить фильтры';
 
   @override
   String appLogsFilteredCount(int shown, int total) {
-    return '$shown of $total';
+    return '$shown из $total';
   }
 }
