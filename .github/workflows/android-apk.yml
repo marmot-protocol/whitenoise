@@ -3,12 +3,54 @@ name: Android APK Build
 on:
   push:
     branches: [master]
+  pull_request:
+    branches: [master]
+    types: [opened, synchronize, reopened, labeled]
   workflow_dispatch:
 
 jobs:
+  check-team:
+    name: Check Core Contributor
+    if: >-
+      github.event_name == 'pull_request'
+      && contains(github.event.pull_request.labels.*.name, 'apk')
+    runs-on: ubuntu-latest
+    outputs:
+      is-member: ${{ steps.check.outputs.is-member }}
+
+    steps:
+    - name: Checkout contributors list
+      uses: actions/checkout@v4
+      with:
+        ref: ${{ github.event.pull_request.base.sha }}
+        sparse-checkout: .github/apk-contributors
+        sparse-checkout-cone-mode: false
+
+    - name: Check contributor membership
+      id: check
+      env:
+        PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+      run: |
+        if grep -qxF "$PR_AUTHOR" .github/apk-contributors; then
+          echo "is-member=true" >> "$GITHUB_OUTPUT"
+          echo "✅ ${PR_AUTHOR} is an APK contributor"
+        else
+          echo "is-member=false" >> "$GITHUB_OUTPUT"
+          echo "⏭️ ${PR_AUTHOR} is not an APK contributor — skipping APK build"
+        fi
+
   build-apk:
     name: Build Staging APK
     runs-on: ubuntu-latest
+    needs: [check-team]
+    # Run when: push/dispatch (not a PR, check-team was skipped), or PR where
+    # the "apk" label is present and actor is a contributor.
+    if: >-
+      always()
+      && (
+        (github.event_name != 'pull_request' && needs.check-team.result == 'skipped')
+        || needs.check-team.outputs.is-member == 'true'
+      )
 
     steps:
     - name: Checkout code
@@ -73,29 +115,43 @@ jobs:
     - name: Set artifact name
       run: |
         echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
-        BRANCH_NAME="${GITHUB_REF_NAME//\//-}"
-        echo "BRANCH_NAME=$BRANCH_NAME" >> $GITHUB_ENV
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          echo "ARTIFACT_SUFFIX=pr-${{ github.event.pull_request.number }}-${GITHUB_SHA::7}" >> $GITHUB_ENV
+        else
+          BRANCH_NAME="${GITHUB_REF_NAME//\//-}"
+          echo "ARTIFACT_SUFFIX=${BRANCH_NAME}-${GITHUB_SHA::7}" >> $GITHUB_ENV
+        fi
 
     - name: Upload APK artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: apk-staging-${{ env.BRANCH_NAME }}-${{ env.SHORT_SHA }}
+        name: apk-staging-${{ env.ARTIFACT_SUFFIX }}
         path: build/app/outputs/flutter-apk/*-staging-*.apk
         retention-days: 30
         if-no-files-found: error
 
     - name: Summary
+      env:
+        SAFE_PR_TITLE: ${{ github.event.pull_request.title }}
+        SAFE_PR_NUMBER: ${{ github.event.pull_request.number }}
       run: |
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          PR_INFO="**PR:** #${SAFE_PR_NUMBER} — ${SAFE_PR_TITLE}"
+        else
+          PR_INFO=""
+        fi
+
         cat >> "${GITHUB_STEP_SUMMARY}" <<SUMMARY
         ## Android APK Build Complete
 
         **Commit:** ${{ github.sha }}
+        ${PR_INFO}
 
         ### Download APKs
         1. Go to the **Actions** tab
         2. Click on this workflow run
         3. Scroll down to **Artifacts**
-        4. Download **apk-staging-${{ env.BRANCH_NAME }}-${{ env.SHORT_SHA }}**
+        4. Download **apk-staging-${{ env.ARTIFACT_SUFFIX }}**
 
         ### APK Files
         SUMMARY

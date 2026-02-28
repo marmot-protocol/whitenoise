@@ -12,6 +12,7 @@ REPO="marmot-protocol/whitenoise"
 WORKFLOW_FILE="android-apk.yml"
 API="https://api.github.com"
 OUT_DIR="site"
+MAX_PR_BUILDS=5
 
 # ---------------------------------------------------------------------------
 # Auth header (optional but recommended – unauthenticated rate-limit is 60/h)
@@ -32,6 +33,12 @@ gh_api() {
 
 html_escape() {
   printf '%s' "$1" | sed 's/&/\&amp;/g; s/</\&lt;/g; s/>/\&gt;/g; s/"/\&quot;/g; s/'"'"'/\&#39;/g'
+}
+
+format_date() {
+  date -u -d "$1" '+%B %d, %Y at %H:%M UTC' 2>/dev/null \
+    || TZ=UTC date -jf '%Y-%m-%dT%H:%M:%SZ' "$1" '+%B %d, %Y at %H:%M UTC' 2>/dev/null \
+    || echo "$1"
 }
 
 # ---------------------------------------------------------------------------
@@ -94,15 +101,134 @@ SHORT_SHA="${HEAD_SHA:0:7}"
 echo "  Commit: $SHORT_SHA by $COMMIT_AUTHOR — $COMMIT_MSG"
 
 # ---------------------------------------------------------------------------
-# 4. Generate static HTML — NES retro style, marmot energy
+# 4. Fetch recent successful PR builds
+# ---------------------------------------------------------------------------
+echo ""
+echo "Fetching recent PR builds..."
+
+# Get recent successful runs for the workflow (across all branches, event=pull_request)
+PR_RUNS_JSON=$(gh_api "$API/repos/$REPO/actions/workflows/$WORKFLOW_FILE/runs?event=pull_request&status=success&per_page=20")
+
+# We'll collect up to MAX_PR_BUILDS PR build entries as HTML fragments
+PR_BUILDS_HTML=""
+PR_COUNT=0
+
+# Iterate through runs, extract PR info from each
+while IFS= read -r row; do
+  if [[ "$PR_COUNT" -ge "$MAX_PR_BUILDS" ]]; then
+    break
+  fi
+
+  unset pr_artifacts_json
+
+  pr_run_id=$(echo "$row" | jq -r '.id')
+  pr_head_sha=$(echo "$row" | jq -r '.head_sha')
+  pr_run_date=$(echo "$row" | jq -r '.updated_at')
+
+  # Get PR number from the run's pull_requests array
+  pr_number=$(echo "$row" | jq -r '.pull_requests[0].number // empty')
+
+  if [[ -z "$pr_number" ]]; then
+    # Fallback: check artifact name for pr-<number> pattern
+    pr_artifacts_json=$(gh_api "$API/repos/$REPO/actions/runs/$pr_run_id/artifacts")
+    pr_artifact_name=$(echo "$pr_artifacts_json" | jq -r '.artifacts[0].name // empty')
+
+    if [[ "$pr_artifact_name" =~ apk-staging-pr-([0-9]+)- ]]; then
+      pr_number="${BASH_REMATCH[1]}"
+    else
+      echo "  Skipping run $pr_run_id — cannot determine PR number"
+      continue
+    fi
+  fi
+
+  # Fetch PR metadata
+  pr_json=$(gh_api "$API/repos/$REPO/pulls/$pr_number" 2>/dev/null || echo '{}')
+  pr_title=$(echo "$pr_json" | jq -r '.title // "Unknown"')
+  pr_author=$(echo "$pr_json" | jq -r '.user.login // "unknown"')
+  pr_state=$(echo "$pr_json" | jq -r '.state // "unknown"')
+  merged_at=$(echo "$pr_json" | jq -r '.merged_at // empty')
+  pr_url="https://github.com/$REPO/pull/$pr_number"
+
+  # Get artifact info for this run
+  if [[ -z "${pr_artifacts_json:-}" ]]; then
+    pr_artifacts_json=$(gh_api "$API/repos/$REPO/actions/runs/$pr_run_id/artifacts")
+  fi
+
+  pr_artifact_id=$(echo "$pr_artifacts_json" | jq -r '.artifacts[0].id // empty')
+  pr_artifact_size=$(echo "$pr_artifacts_json" | jq -r '.artifacts[0].size_in_bytes // 0')
+  pr_artifact_expired=$(echo "$pr_artifacts_json" | jq -r '.artifacts[0].expired // false')
+
+  if [[ -z "$pr_artifact_id" || "$pr_artifact_expired" == "true" ]]; then
+    echo "  Skipping PR #$pr_number — artifact missing or expired"
+    continue
+  fi
+
+  pr_artifact_size_mb=$(awk "BEGIN {printf \"%.1f\", $pr_artifact_size / 1048576}")
+  pr_nightly_url="https://nightly.link/$REPO/actions/artifacts/$pr_artifact_id.zip"
+  pr_short_sha="${pr_head_sha:0:7}"
+  pr_pretty_date=$(format_date "$pr_run_date")
+  pr_title_escaped=$(html_escape "$pr_title")
+  pr_author_escaped=$(html_escape "$pr_author")
+  pr_commit_url="https://github.com/$REPO/commit/$pr_head_sha"
+
+  # Determine state badge
+  if [[ "$pr_state" == "open" ]]; then
+    state_badge="OPEN"
+    state_color="var(--nes-green)"
+  elif [[ -n "$merged_at" ]]; then
+    state_badge="MERGED"
+    state_color="var(--nes-blue)"
+  else
+    state_badge="CLOSED"
+    state_color="var(--nes-red)"
+  fi
+
+  echo "  PR #$pr_number: $pr_title (by $pr_author, $pr_short_sha)"
+
+  PR_BUILDS_HTML+="
+    <div class=\"nes-box is-dark\" style=\"margin: 0.75rem 0;\">
+      <div style=\"display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 0.5rem;\">
+        <div>
+          <span style=\"color: var(--nes-orange); font-size: 0.6rem;\">PR BUILD</span>
+          <span style=\"color: ${state_color}; font-size: 0.5rem; margin-left: 0.5rem;\">[${state_badge}]</span>
+        </div>
+        <a class=\"nes-btn\" href=\"${pr_nightly_url}\" style=\"font-size: 0.5rem; padding: 0.4rem 0.8rem;\">
+          DOWNLOAD
+        </a>
+      </div>
+      <div style=\"margin-top: 0.75rem;\">
+        <a href=\"${pr_url}\" style=\"color: var(--nes-yellow); text-decoration: none; font-size: 0.6rem;\">#${pr_number}</a>
+        <span style=\"font-size: 0.55rem;\"> ${pr_title_escaped}</span>
+      </div>
+      <table class=\"commit-table\" style=\"margin-top: 0.5rem;\">
+        <tr>
+          <td>HERO</td>
+          <td>${pr_author_escaped}</td>
+        </tr>
+        <tr>
+          <td>COMMIT</td>
+          <td><a href=\"${pr_commit_url}\"><span class=\"sha\">${pr_short_sha}</span></a></td>
+        </tr>
+        <tr>
+          <td>BUILT</td>
+          <td>${pr_pretty_date}</td>
+        </tr>
+        <tr>
+          <td>SIZE</td>
+          <td>${pr_artifact_size_mb} MB (zip)</td>
+        </tr>
+      </table>
+    </div>"
+
+  PR_COUNT=$((PR_COUNT + 1))
+done < <(echo "$PR_RUNS_JSON" | jq -c '.workflow_runs[]')
+
+echo "  Found $PR_COUNT PR builds"
+
+# ---------------------------------------------------------------------------
+# 5. Generate static HTML — NES retro style, marmot energy
 # ---------------------------------------------------------------------------
 mkdir -p "$OUT_DIR"
-
-format_date() {
-  date -u -d "$1" '+%B %d, %Y at %H:%M UTC' 2>/dev/null \
-    || TZ=UTC date -jf '%Y-%m-%dT%H:%M:%SZ' "$1" '+%B %d, %Y at %H:%M UTC' 2>/dev/null \
-    || echo "$1"
-}
 
 PRETTY_BUILD_DATE=$(format_date "$RUN_DATE")
 PRETTY_COMMIT_DATE=$(format_date "$COMMIT_DATE")
@@ -386,6 +512,31 @@ cat > "$OUT_DIR/index.html" <<'HTMLEOF_PART1'
       50% { opacity: 1; }
     }
 
+    /* ---- PR builds section ---- */
+    .pr-section-header {
+      font-size: 0.7rem;
+      color: var(--nes-orange);
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .pr-section-sub {
+      font-size: 0.45rem;
+      color: var(--muted);
+      text-align: center;
+      margin-bottom: 1rem;
+      line-height: 2;
+    }
+
+    .pr-empty {
+      font-size: 0.5rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 1rem;
+      line-height: 2;
+    }
+
     /* ---- Responsive ---- */
     @media (max-width: 500px) {
       .title { font-size: 1.2rem; }
@@ -425,7 +576,7 @@ cat > "$OUT_DIR/index.html" <<'HTMLEOF_PART1'
     <p class="section-title">&#9660; GRAB THE LATEST BUILD &#9660;</p>
 HTMLEOF_PART1
 
-# --- inject dynamic values ---
+# --- inject dynamic master build values ---
 cat >> "$OUT_DIR/index.html" <<HTMLEOF_PART2
     <a class="nes-btn" href="${NIGHTLY_LINK_URL}">
       &#9733; DOWNLOAD APK &#9733;
@@ -484,6 +635,37 @@ cat >> "$OUT_DIR/index.html" <<HTMLEOF_PART2
 
   <div class="pixel-divider">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</div>
 
+  <!-- PR BUILDS -->
+  <div style="margin: 1.5rem 0;">
+    <p class="pr-section-header">&#9654; SIDE QUESTS (PR BUILDS) &#9654;</p>
+    <p class="pr-section-sub">
+      Experimental builds from open pull requests.<br>
+      Use at your own risk, adventurer.
+    </p>
+HTMLEOF_PART2
+
+# --- inject PR builds ---
+if [[ -n "$PR_BUILDS_HTML" ]]; then
+  cat >> "$OUT_DIR/index.html" <<HTMLEOF_PR_BUILDS
+${PR_BUILDS_HTML}
+HTMLEOF_PR_BUILDS
+else
+  cat >> "$OUT_DIR/index.html" <<'HTMLEOF_PR_EMPTY'
+    <div class="nes-box is-dark">
+      <p class="pr-empty">
+        No active PR builds right now.<br>
+        The marmot is resting. &#x1F634;
+      </p>
+    </div>
+HTMLEOF_PR_EMPTY
+fi
+
+# --- close out the page ---
+cat >> "$OUT_DIR/index.html" <<HTMLEOF_PART3
+  </div>
+
+  <div class="pixel-divider">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</div>
+
   <footer>
     POWERED BY MARMOT PROTOCOL 🦫<br>
     <a href="https://github.com/${REPO}">GITHUB</a> &bull;
@@ -510,7 +692,7 @@ cat >> "$OUT_DIR/index.html" <<HTMLEOF_PART2
 
 </body>
 </html>
-HTMLEOF_PART2
+HTMLEOF_PART3
 
 echo ""
 echo "Static site generated at $OUT_DIR/index.html"

@@ -1,11 +1,10 @@
 name: Deploy WHEN APK site
 
 on:
-  # Trigger when the Android APK Build workflow completes on master
+  # Trigger when the Android APK Build workflow completes (master or PR)
   workflow_run:
     workflows: ["Android APK Build"]
     types: [completed]
-    branches: [master]
 
   # Also allow manual trigger
   workflow_dispatch:
