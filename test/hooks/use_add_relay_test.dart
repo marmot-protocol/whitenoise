@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_add_relay.dart';
+import 'package:whitenoise/utils/relay_url_validation.dart';
 import '../mocks/mock_clipboard_paste.dart';
 import '../test_helpers.dart';
 
@@ -9,7 +10,7 @@ class _TestWidget extends HookWidget {
   final void Function(
     TextEditingController controller,
     bool isValid,
-    String? validationError,
+    RelayValidationError? validationError,
     void Function() paste,
   )
   onBuild;
@@ -24,7 +25,7 @@ class _TestWidget extends HookWidget {
       children: [
         TextField(controller: controller),
         Text('valid: $isValid'),
-        Text('error: ${validationError ?? 'none'}'),
+        Text('error: ${validationError?.toString() ?? 'none'}'),
         ElevatedButton(onPressed: paste, child: const Text('Paste')),
       ],
     );
@@ -60,7 +61,7 @@ void main() {
     });
 
     testWidgets('starts with no validation error', (tester) async {
-      late String? capturedError;
+      late RelayValidationError? capturedError;
 
       final widget = _TestWidget(
         onBuild: (controller, isValid, validationError, paste) {
@@ -109,7 +110,7 @@ void main() {
     });
 
     testWidgets('returns error for invalid URL format', (tester) async {
-      late String? capturedError;
+      late RelayValidationError? capturedError;
 
       final widget = _TestWidget(
         onBuild: (controller, isValid, validationError, paste) {
@@ -121,11 +122,11 @@ void main() {
       await tester.enterText(find.byType(TextField), 'https://relay.example.com');
       await tester.pump(const Duration(milliseconds: 600));
 
-      expect(capturedError, 'URL must start with wss:// or ws://');
+      expect(capturedError, RelayValidationError.invalidScheme);
     });
 
     testWidgets('returns error for double wss:// URL', (tester) async {
-      late String? capturedError;
+      late RelayValidationError? capturedError;
 
       final widget = _TestWidget(
         onBuild: (controller, isValid, validationError, paste) {
@@ -137,11 +138,11 @@ void main() {
       await tester.enterText(find.byType(TextField), 'wss://wss://relay.example.com');
       await tester.pump(const Duration(milliseconds: 600));
 
-      expect(capturedError, 'Invalid relay URL');
+      expect(capturedError, RelayValidationError.invalidUrl);
     });
 
     testWidgets('returns error for URL with invalid host format', (tester) async {
-      late String? capturedError;
+      late RelayValidationError? capturedError;
 
       final widget = _TestWidget(
         onBuild: (controller, isValid, validationError, paste) {
@@ -153,7 +154,7 @@ void main() {
       await tester.enterText(find.byType(TextField), 'wss://localhost');
       await tester.pump(const Duration(milliseconds: 600));
 
-      expect(capturedError, 'Invalid relay URL');
+      expect(capturedError, RelayValidationError.invalidUrl);
     });
 
     testWidgets('accepts valid ws:// URL', (tester) async {
@@ -174,7 +175,7 @@ void main() {
 
     testWidgets('keeps invalid state for empty wss:// prefix', (tester) async {
       late bool capturedIsValid;
-      late String? capturedError;
+      late RelayValidationError? capturedError;
 
       final widget = _TestWidget(
         onBuild: (controller, isValid, validationError, paste) {

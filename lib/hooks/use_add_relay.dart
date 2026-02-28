@@ -11,13 +11,13 @@ final _logger = Logger('useAddRelay');
 ({
   TextEditingController controller,
   bool isValid,
-  String? validationError,
+  RelayValidationError? validationError,
   void Function() paste,
 })
 useAddRelay() {
   final controller = useTextEditingController(text: 'wss://');
   final isValid = useState(false);
-  final validationError = useState<String?>(null);
+  final validationError = useState<RelayValidationError?>(null);
   final debounceTimer = useRef<Timer?>(null);
 
   void runValidation() {
