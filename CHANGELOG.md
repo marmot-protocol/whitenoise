@@ -21,6 +21,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix npubs middle ellipsis by adding snap to words option [PR #388](https://github.com/marmot-protocol/whitenoise/pull/388)
 
+- Fix media modal blurhash issue [PR #397](https://github.com/marmot-protocol/whitenoise/pull/397)
+
 ### Security
 
 ## [0.3.0] - 2026-02-23
