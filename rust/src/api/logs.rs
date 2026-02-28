@@ -54,12 +54,33 @@ pub async fn subscribe_to_rust_logs(
     };
     file.seek(std::io::SeekFrom::End(0)).await?;
 
+    let mut current_path = path;
     let mut reader = BufReader::new(file);
     let mut line = String::new();
     let mut poll = interval(Duration::from_millis(200));
+    let mut ticks_since_rotation_check: u32 = 0;
+    // Check for date rotation every ~30 seconds (150 ticks * 200ms).
+    const ROTATION_CHECK_INTERVAL: u32 = 150;
 
     loop {
         poll.tick().await;
+
+        ticks_since_rotation_check += 1;
+        if ticks_since_rotation_check >= ROTATION_CHECK_INTERVAL {
+            ticks_since_rotation_check = 0;
+            let new_path = rust_log_path(&logs_base_dir);
+            if new_path != current_path {
+                match File::open(&new_path).await {
+                    Ok(f) => {
+                        current_path = new_path;
+                        reader = BufReader::new(f);
+                        line.clear();
+                    }
+                    Err(_) => {}
+                }
+            }
+        }
+
         match reader.read_line(&mut line).await {
             Ok(0) => {
                 line.clear();
