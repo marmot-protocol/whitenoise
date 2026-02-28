@@ -46,8 +46,9 @@ const _searchBarHeight = 80.0;
 
 class ChatScreen extends HookConsumerWidget {
   final String groupId;
+  final bool isDm;
 
-  const ChatScreen({super.key, required this.groupId});
+  const ChatScreen({super.key, required this.groupId, this.isDm = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -151,7 +152,7 @@ class ChatScreen extends HookConsumerWidget {
 
     Future<void> showMessageMenu(ChatMessage message) async {
       FocusScope.of(context).unfocus();
-      final isGroupChat = chatProfile.data?.otherMemberPubkey == null;
+      final isGroupChat = !isDm;
       final authorMetadata = getAuthorMetadata(message.pubkey);
       final senderName = message.pubkey == pubkey
           ? context.l10n.you
@@ -241,7 +242,7 @@ class ChatScreen extends HookConsumerWidget {
             final senderPictureUrl = authorMetadata?.picture;
 
             final nextMessage = index > 0 ? getMessage(index - 1) : null;
-            final isGroupChat = chatProfile.data?.otherMemberPubkey == null;
+            final isGroupChat = !isDm;
             final showAvatar = shouldShowAvatar(
               current: message,
               next: nextMessage,

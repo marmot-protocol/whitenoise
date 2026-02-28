@@ -171,7 +171,7 @@ class ChatListTile extends HookConsumerWidget {
       key: itemKey,
       onTap: isPending
           ? () => Routes.pushToInvite(context, chatSummary.mlsGroupId)
-          : () => Routes.goToChat(context, chatSummary.mlsGroupId),
+          : () => Routes.goToChat(context, chatSummary.mlsGroupId, isDm: isDm),
       onLongPress: isPending ? null : showContextMenu,
       title: title,
       subtitle: subtitle,

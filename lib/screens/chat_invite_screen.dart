@@ -82,7 +82,11 @@ class ChatInviteScreen extends HookConsumerWidget {
               .ignore();
         }
         if (context.mounted) {
-          Routes.goToChat(context, mlsGroupId);
+          Routes.goToChat(
+            context,
+            mlsGroupId,
+            isDm: chatProfile.data?.otherMemberPubkey != null,
+          );
         }
       } catch (e) {
         if (context.mounted) {

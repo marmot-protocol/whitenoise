@@ -351,7 +351,10 @@ abstract final class Routes {
           path: _chat,
           pageBuilder: (context, state) => _navigationTransition(
             state: state,
-            child: ChatScreen(groupId: state.pathParameters['groupId']!),
+            child: ChatScreen(
+              groupId: state.pathParameters['groupId']!,
+              isDm: state.extra as bool? ?? false,
+            ),
           ),
         ),
       ],
@@ -491,8 +494,8 @@ abstract final class Routes {
     GoRouter.of(context).pushNamed('invite', pathParameters: {'mlsGroupId': mlsGroupId});
   }
 
-  static void goToChat(BuildContext context, String groupId) {
-    GoRouter.of(context).goNamed('chat', pathParameters: {'groupId': groupId});
+  static void goToChat(BuildContext context, String groupId, {bool isDm = false}) {
+    GoRouter.of(context).goNamed('chat', pathParameters: {'groupId': groupId}, extra: isDm);
   }
 
   static void pushToRelayResolution(

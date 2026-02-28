@@ -205,7 +205,7 @@ void main() {
   setUpAll(() => RustLib.initMock(api: _api));
   setUp(() => _api.reset());
 
-  Future<void> pumpChatScreen(WidgetTester tester) async {
+  Future<void> pumpChatScreen(WidgetTester tester, {bool isDm = false}) async {
     await mountTestApp(
       tester,
       overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
@@ -214,6 +214,7 @@ void main() {
     Routes.goToChat(
       tester.element(find.byType(Scaffold)),
       _testGroupId,
+      isDm: isDm,
     );
     await tester.pumpAndSettle();
   }
@@ -268,7 +269,7 @@ void main() {
         });
 
         testWidgets('uses other member pubkey color', (tester) async {
-          await pumpChatScreen(tester);
+          await pumpChatScreen(tester, isDm: true);
 
           final avatar = tester.widget<WnAvatar>(find.byType(WnAvatar));
           expect(avatar.color, AvatarColor.blue);
@@ -320,6 +321,27 @@ void main() {
         of: find.byType(WnMessageBubble),
         matching: find.byType(WnAvatar),
       );
+
+      testWidgets('DM: no avatar shown before chat profile loads', (tester) async {
+        _api.isDm = true;
+        _api.groupMembers = [_testPubkey, testPubkeyC];
+        _api.initialMessages = [
+          _message('m1', DateTime(2024)),
+        ];
+        await mountTestApp(
+          tester,
+          overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
+        );
+        await tester.pumpAndSettle();
+        Routes.goToChat(
+          tester.element(find.byType(Scaffold)),
+          _testGroupId,
+          isDm: true,
+        );
+        await tester.pump();
+
+        expect(avatarsInBubbles(), findsNothing);
+      });
 
       testWidgets('same sender <5 min apart: only older message shows avatar', (tester) async {
         final base = DateTime(2024, 1, 1, 12);
@@ -430,7 +452,7 @@ void main() {
       testWidgets('avatar navigates to chat info screen for DM', (tester) async {
         _api.isDm = true;
         _api.groupMembers = [_testPubkey, testPubkeyC];
-        await pumpChatScreen(tester);
+        await pumpChatScreen(tester, isDm: true);
         await tester.tap(find.byKey(const Key('header_avatar_tap_area')));
         await tester.pumpAndSettle();
         expect(find.byType(ChatInfoScreen), findsOneWidget);
@@ -439,7 +461,7 @@ void main() {
       testWidgets('name navigates to chat info screen for DM', (tester) async {
         _api.isDm = true;
         _api.groupMembers = [_testPubkey, testPubkeyC];
-        await pumpChatScreen(tester);
+        await pumpChatScreen(tester, isDm: true);
         await tester.tap(find.byKey(const Key('header_name_tap_area')));
         await tester.pumpAndSettle();
         expect(find.byType(ChatInfoScreen), findsOneWidget);
@@ -1351,7 +1373,7 @@ void main() {
       Future<void> openSearch(WidgetTester tester) async {
         _api.isDm = true;
         _api.groupMembers = [_testPubkey, testPubkeyC];
-        await pumpChatScreen(tester);
+        await pumpChatScreen(tester, isDm: true);
         await tester.tap(find.byKey(const Key('header_avatar_tap_area')));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('search_button')));

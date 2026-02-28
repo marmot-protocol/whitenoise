@@ -71,7 +71,7 @@ class StartChatScreen extends HookConsumerWidget {
       try {
         final groupId = await dmState.startDm();
         if (context.mounted) {
-          Routes.goToChat(context, groupId);
+          Routes.goToChat(context, groupId, isDm: true);
         }
       } catch (e) {
         _logger.severe('Failed to start chat: $e');
