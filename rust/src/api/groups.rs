@@ -405,3 +405,55 @@ pub async fn get_group_image_path(
     let path = whitenoise.get_group_image_path(&account, &group_id).await?;
     Ok(path.map(|p| p.to_string_lossy().to_string()))
 }
+
+/// Public information about a leaf node in the ratchet tree
+#[frb(non_opaque)]
+#[derive(Debug, Clone)]
+pub struct LeafNodeInfo {
+    /// The leaf index in the ratchet tree
+    pub index: u32,
+    /// The member's public HPKE encryption key (hex-encoded)
+    pub encryption_key: String,
+    /// The member's public signature key (hex-encoded)
+    pub signature_key: String,
+    /// The member's credential identity (hex-encoded, typically a Nostr public key)
+    pub credential_identity: String,
+}
+
+/// Public information about the ratchet tree of an MLS group
+#[frb(non_opaque)]
+#[derive(Debug, Clone)]
+pub struct RatchetTreeInfo {
+    /// SHA-256 fingerprint of the TLS-serialized ratchet tree (hex-encoded)
+    pub tree_hash: String,
+    /// The full ratchet tree serialized via TLS encoding (hex-encoded)
+    pub serialized_tree: String,
+    /// Leaf nodes with their indices and public keys
+    pub leaf_nodes: Vec<LeafNodeInfo>,
+}
+
+#[frb]
+pub async fn get_ratchet_tree_info(
+    account_pubkey: String,
+    group_id: String,
+) -> Result<RatchetTreeInfo, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let group_id = group_id_from_string(&group_id)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let info = whitenoise.ratchet_tree_info(&account, &group_id)?;
+    Ok(RatchetTreeInfo {
+        tree_hash: info.tree_hash,
+        serialized_tree: info.serialized_tree,
+        leaf_nodes: info
+            .leaf_nodes
+            .into_iter()
+            .map(|l| LeafNodeInfo {
+                index: l.index,
+                encryption_key: l.encryption_key,
+                signature_key: l.signature_key,
+                credential_identity: l.credential_identity,
+            })
+            .collect(),
+    })
+}

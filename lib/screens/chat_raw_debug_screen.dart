@@ -1,11 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart';
 import 'package:whitenoise/l10n/l10n.dart';
+import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/message_debug_log_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/src/rust/api/groups.dart' as groups_api;
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
@@ -59,7 +62,7 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                   )
                 : ListView.builder(
                     padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 14.h),
-                    itemCount: messageCount + 4,
+                    itemCount: messageCount + 5,
                     itemBuilder: (context, index) {
                       if (index == 0) {
                         return Padding(
@@ -84,7 +87,13 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                           child: _StreamLogSection(groupId: groupId),
                         );
                       }
-                      if (index == 3 && messageCount == 0) {
+                      if (index == 3) {
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
+                          child: _RatchetTreeSection(groupId: groupId),
+                        );
+                      }
+                      if (index == 4 && messageCount == 0) {
                         return Center(
                           child: Padding(
                             padding: EdgeInsets.only(top: 32.h),
@@ -97,7 +106,7 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                           ),
                         );
                       }
-                      final messageIndex = index - 3;
+                      final messageIndex = index - 4;
                       if (messageIndex < 0 || messageIndex >= messageCount) {
                         return const SizedBox.shrink();
                       }
@@ -402,6 +411,138 @@ class _StreamLogSection extends ConsumerWidget {
     if (e.laggedCount != null) parts.add('lagged=${e.laggedCount}');
     if (e.error != null) parts.add('error=${e.error}');
     return parts.join(' ');
+  }
+}
+
+class _RatchetTreeSection extends HookConsumerWidget {
+  const _RatchetTreeSection({required this.groupId});
+
+  final String groupId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+    final accountPubkey = ref.watch(accountPubkeyProvider);
+
+    final snapshot = useFuture(
+      useMemoized(
+        () => groups_api.getRatchetTreeInfo(
+          accountPubkey: accountPubkey,
+          groupId: groupId,
+        ),
+        [accountPubkey, groupId],
+      ),
+    );
+
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(10.w),
+        decoration: BoxDecoration(
+          color: colors.backgroundSecondary,
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Text(
+          'ratchet_tree: loading...',
+          style: typography.medium10.copyWith(
+            color: colors.backgroundContentTertiary,
+            fontFamily: 'monospace',
+          ),
+        ),
+      );
+    }
+
+    if (snapshot.hasError) {
+      return Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(10.w),
+        decoration: BoxDecoration(
+          color: colors.backgroundSecondary,
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Text(
+          'ratchet_tree: error: ${snapshot.error}',
+          style: typography.medium10.copyWith(
+            color: colors.fillDestructive,
+            fontFamily: 'monospace',
+          ),
+        ),
+      );
+    }
+
+    final info = snapshot.data!;
+    final buffer = StringBuffer();
+    buffer.writeln('tree_hash: ${info.treeHash}');
+    buffer.writeln('serialized_tree (${info.serializedTree.length ~/ 2} bytes):');
+    // Show first 128 hex chars then truncate
+    if (info.serializedTree.length > 128) {
+      buffer.writeln('  ${info.serializedTree.substring(0, 128)}...');
+    } else {
+      buffer.writeln('  ${info.serializedTree}');
+    }
+    buffer.writeln('leaf_nodes (${info.leafNodes.length}):');
+    for (final leaf in info.leafNodes) {
+      buffer.writeln('  [${leaf.index}] identity: ${leaf.credentialIdentity}');
+      buffer.writeln('       enc_key:  ${leaf.encryptionKey.substring(0, 16)}...');
+      buffer.writeln('       sig_key:  ${leaf.signatureKey.substring(0, 16)}...');
+    }
+
+    final text = buffer.toString().trimRight();
+
+    return GestureDetector(
+      onTap: () async {
+        // Copy full data including complete keys
+        final fullBuffer = StringBuffer();
+        fullBuffer.writeln('tree_hash: ${info.treeHash}');
+        fullBuffer.writeln('serialized_tree: ${info.serializedTree}');
+        fullBuffer.writeln('leaf_nodes (${info.leafNodes.length}):');
+        for (final leaf in info.leafNodes) {
+          fullBuffer.writeln('  [${leaf.index}]');
+          fullBuffer.writeln('    identity:       ${leaf.credentialIdentity}');
+          fullBuffer.writeln('    encryption_key: ${leaf.encryptionKey}');
+          fullBuffer.writeln('    signature_key:  ${leaf.signatureKey}');
+        }
+        await Clipboard.setData(ClipboardData(text: fullBuffer.toString().trimRight()));
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(context.l10n.rawDebugViewCopied),
+              duration: const Duration(seconds: 2),
+            ),
+          );
+        }
+      },
+      child: Container(
+        width: double.infinity,
+        padding: EdgeInsets.all(10.w),
+        decoration: BoxDecoration(
+          color: colors.backgroundSecondary,
+          borderRadius: BorderRadius.circular(8.r),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'ratchet_tree (tap to copy full data):',
+              style: typography.semiBold10.copyWith(
+                color: colors.backgroundContentSecondary,
+                fontFamily: 'monospace',
+              ),
+            ),
+            SizedBox(height: 6.h),
+            SelectableText(
+              text,
+              style: typography.medium10.copyWith(
+                color: colors.backgroundContentPrimary,
+                fontFamily: 'monospace',
+                height: 1.4,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 
