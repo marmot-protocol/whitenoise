@@ -209,7 +209,7 @@ void _navigateToNotificationTarget({
   if (isInvite) {
     Routes.pushToInvite(context, groupId);
   } else {
-    Routes.goToChat(context, groupId);
+    Routes.goToChat(context, groupId, isDm: false);
   }
 }
 

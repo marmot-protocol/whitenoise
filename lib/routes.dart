@@ -494,7 +494,7 @@ abstract final class Routes {
     GoRouter.of(context).pushNamed('invite', pathParameters: {'mlsGroupId': mlsGroupId});
   }
 
-  static void goToChat(BuildContext context, String groupId, {bool isDm = false}) {
+  static void goToChat(BuildContext context, String groupId, {required bool isDm}) {
     GoRouter.of(context).goNamed('chat', pathParameters: {'groupId': groupId}, extra: isDm);
   }
 

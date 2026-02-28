@@ -36,7 +36,6 @@ class ChatInviteScreen extends HookConsumerWidget {
 
     final isAccepting = useState(false);
     final isDeclining = useState(false);
-    final isProcessing = isAccepting.value || isDeclining.value;
     final noticeMessage = useState<String?>(null);
 
     void showNotice(String message) {
@@ -48,6 +47,7 @@ class ChatInviteScreen extends HookConsumerWidget {
     }
 
     final chatProfile = useChatProfile(context, pubkey, mlsGroupId);
+    final isProcessing = isAccepting.value || isDeclining.value || chatProfile.data == null;
     final chatMessages = useChatMessages(mlsGroupId);
 
     useActiveChat(

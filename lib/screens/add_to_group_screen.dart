@@ -101,7 +101,7 @@ class AddToGroupScreen extends HookConsumerWidget {
       );
 
       if (confirmed == true && context.mounted) {
-        Routes.goToChat(context, group.mlsGroupId);
+        Routes.goToChat(context, group.mlsGroupId, isDm: false);
       } else if (confirmed == false && context.mounted) {
         showErrorNotice(context.l10n.failedToAddMembers);
       }

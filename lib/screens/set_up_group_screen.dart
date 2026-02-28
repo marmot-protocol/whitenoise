@@ -57,7 +57,7 @@ class SetUpGroupScreen extends HookConsumerWidget {
           await Future<void>.delayed(const Duration(seconds: 2));
           if (!context.mounted) return;
         }
-        Routes.goToChat(context, group.mlsGroupId);
+        Routes.goToChat(context, group.mlsGroupId, isDm: false);
       } else {
         showErrorNotice(context.l10n.createGroupFailed);
       }

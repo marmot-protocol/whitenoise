@@ -482,7 +482,7 @@ void main() {
           authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
         ],
       );
-      Routes.goToChat(getContext(tester), testGroupId);
+      Routes.goToChat(getContext(tester), testGroupId, isDm: false);
       await tester.pumpAndSettle();
       expect(find.byType(ChatScreen), findsOneWidget);
     });
@@ -496,7 +496,7 @@ void main() {
       );
       Routes.pushToSettings(getContext(tester));
       await tester.pumpAndSettle();
-      Routes.goToChat(getContext(tester), testGroupId);
+      Routes.goToChat(getContext(tester), testGroupId, isDm: false);
       await tester.pumpAndSettle();
       Routes.goBack(getContext(tester));
       await tester.pumpAndSettle();
