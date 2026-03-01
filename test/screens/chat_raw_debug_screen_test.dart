@@ -3,7 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
+import 'package:whitenoise/providers/message_debug_log_provider.dart';
 import 'package:whitenoise/screens/chat_raw_debug_screen.dart';
+import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
@@ -39,6 +41,7 @@ ChatMessage _message(
 class _MockApi extends MockWnApi {
   StreamController<MessageStreamItem>? controller;
   List<ChatMessage> initialMessages = [];
+  bool shouldFailRatchetTree = false;
 
   @override
   void reset() {
@@ -46,6 +49,7 @@ class _MockApi extends MockWnApi {
     controller?.close();
     controller = null;
     initialMessages = [];
+    shouldFailRatchetTree = false;
   }
 
   @override
@@ -59,19 +63,42 @@ class _MockApi extends MockWnApi {
     });
     return controller!.stream;
   }
+
+  @override
+  Future<RatchetTreeInfo> crateApiGroupsGetRatchetTreeInfo({
+    required String accountPubkey,
+    required String groupId,
+  }) async {
+    if (shouldFailRatchetTree) {
+      throw Exception('ratchet tree unavailable');
+    }
+    return super.crateApiGroupsGetRatchetTreeInfo(accountPubkey: accountPubkey, groupId: groupId);
+  }
 }
 
 final _api = _MockApi();
+MessageDebugLogState _seededDebugState = const MessageDebugLogState(sendLog: [], streamLog: []);
+
+class _SeededMessageDebugLogNotifier extends MessageDebugLogNotifier {
+  @override
+  MessageDebugLogState build() => _seededDebugState;
+}
 
 void main() {
   setUpAll(() => RustLib.initMock(api: _api));
-  setUp(() => _api.reset());
+  setUp(() {
+    _api.reset();
+    _seededDebugState = const MessageDebugLogState(sendLog: [], streamLog: []);
+  });
 
-  Future<void> pumpDebugScreen(WidgetTester tester) async {
+  Future<void> pumpDebugScreen(
+    WidgetTester tester, {
+    List overrides = const [],
+  }) async {
     await mountWidget(
       const ChatRawDebugScreen(groupId: _testGroupId),
       tester,
-      overrides: [accountPubkeyProvider.overrideWith(_MockAccountPubkeyNotifier.new)],
+      overrides: [accountPubkeyProvider.overrideWith(_MockAccountPubkeyNotifier.new), ...overrides],
     );
     await tester.pumpAndSettle();
   }
@@ -203,6 +230,116 @@ void main() {
 
       expect(find.byKey(const Key('debug_query_error')), findsOneWidget);
       expect(find.textContaining('debug query failed'), findsOneWidget);
+    });
+
+    testWidgets('renders seeded send log entries and overflow indicator', (tester) async {
+      final now = DateTime(2026, 1, 1, 10);
+      _seededDebugState = MessageDebugLogState(
+        sendLog: List.generate(
+          11,
+          (i) => MessageSendLogEntry(
+            timestamp: now.add(Duration(seconds: i)),
+            groupId: _testGroupId,
+            status: i == 0 ? MessageSendStatus.failed : MessageSendStatus.started,
+            contentLen: 120 + i,
+            mediaCount: i % 2,
+            replyToId: i == 0 ? 'reply_0' : null,
+            error: i == 0 ? 'boom' : null,
+          ),
+        ),
+        streamLog: const [],
+      );
+
+      await pumpDebugScreen(
+        tester,
+        overrides: [messageDebugLogProvider.overrideWith(_SeededMessageDebugLogNotifier.new)],
+      );
+
+      expect(find.text('Send Log'), findsOneWidget);
+      expect(find.textContaining('STARTED len='), findsWidgets);
+      expect(find.textContaining('FAILED len='), findsOneWidget);
+      expect(find.text('+1 more entries'), findsOneWidget);
+    });
+
+    testWidgets('renders seeded stream log entries and overflow indicator', (tester) async {
+      final now = DateTime(2026, 1, 1, 10);
+      _seededDebugState = MessageDebugLogState(
+        sendLog: const [],
+        streamLog: List.generate(
+          21,
+          (i) => MessageStreamEventEntry(
+            timestamp: now.add(Duration(seconds: i)),
+            groupId: _testGroupId,
+            eventType: i == 0 ? MessageStreamEventType.streamError : MessageStreamEventType.update,
+            trigger: i == 0 ? null : 'newMessage',
+            messageId: i == 0 ? null : 'm_$i',
+            laggedCount: i == 0 ? 2 : null,
+            error: i == 0 ? 'stream down' : null,
+          ),
+        ),
+      );
+
+      await pumpDebugScreen(
+        tester,
+        overrides: [messageDebugLogProvider.overrideWith(_SeededMessageDebugLogNotifier.new)],
+      );
+
+      await tester.scrollUntilVisible(
+        find.text('Stream Log'),
+        220,
+        scrollable: find.byType(Scrollable).first,
+      );
+      expect(find.text('Stream Log'), findsOneWidget);
+      expect(find.textContaining('UPDATE'), findsWidgets);
+      expect(find.textContaining('STREAMERROR'), findsOneWidget);
+      expect(find.textContaining('more events'), findsOneWidget);
+    });
+
+    testWidgets('shows ratchet tree success details', (tester) async {
+      await pumpDebugScreen(tester);
+      await tester.scrollUntilVisible(
+        find.text('Ratchet Tree'),
+        220,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(find.text('Ratchet Tree'), findsOneWidget);
+      expect(find.textContaining('Leaf [0]'), findsOneWidget);
+      expect(find.textContaining('tree_hash'), findsWidgets);
+      expect(find.textContaining('Raw snapshot'), findsOneWidget);
+    });
+
+    testWidgets('shows ratchet tree load error', (tester) async {
+      _api.shouldFailRatchetTree = true;
+
+      await pumpDebugScreen(tester);
+      await tester.scrollUntilVisible(
+        find.text('Ratchet Tree'),
+        220,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(find.text('Unable to load tree snapshot'), findsOneWidget);
+      expect(find.textContaining('ratchet_tree:'), findsOneWidget);
+    });
+
+    testWidgets('updates message count on stream update event', (tester) async {
+      final now = DateTime(2024, 1, 15, 12);
+      _api.initialMessages = [];
+
+      await pumpDebugScreen(tester);
+      _api.controller?.add(
+        MessageStreamItem.update(
+          update: MessageUpdate(
+            trigger: UpdateTrigger.newMessage,
+            message: _message('stream_msg_1', now, pubkey: testPubkeyC),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final countWidget = tester.widget<SelectableText>(find.byKey(const Key('debug_message_count')));
+      expect(countWidget.data, '1');
     });
   });
 }

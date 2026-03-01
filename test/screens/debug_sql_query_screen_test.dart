@@ -41,4 +41,15 @@ void main() {
     expect(find.byKey(const Key('developer_debug_query_error')), findsOneWidget);
     expect(find.textContaining('debug query failed'), findsOneWidget);
   });
+
+  testWidgets('shows validation error when SQL is empty', (tester) async {
+    await mountWidget(const DebugSqlQueryScreen(), tester);
+    await tester.enterText(find.byKey(const Key('developer_debug_query_input')), '   ');
+    await tester.tap(find.byKey(const Key('developer_debug_query_run_button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('developer_debug_query_error')), findsOneWidget);
+    expect(find.text('debug_query: SQL is empty'), findsOneWidget);
+    expect(api.lastDebugQuerySql, isNull);
+  });
 }
