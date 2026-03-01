@@ -11,7 +11,7 @@ anyhow = "1.0.99"
 chrono = { version = "0.4.40", features = ["serde"] }
 flutter_rust_bridge = { version = "=2.11.1", features = ["chrono"] }
 hex = "0.4"
-mdk-core = { version = "0.6.0", git = "https://github.com/marmot-protocol/mdk", rev = "a295f213063aeaa3a8286baf896804aebd5ccc74", features = [
+mdk-core = { version = "0.6.0", git = "https://github.com/marmot-protocol/mdk", rev = "a295f21", features = [
     "mip04",
 ] }
 nostr-sdk = { version = "0.44", features = [
@@ -34,6 +34,3 @@ unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
 
 [lints.clippy]
 not_unsafe_ptr_arg_deref = "allow"
-
-[patch."https://github.com/marmot-protocol/mdk"]
-mdk-core = { git = "https://github.com/marmot-protocol/mdk", rev = "a295f213063aeaa3a8286baf896804aebd5ccc74" }

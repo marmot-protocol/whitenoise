@@ -2728,31 +2728,7 @@ dependencies = [
  "hkdf",
  "image",
  "kamadak-exif",
- "mdk-storage-traits 0.6.0 (git+https://github.com/marmot-protocol/mdk?rev=a295f21)",
- "nostr",
- "openmls",
- "openmls_basic_credential",
- "openmls_rust_crypto",
- "openmls_traits",
- "serde",
- "sha2",
- "thiserror 2.0.18",
- "tls_codec",
- "tracing",
-]
-
-[[package]]
-name = "mdk-core"
-version = "0.6.0"
-source = "git+https://github.com/marmot-protocol/mdk?rev=a295f213063aeaa3a8286baf896804aebd5ccc74#a295f213063aeaa3a8286baf896804aebd5ccc74"
-dependencies = [
- "blurhash",
- "chacha20poly1305",
- "hex",
- "hkdf",
- "image",
- "kamadak-exif",
- "mdk-storage-traits 0.6.0 (git+https://github.com/marmot-protocol/mdk?rev=a295f213063aeaa3a8286baf896804aebd5ccc74)",
+ "mdk-storage-traits",
  "nostr",
  "openmls",
  "openmls_basic_credential",
@@ -2773,7 +2749,7 @@ dependencies = [
  "getrandom 0.4.1",
  "hex",
  "keyring-core",
- "mdk-storage-traits 0.6.0 (git+https://github.com/marmot-protocol/mdk?rev=a295f21)",
+ "mdk-storage-traits",
  "nostr",
  "openmls",
  "openmls_traits",
@@ -2790,21 +2766,6 @@ dependencies = [
 name = "mdk-storage-traits"
 version = "0.6.0"
 source = "git+https://github.com/marmot-protocol/mdk?rev=a295f21#a295f213063aeaa3a8286baf896804aebd5ccc74"
-dependencies = [
- "nostr",
- "openmls",
- "openmls_traits",
- "postcard",
- "serde",
- "serde_json",
- "thiserror 2.0.18",
- "zeroize",
-]
-
-[[package]]
-name = "mdk-storage-traits"
-version = "0.6.0"
-source = "git+https://github.com/marmot-protocol/mdk?rev=a295f213063aeaa3a8286baf896804aebd5ccc74#a295f213063aeaa3a8286baf896804aebd5ccc74"
 dependencies = [
  "nostr",
  "openmls",
@@ -4043,7 +4004,7 @@ dependencies = [
  "chrono",
  "flutter_rust_bridge",
  "hex",
- "mdk-core 0.6.0 (git+https://github.com/marmot-protocol/mdk?rev=a295f213063aeaa3a8286baf896804aebd5ccc74)",
+ "mdk-core",
  "nostr-sdk",
  "serde_json",
  "thiserror 2.0.18",
@@ -5517,9 +5478,9 @@ dependencies = [
  "keyring-core",
  "lightning-invoice",
  "linux-keyutils-keyring-store",
- "mdk-core 0.6.0 (git+https://github.com/marmot-protocol/mdk?rev=a295f21)",
+ "mdk-core",
  "mdk-sqlite-storage",
- "mdk-storage-traits 0.6.0 (git+https://github.com/marmot-protocol/mdk?rev=a295f21)",
+ "mdk-storage-traits",
  "nostr-blossom",
  "nostr-sdk",
  "nwc",
