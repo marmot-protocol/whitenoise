@@ -1,4 +1,14 @@
 {
+  "photo": "Photo",
+  "@photo": {
+    "description": "Label shown in chat list when the last message contains a single photo"
+  },
+
+  "photos": "Photos",
+  "@photos": {
+    "description": "Label shown in chat list when the last message contains multiple photos"
+  },
+
   "@@locale": "en",
 
   "appTitle": "White Noise",

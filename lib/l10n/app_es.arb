@@ -1,4 +1,6 @@
 {
+  "photo": "Foto",
+  "photos": "Fotos",
   "@@locale": "es",
   "appTitle": "White Noise",
   "sloganDecentralized": "Descentralizado",

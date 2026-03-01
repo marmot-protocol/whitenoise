@@ -9,6 +9,12 @@ class AppLocalizationsEn extends AppLocalizations {
   AppLocalizationsEn([String locale = 'en']) : super(locale);
 
   @override
+  String get photo => 'Photo';
+
+  @override
+  String get photos => 'Photos';
+
+  @override
   String get appTitle => 'White Noise';
 
   @override

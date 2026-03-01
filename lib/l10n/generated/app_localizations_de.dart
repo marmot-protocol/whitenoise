@@ -9,6 +9,12 @@ class AppLocalizationsDe extends AppLocalizations {
   AppLocalizationsDe([String locale = 'de']) : super(locale);
 
   @override
+  String get photo => 'Foto';
+
+  @override
+  String get photos => 'Fotos';
+
+  @override
   String get appTitle => 'White Noise';
 
   @override

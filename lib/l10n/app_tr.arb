@@ -1,4 +1,6 @@
 {
+  "photo": "Fotoğraf",
+  "photos": "Fotoğraflar",
   "@@locale": "tr",
   "appTitle": "White Noise",
   "sloganDecentralized": "Merkezi Olmayan",

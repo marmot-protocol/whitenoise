@@ -9,6 +9,12 @@ class AppLocalizationsTr extends AppLocalizations {
   AppLocalizationsTr([String locale = 'tr']) : super(locale);
 
   @override
+  String get photo => 'Fotoğraf';
+
+  @override
+  String get photos => 'Fotoğraflar';
+
+  @override
   String get appTitle => 'White Noise';
 
   @override

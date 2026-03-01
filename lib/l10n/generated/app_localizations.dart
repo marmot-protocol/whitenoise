@@ -108,6 +108,18 @@ abstract class AppLocalizations {
     Locale('tr'),
   ];
 
+  /// Label shown in chat list when the last message contains a single photo
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get photo;
+
+  /// Label shown in chat list when the last message contains multiple photos
+  ///
+  /// In en, this message translates to:
+  /// **'Photos'**
+  String get photos;
+
   /// The application title displayed on home screen
   ///
   /// In en, this message translates to:

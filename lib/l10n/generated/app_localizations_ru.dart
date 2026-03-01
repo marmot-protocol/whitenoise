@@ -9,6 +9,12 @@ class AppLocalizationsRu extends AppLocalizations {
   AppLocalizationsRu([String locale = 'ru']) : super(locale);
 
   @override
+  String get photo => 'Фото';
+
+  @override
+  String get photos => 'Фото';
+
+  @override
   String get appTitle => 'White Noise';
 
   @override

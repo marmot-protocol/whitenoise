@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -23,6 +25,7 @@ class WnChatListItem extends HookWidget {
     this.onLongPress,
     this.isSelected = false,
     this.prefixSubtitle,
+    this.subtitleIcon,
   });
 
   final String title;
@@ -39,6 +42,7 @@ class WnChatListItem extends HookWidget {
   final VoidCallback? onLongPress;
   final bool isSelected;
   final String? prefixSubtitle;
+  final Widget? subtitleIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -109,6 +113,13 @@ class WnChatListItem extends HookWidget {
                     SizedBox(height: 2.h),
                     Row(
                       children: [
+                        if (subtitleIcon != null) ...[
+                          Padding(
+                            padding: EdgeInsets.only(top: Platform.isIOS ? 2.h : 0),
+                            child: subtitleIcon,
+                          ),
+                          SizedBox(width: 2.w),
+                        ],
                         Expanded(
                           child: Text.rich(
                             TextSpan(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/l10n/l10n.dart';
@@ -9,6 +10,7 @@ import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/src/rust/api/chat_list.dart' show ChatSummary, setChatPinOrder;
 import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
+import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_chat_list_context_menu.dart';
@@ -57,6 +59,7 @@ class ChatListTile extends HookConsumerWidget {
     final String? pictureUrl;
     final String subtitle;
     final String? avatarName;
+    Widget? subtitleIcon;
 
     if (isPending) {
       final hasMessages = chatSummary.lastMessage != null;
@@ -88,7 +91,22 @@ class ChatListTile extends HookConsumerWidget {
         pictureUrl = chatSummary.groupImagePath;
       }
       avatarName = hasGroupName ? chatSummary.name! : null;
-      subtitle = chatSummary.lastMessage?.content ?? '';
+      final lastMessage = chatSummary.lastMessage;
+      if (lastMessage != null &&
+          lastMessage.content.isEmpty &&
+          lastMessage.mediaAttachmentCount > BigInt.zero) {
+        subtitleIcon = WnIcon(
+          WnIcons.image,
+          key: const Key('media_subtitle_icon'),
+          size: 16.w,
+          color: context.colors.backgroundContentSecondary,
+        );
+        subtitle = lastMessage.mediaAttachmentCount == BigInt.one
+            ? context.l10n.photo
+            : context.l10n.photos;
+      } else {
+        subtitle = lastMessage?.content ?? '';
+      }
     }
 
     final timestamp = chatSummary.lastMessage?.createdAt ?? chatSummary.createdAt;
@@ -143,6 +161,7 @@ class ChatListTile extends HookConsumerWidget {
           status: status,
           unreadCount: unreadCount,
           prefixSubtitle: prefixSubtitle,
+          subtitleIcon: subtitleIcon,
         ),
         actions: [
           WnChatListContextMenuAction(
@@ -183,6 +202,7 @@ class ChatListTile extends HookConsumerWidget {
       status: status,
       unreadCount: unreadCount,
       prefixSubtitle: prefixSubtitle,
+      subtitleIcon: subtitleIcon,
     );
   }
 }
