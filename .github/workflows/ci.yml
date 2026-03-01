@@ -9,7 +9,7 @@ on:
 jobs:
   check:
     name: Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest-4-cores
 
     steps:
     - name: Checkout code
@@ -105,17 +105,34 @@ jobs:
       run: flutter pub get
 
     - name: Run Flutter tests (shard ${{ matrix.shard }})
-      run: flutter test --coverage --total-shards 4 --shard-index ${{ matrix.shard }} --reporter failures-only
+      id: tests
+      run: |
+        set +e
+        flutter test --coverage --total-shards 4 --shard-index ${{ matrix.shard }} --reporter failures-only 2>&1 | tee test-output.txt
+        EXIT_CODE=${PIPESTATUS[0]}
+        echo "exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
+        exit $EXIT_CODE
+
+    - name: Upload test failures
+      if: failure() && steps.tests.outputs.exit_code != '0'
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-failures-shard-${{ matrix.shard }}
+        path: test-output.txt
+        retention-days: 1
 
     - name: Upload coverage shard
+      if: always()
       uses: actions/upload-artifact@v4
       with:
         name: coverage-shard-${{ matrix.shard }}
         path: coverage/lcov.info
         retention-days: 1
+        if-no-files-found: ignore
 
   coverage:
     name: Coverage
+    if: always()
     needs: test
     runs-on: ubuntu-latest
     permissions:
@@ -126,6 +143,73 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+
+    # --- Collect and report test failures ---
+
+    - name: Download test failure artifacts
+      id: download_failures
+      continue-on-error: true
+      uses: actions/download-artifact@v4
+      with:
+        pattern: test-failures-shard-*
+        path: test-failures
+
+    - name: Comment PR with test failures
+      if: github.event_name == 'pull_request' && steps.download_failures.outcome == 'success'
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const fs = require('fs');
+          const path = require('path');
+          const marker = '<!-- test-failures -->';
+          const failuresDir = 'test-failures';
+          const sections = [];
+
+          const shardDirs = fs.readdirSync(failuresDir).sort();
+          for (const dir of shardDirs) {
+            const filePath = path.join(failuresDir, dir, 'test-output.txt');
+            if (!fs.existsSync(filePath)) continue;
+            const content = fs.readFileSync(filePath, 'utf8').trim();
+            if (!content) continue;
+
+            const shardNum = dir.replace('test-failures-shard-', '');
+            sections.push(`### Shard ${shardNum}`, '', '```', content, '```', '');
+          }
+
+          if (sections.length === 0) return;
+
+          const body = [
+            '## :x: Test Failures',
+            '',
+            ...sections,
+            marker,
+          ].join('\n');
+
+          const { data: comments } = await github.rest.issues.listComments({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+          });
+
+          const existing = comments.find(c => c.body && c.body.includes(marker));
+
+          if (existing) {
+            await github.rest.issues.updateComment({
+              comment_id: existing.id,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body,
+            });
+          } else {
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body,
+            });
+          }
+
+    # --- Merge coverage ---
 
     - name: Download all coverage shards
       uses: actions/download-artifact@v4
@@ -386,3 +470,11 @@ jobs:
               body: body,
             });
           }
+
+    # --- Final gate: fail if any test shard failed ---
+
+    - name: Fail if tests failed
+      if: always() && needs.test.result != 'success'
+      run: |
+        echo "::error::Test shards failed"
+        exit 1
