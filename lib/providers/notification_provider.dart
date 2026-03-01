@@ -22,8 +22,8 @@ final _logger = Logger('NotificationProvider');
 // coverage:ignore-start
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService(
-    onNotificationTap: (groupId, isInvite, receiverPubkey) {
-      _onNotificationTap(ref, groupId, isInvite, receiverPubkey);
+    onNotificationTap: (groupId, isInvite, receiverPubkey, isDm) {
+      _onNotificationTap(ref, groupId, isInvite, receiverPubkey, isDm);
     },
   );
 });
@@ -134,6 +134,7 @@ Future<void> handleNotificationUpdate(
     body: body,
     receiverPubkey: update.receiver.pubkey,
     isInvite: isInvite,
+    isDm: update.isDm,
   );
 }
 
@@ -186,6 +187,7 @@ Future<void> _onNotificationTap(
   String groupId,
   bool isInvite,
   String receiverPubkey,
+  bool isDm,
 ) async {
   final activePubkey = ref.read(authProvider).value;
   if (activePubkey != receiverPubkey) {
@@ -193,12 +195,13 @@ Future<void> _onNotificationTap(
     _logger.info('Switched to account $receiverPubkey for notification tap');
   }
 
-  _navigateToNotificationTarget(groupId: groupId, isInvite: isInvite);
+  _navigateToNotificationTarget(groupId: groupId, isInvite: isInvite, isDm: isDm);
 }
 
 void _navigateToNotificationTarget({
   required String groupId,
   required bool isInvite,
+  required bool isDm,
 }) {
   final context = Routes.navigatorKey.currentContext;
   if (context == null) {
@@ -209,7 +212,7 @@ void _navigateToNotificationTarget({
   if (isInvite) {
     Routes.pushToInvite(context, groupId);
   } else {
-    Routes.goToChat(context, groupId, isDm: false);
+    Routes.goToChat(context, groupId, isDm: isDm);
   }
 }
 

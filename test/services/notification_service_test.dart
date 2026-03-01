@@ -157,6 +157,7 @@ void main() {
         expect(data['groupId'], 'g1');
         expect(data['trigger'], 'message');
         expect(data['receiverPubkey'], _pubkey1);
+        expect(data['isDm'], isFalse);
       });
 
       test('payload contains invite trigger and receiver pubkey as JSON', () async {
@@ -171,6 +172,19 @@ void main() {
         expect(data['groupId'], 'g1');
         expect(data['trigger'], 'invite');
         expect(data['receiverPubkey'], _pubkey1);
+        expect(data['isDm'], isFalse);
+      });
+
+      test('payload contains isDm true when isDm is true', () async {
+        await service.show(
+          groupId: 'g1',
+          title: 't',
+          body: 'b',
+          receiverPubkey: _pubkey1,
+          isDm: true,
+        );
+        final data = jsonDecode(mockPlugin.lastPayload!) as Map<String, dynamic>;
+        expect(data['isDm'], isTrue);
       });
 
       test('uses consistent notification ID for same groupId', () async {
@@ -280,19 +294,22 @@ void main() {
       String? tappedGroupId;
       bool? tappedIsInvite;
       String? tappedReceiverPubkey;
+      bool? tappedIsDm;
 
       setUp(() async {
         mockPlugin = _MockNotificationsPlugin();
         tappedGroupId = null;
         tappedIsInvite = null;
         tappedReceiverPubkey = null;
+        tappedIsDm = null;
         final service = NotificationService(
           plugin: mockPlugin,
           enabled: true,
-          onNotificationTap: (groupId, isInvite, receiverPubkey) {
+          onNotificationTap: (groupId, isInvite, receiverPubkey, isDm) {
             tappedGroupId = groupId;
             tappedIsInvite = isInvite;
             tappedReceiverPubkey = receiverPubkey;
+            tappedIsDm = isDm;
           },
         );
         await service.initialize();
@@ -315,6 +332,7 @@ void main() {
         expect(tappedGroupId, 'group123');
         expect(tappedIsInvite, isFalse);
         expect(tappedReceiverPubkey, _pubkey1);
+        expect(tappedIsDm, isFalse);
       });
 
       test('calls onNotificationTap for invite payload', () {
@@ -327,6 +345,28 @@ void main() {
         expect(tappedGroupId, 'group456');
         expect(tappedIsInvite, isTrue);
         expect(tappedReceiverPubkey, _pubkey2);
+        expect(tappedIsDm, isFalse);
+      });
+
+      test('passes isDm true from payload', () {
+        final payload = jsonEncode({
+          'groupId': 'group123',
+          'trigger': 'message',
+          'receiverPubkey': _pubkey1,
+          'isDm': true,
+        });
+        mockPlugin.tapCallback!(response(payload: payload));
+        expect(tappedIsDm, isTrue);
+      });
+
+      test('defaults isDm to false when missing from payload', () {
+        final payload = jsonEncode({
+          'groupId': 'group123',
+          'trigger': 'message',
+          'receiverPubkey': _pubkey1,
+        });
+        mockPlugin.tapCallback!(response(payload: payload));
+        expect(tappedIsDm, isFalse);
       });
 
       test('handles groupId containing pipe characters', () {

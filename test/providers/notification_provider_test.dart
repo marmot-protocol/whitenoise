@@ -26,6 +26,7 @@ class _MockNotificationService extends NotificationService {
       String body,
       String receiverPubkey,
       bool isInvite,
+      bool isDm,
     })
   >
   showCalls = [];
@@ -37,6 +38,7 @@ class _MockNotificationService extends NotificationService {
     required String body,
     required String receiverPubkey,
     bool isInvite = false,
+    bool isDm = false,
   }) async {
     showCalls.add((
       groupId: groupId,
@@ -44,6 +46,7 @@ class _MockNotificationService extends NotificationService {
       body: body,
       receiverPubkey: receiverPubkey,
       isInvite: isInvite,
+      isDm: isDm,
     ));
   }
 }
@@ -439,6 +442,7 @@ void main() {
       expect(call.body, 'Hello there');
       expect(call.receiverPubkey, testPubkeyA);
       expect(call.isInvite, isFalse);
+      expect(call.isDm, isTrue);
     });
 
     test('shows notification for a new group message', () async {
@@ -462,6 +466,7 @@ void main() {
       expect(call.title, 'Dev Team');
       expect(call.body, 'Bob: Hey everyone');
       expect(call.isInvite, isFalse);
+      expect(call.isDm, isFalse);
     });
 
     test('shows notification for a DM invite', () async {

@@ -10,20 +10,23 @@ final _logger = Logger('NotificationService');
 const _payloadKeyGroupId = 'groupId';
 const _payloadKeyTrigger = 'trigger';
 const _payloadKeyReceiverPubkey = 'receiverPubkey';
+const _payloadKeyIsDm = 'isDm';
 const _payloadTriggerMessage = 'message';
 const _payloadTriggerInvite = 'invite';
 
 class NotificationService {
   NotificationService({
     FlutterLocalNotificationsPlugin? plugin,
-    void Function(String groupId, bool isInvite, String receiverPubkey)? onNotificationTap,
+    void Function(String groupId, bool isInvite, String receiverPubkey, bool isDm)?
+    onNotificationTap,
     bool? enabled,
   }) : _plugin = plugin ?? FlutterLocalNotificationsPlugin(),
        _onNotificationTap = onNotificationTap,
        _enabled = enabled ?? Platform.isAndroid;
 
   final FlutterLocalNotificationsPlugin _plugin;
-  final void Function(String groupId, bool isInvite, String receiverPubkey)? _onNotificationTap;
+  final void Function(String groupId, bool isInvite, String receiverPubkey, bool isDm)?
+  _onNotificationTap;
   final bool _enabled;
   bool _initialized = false;
 
@@ -72,7 +75,8 @@ class NotificationService {
       }
 
       final isInvite = trigger == _payloadTriggerInvite;
-      _onNotificationTap(groupId, isInvite, receiverPubkey);
+      final isDm = data[_payloadKeyIsDm] as bool? ?? false;
+      _onNotificationTap(groupId, isInvite, receiverPubkey, isDm);
     } catch (e) {
       _logger.warning('Failed to parse notification payload: $payload', e);
     }
@@ -84,6 +88,7 @@ class NotificationService {
     required String body,
     required String receiverPubkey,
     bool isInvite = false,
+    bool isDm = false,
   }) async {
     if (!_enabled) return;
     if (!_initialized) {
@@ -97,6 +102,7 @@ class NotificationService {
       _payloadKeyGroupId: groupId,
       _payloadKeyTrigger: trigger,
       _payloadKeyReceiverPubkey: receiverPubkey,
+      _payloadKeyIsDm: isDm,
     });
 
     const androidDetails = AndroidNotificationDetails(
