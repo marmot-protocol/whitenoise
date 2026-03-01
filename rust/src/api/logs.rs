@@ -71,6 +71,7 @@ pub async fn subscribe_to_rust_logs(
             if new_path != current_path {
                 match File::open(&new_path).await {
                     Ok(f) => {
+                        drop(reader);
                         current_path = new_path;
                         reader = BufReader::new(f);
                         line.clear();

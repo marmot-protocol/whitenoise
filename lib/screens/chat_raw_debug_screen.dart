@@ -14,7 +14,10 @@ import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/utils.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/debug_info_pill.dart';
+import 'package:whitenoise/widgets/debug_key_value_row.dart';
 import 'package:whitenoise/widgets/debug_query_result_table.dart';
+import 'package:whitenoise/widgets/debug_section_card.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 
@@ -171,148 +174,32 @@ class _DebugHeader extends StatelessWidget {
       if (latestMessagePubkey != null) 'latest_message_pubkey: $latestMessagePubkey',
     ].join('\n');
 
-    return _DebugSectionCard(
+    return DebugSectionCard(
       title: 'Session Overview',
       subtitle: 'Group context and top-level counters',
       onCopy: () => _copyDebugText(context, copyText),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _DebugField(
+          DebugKeyValueRow(
             label: 'group_id',
             value: groupId,
             valueKey: const Key('debug_group_id'),
           ),
           SizedBox(height: 4.h),
-          _DebugField(
+          DebugKeyValueRow(
             label: 'message_count',
             value: '$messageCount',
             valueKey: const Key('debug_message_count'),
           ),
           if (latestMessageId != null) ...[
             SizedBox(height: 4.h),
-            _DebugField(label: 'latest_message_id', value: latestMessageId!),
+            DebugKeyValueRow(label: 'latest_message_id', value: latestMessageId!),
           ],
           if (latestMessagePubkey != null) ...[
             SizedBox(height: 4.h),
-            _DebugField(label: 'latest_message_pubkey', value: latestMessagePubkey!),
+            DebugKeyValueRow(label: 'latest_message_pubkey', value: latestMessagePubkey!),
           ],
-        ],
-      ),
-    );
-  }
-}
-
-class _DebugSectionCard extends StatelessWidget {
-  const _DebugSectionCard({
-    required this.title,
-    required this.child,
-    this.subtitle,
-    this.onCopy,
-    this.borderColor,
-  });
-
-  final String title;
-  final String? subtitle;
-  final Widget child;
-  final VoidCallback? onCopy;
-  final Color? borderColor;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typography = context.typographyScaled;
-    final resolvedBorderColor = borderColor ?? colors.borderTertiary;
-
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(12.w),
-      decoration: BoxDecoration(
-        color: colors.backgroundSecondary,
-        borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: resolvedBorderColor.withValues(alpha: 0.7)),
-        boxShadow: [
-          BoxShadow(
-            color: colors.shadow.withValues(alpha: 0.18),
-            blurRadius: 14.r,
-            offset: Offset(0, 8.h),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: typography.semiBold12.copyWith(
-                        color: colors.backgroundContentPrimary,
-                        letterSpacing: 0.2.sp,
-                      ),
-                    ),
-                    if (subtitle != null) ...[
-                      SizedBox(height: 2.h),
-                      Text(
-                        subtitle!,
-                        style: typography.medium10.copyWith(
-                          color: colors.backgroundContentSecondary,
-                          height: 1.35,
-                        ),
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              if (onCopy != null)
-                Material(
-                  color: Colors.transparent,
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(8.r),
-                    onTap: onCopy,
-                    child: Ink(
-                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
-                      decoration: BoxDecoration(
-                        color: colors.fillSecondary,
-                        borderRadius: BorderRadius.circular(8.r),
-                        border: Border.all(color: colors.borderTertiary),
-                      ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.copy_all_rounded,
-                            size: 12.w,
-                            color: colors.backgroundContentSecondary,
-                          ),
-                          SizedBox(width: 5.w),
-                          Text(
-                            'Copy',
-                            style: typography.medium10.copyWith(
-                              color: colors.backgroundContentSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ),
-            ],
-          ),
-          SizedBox(height: 10.h),
-          Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(10.w),
-            decoration: BoxDecoration(
-              color: colors.backgroundPrimary.withValues(alpha: 0.72),
-              borderRadius: BorderRadius.circular(8.r),
-              border: Border.all(color: colors.borderTertiary.withValues(alpha: 0.85)),
-            ),
-            child: child,
-          ),
         ],
       ),
     );
@@ -333,7 +220,7 @@ class _SendLogSection extends ConsumerWidget {
     final copyText = forGroup.map(_formatSendLogEntry).join('\n\n');
 
     if (forGroup.isEmpty) {
-      return const _DebugSectionCard(
+      return const DebugSectionCard(
         title: 'Send Log',
         subtitle: 'No attempts captured for this group',
         child: Text(
@@ -343,7 +230,7 @@ class _SendLogSection extends ConsumerWidget {
       );
     }
 
-    return _DebugSectionCard(
+    return DebugSectionCard(
       title: 'Send Log',
       subtitle: '${forGroup.length} entries',
       onCopy: () => _copyDebugText(context, copyText),
@@ -425,7 +312,7 @@ class _StreamLogSection extends ConsumerWidget {
     final copyText = forGroup.map(_formatStreamEvent).join('\n');
 
     if (forGroup.isEmpty) {
-      return const _DebugSectionCard(
+      return const DebugSectionCard(
         title: 'Stream Log',
         subtitle: 'No stream events captured for this group',
         child: Text(
@@ -435,7 +322,7 @@ class _StreamLogSection extends ConsumerWidget {
       );
     }
 
-    return _DebugSectionCard(
+    return DebugSectionCard(
       title: 'Stream Log',
       subtitle: '${forGroup.length} events',
       onCopy: () => _copyDebugText(context, copyText),
@@ -558,7 +445,7 @@ class _DebugQuerySection extends HookWidget {
       await _copyDebugText(context, result.value!);
     }
 
-    return _DebugSectionCard(
+    return DebugSectionCard(
       title: 'Debug SQL',
       subtitle: 'Run SQL against the local debug database',
       borderColor: colors.accent.violet.border,
@@ -729,7 +616,7 @@ class _RatchetTreeSection extends HookConsumerWidget {
       future: ratchetFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return _DebugSectionCard(
+          return DebugSectionCard(
             title: 'Ratchet Tree',
             subtitle: 'Loading group tree snapshot',
             borderColor: colors.accent.amber.border,
@@ -756,7 +643,7 @@ class _RatchetTreeSection extends HookConsumerWidget {
           );
         }
         if (snapshot.hasError) {
-          return _DebugSectionCard(
+          return DebugSectionCard(
             title: 'Ratchet Tree',
             subtitle: 'Unable to load tree snapshot',
             borderColor: colors.borderDestructiveSecondary,
@@ -772,7 +659,7 @@ class _RatchetTreeSection extends HookConsumerWidget {
         final info = snapshot.data!;
         final text = _formatTreeInfo(info);
         final serializedBytes = info.serializedTree.length ~/ 2;
-        return _DebugSectionCard(
+        return DebugSectionCard(
           title: 'Ratchet Tree',
           subtitle: '${info.leafNodes.length} leaves',
           onCopy: () => _copyDebugText(context, text),
@@ -784,8 +671,8 @@ class _RatchetTreeSection extends HookConsumerWidget {
                 spacing: 8.w,
                 runSpacing: 8.h,
                 children: [
-                  _TreeStatPill(label: 'leaves ${info.leafNodes.length}'),
-                  _TreeStatPill(label: 'size $serializedBytes bytes'),
+                  DebugInfoPill(label: 'leaves ${info.leafNodes.length}'),
+                  DebugInfoPill(label: 'size $serializedBytes bytes'),
                 ],
               ),
               SizedBox(height: 10.h),
@@ -797,9 +684,10 @@ class _RatchetTreeSection extends HookConsumerWidget {
                   borderRadius: BorderRadius.circular(8.r),
                   border: Border.all(color: colors.borderTertiary.withValues(alpha: 0.7)),
                 ),
-                child: _TreeInfoRow(
+                child: DebugKeyValueRow(
                   label: 'tree_hash',
                   value: info.treeHash,
+                  labelWidth: 70.w,
                 ),
               ),
               SizedBox(height: 10.h),
@@ -831,19 +719,22 @@ class _RatchetTreeSection extends HookConsumerWidget {
                           ),
                         ),
                         SizedBox(height: 6.h),
-                        _TreeInfoRow(
+                        DebugKeyValueRow(
                           label: 'credential',
                           value: _shortKey(leaf.credentialIdentity),
+                          labelWidth: 70.w,
                         ),
                         SizedBox(height: 4.h),
-                        _TreeInfoRow(
+                        DebugKeyValueRow(
                           label: 'enc_key',
                           value: _shortKey(leaf.encryptionKey),
+                          labelWidth: 70.w,
                         ),
                         SizedBox(height: 4.h),
-                        _TreeInfoRow(
+                        DebugKeyValueRow(
                           label: 'sig_key',
                           value: _shortKey(leaf.signatureKey),
+                          labelWidth: 70.w,
                         ),
                       ],
                     ),
@@ -870,113 +761,6 @@ class _RatchetTreeSection extends HookConsumerWidget {
           ),
         );
       },
-    );
-  }
-}
-
-class _TreeStatPill extends StatelessWidget {
-  const _TreeStatPill({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typography = context.typographyScaled;
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-      decoration: BoxDecoration(
-        color: colors.fillSecondary,
-        borderRadius: BorderRadius.circular(999.r),
-        border: Border.all(color: colors.borderTertiary),
-      ),
-      child: Text(
-        label,
-        style: typography.medium10.copyWith(color: colors.backgroundContentSecondary),
-      ),
-    );
-  }
-}
-
-class _TreeInfoRow extends StatelessWidget {
-  const _TreeInfoRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typography = context.typographyScaled;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 70.w,
-          child: Text(
-            '$label:',
-            style: typography.semiBold10.copyWith(
-              color: colors.backgroundContentSecondary,
-              fontFamily: 'monospace',
-            ),
-          ),
-        ),
-        Expanded(
-          child: SelectableText(
-            value,
-            style: typography.medium10.copyWith(
-              color: colors.backgroundContentPrimary,
-              fontFamily: 'monospace',
-              height: 1.35,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _DebugField extends StatelessWidget {
-  const _DebugField({
-    required this.label,
-    required this.value,
-    this.valueKey,
-  });
-
-  final String label;
-  final String value;
-  final Key? valueKey;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typography = context.typographyScaled;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '$label: ',
-          style: typography.semiBold10.copyWith(
-            color: colors.backgroundContentSecondary,
-            fontFamily: 'monospace',
-            letterSpacing: 0.1.sp,
-          ),
-        ),
-        Expanded(
-          child: SelectableText(
-            key: valueKey,
-            value,
-            style: typography.medium10.copyWith(
-              color: colors.backgroundContentPrimary,
-              fontFamily: 'monospace',
-              height: 1.35,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }
@@ -1210,12 +994,12 @@ class _RawMessageCard extends StatelessWidget {
               spacing: 6.w,
               runSpacing: 6.h,
               children: [
-                _MessageMetaPill(label: 'kind ${message.kind}'),
-                _MessageMetaPill(label: message.isReply ? 'reply' : 'root'),
-                _MessageMetaPill(label: '$tagsCount tags'),
-                _MessageMetaPill(label: '$emojiReactionCount reactions'),
-                _MessageMetaPill(label: '$mediaCount media'),
-                _MessageMetaPill(label: '$tokenCount tokens'),
+                DebugInfoPill(label: 'kind ${message.kind}'),
+                DebugInfoPill(label: message.isReply ? 'reply' : 'root'),
+                DebugInfoPill(label: '$tagsCount tags'),
+                DebugInfoPill(label: '$emojiReactionCount reactions'),
+                DebugInfoPill(label: '$mediaCount media'),
+                DebugInfoPill(label: '$tokenCount tokens'),
               ],
             ),
             SizedBox(height: 10.h),
@@ -1230,11 +1014,19 @@ class _RawMessageCard extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _MessageSummaryRow(label: 'id', value: message.id),
+                  DebugKeyValueRow(label: 'id', value: message.id, labelWidth: 56.w),
                   SizedBox(height: 5.h),
-                  _MessageSummaryRow(label: 'pubkey', value: _shortPubkey(message.pubkey)),
+                  DebugKeyValueRow(
+                    label: 'pubkey',
+                    value: _shortPubkey(message.pubkey),
+                    labelWidth: 56.w,
+                  ),
                   SizedBox(height: 5.h),
-                  _MessageSummaryRow(label: 'content', value: _contentPreview(message.content)),
+                  DebugKeyValueRow(
+                    label: 'content',
+                    value: _contentPreview(message.content),
+                    labelWidth: 56.w,
+                  ),
                 ],
               ),
             ),
@@ -1283,72 +1075,6 @@ class _RawMessageCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _MessageMetaPill extends StatelessWidget {
-  const _MessageMetaPill({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typography = context.typographyScaled;
-
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
-      decoration: BoxDecoration(
-        color: colors.fillSecondary,
-        borderRadius: BorderRadius.circular(999.r),
-        border: Border.all(color: colors.borderTertiary),
-      ),
-      child: Text(
-        label,
-        style: typography.medium10.copyWith(
-          color: colors.backgroundContentSecondary,
-        ),
-      ),
-    );
-  }
-}
-
-class _MessageSummaryRow extends StatelessWidget {
-  const _MessageSummaryRow({required this.label, required this.value});
-
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typography = context.typographyScaled;
-
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 56.w,
-          child: Text(
-            '$label:',
-            style: typography.semiBold10.copyWith(
-              color: colors.backgroundContentSecondary,
-              fontFamily: 'monospace',
-            ),
-          ),
-        ),
-        Expanded(
-          child: SelectableText(
-            value,
-            style: typography.medium10.copyWith(
-              color: colors.backgroundContentPrimary,
-              fontFamily: 'monospace',
-              height: 1.35,
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

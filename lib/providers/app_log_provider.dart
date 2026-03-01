@@ -26,6 +26,7 @@ class AppLogEntry {
 class AppLogSink {
   final List<AppLogEntry> _entries = [];
   void Function()? _notify;
+  Object? _notifyToken;
 
   List<AppLogEntry> get entries => List.unmodifiable(_entries);
 
@@ -58,6 +59,8 @@ final appLogStore = AppLogSink();
 class AppLogNotifier extends Notifier<List<AppLogEntry>> {
   @override
   List<AppLogEntry> build() {
+    final cleanupToken = Object();
+
     void notify() {
       Future(() {
         if (ref.mounted) {
@@ -67,9 +70,11 @@ class AppLogNotifier extends Notifier<List<AppLogEntry>> {
     }
 
     appLogStore._notify = notify;
+    appLogStore._notifyToken = cleanupToken;
     ref.onDispose(() {
-      if (identical(appLogStore._notify, notify)) {
+      if (identical(appLogStore._notifyToken, cleanupToken)) {
         appLogStore._notify = null;
+        appLogStore._notifyToken = null;
       }
     });
 

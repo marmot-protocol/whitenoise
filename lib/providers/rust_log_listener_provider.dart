@@ -33,17 +33,17 @@ final rustLogListenerProvider = Provider.autoDispose<void>((ref) {
   if (!isStaging) return;
 
   StreamSubscription<String>? subscription;
-  var disposed = false;
+  final disposed = Completer<void>();
 
   ref.onDispose(() {
-    disposed = true;
+    disposed.complete();
     subscription?.cancel();
   });
 
   unawaited(
     _startListening()
         .then((sub) {
-          if (disposed) {
+          if (disposed.isCompleted) {
             sub.cancel();
           } else {
             subscription = sub;
