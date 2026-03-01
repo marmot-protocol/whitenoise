@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Show photo/photos label with image icon in chat list when last message is media-only [PR #414](https://github.com/marmot-protocol/whitenoise/pull/414)
+
 ### Changed
 - Changed reaction emoji sorting [PR #391](https://github.com/marmot-protocol/whitenoise/pull/391)
 
