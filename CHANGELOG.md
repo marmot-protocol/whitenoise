@@ -18,11 +18,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Fixed
-
 - Fix npubs middle ellipsis by adding snap to words option [PR #388](https://github.com/marmot-protocol/whitenoise/pull/388)
 - Fix onboarding carousel text appearing cut off [PR #404](https://github.com/marmot-protocol/whitenoise/pull/404)
-
 - Fix media modal blurhash issue [PR #397](https://github.com/marmot-protocol/whitenoise/pull/397)
+- Added missing error translations for relay urls [PR #396](https://github.com/marmot-protocol/whitenoise/pull/396)
 
 ### Security
 
