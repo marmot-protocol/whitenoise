@@ -338,7 +338,9 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final countWidget = tester.widget<SelectableText>(find.byKey(const Key('debug_message_count')));
+      final countWidget = tester.widget<SelectableText>(
+        find.byKey(const Key('debug_message_count')),
+      );
       expect(countWidget.data, '1');
     });
   });

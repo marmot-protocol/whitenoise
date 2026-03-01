@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -7,7 +5,8 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
-import 'package:whitenoise/providers/app_log_provider.dart' show AppLogEntry, AppLogNotifier, appLogProvider;
+import 'package:whitenoise/providers/app_log_provider.dart'
+    show AppLogEntry, AppLogNotifier, appLogProvider;
 import 'package:whitenoise/screens/app_logs_screen.dart';
 import '../test_helpers.dart';
 
@@ -67,16 +66,16 @@ void main() {
         ],
         child: ScreenUtilInit(
           designSize: testDesignSize,
-          builder: (_, _) => MaterialApp(
-            locale: const Locale('en'),
-            localizationsDelegates: const [
+          builder: (_, _) => const MaterialApp(
+            locale: Locale('en'),
+            localizationsDelegates: [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
             supportedLocales: AppLocalizations.supportedLocales,
-            home: const Scaffold(body: AppLogsScreen()),
+            home: Scaffold(body: AppLogsScreen()),
           ),
         ),
       ),
@@ -99,7 +98,9 @@ void main() {
       expect(find.byKey(const Key('app_logs_clear_filters')), findsNothing);
     });
 
-    testWidgets('renders log rows with level, logger, message, error and stacktrace', (tester) async {
+    testWidgets('renders log rows with level, logger, message, error and stacktrace', (
+      tester,
+    ) async {
       _entries = [
         _entry(
           'failed to send message',

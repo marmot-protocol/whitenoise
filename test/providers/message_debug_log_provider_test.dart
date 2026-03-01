@@ -59,7 +59,11 @@ void main() {
       notifier.logOk(groupId: 'g', resultId: 'id_1');
       notifier.logFailed(groupId: 'g', error: 'err');
 
-      final statuses = container.read(messageDebugLogProvider).sendLog.map((e) => e.status).toList();
+      final statuses = container
+          .read(messageDebugLogProvider)
+          .sendLog
+          .map((e) => e.status)
+          .toList();
       expect(statuses, [MessageSendStatus.failed, MessageSendStatus.ok, MessageSendStatus.started]);
     });
 
