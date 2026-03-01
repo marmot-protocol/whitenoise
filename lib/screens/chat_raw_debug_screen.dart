@@ -230,7 +230,7 @@ class _DebugSectionCard extends StatelessWidget {
       decoration: BoxDecoration(
         color: colors.backgroundSecondary,
         borderRadius: BorderRadius.circular(12.r),
-        border: Border.all(color: resolvedBorderColor.withValues(alpha: 0.7), width: 1),
+        border: Border.all(color: resolvedBorderColor.withValues(alpha: 0.7)),
         boxShadow: [
           BoxShadow(
             color: colors.shadow.withValues(alpha: 0.18),
@@ -773,7 +773,7 @@ class _RatchetTreeSection extends ConsumerWidget {
                 runSpacing: 8.h,
                 children: [
                   _TreeStatPill(label: 'leaves ${info.leafNodes.length}'),
-                  _TreeStatPill(label: 'size ${serializedBytes} bytes'),
+                  _TreeStatPill(label: 'size $serializedBytes bytes'),
                 ],
               ),
               SizedBox(height: 10.h),
