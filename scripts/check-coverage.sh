@@ -16,6 +16,7 @@ set -euo pipefail
 # Default values
 LCOV_FILE="coverage/lcov.info"
 MIN_COVERAGE=""
+WARNINGS_FILE=""
 
 
 print_error() {
@@ -41,6 +42,10 @@ parse_arguments() {
         case $1 in
             --min)
                 MIN_COVERAGE="$2"
+                shift 2
+                ;;
+            --warnings-file)
+                WARNINGS_FILE="$2"
                 shift 2
                 ;;
             *)
@@ -135,12 +140,17 @@ inject_missing_files() {
         if [ "$line_count" -gt 0 ]; then
             generate_zero_coverage_record "$dart_file" "$line_count" >> "$LCOV_FILE"
             missing_files+=("$dart_file")
-            ((missing_count++))
+            missing_count=$((missing_count + 1))
         fi
     done < <(find lib -name "*.dart" -type f -print0 2>/dev/null)
 
     if [ "$missing_count" -gt 0 ]; then
         print_missing_files_warning "$missing_count" "${missing_files[@]}"
+        if [ -n "$WARNINGS_FILE" ]; then
+            printf '%s\n' "${missing_files[@]}" > "$WARNINGS_FILE"
+        fi
+    elif [ -n "$WARNINGS_FILE" ]; then
+        : > "$WARNINGS_FILE"
     fi
 }
 
