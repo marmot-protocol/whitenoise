@@ -211,6 +211,12 @@ jobs:
 
     # --- Merge coverage ---
 
+    - name: Install lcov (cached)
+      uses: awalsh128/cache-apt-pkgs-action@v1
+      with:
+        packages: lcov
+        version: 1.0
+
     - name: Download all coverage shards
       uses: actions/download-artifact@v4
       with:
@@ -220,8 +226,13 @@ jobs:
     - name: Merge coverage shards
       run: |
         mkdir -p coverage
-        cat coverage-shards/coverage-shard-*/lcov.info > coverage/lcov.info
-        echo "Merged $(ls coverage-shards/coverage-shard-*/lcov.info | wc -l) shards"
+        SHARDS=(coverage-shards/coverage-shard-*/lcov.info)
+        ARGS=""
+        for shard in "${SHARDS[@]}"; do
+          ARGS="$ARGS --add-tracefile $shard"
+        done
+        lcov $ARGS --output-file coverage/lcov.info
+        echo "Merged ${#SHARDS[@]} shards"
 
     - name: Extract coverage percentage
       id: coverage
@@ -243,12 +254,6 @@ jobs:
           echo "uncovered_count=0" >> "$GITHUB_OUTPUT"
           echo "uncovered_list=" >> "$GITHUB_OUTPUT"
         fi
-
-    - name: Install lcov (cached)
-      uses: awalsh128/cache-apt-pkgs-action@v1
-      with:
-        packages: lcov
-        version: 1.0
 
     - name: Generate coverage HTML report
       run: genhtml coverage/lcov.info --output-directory coverage/html
