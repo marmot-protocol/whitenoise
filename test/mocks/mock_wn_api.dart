@@ -219,8 +219,8 @@ class MockWnApi implements RustLibApi {
       leafNodes: [
         LeafNodeInfo(
           index: 0,
-          encryptionKey: 'b' * 32,
-          signatureKey: 'c' * 32,
+          encryptionKey: 'b' * 64,
+          signatureKey: 'c' * 64,
           credentialIdentity: testPubkeyA,
         ),
       ],

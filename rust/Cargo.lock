@@ -2728,7 +2728,31 @@ dependencies = [
  "hkdf",
  "image",
  "kamadak-exif",
- "mdk-storage-traits",
+ "mdk-storage-traits 0.6.0 (git+https://github.com/marmot-protocol/mdk?rev=a295f21)",
+ "nostr",
+ "openmls",
+ "openmls_basic_credential",
+ "openmls_rust_crypto",
+ "openmls_traits",
+ "serde",
+ "sha2",
+ "thiserror 2.0.18",
+ "tls_codec",
+ "tracing",
+]
+
+[[package]]
+name = "mdk-core"
+version = "0.6.0"
+source = "git+https://github.com/marmot-protocol/mdk?rev=a295f213063aeaa3a8286baf896804aebd5ccc74#a295f213063aeaa3a8286baf896804aebd5ccc74"
+dependencies = [
+ "blurhash",
+ "chacha20poly1305",
+ "hex",
+ "hkdf",
+ "image",
+ "kamadak-exif",
+ "mdk-storage-traits 0.6.0 (git+https://github.com/marmot-protocol/mdk?rev=a295f213063aeaa3a8286baf896804aebd5ccc74)",
  "nostr",
  "openmls",
  "openmls_basic_credential",
@@ -2749,7 +2773,7 @@ dependencies = [
  "getrandom 0.4.1",
  "hex",
  "keyring-core",
- "mdk-storage-traits",
+ "mdk-storage-traits 0.6.0 (git+https://github.com/marmot-protocol/mdk?rev=a295f21)",
  "nostr",
  "openmls",
  "openmls_traits",
@@ -2766,6 +2790,21 @@ dependencies = [
 name = "mdk-storage-traits"
 version = "0.6.0"
 source = "git+https://github.com/marmot-protocol/mdk?rev=a295f21#a295f213063aeaa3a8286baf896804aebd5ccc74"
+dependencies = [
+ "nostr",
+ "openmls",
+ "openmls_traits",
+ "postcard",
+ "serde",
+ "serde_json",
+ "thiserror 2.0.18",
+ "zeroize",
+]
+
+[[package]]
+name = "mdk-storage-traits"
+version = "0.6.0"
+source = "git+https://github.com/marmot-protocol/mdk?rev=a295f213063aeaa3a8286baf896804aebd5ccc74#a295f213063aeaa3a8286baf896804aebd5ccc74"
 dependencies = [
  "nostr",
  "openmls",
@@ -4004,12 +4043,14 @@ dependencies = [
  "chrono",
  "flutter_rust_bridge",
  "hex",
- "mdk-core",
+ "mdk-core 0.6.0 (git+https://github.com/marmot-protocol/mdk?rev=a295f213063aeaa3a8286baf896804aebd5ccc74)",
  "nostr-sdk",
  "serde_json",
  "thiserror 2.0.18",
  "tokio",
  "tracing",
+ "tracing-appender",
+ "tracing-subscriber",
  "url",
  "whitenoise",
 ]
@@ -5476,9 +5517,9 @@ dependencies = [
  "keyring-core",
  "lightning-invoice",
  "linux-keyutils-keyring-store",
- "mdk-core",
+ "mdk-core 0.6.0 (git+https://github.com/marmot-protocol/mdk?rev=a295f21)",
  "mdk-sqlite-storage",
- "mdk-storage-traits",
+ "mdk-storage-traits 0.6.0 (git+https://github.com/marmot-protocol/mdk?rev=a295f21)",
  "nostr-blossom",
  "nostr-sdk",
  "nwc",

@@ -77,7 +77,7 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                   )
                 : ListView.builder(
                     padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 18.h),
-                    itemCount: messageCount + 6,
+                    itemCount: messageCount == 0 ? messageCount + 6 : messageCount + 5,
                     itemBuilder: (context, index) {
                       if (index == 0) {
                         return Padding(
@@ -534,12 +534,20 @@ class _DebugQuerySection extends HookWidget {
       error.value = null;
       try {
         final rawResult = await debugQuery(sql: sql);
+        if (!context.mounted) {
+          return;
+        }
         result.value = formatDebugQueryResult(rawResult);
       } catch (e) {
+        if (!context.mounted) {
+          return;
+        }
         error.value = 'debug_query: $e';
         result.value = null;
       } finally {
-        isRunning.value = false;
+        if (context.mounted) {
+          isRunning.value = false;
+        }
       }
     }
 
@@ -672,7 +680,7 @@ class _DebugQuerySection extends HookWidget {
   }
 }
 
-class _RatchetTreeSection extends ConsumerWidget {
+class _RatchetTreeSection extends HookConsumerWidget {
   const _RatchetTreeSection({required this.groupId});
 
   final String groupId;
@@ -712,9 +720,13 @@ class _RatchetTreeSection extends ConsumerWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final accountPubkey = ref.watch(accountPubkeyProvider);
+    final ratchetFuture = useMemoized(
+      () => getRatchetTreeInfo(accountPubkey: accountPubkey, groupId: groupId),
+      [accountPubkey, groupId],
+    );
 
     return FutureBuilder<RatchetTreeInfo>(
-      future: getRatchetTreeInfo(accountPubkey: accountPubkey, groupId: groupId),
+      future: ratchetFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
           return _DebugSectionCard(

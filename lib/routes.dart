@@ -187,20 +187,22 @@ abstract final class Routes {
             child: const DeveloperSettingsScreen(),
           ),
         ),
-        GoRoute(
-          path: _appLogs,
-          pageBuilder: (context, state) => _navigationTransition(
-            state: state,
-            child: const AppLogsScreen(),
+        if (isStaging)
+          GoRoute(
+            path: _appLogs,
+            pageBuilder: (context, state) => _navigationTransition(
+              state: state,
+              child: const AppLogsScreen(),
+            ),
           ),
-        ),
-        GoRoute(
-          path: _debugSqlQuery,
-          pageBuilder: (context, state) => _navigationTransition(
-            state: state,
-            child: const DebugSqlQueryScreen(),
+        if (isStaging)
+          GoRoute(
+            path: _debugSqlQuery,
+            pageBuilder: (context, state) => _navigationTransition(
+              state: state,
+              child: const DebugSqlQueryScreen(),
+            ),
           ),
-        ),
         GoRoute(
           path: _profileKeys,
           pageBuilder: (context, state) => _navigationTransition(
@@ -479,10 +481,12 @@ abstract final class Routes {
   }
 
   static void pushToAppLogs(BuildContext context) {
+    if (!isStaging) return;
     GoRouter.of(context).push(_appLogs);
   }
 
   static void pushToDebugSqlQuery(BuildContext context) {
+    if (!isStaging) return;
     GoRouter.of(context).push(_debugSqlQuery);
   }
 

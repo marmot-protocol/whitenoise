@@ -36,12 +36,20 @@ class DebugSqlQueryScreen extends HookWidget {
       error.value = null;
       try {
         final rawResult = await debugQuery(sql: sql);
+        if (!context.mounted) {
+          return;
+        }
         result.value = formatDebugQueryResult(rawResult);
       } catch (e) {
+        if (!context.mounted) {
+          return;
+        }
         error.value = 'debug_query: $e';
         result.value = null;
       } finally {
-        isRunning.value = false;
+        if (context.mounted) {
+          isRunning.value = false;
+        }
       }
     }
 
