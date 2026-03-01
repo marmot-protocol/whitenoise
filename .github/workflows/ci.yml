@@ -105,7 +105,7 @@ jobs:
       run: flutter pub get
 
     - name: Run Flutter tests (shard ${{ matrix.shard }})
-      run: flutter test --coverage --total-shards 4 --shard-index ${{ matrix.shard }}
+      run: flutter test --coverage --total-shards 4 --shard-index ${{ matrix.shard }} --reporter failures-only
 
     - name: Upload coverage shard
       uses: actions/upload-artifact@v4
