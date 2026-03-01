@@ -170,7 +170,7 @@ test-flutter-quiet:
     fi
 
 
-coverage min="80":
+coverage min="99":
     @echo "🧪 Running Flutter tests with coverage..."
     flutter test --coverage && \
         ./scripts/check-coverage.sh --min {{min}}
