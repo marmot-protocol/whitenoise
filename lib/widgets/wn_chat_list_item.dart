@@ -1,5 +1,4 @@
-import 'dart:io';
-
+import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -115,7 +114,9 @@ class WnChatListItem extends HookWidget {
                       children: [
                         if (subtitleIcon != null) ...[
                           Padding(
-                            padding: EdgeInsets.only(top: Platform.isIOS ? 2.h : 0),
+                            padding: EdgeInsets.only(
+                              top: defaultTargetPlatform == TargetPlatform.iOS ? 2.h : 0,
+                            ),
                             child: subtitleIcon,
                           ),
                           SizedBox(width: 2.w),

@@ -1,15 +1,15 @@
 {
-  "photo": "Photo",
-  "@photo": {
-    "description": "Label shown in chat list when the last message contains a single photo"
-  },
-
-  "photos": "Photos",
-  "@photos": {
-    "description": "Label shown in chat list when the last message contains multiple photos"
-  },
-
   "@@locale": "en",
+
+  "photoCount": "{count, plural, =1{Photo} other{Photos}}",
+  "@photoCount": {
+    "description": "Label shown in chat list when the last message contains photos",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
 
   "appTitle": "White Noise",
   "@appTitle": {

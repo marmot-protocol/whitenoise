@@ -1,6 +1,5 @@
 {
-  "photo": "Fotoğraf",
-  "photos": "Fotoğraflar",
+  "photoCount": "{count, plural, =1{Fotoğraf} other{Fotoğraflar}}",
   "@@locale": "tr",
   "appTitle": "White Noise",
   "sloganDecentralized": "Merkezi Olmayan",

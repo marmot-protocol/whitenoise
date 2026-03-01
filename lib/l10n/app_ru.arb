@@ -1,6 +1,5 @@
 {
-  "photo": "Фото",
-  "photos": "Фото",
+  "photoCount": "{count, plural, =1{Фото} other{Фото}}",
   "@@locale": "ru",
   "appTitle": "White Noise",
   "sloganDecentralized": "Децентрализованный",

@@ -101,9 +101,7 @@ class ChatListTile extends HookConsumerWidget {
           size: 16.w,
           color: context.colors.backgroundContentSecondary,
         );
-        subtitle = lastMessage.mediaAttachmentCount == BigInt.one
-            ? context.l10n.photo
-            : context.l10n.photos;
+        subtitle = context.l10n.photoCount(lastMessage.mediaAttachmentCount.toInt());
       } else {
         subtitle = lastMessage?.content ?? '';
       }

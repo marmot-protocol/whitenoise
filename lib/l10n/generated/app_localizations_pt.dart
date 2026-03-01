@@ -9,10 +9,15 @@ class AppLocalizationsPt extends AppLocalizations {
   AppLocalizationsPt([String locale = 'pt']) : super(locale);
 
   @override
-  String get photo => 'Foto';
-
-  @override
-  String get photos => 'Fotos';
+  String photoCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Fotos',
+      one: 'Foto',
+    );
+    return '$_temp0';
+  }
 
   @override
   String get appTitle => 'White Noise';
