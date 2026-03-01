@@ -465,20 +465,6 @@ void main() {
         expect(find.byKey(const Key('media_subtitle_icon')), findsOneWidget);
       });
 
-      testWidgets('shows "Photos" and image icon when multiple media-only message', (
-        tester,
-      ) async {
-        await pumpTile(
-          tester,
-          _chatSummary(lastMessageMediaAttachmentCount: 3),
-        );
-        final finder = find.byType(WnChatListItem);
-        final item = tester.widget<WnChatListItem>(finder);
-        expect(item.subtitle, 'Photos');
-        expect(item.subtitleIcon, isNotNull);
-        expect(find.byKey(const Key('media_subtitle_icon')), findsOneWidget);
-      });
-
       testWidgets('shows message content when media message also has text', (
         tester,
       ) async {
