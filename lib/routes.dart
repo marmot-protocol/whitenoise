@@ -10,11 +10,14 @@ import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
 import 'package:whitenoise/providers/is_adding_account_provider.dart' show isAddingAccountProvider;
 import 'package:whitenoise/screens/add_profile_screen.dart' show AddProfileScreen;
 import 'package:whitenoise/screens/add_to_group_screen.dart' show AddToGroupScreen;
+import 'package:whitenoise/screens/app_logs_screen.dart' show AppLogsScreen;
 import 'package:whitenoise/screens/appearance_screen.dart' show AppearanceScreen;
 import 'package:whitenoise/screens/chat_info_screen.dart' show ChatInfoScreen;
 import 'package:whitenoise/screens/chat_invite_screen.dart' show ChatInviteScreen;
 import 'package:whitenoise/screens/chat_list_screen.dart' show ChatListScreen;
+import 'package:whitenoise/screens/chat_raw_debug_screen.dart' show ChatRawDebugScreen;
 import 'package:whitenoise/screens/chat_screen.dart' show ChatScreen;
+import 'package:whitenoise/screens/debug_sql_query_screen.dart' show DebugSqlQueryScreen;
 import 'package:whitenoise/screens/developer_settings_screen.dart' show DeveloperSettingsScreen;
 import 'package:whitenoise/screens/donate_screen.dart' show DonateScreen;
 import 'package:whitenoise/screens/edit_group_screen.dart' show EditGroupScreen;
@@ -41,6 +44,7 @@ import 'package:whitenoise/screens/user_selection_screen.dart' show UserSelectio
 import 'package:whitenoise/screens/wip_screen.dart' show WipScreen;
 import 'package:whitenoise/src/rust/api/metadata.dart' show FlutterMetadata;
 import 'package:whitenoise/src/rust/api/users.dart' show User;
+import 'package:whitenoise/utils/app_flavor.dart' show isStaging;
 import 'package:whitenoise/widgets/wn_slate_content_transition.dart' show WnSlateContentTransition;
 
 abstract final class Routes {
@@ -58,6 +62,8 @@ abstract final class Routes {
   static const _privacySecurity = '/privacy-security';
   static const _wip = '/wip';
   static const _developerSettings = '/developer-settings';
+  static const _appLogs = '/app-logs';
+  static const _debugSqlQuery = '/debug-sql-query';
   static const _profileKeys = '/profile-keys';
   static const _shareProfile = '/share-profile';
   static const _editProfile = '/edit-profile';
@@ -77,6 +83,7 @@ abstract final class Routes {
   static const _groupMember = '/group-member/:groupId/:memberPubkey';
   static const _invite = '/invites/:mlsGroupId';
   static const _chat = '/chats/:groupId';
+  static const _chatRawDebug = '/chats/:groupId/debug';
   static const _publicRoutes = {_home, _login, _scanNsec, _signup, _relayResolution};
 
   static GoRouter build(WidgetRef ref) {
@@ -180,6 +187,22 @@ abstract final class Routes {
             child: const DeveloperSettingsScreen(),
           ),
         ),
+        if (isStaging)
+          GoRoute(
+            path: _appLogs,
+            pageBuilder: (context, state) => _navigationTransition(
+              state: state,
+              child: const AppLogsScreen(),
+            ),
+          ),
+        if (isStaging)
+          GoRoute(
+            path: _debugSqlQuery,
+            pageBuilder: (context, state) => _navigationTransition(
+              state: state,
+              child: const DebugSqlQueryScreen(),
+            ),
+          ),
         GoRoute(
           path: _profileKeys,
           pageBuilder: (context, state) => _navigationTransition(
@@ -354,6 +377,15 @@ abstract final class Routes {
             child: ChatScreen(groupId: state.pathParameters['groupId']!),
           ),
         ),
+        if (isStaging)
+          GoRoute(
+            name: 'chatRawDebug',
+            path: _chatRawDebug,
+            pageBuilder: (context, state) => _navigationTransition(
+              state: state,
+              child: ChatRawDebugScreen(groupId: state.pathParameters['groupId']!),
+            ),
+          ),
       ],
     );
   }
@@ -446,6 +478,16 @@ abstract final class Routes {
 
   static void pushToDeveloperSettings(BuildContext context) {
     GoRouter.of(context).push(_developerSettings);
+  }
+
+  static void pushToAppLogs(BuildContext context) {
+    if (!isStaging) return;
+    GoRouter.of(context).push(_appLogs);
+  }
+
+  static void pushToDebugSqlQuery(BuildContext context) {
+    if (!isStaging) return;
+    GoRouter.of(context).push(_debugSqlQuery);
   }
 
   static void pushToProfileKeys(BuildContext context) {
@@ -551,5 +593,10 @@ abstract final class Routes {
       pathParameters: {'userPubkey': userPubkey},
       extra: metadata,
     );
+  }
+
+  static void pushToChatRawDebug(BuildContext context, String groupId) {
+    if (!isStaging) return;
+    GoRouter.of(context).pushNamed('chatRawDebug', pathParameters: {'groupId': groupId});
   }
 }

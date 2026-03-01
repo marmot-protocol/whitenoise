@@ -1081,6 +1081,68 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connectAnotherProfile => 'Connect Another Profile';
 
   @override
+  String get rawDebugView => 'Raw debug view';
+
+  @override
+  String get rawDebugViewDescription => 'Show raw message data in chat';
+
+  @override
+  String get rawDebugViewTitle => 'Raw Debug View';
+
+  @override
+  String get rawDebugViewGroupId => 'Group ID';
+
+  @override
+  String rawDebugViewMessageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count messages',
+      one: '1 message',
+      zero: 'No messages',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rawDebugViewCopied => 'Copied to clipboard';
+
+  @override
+  String get appLogsTitle => 'App Logs';
+
+  @override
+  String get appLogsViewLogs => 'View logs';
+
+  @override
+  String get appLogsViewLogsDescription => 'View all Logger output in app';
+
+  @override
+  String get appLogsClear => 'Clear';
+
+  @override
+  String get appLogsEmpty => 'No logs yet';
+
+  @override
+  String get appLogsSearchPlaceholder => 'Search logs...';
+
+  @override
+  String get appLogsAddPatternPlaceholder => 'Add filter pattern';
+
+  @override
+  String get appLogsIgnore => 'Ignore';
+
+  @override
+  String get appLogsShow => 'Show';
+
+  @override
+  String get appLogsClearFilters => 'Clear filters';
+
+  @override
+  String appLogsFilteredCount(int shown, int total) {
+    return '$shown of $total';
+  }
+
+  @override
   String get invalidRelayUrlScheme => 'URL must start with wss:// or ws://';
 
   @override

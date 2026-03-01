@@ -1091,6 +1091,68 @@ class AppLocalizationsFr extends AppLocalizations {
   String get connectAnotherProfile => 'Connecter un autre profil';
 
   @override
+  String get rawDebugView => 'Vue de débogage brute';
+
+  @override
+  String get rawDebugViewDescription => 'Afficher les données brutes des messages dans le chat';
+
+  @override
+  String get rawDebugViewTitle => 'Vue de Débogage Brute';
+
+  @override
+  String get rawDebugViewGroupId => 'ID du Groupe';
+
+  @override
+  String rawDebugViewMessageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count messages',
+      one: '1 message',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rawDebugViewCopied => 'Copié dans le presse-papiers';
+
+  @override
+  String get appLogsTitle => 'Journaux de l\'application';
+
+  @override
+  String get appLogsViewLogs => 'Voir les journaux';
+
+  @override
+  String get appLogsViewLogsDescription =>
+      'Afficher toutes les sorties du journal de l\'application';
+
+  @override
+  String get appLogsClear => 'Effacer';
+
+  @override
+  String get appLogsEmpty => 'Aucun journal pour le moment';
+
+  @override
+  String get appLogsSearchPlaceholder => 'Rechercher dans les journaux...';
+
+  @override
+  String get appLogsAddPatternPlaceholder => 'Ajouter un filtre';
+
+  @override
+  String get appLogsIgnore => 'Ignorer';
+
+  @override
+  String get appLogsShow => 'Afficher';
+
+  @override
+  String get appLogsClearFilters => 'Effacer les filtres';
+
+  @override
+  String appLogsFilteredCount(int shown, int total) {
+    return '$shown sur $total';
+  }
+
+  @override
   String get invalidRelayUrlScheme => 'L\'URL doit commencer par wss:// ou ws://';
 
   @override

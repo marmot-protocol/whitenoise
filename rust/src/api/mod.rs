@@ -1,6 +1,9 @@
 // Re-export everything from the whitenoise crate
 use flutter_rust_bridge::frb;
 use std::path::Path;
+use std::sync::OnceLock;
+use tracing_appender::{non_blocking::WorkerGuard, rolling::Rotation};
+use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
 pub use whitenoise::{AppSettings, Language, RelayType, ThemeMode, Whitenoise};
 
 // Re-export types that flutter_rust_bridge needs
@@ -61,6 +64,7 @@ pub mod chat_list;
 pub mod drafts;
 pub mod error;
 pub mod groups;
+pub mod logs;
 pub mod media_files;
 pub mod messages;
 pub mod metadata;
@@ -78,6 +82,7 @@ pub use chat_list::*;
 pub use drafts::*;
 pub use error::*;
 pub use groups::*;
+pub use logs::*;
 pub use media_files::*;
 pub use messages::*;
 pub use metadata::*;
@@ -88,8 +93,49 @@ pub use user_search::*;
 pub use users::*;
 pub use utils::*;
 
+static TRACING_GUARD: OnceLock<WorkerGuard> = OnceLock::new();
+
+fn initialize_tracing(logs_dir: &str) -> Result<(), ApiError> {
+    if TRACING_GUARD.get().is_some() {
+        return Ok(());
+    }
+
+    let subdir = if cfg!(debug_assertions) {
+        "dev"
+    } else {
+        "release"
+    };
+    let log_dir = Path::new(logs_dir).join(subdir);
+    std::fs::create_dir_all(&log_dir)?;
+
+    let appender = tracing_appender::rolling::RollingFileAppender::builder()
+        .rotation(Rotation::DAILY)
+        .filename_prefix("whitenoise")
+        .filename_suffix("log")
+        .build(log_dir)
+        .map_err(|e| ApiError::Other {
+            message: format!("Failed to initialize tracing appender: {e}"),
+        })?;
+    let (non_blocking, guard) = tracing_appender::non_blocking(appender);
+    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    let fmt_layer = tracing_subscriber::fmt::layer()
+        .with_ansi(false)
+        .with_target(true)
+        .with_writer(non_blocking);
+
+    // Ignore the error when another global subscriber is already installed.
+    let _ = tracing_subscriber::registry()
+        .with(env_filter)
+        .with(fmt_layer)
+        .try_init();
+    let _ = TRACING_GUARD.set(guard);
+
+    Ok(())
+}
+
 #[frb]
 pub async fn initialize_whitenoise(config: WhitenoiseConfig) -> Result<(), ApiError> {
+    initialize_tracing(&config.logs_dir)?;
     let core_config = whitenoise::WhitenoiseConfig::new(
         Path::new(&config.data_dir),
         Path::new(&config.logs_dir),

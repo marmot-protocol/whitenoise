@@ -7,6 +7,7 @@ use crate::frb_generated::StreamSink;
 use chrono::{DateTime, TimeZone, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
+use tracing::{info, warn};
 use whitenoise::whitenoise::message_aggregator::ChatMessageSummary as WhitenoiseChatMessageSummary;
 pub use whitenoise::{
     ChatMessage as WhitenoiseChatMessage, EmojiReaction as WhitenoiseEmojiReaction,
@@ -377,7 +378,10 @@ pub async fn subscribe_to_group_messages(
     sink: StreamSink<MessageStreamItem>,
 ) -> Result<(), ApiError> {
     let whitenoise = Whitenoise::get_instance()?;
+    let group_id_str = group_id.clone();
     let group_id = group_id_from_string(&group_id)?;
+
+    info!(group_id = %group_id_str, "subscribe_to_group_messages: subscribing");
 
     let subscription = whitenoise.subscribe_to_group_messages(&group_id).await?;
 
@@ -388,33 +392,56 @@ pub async fn subscribe_to_group_messages(
         .map(|m| m.into())
         .collect();
 
+    info!(
+        group_id = %group_id_str,
+        count = initial_messages.len(),
+        "subscribe_to_group_messages: emitting initial snapshot"
+    );
+
     if sink
         .add(MessageStreamItem::InitialSnapshot {
             messages: initial_messages,
         })
         .is_err()
     {
+        info!(group_id = %group_id_str, "subscribe_to_group_messages: sink closed after snapshot, exiting");
         return Ok(()); // Sink closed, exit gracefully
     }
 
     // Stream real-time updates
     let mut rx = subscription.updates;
+    let mut lagged_total: u64 = 0;
     loop {
         match rx.recv().await {
             Ok(update) => {
+                info!(
+                    group_id = %group_id_str,
+                    trigger = ?update.trigger,
+                    message_id = %update.message.id,
+                    is_deleted = update.message.is_deleted,
+                    "subscribe_to_group_messages: emitting update"
+                );
                 let item = MessageStreamItem::Update {
                     update: update.into(),
                 };
                 if sink.add(item).is_err() {
+                    info!(group_id = %group_id_str, "subscribe_to_group_messages: sink closed, exiting");
                     break; // Sink closed
                 }
             }
-            Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => {
-                // Slow consumer missed some updates - safe to continue since
-                // each update contains the complete message state
+            Err(tokio::sync::broadcast::error::RecvError::Lagged(n)) => {
+                lagged_total += n;
+                warn!(
+                    group_id = %group_id_str,
+                    skipped = n,
+                    total_lagged = lagged_total,
+                    "subscribe_to_group_messages: consumer lagged, skipping updates"
+                );
+                // Safe to continue since each update contains the complete message state
                 continue;
             }
             Err(tokio::sync::broadcast::error::RecvError::Closed) => {
+                info!(group_id = %group_id_str, "subscribe_to_group_messages: channel closed, exiting");
                 break; // Channel closed
             }
         }

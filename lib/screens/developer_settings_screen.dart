@@ -5,12 +5,15 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_key_packages.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
+import 'package:whitenoise/providers/debug_view_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart' show FlutterEvent;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/app_flavor.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_key_package_card.dart';
 import 'package:whitenoise/widgets/wn_scroll_edge_effect.dart';
+import 'package:whitenoise/widgets/wn_separator.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
@@ -24,6 +27,7 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
     final typography = context.typographyScaled;
     final pubkey = ref.watch(accountPubkeyProvider);
     final (:state, :fetch, :publish, :delete, :deleteAll) = useKeyPackages(pubkey);
+    final debugViewEnabled = ref.watch(debugViewProvider).value ?? false;
 
     final noticeMessage = useState<String?>(null);
     final noticeType = useState<WnSystemNoticeType>(WnSystemNoticeType.success);
@@ -100,7 +104,33 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   SizedBox(height: 16.h),
-                  _ActionButtons(
+                  if (isStaging) ...[
+                    _DeveloperSettingsDebugViewToggle(
+                      label: context.l10n.rawDebugView,
+                      description: context.l10n.rawDebugViewDescription,
+                      enabled: debugViewEnabled,
+                      onChanged: (value) => ref.read(debugViewProvider.notifier).setEnabled(value),
+                    ),
+                    const WnSeparator(),
+                    SizedBox(height: 8.h),
+                    _DeveloperSettingsViewLogsRow(
+                      rowKey: const Key('view_logs_row'),
+                      label: context.l10n.appLogsViewLogs,
+                      description: context.l10n.appLogsViewLogsDescription,
+                      onTap: () => Routes.pushToAppLogs(context),
+                    ),
+                    const WnSeparator(),
+                    SizedBox(height: 8.h),
+                    _DeveloperSettingsViewLogsRow(
+                      rowKey: const Key('debug_sql_query_row'),
+                      label: 'Debug SQL Query',
+                      description: 'Run raw SQL against the local whitenoise database',
+                      onTap: () => Routes.pushToDebugSqlQuery(context),
+                    ),
+                    const WnSeparator(),
+                    SizedBox(height: 8.h),
+                  ],
+                  _DeveloperSettingsActionButtons(
                     isLoading: state.isLoading,
                     onPublish: () => handleAction(publish),
                     onFetch: () => handleAction(fetch),
@@ -131,7 +161,7 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                               color: colors.backgroundContentPrimary,
                             ),
                           )
-                        : _KeyPackagesList(
+                        : _DeveloperSettingsKeyPackagesList(
                             packages: state.packages,
                             onDelete: handleDelete,
                             disabled: state.isLoading,
@@ -147,8 +177,8 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
   }
 }
 
-class _ActionButtons extends StatelessWidget {
-  const _ActionButtons({
+class _DeveloperSettingsActionButtons extends StatelessWidget {
+  const _DeveloperSettingsActionButtons({
     required this.isLoading,
     required this.onPublish,
     required this.onFetch,
@@ -189,8 +219,8 @@ class _ActionButtons extends StatelessWidget {
   }
 }
 
-class _KeyPackagesList extends HookWidget {
-  const _KeyPackagesList({
+class _DeveloperSettingsKeyPackagesList extends HookWidget {
+  const _DeveloperSettingsKeyPackagesList({
     required this.packages,
     required this.onDelete,
     required this.disabled,
@@ -255,6 +285,127 @@ class _KeyPackagesList extends HookWidget {
             if (canScrollUp.value) WnScrollEdgeEffect.slateTop(color: colors.backgroundSecondary),
             if (canScrollDown.value)
               WnScrollEdgeEffect.slateBottom(color: colors.backgroundSecondary),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _DeveloperSettingsViewLogsRow extends StatelessWidget {
+  const _DeveloperSettingsViewLogsRow({
+    required this.rowKey,
+    required this.label,
+    required this.description,
+    required this.onTap,
+  });
+
+  final Key rowKey;
+  final String label;
+  final String description;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+
+    return InkWell(
+      key: rowKey,
+      onTap: onTap,
+      child: SizedBox(
+        height: 56.h,
+        child: Padding(
+          padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: typography.medium16.copyWith(
+                  color: colors.backgroundContentPrimary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                description,
+                style: typography.medium12.copyWith(
+                  color: colors.backgroundContentSecondary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _DeveloperSettingsDebugViewToggle extends StatelessWidget {
+  const _DeveloperSettingsDebugViewToggle({
+    required this.label,
+    required this.description,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final String label;
+  final String description;
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+
+    return InkWell(
+      key: const Key('debug_view_toggle_row'),
+      onTap: () => onChanged(!enabled),
+      child: SizedBox(
+        height: 56.h,
+        child: Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      label,
+                      style: typography.medium16.copyWith(
+                        color: colors.backgroundContentPrimary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      description,
+                      style: typography.medium12.copyWith(
+                        color: colors.backgroundContentSecondary,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.only(right: 10.w),
+              child: Switch(
+                key: const Key('debug_view_switch'),
+                value: enabled,
+                onChanged: onChanged,
+                activeThumbColor: colors.backgroundContentPrimary,
+              ),
+            ),
           ],
         ),
       ),

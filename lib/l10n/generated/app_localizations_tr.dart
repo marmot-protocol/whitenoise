@@ -1082,6 +1082,67 @@ class AppLocalizationsTr extends AppLocalizations {
   String get connectAnotherProfile => 'Başka Profil Bağla';
 
   @override
+  String get rawDebugView => 'Ham hata ayıklama görünümü';
+
+  @override
+  String get rawDebugViewDescription => 'Sohbette ham mesaj verilerini göster';
+
+  @override
+  String get rawDebugViewTitle => 'Ham Hata Ayıklama Görünümü';
+
+  @override
+  String get rawDebugViewGroupId => 'Grup Kimliği';
+
+  @override
+  String rawDebugViewMessageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mesaj',
+      one: '1 mesaj',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rawDebugViewCopied => 'Panoya kopyalandı';
+
+  @override
+  String get appLogsTitle => 'Uygulama Günlükleri';
+
+  @override
+  String get appLogsViewLogs => 'Günlüklere bak';
+
+  @override
+  String get appLogsViewLogsDescription => 'Uygulamadaki tüm Logger çıktısını görüntüle';
+
+  @override
+  String get appLogsClear => 'Temizle';
+
+  @override
+  String get appLogsEmpty => 'Henüz günlük yok';
+
+  @override
+  String get appLogsSearchPlaceholder => 'Günlüklerde ara...';
+
+  @override
+  String get appLogsAddPatternPlaceholder => 'Filtre kalıbı ekle';
+
+  @override
+  String get appLogsIgnore => 'Yoksay';
+
+  @override
+  String get appLogsShow => 'Göster';
+
+  @override
+  String get appLogsClearFilters => 'Filtreleri temizle';
+
+  @override
+  String appLogsFilteredCount(int shown, int total) {
+    return '$shown / $total';
+  }
+
+  @override
   String get invalidRelayUrlScheme => 'URL wss:// veya ws:// ile başlamalıdır';
 
   @override

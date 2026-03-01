@@ -59,6 +59,9 @@ class MockWnApi implements RustLibApi {
   LoginResult? loginStartResult;
   LoginResult? loginExternalSignerStartResult;
   bool registerExternalSignerCalled = false;
+  String debugQueryResult = '[]';
+  bool shouldFailDebugQuery = false;
+  String? lastDebugQuerySql;
 
   String? lastReadMessageId;
   final List<String> markedAsReadMessages = [];
@@ -173,6 +176,15 @@ class MockWnApi implements RustLibApi {
   }
 
   @override
+  Future<String> crateApiUtilsDebugQuery({required String sql}) async {
+    lastDebugQuerySql = sql;
+    if (shouldFailDebugQuery) {
+      throw Exception('debug query failed');
+    }
+    return debugQueryResult;
+  }
+
+  @override
   Future<List<ChatMessage>> crateApiMessagesFetchAggregatedMessagesForGroup({
     required String pubkey,
     required String groupId,
@@ -194,6 +206,25 @@ class MockWnApi implements RustLibApi {
     required String groupId,
   }) async {
     return null;
+  }
+
+  @override
+  Future<RatchetTreeInfo> crateApiGroupsGetRatchetTreeInfo({
+    required String accountPubkey,
+    required String groupId,
+  }) async {
+    return RatchetTreeInfo(
+      treeHash: 'a' * 64,
+      serializedTree: 'deadbeef',
+      leafNodes: [
+        LeafNodeInfo(
+          index: 0,
+          encryptionKey: 'b' * 64,
+          signatureKey: 'c' * 64,
+          credentialIdentity: testPubkeyA,
+        ),
+      ],
+    );
   }
 
   @override
@@ -553,6 +584,9 @@ class MockWnApi implements RustLibApi {
     loginStartResult = null;
     loginExternalSignerStartResult = null;
     registerExternalSignerCalled = false;
+    debugQueryResult = '[]';
+    shouldFailDebugQuery = false;
+    lastDebugQuerySql = null;
     lastReadMessageId = null;
     markedAsReadMessages.clear();
     getAccountGroupCallCount = 0;

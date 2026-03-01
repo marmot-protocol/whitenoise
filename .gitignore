@@ -45,6 +45,7 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+/android/app/pkg/sumdb/
 
 # Compiled Rust native libraries (built via `just build-android`)
 /android/app/src/main/jniLibs/

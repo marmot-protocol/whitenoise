@@ -1110,6 +1110,69 @@ class AppLocalizationsRu extends AppLocalizations {
   String get connectAnotherProfile => 'Подключить другой профиль';
 
   @override
+  String get rawDebugView => 'Просмотр отладочных данных';
+
+  @override
+  String get rawDebugViewDescription => 'Показывать необработанные данные сообщений в чате';
+
+  @override
+  String get rawDebugViewTitle => 'Просмотр Отладки';
+
+  @override
+  String get rawDebugViewGroupId => 'ID группы';
+
+  @override
+  String rawDebugViewMessageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count сообщений',
+      many: '$count сообщений',
+      few: '$count сообщения',
+      one: '1 сообщение',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rawDebugViewCopied => 'Скопировано в буфер обмена';
+
+  @override
+  String get appLogsTitle => 'Журналы приложения';
+
+  @override
+  String get appLogsViewLogs => 'Просмотреть логи';
+
+  @override
+  String get appLogsViewLogsDescription => 'Просмотреть все записи Logger в приложении';
+
+  @override
+  String get appLogsClear => 'Очистить';
+
+  @override
+  String get appLogsEmpty => 'Пока нет записей';
+
+  @override
+  String get appLogsSearchPlaceholder => 'Поиск по логам...';
+
+  @override
+  String get appLogsAddPatternPlaceholder => 'Добавить шаблон фильтра';
+
+  @override
+  String get appLogsIgnore => 'Игнорировать';
+
+  @override
+  String get appLogsShow => 'Показать';
+
+  @override
+  String get appLogsClearFilters => 'Сбросить фильтры';
+
+  @override
+  String appLogsFilteredCount(int shown, int total) {
+    return '$shown из $total';
+  }
+
+  @override
   String get invalidRelayUrlScheme => 'URL должен начинаться с wss:// или ws://';
 
   @override

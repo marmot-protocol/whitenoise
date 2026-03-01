@@ -16,6 +16,7 @@ import 'api/chat_list.dart';
 import 'api/drafts.dart';
 import 'api/error.dart';
 import 'api/groups.dart';
+import 'api/logs.dart';
 import 'api/media_files.dart';
 import 'api/messages.dart';
 import 'api/metadata.dart';
@@ -214,6 +215,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  RustStreamSink<String> dco_decode_StreamSink_String_Sse(dynamic raw);
+
+  @protected
   RustStreamSink<ChatListStreamItem> dco_decode_StreamSink_chat_list_stream_item_Sse(dynamic raw);
 
   @protected
@@ -350,6 +354,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   KeyPackageStatus dco_decode_key_package_status(dynamic raw);
 
   @protected
+  LeafNodeInfo dco_decode_leaf_node_info(dynamic raw);
+
+  @protected
   List<Tag>
   dco_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
     dynamic raw,
@@ -378,6 +385,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<GroupInformation> dco_decode_list_group_information(dynamic raw);
+
+  @protected
+  List<LeafNodeInfo> dco_decode_list_leaf_node_info(dynamic raw);
 
   @protected
   List<List<String>> dco_decode_list_list_String(dynamic raw);
@@ -484,6 +494,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   U8Array32? dco_decode_opt_u_8_array_32(dynamic raw);
 
   @protected
+  RatchetTreeInfo dco_decode_ratchet_tree_info(dynamic raw);
+
+  @protected
   ReactionSummary dco_decode_reaction_summary(dynamic raw);
 
   @protected
@@ -500,6 +513,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   int dco_decode_u_16(dynamic raw);
+
+  @protected
+  int dco_decode_u_32(dynamic raw);
 
   @protected
   BigInt dco_decode_u_64(dynamic raw);
@@ -682,6 +698,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  RustStreamSink<String> sse_decode_StreamSink_String_Sse(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   RustStreamSink<ChatListStreamItem> sse_decode_StreamSink_chat_list_stream_item_Sse(
     SseDeserializer deserializer,
   );
@@ -846,6 +867,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   KeyPackageStatus sse_decode_key_package_status(SseDeserializer deserializer);
 
   @protected
+  LeafNodeInfo sse_decode_leaf_node_info(SseDeserializer deserializer);
+
+  @protected
   List<Tag>
   sse_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
     SseDeserializer deserializer,
@@ -878,6 +902,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<GroupInformation> sse_decode_list_group_information(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  List<LeafNodeInfo> sse_decode_list_leaf_node_info(
     SseDeserializer deserializer,
   );
 
@@ -1008,6 +1037,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   U8Array32? sse_decode_opt_u_8_array_32(SseDeserializer deserializer);
 
   @protected
+  RatchetTreeInfo sse_decode_ratchet_tree_info(SseDeserializer deserializer);
+
+  @protected
   ReactionSummary sse_decode_reaction_summary(SseDeserializer deserializer);
 
   @protected
@@ -1028,6 +1060,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   int sse_decode_u_16(SseDeserializer deserializer);
+
+  @protected
+  int sse_decode_u_32(SseDeserializer deserializer);
 
   @protected
   BigInt sse_decode_u_64(SseDeserializer deserializer);
@@ -1245,6 +1280,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_StreamSink_String_Sse(
+    RustStreamSink<String> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_StreamSink_chat_list_stream_item_Sse(
     RustStreamSink<ChatListStreamItem> self,
     SseSerializer serializer,
@@ -1446,6 +1487,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_leaf_node_info(LeafNodeInfo self, SseSerializer serializer);
+
+  @protected
   void sse_encode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
     List<Tag> self,
     SseSerializer serializer,
@@ -1487,6 +1531,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_list_group_information(
     List<GroupInformation> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_leaf_node_info(
+    List<LeafNodeInfo> self,
     SseSerializer serializer,
   );
 
@@ -1648,6 +1698,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_opt_u_8_array_32(U8Array32? self, SseSerializer serializer);
 
   @protected
+  void sse_encode_ratchet_tree_info(
+    RatchetTreeInfo self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_reaction_summary(
     ReactionSummary self,
     SseSerializer serializer,
@@ -1676,6 +1732,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_u_16(int self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_u_32(int self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_64(BigInt self, SseSerializer serializer);

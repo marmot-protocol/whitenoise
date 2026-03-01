@@ -19,28 +19,42 @@ class MessageService {
     int? replyToMessageKind,
     List<MediaFile> mediaFiles = const [],
   }) async {
-    _logger.info('Sending message to group $groupId');
-
-    final replyTags =
-        (replyToMessageId != null && replyToMessagePubkey != null && replyToMessageKind != null)
-        ? await _eventReferenceTags(
-            eventId: replyToMessageId,
-            eventPubkey: replyToMessagePubkey,
-            eventKind: replyToMessageKind,
-          )
-        : <messages_api.Tag>[];
-
-    final mediaTags = await _buildMediaTags(mediaFiles: mediaFiles);
-    final allTags = [...replyTags, ...mediaTags];
-
-    await messages_api.sendMessageToGroup(
-      pubkey: pubkey,
-      groupId: groupId,
-      message: content,
-      kind: NostrEventKinds.chatMessage,
-      tags: allTags.isEmpty ? null : allTags,
+    _logger.info(
+      'sendMessage START groupId=$groupId contentLen=${content.length} '
+      'replyTo=$replyToMessageId mediaCount=${mediaFiles.length}',
     );
-    _logger.info('Message sent successfully');
+
+    try {
+      final replyTags =
+          (replyToMessageId != null && replyToMessagePubkey != null && replyToMessageKind != null)
+          ? await _eventReferenceTags(
+              eventId: replyToMessageId,
+              eventPubkey: replyToMessagePubkey,
+              eventKind: replyToMessageKind,
+            )
+          : <messages_api.Tag>[];
+
+      final mediaTags = await _buildMediaTags(mediaFiles: mediaFiles);
+      final allTags = [...replyTags, ...mediaTags];
+
+      _logger.info('sendMessage calling Rust API tagsCount=${allTags.length}');
+
+      final result = await messages_api.sendMessageToGroup(
+        pubkey: pubkey,
+        groupId: groupId,
+        message: content,
+        kind: NostrEventKinds.chatMessage,
+        tags: allTags.isEmpty ? null : allTags,
+      );
+
+      _logger.info(
+        'sendMessage OK resultId=${result.id} pubkey=${result.pubkey} kind=${result.kind} '
+        'createdAt=${result.createdAt.toIso8601String()}',
+      );
+    } catch (e, st) {
+      _logger.severe('sendMessage FAILED groupId=$groupId', e, st);
+      rethrow;
+    }
   }
 
   Future<void> sendTextMessage({
@@ -49,25 +63,37 @@ class MessageService {
     String? replyToMessagePubkey,
     int? replyToMessageKind,
   }) async {
-    _logger.info('Sending text message to group $groupId');
-
-    final tags =
-        (replyToMessageId != null && replyToMessagePubkey != null && replyToMessageKind != null)
-        ? await _eventReferenceTags(
-            eventId: replyToMessageId,
-            eventPubkey: replyToMessagePubkey,
-            eventKind: replyToMessageKind,
-          )
-        : null;
-
-    await messages_api.sendMessageToGroup(
-      pubkey: pubkey,
-      groupId: groupId,
-      message: content,
-      kind: NostrEventKinds.chatMessage,
-      tags: tags,
+    _logger.info(
+      'sendTextMessage START groupId=$groupId contentLen=${content.length} replyTo=$replyToMessageId',
     );
-    _logger.info('Message sent successfully');
+
+    try {
+      final tags =
+          (replyToMessageId != null && replyToMessagePubkey != null && replyToMessageKind != null)
+          ? await _eventReferenceTags(
+              eventId: replyToMessageId,
+              eventPubkey: replyToMessagePubkey,
+              eventKind: replyToMessageKind,
+            )
+          : null;
+
+      _logger.info('sendTextMessage calling Rust API hasTags=${tags != null}');
+
+      final result = await messages_api.sendMessageToGroup(
+        pubkey: pubkey,
+        groupId: groupId,
+        message: content,
+        kind: NostrEventKinds.chatMessage,
+        tags: tags,
+      );
+
+      _logger.info(
+        'sendTextMessage OK resultId=${result.id} createdAt=${result.createdAt.toIso8601String()}',
+      );
+    } catch (e, st) {
+      _logger.severe('sendTextMessage FAILED groupId=$groupId', e, st);
+      rethrow;
+    }
   }
 
   Future<void> sendReaction({
@@ -76,21 +102,35 @@ class MessageService {
     required int messageKind,
     required String emoji,
   }) async {
-    final tags = await _eventReferenceTags(
-      eventId: messageId,
-      eventPubkey: messagePubkey,
-      eventKind: messageKind,
+    _logger.info(
+      'sendReaction START groupId=$groupId messageId=$messageId emoji=$emoji kind=$messageKind',
     );
+    try {
+      final tags = await _eventReferenceTags(
+        eventId: messageId,
+        eventPubkey: messagePubkey,
+        eventKind: messageKind,
+      );
 
-    _logger.info('Sending reaction to message $messageId');
-    await messages_api.sendMessageToGroup(
-      pubkey: pubkey,
-      groupId: groupId,
-      message: emoji,
-      kind: NostrEventKinds.reaction,
-      tags: tags,
-    );
-    _logger.info('Reaction sent successfully');
+      _logger.info('sendReaction calling Rust API');
+      final result = await messages_api.sendMessageToGroup(
+        pubkey: pubkey,
+        groupId: groupId,
+        message: emoji,
+        kind: NostrEventKinds.reaction,
+        tags: tags,
+      );
+      _logger.info(
+        'sendReaction OK resultId=${result.id} createdAt=${result.createdAt.toIso8601String()}',
+      );
+    } catch (e, st) {
+      _logger.severe(
+        'sendReaction FAILED groupId=$groupId messageId=$messageId emoji=$emoji',
+        e,
+        st,
+      );
+      rethrow;
+    }
   }
 
   Future<void> toggleReaction({
@@ -100,6 +140,11 @@ class MessageService {
     final existingReaction = message.reactions.userReactions
         .where((r) => r.user == pubkey && r.emoji == emoji)
         .firstOrNull;
+
+    _logger.info(
+      'toggleReaction groupId=$groupId messageId=${message.id} emoji=$emoji '
+      'existing=${existingReaction?.reactionId}',
+    );
 
     if (existingReaction != null) {
       await deleteReaction(
@@ -143,22 +188,31 @@ class MessageService {
     required String eventPubkey,
     required int eventKind,
   }) async {
-    _logger.info('Building deletion tags for event $eventId');
-    final tags = await _eventReferenceTags(
-      eventId: eventId,
-      eventPubkey: eventPubkey,
-      eventKind: eventKind,
+    _logger.info(
+      '_deleteEvent START groupId=$groupId eventId=$eventId eventKind=$eventKind',
     );
+    try {
+      final tags = await _eventReferenceTags(
+        eventId: eventId,
+        eventPubkey: eventPubkey,
+        eventKind: eventKind,
+      );
 
-    _logger.info('Deleting event $eventId');
-    await messages_api.sendMessageToGroup(
-      pubkey: pubkey,
-      groupId: groupId,
-      message: '',
-      tags: tags,
-      kind: NostrEventKinds.deletion,
-    );
-    _logger.info('Event $eventId deleted successfully');
+      _logger.info('_deleteEvent calling Rust API tagsCount=${tags.length}');
+      final result = await messages_api.sendMessageToGroup(
+        pubkey: pubkey,
+        groupId: groupId,
+        message: '',
+        tags: tags,
+        kind: NostrEventKinds.deletion,
+      );
+      _logger.info(
+        '_deleteEvent OK resultId=${result.id} createdAt=${result.createdAt.toIso8601String()}',
+      );
+    } catch (e, st) {
+      _logger.severe('_deleteEvent FAILED groupId=$groupId eventId=$eventId', e, st);
+      rethrow;
+    }
   }
 
   Future<List<messages_api.Tag>> _eventReferenceTags({

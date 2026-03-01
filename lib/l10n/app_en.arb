@@ -1689,6 +1689,89 @@
     "description": "Button text to connect another profile/account"
   },
 
+  "rawDebugView": "Raw debug view",
+  "@rawDebugView": {
+    "description": "Toggle label for raw message debug view in developer settings"
+  },
+
+  "rawDebugViewDescription": "Show raw message data in chat",
+  "@rawDebugViewDescription": {
+    "description": "Subtitle for the raw debug view toggle"
+  },
+
+  "rawDebugViewTitle": "Raw Debug View",
+  "@rawDebugViewTitle": {
+    "description": "Screen title for the raw message debug screen"
+  },
+
+  "rawDebugViewGroupId": "Group ID",
+  "@rawDebugViewGroupId": {
+    "description": "Label for group ID in raw debug view"
+  },
+
+  "rawDebugViewMessageCount": "{count, plural, =0{No messages} =1{1 message} other{{count} messages}}",
+  "@rawDebugViewMessageCount": {
+    "description": "Message count shown in raw debug view",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+
+  "rawDebugViewCopied": "Copied to clipboard",
+  "@rawDebugViewCopied": {
+    "description": "Snackbar text after copying a raw message"
+  },
+
+  "appLogsTitle": "App Logs",
+  "@appLogsTitle": {
+    "description": "Screen title for the in-app log viewer"
+  },
+  "appLogsViewLogs": "View logs",
+  "@appLogsViewLogs": {
+    "description": "Label for the view logs button in developer settings"
+  },
+  "appLogsViewLogsDescription": "View all Logger output in app",
+  "@appLogsViewLogsDescription": {
+    "description": "Subtitle for the view logs button"
+  },
+  "appLogsClear": "Clear",
+  "@appLogsClear": {
+    "description": "Button to clear logs"
+  },
+  "appLogsEmpty": "No logs yet",
+  "@appLogsEmpty": {
+    "description": "Shown when log list is empty"
+  },
+  "appLogsSearchPlaceholder": "Search logs...",
+  "@appLogsSearchPlaceholder": {
+    "description": "Placeholder for log search field"
+  },
+  "appLogsAddPatternPlaceholder": "Add filter pattern",
+  "@appLogsAddPatternPlaceholder": {
+    "description": "Placeholder for adding include/exclude filter"
+  },
+  "appLogsIgnore": "Ignore",
+  "@appLogsIgnore": {
+    "description": "Button to add exclude filter (hide matching logs)"
+  },
+  "appLogsShow": "Show",
+  "@appLogsShow": {
+    "description": "Button to add include filter (show only matching logs)"
+  },
+  "appLogsClearFilters": "Clear filters",
+  "@appLogsClearFilters": {
+    "description": "Button to clear all filter rules"
+  },
+  "appLogsFilteredCount": "{shown} of {total}",
+  "@appLogsFilteredCount": {
+    "description": "Shown/filtered count when filters active",
+    "placeholders": {
+      "shown": {"type": "int"},
+      "total": {"type": "int"}
+    }
+  },
   "invalidRelayUrlScheme": "URL must start with wss:// or ws://",
   "@invalidRelayUrlScheme": {
     "description": "Error message when relay URL doesn't start with wss:// or ws://"

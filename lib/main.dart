@@ -9,16 +9,20 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart' show Flutter
 import 'package:go_router/go_router.dart' show GoRouter;
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     show ConsumerStatefulWidget, ConsumerState, ProviderContainer, UncontrolledProviderScope;
+import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDirectory;
 import 'package:whitenoise/l10n/l10n.dart';
+import 'package:whitenoise/providers/app_log_provider.dart' show appLogStore;
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
 import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart' show notificationListenerProvider;
+import 'package:whitenoise/providers/rust_log_listener_provider.dart' show rustLogListenerProvider;
 import 'package:whitenoise/providers/theme_provider.dart' show themeProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/app_flavor.dart';
 
 // TODO: Remove migration gate and related code in the next release.
 const kDataVersion = 1;
@@ -26,6 +30,22 @@ const kDataVersionFile = 'data_version';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  if (isStaging) {
+    Logger.root.level = Level.ALL;
+    Logger.root.onRecord.listen((record) {
+      appLogStore.add(record);
+      final buf = StringBuffer('${record.level.name}: ${record.loggerName}: ${record.message}');
+      if (record.error != null) {
+        buf.writeln();
+        buf.write('  error: ${record.error}');
+      }
+      if (record.stackTrace != null) {
+        buf.writeln();
+        buf.write('  stackTrace: ${record.stackTrace}');
+      }
+      debugPrint(buf.toString());
+    });
+  }
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
@@ -102,6 +122,7 @@ class _WnAppState extends ConsumerState<WnApp> {
     final themeMode = ref.watch(themeProvider).value ?? ThemeMode.system;
     ref.watch(localeProvider);
     ref.watch(notificationListenerProvider);
+    ref.watch(rustLogListenerProvider);
     final locale = ref.read(localeProvider.notifier).resolveLocale();
 
     return ScreenUtilInit(

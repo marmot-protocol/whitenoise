@@ -1992,6 +1992,108 @@ abstract class AppLocalizations {
   /// **'Connect Another Profile'**
   String get connectAnotherProfile;
 
+  /// Toggle label for raw message debug view in developer settings
+  ///
+  /// In en, this message translates to:
+  /// **'Raw debug view'**
+  String get rawDebugView;
+
+  /// Subtitle for the raw debug view toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Show raw message data in chat'**
+  String get rawDebugViewDescription;
+
+  /// Screen title for the raw message debug screen
+  ///
+  /// In en, this message translates to:
+  /// **'Raw Debug View'**
+  String get rawDebugViewTitle;
+
+  /// Label for group ID in raw debug view
+  ///
+  /// In en, this message translates to:
+  /// **'Group ID'**
+  String get rawDebugViewGroupId;
+
+  /// Message count shown in raw debug view
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =0{No messages} =1{1 message} other{{count} messages}}'**
+  String rawDebugViewMessageCount(int count);
+
+  /// Snackbar text after copying a raw message
+  ///
+  /// In en, this message translates to:
+  /// **'Copied to clipboard'**
+  String get rawDebugViewCopied;
+
+  /// Screen title for the in-app log viewer
+  ///
+  /// In en, this message translates to:
+  /// **'App Logs'**
+  String get appLogsTitle;
+
+  /// Label for the view logs button in developer settings
+  ///
+  /// In en, this message translates to:
+  /// **'View logs'**
+  String get appLogsViewLogs;
+
+  /// Subtitle for the view logs button
+  ///
+  /// In en, this message translates to:
+  /// **'View all Logger output in app'**
+  String get appLogsViewLogsDescription;
+
+  /// Button to clear logs
+  ///
+  /// In en, this message translates to:
+  /// **'Clear'**
+  String get appLogsClear;
+
+  /// Shown when log list is empty
+  ///
+  /// In en, this message translates to:
+  /// **'No logs yet'**
+  String get appLogsEmpty;
+
+  /// Placeholder for log search field
+  ///
+  /// In en, this message translates to:
+  /// **'Search logs...'**
+  String get appLogsSearchPlaceholder;
+
+  /// Placeholder for adding include/exclude filter
+  ///
+  /// In en, this message translates to:
+  /// **'Add filter pattern'**
+  String get appLogsAddPatternPlaceholder;
+
+  /// Button to add exclude filter (hide matching logs)
+  ///
+  /// In en, this message translates to:
+  /// **'Ignore'**
+  String get appLogsIgnore;
+
+  /// Button to add include filter (show only matching logs)
+  ///
+  /// In en, this message translates to:
+  /// **'Show'**
+  String get appLogsShow;
+
+  /// Button to clear all filter rules
+  ///
+  /// In en, this message translates to:
+  /// **'Clear filters'**
+  String get appLogsClearFilters;
+
+  /// Shown/filtered count when filters active
+  ///
+  /// In en, this message translates to:
+  /// **'{shown} of {total}'**
+  String appLogsFilteredCount(int shown, int total);
+
   /// Error message when relay URL doesn't start with wss:// or ws://
   ///
   /// In en, this message translates to:

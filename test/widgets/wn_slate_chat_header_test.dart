@@ -101,5 +101,28 @@ void main() {
         expect(nameTapped, isTrue);
       });
     });
+
+    group('trailingWidget', () {
+      testWidgets('shows trailingWidget when provided', (tester) async {
+        await mountWidget(
+          WnSlateChatHeader(
+            displayName: 'Test',
+            avatarColor: AvatarColor.violet,
+            onBack: () {},
+            onAvatarTap: () {},
+            trailingWidget: const Text('trailing', key: Key('trailing_test')),
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('trailing_test')), findsOneWidget);
+      });
+
+      testWidgets('shows nothing when trailingWidget is null', (tester) async {
+        await pumpHeader(tester);
+
+        expect(find.byKey(const Key('trailing_test')), findsNothing);
+      });
+    });
   });
 }

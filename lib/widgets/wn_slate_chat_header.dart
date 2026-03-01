@@ -13,6 +13,7 @@ class WnSlateChatHeader extends StatelessWidget {
     required this.onBack,
     required this.onAvatarTap,
     this.onNameTap,
+    this.trailingWidget,
   });
 
   final String displayName;
@@ -21,6 +22,7 @@ class WnSlateChatHeader extends StatelessWidget {
   final VoidCallback onBack;
   final VoidCallback onAvatarTap;
   final VoidCallback? onNameTap;
+  final Widget? trailingWidget;
 
   @override
   Widget build(BuildContext context) {
@@ -59,6 +61,7 @@ class WnSlateChatHeader extends StatelessWidget {
               ),
             ),
           ),
+          if (trailingWidget != null) trailingWidget!,
         ],
       ),
     );

@@ -1094,6 +1094,67 @@ class AppLocalizationsEs extends AppLocalizations {
   String get connectAnotherProfile => 'Conectar otro perfil';
 
   @override
+  String get rawDebugView => 'Vista de depuración sin procesar';
+
+  @override
+  String get rawDebugViewDescription => 'Mostrar datos de mensajes sin procesar en el chat';
+
+  @override
+  String get rawDebugViewTitle => 'Vista de Depuración Sin Procesar';
+
+  @override
+  String get rawDebugViewGroupId => 'ID del Grupo';
+
+  @override
+  String rawDebugViewMessageCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count mensajes',
+      one: '1 mensaje',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get rawDebugViewCopied => 'Copiado al portapapeles';
+
+  @override
+  String get appLogsTitle => 'Registros de la aplicación';
+
+  @override
+  String get appLogsViewLogs => 'Ver registros';
+
+  @override
+  String get appLogsViewLogsDescription => 'Ver todas las salidas del Logger en la aplicación';
+
+  @override
+  String get appLogsClear => 'Borrar';
+
+  @override
+  String get appLogsEmpty => 'Aún no hay registros';
+
+  @override
+  String get appLogsSearchPlaceholder => 'Buscar registros...';
+
+  @override
+  String get appLogsAddPatternPlaceholder => 'Añadir filtro';
+
+  @override
+  String get appLogsIgnore => 'Ignorar';
+
+  @override
+  String get appLogsShow => 'Mostrar';
+
+  @override
+  String get appLogsClearFilters => 'Borrar filtros';
+
+  @override
+  String appLogsFilteredCount(int shown, int total) {
+    return '$shown de $total';
+  }
+
+  @override
   String get invalidRelayUrlScheme => 'La URL debe comenzar con wss:// o ws://';
 
   @override
