@@ -107,7 +107,7 @@ void main() {
     test('subscribes using application logs directory', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
-      final sub = container.listen(rustLogListenerProvider, (_, __) {}, fireImmediately: true);
+      final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
       addTearDown(sub.close);
 
       await Future<void>.delayed(Duration.zero);
@@ -120,7 +120,7 @@ void main() {
     test('forwards rust log lines into app log store', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
-      final sub = container.listen(rustLogListenerProvider, (_, __) {}, fireImmediately: true);
+      final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
       addTearDown(sub.close);
 
       await Future<void>.delayed(Duration.zero);
@@ -138,7 +138,7 @@ void main() {
     test('forwards stream errors into app log store', () async {
       final container = ProviderContainer();
       addTearDown(container.dispose);
-      final sub = container.listen(rustLogListenerProvider, (_, __) {}, fireImmediately: true);
+      final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
       addTearDown(sub.close);
 
       await Future<void>.delayed(Duration.zero);
@@ -157,7 +157,7 @@ void main() {
 
     test('cancels subscription when provider is disposed', () async {
       final container = ProviderContainer();
-      final sub = container.listen(rustLogListenerProvider, (_, __) {}, fireImmediately: true);
+      final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
       addTearDown(sub.close);
       await Future<void>.delayed(Duration.zero);
       await Future<void>.delayed(Duration.zero);
