@@ -337,6 +337,15 @@ void main() {
           final avatar = tester.widget<WnAvatar>(find.byType(WnAvatar));
           expect(avatar.color, AvatarColor.blue);
         });
+
+        testWidgets('displays Unknown user when display name is null', (tester) async {
+          _api.metadataByPubkey = {
+            testPubkeyC: const FlutterMetadata(custom: {}),
+          };
+          await pumpChatScreen(tester);
+
+          expect(find.text('Unknown user'), findsOneWidget);
+        });
       });
     });
 

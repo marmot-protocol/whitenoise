@@ -336,7 +336,11 @@ class ChatScreen extends HookConsumerWidget {
                   children: [
                     WnSlate(
                       header: WnSlateChatHeader(
-                        displayName: chatProfile.data?.displayName ?? '',
+                        displayName:
+                            chatProfile.data?.displayName ??
+                            (chatProfile.data?.isDm == true
+                                ? context.l10n.unknownUser
+                                : context.l10n.unknownGroup),
                         avatarColor: chatProfile.data?.color ?? AvatarColor.neutral,
                         pictureUrl: chatProfile.data?.pictureUrl,
                         onBack: isSearchActive.value

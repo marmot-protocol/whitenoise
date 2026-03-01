@@ -191,6 +191,13 @@ void main() {
 
           expect(find.text('My Group'), findsWidgets);
         });
+
+        testWidgets('shows Unknown group when group name is empty', (tester) async {
+          _api.groupName = '';
+          await pumpInviteScreen(tester);
+
+          expect(find.text('Unknown group'), findsWidgets);
+        });
       });
 
       group('when DM', () {
@@ -207,6 +214,13 @@ void main() {
           await pumpInviteScreen(tester);
 
           expect(find.text('Alice'), findsWidgets);
+        });
+
+        testWidgets('shows Unknown user when member name is null', (tester) async {
+          _api.userMetadataResponse = const FlutterMetadata(custom: {});
+          await pumpInviteScreen(tester);
+
+          expect(find.text('Unknown user'), findsWidgets);
         });
       });
     });

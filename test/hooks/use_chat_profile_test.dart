@@ -148,7 +148,6 @@ void main() {
           expect(
             getResult().data,
             const ChatProfile(
-              displayName: 'Unknown User',
               color: _otherPubkeyColor,
               otherMemberPubkey: _otherPubkey,
               isDm: true,
@@ -166,7 +165,6 @@ void main() {
           expect(
             getResult().data,
             const ChatProfile(
-              displayName: 'Unknown User',
               color: _groupIdColor,
               isDm: true,
             ),
@@ -200,7 +198,6 @@ void main() {
         expect(
           getResult().data,
           const ChatProfile(
-            displayName: 'Unknown group',
             color: _groupIdColor,
             pictureUrl: 'https://example.com/group.jpg',
             isDm: false,
