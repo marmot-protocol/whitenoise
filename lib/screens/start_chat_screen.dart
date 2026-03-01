@@ -95,9 +95,11 @@ class StartChatScreen extends HookConsumerWidget {
       final name = presentName(metadata);
       if (keyPackageStatus == KeyPackageStatus.incompatible) {
         return (
-          title: context.l10n.userNeedsUpdate,
+          title: name != null
+              ? context.l10n.updateNeeded(name)
+              : context.l10n.unknownUserNeedsUpdate,
           description: name != null
-              ? context.l10n.userNeedsUpdateDescription(name)
+              ? context.l10n.updateNeededDescription(name)
               : context.l10n.unknownUserNeedsUpdateDescription,
         );
       }

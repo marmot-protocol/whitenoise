@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:whitenoise/hooks/use_add_relay.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/relay_url_validation.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_icon.dart' show WnIcons;
 import 'package:whitenoise/widgets/wn_input.dart' show WnInput, WnInputTrailingButton;
@@ -44,6 +45,13 @@ class WnAddRelayBottomSheet extends HookWidget {
     final colors = context.colors;
     final (:controller, :isValid, :validationError, :paste) = useAddRelay();
 
+    final validationErrorText = validationError == null
+        ? null
+        : switch (validationError) {
+            RelayValidationError.invalidScheme => context.l10n.invalidRelayUrlScheme,
+            RelayValidationError.invalidUrl => context.l10n.invalidRelayUrl,
+          };
+
     Future<void> addRelay() async {
       final relayUrl = controller.text.trim();
       if (relayUrl.isEmpty) return;
@@ -81,7 +89,7 @@ class WnAddRelayBottomSheet extends HookWidget {
               label: context.l10n.enterRelayAddress,
               placeholder: 'wss://relay.example.com',
               controller: controller,
-              errorText: validationError,
+              errorText: validationErrorText,
               trailingAction: WnInputTrailingButton(
                 key: const Key('paste_button'),
                 icon: WnIcons.paste,

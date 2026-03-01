@@ -1,24 +1,30 @@
-String? validateRelayUrl(String url) {
-  if (!url.startsWith('wss://') && !url.startsWith('ws://')) {
-    return 'URL must start with wss:// or ws://';
+enum RelayValidationError {
+  invalidScheme,
+  invalidUrl,
+}
+
+RelayValidationError? validateRelayUrl(String url) {
+  final trimmed = url.trim();
+  if (!trimmed.startsWith('wss://') && !trimmed.startsWith('ws://')) {
+    return RelayValidationError.invalidScheme;
   }
 
-  final uri = Uri.tryParse(url);
+  final uri = Uri.tryParse(trimmed);
   if (uri == null || !uri.hasScheme) {
-    return 'Invalid relay URL';
+    return RelayValidationError.invalidUrl;
   }
 
   if (uri.host.isEmpty) {
-    return 'Invalid relay URL';
+    return RelayValidationError.invalidUrl;
   }
 
   if (uri.host.contains('wss://') || uri.host.contains('ws://') || uri.host.contains('://')) {
-    return 'Invalid relay URL';
+    return RelayValidationError.invalidUrl;
   }
 
   final hostParts = uri.host.split('.');
   if (hostParts.length < 2 || hostParts.any((part) => part.isEmpty)) {
-    return 'Invalid relay URL';
+    return RelayValidationError.invalidUrl;
   }
 
   return null;

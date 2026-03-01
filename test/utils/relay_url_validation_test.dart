@@ -15,28 +15,32 @@ void main() {
       expect(validateRelayUrl('wss://relay.example.com/path'), isNull);
     });
 
+    test('returns null for URL with whitespace', () {
+      expect(validateRelayUrl('  wss://relay.example.com  '), isNull);
+    });
+
     test('returns error for https:// URL', () {
-      expect(validateRelayUrl('https://relay.example.com'), 'URL must start with wss:// or ws://');
+      expect(validateRelayUrl('https://relay.example.com'), RelayValidationError.invalidScheme);
     });
 
     test('returns error for plain domain', () {
-      expect(validateRelayUrl('relay.example.com'), 'URL must start with wss:// or ws://');
+      expect(validateRelayUrl('relay.example.com'), RelayValidationError.invalidScheme);
     });
 
     test('returns error for double wss:// URL', () {
-      expect(validateRelayUrl('wss://wss://relay.example.com'), 'Invalid relay URL');
+      expect(validateRelayUrl('wss://wss://relay.example.com'), RelayValidationError.invalidUrl);
     });
 
     test('returns error for single-part host', () {
-      expect(validateRelayUrl('wss://localhost'), 'Invalid relay URL');
+      expect(validateRelayUrl('wss://localhost'), RelayValidationError.invalidUrl);
     });
 
     test('returns error for empty host', () {
-      expect(validateRelayUrl('wss://'), 'Invalid relay URL');
+      expect(validateRelayUrl('wss://'), RelayValidationError.invalidUrl);
     });
 
     test('returns error for host with empty part', () {
-      expect(validateRelayUrl('wss://.example.com'), 'Invalid relay URL');
+      expect(validateRelayUrl('wss://.example.com'), RelayValidationError.invalidUrl);
     });
   });
 

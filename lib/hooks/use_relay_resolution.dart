@@ -5,7 +5,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart' show LoginResult, LoginStatus;
 import 'package:whitenoise/src/rust/api/error.dart';
-import 'package:whitenoise/utils/relay_url_validation.dart';
+import 'package:whitenoise/utils/relay_url_validation.dart'
+    show RelayValidationError, isRelayUrlEmpty, validateRelayUrl;
 
 final _logger = Logger('useRelayResolution');
 
@@ -13,7 +14,7 @@ class RelayResolutionState {
   final bool isPublishingDefaults;
   final bool isSearchingRelay;
   final String? error;
-  final String? validationError;
+  final RelayValidationError? validationError;
 
   const RelayResolutionState({
     this.isPublishingDefaults = false,
@@ -29,14 +30,18 @@ class RelayResolutionState {
     bool? isSearchingRelay,
     String? error,
     bool clearError = false,
-    String? validationError,
+    RelayValidationError? validationError,
     bool clearValidationError = false,
   }) {
+    final newValidationError = clearValidationError
+        ? null
+        : (validationError ?? this.validationError);
+    final newError = clearError ? null : (error ?? this.error);
     return RelayResolutionState(
       isPublishingDefaults: isPublishingDefaults ?? this.isPublishingDefaults,
       isSearchingRelay: isSearchingRelay ?? this.isSearchingRelay,
-      error: clearError ? null : (error ?? this.error),
-      validationError: clearValidationError ? null : (validationError ?? this.validationError),
+      error: newError,
+      validationError: newValidationError,
     );
   }
 }
@@ -98,7 +103,9 @@ useRelayResolution({
       state.value = state.value.copyWith(clearValidationError: true);
     } else {
       isValid.value = false;
-      state.value = state.value.copyWith(validationError: error);
+      state.value = state.value.copyWith(
+        validationError: error,
+      );
     }
   }
 

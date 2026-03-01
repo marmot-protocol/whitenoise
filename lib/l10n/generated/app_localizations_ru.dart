@@ -1065,10 +1065,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get groupImageUploadFailed => 'Группа создана, но загрузка изображения не удалась.';
 
   @override
-  String get userNeedsUpdate => 'Требуется обновление ключа';
+  String updateNeeded(String name) {
+    return '$name нужно обновление';
+  }
 
   @override
-  String userNeedsUpdateDescription(String name) {
+  String updateNeededDescription(String name) {
     return 'Вы ещё не можете начать безопасный чат с $name. Ему нужно обновить White Noise, чтобы безопасная переписка работала.';
   }
 
@@ -1080,6 +1082,9 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get unknownInviteToWhiteNoiseDescription =>
       'Этот пользователь ещё не в White Noise. Поделитесь приложением, чтобы начать безопасный чат.';
+
+  @override
+  String get unknownUserNeedsUpdate => 'Пользователю нужно обновление';
 
   @override
   String get unknownUserNeedsUpdateDescription =>
@@ -1166,4 +1171,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String appLogsFilteredCount(int shown, int total) {
     return '$shown из $total';
   }
+
+  @override
+  String get invalidRelayUrlScheme => 'URL должен начинаться с wss:// или ws://';
+
+  @override
+  String get invalidRelayUrl => 'Неверный URL реле';
 }

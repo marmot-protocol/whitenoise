@@ -481,7 +481,7 @@ void main() {
 
       testWidgets('shows user needs update callout', (tester) async {
         await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
-        expect(find.text('Key update needed'), findsOneWidget);
+        expect(find.text('Update required'), findsOneWidget);
       });
 
       testWidgets('does not show follow button', (tester) async {
