@@ -58,11 +58,21 @@ final appLogStore = AppLogSink();
 class AppLogNotifier extends Notifier<List<AppLogEntry>> {
   @override
   List<AppLogEntry> build() {
-    appLogStore._notify = () {
+    void notify() {
       Future(() {
-        state = List.unmodifiable(appLogStore._entries);
+        if (ref.mounted) {
+          state = List.unmodifiable(appLogStore._entries);
+        }
       });
-    };
+    }
+
+    appLogStore._notify = notify;
+    ref.onDispose(() {
+      if (identical(appLogStore._notify, notify)) {
+        appLogStore._notify = null;
+      }
+    });
+
     return List.unmodifiable(appLogStore._entries);
   }
 

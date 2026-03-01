@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/providers/app_log_provider.dart';
@@ -16,6 +17,10 @@ LogRecord _record(
 }
 
 void main() {
+  tearDown(() {
+    appLogStore.clear();
+  });
+
   group('AppLogSink', () {
     setUp(() {
       appLogStore.clear();
@@ -58,6 +63,49 @@ void main() {
       expect(appLogStore.entries, hasLength(2));
 
       appLogStore.clear();
+      expect(appLogStore.entries, isEmpty);
+    });
+  });
+
+  group('AppLogNotifier', () {
+    test('build reads existing sink entries', () {
+      appLogStore.add(_record('boot log'));
+
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      final entries = container.read(appLogProvider);
+      expect(entries, hasLength(1));
+      expect(entries.single.message, 'boot log');
+    });
+
+    test('sink notify updates provider state', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      expect(container.read(appLogProvider), isEmpty);
+      appLogStore.add(_record('later log', level: Level.WARNING));
+      await Future<void>.delayed(Duration.zero);
+
+      final entries = container.read(appLogProvider);
+      expect(entries, hasLength(1));
+      expect(entries.single.message, 'later log');
+      expect(entries.single.level, Level.WARNING);
+    });
+
+    test('clear delegates through notifier and empties state', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+
+      appLogStore.add(_record('one'));
+      appLogStore.add(_record('two'));
+      await Future<void>.delayed(Duration.zero);
+      expect(container.read(appLogProvider), hasLength(2));
+
+      container.read(appLogProvider.notifier).clear();
+      await Future<void>.delayed(Duration.zero);
+
+      expect(container.read(appLogProvider), isEmpty);
       expect(appLogStore.entries, isEmpty);
     });
   });
