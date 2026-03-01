@@ -18,6 +18,19 @@ import 'package:whitenoise/widgets/debug_query_result_table.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 
+Future<void> _copyDebugText(BuildContext context, String text) async {
+  await Clipboard.setData(ClipboardData(text: text));
+  if (!context.mounted) {
+    return;
+  }
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(context.l10n.rawDebugViewCopied),
+      duration: const Duration(seconds: 2),
+    ),
+  );
+}
+
 class ChatRawDebugScreen extends HookConsumerWidget {
   final String groupId;
 
@@ -63,7 +76,7 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                     ),
                   )
                 : ListView.builder(
-                    padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 14.h),
+                    padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 18.h),
                     itemCount: messageCount + 6,
                     itemBuilder: (context, index) {
                       if (index == 0) {
@@ -80,25 +93,25 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                       if (index == 1) {
                         return Padding(
                           padding: EdgeInsets.only(bottom: 12.h),
-                          child: _SendLogSection(groupId: groupId),
+                          child: _DebugQuerySection(groupId: groupId),
                         );
                       }
                       if (index == 2) {
                         return Padding(
                           padding: EdgeInsets.only(bottom: 12.h),
-                          child: _StreamLogSection(groupId: groupId),
+                          child: _SendLogSection(groupId: groupId),
                         );
                       }
                       if (index == 3) {
                         return Padding(
                           padding: EdgeInsets.only(bottom: 12.h),
-                          child: _RatchetTreeSection(groupId: groupId),
+                          child: _StreamLogSection(groupId: groupId),
                         );
                       }
-                      if (index == 4 && messageCount == 0) {
+                      if (index == 4) {
                         return Padding(
                           padding: EdgeInsets.only(bottom: 12.h),
-                          child: _DebugQuerySection(groupId: groupId),
+                          child: _RatchetTreeSection(groupId: groupId),
                         );
                       }
                       if (index == 5 && messageCount == 0) {
@@ -112,12 +125,6 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                               ),
                             ),
                           ),
-                        );
-                      }
-                      if (index == 4) {
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 12.h),
-                          child: _DebugQuerySection(groupId: groupId),
                         );
                       }
                       final messageIndex = index - 5;
@@ -157,57 +164,156 @@ class _DebugHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.colors;
+    final copyText = [
+      'group_id:              $groupId',
+      'message_count:         $messageCount',
+      if (latestMessageId != null) 'latest_message_id:     $latestMessageId',
+      if (latestMessagePubkey != null) 'latest_message_pubkey: $latestMessagePubkey',
+    ].join('\n');
 
-    return GestureDetector(
-      onTap: () async {
-        final text = [
-          'group_id:              $groupId',
-          'message_count:         $messageCount',
-          if (latestMessageId != null) 'latest_message_id:     $latestMessageId',
-          if (latestMessagePubkey != null) 'latest_message_pubkey: $latestMessagePubkey',
-        ].join('\n');
-        await Clipboard.setData(ClipboardData(text: text));
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(context.l10n.rawDebugViewCopied),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      },
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(10.w),
-        decoration: BoxDecoration(
-          color: colors.backgroundSecondary,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _DebugField(
-              label: 'group_id',
-              value: groupId,
-              valueKey: const Key('debug_group_id'),
-            ),
+    return _DebugSectionCard(
+      title: 'Session Overview',
+      subtitle: 'Group context and top-level counters',
+      onCopy: () => _copyDebugText(context, copyText),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _DebugField(
+            label: 'group_id',
+            value: groupId,
+            valueKey: const Key('debug_group_id'),
+          ),
+          SizedBox(height: 4.h),
+          _DebugField(
+            label: 'message_count',
+            value: '$messageCount',
+            valueKey: const Key('debug_message_count'),
+          ),
+          if (latestMessageId != null) ...[
             SizedBox(height: 4.h),
-            _DebugField(
-              label: 'message_count',
-              value: '$messageCount',
-              valueKey: const Key('debug_message_count'),
-            ),
-            if (latestMessageId != null) ...[
-              SizedBox(height: 4.h),
-              _DebugField(label: 'latest_message_id', value: latestMessageId!),
-            ],
-            if (latestMessagePubkey != null) ...[
-              SizedBox(height: 4.h),
-              _DebugField(label: 'latest_message_pubkey', value: latestMessagePubkey!),
-            ],
+            _DebugField(label: 'latest_message_id', value: latestMessageId!),
           ],
-        ),
+          if (latestMessagePubkey != null) ...[
+            SizedBox(height: 4.h),
+            _DebugField(label: 'latest_message_pubkey', value: latestMessagePubkey!),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _DebugSectionCard extends StatelessWidget {
+  const _DebugSectionCard({
+    required this.title,
+    required this.child,
+    this.subtitle,
+    this.onCopy,
+    this.borderColor,
+  });
+
+  final String title;
+  final String? subtitle;
+  final Widget child;
+  final VoidCallback? onCopy;
+  final Color? borderColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+    final resolvedBorderColor = borderColor ?? colors.borderTertiary;
+
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(12.w),
+      decoration: BoxDecoration(
+        color: colors.backgroundSecondary,
+        borderRadius: BorderRadius.circular(12.r),
+        border: Border.all(color: resolvedBorderColor.withValues(alpha: 0.7), width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: colors.shadow.withValues(alpha: 0.18),
+            blurRadius: 14.r,
+            offset: Offset(0, 8.h),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: typography.semiBold12.copyWith(
+                        color: colors.backgroundContentPrimary,
+                        letterSpacing: 0.2.sp,
+                      ),
+                    ),
+                    if (subtitle != null) ...[
+                      SizedBox(height: 2.h),
+                      Text(
+                        subtitle!,
+                        style: typography.medium10.copyWith(
+                          color: colors.backgroundContentSecondary,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (onCopy != null)
+                Material(
+                  color: Colors.transparent,
+                  child: InkWell(
+                    borderRadius: BorderRadius.circular(8.r),
+                    onTap: onCopy,
+                    child: Ink(
+                      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 6.h),
+                      decoration: BoxDecoration(
+                        color: colors.fillSecondary,
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(color: colors.borderTertiary),
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.copy_all_rounded,
+                            size: 12.w,
+                            color: colors.backgroundContentSecondary,
+                          ),
+                          SizedBox(width: 5.w),
+                          Text(
+                            'Copy',
+                            style: typography.medium10.copyWith(
+                              color: colors.backgroundContentSecondary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+            ],
+          ),
+          SizedBox(height: 10.h),
+          Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(
+              color: colors.backgroundPrimary.withValues(alpha: 0.72),
+              borderRadius: BorderRadius.circular(8.r),
+              border: Border.all(color: colors.borderTertiary.withValues(alpha: 0.85)),
+            ),
+            child: child,
+          ),
+        ],
       ),
     );
   }
@@ -224,61 +330,40 @@ class _SendLogSection extends ConsumerWidget {
     final typography = context.typographyScaled;
     final state = ref.watch(messageDebugLogProvider);
     final forGroup = state.sendLog.where((e) => e.groupId == groupId).toList();
+    final copyText = forGroup.map(_formatSendLogEntry).join('\n\n');
 
     if (forGroup.isEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(10.w),
-        decoration: BoxDecoration(
-          color: colors.backgroundSecondary,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
+      return const _DebugSectionCard(
+        title: 'Send Log',
+        subtitle: 'No attempts captured for this group',
         child: Text(
           'send_log: (no attempts for this group)',
-          style: typography.medium10.copyWith(
-            color: colors.backgroundContentTertiary,
-            fontFamily: 'monospace',
-          ),
+          style: TextStyle(fontFamily: 'monospace'),
         ),
       );
     }
 
-    return GestureDetector(
-      onTap: () async {
-        final text = forGroup.map(_formatSendLogEntry).join('\n\n');
-        await Clipboard.setData(ClipboardData(text: text));
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(context.l10n.rawDebugViewCopied),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      },
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(10.w),
-        decoration: BoxDecoration(
-          color: colors.backgroundSecondary,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'send_log (${forGroup.length} entries, tap to copy):',
-              style: typography.semiBold10.copyWith(
-                color: colors.backgroundContentSecondary,
-                fontFamily: 'monospace',
-              ),
-            ),
-            SizedBox(height: 6.h),
-            ...forGroup
-                .take(10)
-                .map(
-                  (e) => Padding(
-                    padding: EdgeInsets.only(bottom: 4.h),
+    return _DebugSectionCard(
+      title: 'Send Log',
+      subtitle: '${forGroup.length} entries',
+      onCopy: () => _copyDebugText(context, copyText),
+      borderColor: colors.accent.emerald.border,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...forGroup
+              .take(10)
+              .map(
+                (e) => Padding(
+                  padding: EdgeInsets.only(bottom: 6.h),
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 7.h),
+                    decoration: BoxDecoration(
+                      color: colors.backgroundSecondary.withValues(alpha: 0.75),
+                      borderRadius: BorderRadius.circular(6.r),
+                      border: Border.all(color: colors.borderTertiary.withValues(alpha: 0.6)),
+                    ),
                     child: SelectableText(
                       _formatSendLogEntry(e),
                       style: typography.medium10.copyWith(
@@ -289,8 +374,15 @@ class _SendLogSection extends ConsumerWidget {
                     ),
                   ),
                 ),
-          ],
-        ),
+              ),
+          if (forGroup.length > 10)
+            Text(
+              '+${forGroup.length - 10} more entries',
+              style: typography.medium10.copyWith(
+                color: colors.backgroundContentTertiary,
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -330,61 +422,40 @@ class _StreamLogSection extends ConsumerWidget {
     final typography = context.typographyScaled;
     final state = ref.watch(messageDebugLogProvider);
     final forGroup = state.streamLog.where((e) => e.groupId == groupId).toList();
+    final copyText = forGroup.map(_formatStreamEvent).join('\n');
 
     if (forGroup.isEmpty) {
-      return Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(10.w),
-        decoration: BoxDecoration(
-          color: colors.backgroundSecondary,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
+      return const _DebugSectionCard(
+        title: 'Stream Log',
+        subtitle: 'No stream events captured for this group',
         child: Text(
           'stream_log: (no events for this group)',
-          style: typography.medium10.copyWith(
-            color: colors.backgroundContentTertiary,
-            fontFamily: 'monospace',
-          ),
+          style: TextStyle(fontFamily: 'monospace'),
         ),
       );
     }
 
-    return GestureDetector(
-      onTap: () async {
-        final text = forGroup.map(_formatStreamEvent).join('\n');
-        await Clipboard.setData(ClipboardData(text: text));
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(context.l10n.rawDebugViewCopied),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      },
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(10.w),
-        decoration: BoxDecoration(
-          color: colors.backgroundSecondary,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'stream_log (${forGroup.length} events, tap to copy):',
-              style: typography.semiBold10.copyWith(
-                color: colors.backgroundContentSecondary,
-                fontFamily: 'monospace',
-              ),
-            ),
-            SizedBox(height: 6.h),
-            ...forGroup
-                .take(20)
-                .map(
-                  (e) => Padding(
-                    padding: EdgeInsets.only(bottom: 4.h),
+    return _DebugSectionCard(
+      title: 'Stream Log',
+      subtitle: '${forGroup.length} events',
+      onCopy: () => _copyDebugText(context, copyText),
+      borderColor: colors.accent.sky.border,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          ...forGroup
+              .take(20)
+              .map(
+                (e) => Padding(
+                  padding: EdgeInsets.only(bottom: 6.h),
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 7.h),
+                    decoration: BoxDecoration(
+                      color: colors.backgroundSecondary.withValues(alpha: 0.75),
+                      borderRadius: BorderRadius.circular(6.r),
+                      border: Border.all(color: colors.borderTertiary.withValues(alpha: 0.6)),
+                    ),
                     child: SelectableText(
                       _formatStreamEvent(e),
                       style: typography.medium10.copyWith(
@@ -395,8 +466,15 @@ class _StreamLogSection extends ConsumerWidget {
                     ),
                   ),
                 ),
-          ],
-        ),
+              ),
+          if (forGroup.length > 20)
+            Text(
+              '+${forGroup.length - 20} more events',
+              style: typography.medium10.copyWith(
+                color: colors.backgroundContentTertiary,
+              ),
+            ),
+        ],
       ),
     );
   }
@@ -469,35 +547,16 @@ class _DebugQuerySection extends HookWidget {
       if (result.value == null || result.value!.isEmpty) {
         return;
       }
-      await Clipboard.setData(ClipboardData(text: result.value!));
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(context.l10n.rawDebugViewCopied),
-            duration: const Duration(seconds: 2),
-          ),
-        );
-      }
+      await _copyDebugText(context, result.value!);
     }
 
-    return Container(
-      width: double.infinity,
-      padding: EdgeInsets.all(10.w),
-      decoration: BoxDecoration(
-        color: colors.backgroundSecondary,
-        borderRadius: BorderRadius.circular(8.r),
-      ),
+    return _DebugSectionCard(
+      title: 'Debug SQL',
+      subtitle: 'Run SQL against the local debug database',
+      borderColor: colors.accent.violet.border,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'debug_query ($groupId):',
-            style: typography.semiBold10.copyWith(
-              color: colors.backgroundContentSecondary,
-              fontFamily: 'monospace',
-            ),
-          ),
-          SizedBox(height: 8.h),
           TextField(
             key: const Key('debug_query_input'),
             controller: sqlController,
@@ -535,18 +594,28 @@ class _DebugQuerySection extends HookWidget {
               ),
             ),
           ),
-          SizedBox(height: 8.h),
-          Row(
+          SizedBox(height: 10.h),
+          Wrap(
+            spacing: 8.w,
+            runSpacing: 8.h,
             children: [
-              TextButton(
+              FilledButton.tonal(
                 key: const Key('debug_query_run_button'),
                 onPressed: isRunning.value ? null : runQuery,
+                style: FilledButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                  visualDensity: VisualDensity.compact,
+                ),
                 child: Text(isRunning.value ? 'Running...' : 'Run SQL'),
               ),
-              SizedBox(width: 8.w),
-              TextButton(
+              OutlinedButton(
                 key: const Key('debug_query_copy_button'),
                 onPressed: result.value == null ? null : copyResult,
+                style: OutlinedButton.styleFrom(
+                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
+                  visualDensity: VisualDensity.compact,
+                  side: BorderSide(color: colors.borderTertiary),
+                ),
                 child: const Text('Copy Result'),
               ),
             ],
@@ -584,10 +653,7 @@ class _DebugQuerySection extends HookWidget {
             ),
             Text(
               'result:',
-              style: typography.semiBold10.copyWith(
-                color: colors.backgroundContentSecondary,
-                fontFamily: 'monospace',
-              ),
+              style: typography.semiBold10.copyWith(color: colors.backgroundContentSecondary),
             ),
             SizedBox(height: 4.h),
             SelectableText(
@@ -610,6 +676,13 @@ class _RatchetTreeSection extends ConsumerWidget {
   const _RatchetTreeSection({required this.groupId});
 
   final String groupId;
+
+  String _shortKey(String value) {
+    if (value.length <= 24) {
+      return value;
+    }
+    return '${value.substring(0, 14)}…${value.substring(value.length - 8)}';
+  }
 
   String _formatTreeInfo(RatchetTreeInfo info) {
     final buffer = StringBuffer();
@@ -644,13 +717,10 @@ class _RatchetTreeSection extends ConsumerWidget {
       future: getRatchetTreeInfo(accountPubkey: accountPubkey, groupId: groupId),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(10.w),
-            decoration: BoxDecoration(
-              color: colors.backgroundSecondary,
-              borderRadius: BorderRadius.circular(8.r),
-            ),
+          return _DebugSectionCard(
+            title: 'Ratchet Tree',
+            subtitle: 'Loading group tree snapshot',
+            borderColor: colors.accent.amber.border,
             child: Row(
               children: [
                 SizedBox(
@@ -674,13 +744,10 @@ class _RatchetTreeSection extends ConsumerWidget {
           );
         }
         if (snapshot.hasError) {
-          return Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(10.w),
-            decoration: BoxDecoration(
-              color: colors.backgroundSecondary,
-              borderRadius: BorderRadius.circular(8.r),
-            ),
+          return _DebugSectionCard(
+            title: 'Ratchet Tree',
+            subtitle: 'Unable to load tree snapshot',
+            borderColor: colors.borderDestructiveSecondary,
             child: Text(
               'ratchet_tree: ${snapshot.error}',
               style: typography.medium10.copyWith(
@@ -692,49 +759,169 @@ class _RatchetTreeSection extends ConsumerWidget {
         }
         final info = snapshot.data!;
         final text = _formatTreeInfo(info);
-        return GestureDetector(
-          onTap: () async {
-            await Clipboard.setData(ClipboardData(text: text));
-            if (context.mounted) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(context.l10n.rawDebugViewCopied),
-                  duration: const Duration(seconds: 2),
+        final serializedBytes = info.serializedTree.length ~/ 2;
+        return _DebugSectionCard(
+          title: 'Ratchet Tree',
+          subtitle: '${info.leafNodes.length} leaves',
+          onCopy: () => _copyDebugText(context, text),
+          borderColor: colors.accent.amber.border,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                spacing: 8.w,
+                runSpacing: 8.h,
+                children: [
+                  _TreeStatPill(label: 'leaves ${info.leafNodes.length}'),
+                  _TreeStatPill(label: 'size ${serializedBytes} bytes'),
+                ],
+              ),
+              SizedBox(height: 10.h),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(10.w),
+                decoration: BoxDecoration(
+                  color: colors.backgroundSecondary.withValues(alpha: 0.75),
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(color: colors.borderTertiary.withValues(alpha: 0.7)),
                 ),
-              );
-            }
-          },
-          child: Container(
-            width: double.infinity,
-            padding: EdgeInsets.all(10.w),
-            decoration: BoxDecoration(
-              color: colors.backgroundSecondary,
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'ratchet_tree (${info.leafNodes.length} leaves, tap to copy):',
-                  style: typography.semiBold10.copyWith(
-                    color: colors.backgroundContentSecondary,
-                    fontFamily: 'monospace',
+                child: _TreeInfoRow(
+                  label: 'tree_hash',
+                  value: info.treeHash,
+                ),
+              ),
+              SizedBox(height: 10.h),
+              Text(
+                'Leaf nodes',
+                style: typography.semiBold10.copyWith(
+                  color: colors.backgroundContentSecondary,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              ...info.leafNodes.map(
+                (leaf) => Padding(
+                  padding: EdgeInsets.only(bottom: 8.h),
+                  child: Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(10.w),
+                    decoration: BoxDecoration(
+                      color: colors.backgroundSecondary.withValues(alpha: 0.75),
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(color: colors.borderTertiary.withValues(alpha: 0.7)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Leaf [${leaf.index}]',
+                          style: typography.semiBold10.copyWith(
+                            color: colors.backgroundContentPrimary,
+                          ),
+                        ),
+                        SizedBox(height: 6.h),
+                        _TreeInfoRow(
+                          label: 'credential',
+                          value: _shortKey(leaf.credentialIdentity),
+                        ),
+                        SizedBox(height: 4.h),
+                        _TreeInfoRow(
+                          label: 'enc_key',
+                          value: _shortKey(leaf.encryptionKey),
+                        ),
+                        SizedBox(height: 4.h),
+                        _TreeInfoRow(
+                          label: 'sig_key',
+                          value: _shortKey(leaf.signatureKey),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-                SizedBox(height: 6.h),
-                SelectableText(
-                  text,
-                  style: typography.medium10.copyWith(
-                    color: colors.backgroundContentPrimary,
-                    fontFamily: 'monospace',
-                    height: 1.4,
-                  ),
+              ),
+              SizedBox(height: 2.h),
+              Text(
+                'Raw snapshot',
+                style: typography.semiBold10.copyWith(
+                  color: colors.backgroundContentSecondary,
                 ),
-              ],
-            ),
+              ),
+              SizedBox(height: 6.h),
+              SelectableText(
+                text,
+                style: typography.medium10.copyWith(
+                  color: colors.backgroundContentPrimary,
+                  fontFamily: 'monospace',
+                  height: 1.4,
+                ),
+              ),
+            ],
           ),
         );
       },
+    );
+  }
+}
+
+class _TreeStatPill extends StatelessWidget {
+  const _TreeStatPill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      decoration: BoxDecoration(
+        color: colors.fillSecondary,
+        borderRadius: BorderRadius.circular(999.r),
+        border: Border.all(color: colors.borderTertiary),
+      ),
+      child: Text(
+        label,
+        style: typography.medium10.copyWith(color: colors.backgroundContentSecondary),
+      ),
+    );
+  }
+}
+
+class _TreeInfoRow extends StatelessWidget {
+  const _TreeInfoRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 70.w,
+          child: Text(
+            '$label:',
+            style: typography.semiBold10.copyWith(
+              color: colors.backgroundContentSecondary,
+              fontFamily: 'monospace',
+            ),
+          ),
+        ),
+        Expanded(
+          child: SelectableText(
+            value,
+            style: typography.medium10.copyWith(
+              color: colors.backgroundContentPrimary,
+              fontFamily: 'monospace',
+              height: 1.35,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
@@ -763,6 +950,7 @@ class _DebugField extends StatelessWidget {
           style: typography.semiBold10.copyWith(
             color: colors.backgroundContentSecondary,
             fontFamily: 'monospace',
+            letterSpacing: 0.1.sp,
           ),
         ),
         Expanded(
@@ -772,6 +960,7 @@ class _DebugField extends StatelessWidget {
             style: typography.medium10.copyWith(
               color: colors.backgroundContentPrimary,
               fontFamily: 'monospace',
+              height: 1.35,
             ),
           ),
         ),
@@ -906,48 +1095,248 @@ class _RawMessageCard extends StatelessWidget {
     buffer.writeln('  created_at:          ${m.createdAt.toIso8601String()}');
   }
 
+  String _shortId(String value) {
+    if (value.length <= 12) {
+      return value;
+    }
+    return '${value.substring(0, 12)}…';
+  }
+
+  String _shortPubkey(String value) {
+    if (value.length <= 18) {
+      return value;
+    }
+    return '${value.substring(0, 10)}…${value.substring(value.length - 6)}';
+  }
+
+  String _contentPreview(String value) {
+    final normalized = value.replaceAll('\n', ' ').trim();
+    if (normalized.isEmpty) {
+      return '(empty)';
+    }
+    if (normalized.length <= 110) {
+      return normalized;
+    }
+    return '${normalized.substring(0, 110)}…';
+  }
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final raw = _formatRaw();
+    final tagsCount = message.tags.length;
+    final emojiReactionCount = message.reactions.byEmoji.length;
+    final mediaCount = message.mediaAttachments.length;
+    final tokenCount = message.contentTokens.length;
 
-    return GestureDetector(
+    return InkWell(
       key: Key('raw_message_card_${message.id}'),
-      onTap: () async {
-        await Clipboard.setData(ClipboardData(text: raw));
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(context.l10n.rawDebugViewCopied),
-              duration: const Duration(seconds: 2),
-            ),
-          );
-        }
-      },
+      borderRadius: BorderRadius.circular(12.r),
+      onTap: () => _copyDebugText(context, raw),
       child: Container(
         width: double.infinity,
-        padding: EdgeInsets.all(10.w),
+        padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
           color: message.isDeleted
-              ? colors.backgroundSecondary.withValues(alpha: 0.5)
+              ? colors.backgroundSecondary.withValues(alpha: 0.7)
               : colors.backgroundSecondary,
-          borderRadius: BorderRadius.circular(8.r),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: message.isDeleted
-                ? colors.backgroundContentDestructive.withValues(alpha: 0.4)
-                : colors.backgroundSecondary,
+                ? colors.backgroundContentDestructive.withValues(alpha: 0.55)
+                : colors.borderTertiary.withValues(alpha: 0.7),
           ),
+          boxShadow: [
+            BoxShadow(
+              color: colors.shadow.withValues(alpha: 0.16),
+              blurRadius: 12.r,
+              offset: Offset(0, 7.h),
+            ),
+          ],
         ),
-        child: SelectableText(
-          raw,
-          style: typography.medium10.copyWith(
-            color: colors.backgroundContentPrimary,
-            fontFamily: 'monospace',
-            height: 1.5,
-          ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Message ${_shortId(message.id)}',
+                    style: typography.semiBold12.copyWith(
+                      color: colors.backgroundContentPrimary,
+                      letterSpacing: 0.2.sp,
+                    ),
+                  ),
+                ),
+                Container(
+                  padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+                  decoration: BoxDecoration(
+                    color: message.isDeleted
+                        ? colors.intentionErrorBackground
+                        : colors.intentionInfoBackground,
+                    borderRadius: BorderRadius.circular(999.r),
+                  ),
+                  child: Text(
+                    message.isDeleted ? 'Deleted' : 'Active',
+                    style: typography.medium10.copyWith(
+                      color: message.isDeleted
+                          ? colors.intentionErrorContent
+                          : colors.intentionInfoContent,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              message.createdAt.toIso8601String(),
+              style: typography.medium10.copyWith(color: colors.backgroundContentSecondary),
+            ),
+            SizedBox(height: 8.h),
+            Wrap(
+              spacing: 6.w,
+              runSpacing: 6.h,
+              children: [
+                _MessageMetaPill(label: 'kind ${message.kind}'),
+                _MessageMetaPill(label: message.isReply ? 'reply' : 'root'),
+                _MessageMetaPill(label: '$tagsCount tags'),
+                _MessageMetaPill(label: '$emojiReactionCount reactions'),
+                _MessageMetaPill(label: '$mediaCount media'),
+                _MessageMetaPill(label: '$tokenCount tokens'),
+              ],
+            ),
+            SizedBox(height: 10.h),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(10.w),
+              decoration: BoxDecoration(
+                color: colors.backgroundPrimary.withValues(alpha: 0.72),
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(color: colors.borderTertiary.withValues(alpha: 0.85)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _MessageSummaryRow(label: 'id', value: message.id),
+                  SizedBox(height: 5.h),
+                  _MessageSummaryRow(label: 'pubkey', value: _shortPubkey(message.pubkey)),
+                  SizedBox(height: 5.h),
+                  _MessageSummaryRow(label: 'content', value: _contentPreview(message.content)),
+                ],
+              ),
+            ),
+            SizedBox(height: 8.h),
+            Container(
+              width: double.infinity,
+              padding: EdgeInsets.all(10.w),
+              decoration: BoxDecoration(
+                color: colors.backgroundPrimary.withValues(alpha: 0.72),
+                borderRadius: BorderRadius.circular(8.r),
+                border: Border.all(color: colors.borderTertiary.withValues(alpha: 0.85)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.data_object_rounded,
+                        size: 12.w,
+                        color: colors.backgroundContentSecondary,
+                      ),
+                      SizedBox(width: 6.w),
+                      Expanded(
+                        child: Text(
+                          'Raw payload (tap card to copy)',
+                          style: typography.semiBold10.copyWith(
+                            color: colors.backgroundContentSecondary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 8.h),
+                  SelectableText(
+                    raw,
+                    style: typography.medium10.copyWith(
+                      color: colors.backgroundContentPrimary,
+                      fontFamily: 'monospace',
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
+    );
+  }
+}
+
+class _MessageMetaPill extends StatelessWidget {
+  const _MessageMetaPill({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+
+    return Container(
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 3.h),
+      decoration: BoxDecoration(
+        color: colors.fillSecondary,
+        borderRadius: BorderRadius.circular(999.r),
+        border: Border.all(color: colors.borderTertiary),
+      ),
+      child: Text(
+        label,
+        style: typography.medium10.copyWith(
+          color: colors.backgroundContentSecondary,
+        ),
+      ),
+    );
+  }
+}
+
+class _MessageSummaryRow extends StatelessWidget {
+  const _MessageSummaryRow({required this.label, required this.value});
+
+  final String label;
+  final String value;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 56.w,
+          child: Text(
+            '$label:',
+            style: typography.semiBold10.copyWith(
+              color: colors.backgroundContentSecondary,
+              fontFamily: 'monospace',
+            ),
+          ),
+        ),
+        Expanded(
+          child: SelectableText(
+            value,
+            style: typography.medium10.copyWith(
+              color: colors.backgroundContentPrimary,
+              fontFamily: 'monospace',
+              height: 1.35,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
