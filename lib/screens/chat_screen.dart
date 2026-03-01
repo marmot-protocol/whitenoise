@@ -296,18 +296,6 @@ class ChatScreen extends HookConsumerWidget {
                 color: colors.backgroundPrimary,
                 height: inputAreaHeight.value + safeAreaBottom + 48.h,
               ),
-              if (noticeMessage.value != null)
-                Positioned(
-                  top: safeAreaTop,
-                  left: 0,
-                  right: 0,
-                  child: WnSystemNotice(
-                    key: ValueKey(noticeMessage.value),
-                    title: noticeMessage.value!,
-                    type: WnSystemNoticeType.error,
-                    onDismiss: dismissNotice,
-                  ),
-                ),
               SafeArea(
                 bottom: false,
                 child: Column(
@@ -331,6 +319,14 @@ class ChatScreen extends HookConsumerWidget {
                           }
                         },
                       ),
+                      systemNotice: noticeMessage.value != null
+                          ? WnSystemNotice(
+                              key: ValueKey(noticeMessage.value),
+                              title: noticeMessage.value!,
+                              type: WnSystemNoticeType.error,
+                              onDismiss: dismissNotice,
+                            )
+                          : null,
                     ),
                     if (isSearchActive.value) ...[
                       Padding(
