@@ -306,7 +306,8 @@ void main() {
           findsOneWidget,
         );
 
-        await tester.tap(find.text('Card Content'));
+        final cardRect = tester.getRect(find.byKey(const Key('context_menu_card')));
+        await tester.tapAt(cardRect.topLeft + const Offset(8, 8));
         await tester.pumpAndSettle();
 
         expect(
