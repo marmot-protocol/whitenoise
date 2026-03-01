@@ -17,6 +17,7 @@ import 'package:whitenoise/screens/chat_invite_screen.dart' show ChatInviteScree
 import 'package:whitenoise/screens/chat_list_screen.dart' show ChatListScreen;
 import 'package:whitenoise/screens/chat_raw_debug_screen.dart' show ChatRawDebugScreen;
 import 'package:whitenoise/screens/chat_screen.dart' show ChatScreen;
+import 'package:whitenoise/screens/debug_sql_query_screen.dart' show DebugSqlQueryScreen;
 import 'package:whitenoise/screens/developer_settings_screen.dart' show DeveloperSettingsScreen;
 import 'package:whitenoise/screens/donate_screen.dart' show DonateScreen;
 import 'package:whitenoise/screens/edit_group_screen.dart' show EditGroupScreen;
@@ -62,6 +63,7 @@ abstract final class Routes {
   static const _wip = '/wip';
   static const _developerSettings = '/developer-settings';
   static const _appLogs = '/app-logs';
+  static const _debugSqlQuery = '/debug-sql-query';
   static const _profileKeys = '/profile-keys';
   static const _shareProfile = '/share-profile';
   static const _editProfile = '/edit-profile';
@@ -190,6 +192,13 @@ abstract final class Routes {
           pageBuilder: (context, state) => _navigationTransition(
             state: state,
             child: const AppLogsScreen(),
+          ),
+        ),
+        GoRoute(
+          path: _debugSqlQuery,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: const DebugSqlQueryScreen(),
           ),
         ),
         GoRoute(
@@ -471,6 +480,10 @@ abstract final class Routes {
 
   static void pushToAppLogs(BuildContext context) {
     GoRouter.of(context).push(_appLogs);
+  }
+
+  static void pushToDebugSqlQuery(BuildContext context) {
+    GoRouter.of(context).push(_debugSqlQuery);
   }
 
   static void pushToProfileKeys(BuildContext context) {

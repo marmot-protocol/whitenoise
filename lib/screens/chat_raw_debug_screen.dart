@@ -8,11 +8,13 @@ import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/message_debug_log_provider.dart';
 import 'package:whitenoise/routes.dart';
-import 'package:whitenoise/src/rust/api/groups.dart' as groups_api;
+import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/src/rust/api/utils.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/debug_query_result_table.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 
@@ -62,7 +64,7 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                   )
                 : ListView.builder(
                     padding: EdgeInsets.fromLTRB(14.w, 12.h, 14.w, 14.h),
-                    itemCount: messageCount + 5,
+                    itemCount: messageCount + 6,
                     itemBuilder: (context, index) {
                       if (index == 0) {
                         return Padding(
@@ -94,6 +96,12 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                         );
                       }
                       if (index == 4 && messageCount == 0) {
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
+                          child: _DebugQuerySection(groupId: groupId),
+                        );
+                      }
+                      if (index == 5 && messageCount == 0) {
                         return Center(
                           child: Padding(
                             padding: EdgeInsets.only(top: 32.h),
@@ -106,7 +114,13 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                           ),
                         );
                       }
-                      final messageIndex = index - 4;
+                      if (index == 4) {
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
+                          child: _DebugQuerySection(groupId: groupId),
+                        );
+                      }
+                      final messageIndex = index - 5;
                       if (messageIndex < 0 || messageIndex >= messageCount) {
                         return const SizedBox.shrink();
                       }
@@ -414,125 +428,171 @@ class _StreamLogSection extends ConsumerWidget {
   }
 }
 
-class _RatchetTreeSection extends HookConsumerWidget {
-  const _RatchetTreeSection({required this.groupId});
+class _DebugQuerySection extends HookWidget {
+  const _DebugQuerySection({required this.groupId});
 
   final String groupId;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
     final colors = context.colors;
     final typography = context.typographyScaled;
-    final accountPubkey = ref.watch(accountPubkeyProvider);
-
-    final snapshot = useFuture(
-      useMemoized(
-        () => groups_api.getRatchetTreeInfo(
-          accountPubkey: accountPubkey,
-          groupId: groupId,
-        ),
-        [accountPubkey, groupId],
-      ),
+    final sqlController = useTextEditingController(
+      text: "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name;",
     );
+    final isRunning = useState(false);
+    final result = useState<String?>(null);
+    final error = useState<String?>(null);
 
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(10.w),
-        decoration: BoxDecoration(
-          color: colors.backgroundSecondary,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Text(
-          'ratchet_tree: loading...',
-          style: typography.medium10.copyWith(
-            color: colors.backgroundContentTertiary,
-            fontFamily: 'monospace',
+    Future<void> runQuery() async {
+      final sql = sqlController.text.trim();
+      if (sql.isEmpty) {
+        error.value = 'debug_query: SQL is empty';
+        result.value = null;
+        return;
+      }
+
+      isRunning.value = true;
+      error.value = null;
+      try {
+        final rawResult = await debugQuery(sql: sql);
+        result.value = formatDebugQueryResult(rawResult);
+      } catch (e) {
+        error.value = 'debug_query: $e';
+        result.value = null;
+      } finally {
+        isRunning.value = false;
+      }
+    }
+
+    Future<void> copyResult() async {
+      if (result.value == null || result.value!.isEmpty) {
+        return;
+      }
+      await Clipboard.setData(ClipboardData(text: result.value!));
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(context.l10n.rawDebugViewCopied),
+            duration: const Duration(seconds: 2),
           ),
-        ),
-      );
+        );
+      }
     }
 
-    if (snapshot.hasError) {
-      return Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(10.w),
-        decoration: BoxDecoration(
-          color: colors.backgroundSecondary,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Text(
-          'ratchet_tree: error: ${snapshot.error}',
-          style: typography.medium10.copyWith(
-            color: colors.fillDestructive,
-            fontFamily: 'monospace',
-          ),
-        ),
-      );
-    }
-
-    final info = snapshot.data!;
-    final buffer = StringBuffer();
-    buffer.writeln('tree_hash: ${info.treeHash}');
-    buffer.writeln('serialized_tree (${info.serializedTree.length ~/ 2} bytes):');
-    // Show first 128 hex chars then truncate
-    if (info.serializedTree.length > 128) {
-      buffer.writeln('  ${info.serializedTree.substring(0, 128)}...');
-    } else {
-      buffer.writeln('  ${info.serializedTree}');
-    }
-    buffer.writeln('leaf_nodes (${info.leafNodes.length}):');
-    for (final leaf in info.leafNodes) {
-      buffer.writeln('  [${leaf.index}] identity: ${leaf.credentialIdentity}');
-      buffer.writeln('       enc_key:  ${leaf.encryptionKey.substring(0, 16)}...');
-      buffer.writeln('       sig_key:  ${leaf.signatureKey.substring(0, 16)}...');
-    }
-
-    final text = buffer.toString().trimRight();
-
-    return GestureDetector(
-      onTap: () async {
-        // Copy full data including complete keys
-        final fullBuffer = StringBuffer();
-        fullBuffer.writeln('tree_hash: ${info.treeHash}');
-        fullBuffer.writeln('serialized_tree: ${info.serializedTree}');
-        fullBuffer.writeln('leaf_nodes (${info.leafNodes.length}):');
-        for (final leaf in info.leafNodes) {
-          fullBuffer.writeln('  [${leaf.index}]');
-          fullBuffer.writeln('    identity:       ${leaf.credentialIdentity}');
-          fullBuffer.writeln('    encryption_key: ${leaf.encryptionKey}');
-          fullBuffer.writeln('    signature_key:  ${leaf.signatureKey}');
-        }
-        await Clipboard.setData(ClipboardData(text: fullBuffer.toString().trimRight()));
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(context.l10n.rawDebugViewCopied),
-              duration: const Duration(seconds: 2),
+    return Container(
+      width: double.infinity,
+      padding: EdgeInsets.all(10.w),
+      decoration: BoxDecoration(
+        color: colors.backgroundSecondary,
+        borderRadius: BorderRadius.circular(8.r),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'debug_query ($groupId):',
+            style: typography.semiBold10.copyWith(
+              color: colors.backgroundContentSecondary,
+              fontFamily: 'monospace',
             ),
-          );
-        }
-      },
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.all(10.w),
-        decoration: BoxDecoration(
-          color: colors.backgroundSecondary,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+          ),
+          SizedBox(height: 8.h),
+          TextField(
+            key: const Key('debug_query_input'),
+            controller: sqlController,
+            minLines: 3,
+            maxLines: 8,
+            style: typography.medium10.copyWith(
+              color: colors.backgroundContentPrimary,
+              fontFamily: 'monospace',
+              height: 1.4,
+            ),
+            decoration: InputDecoration(
+              isDense: true,
+              hintText: 'SELECT * FROM accounts LIMIT 10;',
+              hintStyle: typography.medium10.copyWith(
+                color: colors.backgroundContentTertiary,
+                fontFamily: 'monospace',
+              ),
+              filled: true,
+              fillColor: colors.backgroundPrimary,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6.r),
+                borderSide: BorderSide(
+                  color: colors.backgroundContentTertiary.withValues(alpha: 0.4),
+                ),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6.r),
+                borderSide: BorderSide(
+                  color: colors.backgroundContentTertiary.withValues(alpha: 0.4),
+                ),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(6.r),
+                borderSide: BorderSide(color: colors.backgroundContentSecondary),
+              ),
+            ),
+          ),
+          SizedBox(height: 8.h),
+          Row(
+            children: [
+              TextButton(
+                key: const Key('debug_query_run_button'),
+                onPressed: isRunning.value ? null : runQuery,
+                child: Text(isRunning.value ? 'Running...' : 'Run SQL'),
+              ),
+              SizedBox(width: 8.w),
+              TextButton(
+                key: const Key('debug_query_copy_button'),
+                onPressed: result.value == null ? null : copyResult,
+                child: const Text('Copy Result'),
+              ),
+            ],
+          ),
+          if (error.value != null) ...[
+            SizedBox(height: 6.h),
+            SelectableText(
+              key: const Key('debug_query_error'),
+              error.value!,
+              style: typography.medium10.copyWith(
+                color: colors.fillDestructive,
+                fontFamily: 'monospace',
+                height: 1.4,
+              ),
+            ),
+          ],
+          if (result.value != null) ...[
+            SizedBox(height: 6.h),
+            Builder(
+              builder: (context) {
+                final tableData = parseDebugQueryResultTable(result.value!);
+                if (tableData == null) {
+                  return const SizedBox.shrink();
+                }
+                return Padding(
+                  padding: EdgeInsets.only(bottom: 8.h),
+                  child: DebugQueryResultTable(
+                    data: tableData,
+                    title:
+                        'table (${tableData.rows.length} rows, ${tableData.columns.length} columns):',
+                    tableKey: const Key('debug_query_table'),
+                  ),
+                );
+              },
+            ),
             Text(
-              'ratchet_tree (tap to copy full data):',
+              'result:',
               style: typography.semiBold10.copyWith(
                 color: colors.backgroundContentSecondary,
                 fontFamily: 'monospace',
               ),
             ),
-            SizedBox(height: 6.h),
+            SizedBox(height: 4.h),
             SelectableText(
-              text,
+              key: const Key('debug_query_result'),
+              result.value!,
               style: typography.medium10.copyWith(
                 color: colors.backgroundContentPrimary,
                 fontFamily: 'monospace',
@@ -540,8 +600,141 @@ class _RatchetTreeSection extends HookConsumerWidget {
               ),
             ),
           ],
-        ),
+        ],
       ),
+    );
+  }
+}
+
+class _RatchetTreeSection extends ConsumerWidget {
+  const _RatchetTreeSection({required this.groupId});
+
+  final String groupId;
+
+  String _formatTreeInfo(RatchetTreeInfo info) {
+    final buffer = StringBuffer();
+    buffer.writeln('tree_hash:       ${info.treeHash}');
+    buffer.writeln('serialized_len:  ${info.serializedTree.length ~/ 2} bytes');
+    buffer.writeln();
+    buffer.writeln('leaf_nodes (${info.leafNodes.length}):');
+    for (final leaf in info.leafNodes) {
+      final shortCred = leaf.credentialIdentity.length > 16
+          ? '${leaf.credentialIdentity.substring(0, 16)}…'
+          : leaf.credentialIdentity;
+      final shortEnc = leaf.encryptionKey.length > 16
+          ? '${leaf.encryptionKey.substring(0, 16)}…'
+          : leaf.encryptionKey;
+      final shortSig = leaf.signatureKey.length > 16
+          ? '${leaf.signatureKey.substring(0, 16)}…'
+          : leaf.signatureKey;
+      buffer.writeln('  [${leaf.index}] cred=$shortCred');
+      buffer.writeln('      enc_key=$shortEnc');
+      buffer.writeln('      sig_key=$shortSig');
+    }
+    return buffer.toString().trimRight();
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+    final accountPubkey = ref.watch(accountPubkeyProvider);
+
+    return FutureBuilder<RatchetTreeInfo>(
+      future: getRatchetTreeInfo(accountPubkey: accountPubkey, groupId: groupId),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(
+              color: colors.backgroundSecondary,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 12.w,
+                  height: 12.w,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: colors.backgroundContentSecondary,
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  'ratchet_tree: loading…',
+                  style: typography.medium10.copyWith(
+                    color: colors.backgroundContentTertiary,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        if (snapshot.hasError) {
+          return Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(
+              color: colors.backgroundSecondary,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Text(
+              'ratchet_tree: ${snapshot.error}',
+              style: typography.medium10.copyWith(
+                color: colors.fillDestructive,
+                fontFamily: 'monospace',
+              ),
+            ),
+          );
+        }
+        final info = snapshot.data!;
+        final text = _formatTreeInfo(info);
+        return GestureDetector(
+          onTap: () async {
+            await Clipboard.setData(ClipboardData(text: text));
+            if (context.mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(context.l10n.rawDebugViewCopied),
+                  duration: const Duration(seconds: 2),
+                ),
+              );
+            }
+          },
+          child: Container(
+            width: double.infinity,
+            padding: EdgeInsets.all(10.w),
+            decoration: BoxDecoration(
+              color: colors.backgroundSecondary,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'ratchet_tree (${info.leafNodes.length} leaves, tap to copy):',
+                  style: typography.semiBold10.copyWith(
+                    color: colors.backgroundContentSecondary,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+                SizedBox(height: 6.h),
+                SelectableText(
+                  text,
+                  style: typography.medium10.copyWith(
+                    color: colors.backgroundContentPrimary,
+                    fontFamily: 'monospace',
+                    height: 1.4,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 }

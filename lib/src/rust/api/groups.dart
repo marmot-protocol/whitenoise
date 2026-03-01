@@ -9,7 +9,7 @@ import '../frb_generated.dart';
 import '../lib.dart';
 import 'error.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`
 
 Future<List<Group>> activeGroups({required String pubkey}) =>
     RustLib.instance.api.crateApiGroupsActiveGroups(pubkey: pubkey);
@@ -110,6 +110,14 @@ Future<String?> getGroupImagePath({
   groupId: groupId,
 );
 
+Future<RatchetTreeInfo> getRatchetTreeInfo({
+  required String accountPubkey,
+  required String groupId,
+}) => RustLib.instance.api.crateApiGroupsGetRatchetTreeInfo(
+  accountPubkey: accountPubkey,
+  groupId: groupId,
+);
+
 class FlutterGroupDataUpdate {
   final String? name;
   final String? description;
@@ -180,8 +188,10 @@ class Group {
     required this.state,
   });
 
-  Future<GroupType> groupType({required String accountPubkey}) =>
-      RustLib.instance.api.crateApiGroupsGroupGroupType(that: this, accountPubkey: accountPubkey);
+  Future<GroupType> groupType({required String accountPubkey}) => RustLib
+      .instance
+      .api
+      .crateApiGroupsGroupGroupType(that: this, accountPubkey: accountPubkey);
 
   Future<bool> isDirectMessageType({required String accountPubkey}) =>
       RustLib.instance.api.crateApiGroupsGroupIsDirectMessageType(
@@ -189,8 +199,10 @@ class Group {
         accountPubkey: accountPubkey,
       );
 
-  Future<bool> isGroupType({required String accountPubkey}) =>
-      RustLib.instance.api.crateApiGroupsGroupIsGroupType(that: this, accountPubkey: accountPubkey);
+  Future<bool> isGroupType({required String accountPubkey}) => RustLib
+      .instance
+      .api
+      .crateApiGroupsGroupIsGroupType(that: this, accountPubkey: accountPubkey);
 
   Future<void> updateGroupData({
     required String accountPubkey,
@@ -248,7 +260,10 @@ class GroupInformation {
 
   @override
   int get hashCode =>
-      mlsGroupId.hashCode ^ groupType.hashCode ^ createdAt.hashCode ^ updatedAt.hashCode;
+      mlsGroupId.hashCode ^
+      groupType.hashCode ^
+      createdAt.hashCode ^
+      updatedAt.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -272,6 +287,76 @@ enum GroupType {
   group,
 }
 
+/// Public information about a leaf node in the ratchet tree
+class LeafNodeInfo {
+  /// The leaf index in the ratchet tree
+  final int index;
+
+  /// The member's public HPKE encryption key (hex-encoded)
+  final String encryptionKey;
+
+  /// The member's public signature key (hex-encoded)
+  final String signatureKey;
+
+  /// The member's credential identity (hex-encoded, typically a Nostr public key)
+  final String credentialIdentity;
+
+  const LeafNodeInfo({
+    required this.index,
+    required this.encryptionKey,
+    required this.signatureKey,
+    required this.credentialIdentity,
+  });
+
+  @override
+  int get hashCode =>
+      index.hashCode ^
+      encryptionKey.hashCode ^
+      signatureKey.hashCode ^
+      credentialIdentity.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LeafNodeInfo &&
+          runtimeType == other.runtimeType &&
+          index == other.index &&
+          encryptionKey == other.encryptionKey &&
+          signatureKey == other.signatureKey &&
+          credentialIdentity == other.credentialIdentity;
+}
+
+/// Public information about the ratchet tree of an MLS group
+class RatchetTreeInfo {
+  /// SHA-256 fingerprint of the TLS-serialized ratchet tree (hex-encoded)
+  final String treeHash;
+
+  /// The full ratchet tree serialized via TLS encoding (hex-encoded)
+  final String serializedTree;
+
+  /// Leaf nodes with their indices and public keys
+  final List<LeafNodeInfo> leafNodes;
+
+  const RatchetTreeInfo({
+    required this.treeHash,
+    required this.serializedTree,
+    required this.leafNodes,
+  });
+
+  @override
+  int get hashCode =>
+      treeHash.hashCode ^ serializedTree.hashCode ^ leafNodes.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is RatchetTreeInfo &&
+          runtimeType == other.runtimeType &&
+          treeHash == other.treeHash &&
+          serializedTree == other.serializedTree &&
+          leafNodes == other.leafNodes;
+}
+
 class UploadGroupImageResult {
   final U8Array32 encryptedHash;
   final U8Array32 imageKey;
@@ -284,7 +369,8 @@ class UploadGroupImageResult {
   });
 
   @override
-  int get hashCode => encryptedHash.hashCode ^ imageKey.hashCode ^ imageNonce.hashCode;
+  int get hashCode =>
+      encryptedHash.hashCode ^ imageKey.hashCode ^ imageNonce.hashCode;
 
   @override
   bool operator ==(Object other) =>

@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/screens/chat_raw_debug_screen.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -10,6 +11,11 @@ import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
 const _testGroupId = testGroupId;
+
+class _MockAccountPubkeyNotifier extends AccountPubkeyNotifier {
+  @override
+  String build() => testPubkeyA;
+}
 
 ChatMessage _message(
   String id,
@@ -65,6 +71,7 @@ void main() {
     await mountWidget(
       const ChatRawDebugScreen(groupId: _testGroupId),
       tester,
+      overrides: [accountPubkeyProvider.overrideWith(_MockAccountPubkeyNotifier.new)],
     );
     await tester.pumpAndSettle();
   }
@@ -106,6 +113,11 @@ void main() {
       ];
 
       await pumpDebugScreen(tester);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('raw_message_card_msg2')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
 
       // msg2 is latest so it appears first in the reversed list (always visible)
       expect(find.byKey(const Key('raw_message_card_msg2')), findsOneWidget);
@@ -134,6 +146,11 @@ void main() {
       _api.initialMessages = [_message('msg1', now)];
 
       await pumpDebugScreen(tester);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('raw_message_card_msg1')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
 
       expect(find.textContaining('Content of msg1'), findsWidgets);
     });
@@ -158,6 +175,34 @@ void main() {
       await pumpDebugScreen(tester);
 
       expect(find.byKey(const Key('slate_back_button')), findsOneWidget);
+    });
+
+    testWidgets('executes debug query and shows formatted result', (tester) async {
+      _api.debugQueryResult = '[{"table":"accounts","rows":2}]';
+
+      await pumpDebugScreen(tester);
+      await tester.enterText(
+        find.byKey(const Key('debug_query_input')),
+        'SELECT * FROM accounts;',
+      );
+      await tester.tap(find.byKey(const Key('debug_query_run_button')));
+      await tester.pumpAndSettle();
+
+      expect(_api.lastDebugQuerySql, 'SELECT * FROM accounts;');
+      expect(find.byKey(const Key('debug_query_table')), findsOneWidget);
+      expect(find.byKey(const Key('debug_query_result')), findsOneWidget);
+      expect(find.textContaining('"table": "accounts"'), findsOneWidget);
+    });
+
+    testWidgets('shows debug query errors', (tester) async {
+      _api.shouldFailDebugQuery = true;
+
+      await pumpDebugScreen(tester);
+      await tester.tap(find.byKey(const Key('debug_query_run_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('debug_query_error')), findsOneWidget);
+      expect(find.textContaining('debug query failed'), findsOneWidget);
     });
   });
 }

@@ -114,9 +114,18 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                     const WnSeparator(),
                     SizedBox(height: 8.h),
                     _DeveloperSettingsViewLogsRow(
+                      rowKey: const Key('view_logs_row'),
                       label: context.l10n.appLogsViewLogs,
                       description: context.l10n.appLogsViewLogsDescription,
                       onTap: () => Routes.pushToAppLogs(context),
+                    ),
+                    const WnSeparator(),
+                    SizedBox(height: 8.h),
+                    _DeveloperSettingsViewLogsRow(
+                      rowKey: const Key('debug_sql_query_row'),
+                      label: 'Debug SQL Query',
+                      description: 'Run raw SQL against the local whitenoise database',
+                      onTap: () => Routes.pushToDebugSqlQuery(context),
                     ),
                     const WnSeparator(),
                     SizedBox(height: 8.h),
@@ -285,11 +294,13 @@ class _DeveloperSettingsKeyPackagesList extends HookWidget {
 
 class _DeveloperSettingsViewLogsRow extends StatelessWidget {
   const _DeveloperSettingsViewLogsRow({
+    required this.rowKey,
     required this.label,
     required this.description,
     required this.onTap,
   });
 
+  final Key rowKey;
   final String label;
   final String description;
   final VoidCallback onTap;
@@ -300,7 +311,7 @@ class _DeveloperSettingsViewLogsRow extends StatelessWidget {
     final typography = context.typographyScaled;
 
     return InkWell(
-      key: const Key('view_logs_row'),
+      key: rowKey,
       onTap: onTap,
       child: SizedBox(
         height: 56.h,
