@@ -432,6 +432,16 @@ void main() {
     });
 
     group('layout behavior', () {
+      testWidgets('renders with non-zero height', (tester) async {
+        await mountWidget(
+          const WnCarouselIndicator(itemCount: 3, activeIndex: 0),
+          tester,
+        );
+
+        final size = tester.getSize(find.byType(WnCarouselIndicator));
+        expect(size.height, greaterThan(0));
+      });
+
       testWidgets('uses Row with mainAxisSize.min', (tester) async {
         await mountWidget(
           const WnCarouselIndicator(itemCount: 3, activeIndex: 0),

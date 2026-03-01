@@ -111,16 +111,6 @@ final directories = <_widgetbook.WidgetbookNode>[
         ],
       ),
       _widgetbook.WidgetbookComponent(
-        name: 'WnIconButton',
-        useCases: [
-          _widgetbook.WidgetbookUseCase(
-            name: 'Icon Button',
-            builder: _whitenoise_widgetbook_components_icon_button
-                .wnIconButtonShowcase,
-          ),
-        ],
-      ),
-      _widgetbook.WidgetbookComponent(
         name: 'WnCalloutStory',
         useCases: [
           _widgetbook.WidgetbookUseCase(
@@ -457,6 +447,21 @@ final directories = <_widgetbook.WidgetbookNode>[
             name: 'Typography',
             builder:
                 _whitenoise_widgetbook_foundations_typography.allTypography,
+          ),
+        ],
+      ),
+    ],
+  ),
+  _widgetbook.WidgetbookFolder(
+    name: 'widgets',
+    children: [
+      _widgetbook.WidgetbookComponent(
+        name: 'WnIconButton',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Icon Button',
+            builder: _whitenoise_widgetbook_components_icon_button
+                .wnIconButtonShowcase,
           ),
         ],
       ),

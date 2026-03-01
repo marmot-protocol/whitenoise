@@ -152,5 +152,36 @@ void main() {
         expect(find.text('Privacy and security'), findsOneWidget);
       });
     });
+
+    group('layout', () {
+      testWidgets('renders without overflow in compact height container', (tester) async {
+        await mountWidget(
+          const SizedBox(height: 300, child: WnOnboardingCarousel()),
+          tester,
+        );
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(find.byType(PageView), findsOneWidget);
+      });
+
+      testWidgets('indicator is visible below the PageView', (tester) async {
+        await mountWidget(const WnOnboardingCarousel(), tester);
+        await tester.pumpAndSettle();
+        final pageViewBottom = tester.getBottomLeft(find.byType(PageView)).dy;
+        final indicatorTop = tester
+            .getTopLeft(find.byKey(const Key('login_carousel_indicator')))
+            .dy;
+        expect(indicatorTop, greaterThan(pageViewBottom));
+      });
+
+      testWidgets('indicator is positioned below center of carousel', (tester) async {
+        await mountWidget(const WnOnboardingCarousel(), tester);
+        await tester.pumpAndSettle();
+        final carouselRect = tester.getRect(find.byType(WnOnboardingCarousel));
+        final indicatorRect = tester.getRect(find.byKey(const Key('login_carousel_indicator')));
+        final centerY = carouselRect.center.dy;
+        expect(indicatorRect.center.dy, greaterThan(centerY));
+      });
+    });
   });
 }

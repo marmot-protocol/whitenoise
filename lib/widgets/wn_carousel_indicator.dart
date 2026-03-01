@@ -42,23 +42,26 @@ class WnCarouselIndicator extends HookWidget {
 
     previousIndexRef.value = activeIndex;
 
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: List.generate(itemCount, (index) {
-        final isActive = index == activeIndex;
-        final wasActive = index == wasActiveIndex;
-        return Padding(
-          padding: EdgeInsets.only(left: index > 0 ? 8.w : 0),
-          child: _WnCarouselIndicatorItem(
-            key: ValueKey('carousel_indicator_item_$index'),
-            isActive: isActive,
-            wasActive: wasActive,
-            movingForward: movingForward,
-            activeColor: activeColor ?? colors.fillPrimary,
-            inactiveColor: colors.fillSecondary,
-          ),
-        );
-      }),
+    return SizedBox(
+      height: 8.h,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: List.generate(itemCount, (index) {
+          final isActive = index == activeIndex;
+          final wasActive = index == wasActiveIndex;
+          return Padding(
+            padding: EdgeInsets.only(left: index > 0 ? 8.w : 0),
+            child: _WnCarouselIndicatorItem(
+              key: ValueKey('carousel_indicator_item_$index'),
+              isActive: isActive,
+              wasActive: wasActive,
+              movingForward: movingForward,
+              activeColor: activeColor ?? colors.fillPrimary,
+              inactiveColor: colors.fillSecondary,
+            ),
+          );
+        }),
+      ),
     );
   }
 }
