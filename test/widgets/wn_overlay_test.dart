@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_overlay.dart';
 
-import '../test_helpers.dart' show mountStackedWidget;
+import '../test_helpers.dart' show mountStackedWidget, setUpTestView, testDesignSize;
 
 void main() {
   group('WnOverlay widget', () {
@@ -77,11 +78,15 @@ void main() {
       });
 
       testWidgets('heavy variant uses overlayPrimary color from dark theme', (tester) async {
+        setUpTestView(tester);
         await tester.pumpWidget(
-          MaterialApp(
-            theme: ThemeData.dark().copyWith(extensions: [SemanticColors.dark]),
-            home: const Scaffold(
-              body: Stack(children: [WnOverlay()]),
+          ScreenUtilInit(
+            designSize: testDesignSize,
+            builder: (_, _) => MaterialApp(
+              theme: ThemeData.dark().copyWith(extensions: [SemanticColors.dark]),
+              home: const Scaffold(
+                body: Stack(children: [WnOverlay()]),
+              ),
             ),
           ),
         );
@@ -93,11 +98,15 @@ void main() {
       });
 
       testWidgets('light variant uses overlaySecondary color from dark theme', (tester) async {
+        setUpTestView(tester);
         await tester.pumpWidget(
-          MaterialApp(
-            theme: ThemeData.dark().copyWith(extensions: [SemanticColors.dark]),
-            home: const Scaffold(
-              body: Stack(children: [WnOverlay(variant: WnOverlayVariant.light)]),
+          ScreenUtilInit(
+            designSize: testDesignSize,
+            builder: (_, _) => MaterialApp(
+              theme: ThemeData.dark().copyWith(extensions: [SemanticColors.dark]),
+              home: const Scaffold(
+                body: Stack(children: [WnOverlay(variant: WnOverlayVariant.light)]),
+              ),
             ),
           ),
         );
