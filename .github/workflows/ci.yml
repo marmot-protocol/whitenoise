@@ -73,12 +73,12 @@ jobs:
       run: cd rust && cargo test
 
   test:
-    name: Test (${{ matrix.shard + 1 }}/4)
+    name: Test (${{ matrix.shard }}/4)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        shard: [0, 1, 2, 3]
+        shard: [1, 2, 3, 4]
 
     steps:
     - name: Checkout code
@@ -108,7 +108,8 @@ jobs:
       id: tests
       run: |
         set +e
-        flutter test --coverage --total-shards 4 --shard-index ${{ matrix.shard }} --reporter failures-only 2>&1 | tee test-output.txt
+        SHARD_INDEX=$(( ${{ matrix.shard }} - 1 ))
+        flutter test --coverage --total-shards 4 --shard-index $SHARD_INDEX --reporter failures-only 2>&1 | tee test-output.txt
         EXIT_CODE=${PIPESTATUS[0]}
         echo "exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
         exit $EXIT_CODE
