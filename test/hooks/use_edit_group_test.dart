@@ -396,6 +396,20 @@ void main() {
         expect(_api.updateGroupDataCalls, isEmpty);
       });
 
+      testWidgets('returns false and sets error when group not loaded', (tester) async {
+        _api.getGroupError = Exception('Load failed');
+        await pumpAndLoad(tester);
+
+        getResult().nameController.text = 'Changed';
+        await tester.pump();
+
+        final result = await getResult().saveGroup();
+        await tester.pump();
+
+        expect(result, isFalse);
+        expect(getResult().state.error, contains('Cannot update group'));
+      });
+
       testWidgets('trims name and description before saving', (tester) async {
         _api.groupToReturn = _testGroup(name: 'Old');
         await pumpAndLoad(tester);

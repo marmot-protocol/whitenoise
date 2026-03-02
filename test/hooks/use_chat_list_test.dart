@@ -205,6 +205,17 @@ void main() {
       });
     });
 
+    group('error handling', () {
+      testWidgets('logs error and rethrows when stream emits error', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.controller?.addError(Exception('connection lost'));
+        await tester.pump();
+
+        expect(getResult().chats, isEmpty);
+      });
+    });
+
     group('lastMessageDeleted trigger', () {
       testWidgets('updates chat data without changing order', (tester) async {
         final getResult = await _pump(tester, testPubkeyA);

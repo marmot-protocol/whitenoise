@@ -373,6 +373,11 @@ void main() {
       await tester.pump();
       await tester.pump();
       await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      // Debug: dump the widget tree
+      debugDumpApp();
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 
