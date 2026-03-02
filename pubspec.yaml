@@ -58,7 +58,7 @@ dependencies:
   mime: ^2.0.0
   qr_flutter: ^4.1.0
   cached_network_image: ^3.4.1
-  mobile_scanner: ^7.1.4
+  mobile_scanner: ^7.2.0
   scroll_to_index: ^3.0.1
   crypto: ^3.0.7
   flutter_local_notifications: ^20.1.0
@@ -82,12 +82,12 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^6.0.0
-  freezed: ^3.2.3
-  build_runner: ^2.11.0
+  freezed: ^3.2.5
+  build_runner: ^2.11.1
 
-  widgetbook: ^3.20.0
+  widgetbook: ^3.22.0
   widgetbook_annotation: ^3.9.0
-  widgetbook_generator: ^3.20.1
+  widgetbook_generator: ^3.22.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
