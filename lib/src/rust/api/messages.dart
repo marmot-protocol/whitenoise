@@ -12,7 +12,7 @@ import 'media_files.dart';
 
 part 'messages.freezed.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
 
 Future<MessageWithTokens> sendMessageToGroup({
   required String pubkey,
@@ -26,6 +26,20 @@ Future<MessageWithTokens> sendMessageToGroup({
   message: message,
   kind: kind,
   tags: tags,
+);
+
+/// Retry publishing a failed message.
+///
+/// Re-creates the MLS message event from the original message in the MDK store,
+/// updates the delivery status to `Sending`, and spawns a new background publish task.
+Future<void> retryMessagePublish({
+  required String pubkey,
+  required String groupId,
+  required String eventId,
+}) => RustLib.instance.api.crateApiMessagesRetryMessagePublish(
+  pubkey: pubkey,
+  groupId: groupId,
+  eventId: eventId,
 );
 
 Future<List<ChatMessage>> fetchAggregatedMessagesForGroup({
@@ -66,6 +80,9 @@ class ChatMessage {
   final List<MediaFile> mediaAttachments;
   final int kind;
 
+  /// Delivery status for outgoing messages. `None` for incoming messages.
+  final DeliveryStatus? deliveryStatus;
+
   const ChatMessage({
     required this.id,
     required this.pubkey,
@@ -79,6 +96,7 @@ class ChatMessage {
     required this.reactions,
     required this.mediaAttachments,
     required this.kind,
+    this.deliveryStatus,
   });
 
   @override
@@ -94,7 +112,8 @@ class ChatMessage {
       contentTokens.hashCode ^
       reactions.hashCode ^
       mediaAttachments.hashCode ^
-      kind.hashCode;
+      kind.hashCode ^
+      deliveryStatus.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -112,7 +131,8 @@ class ChatMessage {
           contentTokens == other.contentTokens &&
           reactions == other.reactions &&
           mediaAttachments == other.mediaAttachments &&
-          kind == other.kind;
+          kind == other.kind &&
+          deliveryStatus == other.deliveryStatus;
 }
 
 class ChatMessageSummary {
@@ -152,6 +172,24 @@ class ChatMessageSummary {
           content == other.content &&
           createdAt == other.createdAt &&
           mediaAttachmentCount == other.mediaAttachmentCount;
+}
+
+@freezed
+sealed class DeliveryStatus with _$DeliveryStatus {
+  const DeliveryStatus._();
+
+  /// Background publish in progress
+  const factory DeliveryStatus.sending() = DeliveryStatus_Sending;
+
+  /// Published successfully to N relays
+  const factory DeliveryStatus.sent({
+    required BigInt relayCount,
+  }) = DeliveryStatus_Sent;
+
+  /// All publish attempts exhausted
+  const factory DeliveryStatus.failed({
+    required String reason,
+  }) = DeliveryStatus_Failed;
 }
 
 /// Flutter-compatible emoji reaction details
@@ -316,6 +354,12 @@ enum UpdateTrigger {
 
   /// The message itself was marked as deleted
   messageDeleted,
+
+  /// The delivery status of an outgoing message changed (Sending -> Sent or Failed)
+  deliveryStatusChanged,
+
+  /// A failed message was retried and needs repositioning in the chat
+  messageRetried,
 }
 
 /// Flutter-compatible user reaction
@@ -333,7 +377,8 @@ class UserReaction {
   });
 
   @override
-  int get hashCode => reactionId.hashCode ^ user.hashCode ^ emoji.hashCode ^ createdAt.hashCode;
+  int get hashCode =>
+      reactionId.hashCode ^ user.hashCode ^ emoji.hashCode ^ createdAt.hashCode;
 
   @override
   bool operator ==(Object other) =>
