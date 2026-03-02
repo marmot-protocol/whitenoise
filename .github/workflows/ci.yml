@@ -104,9 +104,6 @@ jobs:
         flutter pub get
         cd widgetbook && flutter pub get
 
-    - name: Run Flutter tests with coverage
-      run: flutter test --coverage
-
     - name: Extract coverage percentage
       id: coverage
       run: |
