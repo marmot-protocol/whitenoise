@@ -194,7 +194,7 @@ void main() {
 
   group('DebugQueryResultTable widget', () {
     testWidgets('renders title and table columns', (tester) async {
-      final data = DebugQueryResultTableData(
+      final data = const DebugQueryResultTableData(
         columns: ['id', 'name'],
         rows: [
           ['1', 'Alice'],
@@ -216,7 +216,7 @@ void main() {
     });
 
     testWidgets('does not show truncation message when not truncated', (tester) async {
-      final data = DebugQueryResultTableData(
+      final data = const DebugQueryResultTableData(
         columns: ['id'],
         rows: [
           ['1'],
@@ -233,7 +233,7 @@ void main() {
     });
 
     testWidgets('shows truncation message when isTruncated is true', (tester) async {
-      final data = DebugQueryResultTableData(
+      final data = const DebugQueryResultTableData(
         columns: ['id', 'value'],
         rows: [
           ['1', 'a'],
@@ -254,7 +254,7 @@ void main() {
 
     testWidgets('applies custom tableKey to DataTable', (tester) async {
       const tableKey = Key('custom_table_key');
-      final data = DebugQueryResultTableData(
+      final data = const DebugQueryResultTableData(
         columns: ['col'],
         rows: [
           ['val'],
@@ -271,7 +271,7 @@ void main() {
     });
 
     testWidgets('renders DataTable with correct number of rows', (tester) async {
-      final data = DebugQueryResultTableData(
+      final data = const DebugQueryResultTableData(
         columns: ['x'],
         rows: [
           ['1'],
