@@ -237,6 +237,17 @@ void main() {
         expect(getResult().replyingTo, isNull);
       });
 
+      testWidgets('handles loadDraft failure gracefully', (tester) async {
+        _api.shouldFailLoadDraft = true;
+
+        final getResult = await _mountInput(tester);
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+
+        expect(getResult().controller.text, isEmpty);
+        expect(getResult().replyingTo, isNull);
+      });
+
       testWidgets('does nothing when loadDraft returns null', (tester) async {
         _api.loadDraftResult = null;
 
@@ -314,6 +325,16 @@ void main() {
         expect(_api.lastSavedDraftReplyToId, equals('reply-id'));
       });
 
+      testWidgets('saveDraft failure is handled gracefully', (tester) async {
+        _api.shouldFailSaveDraft = true;
+        final getResult = await _mountInput(tester);
+        getResult().controller.text = 'hello draft';
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+
+        expect(_api.saveDraftCallCount, equals(1));
+      });
+
       testWidgets('saves when reply is set with no text', (tester) async {
         final replyMessage = _createTestMessage(id: 'reply-only');
         final getResult = await _mountInput(tester);
@@ -363,6 +384,32 @@ void main() {
         getResult().controller.text = '';
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 600));
+
+        expect(_api.deleteDraftCallCount, equals(1));
+      });
+
+      testWidgets('deleteDraft failure in debounced save is handled gracefully', (tester) async {
+        _api.shouldFailDeleteDraft = true;
+        final getResult = await _mountInput(tester);
+        getResult().controller.text = 'some text';
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+
+        getResult().controller.text = '';
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+
+        expect(_api.deleteDraftCallCount, equals(1));
+      });
+
+      testWidgets('deleteDraft failure on clear is handled gracefully', (tester) async {
+        _api.shouldFailDeleteDraft = true;
+        final getResult = await _mountInput(tester);
+        getResult().controller.text = 'draft to delete';
+        await tester.pump();
+
+        getResult().clear();
+        await tester.pumpAndSettle();
 
         expect(_api.deleteDraftCallCount, equals(1));
       });

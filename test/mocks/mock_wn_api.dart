@@ -71,10 +71,13 @@ class MockWnApi implements RustLibApi {
   Draft? loadDraftResult;
   Completer<Draft?>? loadDraftCompleter;
   int loadDraftCallCount = 0;
+  bool shouldFailLoadDraft = false;
   int saveDraftCallCount = 0;
   String? lastSavedDraftContent;
   String? lastSavedDraftReplyToId;
+  bool shouldFailSaveDraft = false;
   int deleteDraftCallCount = 0;
+  bool shouldFailDeleteDraft = false;
 
   @override
   Future<KeyPackageStatus> crateApiUsersUserHasKeyPackage({
@@ -531,6 +534,7 @@ class MockWnApi implements RustLibApi {
     required String groupId,
   }) async {
     loadDraftCallCount++;
+    if (shouldFailLoadDraft) throw Exception('loadDraft failed');
     if (loadDraftCompleter != null) return loadDraftCompleter!.future;
     return loadDraftResult;
   }
@@ -544,6 +548,7 @@ class MockWnApi implements RustLibApi {
     required List<MediaFile> mediaAttachments,
   }) async {
     saveDraftCallCount++;
+    if (shouldFailSaveDraft) throw Exception('saveDraft failed');
     lastSavedDraftContent = content;
     lastSavedDraftReplyToId = replyToId;
     return Draft(
@@ -563,6 +568,7 @@ class MockWnApi implements RustLibApi {
     required String groupId,
   }) async {
     deleteDraftCallCount++;
+    if (shouldFailDeleteDraft) throw Exception('deleteDraft failed');
   }
 
   void reset() {
@@ -594,10 +600,13 @@ class MockWnApi implements RustLibApi {
     loadDraftResult = null;
     loadDraftCompleter = null;
     loadDraftCallCount = 0;
+    shouldFailLoadDraft = false;
     saveDraftCallCount = 0;
     lastSavedDraftContent = null;
     lastSavedDraftReplyToId = null;
+    shouldFailSaveDraft = false;
     deleteDraftCallCount = 0;
+    shouldFailDeleteDraft = false;
   }
 
   @override

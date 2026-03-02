@@ -49,7 +49,7 @@ MediaFile _mediaFile(String id) => MediaFile(
 
 const _emptyMetadata = FlutterMetadata(custom: {});
 
-enum _MetadataMode { normal, emptyThenSuccess }
+enum _MetadataMode { normal, emptyThenSuccess, fail }
 
 class _MockApi extends MockWnApi {
   StreamController<MessageStreamItem>? controller;
@@ -90,6 +90,10 @@ class _MockApi extends MockWnApi {
     );
   }
 
+  void emitError(Object error, [StackTrace? stackTrace]) {
+    controller?.addError(error, stackTrace ?? StackTrace.current);
+  }
+
   @override
   Stream<MessageStreamItem> crateApiMessagesSubscribeToGroupMessages({
     required String groupId,
@@ -120,6 +124,11 @@ class _MockApi extends MockWnApi {
                 userMetadataResponse ?? const FlutterMetadata(displayName: 'Author', custom: {}),
               )
             : Future.value(_emptyMetadata);
+      case _MetadataMode.fail:
+        return Future.error(
+          Exception('metadata fetch failed'),
+          StackTrace.current,
+        );
     }
   }
 
@@ -451,6 +460,51 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(getResult().getMessage(0).reactions.byEmoji, isEmpty);
+      });
+    });
+
+    group('stream error handling', () {
+      testWidgets('handles stream error via handleError', (tester) async {
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([_message('m1', DateTime(2024))]);
+        await tester.pumpAndSettle();
+
+        expect(getResult().messageCount, 1);
+
+        _api.emitError(Exception('test stream error'));
+        await tester.pump();
+
+        expect(getResult().messageCount, 1);
+      });
+
+      testWidgets('snapshot reports hasError after stream error', (tester) async {
+        await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([_message('m1', DateTime(2024))]);
+        await tester.pumpAndSettle();
+
+        _api.emitError(Exception('snapshot error test'));
+        await tester.pump();
+        await tester.pump();
+      });
+    });
+
+    group('fetchAuthorMetadata error handling', () {
+      testWidgets('handles metadata fetch failure gracefully', (tester) async {
+        _api.metadataMode = _MetadataMode.fail;
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([
+          _message('m1', DateTime(2024), pubkey: testPubkeyB, content: 'Hello'),
+        ]);
+        await tester.pump();
+        getResult().getChatMessageQuote('m1');
+        await tester.pumpAndSettle();
+
+        final preview = getResult().getChatMessageQuote('m1');
+        expect(preview, isNotNull);
+        expect(preview!.authorMetadata, isNull);
       });
     });
 
