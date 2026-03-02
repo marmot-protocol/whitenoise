@@ -23,6 +23,7 @@ class _MockTag implements Tag {
 class _MockApi extends MockWnApi {
   final List<({String pubkey, String groupId, String message, int kind, List<Tag>? tags})>
   sentMessages = [];
+  bool shouldFailSendMessage = false;
 
   @override
   Future<Tag> crateApiUtilsTagFromVec({required List<String> vec}) async {
@@ -38,6 +39,7 @@ class _MockApi extends MockWnApi {
     List<Tag>? tags,
   }) async {
     sentMessages.add((pubkey: pubkey, groupId: groupId, message: message, kind: kind, tags: tags));
+    if (shouldFailSendMessage) throw Exception('send message failed');
     return MessageWithTokens(
       id: 'sent_${sentMessages.length}',
       pubkey: pubkey,
@@ -60,6 +62,7 @@ void main() {
 
   setUp(() {
     mockApi.sentMessages.clear();
+    mockApi.shouldFailSendMessage = false;
     service = const MessageService(pubkey: _testPubkey, groupId: 'group1');
   });
 
@@ -98,6 +101,17 @@ void main() {
       await service.sendTextMessage(content: 'Hello');
 
       expect(mockApi.sentMessages.first.tags, isNull);
+    });
+
+    test('rethrows error when API call fails', () async {
+      mockApi.shouldFailSendMessage = true;
+
+      expect(
+        () => service.sendTextMessage(content: 'Hello'),
+        throwsA(
+          isA<Exception>().having((e) => e.toString(), 'message', contains('send message failed')),
+        ),
+      );
     });
   });
 
