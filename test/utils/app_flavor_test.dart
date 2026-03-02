@@ -2,7 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/utils/app_flavor.dart';
 
 void main() {
-  const appFlavor = String.fromEnvironment('APP_FLAVOR');
+  const appFlavor = String.fromEnvironment('APP_FLAVOR', defaultValue: 'staging');
 
   group('isStaging', () {
     test('matches APP_FLAVOR', () {
