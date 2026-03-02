@@ -10,6 +10,7 @@ import 'package:whitenoise/widgets/chat_message_media.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/media_modal.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
+import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_reaction.dart';
 
@@ -56,6 +57,7 @@ ChatMessage _message({
   ReactionSummary reactions = const ReactionSummary(byEmoji: [], userReactions: []),
   List<MediaFile> mediaAttachments = const [],
   DateTime? createdAt,
+  DeliveryStatus? deliveryStatus,
 }) => ChatMessage(
   id: 'msg1',
   pubkey: testPubkeyA,
@@ -69,6 +71,7 @@ ChatMessage _message({
   reactions: reactions,
   mediaAttachments: mediaAttachments,
   kind: 9,
+  deliveryStatus: deliveryStatus,
 );
 
 void main() {
@@ -532,6 +535,60 @@ void main() {
         );
 
         expect(find.byType(ChatMessageMedia), findsOneWidget);
+      });
+    });
+
+    group('delivery status', () {
+      testWidgets('maps Sending to sent status for own message', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(deliveryStatus: const DeliveryStatus.sending()),
+            isOwnMessage: true,
+          ),
+          tester,
+        );
+
+        final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
+        expect(bubble.deliveryStatus, ChatStatusType.sent);
+      });
+
+      testWidgets('maps Sent to delivered status for own message', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(deliveryStatus: DeliveryStatus.sent(relayCount: BigInt.from(2))),
+            isOwnMessage: true,
+          ),
+          tester,
+        );
+
+        final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
+        expect(bubble.deliveryStatus, ChatStatusType.delivered);
+      });
+
+      testWidgets('maps Failed to failed status for own message', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(deliveryStatus: const DeliveryStatus.failed(reason: 'timeout')),
+            isOwnMessage: true,
+          ),
+          tester,
+        );
+
+        final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
+        expect(bubble.deliveryStatus, ChatStatusType.failed);
+      });
+
+      testWidgets('does not pass delivery status for other user messages', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(deliveryStatus: const DeliveryStatus.sending()),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+
+        final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
+        expect(bubble.deliveryStatus, isNull);
       });
     });
 
