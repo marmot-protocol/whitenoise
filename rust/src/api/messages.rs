@@ -570,8 +570,7 @@ mod tests {
 
     #[test]
     fn test_delivery_status_conversion_failed() {
-        let status: DeliveryStatus =
-            WhitenoiseDeliveryStatus::Failed("timeout".to_string()).into();
+        let status: DeliveryStatus = WhitenoiseDeliveryStatus::Failed("timeout".to_string()).into();
         assert_eq!(
             status,
             DeliveryStatus::Failed {

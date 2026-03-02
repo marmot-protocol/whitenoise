@@ -127,13 +127,15 @@ ChatMessagesResult useChatMessages(
                   final newIndex = messageIds.value.length;
                   messageIds.value.add(message.id);
                   indexById.value[message.id] = newIndex;
-                } else if (update.trigger == UpdateTrigger.messageRetried &&
-                    indexById.value.containsKey(message.id)) {
-                  final oldIndex = indexById.value[message.id]!;
-                  messageIds.value.removeAt(oldIndex);
-                  indexById.value.clear();
-                  for (var i = 0; i < messageIds.value.length; i++) {
-                    indexById.value[messageIds.value[i]] = i;
+                } else if (update.trigger == UpdateTrigger.messageRetried) {
+                  if (indexById.value.containsKey(message.id)) {
+                    // Reposition existing message to the end
+                    final oldIndex = indexById.value[message.id]!;
+                    messageIds.value.removeAt(oldIndex);
+                    indexById.value.clear();
+                    for (var i = 0; i < messageIds.value.length; i++) {
+                      indexById.value[messageIds.value[i]] = i;
+                    }
                   }
                   final newIndex = messageIds.value.length;
                   messageIds.value.add(message.id);
