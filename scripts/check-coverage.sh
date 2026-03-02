@@ -42,6 +42,10 @@ parse_arguments() {
 			MIN_COVERAGE="$2"
 			shift 2
 			;;
+		--warnings-file)
+			WARNINGS_FILE="$2"
+			shift 2
+			;;
 		*)
 			LCOV_FILE="$1"
 			shift
@@ -139,13 +143,13 @@ inject_missing_files() {
 	done < <(find lib -name "*.dart" -type f -print0 2>/dev/null)
 
 	if [ "$missing_count" -gt 0 ]; then
-    print_missing_files_warning "$missing_count" "${missing_files[@]}"
-    if [ -n "$WARNINGS_FILE" ]; then
-      printf '%s\n' "${missing_files[@]}" > "$WARNINGS_FILE"
-    fi
-  elif [ -n "$WARNINGS_FILE" ]; then
-    : > "$WARNINGS_FILE"
-  fi
+		print_missing_files_warning "$missing_count" "${missing_files[@]}"
+		if [ -n "$WARNINGS_FILE" ]; then
+			printf '%s\n' "${missing_files[@]}" >"$WARNINGS_FILE"
+		fi
+	elif [ -n "$WARNINGS_FILE" ]; then
+		: >"$WARNINGS_FILE"
+	fi
 }
 
 filter_generated_files() {
