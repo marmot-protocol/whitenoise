@@ -9,7 +9,7 @@ on:
 jobs:
   check:
     name: Check
-    runs-on: namespace-profile-default
+    runs-on: ubuntu-latest
 
     steps:
     - name: Checkout code
@@ -74,7 +74,7 @@ jobs:
 
   test:
     name: Test (${{ matrix.shard }}/4)
-    runs-on: namespace-profile-default
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
@@ -135,7 +135,7 @@ jobs:
     name: Coverage
     if: always()
     needs: test
-    runs-on: namespace-profile-default
+    runs-on: ubuntu-latest
     permissions:
       actions: read
       contents: read
