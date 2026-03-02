@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,6 +9,7 @@ import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/app_log_provider.dart'
     show AppLogEntry, AppLogNotifier, appLogProvider;
 import 'package:whitenoise/screens/app_logs_screen.dart';
+
 import '../test_helpers.dart';
 
 class _TestAppLogNotifier extends AppLogNotifier {
@@ -164,6 +166,18 @@ void main() {
       expect(find.byKey(const Key('include_auth')), findsNothing);
     });
 
+    testWidgets('submitting pattern input adds exclude filter', (tester) async {
+      _entries = [_entry('alpha'), _entry('beta')];
+      await pumpScreen(tester);
+
+      await tester.enterText(find.byKey(const Key('app_logs_pattern_input')), 'alpha');
+      await tester.testTextInput.receiveAction(TextInputAction.done);
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('exclude_alpha')), findsOneWidget);
+      expect(find.text('alpha'), findsNothing);
+    });
+
     testWidgets('clear filters resets search and patterns', (tester) async {
       _entries = [_entry('foo event'), _entry('bar event')];
       await pumpScreen(tester);
@@ -183,6 +197,18 @@ void main() {
       expect(find.byKey(const Key('app_logs_clear_filters')), findsNothing);
     });
 
+    testWidgets('shows filtered count when entries are filtered out', (tester) async {
+      _entries = [_entry('alpha event'), _entry('beta event')];
+      await pumpScreen(tester);
+
+      await tester.enterText(find.byKey(const Key('app_logs_search')), 'nomatch');
+      await tester.pumpAndSettle();
+
+      final context = tester.element(find.byType(AppLogsScreen));
+      final l10n = AppLocalizations.of(context);
+      expect(find.text(l10n.appLogsFilteredCount(0, 2)), findsWidgets);
+    });
+
     testWidgets('clear logs button removes all entries', (tester) async {
       _entries = [_entry('first'), _entry('second')];
       await pumpScreen(tester);
@@ -196,6 +222,56 @@ void main() {
       expect(find.text('first'), findsNothing);
       expect(find.text('second'), findsNothing);
       expect(find.byType(ListView), findsNothing);
+    });
+
+    testWidgets('tapping log entry copies formatted text and shows snackbar', (tester) async {
+      String? clipboardText;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            clipboardText = call.arguments['text'] as String?;
+          }
+          return null;
+        },
+      );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      _entries = [
+        _entry(
+          'failed to send message',
+          level: Level.SEVERE,
+          logger: 'rust',
+          error: 'socket error',
+          stackTrace: StackTrace.fromString('line_1\nline_2\nline_3'),
+          time: DateTime(2026, 1, 1, 10, 11, 12, 123),
+        ),
+      ];
+
+      await pumpScreen(tester);
+      final entryTile = find.ancestor(
+        of: find.text('failed to send message'),
+        matching: find.byType(GestureDetector),
+      );
+      expect(entryTile, findsOneWidget);
+      final gesture = tester.widget<GestureDetector>(entryTile);
+      gesture.onTap?.call();
+      await tester.pumpAndSettle();
+
+      expect(clipboardText, isNotNull);
+      expect(clipboardText, contains('SEVERE rust'));
+      expect(clipboardText, contains('failed to send message'));
+      expect(clipboardText, contains('error: socket error'));
+      expect(clipboardText, contains('stackTrace: line_1'));
+
+      final context = tester.element(find.byType(AppLogsScreen));
+      final l10n = AppLocalizations.of(context);
+      expect(find.text(l10n.rawDebugViewCopied), findsOneWidget);
     });
   });
 }
