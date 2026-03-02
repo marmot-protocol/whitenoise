@@ -1,9 +1,6 @@
 // Re-export everything from the whitenoise crate
 use flutter_rust_bridge::frb;
 use std::path::Path;
-use std::sync::OnceLock;
-use tracing_appender::{non_blocking::WorkerGuard, rolling::Rotation};
-use tracing_subscriber::{EnvFilter, layer::SubscriberExt};
 pub use whitenoise::{AppSettings, Language, RelayType, ThemeMode, Whitenoise};
 
 // Re-export types that flutter_rust_bridge needs
@@ -93,64 +90,8 @@ pub use user_search::*;
 pub use users::*;
 pub use utils::*;
 
-static TRACING_GUARD: OnceLock<WorkerGuard> = OnceLock::new();
-
-fn initialize_tracing(logs_dir: &str) -> Result<(), ApiError> {
-    if TRACING_GUARD.get().is_some() {
-        return Ok(());
-    }
-
-    let subdir = if cfg!(debug_assertions) {
-        "dev"
-    } else {
-        "release"
-    };
-    let log_dir = Path::new(logs_dir).join(subdir);
-    std::fs::create_dir_all(&log_dir)?;
-
-    let appender = tracing_appender::rolling::RollingFileAppender::builder()
-        .rotation(Rotation::DAILY)
-        .filename_prefix("whitenoise")
-        .filename_suffix("log")
-        .build(log_dir)
-        .map_err(|e| ApiError::Other {
-            message: format!("Failed to initialize tracing appender: {e}"),
-        })?;
-    let (non_blocking, guard) = tracing_appender::non_blocking(appender);
-    let env_filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
-    let fmt_layer = tracing_subscriber::fmt::layer()
-        .with_ansi(false)
-        .with_target(true)
-        .with_writer(non_blocking);
-
-    let subscriber = tracing_subscriber::registry()
-        .with(env_filter)
-        .with(fmt_layer);
-
-    // Try setting as global default. If that fails (because flutter_rust_bridge
-    // already set one), fall back to setting it as the *default for this thread*
-    // — but more importantly, we keep the guard alive either way.
-    match tracing::subscriber::set_global_default(subscriber) {
-        Ok(()) => {}
-        Err(_) => {
-            // FRB (or something else) already owns the global subscriber.
-            // We can't add layers to it after the fact.
-            // Log a warning and move on — the guard will still be stored
-            // so the appender stays alive, but logs will go to FRB's subscriber.
-            eprintln!(
-                "Warning: global tracing subscriber already set (likely by flutter_rust_bridge). \
-                 File logging layer could not be installed."
-            );
-        }
-    }
-
-    let _ = TRACING_GUARD.set(guard);
-    Ok(())
-}
-
 #[frb]
 pub async fn initialize_whitenoise(config: WhitenoiseConfig) -> Result<(), ApiError> {
-    initialize_tracing(&config.logs_dir)?;
     let core_config = whitenoise::WhitenoiseConfig::new(
         Path::new(&config.data_dir),
         Path::new(&config.logs_dir),
