@@ -17,6 +17,15 @@ List<MethodCall> mockSharePlus() {
   return _shareCalls;
 }
 
+void mockSharePlusFailing() {
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+    _sharePlusChannel,
+    (call) async {
+      throw PlatformException(code: 'ERROR', message: 'Share failed');
+    },
+  );
+}
+
 void clearSharePlusMock() {
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
     _sharePlusChannel,

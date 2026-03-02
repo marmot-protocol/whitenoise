@@ -234,6 +234,33 @@ void main() {
       });
     });
 
+    group('scroll behavior', () {
+      testWidgets('collapses list items when scrolling starts', (tester) async {
+        mockApi.normalRelays = List.generate(
+          20,
+          (i) => Relay(
+            url: 'wss://relay$i.com',
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        );
+        mockApi.relayStatuses = List.generate(
+          20,
+          (i) => ('wss://relay$i.com', 'connected'),
+        );
+
+        await pumpNetworkScreen(tester);
+
+        final listView = find.byType(ListView);
+        expect(listView, findsOneWidget);
+
+        await tester.drag(listView, const Offset(0, -200));
+        await tester.pump();
+
+        expect(find.byType(ListView), findsOneWidget);
+      });
+    });
+
     group('add relay', () {
       testWidgets('opens add relay bottom sheet when add icon is tapped', (tester) async {
         await pumpNetworkScreen(tester);
