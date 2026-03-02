@@ -90,6 +90,22 @@ class _MockApi extends MockWnApi {
     );
   }
 
+  void emitDeliveryStatusChanged(ChatMessage message) {
+    controller?.add(
+      MessageStreamItem.update(
+        update: MessageUpdate(trigger: UpdateTrigger.deliveryStatusChanged, message: message),
+      ),
+    );
+  }
+
+  void emitMessageRetried(ChatMessage message) {
+    controller?.add(
+      MessageStreamItem.update(
+        update: MessageUpdate(trigger: UpdateTrigger.messageRetried, message: message),
+      ),
+    );
+  }
+
   void emitError(Object error, [StackTrace? stackTrace]) {
     controller?.addError(error, stackTrace ?? StackTrace.current);
   }
@@ -557,6 +573,113 @@ void main() {
         final result = getResult();
         expect(result.messageCount, 1);
         expect(result.getMessage(0).content, 'updated');
+      });
+    });
+
+    group('deliveryStatusChanged', () {
+      testWidgets('updates message data in place', (tester) async {
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([
+          _message('m1', DateTime(2024), content: 'hello'),
+          _message('m2', DateTime(2024, 1, 2), content: 'world'),
+        ]);
+        await tester.pumpAndSettle();
+
+        _api.emitDeliveryStatusChanged(_message('m1', DateTime(2024), content: 'hello-updated'));
+        await tester.pumpAndSettle();
+
+        final result = getResult();
+        expect(result.messageCount, 2);
+        expect(result.getMessageById('m1')?.content, 'hello-updated');
+      });
+
+      testWidgets('does not change message order', (tester) async {
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([
+          _message('m1', DateTime(2024)),
+          _message('m2', DateTime(2024, 1, 2)),
+        ]);
+        await tester.pumpAndSettle();
+
+        _api.emitDeliveryStatusChanged(_message('m1', DateTime(2024)));
+        await tester.pumpAndSettle();
+
+        final result = getResult();
+        expect(result.getMessage(0).id, 'm2');
+        expect(result.getMessage(1).id, 'm1');
+      });
+    });
+
+    group('messageRetried', () {
+      testWidgets('repositions existing message to end', (tester) async {
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([
+          _message('m1', DateTime(2024)),
+          _message('m2', DateTime(2024, 1, 2)),
+          _message('m3', DateTime(2024, 1, 3)),
+        ]);
+        await tester.pumpAndSettle();
+
+        _api.emitMessageRetried(_message('m1', DateTime(2024)));
+        await tester.pumpAndSettle();
+
+        final result = getResult();
+        expect(result.messageCount, 3);
+        // m1 should now be at the end (reversed index 0 = newest)
+        expect(result.getMessage(0).id, 'm1');
+        expect(result.getMessage(1).id, 'm3');
+        expect(result.getMessage(2).id, 'm2');
+      });
+
+      testWidgets('appends message when id is not yet indexed', (tester) async {
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([
+          _message('m1', DateTime(2024)),
+        ]);
+        await tester.pumpAndSettle();
+
+        _api.emitMessageRetried(_message('m-new', DateTime(2024, 1, 2)));
+        await tester.pumpAndSettle();
+
+        final result = getResult();
+        expect(result.messageCount, 2);
+        expect(result.getMessage(0).id, 'm-new');
+        expect(result.getMessage(1).id, 'm1');
+      });
+
+      testWidgets('updates message data', (tester) async {
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([
+          _message('m1', DateTime(2024), content: 'original'),
+        ]);
+        await tester.pumpAndSettle();
+
+        _api.emitMessageRetried(_message('m1', DateTime(2024), content: 'retried'));
+        await tester.pumpAndSettle();
+
+        expect(getResult().getMessageById('m1')?.content, 'retried');
+      });
+
+      testWidgets('updates latestMessageId after reposition', (tester) async {
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([
+          _message('m1', DateTime(2024)),
+          _message('m2', DateTime(2024, 1, 2)),
+        ]);
+        await tester.pumpAndSettle();
+
+        expect(getResult().latestMessageId, 'm2');
+
+        _api.emitMessageRetried(_message('m1', DateTime(2024)));
+        await tester.pumpAndSettle();
+
+        expect(getResult().latestMessageId, 'm1');
       });
     });
 
