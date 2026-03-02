@@ -166,27 +166,25 @@ jobs:
           const failuresDir = 'test-failures';
           const sections = [];
 
-          if (fs.existsSync(failuresDir)) {
-            const shardDirs = fs.readdirSync(failuresDir).sort();
-            for (const dir of shardDirs) {
-              const filePath = path.join(failuresDir, dir, 'test-output.txt');
-              if (!fs.existsSync(filePath)) continue;
-              const content = fs.readFileSync(filePath, 'utf8').trim();
-              if (!content) continue;
+          const shardDirs = fs.readdirSync(failuresDir).sort();
+          for (const dir of shardDirs) {
+            const filePath = path.join(failuresDir, dir, 'test-output.txt');
+            if (!fs.existsSync(filePath)) continue;
+            const content = fs.readFileSync(filePath, 'utf8').trim();
+            if (!content) continue;
 
-              const shardNum = dir.replace('test-failures-shard-', '');
-              sections.push(
-                '<details>',
-                `<summary>Shard ${shardNum}</summary>`,
-                '',
-                '```',
-                content,
-                '```',
-                '',
-                '</details>',
-                ''
-              );
-            }
+            const shardNum = dir.replace('test-failures-shard-', '');
+          sections.push(
+            '<details>',
+            `<summary>Shard ${shardNum}</summary>`,
+            '',
+            '```',
+            content,
+            '```',
+            '',
+            '</details>',
+            ''
+          );
           }
 
           const { data: comments } = await github.rest.issues.listComments({
