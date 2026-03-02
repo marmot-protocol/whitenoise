@@ -12,6 +12,7 @@ jobs:
   label:
     name: Apply PR labels
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Apply labels from changed files
         uses: actions/labeler@v6
