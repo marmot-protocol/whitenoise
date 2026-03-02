@@ -360,24 +360,13 @@ void main() {
     });
 
     testWidgets('shows loading indicator while fetching packages', (tester) async {
+      await pumpScreen(tester);
+
       mockApi.fetchCompleter = Completer<List<FlutterEvent>>();
 
-      await mountTestApp(
-        tester,
-        overrides: [
-          authProvider.overrideWith(() => _MockAuthNotifier()),
-          secureStorageProvider.overrideWithValue(MockSecureStorage()),
-        ],
-      );
-      Routes.pushToDeveloperSettings(tester.element(find.byType(Scaffold)));
+      await tester.tap(find.text('Refresh Key Packages'));
       await tester.pump();
       await tester.pump();
-      await tester.pump();
-      await tester.pump();
-      await tester.pump();
-
-      // Debug: dump the widget tree
-      debugDumpApp();
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
 

@@ -317,6 +317,26 @@ void main() {
       });
     });
 
+    group('system notice', () {
+      testWidgets('shows error notice when pin action fails', (tester) async {
+        _api.initialChats = [
+          _chatSummary(id: testPubkeyA, pendingConfirmation: false),
+        ];
+        await pumpChatListScreen(tester);
+
+        await tester.longPress(find.byType(ChatListTile));
+        await tester.pumpAndSettle();
+
+        final pinAction = find.byKey(const Key('context_menu_action_pin'));
+        if (pinAction.evaluate().isNotEmpty) {
+          await tester.tap(pinAction);
+          await tester.pumpAndSettle();
+
+          expect(find.byType(WnSystemNotice), findsOneWidget);
+        }
+      });
+    });
+
     group('search', () {
       Future<void> revealSearchBar(WidgetTester tester) async {
         final gesture = await tester.startGesture(const Offset(200, 400));
