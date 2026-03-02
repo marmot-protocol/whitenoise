@@ -292,8 +292,8 @@ void main() {
     });
 
     group('max bubble width', () {
-      // Viewport = 390px, column = viewport − 20px = 370px, max = 80% of 370 = 296px.
-      const expectedMaxWidth = (390 - 20) * 0.8;
+      // Viewport = 420px (testDesignWidth), column = viewport − 20px = 400px, max = 80% of 400 = 320px.
+      const expectedMaxWidth = (testDesignWidth - 20) * 0.8;
 
       Finder findBubbleConstrainedBox() => find.descendant(
         of: find.byType(WnMessageBubble),

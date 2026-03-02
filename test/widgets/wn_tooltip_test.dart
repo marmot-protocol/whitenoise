@@ -4,7 +4,7 @@ import 'package:flutter/material.dart'
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/widgets/wn_tooltip.dart'
     show ArrowPainter, WnTooltip, WnTooltipPosition, WnTooltipTriggerMode;
-import '../test_helpers.dart' show mountWidget, setUpTestView, testDesignSize;
+import '../test_helpers.dart';
 
 void main() {
   group('WnTooltip tests', () {
@@ -589,8 +589,8 @@ void main() {
         setUpTestView(tester);
         final widget = const Scaffold(
           body: SizedBox(
-            width: 400,
-            height: 400,
+            width: testDesignWidth,
+            height: testDesignHeight,
             child: Align(
               alignment: Alignment.centerLeft,
               child: WnTooltip(
@@ -617,8 +617,8 @@ void main() {
         setUpTestView(tester);
         final widget = const Scaffold(
           body: SizedBox(
-            width: 400,
-            height: 400,
+            width: testDesignWidth,
+            height: testDesignHeight,
             child: Align(
               alignment: Alignment.centerRight,
               child: WnTooltip(
@@ -636,7 +636,7 @@ void main() {
         expect(tooltipContent, findsOneWidget);
 
         final tooltipBox = tester.getRect(tooltipContent);
-        expect(tooltipBox.right, lessThanOrEqualTo(400));
+        expect(tooltipBox.right, lessThanOrEqualTo(testDesignWidth));
       });
 
       testWidgets('arrow remains pointing at target when tooltip shifts', (
@@ -645,8 +645,8 @@ void main() {
         setUpTestView(tester);
         final widget = const Scaffold(
           body: SizedBox(
-            width: 400,
-            height: 400,
+            width: 420,
+            height: 420,
             child: Align(
               alignment: Alignment.centerLeft,
               child: WnTooltip(

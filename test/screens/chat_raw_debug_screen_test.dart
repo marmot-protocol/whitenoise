@@ -585,6 +585,8 @@ void main() {
       );
 
       final copyButtons = find.text('Copy');
+      await tester.ensureVisible(copyButtons.last);
+      await tester.pumpAndSettle();
       await tester.tap(copyButtons.last);
       await tester.pumpAndSettle();
 

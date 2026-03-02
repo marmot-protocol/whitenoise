@@ -126,7 +126,7 @@ class _WnAppState extends ConsumerState<WnApp> {
     final locale = ref.read(localeProvider.notifier).resolveLocale();
 
     return ScreenUtilInit(
-      designSize: const Size(390, 844),
+      designSize: const Size(420, 912),
       builder: (context, child) {
         return MaterialApp.router(
           title: 'White Noise',

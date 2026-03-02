@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/theme/app_typography.dart';
+import '../test_helpers.dart';
 
 void main() {
   group('AppTypography', () {
@@ -296,7 +297,7 @@ void main() {
 
       await tester.pumpWidget(
         ScreenUtilInit(
-          designSize: const Size(390, 844),
+          designSize: testDesignSize,
           builder: (context, child) {
             return MaterialApp(
               theme: ThemeData(extensions: const [AppTypography.instance]),

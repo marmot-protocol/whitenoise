@@ -28,7 +28,7 @@ class WidgetbookApp extends StatelessWidget {
           ],
           themeBuilder: (context, theme, child) {
             return ScreenUtilInit(
-              designSize: const Size(390, 844),
+              designSize: const Size(420, 912),
               minTextAdapt: true,
               enableScaleWH: () => false,
               enableScaleText: () => false,

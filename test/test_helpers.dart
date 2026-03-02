@@ -11,7 +11,9 @@ import 'package:flutter_test/flutter_test.dart'
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/routes.dart';
 
-const testDesignSize = Size(390, 844);
+const double testDesignWidth = 420;
+const double testDesignHeight = 912;
+const testDesignSize = Size(testDesignWidth, testDesignHeight);
 
 const testPubkeyA = 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4';
 const testNpubA = 'npub1a1b2c31111111111111111111111111111111111111111111111111111';

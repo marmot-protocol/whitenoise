@@ -93,7 +93,7 @@ void main() {
 
         await tester.drag(
           find.byKey(const Key('login_carousel_page_view')),
-          const Offset(400, 0),
+          const Offset(testDesignWidth, 0),
         );
         await tester.pumpAndSettle();
 
