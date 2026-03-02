@@ -108,7 +108,7 @@ jobs:
         cd widgetbook && flutter pub get
 
     - name: Run Flutter tests with coverage
-      run: flutter test --coverage --dart-define=APP_FLAVOR=staging
+      run: flutter test --coverage
 
     - name: Extract coverage percentage
       id: coverage
