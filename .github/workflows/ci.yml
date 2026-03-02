@@ -73,7 +73,7 @@ jobs:
       run: cd rust && cargo test
 
   test:
-    name: Test (${{ matrix.shard }}/4)
+    name: Test (${{ matrix.shard + 1 }}/4)
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
@@ -176,15 +176,6 @@ jobs:
             sections.push(`### Shard ${shardNum}`, '', '```', content, '```', '');
           }
 
-          if (sections.length === 0) return;
-
-          const body = [
-            '## :x: Test Failures',
-            '',
-            ...sections,
-            marker,
-          ].join('\n');
-
           const { data: comments } = await github.rest.issues.listComments({
             issue_number: context.issue.number,
             owner: context.repo.owner,
@@ -192,6 +183,24 @@ jobs:
           });
 
           const existing = comments.find(c => c.body && c.body.includes(marker));
+
+          if (sections.length === 0) {
+            if (existing) {
+              await github.rest.issues.deleteComment({
+                comment_id: existing.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+              });
+            }
+            return;
+          }
+
+          const body = [
+            '## :x: Test Failures',
+            '',
+            ...sections,
+            marker,
+          ].join('\n');
 
           if (existing) {
             await github.rest.issues.updateComment({
@@ -226,7 +235,15 @@ jobs:
     - name: Merge coverage shards
       run: |
         mkdir -p coverage
-        SHARDS=(coverage-shards/coverage-shard-*/lcov.info)
+        SHARDS=()
+        for f in coverage-shards/coverage-shard-*/lcov.info; do
+          [ -f "$f" ] && SHARDS+=("$f")
+        done
+        if [ ${#SHARDS[@]} -eq 0 ]; then
+          echo "No coverage shards found, skipping merge"
+          touch coverage/lcov.info
+          exit 0
+        fi
         ARGS=""
         for shard in "${SHARDS[@]}"; do
           ARGS="$ARGS --add-tracefile $shard"
@@ -376,12 +393,17 @@ jobs:
     - name: Comment PR with coverage
       if: github.event_name == 'pull_request' && always() && steps.master_coverage.outputs.baseline != '0'
       uses: actions/github-script@v7
+      env:
+        COVERAGE_PERCENTAGE: ${{ steps.coverage.outputs.percentage }}
+        COVERAGE_BASELINE: ${{ steps.master_coverage.outputs.baseline }}
+        COVERAGE_UNCOVERED_COUNT: ${{ steps.coverage.outputs.uncovered_count }}
+        COVERAGE_UNCOVERED_LIST: ${{ steps.coverage.outputs.uncovered_list }}
       with:
         script: |
-          const current = parseFloat('${{ steps.coverage.outputs.percentage }}');
-          const baseline = parseFloat('${{ steps.master_coverage.outputs.baseline }}');
-          const uncoveredCount = parseInt('${{ steps.coverage.outputs.uncovered_count }}') || 0;
-          const uncoveredList = `${{ steps.coverage.outputs.uncovered_list }}`.trim();
+          const current = parseFloat(process.env.COVERAGE_PERCENTAGE);
+          const baseline = parseFloat(process.env.COVERAGE_BASELINE);
+          const uncoveredCount = parseInt(process.env.COVERAGE_UNCOVERED_COUNT) || 0;
+          const uncoveredList = (process.env.COVERAGE_UNCOVERED_LIST || '').trim();
           const rawDiff = current - baseline;
           const displayDiff = rawDiff.toFixed(2);
           const sha = context.sha.substring(0, 7);
