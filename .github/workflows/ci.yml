@@ -104,14 +104,6 @@ jobs:
         flutter pub get
         cd widgetbook && flutter pub get
 
-    - name: Extract coverage percentage
-      id: coverage
-      run: |
-        chmod +x scripts/check-coverage.sh
-        COVERAGE=$(./scripts/check-coverage.sh coverage/lcov.info)
-        echo "percentage=$COVERAGE" >> "$GITHUB_OUTPUT"
-        echo "Current coverage: $COVERAGE%"
-
     - name: Install lcov (cached)
       uses: awalsh128/cache-apt-pkgs-action@v1
       with:
