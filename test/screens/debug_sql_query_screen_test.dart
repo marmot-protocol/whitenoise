@@ -52,4 +52,45 @@ void main() {
     expect(find.text('debug_query: SQL is empty'), findsOneWidget);
     expect(api.lastDebugQuerySql, isNull);
   });
+
+  testWidgets('copy button is disabled when no result exists', (tester) async {
+    await mountWidget(const DebugSqlQueryScreen(), tester);
+
+    final copyButton = tester.widget<TextButton>(
+      find.byKey(const Key('developer_debug_query_copy_button')),
+    );
+    expect(copyButton.onPressed, isNull);
+  });
+
+  testWidgets('copy button is enabled after running a query', (tester) async {
+    api.debugQueryResult = '[{"table":"accounts","count":2}]';
+
+    await mountWidget(const DebugSqlQueryScreen(), tester);
+    await tester.tap(find.byKey(const Key('developer_debug_query_run_button')));
+    await tester.pumpAndSettle();
+
+    final copyButton = tester.widget<TextButton>(
+      find.byKey(const Key('developer_debug_query_copy_button')),
+    );
+    expect(copyButton.onPressed, isNotNull);
+  });
+
+  testWidgets('copy button returns early when result is empty string', (tester) async {
+    api.debugQueryResult = '';
+
+    await mountWidget(const DebugSqlQueryScreen(), tester);
+    await tester.tap(find.byKey(const Key('developer_debug_query_run_button')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('developer_debug_query_copy_button')));
+    await tester.pump();
+
+    expect(find.text('Copied to clipboard'), findsNothing);
+  });
+
+  testWidgets('back button is rendered', (tester) async {
+    await mountWidget(const DebugSqlQueryScreen(), tester);
+
+    expect(find.byKey(const Key('slate_back_button')), findsOneWidget);
+  });
 }

@@ -156,7 +156,7 @@ check-dart-format:
 test-flutter:
     @echo "🧪 Testing Flutter code..."
     @if [ -d "test" ]; then \
-        flutter test --reporter=compact && echo "✅ Flutter tests passed!" || (echo "❌ Flutter tests failed!" && exit 1); \
+        flutter test --reporter=compact --dart-define=APP_FLAVOR=staging && echo "✅ Flutter tests passed!" || (echo "❌ Flutter tests failed!" && exit 1); \
     else \
         echo "No test directory found. Create tests in test/ directory."; \
     fi
@@ -164,7 +164,7 @@ test-flutter:
 # Test Flutter code with minimal output (for agents/CI)
 test-flutter-quiet:
     @if [ -d "test" ]; then \
-        flutter test --no-pub --reporter=failures-only; \
+        flutter test --no-pub --reporter=failures-only --dart-define=APP_FLAVOR=staging; \
     else \
         echo "No test directory found."; \
     fi
@@ -172,12 +172,12 @@ test-flutter-quiet:
 
 coverage min="99":
     @echo "🧪 Running Flutter tests with coverage..."
-    flutter test --coverage && \
+    flutter test --coverage --dart-define=APP_FLAVOR=staging && \
         ./scripts/check-coverage.sh --min {{min}}
 
 coverage-report:
   @echo "🧪 Generating coverage report..."
-  flutter test --coverage && \
+  flutter test --coverage --dart-define=APP_FLAVOR=staging && \
   ./scripts/check-coverage.sh && \
   genhtml coverage/lcov.info -o coverage/html
   @echo "📊 Coverage report generated at coverage/html/index.html"

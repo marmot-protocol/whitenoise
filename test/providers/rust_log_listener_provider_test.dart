@@ -155,6 +155,58 @@ void main() {
       expect(entry.message, contains('boom'));
     });
 
+    test('cancels subscription when disposed before listening starts', () async {
+      final container = ProviderContainer();
+      final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
+      sub.close();
+      container.dispose();
+
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      if (api.logsController != null) {
+        expect(api.logsController?.hasListener, isFalse);
+      }
+    });
+
+    test('handles _startListening failure gracefully', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        pathProviderChannel,
+        (call) async => throw PlatformException(code: 'ERROR', message: 'No directory'),
+      );
+
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
+      addTearDown(sub.close);
+
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(api.logsController, isNull);
+
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        pathProviderChannel,
+        (call) async => '/tmp/wn_test_docs',
+      );
+    });
+
+    test('handles stream done event', () async {
+      final container = ProviderContainer();
+      addTearDown(container.dispose);
+      final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
+      addTearDown(sub.close);
+
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(api.logsController, isNotNull);
+      await api.logsController!.close();
+      await Future<void>.delayed(Duration.zero);
+    });
+
     test('cancels subscription when provider is disposed', () async {
       final container = ProviderContainer();
       final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);

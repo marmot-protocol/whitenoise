@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/constants/nostr_event_kinds.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/screens/app_logs_screen.dart';
+import 'package:whitenoise/screens/debug_sql_query_screen.dart';
 import 'package:whitenoise/screens/developer_settings_screen.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
@@ -21,6 +25,7 @@ class _MockApi extends MockWnApi {
   bool shouldThrowOnPublish = false;
   bool shouldThrowOnDeleteAll = false;
   bool shouldThrowOnDelete = false;
+  Completer<List<FlutterEvent>>? fetchCompleter;
 
   @override
   Future<FlutterMetadata> crateApiUsersUserMetadata({
@@ -32,6 +37,7 @@ class _MockApi extends MockWnApi {
   Future<List<FlutterEvent>> crateApiAccountsAccountKeyPackages({
     required String accountPubkey,
   }) async {
+    if (fetchCompleter != null) return fetchCompleter!.future;
     if (shouldThrowOnFetch) throw Exception('Network error');
     return keyPackages;
   }
@@ -99,6 +105,7 @@ void main() {
     mockApi.shouldThrowOnPublish = false;
     mockApi.shouldThrowOnDeleteAll = false;
     mockApi.shouldThrowOnDelete = false;
+    mockApi.fetchCompleter = null;
   });
 
   Future<void> pumpScreen(WidgetTester tester) async {
@@ -349,6 +356,72 @@ void main() {
               (effect) => effect.position == ScrollEdgePosition.top,
             );
         expect(topEffect.type, ScrollEdgeEffectType.slate);
+      });
+    });
+
+    testWidgets('shows loading indicator while fetching packages', (tester) async {
+      await pumpScreen(tester);
+
+      mockApi.fetchCompleter = Completer<List<FlutterEvent>>();
+
+      await tester.tap(find.text('Refresh Key Packages'));
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+
+      mockApi.fetchCompleter!.complete([]);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+    });
+
+    group('staging-only settings', () {
+      testWidgets('tapping debug view toggle row toggles the switch', (tester) async {
+        await pumpScreen(tester);
+
+        final switchBefore = tester.widget<Switch>(
+          find.byKey(const Key('debug_view_switch')),
+        );
+        expect(switchBefore.value, isFalse);
+
+        await tester.tap(find.byKey(const Key('debug_view_toggle_row')));
+        await tester.pumpAndSettle();
+
+        final switchAfter = tester.widget<Switch>(
+          find.byKey(const Key('debug_view_switch')),
+        );
+        expect(switchAfter.value, isTrue);
+      });
+
+      testWidgets('tapping debug view switch toggles the value', (tester) async {
+        await pumpScreen(tester);
+
+        await tester.tap(find.byKey(const Key('debug_view_switch')));
+        await tester.pumpAndSettle();
+
+        final switchAfter = tester.widget<Switch>(
+          find.byKey(const Key('debug_view_switch')),
+        );
+        expect(switchAfter.value, isTrue);
+      });
+
+      testWidgets('tapping View Logs row navigates to app logs screen', (tester) async {
+        await pumpScreen(tester);
+
+        await tester.tap(find.byKey(const Key('view_logs_row')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(AppLogsScreen), findsOneWidget);
+      });
+
+      testWidgets('tapping Debug SQL Query row navigates to debug SQL screen', (tester) async {
+        await pumpScreen(tester);
+
+        await tester.tap(find.byKey(const Key('debug_sql_query_row')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(DebugSqlQueryScreen), findsOneWidget);
       });
     });
   });

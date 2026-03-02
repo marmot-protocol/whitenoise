@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart'
     show FilledButton, Key, Locale, MaterialApp, Scaffold, Builder, ElevatedButton, Text, TextField;
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/widgets/wn_add_relay_bottom_sheet.dart';
@@ -118,25 +119,29 @@ void main() {
     });
 
     testWidgets('calls onRelayAdded when add button is tapped', (tester) async {
+      setUpTestView(tester);
       String? addedUrl;
       await tester.pumpWidget(
-        MaterialApp(
-          locale: const Locale('en'),
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => ElevatedButton(
-                onPressed: () => WnAddRelayBottomSheet.show(
-                  context: context,
-                  onRelayAdded: (url) async => addedUrl = url,
+        ScreenUtilInit(
+          designSize: testDesignSize,
+          builder: (_, _) => MaterialApp(
+            locale: const Locale('en'),
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => ElevatedButton(
+                  onPressed: () => WnAddRelayBottomSheet.show(
+                    context: context,
+                    onRelayAdded: (url) async => addedUrl = url,
+                  ),
+                  child: const Text('Open'),
                 ),
-                child: const Text('Open'),
               ),
             ),
           ),
@@ -156,24 +161,28 @@ void main() {
     });
 
     testWidgets('closes bottom sheet after adding relay', (tester) async {
+      setUpTestView(tester);
       await tester.pumpWidget(
-        MaterialApp(
-          locale: const Locale('en'),
-          localizationsDelegates: const [
-            AppLocalizations.delegate,
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-          ],
-          supportedLocales: AppLocalizations.supportedLocales,
-          home: Scaffold(
-            body: Builder(
-              builder: (context) => ElevatedButton(
-                onPressed: () => WnAddRelayBottomSheet.show(
-                  context: context,
-                  onRelayAdded: (_) async {},
+        ScreenUtilInit(
+          designSize: testDesignSize,
+          builder: (_, _) => MaterialApp(
+            locale: const Locale('en'),
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: AppLocalizations.supportedLocales,
+            home: Scaffold(
+              body: Builder(
+                builder: (context) => ElevatedButton(
+                  onPressed: () => WnAddRelayBottomSheet.show(
+                    context: context,
+                    onRelayAdded: (_) async {},
+                  ),
+                  child: const Text('Open'),
                 ),
-                child: const Text('Open'),
               ),
             ),
           ),
@@ -196,24 +205,28 @@ void main() {
 
     group('static show method', () {
       testWidgets('opens modal bottom sheet', (tester) async {
+        setUpTestView(tester);
         await tester.pumpWidget(
-          MaterialApp(
-            locale: const Locale('en'),
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(
-              body: Builder(
-                builder: (context) => ElevatedButton(
-                  onPressed: () => WnAddRelayBottomSheet.show(
-                    context: context,
-                    onRelayAdded: (_) async {},
+          ScreenUtilInit(
+            designSize: testDesignSize,
+            builder: (_, _) => MaterialApp(
+              locale: const Locale('en'),
+              localizationsDelegates: const [
+                AppLocalizations.delegate,
+                GlobalMaterialLocalizations.delegate,
+                GlobalWidgetsLocalizations.delegate,
+                GlobalCupertinoLocalizations.delegate,
+              ],
+              supportedLocales: AppLocalizations.supportedLocales,
+              home: Scaffold(
+                body: Builder(
+                  builder: (context) => ElevatedButton(
+                    onPressed: () => WnAddRelayBottomSheet.show(
+                      context: context,
+                      onRelayAdded: (_) async {},
+                    ),
+                    child: const Text('Open Sheet'),
                   ),
-                  child: const Text('Open Sheet'),
                 ),
               ),
             ),

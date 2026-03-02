@@ -16,7 +16,7 @@ import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 import '../mocks/mock_clipboard.dart' show clearClipboardMock, mockClipboard, mockClipboardFailing;
-import '../mocks/mock_share_plus.dart';
+import '../mocks/mock_share_plus.dart' show clearSharePlusMock, mockSharePlus, mockSharePlusFailing;
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
@@ -414,6 +414,17 @@ void main() {
         await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
         final button = tester.widget<WnButton>(find.byKey(const Key('invite_button')));
         expect(button.text, 'Share');
+      });
+
+      testWidgets('handles share failure gracefully', (tester) async {
+        mockSharePlusFailing();
+        addTearDown(clearSharePlusMock);
+        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+
+        await tester.tap(find.byKey(const Key('invite_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(WnSlate), findsOneWidget);
       });
 
       testWidgets('tapping invite button calls SharePlus.instance.share with invite message', (

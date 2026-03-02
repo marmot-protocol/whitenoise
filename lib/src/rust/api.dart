@@ -8,6 +8,7 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'api/error.dart';
 import 'frb_generated.dart';
 
+// These functions are ignored because they are not marked as `pub`: `initialize_tracing`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`, `from`
 
 /// Creates a `WhitenoiseConfig` object from string directory paths.

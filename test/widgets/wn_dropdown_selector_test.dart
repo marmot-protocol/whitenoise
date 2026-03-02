@@ -160,24 +160,28 @@ void main() {
     });
 
     testWidgets('displays correct selected value after change', (tester) async {
+      setUpTestView(tester);
       String currentValue = 'a';
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: StatefulBuilder(
-            builder: (context, setState) {
-              return Scaffold(
-                body: WnDropdownSelector<String>(
-                  label: 'Test',
-                  options: const [
-                    WnDropdownOption(value: 'a', label: 'Option A'),
-                    WnDropdownOption(value: 'b', label: 'Option B'),
-                  ],
-                  value: currentValue,
-                  onChanged: (value) => setState(() => currentValue = value),
-                ),
-              );
-            },
+        ScreenUtilInit(
+          designSize: testDesignSize,
+          builder: (_, _) => MaterialApp(
+            home: StatefulBuilder(
+              builder: (context, setState) {
+                return Scaffold(
+                  body: WnDropdownSelector<String>(
+                    label: 'Test',
+                    options: const [
+                      WnDropdownOption(value: 'a', label: 'Option A'),
+                      WnDropdownOption(value: 'b', label: 'Option B'),
+                    ],
+                    value: currentValue,
+                    onChanged: (value) => setState(() => currentValue = value),
+                  ),
+                );
+              },
+            ),
           ),
         ),
       );
@@ -473,31 +477,34 @@ void main() {
       bool isDisabled = false;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: StatefulBuilder(
-            builder: (context, setState) {
-              return Scaffold(
-                body: Column(
-                  children: [
-                    WnDropdownSelector<String>(
-                      label: 'Test',
-                      options: const [
-                        WnDropdownOption(value: 'a', label: 'Option A'),
-                        WnDropdownOption(value: 'b', label: 'Option B'),
-                      ],
-                      value: 'a',
-                      onChanged: (_) {},
-                      isDisabled: isDisabled,
-                    ),
-                    ElevatedButton(
-                      key: const Key('disable_button'),
-                      onPressed: () => setState(() => isDisabled = true),
-                      child: const Text('Disable'),
-                    ),
-                  ],
-                ),
-              );
-            },
+        ScreenUtilInit(
+          designSize: testDesignSize,
+          builder: (_, _) => MaterialApp(
+            home: StatefulBuilder(
+              builder: (context, setState) {
+                return Scaffold(
+                  body: Column(
+                    children: [
+                      WnDropdownSelector<String>(
+                        label: 'Test',
+                        options: const [
+                          WnDropdownOption(value: 'a', label: 'Option A'),
+                          WnDropdownOption(value: 'b', label: 'Option B'),
+                        ],
+                        value: 'a',
+                        onChanged: (_) {},
+                        isDisabled: isDisabled,
+                      ),
+                      ElevatedButton(
+                        key: const Key('disable_button'),
+                        onPressed: () => setState(() => isDisabled = true),
+                        child: const Text('Disable'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ),
       );
@@ -521,31 +528,34 @@ void main() {
       String? selectedValue;
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: StatefulBuilder(
-            builder: (context, setState) {
-              return Scaffold(
-                body: Column(
-                  children: [
-                    WnDropdownSelector<String>(
-                      label: 'Test',
-                      options: const [
-                        WnDropdownOption(value: 'a', label: 'Option A'),
-                        WnDropdownOption(value: 'b', label: 'Option B'),
-                      ],
-                      value: 'a',
-                      onChanged: (value) => selectedValue = value,
-                      isDisabled: isDisabled,
-                    ),
-                    ElevatedButton(
-                      key: const Key('disable_button'),
-                      onPressed: () => setState(() => isDisabled = true),
-                      child: const Text('Disable'),
-                    ),
-                  ],
-                ),
-              );
-            },
+        ScreenUtilInit(
+          designSize: testDesignSize,
+          builder: (_, _) => MaterialApp(
+            home: StatefulBuilder(
+              builder: (context, setState) {
+                return Scaffold(
+                  body: Column(
+                    children: [
+                      WnDropdownSelector<String>(
+                        label: 'Test',
+                        options: const [
+                          WnDropdownOption(value: 'a', label: 'Option A'),
+                          WnDropdownOption(value: 'b', label: 'Option B'),
+                        ],
+                        value: 'a',
+                        onChanged: (value) => selectedValue = value,
+                        isDisabled: isDisabled,
+                      ),
+                      ElevatedButton(
+                        key: const Key('disable_button'),
+                        onPressed: () => setState(() => isDisabled = true),
+                        child: const Text('Disable'),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ),
       );
@@ -626,19 +636,22 @@ void main() {
       final controller = WnDropdownController();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: WnDropdownScope(
-              controller: controller,
-              child: const WnDropdownSelector<String>(
-                key: Key('dd'),
-                label: 'Test',
-                options: [
-                  WnDropdownOption(value: 'a', label: 'Option A'),
-                  WnDropdownOption(value: 'b', label: 'Option B'),
-                ],
-                value: 'a',
-                onChanged: _noop,
+        ScreenUtilInit(
+          designSize: testDesignSize,
+          builder: (_, _) => MaterialApp(
+            home: Scaffold(
+              body: WnDropdownScope(
+                controller: controller,
+                child: const WnDropdownSelector<String>(
+                  key: Key('dd'),
+                  label: 'Test',
+                  options: [
+                    WnDropdownOption(value: 'a', label: 'Option A'),
+                    WnDropdownOption(value: 'b', label: 'Option B'),
+                  ],
+                  value: 'a',
+                  onChanged: _noop,
+                ),
               ),
             ),
           ),
@@ -662,19 +675,22 @@ void main() {
       final controller = WnDropdownController();
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: WnDropdownScope(
-              controller: controller,
-              child: WnDropdownSelector<String>(
-                key: const Key('dd'),
-                label: 'Test',
-                options: const [
-                  WnDropdownOption(value: 'a', label: 'Option A'),
-                  WnDropdownOption(value: 'b', label: 'Option B'),
-                ],
-                value: 'a',
-                onChanged: (v) => selected = v,
+        ScreenUtilInit(
+          designSize: testDesignSize,
+          builder: (_, _) => MaterialApp(
+            home: Scaffold(
+              body: WnDropdownScope(
+                controller: controller,
+                child: WnDropdownSelector<String>(
+                  key: const Key('dd'),
+                  label: 'Test',
+                  options: const [
+                    WnDropdownOption(value: 'a', label: 'Option A'),
+                    WnDropdownOption(value: 'b', label: 'Option B'),
+                  ],
+                  value: 'a',
+                  onChanged: (v) => selected = v,
+                ),
               ),
             ),
           ),
@@ -952,11 +968,63 @@ void main() {
       setUpTestView(tester);
 
       await tester.pumpWidget(
-        MaterialApp(
-          home: Scaffold(
-            body: WnDropdownScope(
-              controller: WnDropdownController(),
-              child: const Column(
+        ScreenUtilInit(
+          designSize: testDesignSize,
+          builder: (_, _) => MaterialApp(
+            home: Scaffold(
+              body: WnDropdownScope(
+                controller: WnDropdownController(),
+                child: const Column(
+                  children: [
+                    WnDropdownSelector<String>(
+                      key: Key('dropdown_1'),
+                      label: 'First',
+                      options: [
+                        WnDropdownOption(value: 'a', label: 'Option A'),
+                        WnDropdownOption(value: 'b', label: 'Option B'),
+                      ],
+                      value: 'a',
+                      onChanged: _noop,
+                    ),
+                    WnDropdownSelector<String>(
+                      key: Key('dropdown_2'),
+                      label: 'Second',
+                      options: [
+                        WnDropdownOption(value: 'x', label: 'Option X'),
+                        WnDropdownOption(value: 'y', label: 'Option Y'),
+                      ],
+                      value: 'x',
+                      onChanged: _noop,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.tap(find.text('Option A'));
+      await tester.pumpAndSettle();
+      expect(find.text('Option B'), findsOneWidget);
+
+      await tester.tap(find.text('Option X'));
+      await tester.pumpAndSettle();
+      expect(find.text('Option Y'), findsOneWidget);
+      expect(find.text('Option B'), findsNothing);
+    });
+
+    testWidgets('without WnDropdownScope both dropdowns can be open simultaneously', (
+      tester,
+    ) async {
+      setUpTestView(tester);
+
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: testDesignSize,
+          builder: (_, _) => const MaterialApp(
+            home: Scaffold(
+              body: Column(
                 children: [
                   WnDropdownSelector<String>(
                     key: Key('dropdown_1'),
@@ -980,52 +1048,6 @@ void main() {
                   ),
                 ],
               ),
-            ),
-          ),
-        ),
-      );
-
-      await tester.tap(find.text('Option A'));
-      await tester.pumpAndSettle();
-      expect(find.text('Option B'), findsOneWidget);
-
-      await tester.tap(find.text('Option X'));
-      await tester.pumpAndSettle();
-      expect(find.text('Option Y'), findsOneWidget);
-      expect(find.text('Option B'), findsNothing);
-    });
-
-    testWidgets('without WnDropdownScope both dropdowns can be open simultaneously', (
-      tester,
-    ) async {
-      setUpTestView(tester);
-
-      await tester.pumpWidget(
-        const MaterialApp(
-          home: Scaffold(
-            body: Column(
-              children: [
-                WnDropdownSelector<String>(
-                  key: Key('dropdown_1'),
-                  label: 'First',
-                  options: [
-                    WnDropdownOption(value: 'a', label: 'Option A'),
-                    WnDropdownOption(value: 'b', label: 'Option B'),
-                  ],
-                  value: 'a',
-                  onChanged: _noop,
-                ),
-                WnDropdownSelector<String>(
-                  key: Key('dropdown_2'),
-                  label: 'Second',
-                  options: [
-                    WnDropdownOption(value: 'x', label: 'Option X'),
-                    WnDropdownOption(value: 'y', label: 'Option Y'),
-                  ],
-                  value: 'x',
-                  onChanged: _noop,
-                ),
-              ],
             ),
           ),
         ),

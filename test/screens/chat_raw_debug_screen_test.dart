@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/message_debug_log_provider.dart';
 import 'package:whitenoise/screens/chat_raw_debug_screen.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
+import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
@@ -24,17 +26,24 @@ ChatMessage _message(
   DateTime createdAt, {
   String pubkey = testPubkeyB,
   bool isDeleted = false,
+  bool isReply = false,
+  String? replyToId,
+  List<List<String>> tags = const [],
+  List<SerializableToken> contentTokens = const [],
+  ReactionSummary reactions = const ReactionSummary(byEmoji: [], userReactions: []),
+  List<MediaFile> mediaAttachments = const [],
 }) => ChatMessage(
   id: id,
   pubkey: pubkey,
   content: 'Content of $id',
   createdAt: createdAt,
-  tags: const [],
-  isReply: false,
+  tags: tags,
+  isReply: isReply,
+  replyToId: replyToId,
   isDeleted: isDeleted,
-  contentTokens: const [],
-  reactions: const ReactionSummary(byEmoji: [], userReactions: []),
-  mediaAttachments: const [],
+  contentTokens: contentTokens,
+  reactions: reactions,
+  mediaAttachments: mediaAttachments,
   kind: 9,
 );
 
@@ -342,6 +351,329 @@ void main() {
         find.byKey(const Key('debug_message_count')),
       );
       expect(countWidget.data, '1');
+    });
+
+    testWidgets('tapping Session Overview copy button copies to clipboard and shows snackbar', (
+      tester,
+    ) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          return null;
+        },
+      );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      await pumpDebugScreen(tester);
+
+      final copyButtons = find.text('Copy');
+      expect(copyButtons, findsWidgets);
+      await tester.tap(copyButtons.first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Copied to clipboard'), findsOneWidget);
+    });
+
+    testWidgets('tapping send log copy button triggers clipboard copy', (tester) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          return null;
+        },
+      );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      final now = DateTime(2026, 1, 1, 10);
+      _seededDebugState = MessageDebugLogState(
+        sendLog: [
+          MessageSendLogEntry(
+            timestamp: now,
+            groupId: _testGroupId,
+            status: MessageSendStatus.ok,
+            contentLen: 42,
+            resultId: 'result_abc',
+          ),
+        ],
+        streamLog: const [],
+      );
+
+      await pumpDebugScreen(
+        tester,
+        overrides: [messageDebugLogProvider.overrideWith(_SeededMessageDebugLogNotifier.new)],
+      );
+
+      await tester.scrollUntilVisible(
+        find.text('1 entries'),
+        220,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      final copyButtons = find.text('Copy');
+      await tester.tap(copyButtons.at(1));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Copied to clipboard'), findsOneWidget);
+    });
+
+    testWidgets('send log entry with stackTrace shows stack info', (tester) async {
+      final now = DateTime(2026, 1, 1, 10);
+      _seededDebugState = MessageDebugLogState(
+        sendLog: [
+          MessageSendLogEntry(
+            timestamp: now,
+            groupId: _testGroupId,
+            status: MessageSendStatus.failed,
+            contentLen: 50,
+            error: 'timeout',
+            stackTrace: StackTrace.current,
+          ),
+        ],
+        streamLog: const [],
+      );
+
+      await pumpDebugScreen(
+        tester,
+        overrides: [messageDebugLogProvider.overrideWith(_SeededMessageDebugLogNotifier.new)],
+      );
+
+      expect(find.textContaining('stack='), findsOneWidget);
+    });
+
+    testWidgets('tapping stream log copy button triggers clipboard copy', (tester) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          return null;
+        },
+      );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      final now = DateTime(2026, 1, 1, 10);
+      _seededDebugState = MessageDebugLogState(
+        sendLog: const [],
+        streamLog: [
+          MessageStreamEventEntry(
+            timestamp: now,
+            groupId: _testGroupId,
+            eventType: MessageStreamEventType.update,
+            trigger: 'newMessage',
+            messageId: 'msg_123',
+          ),
+        ],
+      );
+
+      await pumpDebugScreen(
+        tester,
+        overrides: [messageDebugLogProvider.overrideWith(_SeededMessageDebugLogNotifier.new)],
+      );
+
+      final listScrollable = find.byType(Scrollable).first;
+      await tester.scrollUntilVisible(find.text('Stream Log'), 200, scrollable: listScrollable);
+      await tester.pumpAndSettle();
+
+      final copyButtons = find.text('Copy');
+      expect(copyButtons, findsWidgets);
+      await tester.tap(copyButtons.first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Copied to clipboard'), findsOneWidget);
+    });
+
+    testWidgets('shows error when running empty SQL query', (tester) async {
+      await pumpDebugScreen(tester);
+
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('debug_query_input')),
+        220,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      await tester.enterText(find.byKey(const Key('debug_query_input')), '   ');
+      await tester.tap(find.byKey(const Key('debug_query_run_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('debug_query_error')), findsOneWidget);
+      expect(find.textContaining('SQL is empty'), findsOneWidget);
+    });
+
+    testWidgets('copy result button copies query result to clipboard', (tester) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          return null;
+        },
+      );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      _api.debugQueryResult = '[{"name":"accounts"}]';
+
+      await pumpDebugScreen(tester);
+
+      final listScrollable = find.byType(Scrollable).first;
+      await tester.scrollUntilVisible(
+        find.text('Run SQL'),
+        220,
+        scrollable: listScrollable,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.byKey(const Key('debug_query_input')),
+        'SELECT name FROM sqlite_master;',
+      );
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('debug_query_run_button')),
+        100,
+        scrollable: listScrollable,
+      );
+      await tester.tap(find.byKey(const Key('debug_query_run_button')));
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('debug_query_copy_button')),
+        100,
+        scrollable: listScrollable,
+      );
+      await tester.tap(find.byKey(const Key('debug_query_copy_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Copied to clipboard'), findsOneWidget);
+    });
+
+    testWidgets('tapping ratchet tree copy button triggers clipboard copy', (tester) async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          return null;
+        },
+      );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      await pumpDebugScreen(tester);
+
+      await tester.scrollUntilVisible(
+        find.text('1 leaves'),
+        220,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      final copyButtons = find.text('Copy');
+      await tester.tap(copyButtons.last);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Copied to clipboard'), findsOneWidget);
+    });
+
+    testWidgets('message card renders reply_to_id when message is a reply', (tester) async {
+      final now = DateTime(2024, 1, 15, 12);
+      _api.initialMessages = [
+        _message(
+          'reply_msg',
+          now,
+          isReply: true,
+          replyToId: 'parent_message_id',
+        ),
+      ];
+
+      await pumpDebugScreen(tester);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('raw_message_card_reply_msg')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(find.textContaining('reply_to_id'), findsWidgets);
+      expect(find.textContaining('parent_message_id'), findsWidgets);
+    });
+
+    testWidgets('message card renders tags when present', (tester) async {
+      final now = DateTime(2024, 1, 15, 12);
+      _api.initialMessages = [
+        _message(
+          'tagged_msg',
+          now,
+          tags: const [
+            ['e', 'event_id_123'],
+            ['p', testPubkeyC],
+          ],
+        ),
+      ];
+
+      await pumpDebugScreen(tester);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('raw_message_card_tagged_msg')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(find.textContaining('e, event_id_123'), findsOneWidget);
+      expect(find.textContaining('p, $testPubkeyC'), findsOneWidget);
+    });
+
+    testWidgets('message card renders emoji reactions and user reactions', (tester) async {
+      final now = DateTime(2024, 1, 15, 12);
+      _api.initialMessages = [
+        _message(
+          'reacted_msg',
+          now,
+          reactions: ReactionSummary(
+            byEmoji: [
+              EmojiReaction(
+                emoji: '👍',
+                count: BigInt.from(2),
+                users: [testPubkeyA, testPubkeyB],
+              ),
+            ],
+            userReactions: [
+              UserReaction(
+                reactionId: 'reaction_001',
+                user: testPubkeyA,
+                emoji: '👍',
+                createdAt: now,
+              ),
+            ],
+          ),
+        ),
+      ];
+
+      await pumpDebugScreen(tester);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('raw_message_card_reacted_msg')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(find.textContaining('👍'), findsWidgets);
+      expect(find.textContaining('count=2'), findsOneWidget);
+      expect(find.textContaining('raw user reactions'), findsOneWidget);
+      expect(find.textContaining('reaction_001'), findsOneWidget);
     });
   });
 }

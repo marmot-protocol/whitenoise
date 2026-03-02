@@ -32,7 +32,11 @@ class EditGroupState {
   });
 
   bool get hasUnsavedChanges {
-    if (currentGroup == null) return false;
+    if (currentGroup == null) {
+      return (name != null && name!.isNotEmpty) ||
+          (description != null && description!.isNotEmpty) ||
+          (selectedImagePath != null && selectedImagePath!.isNotEmpty);
+    }
     return name != currentGroup?.name ||
         description != currentGroup?.description ||
         selectedImagePath != null;

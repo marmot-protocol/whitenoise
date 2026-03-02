@@ -3,7 +3,7 @@ use flutter_rust_bridge::frb;
 use std::path::Path;
 use std::sync::OnceLock;
 use tracing_appender::{non_blocking::WorkerGuard, rolling::Rotation};
-use tracing_subscriber::{EnvFilter, layer::SubscriberExt, util::SubscriberInitExt};
+use tracing_subscriber::{EnvFilter, layer::SubscriberExt};
 pub use whitenoise::{AppSettings, Language, RelayType, ThemeMode, Whitenoise};
 
 // Re-export types that flutter_rust_bridge needs
@@ -123,13 +123,28 @@ fn initialize_tracing(logs_dir: &str) -> Result<(), ApiError> {
         .with_target(true)
         .with_writer(non_blocking);
 
-    // Ignore the error when another global subscriber is already installed.
-    let _ = tracing_subscriber::registry()
+    let subscriber = tracing_subscriber::registry()
         .with(env_filter)
-        .with(fmt_layer)
-        .try_init();
-    let _ = TRACING_GUARD.set(guard);
+        .with(fmt_layer);
 
+    // Try setting as global default. If that fails (because flutter_rust_bridge
+    // already set one), fall back to setting it as the *default for this thread*
+    // — but more importantly, we keep the guard alive either way.
+    match tracing::subscriber::set_global_default(subscriber) {
+        Ok(()) => {}
+        Err(_) => {
+            // FRB (or something else) already owns the global subscriber.
+            // We can't add layers to it after the fact.
+            // Log a warning and move on — the guard will still be stored
+            // so the appender stays alive, but logs will go to FRB's subscriber.
+            eprintln!(
+                "Warning: global tracing subscriber already set (likely by flutter_rust_bridge). \
+                 File logging layer could not be installed."
+            );
+        }
+    }
+
+    let _ = TRACING_GUARD.set(guard);
     Ok(())
 }
 

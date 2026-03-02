@@ -2,16 +2,22 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/debug_view_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_info_screen.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
+import 'package:whitenoise/screens/chat_raw_debug_screen.dart';
 import 'package:whitenoise/screens/group_info_screen.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
 import 'package:whitenoise/src/rust/api/drafts.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
+import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
@@ -22,6 +28,17 @@ import '../test_helpers.dart';
 
 const _testPubkey = testPubkeyA;
 const _testGroupId = testGroupId;
+
+class _MockImagePickerPlatform extends ImagePickerPlatform with MockPlatformInterfaceMixin {
+  List<XFile> filesToReturn = [];
+
+  @override
+  Future<List<XFile>> getMultiImageWithOptions({
+    MultiImagePickerOptions options = const MultiImagePickerOptions(),
+  }) async {
+    return filesToReturn;
+  }
+}
 
 class _MockTag implements Tag {
   final List<String> vec;
@@ -71,6 +88,7 @@ class _MockApi extends MockWnApi {
   int _sendCallCount = 0;
   bool isDm = false;
   List<String> groupMembers = [];
+  Completer<MediaFile>? uploadCompleter;
 
   @override
   void reset() {
@@ -89,6 +107,7 @@ class _MockApi extends MockWnApi {
     _sendCallCount = 0;
     isDm = false;
     groupMembers = [];
+    uploadCompleter = null;
   }
 
   @override
@@ -192,11 +211,39 @@ class _MockApi extends MockWnApi {
   }) {
     return Future.value(groupMembers);
   }
+
+  @override
+  Future<MediaFile> crateApiMediaFilesUploadChatMedia({
+    required String accountPubkey,
+    required String groupId,
+    required String filePath,
+  }) async {
+    if (uploadCompleter != null) {
+      return uploadCompleter!.future;
+    }
+    return MediaFile(
+      id: 'media_${filePath.hashCode}',
+      mlsGroupId: groupId,
+      accountPubkey: accountPubkey,
+      filePath: filePath,
+      encryptedFileHash: 'encrypted_hash',
+      mimeType: 'image/jpeg',
+      mediaType: 'image',
+      blossomUrl: 'https://example.com/media',
+      nostrKey: 'nostr_key',
+      createdAt: DateTime(2024),
+    );
+  }
 }
 
 class _MockAuthNotifier extends AuthNotifier {
   @override
   Future<String?> build() async => _testPubkey;
+}
+
+class _MockDebugViewNotifier extends DebugViewNotifier {
+  @override
+  Future<bool> build() async => true;
 }
 
 final _api = _MockApi();
@@ -1493,6 +1540,77 @@ void main() {
         await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message m1');
         await tester.pumpAndSettle();
         expect(find.text('1 of 1 match'), findsOneWidget);
+      });
+    });
+
+    group('attachment area with reply and media', () {
+      late _MockImagePickerPlatform mockImagePicker;
+
+      setUp(() {
+        mockImagePicker = _MockImagePickerPlatform();
+        ImagePickerPlatform.instance = mockImagePicker;
+      });
+
+      testWidgets('shows media upload preview when images are picked', (tester) async {
+        mockImagePicker.filesToReturn = [XFile('/tmp/test_image.jpg')];
+        _api.initialMessages = [_message('m1', DateTime(2024))];
+        await pumpChatScreen(tester);
+
+        await tester.tap(find.byKey(const Key('add_button')));
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 100)));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ChatMediaUploadPreview), findsOneWidget);
+      });
+
+      testWidgets('shows both reply preview and media preview with spacer', (tester) async {
+        mockImagePicker.filesToReturn = [XFile('/tmp/test_image.jpg')];
+        _api.initialMessages = [_message('m1', DateTime(2024))];
+        await pumpChatScreen(tester);
+
+        await tester.longPress(find.textContaining('Message m1'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('reply_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ChatMessageQuote), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('add_button')));
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 100)));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ChatMessageQuote), findsOneWidget);
+        expect(find.byType(ChatMediaUploadPreview), findsOneWidget);
+      });
+    });
+
+    group('debug view', () {
+      Future<void> pumpChatScreenWithDebug(WidgetTester tester) async {
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            debugViewProvider.overrideWith(() => _MockDebugViewNotifier()),
+          ],
+        );
+        await tester.pumpAndSettle();
+        Routes.goToChat(
+          tester.element(find.byType(Scaffold)),
+          _testGroupId,
+        );
+        await tester.pumpAndSettle();
+      }
+
+      testWidgets('shows debug button when debug view is enabled', (tester) async {
+        await pumpChatScreenWithDebug(tester);
+        expect(find.byKey(const Key('chat_raw_debug_button')), findsOneWidget);
+      });
+
+      testWidgets('debug button navigates to raw debug screen', (tester) async {
+        await pumpChatScreenWithDebug(tester);
+        await tester.tap(find.byKey(const Key('chat_raw_debug_button')));
+        await tester.pumpAndSettle();
+        expect(find.byType(ChatRawDebugScreen), findsOneWidget);
       });
     });
   });
