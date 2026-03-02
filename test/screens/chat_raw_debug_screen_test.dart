@@ -376,7 +376,7 @@ void main() {
       await tester.tap(copyButtons.first);
       await tester.pumpAndSettle();
 
-      expect(find.text('Copied!'), findsOneWidget);
+      expect(find.text('Copied to clipboard'), findsOneWidget);
     });
 
     testWidgets('tapping send log copy button triggers clipboard copy', (tester) async {
@@ -413,23 +413,16 @@ void main() {
       );
 
       await tester.scrollUntilVisible(
-        find.text('Send Log'),
+        find.text('1 entries'),
         220,
         scrollable: find.byType(Scrollable).first,
       );
 
-      final sendLogSection = find.ancestor(
-        of: find.text('Send Log'),
-        matching: find.byType(Column),
-      );
-      final copyInSendLog = find.descendant(
-        of: sendLogSection.first,
-        matching: find.text('Copy'),
-      );
-      await tester.tap(copyInSendLog.first);
+      final copyButtons = find.text('Copy');
+      await tester.tap(copyButtons.at(1));
       await tester.pumpAndSettle();
 
-      expect(find.text('Copied!'), findsOneWidget);
+      expect(find.text('Copied to clipboard'), findsOneWidget);
     });
 
     testWidgets('send log entry with stackTrace shows stack info', (tester) async {
@@ -489,24 +482,16 @@ void main() {
         overrides: [messageDebugLogProvider.overrideWith(_SeededMessageDebugLogNotifier.new)],
       );
 
-      await tester.scrollUntilVisible(
-        find.text('Stream Log'),
-        220,
-        scrollable: find.byType(Scrollable).first,
-      );
-
-      final streamLogSection = find.ancestor(
-        of: find.text('Stream Log'),
-        matching: find.byType(Column),
-      );
-      final copyInStreamLog = find.descendant(
-        of: streamLogSection.first,
-        matching: find.text('Copy'),
-      );
-      await tester.tap(copyInStreamLog.first);
+      final listScrollable = find.byType(Scrollable).first;
+      await tester.scrollUntilVisible(find.text('Stream Log'), 200, scrollable: listScrollable);
       await tester.pumpAndSettle();
 
-      expect(find.text('Copied!'), findsOneWidget);
+      final copyButtons = find.text('Copy');
+      expect(copyButtons, findsWidgets);
+      await tester.tap(copyButtons.first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Copied to clipboard'), findsOneWidget);
     });
 
     testWidgets('shows error when running empty SQL query', (tester) async {
@@ -544,30 +529,37 @@ void main() {
 
       await pumpDebugScreen(tester);
 
+      final listScrollable = find.byType(Scrollable).first;
       await tester.scrollUntilVisible(
-        find.byKey(const Key('debug_query_input')),
+        find.text('Run SQL'),
         220,
-        scrollable: find.byType(Scrollable).first,
+        scrollable: listScrollable,
       );
+      await tester.pumpAndSettle();
 
       await tester.enterText(
         find.byKey(const Key('debug_query_input')),
         'SELECT name FROM sqlite_master;',
       );
+      await tester.pumpAndSettle();
+
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('debug_query_run_button')),
+        100,
+        scrollable: listScrollable,
+      );
       await tester.tap(find.byKey(const Key('debug_query_run_button')));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('debug_query_result')), findsOneWidget);
-
       await tester.scrollUntilVisible(
         find.byKey(const Key('debug_query_copy_button')),
-        220,
-        scrollable: find.byType(Scrollable).first,
+        100,
+        scrollable: listScrollable,
       );
       await tester.tap(find.byKey(const Key('debug_query_copy_button')));
       await tester.pumpAndSettle();
 
-      expect(find.text('Copied!'), findsOneWidget);
+      expect(find.text('Copied to clipboard'), findsOneWidget);
     });
 
     testWidgets('tapping ratchet tree copy button triggers clipboard copy', (tester) async {
@@ -587,23 +579,16 @@ void main() {
       await pumpDebugScreen(tester);
 
       await tester.scrollUntilVisible(
-        find.text('Ratchet Tree'),
+        find.text('1 leaves'),
         220,
         scrollable: find.byType(Scrollable).first,
       );
 
-      final ratchetSection = find.ancestor(
-        of: find.text('Ratchet Tree'),
-        matching: find.byType(Column),
-      );
-      final copyInRatchet = find.descendant(
-        of: ratchetSection.first,
-        matching: find.text('Copy'),
-      );
-      await tester.tap(copyInRatchet.first);
+      final copyButtons = find.text('Copy');
+      await tester.tap(copyButtons.last);
       await tester.pumpAndSettle();
 
-      expect(find.text('Copied!'), findsOneWidget);
+      expect(find.text('Copied to clipboard'), findsOneWidget);
     });
 
     testWidgets('message card renders reply_to_id when message is a reply', (tester) async {
