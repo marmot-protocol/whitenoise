@@ -9,7 +9,7 @@ on:
 jobs:
   check:
     name: Check
-    runs-on: namespace-profile-whitenoise
+    runs-on: blacksmith-4vcpu-ubuntu-2404
 
     steps:
     - name: Checkout code
@@ -72,7 +72,7 @@ jobs:
 
   test:
     name: Test (${{ matrix.shard }}/4)
-    runs-on: namespace-profile-whitenoise
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     strategy:
       fail-fast: false
       matrix:
@@ -152,7 +152,7 @@ jobs:
     name: Coverage
     if: always()
     needs: test
-    runs-on: namespace-profile-whitenoise
+    runs-on: blacksmith-4vcpu-ubuntu-2404
     permissions:
       actions: read
       contents: read
