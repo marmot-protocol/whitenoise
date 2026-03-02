@@ -174,7 +174,17 @@ jobs:
             if (!content) continue;
 
             const shardNum = dir.replace('test-failures-shard-', '');
-            sections.push(`### Shard ${shardNum}`, '', '```', content, '```', '');
+          sections.push(
+            '<details>',
+            `<summary>Shard ${shardNum}</summary>`,
+            '',
+            '```',
+            content,
+            '```',
+            '',
+            '</details>',
+            ''
+          );
           }
 
           const { data: comments } = await github.rest.issues.listComments({
