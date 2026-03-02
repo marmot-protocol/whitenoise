@@ -36,9 +36,9 @@ html_escape() {
 }
 
 format_date() {
-  date -u -d "$1" '+%B %d, %Y at %H:%M UTC' 2>/dev/null \
-    || TZ=UTC date -jf '%Y-%m-%dT%H:%M:%SZ' "$1" '+%B %d, %Y at %H:%M UTC' 2>/dev/null \
-    || echo "$1"
+  date -u -d "$1" '+%B %d, %Y at %H:%M UTC' 2>/dev/null ||
+    TZ=UTC date -jf '%Y-%m-%dT%H:%M:%SZ' "$1" '+%B %d, %Y at %H:%M UTC' 2>/dev/null ||
+    echo "$1"
 }
 
 # ---------------------------------------------------------------------------
@@ -53,9 +53,9 @@ if [[ -z "$RUN_ID" ]]; then
   exit 1
 fi
 
-HEAD_SHA=$(echo "$RUNS_JSON"  | jq -r '.workflow_runs[0].head_sha')
-RUN_URL=$(echo "$RUNS_JSON"   | jq -r '.workflow_runs[0].html_url')
-RUN_DATE=$(echo "$RUNS_JSON"  | jq -r '.workflow_runs[0].updated_at')
+HEAD_SHA=$(echo "$RUNS_JSON" | jq -r '.workflow_runs[0].head_sha')
+RUN_URL=$(echo "$RUNS_JSON" | jq -r '.workflow_runs[0].html_url')
+RUN_DATE=$(echo "$RUNS_JSON" | jq -r '.workflow_runs[0].updated_at')
 
 echo "  Run #$RUN_ID  sha=$HEAD_SHA"
 
@@ -66,7 +66,7 @@ echo "Fetching artifacts..."
 ARTIFACTS_JSON=$(gh_api "$API/repos/$REPO/actions/runs/$RUN_ID/artifacts")
 
 ARTIFACT_NAME=$(echo "$ARTIFACTS_JSON" | jq -r '.artifacts[0].name // empty')
-ARTIFACT_ID=$(echo "$ARTIFACTS_JSON"   | jq -r '.artifacts[0].id // empty')
+ARTIFACT_ID=$(echo "$ARTIFACTS_JSON" | jq -r '.artifacts[0].id // empty')
 ARTIFACT_SIZE=$(echo "$ARTIFACTS_JSON" | jq -r '.artifacts[0].size_in_bytes // 0')
 ARTIFACT_EXPIRED=$(echo "$ARTIFACTS_JSON" | jq -r '.artifacts[0].expired // false')
 
@@ -91,10 +91,10 @@ echo "  Artifact: $ARTIFACT_NAME ($ARTIFACT_SIZE_MB MB)"
 echo "Fetching commit info for $HEAD_SHA..."
 COMMIT_JSON=$(gh_api "$API/repos/$REPO/commits/$HEAD_SHA")
 
-COMMIT_MSG=$(echo "$COMMIT_JSON"    | jq -r '.commit.message' | head -1)
+COMMIT_MSG=$(echo "$COMMIT_JSON" | jq -r '.commit.message' | head -1)
 COMMIT_AUTHOR=$(echo "$COMMIT_JSON" | jq -r '.commit.author.name')
 COMMIT_AUTHOR_ESCAPED=$(html_escape "$COMMIT_AUTHOR")
-COMMIT_DATE=$(echo "$COMMIT_JSON"   | jq -r '.commit.author.date')
+COMMIT_DATE=$(echo "$COMMIT_JSON" | jq -r '.commit.author.date')
 COMMIT_URL="https://github.com/$REPO/commit/$HEAD_SHA"
 SHORT_SHA="${HEAD_SHA:0:7}"
 
@@ -236,7 +236,7 @@ PRETTY_COMMIT_DATE=$(format_date "$COMMIT_DATE")
 # Escape commit message for safe HTML embedding
 COMMIT_MSG_ESCAPED=$(html_escape "$COMMIT_MSG")
 
-cat > "$OUT_DIR/index.html" <<'HTMLEOF_PART1'
+cat >"$OUT_DIR/index.html" <<'HTMLEOF_PART1'
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -577,7 +577,7 @@ cat > "$OUT_DIR/index.html" <<'HTMLEOF_PART1'
 HTMLEOF_PART1
 
 # --- inject dynamic master build values ---
-cat >> "$OUT_DIR/index.html" <<HTMLEOF_PART2
+cat >>"$OUT_DIR/index.html" <<HTMLEOF_PART2
     <a class="nes-btn" href="${NIGHTLY_LINK_URL}">
       &#9733; DOWNLOAD APK &#9733;
     </a>
@@ -646,11 +646,11 @@ HTMLEOF_PART2
 
 # --- inject PR builds ---
 if [[ -n "$PR_BUILDS_HTML" ]]; then
-  cat >> "$OUT_DIR/index.html" <<HTMLEOF_PR_BUILDS
+  cat >>"$OUT_DIR/index.html" <<HTMLEOF_PR_BUILDS
 ${PR_BUILDS_HTML}
 HTMLEOF_PR_BUILDS
 else
-  cat >> "$OUT_DIR/index.html" <<'HTMLEOF_PR_EMPTY'
+  cat >>"$OUT_DIR/index.html" <<'HTMLEOF_PR_EMPTY'
     <div class="nes-box is-dark">
       <p class="pr-empty">
         No active PR builds right now.<br>
@@ -661,7 +661,7 @@ HTMLEOF_PR_EMPTY
 fi
 
 # --- close out the page ---
-cat >> "$OUT_DIR/index.html" <<HTMLEOF_PART3
+cat >>"$OUT_DIR/index.html" <<HTMLEOF_PART3
   </div>
 
   <div class="pixel-divider">&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;&#9608;</div>
