@@ -7,6 +7,7 @@ import 'package:whitenoise/widgets/chat_message_media.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/media_modal.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
+import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 
 class ChatMessageBubble extends StatelessWidget {
@@ -38,6 +39,16 @@ class ChatMessageBubble extends StatelessWidget {
     this.showTail = true,
     this.isGroupChat = false,
   });
+
+  ChatStatusType? get _deliveryStatusType {
+    final status = message.deliveryStatus;
+    if (status == null) return null;
+    return switch (status) {
+      DeliveryStatus_Sending() => ChatStatusType.sent,
+      DeliveryStatus_Sent() => ChatStatusType.delivered,
+      DeliveryStatus_Failed() => ChatStatusType.failed,
+    };
+  }
 
   void _showMediaModal(BuildContext context, int index) {
     MediaModal.show(
@@ -102,6 +113,7 @@ class ChatMessageBubble extends StatelessWidget {
         showTail: showTail,
         isGroupChat: isGroupChat,
       ),
+      deliveryStatus: isOwnMessage ? _deliveryStatusType : null,
     );
   }
 }
