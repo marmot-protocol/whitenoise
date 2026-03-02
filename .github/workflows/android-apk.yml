@@ -70,11 +70,6 @@ jobs:
         channel: 'stable'
         cache: true
 
-    - name: Setup Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
-
     - name: Cache Flutter dependencies
       uses: actions/cache@v4
       with:
@@ -85,7 +80,22 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pub-cache-
 
+    - name: Cache pre-built Android native libraries
+      id: jnilibs-cache
+      uses: actions/cache@v4
+      with:
+        path: android/app/src/main/jniLibs
+        key: ${{ runner.os }}-jnilibs-${{ hashFiles('rust/Cargo.toml', 'rust/Cargo.lock', 'rust/src/**', 'scripts/build_android.sh', 'scripts/build_openssl_android.sh', 'scripts/setup_android_config.sh') }}
+
+    # ── Rust build steps (skipped when native libs are cached) ──
+    - name: Setup Rust
+      if: steps.jnilibs-cache.outputs.cache-hit != 'true'
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+
     - name: Cache Rust dependencies
+      if: steps.jnilibs-cache.outputs.cache-hit != 'true'
       uses: actions/cache@v4
       with:
         path: |
@@ -97,6 +107,7 @@ jobs:
           ${{ runner.os }}-cargo-android-
 
     - name: Cache OpenSSL for Android
+      if: steps.jnilibs-cache.outputs.cache-hit != 'true'
       uses: actions/cache@v4
       with:
         path: rust/target/openssl/install
@@ -120,12 +131,14 @@ jobs:
       run: echo "y" | sdkmanager --install "ndk;27.0.12077973"
 
     - name: Set NDK environment
+      if: steps.jnilibs-cache.outputs.cache-hit != 'true'
       run: echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
 
     - name: Install Flutter dependencies
       run: flutter pub get
 
     - name: Build Rust libraries for Android
+      if: steps.jnilibs-cache.outputs.cache-hit != 'true'
       run: ./scripts/build_android.sh
 
     - name: Build staging APK
