@@ -249,7 +249,10 @@ class _MockDebugViewNotifier extends DebugViewNotifier {
 final _api = _MockApi();
 
 void main() {
-  setUpAll(() => RustLib.initMock(api: _api));
+  setUpAll(() {
+    mockPathProvider();
+    RustLib.initMock(api: _api);
+  });
   setUp(() => _api.reset());
 
   Future<void> pumpChatScreen(WidgetTester tester) async {
