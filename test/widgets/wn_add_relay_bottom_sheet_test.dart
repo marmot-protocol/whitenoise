@@ -284,5 +284,74 @@ void main() {
         expect(button.onPressed, isNull);
       });
     });
+
+    group('clear button', () {
+      testWidgets('shows clear button when text is entered', (tester) async {
+        final widget = WnAddRelayBottomSheet(
+          onRelayAdded: (_) async {},
+        );
+        await mountWidget(widget, tester);
+
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump();
+
+        expect(find.byKey(const Key('clear_button')), findsOneWidget);
+        expect(find.byKey(const Key('paste_button')), findsNothing);
+      });
+
+      testWidgets('clears input when clear button is tapped', (tester) async {
+        final widget = WnAddRelayBottomSheet(
+          onRelayAdded: (_) async {},
+        );
+        await mountWidget(widget, tester);
+
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump();
+
+        await tester.tap(find.byKey(const Key('clear_button')));
+        await tester.pump();
+
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.controller?.text, 'wss://');
+      });
+
+      testWidgets('shows paste button after clearing', (tester) async {
+        final widget = WnAddRelayBottomSheet(
+          onRelayAdded: (_) async {},
+        );
+        await mountWidget(widget, tester);
+
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump();
+
+        expect(find.byKey(const Key('clear_button')), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('clear_button')));
+        await tester.pump();
+
+        expect(find.byKey(const Key('paste_button')), findsOneWidget);
+        expect(find.byKey(const Key('clear_button')), findsNothing);
+      });
+
+      testWidgets('disables submit button after clearing', (tester) async {
+        final widget = WnAddRelayBottomSheet(
+          onRelayAdded: (_) async {},
+        );
+        await mountWidget(widget, tester);
+
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump(const Duration(milliseconds: 600));
+
+        final buttons = find.byType(FilledButton);
+        final buttonBefore = tester.widget<FilledButton>(buttons.last);
+        expect(buttonBefore.onPressed, isNotNull);
+
+        await tester.tap(find.byKey(const Key('clear_button')));
+        await tester.pump();
+
+        final buttonAfter = tester.widget<FilledButton>(buttons.last);
+        expect(buttonAfter.onPressed, isNull);
+      });
+    });
   });
 }
