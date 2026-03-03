@@ -113,6 +113,7 @@ ChatInputState useChatInput({
 
   void setReplyingTo(ChatMessage message) {
     replyingTo.value = message;
+    focusNode.requestFocus();
   }
 
   void cancelReply() {

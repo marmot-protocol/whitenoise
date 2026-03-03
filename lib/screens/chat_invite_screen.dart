@@ -127,7 +127,11 @@ class ChatInviteScreen extends HookConsumerWidget {
             WnSlate(
               tag: 'wn-slate-invite-header',
               header: WnSlateChatHeader(
-                displayName: chatProfile.data?.displayName ?? '',
+                displayName:
+                    chatProfile.data?.displayName ??
+                    (chatProfile.data?.isDm == true
+                        ? context.l10n.unknownUser
+                        : context.l10n.unknownGroup),
                 avatarColor: chatProfile.data?.color ?? AvatarColor.neutral,
                 pictureUrl: chatProfile.data?.pictureUrl,
                 onBack: () => Routes.goToChatList(context),
@@ -149,7 +153,10 @@ class ChatInviteScreen extends HookConsumerWidget {
                 ),
                 SizedBox(height: 16.h),
                 Text(
-                  chatProfile.data?.displayName ?? '',
+                  chatProfile.data?.displayName ??
+                      (chatProfile.data?.isDm == true
+                          ? context.l10n.unknownUser
+                          : context.l10n.unknownGroup),
                   style: typography.semiBold18.copyWith(
                     color: colors.backgroundContentPrimary,
                   ),
@@ -177,7 +184,7 @@ class ChatInviteScreen extends HookConsumerWidget {
                   : _InviteMessageList(
                       chatMessages: chatMessages,
                       pubkey: pubkey,
-                      isGroupChat: chatProfile.data?.otherMemberPubkey == null,
+                      isGroupChat: chatProfile.data?.isDm == false,
                     ),
             ),
             WnSlate(

@@ -16,12 +16,14 @@ class ChatMessageQuote extends StatelessWidget {
     this.currentUserPubkey,
     this.onTap,
     this.onCancel,
+    this.authorColor,
   });
 
   final ChatMessageQuoteData data;
   final String? currentUserPubkey;
   final VoidCallback? onTap;
   final VoidCallback? onCancel;
+  final Color? authorColor;
 
   @override
   Widget build(BuildContext context) {
@@ -42,6 +44,7 @@ class ChatMessageQuote extends StatelessWidget {
         mediaFile: data.mediaFile!,
         onTap: onTap,
         onCancel: onCancel,
+        authorColor: authorColor,
       );
     }
 
@@ -50,6 +53,7 @@ class ChatMessageQuote extends StatelessWidget {
       text: text,
       onTap: onTap,
       onCancel: onCancel,
+      authorColor: authorColor,
     );
   }
 }
@@ -61,6 +65,7 @@ class _ChatMessageQuoteWithMedia extends HookWidget {
     required this.mediaFile,
     this.onTap,
     this.onCancel,
+    this.authorColor,
   });
 
   final String author;
@@ -68,6 +73,7 @@ class _ChatMessageQuoteWithMedia extends HookWidget {
   final MediaFile mediaFile;
   final VoidCallback? onTap;
   final VoidCallback? onCancel;
+  final Color? authorColor;
 
   @override
   Widget build(BuildContext context) {
@@ -84,6 +90,7 @@ class _ChatMessageQuoteWithMedia extends HookWidget {
       image: image,
       onTap: onTap,
       onCancel: onCancel,
+      authorColor: authorColor,
     );
   }
 }

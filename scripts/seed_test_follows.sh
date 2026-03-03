@@ -19,10 +19,16 @@ INPUT="$1"
 # Detect format and normalize to both npub and hex
 if [[ "$INPUT" == npub1* ]]; then
   NPUB="$INPUT"
-  HEX=$(nak decode "$INPUT" 2>/dev/null) || { echo "ERROR: Invalid npub"; exit 1; }
+  HEX=$(nak decode "$INPUT" 2>/dev/null) || {
+    echo "ERROR: Invalid npub"
+    exit 1
+  }
 else
   HEX="$INPUT"
-  NPUB=$(nak encode npub "$INPUT" 2>/dev/null) || { echo "ERROR: Invalid hex pubkey"; exit 1; }
+  NPUB=$(nak encode npub "$INPUT" 2>/dev/null) || {
+    echo "ERROR: Invalid hex pubkey"
+    exit 1
+  }
 fi
 
 SOURCE_RELAYS="wss://relay.primal.net wss://relay.damus.io wss://purplepag.es wss://nos.lol"
@@ -78,12 +84,12 @@ while read -r pk; do
       [ -z "$event" ] && continue
       publish "$event" >/dev/null 2>&1
       BATCH_COUNT=$((BATCH_COUNT + 1))
-    done <<< "$EVENTS"
+    done <<<"$EVENTS"
     PUBLISHED=$((PUBLISHED + BATCH_COUNT))
     printf "  batch %d: %d metadata events (%d total)\n" "$BATCH_NUM" "$BATCH_COUNT" "$PUBLISHED"
     BATCH_ARGS=()
   fi
-done <<< "$PUBKEYS"
+done <<<"$PUBKEYS"
 
 if [ ${#BATCH_ARGS[@]} -gt 0 ]; then
   BATCH_NUM=$((BATCH_NUM + 1))
@@ -93,7 +99,7 @@ if [ ${#BATCH_ARGS[@]} -gt 0 ]; then
     [ -z "$event" ] && continue
     publish "$event" >/dev/null 2>&1
     BATCH_COUNT=$((BATCH_COUNT + 1))
-  done <<< "$EVENTS"
+  done <<<"$EVENTS"
   PUBLISHED=$((PUBLISHED + BATCH_COUNT))
   printf "  batch %d: %d metadata events (%d total)\n" "$BATCH_NUM" "$BATCH_COUNT" "$PUBLISHED"
 fi

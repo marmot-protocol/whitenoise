@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage;
 import 'package:whitenoise/theme.dart';
@@ -26,6 +27,7 @@ class MessageActionsScreen extends HookWidget {
     this.senderName,
     this.senderPictureUrl,
     this.isGroupChat = false,
+    this.getChatMessageQuote,
   });
 
   final ChatMessage message;
@@ -37,6 +39,7 @@ class MessageActionsScreen extends HookWidget {
   final String? senderName;
   final String? senderPictureUrl;
   final bool isGroupChat;
+  final ChatMessageQuoteData? Function(String? replyId)? getChatMessageQuote;
 
   static Future<void> show(
     BuildContext context, {
@@ -49,6 +52,7 @@ class MessageActionsScreen extends HookWidget {
     String? senderName,
     String? senderPictureUrl,
     bool isGroupChat = false,
+    ChatMessageQuoteData? Function(String? replyId)? getChatMessageQuote,
   }) {
     final colors = context.colors;
 
@@ -68,6 +72,7 @@ class MessageActionsScreen extends HookWidget {
             senderName: senderName,
             senderPictureUrl: senderPictureUrl,
             isGroupChat: isGroupChat,
+            getChatMessageQuote: getChatMessageQuote,
           );
         },
         transitionsBuilder: (_, animation, _, child) {
@@ -160,13 +165,16 @@ class MessageActionsScreen extends HookWidget {
                     selectedEmojis: selectedEmojis,
                     onReply: onReply != null
                         ? () {
-                            onReply!(message);
                             Navigator.of(context).pop();
+                            WidgetsBinding.instance.addPostFrameCallback((_) {
+                              onReply!(message);
+                            });
                           }
                         : null,
                     senderName: senderName,
                     senderPictureUrl: senderPictureUrl,
                     isGroupChat: isGroupChat,
+                    getChatMessageQuote: getChatMessageQuote,
                   ),
                 ],
               ),
@@ -197,6 +205,7 @@ class MessageActionsModal extends StatelessWidget {
     this.senderName,
     this.senderPictureUrl,
     this.isGroupChat = false,
+    this.getChatMessageQuote,
   });
 
   final ChatMessage message;
@@ -210,6 +219,7 @@ class MessageActionsModal extends StatelessWidget {
   final String? senderName;
   final String? senderPictureUrl;
   final bool isGroupChat;
+  final ChatMessageQuoteData? Function(String? replyId)? getChatMessageQuote;
 
   static const List<String> reactions = [
     '❤',
@@ -224,6 +234,7 @@ class MessageActionsModal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
+    final replyPreview = message.isReply ? getChatMessageQuote?.call(message.replyToId) : null;
 
     return WnSlate(
       child: Padding(
@@ -245,6 +256,7 @@ class MessageActionsModal extends StatelessWidget {
               senderName: senderName,
               senderPictureUrl: senderPictureUrl,
               isGroupChat: isGroupChat,
+              replyPreview: replyPreview,
             ),
             SizedBox(height: 16.h),
             Row(

@@ -1,11 +1,13 @@
-import 'dart:typed_data';
+import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart' show ScreenUtilInit;
-import 'package:flutter_test/flutter_test.dart' show WidgetTester, addTearDown;
+import 'package:flutter_test/flutter_test.dart'
+    show TestWidgetsFlutterBinding, WidgetTester, addTearDown;
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/routes.dart';
 
@@ -112,6 +114,15 @@ final testImageProvider = MemoryImage(
     0x82,
   ]),
 );
+
+void mockPathProvider() {
+  final binding = TestWidgetsFlutterBinding.ensureInitialized();
+  const channel = MethodChannel('plugins.flutter.io/path_provider');
+  binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
+    final dir = await Directory.systemTemp.createTemp('wn_test_');
+    return dir.path;
+  });
+}
 
 void setUpTestView(WidgetTester tester) {
   tester.view.physicalSize = testDesignSize;

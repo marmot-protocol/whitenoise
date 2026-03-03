@@ -170,7 +170,7 @@ class ChatScreen extends HookConsumerWidget {
 
     Future<void> showMessageMenu(ChatMessage message) async {
       FocusScope.of(context).unfocus();
-      final isGroupChat = chatProfile.data?.otherMemberPubkey == null;
+      final isGroupChat = chatProfile.data?.isDm != true;
       final authorMetadata = getAuthorMetadata(message.pubkey);
       final senderName = message.pubkey == pubkey
           ? context.l10n.you
@@ -196,6 +196,7 @@ class ChatScreen extends HookConsumerWidget {
         ),
         onReply: (msg) => input.setReplyingTo(msg),
         senderName: senderName,
+        getChatMessageQuote: getChatMessageQuote,
         senderPictureUrl: senderPictureUrl,
         isGroupChat: isGroupChat,
       );
@@ -260,7 +261,7 @@ class ChatScreen extends HookConsumerWidget {
             final senderPictureUrl = authorMetadata?.picture;
 
             final nextMessage = index > 0 ? getMessage(index - 1) : null;
-            final isGroupChat = chatProfile.data?.otherMemberPubkey == null;
+            final isGroupChat = chatProfile.data?.isDm != true;
             final showAvatar = shouldShowAvatar(
               current: message,
               next: nextMessage,
@@ -279,6 +280,7 @@ class ChatScreen extends HookConsumerWidget {
                 currentUserPubkey: pubkey,
                 onLongPress: () => showMessageMenu(message),
                 onReaction: (emoji) => toggleReaction(message, emoji),
+                onHorizontalDragEnd: () => input.setReplyingTo(message),
                 replyPreview: replyPreview,
                 onReplyTap: replyPreview != null && !replyPreview.isNotFound
                     ? () => scrollToMessageResult.scrollToMessage(replyPreview.messageId)
@@ -315,18 +317,6 @@ class ChatScreen extends HookConsumerWidget {
                 color: colors.backgroundPrimary,
                 height: inputAreaHeight.value + safeAreaBottom + 48.h,
               ),
-              if (noticeMessage.value != null)
-                Positioned(
-                  top: safeAreaTop,
-                  left: 0,
-                  right: 0,
-                  child: WnSystemNotice(
-                    key: ValueKey(noticeMessage.value),
-                    title: noticeMessage.value!,
-                    type: WnSystemNoticeType.error,
-                    onDismiss: dismissNotice,
-                  ),
-                ),
               SafeArea(
                 bottom: false,
                 child: Column(
@@ -334,7 +324,11 @@ class ChatScreen extends HookConsumerWidget {
                   children: [
                     WnSlate(
                       header: WnSlateChatHeader(
-                        displayName: chatProfile.data?.displayName ?? '',
+                        displayName:
+                            chatProfile.data?.displayName ??
+                            (chatProfile.data?.isDm == true
+                                ? context.l10n.unknownUser
+                                : context.l10n.unknownGroup),
                         avatarColor: chatProfile.data?.color ?? AvatarColor.neutral,
                         pictureUrl: chatProfile.data?.pictureUrl,
                         onBack: isSearchActive.value
@@ -357,6 +351,14 @@ class ChatScreen extends HookConsumerWidget {
                               )
                             : null,
                       ),
+                      systemNotice: noticeMessage.value != null
+                          ? WnSystemNotice(
+                              key: ValueKey(noticeMessage.value),
+                              title: noticeMessage.value!,
+                              type: WnSystemNoticeType.error,
+                              onDismiss: dismissNotice,
+                            )
+                          : null,
                     ),
                     if (isSearchActive.value) ...[
                       Padding(
@@ -438,6 +440,7 @@ class ChatScreen extends HookConsumerWidget {
                       input: input,
                       mediaUpload: mediaUpload,
                       currentUserPubkey: pubkey,
+                      isGroupChat: chatProfile.data?.isDm != true,
                       onSend: sendMessage,
                       onError: showNotice,
                       getChatMessageQuote: getChatMessageQuote,
@@ -471,6 +474,7 @@ class _ChatInput extends StatelessWidget {
     required this.input,
     required this.mediaUpload,
     required this.currentUserPubkey,
+    required this.isGroupChat,
     required this.onSend,
     required this.onError,
     required this.getChatMessageQuote,
@@ -479,6 +483,7 @@ class _ChatInput extends StatelessWidget {
   final ChatInputState input;
   final MediaUploadState mediaUpload;
   final String currentUserPubkey;
+  final bool isGroupChat;
   final Future<void> Function(
     String message,
     ChatMessage? replyingTo,
@@ -522,17 +527,24 @@ class _ChatInput extends StatelessWidget {
       final hasQuote = input.replyingTo != null;
       if (!hasQuote && !hasMedia) return null;
 
+      final quoteData = hasQuote ? getChatMessageQuote(input.replyingTo!.id) : null;
+      final shouldRenderQuote = hasQuote && quoteData != null && !quoteData.isNotFound;
+      final replyAuthorColor = isGroupChat && shouldRenderQuote
+          ? AvatarColor.fromPubkey(quoteData.authorPubkey).toColorSet(context.colors).content
+          : null;
+
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (hasQuote)
+          if (shouldRenderQuote)
             ChatMessageQuote(
-              data: getChatMessageQuote(input.replyingTo!.id)!,
+              data: quoteData,
               currentUserPubkey: currentUserPubkey,
               onCancel: input.cancelReply,
+              authorColor: replyAuthorColor,
             ),
-          if (hasQuote && hasMedia) SizedBox(height: 8.h),
+          if (shouldRenderQuote && hasMedia) SizedBox(height: 8.h),
           if (hasMedia)
             ChatMediaUploadPreview(
               items: mediaUpload.items,

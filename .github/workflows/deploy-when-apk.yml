@@ -13,6 +13,7 @@ jobs:
   deploy:
     name: Generate & Deploy to Cloudflare Pages
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     # Only deploy if the APK build succeeded (or manual trigger)
     if: ${{ github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success' }}
 
@@ -23,8 +24,11 @@ jobs:
       - name: Checkout helpers
         uses: actions/checkout@v4
 
-      - name: Install dependencies
-        run: sudo apt-get install -y jq
+      - name: Install jq (cached)
+        uses: awalsh128/cache-apt-pkgs-action@v1
+        with:
+          packages: jq
+          version: 1.0
 
       - name: Generate static site
         env:

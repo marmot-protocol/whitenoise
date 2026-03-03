@@ -15,6 +15,7 @@ jobs:
       github.event_name == 'pull_request'
       && contains(github.event.pull_request.labels.*.name, 'apk')
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     outputs:
       is-member: ${{ steps.check.outputs.is-member }}
 
@@ -41,7 +42,8 @@ jobs:
 
   build-apk:
     name: Build Staging APK
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-8vcpu-ubuntu-2404
+    timeout-minutes: 10
     needs: [check-team]
     # Run when: push/dispatch (not a PR, check-team was skipped), or PR where
     # the "apk" label is present and actor is a contributor.
@@ -55,12 +57,15 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 1
 
     - name: Setup Java
       uses: actions/setup-java@v4
       with:
         distribution: 'temurin'
         java-version: '17'
+        cache: 'gradle'
 
     - name: Setup Flutter
       uses: subosito/flutter-action@v2
@@ -68,11 +73,6 @@ jobs:
         flutter-version: '3.38.4'
         channel: 'stable'
         cache: true
-
-    - name: Setup Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
 
     - name: Cache Flutter dependencies
       uses: actions/cache@v4
@@ -84,7 +84,22 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pub-cache-
 
+    - name: Cache pre-built Android native libraries
+      id: jnilibs-cache
+      uses: actions/cache@v4
+      with:
+        path: android/app/src/main/jniLibs
+        key: ${{ runner.os }}-jnilibs-${{ hashFiles('rust/Cargo.toml', 'rust/Cargo.lock', 'rust/src/**', 'scripts/build_android.sh', 'scripts/build_openssl_android.sh', 'scripts/setup_android_config.sh') }}
+
+    # ── Rust build steps (skipped when native libs are cached) ──
+    - name: Setup Rust
+      if: steps.jnilibs-cache.outputs.cache-hit != 'true'
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+
     - name: Cache Rust dependencies
+      if: steps.jnilibs-cache.outputs.cache-hit != 'true'
       uses: actions/cache@v4
       with:
         path: |
@@ -95,28 +110,52 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-cargo-android-
 
+    - name: Cache OpenSSL for Android
+      if: steps.jnilibs-cache.outputs.cache-hit != 'true'
+      uses: actions/cache@v4
+      with:
+        path: rust/target/openssl/install
+        key: ${{ runner.os }}-openssl-android-${{ hashFiles('scripts/build_openssl_android.sh') }}
+
+    - name: Cache Android SDK & NDK
+      id: android-cache
+      uses: actions/cache@v4
+      with:
+        path: |
+          /usr/local/lib/android/sdk/ndk/27.0.12077973
+          /usr/local/lib/android/sdk/build-tools
+          /usr/local/lib/android/sdk/platforms
+        key: ${{ runner.os }}-android-ndk-27.0.12077973
+
     - name: Setup Android SDK
       uses: android-actions/setup-android@v3
 
     - name: Install Android NDK
-      run: |
-        echo "y" | sdkmanager --install "ndk;27.0.12077973"
-        echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
+      if: steps.android-cache.outputs.cache-hit != 'true'
+      run: echo "y" | sdkmanager --install "ndk;27.0.12077973"
+
+    - name: Set NDK environment
+      if: steps.jnilibs-cache.outputs.cache-hit != 'true'
+      run: echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
 
     - name: Install Flutter dependencies
       run: flutter pub get
 
     - name: Build Rust libraries for Android
+      if: steps.jnilibs-cache.outputs.cache-hit != 'true'
       run: ./scripts/build_android.sh
 
     - name: Build staging APK
-      run: flutter build apk --flavor staging --split-per-abi
+      run: flutter build apk --flavor staging --split-per-abi --dart-define=APP_FLAVOR=staging --build-number=${{ github.run_number }}
 
     - name: Set artifact name
+      env:
+        EVENT_NAME: ${{ github.event_name }}
+        PR_NUMBER: ${{ github.event.pull_request.number }}
       run: |
         echo "SHORT_SHA=${GITHUB_SHA::7}" >> $GITHUB_ENV
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
-          echo "ARTIFACT_SUFFIX=pr-${{ github.event.pull_request.number }}-${GITHUB_SHA::7}" >> $GITHUB_ENV
+        if [ "$EVENT_NAME" = "pull_request" ]; then
+          echo "ARTIFACT_SUFFIX=pr-${PR_NUMBER}-${GITHUB_SHA::7}" >> $GITHUB_ENV
         else
           BRANCH_NAME="${GITHUB_REF_NAME//\//-}"
           echo "ARTIFACT_SUFFIX=${BRANCH_NAME}-${GITHUB_SHA::7}" >> $GITHUB_ENV
@@ -134,8 +173,11 @@ jobs:
       env:
         SAFE_PR_TITLE: ${{ github.event.pull_request.title }}
         SAFE_PR_NUMBER: ${{ github.event.pull_request.number }}
+        EVENT_NAME: ${{ github.event_name }}
+        COMMIT_SHA: ${{ github.sha }}
+        ARTIFACT_SUFFIX: ${{ env.ARTIFACT_SUFFIX }}
       run: |
-        if [ "${{ github.event_name }}" = "pull_request" ]; then
+        if [ "$EVENT_NAME" = "pull_request" ]; then
           PR_INFO="**PR:** #${SAFE_PR_NUMBER} — ${SAFE_PR_TITLE}"
         else
           PR_INFO=""
@@ -144,14 +186,14 @@ jobs:
         cat >> "${GITHUB_STEP_SUMMARY}" <<SUMMARY
         ## Android APK Build Complete
 
-        **Commit:** ${{ github.sha }}
+        **Commit:** ${COMMIT_SHA}
         ${PR_INFO}
 
         ### Download APKs
         1. Go to the **Actions** tab
         2. Click on this workflow run
         3. Scroll down to **Artifacts**
-        4. Download **apk-staging-${{ env.ARTIFACT_SUFFIX }}**
+        4. Download **apk-staging-${ARTIFACT_SUFFIX}**
 
         ### APK Files
         SUMMARY

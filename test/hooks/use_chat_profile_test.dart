@@ -119,6 +119,7 @@ void main() {
               color: _otherPubkeyColor,
               pictureUrl: 'https://example.com/alice.jpg',
               otherMemberPubkey: _otherPubkey,
+              isDm: true,
             ),
           );
         });
@@ -133,6 +134,7 @@ void main() {
               displayName: 'bob',
               color: _otherPubkeyColor,
               otherMemberPubkey: _otherPubkey,
+              isDm: true,
             ),
           );
         });
@@ -146,9 +148,9 @@ void main() {
           expect(
             getResult().data,
             const ChatProfile(
-              displayName: 'Unknown User',
               color: _otherPubkeyColor,
               otherMemberPubkey: _otherPubkey,
+              isDm: true,
             ),
           );
         });
@@ -163,8 +165,8 @@ void main() {
           expect(
             getResult().data,
             const ChatProfile(
-              displayName: 'Unknown User',
               color: _groupIdColor,
+              isDm: true,
             ),
           );
         });
@@ -184,6 +186,7 @@ void main() {
             displayName: 'Cool Group',
             color: _groupIdColor,
             pictureUrl: 'https://example.com/group.jpg',
+            isDm: false,
           ),
         );
       });
@@ -195,9 +198,9 @@ void main() {
         expect(
           getResult().data,
           const ChatProfile(
-            displayName: 'Unknown group',
             color: _groupIdColor,
             pictureUrl: 'https://example.com/group.jpg',
+            isDm: false,
           ),
         );
       });
@@ -222,13 +225,15 @@ void main() {
         displayName: 'Alice',
         color: _pubkeyColor,
         pictureUrl: 'https://example.com/alice.jpg',
-        otherMemberPubkey: 'pubkey1',
+        otherMemberPubkey: testPubkeyA,
+        isDm: false,
       );
       const profile2 = ChatProfile(
         displayName: 'Alice',
         color: _pubkeyColor,
         pictureUrl: 'https://example.com/alice.jpg',
-        otherMemberPubkey: 'pubkey1',
+        otherMemberPubkey: testPubkeyA,
+        isDm: false,
       );
 
       expect(profile1, profile2);
@@ -236,16 +241,16 @@ void main() {
     });
 
     test('equal objects with null pictureUrl have equal hash codes', () {
-      const profile1 = ChatProfile(displayName: 'Bob', color: AvatarColor.blue);
-      const profile2 = ChatProfile(displayName: 'Bob', color: AvatarColor.blue);
+      const profile1 = ChatProfile(displayName: 'Bob', color: AvatarColor.blue, isDm: false);
+      const profile2 = ChatProfile(displayName: 'Bob', color: AvatarColor.blue, isDm: false);
 
       expect(profile1, profile2);
       expect(profile1.hashCode, profile2.hashCode);
     });
 
     test('different displayNames produce different hash codes', () {
-      const profile1 = ChatProfile(displayName: 'Alice', color: AvatarColor.blue);
-      const profile2 = ChatProfile(displayName: 'Bob', color: AvatarColor.blue);
+      const profile1 = ChatProfile(displayName: 'Alice', color: AvatarColor.blue, isDm: false);
+      const profile2 = ChatProfile(displayName: 'Bob', color: AvatarColor.blue, isDm: false);
 
       expect(profile1, isNot(profile2));
       expect(profile1.hashCode, isNot(profile2.hashCode));
@@ -256,11 +261,13 @@ void main() {
         displayName: 'Alice',
         color: AvatarColor.blue,
         pictureUrl: 'https://example.com/pic1.jpg',
+        isDm: false,
       );
       const profile2 = ChatProfile(
         displayName: 'Alice',
         color: AvatarColor.blue,
         pictureUrl: 'https://example.com/pic2.jpg',
+        isDm: false,
       );
 
       expect(profile1, isNot(profile2));
@@ -271,12 +278,14 @@ void main() {
       const profile1 = ChatProfile(
         displayName: 'Alice',
         color: AvatarColor.blue,
-        otherMemberPubkey: 'pubkey1',
+        otherMemberPubkey: testPubkeyA,
+        isDm: false,
       );
       const profile2 = ChatProfile(
         displayName: 'Alice',
         color: AvatarColor.blue,
-        otherMemberPubkey: 'pubkey2',
+        otherMemberPubkey: testPubkeyB,
+        isDm: false,
       );
 
       expect(profile1, isNot(profile2));
@@ -284,8 +293,16 @@ void main() {
     });
 
     test('different colors produce different hash codes', () {
-      const profile1 = ChatProfile(displayName: 'Alice', color: AvatarColor.blue);
-      const profile2 = ChatProfile(displayName: 'Alice', color: AvatarColor.amber);
+      const profile1 = ChatProfile(displayName: 'Alice', color: AvatarColor.blue, isDm: false);
+      const profile2 = ChatProfile(displayName: 'Alice', color: AvatarColor.amber, isDm: false);
+
+      expect(profile1, isNot(profile2));
+      expect(profile1.hashCode, isNot(profile2.hashCode));
+    });
+
+    test('different isDm produce different hash codes', () {
+      const profile1 = ChatProfile(displayName: 'Alice', color: AvatarColor.blue, isDm: false);
+      const profile2 = ChatProfile(displayName: 'Alice', color: AvatarColor.blue, isDm: true);
 
       expect(profile1, isNot(profile2));
       expect(profile1.hashCode, isNot(profile2.hashCode));

@@ -1041,5 +1041,49 @@ void main() {
         expect(nameText.style?.color, nameColor);
       });
     });
+
+    group('onHorizontalDragEnd', () {
+      testWidgets('calls callback when swiped (distance-based)', (tester) async {
+        var called = false;
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Swipe me',
+            onHorizontalDragEnd: () => called = true,
+          ),
+          tester,
+        );
+
+        await tester.drag(find.byType(GestureDetector).first, const Offset(200, 0));
+        await tester.pump();
+
+        expect(called, isTrue);
+      });
+
+      testWidgets('calls callback when swiped slowly (distance-based, not velocity-based)', (
+        tester,
+      ) async {
+        var called = false;
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Swipe me slowly',
+            onHorizontalDragEnd: () => called = true,
+          ),
+          tester,
+        );
+
+        await tester.timedDrag(
+          find.byType(GestureDetector).first,
+          const Offset(200, 0),
+          const Duration(milliseconds: 500),
+        );
+        await tester.pump();
+
+        expect(called, isTrue);
+      });
+    });
   });
 }
