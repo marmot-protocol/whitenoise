@@ -4,7 +4,9 @@ import 'package:flutter_hooks/flutter_hooks.dart'
         HookWidget,
         useAnimationController,
         useEffect,
+        useFocusNode,
         useMemoized,
+        useScrollController,
         useState,
         useTextEditingController;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -50,6 +52,8 @@ class SignupScreen extends HookConsumerWidget {
       text: generatedDisplayName,
     );
     final bioController = useTextEditingController();
+    final bioFocusNode = useFocusNode();
+    final scrollController = useScrollController();
     final (:state, :submit, :onImageSelected, :clearErrors) = useSignup(
       () => ref.read(authProvider.notifier).signup(),
     );
@@ -97,6 +101,32 @@ class SignupScreen extends HookConsumerWidget {
       }
       return null;
     }, [imagePickerError]);
+
+    useEffect(() {
+      var isActive = true;
+
+      void onBioFocusChange() {
+        if (bioFocusNode.hasFocus && scrollController.hasClients) {
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (!isActive || !bioFocusNode.hasFocus || !scrollController.hasClients) return;
+            final currentOffset = scrollController.offset;
+            final maxOffset = scrollController.position.maxScrollExtent;
+            final targetOffset = (currentOffset + 60.h).clamp(0.0, maxOffset);
+            scrollController.animateTo(
+              targetOffset,
+              duration: const Duration(milliseconds: 200),
+              curve: Curves.easeOut,
+            );
+          });
+        }
+      }
+
+      bioFocusNode.addListener(onBioFocusChange);
+      return () {
+        isActive = false;
+        bioFocusNode.removeListener(onBioFocusChange);
+      };
+    }, [bioFocusNode, scrollController]);
 
     Future<void> onSubmit() async {
       final success = await submit(
@@ -173,6 +203,7 @@ class SignupScreen extends HookConsumerWidget {
                                   )
                                 : null,
                             child: SingleChildScrollView(
+                              controller: scrollController,
                               child: Padding(
                                 padding: EdgeInsets.fromLTRB(
                                   14.w,
@@ -214,9 +245,11 @@ class SignupScreen extends HookConsumerWidget {
                                       },
                                     ),
                                     WnInputTextArea(
+                                      key: const Key('signup_bio_field'),
                                       label: context.l10n.introduceYourself,
                                       placeholder: context.l10n.writeSomethingAboutYourself,
                                       controller: bioController,
+                                      focusNode: bioFocusNode,
                                       textInputAction: TextInputAction.done,
                                     ),
                                     Column(

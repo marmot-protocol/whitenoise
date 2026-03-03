@@ -239,9 +239,7 @@ void main() {
     });
 
     group('keyboard', () {
-      testWidgets('inputs remain visible when keyboard appears', (
-        tester,
-      ) async {
+      Future<void> pumpSignupWithSmallScreen(WidgetTester tester) async {
         tester.view.physicalSize = const Size(390, 550);
         tester.view.devicePixelRatio = 1.0;
         addTearDown(tester.view.reset);
@@ -266,6 +264,12 @@ void main() {
 
         Routes.pushToSignup(tester.element(find.byType(Scaffold)));
         await tester.pumpAndSettle();
+      }
+
+      testWidgets('inputs remain visible when keyboard appears', (
+        tester,
+      ) async {
+        await pumpSignupWithSmallScreen(tester);
 
         expect(find.text('Choose a name'), findsOneWidget);
         expect(find.text('Sign Up'), findsOneWidget);
@@ -273,6 +277,45 @@ void main() {
         tester.view.viewInsets = const FakeViewPadding(bottom: 300);
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 400));
+
+        expect(find.text('Choose a name'), findsOneWidget);
+      });
+
+      testWidgets('scrolls when bio field is focused and keyboard appears', (
+        tester,
+      ) async {
+        await pumpSignupWithSmallScreen(tester);
+
+        final scrollableFinder = find.byType(SingleChildScrollView);
+        final scrollable = tester.widget<SingleChildScrollView>(scrollableFinder);
+        final controller = scrollable.controller!;
+
+        final initialOffset = controller.offset;
+
+        await tester.tap(find.byKey(const Key('signup_bio_field')));
+        await tester.pump();
+
+        tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 400));
+        await tester.pumpAndSettle();
+
+        expect(controller.offset, greaterThan(initialOffset));
+        expect(find.text('Choose a name'), findsOneWidget);
+      });
+
+      testWidgets('name field remains visible when focused', (
+        tester,
+      ) async {
+        await pumpSignupWithSmallScreen(tester);
+
+        await tester.tap(find.byType(TextField).first);
+        await tester.pump();
+
+        tester.view.viewInsets = const FakeViewPadding(bottom: 300);
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 400));
+        await tester.pumpAndSettle();
 
         expect(find.text('Choose a name'), findsOneWidget);
 
