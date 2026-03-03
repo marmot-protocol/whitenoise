@@ -46,8 +46,7 @@ sealed class SearchUpdateTrigger with _$SearchUpdateTrigger {
   const factory SearchUpdateTrigger.radiusStarted({
     required int radius,
   }) = SearchUpdateTrigger_RadiusStarted;
-  const factory SearchUpdateTrigger.resultsFound() =
-      SearchUpdateTrigger_ResultsFound;
+  const factory SearchUpdateTrigger.resultsFound() = SearchUpdateTrigger_ResultsFound;
   const factory SearchUpdateTrigger.radiusCompleted({
     required int radius,
     required BigInt totalPubkeysSearched,
@@ -115,8 +114,7 @@ class UserSearchUpdate {
   });
 
   @override
-  int get hashCode =>
-      trigger.hashCode ^ newResults.hashCode ^ totalResultCount.hashCode;
+  int get hashCode => trigger.hashCode ^ newResults.hashCode ^ totalResultCount.hashCode;
 
   @override
   bool operator ==(Object other) =>
