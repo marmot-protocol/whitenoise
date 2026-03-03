@@ -21,6 +21,7 @@ class WidgetbookApp extends StatelessWidget {
     return Widgetbook.material(
       initialRoute: '?path=introduction/resources',
       addons: [
+        InspectorAddon(),
         ThemeAddon(
           themes: [
             WidgetbookTheme(name: 'Light', data: lightTheme),
