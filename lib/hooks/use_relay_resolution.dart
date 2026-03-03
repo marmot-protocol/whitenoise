@@ -1,12 +1,11 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
+import 'package:whitenoise/hooks/use_relay_input.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart' show LoginResult, LoginStatus;
 import 'package:whitenoise/src/rust/api/error.dart';
-import 'package:whitenoise/utils/relay_url_validation.dart'
-    show RelayValidationError, isRelayUrlEmpty, validateRelayUrl;
+import 'package:whitenoise/utils/relay_url_validation.dart' show isRelayUrlEmpty;
+import 'package:whitenoise/widgets/wn_icon.dart' show WnIcons;
 
 final _logger = Logger('useRelayResolution');
 
@@ -14,13 +13,11 @@ class RelayResolutionState {
   final bool isPublishingDefaults;
   final bool isSearchingRelay;
   final String? error;
-  final RelayValidationError? validationError;
 
   const RelayResolutionState({
     this.isPublishingDefaults = false,
     this.isSearchingRelay = false,
     this.error,
-    this.validationError,
   });
 
   bool get isLoading => isPublishingDefaults || isSearchingRelay;
@@ -30,18 +27,11 @@ class RelayResolutionState {
     bool? isSearchingRelay,
     String? error,
     bool clearError = false,
-    RelayValidationError? validationError,
-    bool clearValidationError = false,
   }) {
-    final newValidationError = clearValidationError
-        ? null
-        : (validationError ?? this.validationError);
-    final newError = clearError ? null : (error ?? this.error);
     return RelayResolutionState(
       isPublishingDefaults: isPublishingDefaults ?? this.isPublishingDefaults,
       isSearchingRelay: isSearchingRelay ?? this.isSearchingRelay,
-      error: newError,
-      validationError: newValidationError,
+      error: clearError ? null : (error ?? this.error),
     );
   }
 }
@@ -63,6 +53,10 @@ String _relayResolutionErrorMessage(Object error) {
   TextEditingController relayUrlController,
   RelayResolutionState relayResolutionState,
   bool isRelayUrlValid,
+  String? validationError,
+  WnIcons trailingIcon,
+  String trailingKey,
+  void Function() handleTrailingAction,
   Future<bool> Function() publishDefaults,
   Future<bool> Function() tryCustomRelay,
   Future<void> Function() cancel,
@@ -74,53 +68,15 @@ useRelayResolution({
   required CustomRelayCallback customRelay,
   required CancelLoginCallback cancelLogin,
 }) {
-  final controller = useTextEditingController(text: 'wss://');
+  final relayInput = useRelayInput();
   final state = useState(const RelayResolutionState());
   final isMounted = useRef(true);
-  final isValid = useState(false);
-  final debounceTimer = useRef<Timer?>(null);
 
   useEffect(() {
     return () {
       isMounted.value = false;
-      debounceTimer.value?.cancel();
     };
   }, const []);
-
-  void runValidation() {
-    final url = controller.text.trim();
-
-    if (isRelayUrlEmpty(url)) {
-      isValid.value = false;
-      state.value = state.value.copyWith(clearValidationError: true);
-      return;
-    }
-
-    final error = validateRelayUrl(url);
-
-    if (error == null) {
-      isValid.value = true;
-      state.value = state.value.copyWith(clearValidationError: true);
-    } else {
-      isValid.value = false;
-      state.value = state.value.copyWith(
-        validationError: error,
-      );
-    }
-  }
-
-  void onUrlChanged() {
-    debounceTimer.value?.cancel();
-    isValid.value = false;
-    debounceTimer.value = Timer(const Duration(milliseconds: 500), runValidation);
-  }
-
-  useEffect(() {
-    controller.addListener(onUrlChanged);
-    return () {
-      controller.removeListener(onUrlChanged);
-    };
-  }, [controller]);
 
   Future<bool> publishDefaults() async {
     state.value = state.value.copyWith(isPublishingDefaults: true, clearError: true);
@@ -142,7 +98,7 @@ useRelayResolution({
   }
 
   Future<bool> tryCustomRelay() async {
-    final relayUrl = controller.text.trim();
+    final relayUrl = relayInput.controller.text.trim();
     if (isRelayUrlEmpty(relayUrl)) return false;
 
     state.value = state.value.copyWith(isSearchingRelay: true, clearError: true);
@@ -184,9 +140,13 @@ useRelayResolution({
   }
 
   return (
-    relayUrlController: controller,
+    relayUrlController: relayInput.controller,
     relayResolutionState: state.value,
-    isRelayUrlValid: isValid.value,
+    isRelayUrlValid: relayInput.isValid,
+    validationError: relayInput.validationError,
+    trailingIcon: relayInput.trailingIcon,
+    trailingKey: relayInput.trailingKey,
+    handleTrailingAction: relayInput.handleTrailingAction,
     publishDefaults: publishDefaults,
     tryCustomRelay: tryCustomRelay,
     cancel: cancel,

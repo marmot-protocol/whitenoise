@@ -6,9 +6,8 @@ import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/theme.dart';
-import 'package:whitenoise/utils/relay_url_validation.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
-import 'package:whitenoise/widgets/wn_input.dart' show WnInput;
+import 'package:whitenoise/widgets/wn_input.dart' show WnInput, WnInputTrailingButton;
 import 'package:whitenoise/widgets/wn_onboarding_carousel.dart' show WnOnboardingCarousel;
 import 'package:whitenoise/widgets/wn_overlay.dart' show WnOverlay;
 import 'package:whitenoise/widgets/wn_slate.dart';
@@ -22,6 +21,8 @@ String _resolveError(String errorKey, AppLocalizations l10n) {
     'loginErrorNoRelayConnections' => l10n.loginErrorNoRelayConnections,
     'loginErrorTimeout' => l10n.loginErrorTimeout,
     'loginErrorInternal' => l10n.loginErrorInternal,
+    'invalidRelayUrlScheme' => l10n.invalidRelayUrlScheme,
+    'invalidRelayUrl' => l10n.invalidRelayUrl,
     _ => l10n.loginErrorGeneric,
   };
 }
@@ -46,6 +47,10 @@ class RelayResolutionScreen extends HookConsumerWidget {
       :relayUrlController,
       :relayResolutionState,
       :isRelayUrlValid,
+      :validationError,
+      :trailingIcon,
+      :trailingKey,
+      :handleTrailingAction,
       :publishDefaults,
       :tryCustomRelay,
       :cancel,
@@ -141,15 +146,16 @@ class RelayResolutionScreen extends HookConsumerWidget {
                         label: context.l10n.relayResolutionRelayLabel,
                         placeholder: context.l10n.relayResolutionRelayPlaceholder,
                         controller: relayUrlController,
-                        errorText: relayResolutionState.validationError == null
-                            ? null
-                            : switch (relayResolutionState.validationError!) {
-                                RelayValidationError.invalidScheme =>
-                                  context.l10n.invalidRelayUrlScheme,
-                                RelayValidationError.invalidUrl => context.l10n.invalidRelayUrl,
-                              },
+                        errorText: validationError != null
+                            ? _resolveError(validationError, context.l10n)
+                            : null,
                         onChanged: (_) => clearError(),
                         textInputAction: TextInputAction.done,
+                        trailingAction: WnInputTrailingButton(
+                          key: Key(trailingKey),
+                          icon: trailingIcon,
+                          onPressed: handleTrailingAction,
+                        ),
                       ),
                       Column(
                         spacing: 8.h,

@@ -7,7 +7,8 @@ import 'package:whitenoise/hooks/use_relay_resolution.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart'
     show LoginResult, LoginStatus, Account, AccountType;
 import 'package:whitenoise/src/rust/api/error.dart';
-import 'package:whitenoise/utils/relay_url_validation.dart' show RelayValidationError;
+import 'package:whitenoise/widgets/wn_icon.dart' show WnIcons;
+import '../mocks/mock_clipboard_paste.dart';
 import '../test_helpers.dart';
 
 LoginResult _completeLoginResult() => LoginResult(
@@ -38,6 +39,10 @@ class _TestWidget extends HookWidget {
     TextEditingController controller,
     RelayResolutionState state,
     bool isRelayUrlValid,
+    String? validationError,
+    WnIcons trailingIcon,
+    String trailingKey,
+    void Function() handleTrailingAction,
     Future<bool> Function() publishDefaults,
     Future<bool> Function() tryCustomRelay,
     Future<void> Function() cancel,
@@ -58,6 +63,10 @@ class _TestWidget extends HookWidget {
       relayUrlController: controller,
       relayResolutionState: state,
       isRelayUrlValid: isRelayUrlValid,
+      validationError: validationError,
+      trailingIcon: trailingIcon,
+      trailingKey: trailingKey,
+      handleTrailingAction: handleTrailingAction,
       publishDefaults: publishDefaults,
       tryCustomRelay: tryCustomRelay,
       cancel: cancel,
@@ -72,6 +81,10 @@ class _TestWidget extends HookWidget {
       controller,
       state,
       isRelayUrlValid,
+      validationError,
+      trailingIcon,
+      trailingKey,
+      handleTrailingAction,
       publishDefaults,
       tryCustomRelay,
       cancel,
@@ -80,12 +93,15 @@ class _TestWidget extends HookWidget {
     return Column(
       children: [
         TextField(controller: controller),
+        ElevatedButton(onPressed: handleTrailingAction, child: const Text('Trailing Action')),
         Text('isPublishingDefaults: ${state.isPublishingDefaults}'),
         Text('isSearchingRelay: ${state.isSearchingRelay}'),
         Text('isLoading: ${state.isLoading}'),
         Text('error: ${state.error ?? 'none'}'),
-        Text('validationError: ${state.validationError ?? 'none'}'),
+        Text('validationError: ${validationError ?? 'none'}'),
         Text('isRelayUrlValid: $isRelayUrlValid'),
+        Text('trailingIcon: ${trailingIcon.name}'),
+        Text('trailingKey: $trailingKey'),
       ],
     );
   }
@@ -99,6 +115,10 @@ _TestWidget _buildTestWidget({
     TextEditingController controller,
     RelayResolutionState state,
     bool isRelayUrlValid,
+    String? validationError,
+    WnIcons trailingIcon,
+    String trailingKey,
+    void Function() handleTrailingAction,
     Future<bool> Function() publishDefaults,
     Future<bool> Function() tryCustomRelay,
     Future<void> Function() cancel,
@@ -125,6 +145,10 @@ void main() {
               controller,
               state,
               isRelayUrlValid,
+              validationError,
+              trailingIcon,
+              trailingKey,
+              handleTrailingAction,
               publishDefaults,
               tryCustomRelay,
               cancel,
@@ -147,6 +171,10 @@ void main() {
               controller,
               state,
               isRelayUrlValid,
+              validationError,
+              trailingIcon,
+              trailingKey,
+              handleTrailingAction,
               publishDefaults,
               tryCustomRelay,
               cancel,
@@ -169,6 +197,10 @@ void main() {
               controller,
               state,
               isRelayUrlValid,
+              validationError,
+              trailingIcon,
+              trailingKey,
+              handleTrailingAction,
               publishDefaults,
               tryCustomRelay,
               cancel,
@@ -191,6 +223,10 @@ void main() {
               controller,
               state,
               isRelayUrlValid,
+              validationError,
+              trailingIcon,
+              trailingKey,
+              handleTrailingAction,
               publishDefaults,
               tryCustomRelay,
               cancel,
@@ -205,7 +241,7 @@ void main() {
     });
 
     testWidgets('initializes with null validationError', (tester) async {
-      late RelayResolutionState capturedState;
+      late String? capturedValidationError;
 
       final widget = _buildTestWidget(
         onBuild:
@@ -213,17 +249,21 @@ void main() {
               controller,
               state,
               isRelayUrlValid,
+              validationError,
+              trailingIcon,
+              trailingKey,
+              handleTrailingAction,
               publishDefaults,
               tryCustomRelay,
               cancel,
               clearError,
             ) {
-              capturedState = state;
+              capturedValidationError = validationError;
             },
       );
       await mountWidget(widget, tester);
 
-      expect(capturedState.validationError, isNull);
+      expect(capturedValidationError, isNull);
     });
 
     testWidgets('initializes with wss:// prefilled controller', (tester) async {
@@ -235,6 +275,10 @@ void main() {
               controller,
               state,
               isRelayUrlValid,
+              validationError,
+              trailingIcon,
+              trailingKey,
+              handleTrailingAction,
               publishDefaults,
               tryCustomRelay,
               cancel,
@@ -257,6 +301,10 @@ void main() {
               controller,
               state,
               isRelayUrlValid,
+              validationError,
+              trailingIcon,
+              trailingKey,
+              handleTrailingAction,
               publishDefaults,
               tryCustomRelay,
               cancel,
@@ -270,12 +318,41 @@ void main() {
       expect(capturedIsRelayUrlValid, false);
     });
 
+    testWidgets('initializes with paste trailing icon', (tester) async {
+      late WnIcons capturedIcon;
+      late String capturedKey;
+
+      final widget = _buildTestWidget(
+        onBuild:
+            (
+              controller,
+              state,
+              isRelayUrlValid,
+              validationError,
+              trailingIcon,
+              trailingKey,
+              handleTrailingAction,
+              publishDefaults,
+              tryCustomRelay,
+              cancel,
+              clearError,
+            ) {
+              capturedIcon = trailingIcon;
+              capturedKey = trailingKey;
+            },
+      );
+      await mountWidget(widget, tester);
+
+      expect(capturedIcon, WnIcons.paste);
+      expect(capturedKey, 'paste_button');
+    });
+
     group('URL validation', () {
       testWidgets('validates URL after debounce and sets isRelayUrlValid true for valid URL', (
         tester,
       ) async {
         late bool capturedIsRelayUrlValid;
-        late RelayResolutionState capturedState;
+        late String? capturedValidationError;
 
         final widget = _buildTestWidget(
           onBuild:
@@ -283,13 +360,17 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
                 clearError,
               ) {
                 capturedIsRelayUrlValid = isRelayUrlValid;
-                capturedState = state;
+                capturedValidationError = validationError;
               },
         );
         await mountWidget(widget, tester);
@@ -298,12 +379,12 @@ void main() {
         await tester.pump(const Duration(milliseconds: 600));
 
         expect(capturedIsRelayUrlValid, true);
-        expect(capturedState.validationError, isNull);
+        expect(capturedValidationError, isNull);
       });
 
       testWidgets('sets validationError for invalid URL after debounce', (tester) async {
         late bool capturedIsRelayUrlValid;
-        late RelayResolutionState capturedState;
+        late String? capturedValidationError;
 
         final widget = _buildTestWidget(
           onBuild:
@@ -311,13 +392,17 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
                 clearError,
               ) {
                 capturedIsRelayUrlValid = isRelayUrlValid;
-                capturedState = state;
+                capturedValidationError = validationError;
               },
         );
         await mountWidget(widget, tester);
@@ -326,11 +411,11 @@ void main() {
         await tester.pump(const Duration(milliseconds: 600));
 
         expect(capturedIsRelayUrlValid, false);
-        expect(capturedState.validationError, RelayValidationError.invalidUrl);
+        expect(capturedValidationError, isNotNull);
       });
 
       testWidgets('clears validationError for valid URL', (tester) async {
-        late RelayResolutionState capturedState;
+        late String? capturedValidationError;
 
         final widget = _buildTestWidget(
           onBuild:
@@ -338,12 +423,16 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
                 clearError,
               ) {
-                capturedState = state;
+                capturedValidationError = validationError;
               },
         );
         await mountWidget(widget, tester);
@@ -351,12 +440,12 @@ void main() {
         await tester.enterText(find.byType(TextField), 'wss://invalid');
         await tester.pump(const Duration(milliseconds: 600));
 
-        expect(capturedState.validationError, RelayValidationError.invalidUrl);
+        expect(capturedValidationError, isNotNull);
 
         await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
         await tester.pump(const Duration(milliseconds: 600));
 
-        expect(capturedState.validationError, isNull);
+        expect(capturedValidationError, isNull);
       });
 
       testWidgets('isRelayUrlValid false immediately on text change before debounce completes', (
@@ -370,6 +459,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -395,7 +488,7 @@ void main() {
         'clears validationError and sets isRelayUrlValid false when text cleared to prefix',
         (tester) async {
           late bool capturedIsRelayUrlValid;
-          late RelayResolutionState capturedState;
+          late String? capturedValidationError;
 
           final widget = _buildTestWidget(
             onBuild:
@@ -403,13 +496,17 @@ void main() {
                   controller,
                   state,
                   isRelayUrlValid,
+                  validationError,
+                  trailingIcon,
+                  trailingKey,
+                  handleTrailingAction,
                   publishDefaults,
                   tryCustomRelay,
                   cancel,
                   clearError,
                 ) {
                   capturedIsRelayUrlValid = isRelayUrlValid;
-                  capturedState = state;
+                  capturedValidationError = validationError;
                 },
           );
           await mountWidget(widget, tester);
@@ -418,18 +515,21 @@ void main() {
           await tester.pump(const Duration(milliseconds: 600));
 
           expect(capturedIsRelayUrlValid, false);
-          expect(capturedState.validationError, RelayValidationError.invalidUrl);
+          expect(capturedValidationError, isNotNull);
 
           await tester.enterText(find.byType(TextField), 'wss://');
           await tester.pump(const Duration(milliseconds: 600));
 
           expect(capturedIsRelayUrlValid, false);
-          expect(capturedState.validationError, isNull);
+          expect(capturedValidationError, isNull);
         },
       );
+    });
 
-      testWidgets('sets invalidScheme error for https:// URL', (tester) async {
-        late RelayResolutionState capturedState;
+    group('trailing icon', () {
+      testWidgets('shows clear icon when text entered', (tester) async {
+        late WnIcons capturedIcon;
+        late String capturedKey;
 
         final widget = _buildTestWidget(
           onBuild:
@@ -437,20 +537,58 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
                 clearError,
               ) {
-                capturedState = state;
+                capturedIcon = trailingIcon;
+                capturedKey = trailingKey;
               },
         );
         await mountWidget(widget, tester);
 
-        await tester.enterText(find.byType(TextField), 'https://relay.example.com');
-        await tester.pump(const Duration(milliseconds: 600));
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump();
 
-        expect(capturedState.validationError, RelayValidationError.invalidScheme);
+        expect(capturedIcon, WnIcons.closeSmall);
+        expect(capturedKey, 'clear_button');
+      });
+
+      testWidgets('handleTrailingAction clears when hasText is true', (tester) async {
+        late TextEditingController capturedController;
+
+        final widget = _buildTestWidget(
+          onBuild:
+              (
+                controller,
+                state,
+                isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
+                publishDefaults,
+                tryCustomRelay,
+                cancel,
+                clearError,
+              ) {
+                capturedController = controller;
+              },
+        );
+        await mountWidget(widget, tester);
+
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump();
+
+        await tester.tap(find.text('Trailing Action'));
+        await tester.pump();
+
+        expect(capturedController.text, 'wss://');
       });
     });
 
@@ -469,6 +607,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -506,6 +648,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -533,6 +679,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -562,6 +712,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -590,6 +744,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -629,6 +787,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -658,6 +820,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -690,6 +856,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -724,6 +894,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -750,6 +924,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -779,6 +957,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -819,6 +1001,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -849,6 +1035,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -879,6 +1069,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -909,6 +1103,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -942,6 +1140,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -973,6 +1175,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -1004,6 +1210,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -1036,6 +1246,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -1067,6 +1281,10 @@ void main() {
                 controller,
                 state,
                 isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
                 publishDefaults,
                 tryCustomRelay,
                 cancel,
@@ -1086,6 +1304,217 @@ void main() {
         final result = await future;
 
         expect(result, false);
+      });
+    });
+
+    group('paste via handleTrailingAction', () {
+      late void Function(Map<String, dynamic>?) setClipboardData;
+      late void Function() resetClipboard;
+
+      setUp(() {
+        final mock = mockClipboardPaste();
+        setClipboardData = mock.setData;
+        resetClipboard = mock.reset;
+      });
+
+      tearDown(() {
+        resetClipboard();
+      });
+
+      testWidgets('handleTrailingAction pastes when hasText is false', (tester) async {
+        late TextEditingController capturedController;
+
+        final widget = _buildTestWidget(
+          onBuild:
+              (
+                controller,
+                state,
+                isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
+                publishDefaults,
+                tryCustomRelay,
+                cancel,
+                clearError,
+              ) {
+                capturedController = controller;
+              },
+        );
+        await mountWidget(widget, tester);
+
+        setClipboardData({'text': 'wss://pasted.relay.com'});
+
+        await tester.tap(find.text('Trailing Action'));
+        await tester.pump(const Duration(milliseconds: 200));
+        await tester.pumpAndSettle();
+
+        expect(capturedController.text, 'wss://pasted.relay.com');
+      });
+
+      testWidgets('adds wss:// prefix when pasting non-websocket URL', (tester) async {
+        late TextEditingController capturedController;
+
+        final widget = _buildTestWidget(
+          onBuild:
+              (
+                controller,
+                state,
+                isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
+                publishDefaults,
+                tryCustomRelay,
+                cancel,
+                clearError,
+              ) {
+                capturedController = controller;
+              },
+        );
+        await mountWidget(widget, tester);
+
+        setClipboardData({'text': 'relay.example.com'});
+
+        await tester.tap(find.text('Trailing Action'));
+        await tester.pump(const Duration(milliseconds: 200));
+        await tester.pumpAndSettle();
+
+        expect(capturedController.text, 'wss://relay.example.com');
+      });
+
+      testWidgets('handles empty clipboard gracefully', (tester) async {
+        late TextEditingController capturedController;
+
+        final widget = _buildTestWidget(
+          onBuild:
+              (
+                controller,
+                state,
+                isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
+                publishDefaults,
+                tryCustomRelay,
+                cancel,
+                clearError,
+              ) {
+                capturedController = controller;
+              },
+        );
+        await mountWidget(widget, tester);
+
+        setClipboardData(null);
+
+        await tester.tap(find.text('Trailing Action'));
+        await tester.pumpAndSettle();
+
+        expect(capturedController.text, 'wss://');
+      });
+    });
+
+    group('clear via handleTrailingAction', () {
+      testWidgets('resets controller to wss:// prefix', (tester) async {
+        late TextEditingController capturedController;
+
+        final widget = _buildTestWidget(
+          onBuild:
+              (
+                controller,
+                state,
+                isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
+                publishDefaults,
+                tryCustomRelay,
+                cancel,
+                clearError,
+              ) {
+                capturedController = controller;
+              },
+        );
+        await mountWidget(widget, tester);
+
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(capturedController.text, 'wss://relay.example.com');
+
+        await tester.tap(find.text('Trailing Action'));
+        await tester.pumpAndSettle();
+
+        expect(capturedController.text, 'wss://');
+      });
+
+      testWidgets('resets isRelayUrlValid to false', (tester) async {
+        late bool capturedIsValid;
+
+        final widget = _buildTestWidget(
+          onBuild:
+              (
+                controller,
+                state,
+                isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
+                publishDefaults,
+                tryCustomRelay,
+                cancel,
+                clearError,
+              ) {
+                capturedIsValid = isRelayUrlValid;
+              },
+        );
+        await mountWidget(widget, tester);
+
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(capturedIsValid, true);
+
+        await tester.tap(find.text('Trailing Action'));
+        await tester.pumpAndSettle();
+
+        expect(capturedIsValid, false);
+      });
+
+      testWidgets('clears validation error', (tester) async {
+        late String? capturedValidationError;
+
+        final widget = _buildTestWidget(
+          onBuild:
+              (
+                controller,
+                state,
+                isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
+                publishDefaults,
+                tryCustomRelay,
+                cancel,
+                clearError,
+              ) {
+                capturedValidationError = validationError;
+              },
+        );
+        await mountWidget(widget, tester);
+
+        await tester.enterText(find.byType(TextField), 'https://relay.example.com');
+        await tester.pump(const Duration(milliseconds: 600));
+        expect(capturedValidationError, 'invalidRelayUrlScheme');
+
+        await tester.tap(find.text('Trailing Action'));
+        await tester.pumpAndSettle();
+
+        expect(capturedValidationError, isNull);
       });
     });
   });

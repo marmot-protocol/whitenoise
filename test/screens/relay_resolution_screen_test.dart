@@ -528,5 +528,85 @@ void main() {
         expect(find.byType(WnOverlay), findsNothing);
       });
     });
+
+    group('clear button', () {
+      testWidgets('shows paste button initially', (tester) async {
+        await pumpRelayResolutionScreen(tester);
+        expect(find.byKey(const Key('paste_button')), findsOneWidget);
+        expect(find.byKey(const Key('clear_button')), findsNothing);
+      });
+
+      testWidgets('shows clear button when text is entered', (tester) async {
+        await pumpRelayResolutionScreen(tester);
+
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump();
+
+        expect(find.byKey(const Key('clear_button')), findsOneWidget);
+        expect(find.byKey(const Key('paste_button')), findsNothing);
+      });
+
+      testWidgets('clears input when clear button is tapped', (tester) async {
+        await pumpRelayResolutionScreen(tester);
+
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump();
+
+        await tester.tap(find.byKey(const Key('clear_button')));
+        await tester.pump();
+
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.controller?.text, 'wss://');
+      });
+
+      testWidgets('shows paste button after clearing', (tester) async {
+        await pumpRelayResolutionScreen(tester);
+
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump();
+
+        expect(find.byKey(const Key('clear_button')), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('clear_button')));
+        await tester.pump();
+
+        expect(find.byKey(const Key('paste_button')), findsOneWidget);
+        expect(find.byKey(const Key('clear_button')), findsNothing);
+      });
+
+      testWidgets('disables search relay button after clearing', (tester) async {
+        await pumpRelayResolutionScreen(tester);
+
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump(const Duration(milliseconds: 600));
+
+        final buttonBefore = tester.widget<WnButton>(
+          find.byKey(const Key('try_custom_relay_button')),
+        );
+        expect(buttonBefore.disabled, isFalse);
+
+        await tester.tap(find.byKey(const Key('clear_button')));
+        await tester.pump();
+
+        final buttonAfter = tester.widget<WnButton>(
+          find.byKey(const Key('try_custom_relay_button')),
+        );
+        expect(buttonAfter.disabled, isTrue);
+      });
+
+      testWidgets('clears validation error when clear button is tapped', (tester) async {
+        await pumpRelayResolutionScreen(tester);
+
+        await tester.enterText(find.byType(TextField), 'wss://invalid');
+        await tester.pump(const Duration(milliseconds: 600));
+
+        expect(find.text('Invalid relay URL'), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('clear_button')));
+        await tester.pump();
+
+        expect(find.text('Invalid relay URL'), findsNothing);
+      });
+    });
   });
 }
