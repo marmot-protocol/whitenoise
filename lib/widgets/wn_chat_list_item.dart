@@ -112,15 +112,6 @@ class WnChatListItem extends HookWidget {
                     SizedBox(height: 2.h),
                     Row(
                       children: [
-                        if (subtitleIcon != null) ...[
-                          Padding(
-                            padding: EdgeInsets.only(
-                              top: defaultTargetPlatform == TargetPlatform.iOS ? 2.h : 0,
-                            ),
-                            child: subtitleIcon,
-                          ),
-                          SizedBox(width: 2.w),
-                        ],
                         Expanded(
                           child: Text.rich(
                             TextSpan(
@@ -135,6 +126,18 @@ class WnChatListItem extends HookWidget {
                                       color: colors.backgroundContentPrimary,
                                     ),
                                   ),
+                                if (subtitleIcon != null) ...[
+                                  WidgetSpan(
+                                    alignment: PlaceholderAlignment.middle,
+                                    child: Padding(
+                                      padding: EdgeInsets.only(
+                                        top: defaultTargetPlatform == TargetPlatform.iOS ? 2.h : 0,
+                                      ),
+                                      child: subtitleIcon,
+                                    ),
+                                  ),
+                                  const TextSpan(text: ' '),
+                                ],
                                 TextSpan(text: subtitle),
                               ],
                             ),
