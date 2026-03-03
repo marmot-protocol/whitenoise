@@ -234,6 +234,24 @@ void main() {
         expect(getResult().state.hasUnsavedChanges, isFalse);
       });
 
+      testWidgets('is true when no group loaded but name is set', (tester) async {
+        await pump(tester);
+
+        getResult().nameController.text = 'Changed';
+        await tester.pump();
+
+        expect(getResult().state.hasUnsavedChanges, isTrue);
+      });
+
+      testWidgets('is true when no group loaded but description is set', (tester) async {
+        await pump(tester);
+
+        getResult().descriptionController.text = 'Changed';
+        await tester.pump();
+
+        expect(getResult().state.hasUnsavedChanges, isTrue);
+      });
+
       testWidgets('is true when image is selected', (tester) async {
         await pumpAndLoad(tester);
 
@@ -401,6 +419,22 @@ void main() {
         await pumpAndLoad(tester);
 
         getResult().nameController.text = 'Changed';
+        await tester.pump();
+
+        final result = await getResult().saveGroup();
+        await tester.pump();
+
+        expect(result, isFalse);
+        expect(getResult().state.error, contains('Cannot update group'));
+      });
+
+      testWidgets('returns false and sets error when group not loaded but image selected', (
+        tester,
+      ) async {
+        _api.getGroupError = Exception('Load failed');
+        await pumpAndLoad(tester);
+
+        getResult().onImageSelected('/some/image.jpg');
         await tester.pump();
 
         final result = await getResult().saveGroup();
