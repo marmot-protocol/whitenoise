@@ -32,7 +32,7 @@ use crate::api::utils::*;
 use crate::api::*;
 use crate::*;
 use flutter_rust_bridge::for_generated::byteorder::{NativeEndian, ReadBytesExt, WriteBytesExt};
-use flutter_rust_bridge::for_generated::{Lifetimeable, Lockable, transform_result_dco};
+use flutter_rust_bridge::for_generated::{transform_result_dco, Lifetimeable, Lockable};
 use flutter_rust_bridge::{Handler, IntoIntoDart};
 
 // Section: boilerplate
@@ -4912,6 +4912,9 @@ impl SseDecode for crate::api::messages::DeliveryStatus {
                 let mut var_reason = <String>::sse_decode(deserializer);
                 return crate::api::messages::DeliveryStatus::Failed { reason: var_reason };
             }
+            3 => {
+                return crate::api::messages::DeliveryStatus::Retried;
+            }
             _ => {
                 unimplemented!("");
             }
@@ -5941,7 +5944,6 @@ impl SseDecode for crate::api::messages::UpdateTrigger {
             2 => crate::api::messages::UpdateTrigger::ReactionRemoved,
             3 => crate::api::messages::UpdateTrigger::MessageDeleted,
             4 => crate::api::messages::UpdateTrigger::DeliveryStatusChanged,
-            5 => crate::api::messages::UpdateTrigger::MessageRetried,
             _ => unreachable!("Invalid variant for UpdateTrigger: {}", inner),
         };
     }
@@ -6790,6 +6792,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::messages::DeliveryStatus {
             crate::api::messages::DeliveryStatus::Failed { reason } => {
                 [2.into_dart(), reason.into_into_dart().into_dart()].into_dart()
             }
+            crate::api::messages::DeliveryStatus::Retried => [3.into_dart()].into_dart(),
             _ => {
                 unimplemented!("");
             }
@@ -7489,7 +7492,6 @@ impl flutter_rust_bridge::IntoDart for crate::api::messages::UpdateTrigger {
             Self::ReactionRemoved => 2.into_dart(),
             Self::MessageDeleted => 3.into_dart(),
             Self::DeliveryStatusChanged => 4.into_dart(),
-            Self::MessageRetried => 5.into_dart(),
             _ => unreachable!(),
         }
     }
@@ -8108,6 +8110,9 @@ impl SseEncode for crate::api::messages::DeliveryStatus {
             crate::api::messages::DeliveryStatus::Failed { reason } => {
                 <i32>::sse_encode(2, serializer);
                 <String>::sse_encode(reason, serializer);
+            }
+            crate::api::messages::DeliveryStatus::Retried => {
+                <i32>::sse_encode(3, serializer);
             }
             _ => {
                 unimplemented!("");
@@ -8939,7 +8944,6 @@ impl SseEncode for crate::api::messages::UpdateTrigger {
                 crate::api::messages::UpdateTrigger::ReactionRemoved => 2,
                 crate::api::messages::UpdateTrigger::MessageDeleted => 3,
                 crate::api::messages::UpdateTrigger::DeliveryStatusChanged => 4,
-                crate::api::messages::UpdateTrigger::MessageRetried => 5,
                 _ => {
                     unimplemented!("");
                 }
@@ -9034,7 +9038,7 @@ mod io {
     use flutter_rust_bridge::for_generated::byteorder::{
         NativeEndian, ReadBytesExt, WriteBytesExt,
     };
-    use flutter_rust_bridge::for_generated::{Lifetimeable, Lockable, transform_result_dco};
+    use flutter_rust_bridge::for_generated::{transform_result_dco, Lifetimeable, Lockable};
     use flutter_rust_bridge::{Handler, IntoIntoDart};
 
     // Section: boilerplate

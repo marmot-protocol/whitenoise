@@ -4864,6 +4864,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         return DeliveryStatus_Failed(
           reason: dco_decode_String(raw[1]),
         );
+      case 3:
+        return const DeliveryStatus_Retried();
       default:
         throw Exception('unreachable');
     }
@@ -6303,6 +6305,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case 2:
         final var_reason = sse_decode_String(deserializer);
         return DeliveryStatus_Failed(reason: var_reason);
+      case 3:
+        return const DeliveryStatus_Retried();
       default:
         throw UnimplementedError('');
     }
@@ -8073,6 +8077,8 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case DeliveryStatus_Failed(reason: final reason):
         sse_encode_i_32(2, serializer);
         sse_encode_String(reason, serializer);
+      case DeliveryStatus_Retried():
+        sse_encode_i_32(3, serializer);
     }
   }
 

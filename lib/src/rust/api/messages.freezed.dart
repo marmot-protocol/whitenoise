@@ -55,13 +55,14 @@ extension DeliveryStatusPatterns on DeliveryStatus {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( DeliveryStatus_Sending value)?  sending,TResult Function( DeliveryStatus_Sent value)?  sent,TResult Function( DeliveryStatus_Failed value)?  failed,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( DeliveryStatus_Sending value)?  sending,TResult Function( DeliveryStatus_Sent value)?  sent,TResult Function( DeliveryStatus_Failed value)?  failed,TResult Function( DeliveryStatus_Retried value)?  retried,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case DeliveryStatus_Sending() when sending != null:
 return sending(_that);case DeliveryStatus_Sent() when sent != null:
 return sent(_that);case DeliveryStatus_Failed() when failed != null:
-return failed(_that);case _:
+return failed(_that);case DeliveryStatus_Retried() when retried != null:
+return retried(_that);case _:
   return orElse();
 
 }
@@ -79,13 +80,14 @@ return failed(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( DeliveryStatus_Sending value)  sending,required TResult Function( DeliveryStatus_Sent value)  sent,required TResult Function( DeliveryStatus_Failed value)  failed,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( DeliveryStatus_Sending value)  sending,required TResult Function( DeliveryStatus_Sent value)  sent,required TResult Function( DeliveryStatus_Failed value)  failed,required TResult Function( DeliveryStatus_Retried value)  retried,}){
 final _that = this;
 switch (_that) {
 case DeliveryStatus_Sending():
 return sending(_that);case DeliveryStatus_Sent():
 return sent(_that);case DeliveryStatus_Failed():
-return failed(_that);}
+return failed(_that);case DeliveryStatus_Retried():
+return retried(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -99,13 +101,14 @@ return failed(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( DeliveryStatus_Sending value)?  sending,TResult? Function( DeliveryStatus_Sent value)?  sent,TResult? Function( DeliveryStatus_Failed value)?  failed,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( DeliveryStatus_Sending value)?  sending,TResult? Function( DeliveryStatus_Sent value)?  sent,TResult? Function( DeliveryStatus_Failed value)?  failed,TResult? Function( DeliveryStatus_Retried value)?  retried,}){
 final _that = this;
 switch (_that) {
 case DeliveryStatus_Sending() when sending != null:
 return sending(_that);case DeliveryStatus_Sent() when sent != null:
 return sent(_that);case DeliveryStatus_Failed() when failed != null:
-return failed(_that);case _:
+return failed(_that);case DeliveryStatus_Retried() when retried != null:
+return retried(_that);case _:
   return null;
 
 }
@@ -122,12 +125,13 @@ return failed(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  sending,TResult Function( BigInt relayCount)?  sent,TResult Function( String reason)?  failed,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  sending,TResult Function( BigInt relayCount)?  sent,TResult Function( String reason)?  failed,TResult Function()?  retried,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case DeliveryStatus_Sending() when sending != null:
 return sending();case DeliveryStatus_Sent() when sent != null:
 return sent(_that.relayCount);case DeliveryStatus_Failed() when failed != null:
-return failed(_that.reason);case _:
+return failed(_that.reason);case DeliveryStatus_Retried() when retried != null:
+return retried();case _:
   return orElse();
 
 }
@@ -145,12 +149,13 @@ return failed(_that.reason);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  sending,required TResult Function( BigInt relayCount)  sent,required TResult Function( String reason)  failed,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  sending,required TResult Function( BigInt relayCount)  sent,required TResult Function( String reason)  failed,required TResult Function()  retried,}) {final _that = this;
 switch (_that) {
 case DeliveryStatus_Sending():
 return sending();case DeliveryStatus_Sent():
 return sent(_that.relayCount);case DeliveryStatus_Failed():
-return failed(_that.reason);}
+return failed(_that.reason);case DeliveryStatus_Retried():
+return retried();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -164,12 +169,13 @@ return failed(_that.reason);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  sending,TResult? Function( BigInt relayCount)?  sent,TResult? Function( String reason)?  failed,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  sending,TResult? Function( BigInt relayCount)?  sent,TResult? Function( String reason)?  failed,TResult? Function()?  retried,}) {final _that = this;
 switch (_that) {
 case DeliveryStatus_Sending() when sending != null:
 return sending();case DeliveryStatus_Sent() when sent != null:
 return sent(_that.relayCount);case DeliveryStatus_Failed() when failed != null:
-return failed(_that.reason);case _:
+return failed(_that.reason);case DeliveryStatus_Retried() when retried != null:
+return retried();case _:
   return null;
 
 }
@@ -340,6 +346,38 @@ as String,
 
 
 }
+
+/// @nodoc
+
+
+class DeliveryStatus_Retried extends DeliveryStatus {
+  const DeliveryStatus_Retried(): super._();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DeliveryStatus_Retried);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'DeliveryStatus.retried()';
+}
+
+
+}
+
+
+
 
 /// @nodoc
 mixin _$MessageStreamItem {

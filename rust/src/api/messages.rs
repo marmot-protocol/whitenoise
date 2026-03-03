@@ -98,6 +98,8 @@ pub enum DeliveryStatus {
     Sent { relay_count: u64 },
     /// All publish attempts exhausted
     Failed { reason: String },
+    /// The user retried this message — excluded from UI snapshots
+    Retried,
 }
 
 #[frb(non_opaque)]
@@ -125,8 +127,6 @@ pub enum UpdateTrigger {
     MessageDeleted,
     /// The delivery status of an outgoing message changed (Sending -> Sent or Failed)
     DeliveryStatusChanged,
-    /// A failed message was retried and needs repositioning in the chat
-    MessageRetried,
 }
 
 /// A real-time update for a group message.
@@ -247,6 +247,7 @@ impl From<&WhitenoiseDeliveryStatus> for DeliveryStatus {
             WhitenoiseDeliveryStatus::Failed(reason) => Self::Failed {
                 reason: reason.clone(),
             },
+            WhitenoiseDeliveryStatus::Retried => Self::Retried,
         }
     }
 }
@@ -358,7 +359,6 @@ impl From<WhitenoiseUpdateTrigger> for UpdateTrigger {
             WhitenoiseUpdateTrigger::ReactionRemoved => Self::ReactionRemoved,
             WhitenoiseUpdateTrigger::MessageDeleted => Self::MessageDeleted,
             WhitenoiseUpdateTrigger::DeliveryStatusChanged => Self::DeliveryStatusChanged,
-            WhitenoiseUpdateTrigger::MessageRetried => Self::MessageRetried,
         }
     }
 }
@@ -366,7 +366,7 @@ impl From<WhitenoiseUpdateTrigger> for UpdateTrigger {
 impl From<&WhitenoiseMessageUpdate> for MessageUpdate {
     fn from(update: &WhitenoiseMessageUpdate) -> Self {
         Self {
-            trigger: update.trigger.clone().into(),
+            trigger: update.trigger.into(),
             message: (&update.message).into(),
         }
     }
@@ -398,8 +398,7 @@ pub async fn send_message_to_group(
 
 /// Retry publishing a failed message.
 ///
-/// Re-creates the MLS message event from the original message in the MDK store,
-/// updates the delivery status to `Sending`, and spawns a new background publish task.
+/// Creates a new message with the same content and marks the original as `Retried`.
 #[frb]
 pub async fn retry_message_publish(
     pubkey: String,
@@ -551,12 +550,6 @@ mod tests {
     }
 
     #[test]
-    fn test_update_trigger_conversion_message_retried() {
-        let trigger: UpdateTrigger = WhitenoiseUpdateTrigger::MessageRetried.into();
-        assert_eq!(trigger, UpdateTrigger::MessageRetried);
-    }
-
-    #[test]
     fn test_delivery_status_conversion_sending() {
         let status: DeliveryStatus = WhitenoiseDeliveryStatus::Sending.into();
         assert_eq!(status, DeliveryStatus::Sending);
@@ -577,5 +570,11 @@ mod tests {
                 reason: "timeout".to_string()
             }
         );
+    }
+
+    #[test]
+    fn test_delivery_status_conversion_retried() {
+        let status: DeliveryStatus = WhitenoiseDeliveryStatus::Retried.into();
+        assert_eq!(status, DeliveryStatus::Retried);
     }
 }

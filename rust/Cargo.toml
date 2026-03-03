@@ -27,7 +27,7 @@ tracing = "0.1"
 tracing-appender = "0.2"
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 url = "2.5.1"
-whitenoise = { version = "0.1.0", git = "https://github.com/marmot-protocol/whitenoise-rs", rev = "aa56ba6" }
+whitenoise = { version = "0.1.0", git = "https://github.com/marmot-protocol/whitenoise-rs", rev = "74a3071" }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

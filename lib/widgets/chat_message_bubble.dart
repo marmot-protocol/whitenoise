@@ -47,6 +47,7 @@ class ChatMessageBubble extends StatelessWidget {
       DeliveryStatus_Sending() => ChatStatusType.sent,
       DeliveryStatus_Sent() => ChatStatusType.delivered,
       DeliveryStatus_Failed() => ChatStatusType.failed,
+      DeliveryStatus_Retried() => null,
     };
   }
 

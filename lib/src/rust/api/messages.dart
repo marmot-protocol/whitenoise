@@ -30,8 +30,7 @@ Future<MessageWithTokens> sendMessageToGroup({
 
 /// Retry publishing a failed message.
 ///
-/// Re-creates the MLS message event from the original message in the MDK store,
-/// updates the delivery status to `Sending`, and spawns a new background publish task.
+/// Creates a new message with the same content and marks the original as `Retried`.
 Future<void> retryMessagePublish({
   required String pubkey,
   required String groupId,
@@ -190,6 +189,9 @@ sealed class DeliveryStatus with _$DeliveryStatus {
   const factory DeliveryStatus.failed({
     required String reason,
   }) = DeliveryStatus_Failed;
+
+  /// The user retried this message — excluded from UI snapshots
+  const factory DeliveryStatus.retried() = DeliveryStatus_Retried;
 }
 
 /// Flutter-compatible emoji reaction details
@@ -357,9 +359,6 @@ enum UpdateTrigger {
 
   /// The delivery status of an outgoing message changed (Sending -> Sent or Failed)
   deliveryStatusChanged,
-
-  /// A failed message was retried and needs repositioning in the chat
-  messageRetried,
 }
 
 /// Flutter-compatible user reaction
