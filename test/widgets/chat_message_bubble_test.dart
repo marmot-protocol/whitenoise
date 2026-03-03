@@ -578,6 +578,19 @@ void main() {
         expect(bubble.deliveryStatus, ChatStatusType.failed);
       });
 
+      testWidgets('maps Retried to null status for own message', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(deliveryStatus: const DeliveryStatus.retried()),
+            isOwnMessage: true,
+          ),
+          tester,
+        );
+
+        final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
+        expect(bubble.deliveryStatus, isNull);
+      });
+
       testWidgets('does not pass delivery status for other user messages', (tester) async {
         await mountWidget(
           ChatMessageBubble(
