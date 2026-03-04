@@ -1,8 +1,12 @@
 # White Noise
 
+![White Noise](https://blossom.primal.net/3c36c07202823ff2f84072b94e9dd59896add1ceaaedb464fa639f988a6d8d1e.png)
+
 A secure, private, and decentralized chat app using the [marmot protocol 🦫](https://github.com/marmot-protocol/marmot) to build secure messaging with MLS and Nostr
 
 ## 📱 Supported Platforms
+
+![Supported Platforms](https://blossom.primal.net/f03868727daf86f5d7d28d0e1286595381195f2d5e11b67c0d07e0b6fd8643fe.png)
 
 - ✅ **Android** - Fully supported
 - ✅ **iOS** - Fully supported
@@ -12,6 +16,8 @@ A secure, private, and decentralized chat app using the [marmot protocol 🦫](h
 - ⏳ **Web** - Not supported yet
 
 ## Structure
+
+![Structure](https://blossom.primal.net/5d7e0ee655d45321c7b9c245bea50b1197e63baf33d10fd1fc708320f5b12ceb.png)
 
 ```
 lib/
@@ -26,6 +32,9 @@ lib/
 
 
 ## 🏗️ Stack
+
+![Stack](https://blossom.primal.net/ac2b5cd3a7300114a4ddf3e9fa46850ae31a48e60bcba26b7c6e3f6774214dc1.png)
+
 - [Flutter](https://docs.flutter.dev/)
 - Rust
 - flutter_rust_bridge - Dart ↔ Rust integration
@@ -40,6 +49,9 @@ lib/
 
 
 ## 🛠️ Commands
+
+![Commands](https://blossom.primal.net/e64f261507f6bcf1ca986fc0c38998e18ea02b7d8dbfd57bf43873b139645c58.png)
+
 ```bash
 # Install dependencies
 just deps              # Install both Flutter and Rust deps
@@ -76,6 +88,9 @@ genhtml coverage/lcov.info -o coverage/html
 
 
 ## Development philosophy
+
+![Development Philosophy](https://blossom.primal.net/edcfec3e6e04cb1ddde6198a9494cf9a3ae19b6b994ce11e444af1f9b8ca4502.png)
+
 - We keep complexity low.
 - We keep the app thin.
 - We test our code.
@@ -89,6 +104,9 @@ genhtml coverage/lcov.info -o coverage/html
 - We avoid comments unless strictly necessary and write self-explanatory code.
 
 ## 📚 Resources
+
+![Resources](https://blossom.primal.net/04a82bb37c8270cc4b13f26c8f3d904fee3624c9eaa6aaa96c489003129ecd21.png)
+
 - [Flutter Docs](https://docs.flutter.dev/)
 - [White Noise Rust crate](https://github.com/marmot-protocol/whitenoise-rs)
 - [White Noise Flutter](https://github.com/marmot-protocol/whitenoise)
