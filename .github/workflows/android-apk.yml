@@ -42,8 +42,8 @@ jobs:
 
   build-apk:
     name: Build Staging APK
-    runs-on: blacksmith-8vcpu-ubuntu-2404
-    timeout-minutes: 10
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [check-team]
     # Run when: push/dispatch (not a PR, check-team was skipped), or PR where
     # the "apk" label is present and actor is a contributor.
