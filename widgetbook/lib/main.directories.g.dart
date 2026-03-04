@@ -24,6 +24,8 @@ import 'package:whitenoise_widgetbook/components/chat_message_input.dart'
     as _whitenoise_widgetbook_components_chat_message_input;
 import 'package:whitenoise_widgetbook/components/chat_status.dart'
     as _whitenoise_widgetbook_components_chat_status;
+import 'package:whitenoise_widgetbook/components/chat_system_message.dart'
+    as _whitenoise_widgetbook_components_chat_system_message;
 import 'package:whitenoise_widgetbook/components/feedback.dart'
     as _whitenoise_widgetbook_components_feedback;
 import 'package:whitenoise_widgetbook/components/filter_chip.dart'
@@ -177,6 +179,16 @@ final directories = <_widgetbook.WidgetbookNode>[
             name: 'Chat Status',
             builder: _whitenoise_widgetbook_components_chat_status
                 .wnChatStatusShowcase,
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookComponent(
+        name: 'WnChatSystemMessageStory',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Chat System Message',
+            builder: _whitenoise_widgetbook_components_chat_system_message
+                .wnChatSystemMessageShowcase,
           ),
         ],
       ),
