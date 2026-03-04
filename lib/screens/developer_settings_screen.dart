@@ -129,14 +129,6 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                     ),
                     const WnSeparator(),
                     SizedBox(height: 8.h),
-                    _DeveloperSettingsViewLogsRow(
-                      rowKey: const Key('route_browser_row'),
-                      label: 'Route Browser',
-                      description: 'Open app routes for screen inspection',
-                      onTap: () => Routes.pushToRouteBrowser(context),
-                    ),
-                    const WnSeparator(),
-                    SizedBox(height: 8.h),
                   ],
                   _DeveloperSettingsActionButtons(
                     isLoading: state.isLoading,
