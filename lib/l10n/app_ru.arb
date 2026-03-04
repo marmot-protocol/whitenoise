@@ -104,6 +104,7 @@
   "messagePlaceholder": "Сообщение",
   "failedToSendMessage": "Не удалось отправить сообщение. Попробуйте снова.",
   "invitedToSecureChat": "Вы приглашены в безопасный чат",
+  "invitedYouToChatSuffix": " пригласил вас в чат",
   "decline": "Отклонить",
   "accept": "Принять",
   "failedToAcceptInvitation": "Не удалось принять приглашение: {error}",

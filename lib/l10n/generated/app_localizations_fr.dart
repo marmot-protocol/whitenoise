@@ -350,6 +350,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get invitedToSecureChat => 'Vous êtes invité à une discussion sécurisée';
 
   @override
+  String get invitedYouToChatSuffix => ' vous a invité à discuter';
+
+  @override
   String get decline => 'Refuser';
 
   @override

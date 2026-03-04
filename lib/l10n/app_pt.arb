@@ -104,6 +104,7 @@
   "messagePlaceholder": "Mensagem",
   "failedToSendMessage": "Falha ao enviar mensagem. Por favor, tente novamente.",
   "invitedToSecureChat": "Você foi convidado para uma conversa segura",
+  "invitedYouToChatSuffix": " convidou você para o chat",
   "decline": "Recusar",
   "accept": "Aceitar",
   "failedToAcceptInvitation": "Falha ao aceitar o convite: {error}",

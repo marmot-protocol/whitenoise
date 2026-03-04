@@ -104,6 +104,7 @@
   "messagePlaceholder": "Mesaj",
   "failedToSendMessage": "Mesaj gönderilemedi. Lütfen tekrar deneyin.",
   "invitedToSecureChat": "Güvenli bir sohbete davet edildiniz",
+  "invitedYouToChatSuffix": " sizi sohbete davet etti",
   "decline": "Reddet",
   "accept": "Kabul et",
   "failedToAcceptInvitation": "Davet kabul edilemedi: {error}",

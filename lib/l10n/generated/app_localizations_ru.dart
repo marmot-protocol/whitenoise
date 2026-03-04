@@ -350,6 +350,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get invitedToSecureChat => 'Вы приглашены в безопасный чат';
 
   @override
+  String get invitedYouToChatSuffix => ' пригласил вас в чат';
+
+  @override
   String get decline => 'Отклонить';
 
   @override

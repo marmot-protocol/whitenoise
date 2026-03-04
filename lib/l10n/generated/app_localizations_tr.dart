@@ -349,6 +349,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get invitedToSecureChat => 'Güvenli bir sohbete davet edildiniz';
 
   @override
+  String get invitedYouToChatSuffix => ' sizi sohbete davet etti';
+
+  @override
   String get decline => 'Reddet';
 
   @override

@@ -732,6 +732,12 @@ abstract class AppLocalizations {
   /// **'You are invited to a secure chat'**
   String get invitedToSecureChat;
 
+  /// Suffix for system message showing who invited the user to chat (preceded by bold name)
+  ///
+  /// In en, this message translates to:
+  /// **' invited you to chat'**
+  String get invitedYouToChatSuffix;
+
   /// Decline button text
   ///
   /// In en, this message translates to:

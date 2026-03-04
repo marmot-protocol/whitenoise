@@ -350,6 +350,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get invitedToSecureChat => 'Sei stato invitato a una chat sicura';
 
   @override
+  String get invitedYouToChatSuffix => ' ti ha invitato alla chat';
+
+  @override
   String get decline => 'Rifiuta';
 
   @override

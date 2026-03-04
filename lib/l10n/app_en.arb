@@ -540,6 +540,11 @@
     "description": "Message when invited to a chat"
   },
 
+  "invitedYouToChatSuffix": " invited you to chat",
+  "@invitedYouToChatSuffix": {
+    "description": "Suffix for system message showing who invited the user to chat (preceded by bold name)"
+  },
+
   "decline": "Decline",
   "@decline": {
     "description": "Decline button text"
