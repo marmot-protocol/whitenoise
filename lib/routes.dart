@@ -30,6 +30,7 @@ import 'package:whitenoise/screens/network_screen.dart' show NetworkScreen;
 import 'package:whitenoise/screens/privacy_security_screen.dart' show PrivacySecurityScreen;
 import 'package:whitenoise/screens/profile_keys_screen.dart' show ProfileKeysScreen;
 import 'package:whitenoise/screens/relay_resolution_screen.dart' show RelayResolutionScreen;
+import 'package:whitenoise/screens/route_browser_screen.dart' show RouteBrowserScreen;
 import 'package:whitenoise/screens/scan_npub_screen.dart' show ScanNpubScreen;
 import 'package:whitenoise/screens/scan_nsec_screen.dart' show ScanNsecScreen;
 import 'package:whitenoise/screens/set_up_group_screen.dart' show SetUpGroupScreen;
@@ -64,6 +65,7 @@ abstract final class Routes {
   static const _developerSettings = '/developer-settings';
   static const _appLogs = '/app-logs';
   static const _debugSqlQuery = '/debug-sql-query';
+  static const _routeBrowser = '/route-browser';
   static const _profileKeys = '/profile-keys';
   static const _shareProfile = '/share-profile';
   static const _editProfile = '/edit-profile';
@@ -201,6 +203,14 @@ abstract final class Routes {
             pageBuilder: (context, state) => _navigationTransition(
               state: state,
               child: const DebugSqlQueryScreen(),
+            ),
+          ),
+        if (isStaging)
+          GoRoute(
+            path: _routeBrowser,
+            pageBuilder: (context, state) => _navigationTransition(
+              state: state,
+              child: const RouteBrowserScreen(),
             ),
           ),
         GoRoute(
@@ -488,6 +498,11 @@ abstract final class Routes {
   static void pushToDebugSqlQuery(BuildContext context) {
     if (!isStaging) return;
     GoRouter.of(context).push(_debugSqlQuery);
+  }
+
+  static void pushToRouteBrowser(BuildContext context) {
+    if (!isStaging) return;
+    GoRouter.of(context).push(_routeBrowser);
   }
 
   static void pushToProfileKeys(BuildContext context) {
