@@ -66,6 +66,7 @@ class _MockApi extends MockWnApi {
   FlutterMetadata? userMetadataResponse;
   bool isDm = false;
   List<String> groupMembers = [];
+  String? welcomerPubkey;
 
   @override
   void reset() {
@@ -80,6 +81,7 @@ class _MockApi extends MockWnApi {
     userMetadataResponse = null;
     isDm = false;
     groupMembers = [];
+    welcomerPubkey = null;
   }
 
   void emitMessage(ChatMessage message) {
@@ -139,6 +141,20 @@ class _MockApi extends MockWnApi {
     required String pubkey,
     required String groupId,
   }) async => groupMembers;
+
+  @override
+  Future<AccountGroup> crateApiAccountGroupsGetAccountGroup({
+    required String accountPubkey,
+    required String mlsGroupId,
+  }) async {
+    return AccountGroup(
+      accountPubkey: accountPubkey,
+      mlsGroupId: mlsGroupId,
+      welcomerPubkey: welcomerPubkey,
+      createdAt: PlatformInt64Util.from(0),
+      updatedAt: PlatformInt64Util.from(0),
+    );
+  }
 
   @override
   Future<AccountGroup> crateApiAccountGroupsAcceptAccountGroup({
@@ -280,11 +296,36 @@ void main() {
       });
     });
 
-    group('with no messages', () {
-      testWidgets('shows empty state text', (tester) async {
+    group('inviter system message', () {
+      testWidgets('shows inviter name when welcomerPubkey is set', (tester) async {
+        _api.welcomerPubkey = testPubkeyC;
+        _api.userMetadataResponse = const FlutterMetadata(
+          displayName: 'Alice',
+          custom: {},
+        );
         await pumpInviteScreen(tester);
 
-        expect(find.text('You are invited to a secure chat'), findsOneWidget);
+        expect(find.text('Alice invited you to chat'), findsOneWidget);
+      });
+
+      testWidgets('does not show inviter message when welcomerPubkey is null', (tester) async {
+        _api.welcomerPubkey = null;
+        await pumpInviteScreen(tester);
+
+        expect(find.textContaining('invited you to chat'), findsNothing);
+      });
+
+      testWidgets('shows inviter message even when there are messages', (tester) async {
+        _api.welcomerPubkey = testPubkeyC;
+        _api.userMetadataResponse = const FlutterMetadata(
+          displayName: 'Bob',
+          custom: {},
+        );
+        _api.initialMessages = [_message('m1'), _message('m2')];
+        await pumpInviteScreen(tester);
+
+        expect(find.text('Bob invited you to chat'), findsOneWidget);
+        expect(find.byType(WnMessageBubble), findsNWidgets(2));
       });
     });
 
@@ -297,12 +338,6 @@ void main() {
         await pumpInviteScreen(tester);
 
         expect(find.byType(WnMessageBubble), findsNWidgets(2));
-      });
-
-      testWidgets('hides empty state text', (tester) async {
-        await pumpInviteScreen(tester);
-
-        expect(find.text('You are invited to a secure chat'), findsNothing);
       });
 
       testWidgets('does not display deleted message text', (tester) async {

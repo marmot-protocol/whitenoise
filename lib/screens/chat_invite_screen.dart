@@ -12,6 +12,7 @@ import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/active_chat_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart' as account_groups_api;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart';
@@ -20,6 +21,7 @@ import 'package:whitenoise/widgets/chat_message_bubble.dart';
 import 'package:whitenoise/widgets/chat_scroll_down_button.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/widgets/wn_chat_system_message.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_chat_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
@@ -50,6 +52,26 @@ class ChatInviteScreen extends HookConsumerWidget {
 
     final chatProfile = useChatProfile(context, pubkey, mlsGroupId);
     final chatMessages = useChatMessages(mlsGroupId);
+
+    final accountGroup = useMemoized(
+      () => account_groups_api.getAccountGroup(
+        accountPubkey: pubkey,
+        mlsGroupId: mlsGroupId,
+      ),
+      [pubkey, mlsGroupId],
+    );
+    final inviterName = useFuture(
+      useMemoized(
+        () async {
+          final group = await accountGroup;
+          final welcomerPubkey = group.welcomerPubkey;
+          if (welcomerPubkey == null) return null;
+          final metadata = await UserService(welcomerPubkey).fetchMetadata();
+          return presentName(metadata);
+        },
+        [accountGroup],
+      ),
+    );
 
     useActiveChat(
       groupId: mlsGroupId,
@@ -166,20 +188,30 @@ class ChatInviteScreen extends HookConsumerWidget {
                 SizedBox(height: 8.h),
               ],
             ),
+            if (inviterName.data != null && inviterName.data!.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.only(top: 8.h),
+                child: WnChatSystemMessage(
+                  text: '${inviterName.data!}${context.l10n.invitedYouToChatSuffix}',
+                  textSpan: TextSpan(
+                    style: typography.medium14.copyWith(
+                      color: colors.backgroundContentSecondary,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: inviterName.data,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(text: context.l10n.invitedYouToChatSuffix),
+                    ],
+                  ),
+                ),
+              ),
             Expanded(
               child: chatMessages.isLoading
                   ? Center(
                       child: CircularProgressIndicator(
                         color: colors.backgroundContentPrimary,
-                      ),
-                    )
-                  : chatMessages.messageCount == 0
-                  ? Center(
-                      child: Text(
-                        context.l10n.invitedToSecureChat,
-                        style: typography.medium14.copyWith(
-                          color: colors.backgroundContentTertiary,
-                        ),
                       ),
                     )
                   : _InviteMessageList(
