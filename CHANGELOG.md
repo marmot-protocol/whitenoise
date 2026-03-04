@@ -9,8 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Show reply preview in message actions, add author color in reply preview in input, swipe to reply [PR #389](https://github.com/marmot-protocol/whitenoise/pull/389)
-
 - Show photo/photos label with image icon in chat list when last message is media-only [PR #414](https://github.com/marmot-protocol/whitenoise/pull/414)
+- Add clear option to relay inputs [PR #412](https://github.com/marmot-protocol/whitenoise/pull/412)
 
 ### Changed
 - Changed reaction emoji sorting [PR #391](https://github.com/marmot-protocol/whitenoise/pull/391)
