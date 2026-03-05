@@ -456,6 +456,18 @@ void main() {
         });
       });
 
+      group('when own message in group', () {
+        setUp(() {
+          _api.initialMessages = [_message('m1', pubkey: _testPubkey)];
+        });
+
+        testWidgets('does not show sender name or avatar', (tester) async {
+          await pumpInviteScreen(tester);
+
+          expect(find.byKey(const Key('bubble_avatar_row')), findsNothing);
+        });
+      });
+
       group('when DM', () {
         setUp(() {
           _api.isDm = true;

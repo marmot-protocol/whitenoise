@@ -61,6 +61,7 @@ ChatMessage _message(
   bool isReply = false,
   String? replyToId,
   ReactionSummary reactions = const ReactionSummary(byEmoji: [], userReactions: []),
+  DeliveryStatus? deliveryStatus,
 }) => ChatMessage(
   id: id,
   pubkey: pubkey,
@@ -74,6 +75,7 @@ ChatMessage _message(
   reactions: reactions,
   mediaAttachments: const [],
   kind: 9,
+  deliveryStatus: deliveryStatus,
 );
 
 class _MockApi extends MockWnApi {
@@ -84,9 +86,11 @@ class _MockApi extends MockWnApi {
   final List<({String groupId, int kind, List<Tag>? tags})> deletionCalls = [];
   final List<({String groupId, String message, int kind, List<Tag>? tags})> reactionCalls = [];
   final List<List<List<String>>> sentTextMessageTagVecs = [];
+  final List<({String pubkey, String groupId, String eventId})> retryAttempts = [];
   Exception? sendError;
   Exception? deleteError;
   Exception? reactionError;
+  Exception? retryError;
   int _sendCallCount = 0;
   bool isDm = false;
   List<String> groupMembers = [];
@@ -103,15 +107,27 @@ class _MockApi extends MockWnApi {
     sentMessages.clear();
     deletionCalls.clear();
     reactionCalls.clear();
+    retryAttempts.clear();
     sentTextMessageTagVecs.clear();
     sendError = null;
     deleteError = null;
     reactionError = null;
+    retryError = null;
     _sendCallCount = 0;
     isDm = false;
     groupMembers = [];
     uploadCompleter = null;
     metadataByPubkey = null;
+  }
+
+  @override
+  Future<void> crateApiMessagesRetryMessagePublish({
+    required String pubkey,
+    required String groupId,
+    required String eventId,
+  }) async {
+    retryAttempts.add((pubkey: pubkey, groupId: groupId, eventId: eventId));
+    if (retryError != null) throw retryError!;
   }
 
   @override
@@ -610,6 +626,51 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.textContaining('Message new_msg'), findsOneWidget);
+      });
+    });
+
+    group('retry failed message', () {
+      setUp(() {
+        _api.initialMessages = [
+          _message(
+            'failed1',
+            DateTime(2024),
+            pubkey: _testPubkey,
+            deliveryStatus: const DeliveryStatus.failed(reason: 'timeout'),
+          ),
+        ];
+      });
+
+      testWidgets('calls retryMessagePublish on tap', (tester) async {
+        await pumpChatScreen(tester);
+        await tester.tap(find.byKey(const Key('status_tap_area')));
+        await tester.pumpAndSettle();
+
+        expect(_api.retryAttempts.length, 1);
+        expect(_api.retryAttempts.first.eventId, 'failed1');
+      });
+
+      testWidgets('shows system notice when retry fails', (tester) async {
+        _api.retryError = Exception('retry failed');
+        await pumpChatScreen(tester);
+        await tester.tap(find.byKey(const Key('status_tap_area')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(WnSystemNotice), findsOneWidget);
+        expect(find.text('Failed to send message. Please try again.'), findsOneWidget);
+      });
+
+      testWidgets('does not show retry for non-own messages', (tester) async {
+        _api.initialMessages = [
+          _message(
+            'failed2',
+            DateTime(2024),
+            deliveryStatus: const DeliveryStatus.failed(reason: 'timeout'),
+          ),
+        ];
+        await pumpChatScreen(tester);
+
+        expect(find.byKey(const Key('status_tap_area')), findsNothing);
       });
     });
 
