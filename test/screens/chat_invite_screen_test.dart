@@ -8,7 +8,7 @@ import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_info_screen.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/chat_screen.dart';
-import 'package:whitenoise/screens/wip_screen.dart';
+import 'package:whitenoise/screens/group_info_screen.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
@@ -639,20 +639,20 @@ void main() {
       });
 
       group('when group', () {
-        testWidgets('header avatar navigates to WIP', (tester) async {
+        testWidgets('header avatar navigates to group info', (tester) async {
           await pumpInviteScreen(tester);
           await tester.tap(find.byKey(const Key('header_avatar_tap_area')));
           await tester.pumpAndSettle();
 
-          expect(find.byType(WipScreen), findsOneWidget);
+          expect(find.byType(GroupInfoScreen), findsOneWidget);
         });
 
-        testWidgets('large avatar navigates to WIP', (tester) async {
+        testWidgets('large avatar navigates to group info', (tester) async {
           await pumpInviteScreen(tester);
           await tester.tap(find.byKey(const Key('large_avatar_tap_area')));
           await tester.pumpAndSettle();
 
-          expect(find.byType(WipScreen), findsOneWidget);
+          expect(find.byType(GroupInfoScreen), findsOneWidget);
         });
       });
     });
