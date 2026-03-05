@@ -41,7 +41,6 @@ import 'package:whitenoise/screens/start_chat_screen.dart' show StartChatScreen;
 import 'package:whitenoise/screens/switch_profile_screen.dart' show SwitchProfileScreen;
 import 'package:whitenoise/screens/user_search_screen.dart' show UserSearchScreen;
 import 'package:whitenoise/screens/user_selection_screen.dart' show UserSelectionScreen;
-import 'package:whitenoise/screens/wip_screen.dart' show WipScreen;
 import 'package:whitenoise/src/rust/api/metadata.dart' show FlutterMetadata;
 import 'package:whitenoise/src/rust/api/users.dart' show User;
 import 'package:whitenoise/utils/app_flavor.dart' show isStaging;
@@ -170,13 +169,6 @@ abstract final class Routes {
           pageBuilder: (context, state) => _navigationTransition(
             state: state,
             child: const PrivacySecurityScreen(),
-          ),
-        ),
-        GoRoute(
-          path: _wip,
-          pageBuilder: (context, state) => _navigationTransition(
-            state: state,
-            child: const WipScreen(),
           ),
         ),
 

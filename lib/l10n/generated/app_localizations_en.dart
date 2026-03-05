@@ -519,9 +519,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportError => 'Report error';
 
   @override
-  String get workInProgress => 'We\'re working on this';
-
-  @override
   String get wipMessage =>
       'We\'re working on this feature. To support development, please donate to White Noise';
 

@@ -148,7 +148,6 @@
   "packageNumber": "Paket {number}",
   "goBack": "Geri dön",
   "reportError": "Hata bildir",
-  "workInProgress": "Bunun üzerinde çalışıyoruz",
   "wipMessage": "Bu özellik üzerinde çalışıyoruz. Geliştirmeyi desteklemek için lütfen White Noise'a bağış yapın",
   "donate": "Bağış yap",
   "addRelay": "Röle Ekle",

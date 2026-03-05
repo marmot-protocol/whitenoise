@@ -996,12 +996,6 @@ abstract class AppLocalizations {
   /// **'Report error'**
   String get reportError;
 
-  /// WIP screen title
-  ///
-  /// In en, this message translates to:
-  /// **'We\'re working on this'**
-  String get workInProgress;
-
   /// WIP screen message
   ///
   /// In en, this message translates to:

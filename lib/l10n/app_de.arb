@@ -148,7 +148,6 @@
   "packageNumber": "Paket {number}",
   "goBack": "Zurück",
   "reportError": "Fehler melden",
-  "workInProgress": "Wir arbeiten daran",
   "wipMessage": "Wir arbeiten an dieser Funktion. Um die Entwicklung zu unterstützen, spende bitte an White Noise",
   "donate": "Spenden",
   "addRelay": "Relay hinzufügen",

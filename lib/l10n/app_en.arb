@@ -806,11 +806,6 @@
     "description": "Report error button text"
   },
 
-  "workInProgress": "We're working on this",
-  "@workInProgress": {
-    "description": "WIP screen title"
-  },
-
   "wipMessage": "We're working on this feature. To support development, please donate to White Noise",
   "@wipMessage": {
     "description": "WIP screen message"
