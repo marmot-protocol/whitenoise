@@ -33,6 +33,7 @@ and this project adheres to Calendar Versioning (CalVer).
 - Fix bio field looking cut in signup form by adding automatic scroll [PR #435](https://github.com/marmot-protocol/whitenoise/pull/435)
 - Fix base design size [#433](https://github.com/marmot-protocol/whitenoise/pull/433)
 - Fix messages bubbles and handle manual retry [PR #442](https://github.com/marmot-protocol/whitenoise/pull/442)
+- Fix chat invite avatar navigating to wip screen for group chats and hide search for unaccepted dm chat info  [#452](https://github.com/marmot-protocol/whitenoise/pull/452)
 
 ### Security
 
