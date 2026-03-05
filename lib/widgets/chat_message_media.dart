@@ -59,7 +59,7 @@ class _ChatMessageMediaTile extends HookWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(4.r),
       child: Stack(
-        fit: StackFit.passthrough,
+        fit: StackFit.expand,
         children: [
           WnBlurhashPlaceholder(
             key: const Key('loading_placeholder'),
