@@ -23,46 +23,39 @@ class HomeScreen extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           SafeArea(
-            child: Column(
-              children: [
-                Expanded(
-                  child: Center(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Gap(60.h),
-                          SvgPicture.asset(
-                            'assets/svgs/whitenoise.svg',
-                            colorFilter: ColorFilter.mode(
-                              colors.backgroundContentPrimary,
-                              BlendMode.srcIn,
-                            ),
-                          ),
-                          Gap(32.h),
-                          _RotatingSloganText(
-                            texts: [
-                              context.l10n.sloganDecentralized,
-                              context.l10n.sloganUncensorable,
-                              context.l10n.sloganSecureMessaging,
-                            ],
-                            style: typography.bold36.copyWith(
-                              color: colors.backgroundContentTertiary,
-                            ),
-                          ),
-                        ],
-                      ),
+            child: SingleChildScrollView(
+              child: Column(
+                children: [
+                  Gap(216.5.h),
+                  SvgPicture.asset(
+                    'assets/svgs/whitenoise.svg',
+                    width: 160.w,
+                    height: 123.h,
+                    colorFilter: ColorFilter.mode(
+                      colors.backgroundContentPrimary,
+                      BlendMode.srcIn,
                     ),
                   ),
-                ),
-                WnSlate(
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 14.w),
-                    child: const WnAuthButtonsContainer(),
+                  Gap(24.h),
+                  _RotatingSloganText(
+                    texts: [
+                      context.l10n.sloganDecentralized,
+                      context.l10n.sloganUncensorable,
+                      context.l10n.sloganSecureMessaging,
+                    ],
+                    style: typography.bold36.copyWith(
+                      color: colors.backgroundContentTertiary,
+                    ),
                   ),
-                ),
-                Gap(44.h),
-              ],
+                  Gap(224.5.h),
+                  WnSlate(
+                    child: Padding(
+                      padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 14.w),
+                      child: const WnAuthButtonsContainer(),
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ],

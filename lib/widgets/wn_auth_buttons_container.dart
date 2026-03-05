@@ -25,7 +25,7 @@ class WnAuthButtonsContainer extends StatelessWidget {
           type: WnButtonType.outline,
           onPressed: onLogin ?? () => Routes.pushToLogin(context),
         ),
-        Gap(8.h),
+        Gap(12.h),
         WnButton(
           text: context.l10n.signUp,
           onPressed: onSignup ?? () => Routes.pushToSignup(context),
