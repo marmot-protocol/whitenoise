@@ -23,7 +23,9 @@ class _MockTag implements Tag {
 class _MockApi extends MockWnApi {
   final List<({String pubkey, String groupId, String message, int kind, List<Tag>? tags})>
   sentMessages = [];
+  final List<({String pubkey, String groupId, String eventId})> retryAttempts = [];
   bool shouldFailSendMessage = false;
+  bool shouldFailRetry = false;
 
   @override
   Future<Tag> crateApiUtilsTagFromVec({required List<String> vec}) async {
@@ -49,6 +51,16 @@ class _MockApi extends MockWnApi {
       tokens: const [],
     );
   }
+
+  @override
+  Future<void> crateApiMessagesRetryMessagePublish({
+    required String pubkey,
+    required String groupId,
+    required String eventId,
+  }) async {
+    retryAttempts.add((pubkey: pubkey, groupId: groupId, eventId: eventId));
+    if (shouldFailRetry) throw Exception('retry failed');
+  }
 }
 
 void main() {
@@ -62,8 +74,47 @@ void main() {
 
   setUp(() {
     mockApi.sentMessages.clear();
+    mockApi.retryAttempts.clear();
     mockApi.shouldFailSendMessage = false;
+    mockApi.shouldFailRetry = false;
     service = const MessageService(pubkey: _testPubkey, groupId: 'group1');
+  });
+
+  group('retryMessage', () {
+    test('calls retry API once', () async {
+      await service.retryMessage(eventId: 'event123');
+
+      expect(mockApi.retryAttempts.length, 1);
+    });
+
+    test('passes correct pubkey from constructor', () async {
+      await service.retryMessage(eventId: 'event123');
+
+      expect(mockApi.retryAttempts.first.pubkey, _testPubkey);
+    });
+
+    test('passes correct groupId from constructor', () async {
+      await service.retryMessage(eventId: 'event123');
+
+      expect(mockApi.retryAttempts.first.groupId, 'group1');
+    });
+
+    test('passes correct eventId argument', () async {
+      await service.retryMessage(eventId: 'event123');
+
+      expect(mockApi.retryAttempts.first.eventId, 'event123');
+    });
+
+    test('rethrows when API call fails', () async {
+      mockApi.shouldFailRetry = true;
+
+      expect(
+        () => service.retryMessage(eventId: 'event123'),
+        throwsA(
+          isA<Exception>().having((e) => e.toString(), 'message', contains('retry failed')),
+        ),
+      );
+    });
   });
 
   group('sendTextMessage', () {

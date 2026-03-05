@@ -12,6 +12,21 @@ class MessageService {
 
   const MessageService({required this.pubkey, required this.groupId});
 
+  Future<void> retryMessage({required String eventId}) async {
+    _logger.info('retryMessage START groupId=$groupId eventId=$eventId');
+    try {
+      await messages_api.retryMessagePublish(
+        pubkey: pubkey,
+        groupId: groupId,
+        eventId: eventId,
+      );
+      _logger.info('retryMessage OK groupId=$groupId eventId=$eventId');
+    } catch (e, st) {
+      _logger.severe('retryMessage FAILED groupId=$groupId eventId=$eventId', e, st);
+      rethrow;
+    }
+  }
+
   Future<void> sendMessage({
     required String content,
     String? replyToMessageId,
