@@ -77,6 +77,7 @@ abstract final class Routes {
   static const _addToGroup = '/add-to-group/:userPubkey';
   static const _startChat = '/start-chat/:userPubkey';
   static const _chatInfo = '/chat-info/:userPubkey';
+  static const _inviteInfo = '/invite-info/:userPubkey';
   static const _groupInfo = '/group-info/:groupId';
   static const _editGroup = '/edit-group/:groupId';
   static const _groupMember = '/group-member/:groupId/:memberPubkey';
@@ -325,6 +326,18 @@ abstract final class Routes {
           ),
         ),
         GoRoute(
+          name: 'inviteInfo',
+          path: _inviteInfo,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: ChatInfoScreen(
+              userPubkey: state.pathParameters['userPubkey']!,
+              showSearch: false,
+            ),
+            opaque: false,
+          ),
+        ),
+        GoRoute(
           name: 'groupInfo',
           path: _groupInfo,
           pageBuilder: (context, state) => _navigationTransition(
@@ -566,6 +579,12 @@ abstract final class Routes {
     return GoRouter.of(
       context,
     ).pushNamed<bool>('chatInfo', pathParameters: {'userPubkey': userPubkey});
+  }
+
+  static Future<void> pushToInviteInfo(BuildContext context, String userPubkey) {
+    return GoRouter.of(
+      context,
+    ).pushNamed('inviteInfo', pathParameters: {'userPubkey': userPubkey});
   }
 
   static void pushToAddToGroup(BuildContext context, String userPubkey) {

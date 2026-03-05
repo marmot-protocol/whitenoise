@@ -13,6 +13,7 @@ void main() {
     required bool isOwnProfile,
     bool isFollowing = false,
     bool isFollowLoading = false,
+    bool showSearch = true,
     VoidCallback? onFollowTap,
     VoidCallback? onSearchTap,
     VoidCallback? onAddToGroupTap,
@@ -23,7 +24,7 @@ void main() {
         isFollowing: isFollowing,
         isFollowLoading: isFollowLoading,
         onFollowTap: onFollowTap ?? () {},
-        onSearchTap: onSearchTap ?? () {},
+        onSearchTap: showSearch ? (onSearchTap ?? () {}) : null,
         onAddToGroupTap: onAddToGroupTap ?? () {},
       ),
       tester,
@@ -35,6 +36,14 @@ void main() {
       await pumpActions(tester, isOwnProfile: false);
 
       expect(find.byKey(const Key('search_button')), findsOneWidget);
+      expect(find.byKey(const Key('contact_button')), findsOneWidget);
+      expect(find.byKey(const Key('add_to_group_button')), findsOneWidget);
+    });
+
+    testWidgets('hides search button when onSearchTap is null', (tester) async {
+      await pumpActions(tester, isOwnProfile: false, showSearch: false);
+
+      expect(find.byKey(const Key('search_button')), findsNothing);
       expect(find.byKey(const Key('contact_button')), findsOneWidget);
       expect(find.byKey(const Key('add_to_group_button')), findsOneWidget);
     });

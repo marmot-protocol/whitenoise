@@ -17,9 +17,10 @@ import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart' show WnSystemNotice;
 
 class ChatInfoScreen extends HookConsumerWidget {
-  const ChatInfoScreen({super.key, required this.userPubkey});
+  const ChatInfoScreen({super.key, required this.userPubkey, this.showSearch = true});
 
   final String userPubkey;
+  final bool showSearch;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -94,7 +95,7 @@ class ChatInfoScreen extends HookConsumerWidget {
                               isFollowing: isFollowing,
                               isFollowLoading: followState.isActionLoading,
                               onFollowTap: handleFollowAction,
-                              onSearchTap: () => GoRouter.of(context).pop(true),
+                              onSearchTap: showSearch ? () => GoRouter.of(context).pop(true) : null,
                               onAddToGroupTap: () => Routes.pushToAddToGroup(context, userPubkey),
                             ),
                           ],
