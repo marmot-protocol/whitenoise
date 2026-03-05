@@ -2719,9 +2719,10 @@ dependencies = [
 
 [[package]]
 name = "mdk-core"
-version = "0.6.0"
-source = "git+https://github.com/marmot-protocol/mdk?rev=a295f21#a295f213063aeaa3a8286baf896804aebd5ccc74"
+version = "0.7.0"
+source = "git+https://github.com/marmot-protocol/mdk?rev=491e24923cafd07c37d4cb3ea99aa0788ffbe1f3#491e24923cafd07c37d4cb3ea99aa0788ffbe1f3"
 dependencies = [
+ "base64",
  "blurhash",
  "chacha20poly1305",
  "hex",
@@ -2743,8 +2744,8 @@ dependencies = [
 
 [[package]]
 name = "mdk-sqlite-storage"
-version = "0.6.0"
-source = "git+https://github.com/marmot-protocol/mdk?rev=a295f21#a295f213063aeaa3a8286baf896804aebd5ccc74"
+version = "0.7.0"
+source = "git+https://github.com/marmot-protocol/mdk?rev=491e24923cafd07c37d4cb3ea99aa0788ffbe1f3#491e24923cafd07c37d4cb3ea99aa0788ffbe1f3"
 dependencies = [
  "getrandom 0.4.1",
  "hex",
@@ -2764,8 +2765,8 @@ dependencies = [
 
 [[package]]
 name = "mdk-storage-traits"
-version = "0.6.0"
-source = "git+https://github.com/marmot-protocol/mdk?rev=a295f21#a295f213063aeaa3a8286baf896804aebd5ccc74"
+version = "0.7.0"
+source = "git+https://github.com/marmot-protocol/mdk?rev=491e24923cafd07c37d4cb3ea99aa0788ffbe1f3#491e24923cafd07c37d4cb3ea99aa0788ffbe1f3"
 dependencies = [
  "nostr",
  "openmls",
@@ -5452,7 +5453,7 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "whitenoise"
 version = "0.1.0"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=74a3071#74a3071d25e246b44501559de90361807904dedc"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=552323ef9e4a1153b5717b0a35559bfe9be7eb86#552323ef9e4a1153b5717b0a35559bfe9be7eb86"
 dependencies = [
  "android-native-keyring-store",
  "anyhow",
