@@ -15,6 +15,7 @@ import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart' as account_groups_api;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart';
+import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/widgets/chat_message_bubble.dart';
 import 'package:whitenoise/widgets/chat_scroll_down_button.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
@@ -184,7 +185,7 @@ class ChatInviteScreen extends HookConsumerWidget {
                   : _InviteMessageList(
                       chatMessages: chatMessages,
                       pubkey: pubkey,
-                      isGroupChat: chatProfile.data?.isDm == false,
+                      isGroupChat: chatProfile.data?.isDm != true,
                     ),
             ),
             WnSlate(
@@ -277,11 +278,18 @@ class _InviteMessageList extends HookWidget {
               isGroupChat: isGroupChat,
             );
             final showTail = shouldShowTail(current: message, next: nextMessage);
+            final authorMetadata = chatMessages.getAuthorMetadata(message.pubkey);
+            final senderName = isOwnMessage
+                ? context.l10n.you
+                : presentName(authorMetadata) ?? context.l10n.unknownUser;
+            final senderPictureUrl = authorMetadata?.picture;
             return ChatMessageBubble(
               message: message,
               isOwnMessage: isOwnMessage,
               currentUserPubkey: pubkey,
               replyPreview: replyPreview,
+              senderName: senderName,
+              senderPictureUrl: senderPictureUrl,
               showAvatar: showAvatar,
               showTail: showTail,
               isGroupChat: isGroupChat,

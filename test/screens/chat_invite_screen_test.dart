@@ -388,7 +388,11 @@ void main() {
         ];
         await pumpInviteScreen(tester);
 
-        expect(find.text('Reply Author'), findsOneWidget);
+        final replyPreview = find.byType(ChatMessageQuote);
+        expect(
+          find.descendant(of: replyPreview, matching: find.text('Reply Author')),
+          findsOneWidget,
+        );
       });
 
       testWidgets('displays original message content in reply preview', (tester) async {
@@ -423,6 +427,47 @@ void main() {
 
         expect(find.byType(ChatMessageQuote), findsOneWidget);
         expect(find.text('Message not found'), findsOneWidget);
+      });
+    });
+
+    group('sender info on messages', () {
+      group('when group', () {
+        setUp(() {
+          _api.initialMessages = [_message('m1')];
+        });
+
+        testWidgets('shows sender name', (tester) async {
+          await pumpInviteScreen(tester);
+
+          expect(find.text('Author'), findsOneWidget);
+        });
+
+        testWidgets('shows sender avatar', (tester) async {
+          await pumpInviteScreen(tester);
+
+          expect(find.byType(WnAvatar), findsNWidgets(3));
+        });
+
+        testWidgets('shows Unknown user when metadata has no name', (tester) async {
+          _api.userMetadataResponse = const FlutterMetadata(custom: {});
+          await pumpInviteScreen(tester);
+
+          expect(find.text('Unknown user'), findsOneWidget);
+        });
+      });
+
+      group('when DM', () {
+        setUp(() {
+          _api.isDm = true;
+          _api.groupMembers = [_testPubkey, testPubkeyB];
+          _api.initialMessages = [_message('m1')];
+        });
+
+        testWidgets('does not show sender avatar', (tester) async {
+          await pumpInviteScreen(tester);
+
+          expect(find.byType(WnAvatar), findsNWidgets(2));
+        });
       });
     });
 
