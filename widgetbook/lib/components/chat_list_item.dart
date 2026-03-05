@@ -40,7 +40,7 @@ Widget wnChatListItemShowcase(BuildContext context) {
   final status = context.knobs.objectOrNull.dropdown<ChatStatusType>(
     label: 'Status',
     options: ChatStatusType.values,
-    initialOption: ChatStatusType.sent,
+    initialOption: ChatStatusType.sending,
     labelBuilder: (value) => value.name,
   );
   final unreadCount = context.knobs.int.slider(
@@ -108,18 +108,18 @@ Widget wnChatListItemShowcase(BuildContext context) {
             ),
             const SizedBox(height: 16),
             WnChatListItem(
-              title: 'Sent (from you)',
-              subtitle: 'Message sent',
+              title: 'Sending (from you)',
+              subtitle: 'Message sending',
               timestamp: '1m',
-              status: ChatStatusType.sent,
+              status: ChatStatusType.sending,
               prefixSubtitle: 'You: ',
               onTap: () {},
             ),
             WnChatListItem(
-              title: 'Delivered (from you)',
-              subtitle: 'Message delivered',
+              title: 'Sent (from you)',
+              subtitle: 'Message sent',
               timestamp: '2m',
-              status: ChatStatusType.delivered,
+              status: ChatStatusType.sent,
               prefixSubtitle: 'You: ',
               onTap: () {},
             ),
@@ -173,7 +173,7 @@ Widget wnChatListItemShowcase(BuildContext context) {
                   ' wrap onto two lines before truncating'
                   ' with ellipsis',
               timestamp: '7m',
-              status: ChatStatusType.sent,
+              status: ChatStatusType.sending,
               prefixSubtitle: 'You: ',
               onTap: () {},
             ),

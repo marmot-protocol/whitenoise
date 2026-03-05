@@ -74,7 +74,7 @@ void main() {
           title: 'Charlie',
           subtitle: 'Sent',
           timestamp: '1m',
-          status: ChatStatusType.sent,
+          status: ChatStatusType.sending,
         ),
         tester,
       );
