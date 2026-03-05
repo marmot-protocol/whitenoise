@@ -3,9 +3,11 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project adheres to Calendar Versioning (CalVer).
 
 ## Unreleased
+
+## [2026-03-05] - 2026-03-05
 
 ### Added
 - Show reply preview in message actions, add author color in reply preview in input, swipe to reply [PR #389](https://github.com/marmot-protocol/whitenoise/pull/389)
@@ -19,7 +21,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Deprecated
 
 ### Removed
-
 
 ### Fixed
 - UI Polish: Home Screen [PR #441](https://github.com/marmot-protocol/whitenoise/pull/441)
