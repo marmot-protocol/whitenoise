@@ -28,6 +28,7 @@ class _TextWithTimestamp extends StatelessWidget {
     required this.tsStyle,
     required this.isOutgoing,
     this.deliveryStatus,
+    this.onStatusTap,
   });
 
   final String content;
@@ -36,10 +37,31 @@ class _TextWithTimestamp extends StatelessWidget {
   final TextStyle tsStyle;
   final bool isOutgoing;
   final ChatStatusType? deliveryStatus;
+  final VoidCallback? onStatusTap;
 
   @override
   Widget build(BuildContext context) {
     final reservedWidth = _timestampReservedWidth(timestamp, tsStyle, isOutgoing);
+
+    Widget statusRow = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(timestamp, style: tsStyle),
+        if (isOutgoing) ...[
+          SizedBox(width: _chatStatusGap.w),
+          WnChatStatus(status: deliveryStatus ?? ChatStatusType.sending),
+        ],
+      ],
+    );
+
+    if (onStatusTap != null) {
+      statusRow = GestureDetector(
+        key: const Key('status_tap_area'),
+        behavior: HitTestBehavior.opaque,
+        onTap: onStatusTap,
+        child: statusRow,
+      );
+    }
 
     return Stack(
       children: [
@@ -51,20 +73,7 @@ class _TextWithTimestamp extends StatelessWidget {
             ],
           ),
         ),
-        Positioned(
-          bottom: 0,
-          right: 0,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(timestamp, style: tsStyle),
-              if (isOutgoing) ...[
-                SizedBox(width: _chatStatusGap.w),
-                WnChatStatus(status: deliveryStatus ?? ChatStatusType.sent),
-              ],
-            ],
-          ),
-        ),
+        Positioned(bottom: 0, right: 0, child: statusRow),
       ],
     );
   }
@@ -190,6 +199,7 @@ class _BubbleContent extends StatelessWidget {
     required this.currentUserPubkey,
     required this.onReaction,
     this.deliveryStatus,
+    this.onStatusTap,
   });
 
   final Color bubbleColor;
@@ -212,6 +222,29 @@ class _BubbleContent extends StatelessWidget {
   final String? currentUserPubkey;
   final void Function(String emoji)? onReaction;
   final ChatStatusType? deliveryStatus;
+  final VoidCallback? onStatusTap;
+
+  Widget _buildTimestampRow() {
+    Widget row = Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(timestamp!, style: tsStyle),
+        if (isOutgoing) ...[
+          SizedBox(width: _chatStatusGap.w),
+          WnChatStatus(status: deliveryStatus ?? ChatStatusType.sending),
+        ],
+      ],
+    );
+    if (onStatusTap != null) {
+      row = GestureDetector(
+        key: const Key('status_tap_area'),
+        behavior: HitTestBehavior.opaque,
+        onTap: onStatusTap,
+        child: row,
+      );
+    }
+    return row;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -253,21 +286,13 @@ class _BubbleContent extends StatelessWidget {
               tsStyle: tsStyle,
               isOutgoing: isOutgoing,
               deliveryStatus: deliveryStatus,
+              onStatusTap: onStatusTap,
             )
           else if (hasText)
             Text(content!, style: textStyle)
           else if (hasTimestamp) ...[
             SizedBox(height: 2.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(timestamp!, style: tsStyle),
-                if (isOutgoing) ...[
-                  SizedBox(width: _chatStatusGap.w),
-                  WnChatStatus(status: deliveryStatus ?? ChatStatusType.sent),
-                ],
-              ],
-            ),
+            _buildTimestampRow(),
           ],
           if (hasReactions) ...[
             SizedBox(height: 8.h),
@@ -293,6 +318,59 @@ class _BubbleContent extends StatelessWidget {
   }
 }
 
+class _BubbleInner extends StatelessWidget {
+  const _BubbleInner({
+    required this.onHorizontalDragEnd,
+    required this.onLongPress,
+    required this.bubbleContent,
+    required this.showTail,
+    required this.isOutgoing,
+    required this.tailOverhang,
+    required this.tailW,
+    required this.tailH,
+    required this.bubbleColor,
+  });
+
+  final VoidCallback? onHorizontalDragEnd;
+  final VoidCallback? onLongPress;
+  final Widget bubbleContent;
+  final bool showTail;
+  final bool isOutgoing;
+  final double tailOverhang;
+  final double tailW;
+  final double tailH;
+  final Color bubbleColor;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: onLongPress,
+      child: bubbleContent,
+    );
+    if (onHorizontalDragEnd != null) {
+      child = _SwipeableBubble(onSwipeReply: onHorizontalDragEnd!, child: child);
+    }
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        child,
+        if (showTail)
+          Positioned(
+            bottom: 0,
+            left: isOutgoing ? null : -tailOverhang,
+            right: isOutgoing ? -tailOverhang : null,
+            child: CustomPaint(
+              size: Size(tailW, tailH),
+              painter: _BubbleTailPainter(color: bubbleColor, incoming: !isOutgoing),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 class WnMessageBubble extends StatelessWidget {
   final MessageDirection direction;
   final bool isDeleted;
@@ -311,6 +389,7 @@ class WnMessageBubble extends StatelessWidget {
   final Color? senderNameColor;
   final BubbleLeadingVariant leadingVariant;
   final ChatStatusType? deliveryStatus;
+  final VoidCallback? onStatusTap;
 
   const WnMessageBubble({
     super.key,
@@ -331,9 +410,15 @@ class WnMessageBubble extends StatelessWidget {
     this.senderNameColor,
     this.leadingVariant = BubbleLeadingVariant.none,
     this.deliveryStatus,
+    this.onStatusTap,
   });
 
   bool get _isOutgoing => direction == MessageDirection.outgoing;
+
+  static Widget _wrapBubbleInner({required bool hasMedia, required Widget child}) {
+    if (hasMedia) return child;
+    return IntrinsicWidth(child: child);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -346,7 +431,6 @@ class WnMessageBubble extends StatelessWidget {
     final textColor = _isOutgoing ? colors.fillContentPrimary : colors.backgroundContentPrimary;
     final timestampColor = colors.backgroundContentTertiary;
 
-    final viewportWidth = MediaQuery.sizeOf(context).width;
     final hasAvatar = !_isOutgoing && avatar != null;
     final avatarColW = hasAvatar ? 44.w : 0.0;
     final leadingIndent = switch (leadingVariant) {
@@ -354,7 +438,6 @@ class WnMessageBubble extends StatelessWidget {
       BubbleLeadingVariant.tail => _tailOverhang.w,
       BubbleLeadingVariant.avatar => 44.w + _tailOverhang.w,
     };
-    final maxBubbleWidth = (viewportWidth - 20.w - avatarColW - leadingIndent) * 0.8;
 
     final tailW = _tailW.w;
     final tailH = _tailH.h;
@@ -395,77 +478,73 @@ class WnMessageBubble extends StatelessWidget {
       currentUserPubkey: currentUserPubkey,
       onReaction: onReaction,
       deliveryStatus: deliveryStatus,
+      onStatusTap: onStatusTap,
     );
 
-    final bubble = Align(
-      alignment: _isOutgoing ? Alignment.centerRight : Alignment.centerLeft,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxBubbleWidth),
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: showTail && !_isOutgoing ? tailOverhang : 0,
-            right: _isOutgoing && showTail ? tailOverhang : 0,
-          ),
-          child: IntrinsicWidth(
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                if (onHorizontalDragEnd != null)
-                  _SwipeableBubble(
-                    onSwipeReply: onHorizontalDragEnd!,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onLongPress: onLongPress,
-                      child: bubbleContent,
-                    ),
-                  )
-                else
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onLongPress: onLongPress,
-                    child: bubbleContent,
-                  ),
-                if (showTail)
-                  Positioned(
-                    bottom: 0,
-                    left: _isOutgoing ? null : -tailOverhang,
-                    right: _isOutgoing ? -tailOverhang : null,
-                    child: CustomPaint(
-                      size: Size(tailW, tailH),
-                      painter: _BubbleTailPainter(
-                        color: bubbleColor,
-                        incoming: !_isOutgoing,
-                      ),
-                    ),
-                  ),
-              ],
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final baseMaxBubbleWidth = (constraints.maxWidth - avatarColW - leadingIndent) * 0.8;
+        final maxBubbleWidth = _isOutgoing && !showTail
+            ? baseMaxBubbleWidth - tailOverhang
+            : baseMaxBubbleWidth;
+
+        final bubble = Align(
+          alignment: _isOutgoing ? Alignment.centerRight : Alignment.centerLeft,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxBubbleWidth),
+            child: Padding(
+              key: const Key('bubble_tail_padding'),
+              padding: EdgeInsets.only(
+                left: showTail && !_isOutgoing ? tailOverhang : 0,
+                right: _isOutgoing && showTail ? tailOverhang : 0,
+              ),
+              child: _wrapBubbleInner(
+                hasMedia: mediaContent != null,
+                child: _BubbleInner(
+                  onHorizontalDragEnd: onHorizontalDragEnd,
+                  onLongPress: onLongPress,
+                  bubbleContent: bubbleContent,
+                  showTail: showTail,
+                  isOutgoing: _isOutgoing,
+                  tailOverhang: tailOverhang,
+                  tailW: tailW,
+                  tailH: tailH,
+                  bubbleColor: bubbleColor,
+                ),
+              ),
             ),
           ),
-        ),
-      ),
-    );
+        );
 
-    final bottomMargin = showTail ? 12.h : 4.h;
+        final bottomMargin = showTail ? 12.h : 4.h;
 
-    if (!hasAvatar) {
-      return Padding(
-        padding: EdgeInsets.only(left: leadingIndent, bottom: bottomMargin),
-        child: bubble,
-      );
-    }
+        if (!hasAvatar) {
+          final trailingIndent = _isOutgoing && !showTail ? tailOverhang : 0.0;
+          return Padding(
+            key: const Key('bubble_outer_padding'),
+            padding: EdgeInsets.only(
+              left: leadingIndent,
+              right: trailingIndent,
+              bottom: bottomMargin,
+            ),
+            child: bubble,
+          );
+        }
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: bottomMargin),
-      child: Row(
-        key: const Key('bubble_avatar_row'),
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(width: 36.w, child: avatar),
-          SizedBox(width: 8.w),
-          Flexible(child: bubble),
-        ],
-      ),
+        return Padding(
+          padding: EdgeInsets.only(bottom: bottomMargin),
+          child: Row(
+            key: const Key('bubble_avatar_row'),
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(width: 36.w, child: avatar),
+              SizedBox(width: 8.w),
+              Flexible(child: bubble),
+            ],
+          ),
+        );
+      },
     );
   }
 }

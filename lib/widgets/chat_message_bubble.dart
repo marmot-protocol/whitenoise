@@ -19,6 +19,7 @@ class ChatMessageBubble extends StatelessWidget {
   final ChatMessageQuoteData? replyPreview;
   final VoidCallback? onReplyTap;
   final VoidCallback? onHorizontalDragEnd;
+  final VoidCallback? onRetry;
   final String? senderName;
   final String? senderPictureUrl;
   final bool showAvatar;
@@ -35,6 +36,7 @@ class ChatMessageBubble extends StatelessWidget {
     this.replyPreview,
     this.onReplyTap,
     this.onHorizontalDragEnd,
+    this.onRetry,
     this.senderName,
     this.senderPictureUrl,
     this.showAvatar = false,
@@ -46,8 +48,8 @@ class ChatMessageBubble extends StatelessWidget {
     final status = message.deliveryStatus;
     if (status == null) return null;
     return switch (status) {
-      DeliveryStatus_Sending() => ChatStatusType.sent,
-      DeliveryStatus_Sent() => ChatStatusType.delivered,
+      DeliveryStatus_Sending() => ChatStatusType.sending,
+      DeliveryStatus_Sent() => ChatStatusType.sent,
       DeliveryStatus_Failed() => ChatStatusType.failed,
       DeliveryStatus_Retried() => null,
     };
@@ -74,12 +76,18 @@ class ChatMessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (isOwnMessage && message.deliveryStatus is DeliveryStatus_Retried) {
+      return const SizedBox.shrink();
+    }
+
     final avatarColor = AvatarColor.fromPubkey(message.pubkey);
     final colorSet = avatarColor.toColorSet(context.colors);
 
     final replyAuthorColor = isGroupChat && replyPreview != null && !replyPreview!.isNotFound
         ? AvatarColor.fromPubkey(replyPreview!.authorPubkey).toColorSet(context.colors).content
         : null;
+
+    final showStatus = showTail || _deliveryStatusType == ChatStatusType.failed;
 
     return WnMessageBubble(
       direction: isOwnMessage ? MessageDirection.outgoing : MessageDirection.incoming,
@@ -101,7 +109,7 @@ class ChatMessageBubble extends StatelessWidget {
               authorColor: replyAuthorColor,
             )
           : null,
-      timestamp: showTail ? _formatTime(message.createdAt) : null,
+      timestamp: showStatus ? _formatTime(message.createdAt) : null,
       reactions: message.reactions.byEmoji,
       currentUserPubkey: currentUserPubkey,
       onLongPress: onLongPress,
@@ -123,6 +131,7 @@ class ChatMessageBubble extends StatelessWidget {
         isGroupChat: isGroupChat,
       ),
       deliveryStatus: isOwnMessage ? _deliveryStatusType : null,
+      onStatusTap: _deliveryStatusType == ChatStatusType.failed ? onRetry : null,
     );
   }
 }
