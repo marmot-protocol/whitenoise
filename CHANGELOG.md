@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 
 ### Fixed
+- UI Polish: Home Screen [PR #441](https://github.com/marmot-protocol/whitenoise/pull/441)
 - Fix focus on reply [PR #389](https://github.com/marmot-protocol/whitenoise/pull/389)
 - Fix npubs middle ellipsis by adding snap to words option [PR #388](https://github.com/marmot-protocol/whitenoise/pull/388)
 - Fix onboarding carousel text appearing cut off [PR #404](https://github.com/marmot-protocol/whitenoise/pull/404)
