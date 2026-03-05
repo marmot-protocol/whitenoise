@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_hooks/flutter_hooks.dart' show useState;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' show HookConsumerWidget, WidgetRef;
 import 'package:whitenoise/hooks/use_login_with_android_signer.dart' show useLoginWithAndroidSigner;
@@ -9,6 +10,7 @@ import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/src/rust/api/accounts.dart' show LoginResult, LoginStatus;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/widgets/wn_carousel_indicator.dart' show WnCarouselIndicator;
 import 'package:whitenoise/widgets/wn_input_password.dart' show WnInputPassword;
 import 'package:whitenoise/widgets/wn_onboarding_carousel.dart' show WnOnboardingCarousel;
 import 'package:whitenoise/widgets/wn_overlay.dart' show WnOverlay;
@@ -102,6 +104,9 @@ class LoginScreen extends HookConsumerWidget {
           ref.read(authProvider.notifier).loginExternalSignerStart(pubkey: pubkey),
     );
 
+    final carouselIndex = useState(0);
+    final carouselAccentColor = useState<Color>(colors.accent.cyan.contentSecondary);
+
     Future<void> onSubmit() async {
       final result = await submitLoginWithNsec();
       if (result != null && context.mounted) {
@@ -126,108 +131,144 @@ class LoginScreen extends HookConsumerWidget {
     }
 
     final keyboardHeight = MediaQuery.viewInsetsOf(context).bottom;
+    final bottomSafeArea = MediaQuery.paddingOf(context).bottom;
     final isKeyboardOpen = keyboardHeight > 0;
+    final slateBottomPadding = ((keyboardHeight - bottomSafeArea) + (isKeyboardOpen ? 10.h : 0.0))
+        .clamp(0.0, double.infinity);
+
+    const slideCount = 3;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: colors.backgroundPrimary,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          SafeArea(
-            child: Padding(
-              key: const Key('login_carousel_padding'),
-              padding: EdgeInsets.only(bottom: isAndroidSignerAvailable ? 228.h : 160.h),
-              child: const WnOnboardingCarousel(),
-            ),
-          ),
-          if (isKeyboardOpen) const WnOverlay(key: Key('login_keyboard_overlay')),
-          Positioned.fill(
-            child: GestureDetector(
+      body: SafeArea(
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            GestureDetector(
               key: const Key('login_background'),
               onTap: () => Routes.goBack(context),
               behavior: HitTestBehavior.translucent,
             ),
-          ),
-          Positioned(
-            left: 0,
-            right: 0,
-            bottom: isKeyboardOpen ? keyboardHeight + 10.h : 0,
-            child: SafeArea(
-              top: false,
-              bottom: !isKeyboardOpen,
-              child: WnSlate(
-                header: WnSlateNavigationHeader(
-                  title: context.l10n.loginTitle,
-                  type: WnSlateNavigationType.back,
-                  onNavigate: () => Routes.goBack(context),
-                ),
-                systemNotice: loginWithAndroidSignerState.error != null
-                    ? WnSystemNotice(
-                        key: ValueKey(loginWithAndroidSignerState.error),
-                        title: _signerErrorL10n(
-                          loginWithAndroidSignerState.error!,
-                          context.l10n,
-                        ),
-                        type: WnSystemNoticeType.error,
-                        variant: WnSystemNoticeVariant.dismissible,
-                        onDismiss: clearLoginWithAndroidSignerError,
-                      )
-                    : null,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-                  child: Column(
-                    spacing: 8.h,
-                    mainAxisSize: MainAxisSize.min,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      WnInputPassword(
-                        label: context.l10n.enterPrivateKey,
-                        placeholder: context.l10n.nsecPlaceholder,
-                        controller: nsecInputController,
-                        errorText: loginWithNsecState.error != null
-                            ? _loginErrorL10n(loginWithNsecState.error!, context.l10n)
-                            : null,
-                        onChanged: (_) => clearLoginWithNsecError(),
-                        onPaste: pasteNsec,
-                        onScan: onScan,
-                      ),
-                      ListenableBuilder(
-                        listenable: nsecInputController,
-                        builder: (context, _) {
-                          final nsecEmpty = nsecInputController.text.trim().isEmpty;
-                          return Column(
-                            spacing: 8.h,
-                            mainAxisSize: MainAxisSize.min,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+            Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final carouselHeight = isKeyboardOpen
+                          ? (constraints.maxHeight - 16.h - 8.h - 20.h).clamp(0.0, 260.h)
+                          : 260.h;
+                      return Stack(
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
                             children: [
-                              WnButton(
-                                key: const Key('login_button'),
-                                text: context.l10n.login,
-                                onPressed: onSubmit,
-                                loading: loginWithNsecState.isLoading,
-                                disabled: nsecEmpty || loginWithAndroidSignerState.isLoading,
+                              WnOnboardingCarousel(
+                                key: const Key('login_carousel_padding'),
+                                height: carouselHeight,
+                                onSlideChanged: (index, accentColor) {
+                                  carouselIndex.value = index;
+                                  carouselAccentColor.value = accentColor;
+                                },
                               ),
-                              if (isAndroidSignerAvailable)
-                                WnButton(
-                                  key: const Key('android_signer_login_button'),
-                                  text: context.l10n.loginWithAmber,
-                                  type: WnButtonType.outline,
-                                  onPressed: onAndroidSignerSubmit,
-                                  loading: loginWithAndroidSignerState.isLoading,
-                                  disabled: loginWithNsecState.isLoading,
-                                ),
+                              SizedBox(height: 16.h),
+                              WnCarouselIndicator(
+                                key: const Key('login_carousel_indicator'),
+                                itemCount: slideCount,
+                                activeIndex: carouselIndex.value,
+                                activeColor: carouselAccentColor.value,
+                              ),
+                              AnimatedContainer(
+                                duration: const Duration(milliseconds: 150),
+                                curve: Curves.easeOut,
+                                height: isKeyboardOpen ? 20.h : 205.h,
+                              ),
                             ],
-                          );
-                        },
-                      ),
-                    ],
+                          ),
+                          if (isKeyboardOpen) const WnOverlay(key: Key('login_keyboard_overlay')),
+                        ],
+                      );
+                    },
                   ),
                 ),
-              ),
+                AnimatedPadding(
+                  duration: const Duration(milliseconds: 150),
+                  curve: Curves.easeOut,
+                  padding: EdgeInsets.only(bottom: slateBottomPadding),
+                  child: WnSlate(
+                    header: WnSlateNavigationHeader(
+                      title: context.l10n.loginTitle,
+                      type: WnSlateNavigationType.back,
+                      onNavigate: () => Routes.goBack(context),
+                    ),
+                    systemNotice: loginWithAndroidSignerState.error != null
+                        ? WnSystemNotice(
+                            key: ValueKey(loginWithAndroidSignerState.error),
+                            title: _signerErrorL10n(
+                              loginWithAndroidSignerState.error!,
+                              context.l10n,
+                            ),
+                            type: WnSystemNoticeType.error,
+                            variant: WnSystemNoticeVariant.dismissible,
+                            onDismiss: clearLoginWithAndroidSignerError,
+                          )
+                        : null,
+                    child: Padding(
+                      padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+                      child: Column(
+                        spacing: 12.h,
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          WnInputPassword(
+                            placeholder: context.l10n.nsecPlaceholder,
+                            controller: nsecInputController,
+                            errorText: loginWithNsecState.error != null
+                                ? _loginErrorL10n(loginWithNsecState.error!, context.l10n)
+                                : null,
+                            onChanged: (_) => clearLoginWithNsecError(),
+                            onPaste: pasteNsec,
+                            onScan: onScan,
+                          ),
+                          ListenableBuilder(
+                            listenable: nsecInputController,
+                            builder: (context, _) {
+                              final nsecEmpty = nsecInputController.text.trim().isEmpty;
+                              return Column(
+                                spacing: 8.h,
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  WnButton(
+                                    key: const Key('login_button'),
+                                    text: context.l10n.login,
+                                    onPressed: onSubmit,
+                                    loading: loginWithNsecState.isLoading,
+                                    disabled: nsecEmpty || loginWithAndroidSignerState.isLoading,
+                                  ),
+                                  if (isAndroidSignerAvailable)
+                                    WnButton(
+                                      key: const Key('android_signer_login_button'),
+                                      text: context.l10n.loginWithAmber,
+                                      type: WnButtonType.outline,
+                                      onPressed: onAndroidSignerSubmit,
+                                      loading: loginWithAndroidSignerState.isLoading,
+                                      disabled: loginWithNsecState.isLoading,
+                                    ),
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

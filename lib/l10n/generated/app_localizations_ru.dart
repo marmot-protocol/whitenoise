@@ -38,7 +38,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get signUp => 'Регистрация';
 
   @override
-  String get loginTitle => 'Войти';
+  String get loginTitle => 'Введите ваш приватный ключ';
 
   @override
   String get enterPrivateKey => 'Введите ваш приватный ключ';
@@ -939,8 +939,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'На этом реле не найдено списков. Попробуйте другое или используйте стандартные.';
 
   @override
-  String get loginErrorInvalidKey =>
-      'Неверный формат приватного ключа. Пожалуйста, проверьте и попробуйте снова.';
+  String get loginErrorInvalidKey => 'Неверный nsec. Убедитесь, что вы ввели его правильно.';
 
   @override
   String get loginErrorNoRelayConnections =>

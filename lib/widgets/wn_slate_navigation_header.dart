@@ -29,39 +29,41 @@ class WnSlateNavigationHeader extends StatelessWidget {
 
     return SizedBox(
       height: 80.h,
-      child: Row(
+      child: Stack(
+        alignment: Alignment.center,
         children: [
-          if (hasLeadingAction)
-            _SlateHeaderAction(
-              key: const Key('slate_back_button'),
-              isBack: true,
-              onPressed: onNavigate!,
-            ),
-          Expanded(
-            child: Padding(
-              padding: EdgeInsets.only(
-                left: hasTrailingAction ? 54.w : 0,
-                right: hasLeadingAction ? 54.w : 0,
-              ),
-              child: Center(
-                child:
-                    titleWidget ??
-                    Text(
-                      title!,
-                      style: context.typographyScaled.semiBold16.copyWith(
-                        color: colors.backgroundContentPrimary,
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-              ),
-            ),
+          Center(
+            child:
+                titleWidget ??
+                Text(
+                  title!,
+                  style: context.typographyScaled.semiBold16.copyWith(
+                    color: colors.backgroundContentPrimary,
+                  ),
+                  overflow: TextOverflow.ellipsis,
+                ),
           ),
-          if (hasTrailingAction)
-            _SlateHeaderAction(
-              key: const Key('slate_close_button'),
-              isBack: false,
-              onPressed: onNavigate!,
-            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              if (hasLeadingAction)
+                _SlateHeaderAction(
+                  key: const Key('slate_back_button'),
+                  isBack: true,
+                  onPressed: onNavigate!,
+                )
+              else
+                const SizedBox.shrink(),
+              if (hasTrailingAction)
+                _SlateHeaderAction(
+                  key: const Key('slate_close_button'),
+                  isBack: false,
+                  onPressed: onNavigate!,
+                )
+              else
+                const SizedBox.shrink(),
+            ],
+          ),
         ],
       ),
     );
@@ -81,7 +83,7 @@ class _SlateHeaderAction extends StatelessWidget {
   WnIcons get _icon => isBack ? WnIcons.chevronLeft : WnIcons.closeLarge;
 
   EdgeInsetsGeometry get _padding =>
-      isBack ? EdgeInsets.only(left: 14.w, right: 16.w) : EdgeInsets.only(left: 16.w, right: 14.w);
+      isBack ? EdgeInsets.only(left: 24.w, right: 32.w) : EdgeInsets.only(left: 16.w, right: 14.w);
 
   @override
   Widget build(BuildContext context) {

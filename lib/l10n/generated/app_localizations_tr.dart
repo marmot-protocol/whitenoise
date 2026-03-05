@@ -38,7 +38,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get signUp => 'Kayıt Ol';
 
   @override
-  String get loginTitle => 'Giriş Yap';
+  String get loginTitle => 'Özel anahtarınızı girin';
 
   @override
   String get enterPrivateKey => 'Özel anahtarınızı girin';
@@ -914,8 +914,7 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu rölede röle listesi bulunamadı. Başka bir tane deneyin veya varsayılanları kullanın.';
 
   @override
-  String get loginErrorInvalidKey =>
-      'Geçersiz özel anahtar biçimi. Lütfen kontrol edip tekrar deneyin.';
+  String get loginErrorInvalidKey => 'Geçersiz nsec. Doğru girdiğinizden emin olun.';
 
   @override
   String get loginErrorNoRelayConnections =>

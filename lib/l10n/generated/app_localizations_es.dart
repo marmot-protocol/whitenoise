@@ -38,7 +38,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get signUp => 'Registrarse';
 
   @override
-  String get loginTitle => 'Iniciar sesión';
+  String get loginTitle => 'Introduce tu llave privada';
 
   @override
   String get enterPrivateKey => 'Introduce tu llave privada';
@@ -922,8 +922,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se encontraron listas de relés en este relé. Prueba con otro o usa los predeterminados.';
 
   @override
-  String get loginErrorInvalidKey =>
-      'Formato de clave privada no válido. Por favor, verifica e inténtalo de nuevo.';
+  String get loginErrorInvalidKey => 'nsec inválido. Asegúrate de haberlo ingresado correctamente.';
 
   @override
   String get loginErrorNoRelayConnections =>

@@ -41,7 +41,7 @@
     "description": "Sign up button text"
   },
 
-  "loginTitle": "Login",
+  "loginTitle": "Enter your private key",
   "@loginTitle": {
     "description": "Title on login screen"
   },
@@ -1413,7 +1413,7 @@
     "description": "Error when custom relay didn't find lists"
   },
 
-  "loginErrorInvalidKey": "Invalid private key format. Please check and try again.",
+  "loginErrorInvalidKey": "Invalid nsec. Make sure you entered it correctly.",
   "@loginErrorInvalidKey": {
     "description": "Error message for LoginInvalidKeyFormat"
   },

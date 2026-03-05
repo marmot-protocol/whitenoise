@@ -153,7 +153,7 @@ abstract class AppLocalizations {
   /// Title on login screen
   ///
   /// In en, this message translates to:
-  /// **'Login'**
+  /// **'Enter your private key'**
   String get loginTitle;
 
   /// Label for private key input field
@@ -1689,7 +1689,7 @@ abstract class AppLocalizations {
   /// Error message for LoginInvalidKeyFormat
   ///
   /// In en, this message translates to:
-  /// **'Invalid private key format. Please check and try again.'**
+  /// **'Invalid nsec. Make sure you entered it correctly.'**
   String get loginErrorInvalidKey;
 
   /// Error message for LoginNoRelayConnections

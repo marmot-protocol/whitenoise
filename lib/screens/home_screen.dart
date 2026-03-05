@@ -19,46 +19,46 @@ class HomeScreen extends StatelessWidget {
     final typography = context.typographyScaled;
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
-      body: Stack(
-        fit: StackFit.expand,
-        children: [
-          SafeArea(
-            child: SingleChildScrollView(
-              child: Column(
-                children: [
-                  Gap(216.5.h),
-                  SvgPicture.asset(
-                    'assets/svgs/whitenoise.svg',
-                    width: 160.w,
-                    height: 123.h,
-                    colorFilter: ColorFilter.mode(
-                      colors.backgroundContentPrimary,
-                      BlendMode.srcIn,
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    Gap(216.5.h),
+                    SvgPicture.asset(
+                      'assets/svgs/whitenoise.svg',
+                      width: 160.w,
+                      height: 123.h,
+                      colorFilter: ColorFilter.mode(
+                        colors.backgroundContentPrimary,
+                        BlendMode.srcIn,
+                      ),
                     ),
-                  ),
-                  Gap(24.h),
-                  _RotatingSloganText(
-                    texts: [
-                      context.l10n.sloganDecentralized,
-                      context.l10n.sloganUncensorable,
-                      context.l10n.sloganSecureMessaging,
-                    ],
-                    style: typography.bold36.copyWith(
-                      color: colors.backgroundContentTertiary,
+                    Gap(24.h),
+                    _RotatingSloganText(
+                      texts: [
+                        context.l10n.sloganDecentralized,
+                        context.l10n.sloganUncensorable,
+                        context.l10n.sloganSecureMessaging,
+                      ],
+                      style: typography.bold36.copyWith(
+                        color: colors.backgroundContentTertiary,
+                      ),
                     ),
-                  ),
-                  Gap(224.5.h),
-                  WnSlate(
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 14.w),
-                      child: const WnAuthButtonsContainer(),
-                    ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
-          ),
-        ],
+            WnSlate(
+              child: Padding(
+                padding: EdgeInsets.symmetric(vertical: 14.h, horizontal: 14.w),
+                child: const WnAuthButtonsContainer(),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

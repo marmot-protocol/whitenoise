@@ -164,7 +164,7 @@ void main() {
 
       testWidgets('tapping outside slate returns to home screen', (tester) async {
         await pumpLoginScreen(tester);
-        await tester.tap(find.byKey(const Key('login_background')));
+        await tester.tapAt(const Offset(10, 10));
         await tester.pumpAndSettle();
         expect(find.byType(HomeScreen), findsOneWidget);
       });
@@ -658,23 +658,11 @@ void main() {
         expect(find.byKey(const Key('login_carousel_indicator')), findsOneWidget);
       });
 
-      testWidgets('carousel uses smaller bottom padding when signer is unavailable', (
-        tester,
-      ) async {
+      testWidgets('renders carousel widget', (tester) async {
         await pumpLoginScreen(tester);
-        final padding = tester.widget<Padding>(find.byKey(const Key('login_carousel_padding')));
-        expect(padding.padding.resolve(TextDirection.ltr).bottom, lessThan(200));
+        expect(find.byKey(const Key('login_carousel_padding')), findsOneWidget);
+        expect(find.byType(WnOnboardingCarousel), findsOneWidget);
       });
-
-      testWidgets(
-        'carousel uses larger bottom padding when signer is available',
-        (tester) async {
-          await pumpLoginScreen(tester, signerAvailable: true);
-          final padding = tester.widget<Padding>(find.byKey(const Key('login_carousel_padding')));
-          expect(padding.padding.resolve(TextDirection.ltr).bottom, greaterThan(200));
-        },
-        variant: TargetPlatformVariant.only(TargetPlatform.android),
-      );
     });
 
     group('keyboard overlay', () {

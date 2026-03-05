@@ -38,7 +38,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get signUp => 'Registrati';
 
   @override
-  String get loginTitle => 'Accedi';
+  String get loginTitle => 'Inserisci la tua chiave privata';
 
   @override
   String get enterPrivateKey => 'Inserisci la tua chiave privata';
@@ -916,7 +916,8 @@ class AppLocalizationsIt extends AppLocalizations {
       'Nessuna lista di relay trovata su questo relay. Prova con un altro o usa quelli predefiniti.';
 
   @override
-  String get loginErrorInvalidKey => 'Formato della chiave privata non valido. Verifica e riprova.';
+  String get loginErrorInvalidKey =>
+      'nsec non valido. Assicurati di averlo inserito correttamente.';
 
   @override
   String get loginErrorNoRelayConnections =>

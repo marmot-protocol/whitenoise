@@ -38,7 +38,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get signUp => 'S\'inscrire';
 
   @override
-  String get loginTitle => 'Connexion';
+  String get loginTitle => 'Entrez votre clé privée';
 
   @override
   String get enterPrivateKey => 'Entrez votre clé privée';
@@ -920,8 +920,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Aucune liste de relais trouvée sur ce relais. Essayez un autre ou utilisez les valeurs par défaut.';
 
   @override
-  String get loginErrorInvalidKey =>
-      'Format de clé privée invalide. Veuillez vérifier et réessayer.';
+  String get loginErrorInvalidKey => 'nsec invalide. Assurez-vous de l\'avoir saisi correctement.';
 
   @override
   String get loginErrorNoRelayConnections =>

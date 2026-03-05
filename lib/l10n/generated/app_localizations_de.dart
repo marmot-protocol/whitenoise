@@ -38,7 +38,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get signUp => 'Registrieren';
 
   @override
-  String get loginTitle => 'Anmelden';
+  String get loginTitle => 'Privaten Schlüssel eingeben';
 
   @override
   String get enterPrivateKey => 'Privaten Schlüssel eingeben';
@@ -933,7 +933,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get loginErrorInvalidKey =>
-      'Ungültiges Format des privaten Schlüssels. Bitte überprüfen und erneut versuchen.';
+      'Ungültiger nsec. Stellen Sie sicher, dass Sie ihn korrekt eingegeben haben.';
 
   @override
   String get loginErrorNoRelayConnections =>
