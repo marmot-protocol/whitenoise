@@ -29,6 +29,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix positioning of error notice in chat screen [PR #409](https://github.com/marmot-protocol/whitenoise/pull/409)
 - Fix bio field looking cut in signup form by adding automatic scroll [PR #435](https://github.com/marmot-protocol/whitenoise/pull/435)
 - Fix base design size [#433](https://github.com/marmot-protocol/whitenoise/pull/433)
+- Fix messages bubbles and handle manual retry [PR #442](https://github.com/marmot-protocol/whitenoise/pull/442)
+
 ### Security
 
 ## [0.3.0] - 2026-02-23
