@@ -4,13 +4,13 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' show HookConsumerWidget, WidgetRef;
 import 'package:whitenoise/hooks/use_login_with_android_signer.dart' show useLoginWithAndroidSigner;
 import 'package:whitenoise/hooks/use_login_with_nsec.dart' show useLoginWithNsec;
+import 'package:whitenoise/hooks/use_onboarding_carousel.dart' show onboardingCarouselSlideCount;
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/src/rust/api/accounts.dart' show LoginResult, LoginStatus;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
-import 'package:whitenoise/hooks/use_onboarding_carousel.dart' show onboardingCarouselSlideCount;
 import 'package:whitenoise/widgets/wn_carousel_indicator.dart' show WnCarouselIndicator;
 import 'package:whitenoise/widgets/wn_input_password.dart' show WnInputPassword;
 import 'package:whitenoise/widgets/wn_onboarding_carousel.dart' show WnOnboardingCarousel;
@@ -159,7 +159,6 @@ class LoginScreen extends HookConsumerWidget {
                           ? (constraints.maxHeight - 16.h - 8.h - 20.h).clamp(0.0, 260.h)
                           : 260.h;
                       return Stack(
-                        clipBehavior: Clip.hardEdge,
                         children: [
                           Column(
                             mainAxisAlignment: MainAxisAlignment.end,
