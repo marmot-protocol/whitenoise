@@ -10,6 +10,7 @@ import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/src/rust/api/accounts.dart' show LoginResult, LoginStatus;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/hooks/use_onboarding_carousel.dart' show onboardingCarouselSlideCount;
 import 'package:whitenoise/widgets/wn_carousel_indicator.dart' show WnCarouselIndicator;
 import 'package:whitenoise/widgets/wn_input_password.dart' show WnInputPassword;
 import 'package:whitenoise/widgets/wn_onboarding_carousel.dart' show WnOnboardingCarousel;
@@ -136,8 +137,6 @@ class LoginScreen extends HookConsumerWidget {
     final slateBottomPadding = ((keyboardHeight - bottomSafeArea) + (isKeyboardOpen ? 10.h : 0.0))
         .clamp(0.0, double.infinity);
 
-    const slideCount = 3;
-
     return Scaffold(
       resizeToAvoidBottomInset: false,
       backgroundColor: colors.backgroundPrimary,
@@ -160,12 +159,13 @@ class LoginScreen extends HookConsumerWidget {
                           ? (constraints.maxHeight - 16.h - 8.h - 20.h).clamp(0.0, 260.h)
                           : 260.h;
                       return Stack(
+                        clipBehavior: Clip.hardEdge,
                         children: [
                           Column(
                             mainAxisAlignment: MainAxisAlignment.end,
                             children: [
                               WnOnboardingCarousel(
-                                key: const Key('login_carousel_padding'),
+                                key: const Key('login_onboarding_carousel'),
                                 height: carouselHeight,
                                 onSlideChanged: (index, accentColor) {
                                   carouselIndex.value = index;
@@ -175,7 +175,7 @@ class LoginScreen extends HookConsumerWidget {
                               SizedBox(height: 16.h),
                               WnCarouselIndicator(
                                 key: const Key('login_carousel_indicator'),
-                                itemCount: slideCount,
+                                itemCount: onboardingCarouselSlideCount,
                                 activeIndex: carouselIndex.value,
                                 activeColor: carouselAccentColor.value,
                               ),

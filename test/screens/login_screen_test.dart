@@ -164,7 +164,8 @@ void main() {
 
       testWidgets('tapping outside slate returns to home screen', (tester) async {
         await pumpLoginScreen(tester);
-        await tester.tapAt(const Offset(10, 10));
+        final topLeft = tester.getTopLeft(find.byKey(const Key('login_background')));
+        await tester.tapAt(topLeft + const Offset(10, 10));
         await tester.pumpAndSettle();
         expect(find.byType(HomeScreen), findsOneWidget);
       });
@@ -660,7 +661,7 @@ void main() {
 
       testWidgets('renders carousel widget', (tester) async {
         await pumpLoginScreen(tester);
-        expect(find.byKey(const Key('login_carousel_padding')), findsOneWidget);
+        expect(find.byKey(const Key('login_onboarding_carousel')), findsOneWidget);
         expect(find.byType(WnOnboardingCarousel), findsOneWidget);
       });
     });

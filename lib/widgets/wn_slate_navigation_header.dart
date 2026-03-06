@@ -32,11 +32,13 @@ class WnSlateNavigationHeader extends StatelessWidget {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          Center(
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 56.w),
             child:
                 titleWidget ??
                 Text(
                   title!,
+                  textAlign: TextAlign.center,
                   style: context.typographyScaled.semiBold16.copyWith(
                     color: colors.backgroundContentPrimary,
                   ),
