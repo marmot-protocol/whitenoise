@@ -120,7 +120,7 @@ if [ "$BUILD_ANDROID" = true ]; then
   ./scripts/build_android.sh
 
   print_info "Building split APKs (production flavor)..."
-  flutter build apk --flavor production --split-per-abi
+  flutter build apk --flavor production --split-per-abi --dart-define=APP_FLAVOR=production
 
   APK_DIR="build/app/outputs/flutter-apk"
 

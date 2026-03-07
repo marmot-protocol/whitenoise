@@ -255,16 +255,6 @@ build-android:
 build-android-quiet:
     @./scripts/build_android.sh > /dev/null 2>&1 && echo "✅ Android build complete" || { echo "❌ Android build failed"; false; }
 
-build-android-apk flavor:
-    ./scripts/build_android.sh && flutter build apk --flavor {{flavor}} --dart-define=APP_FLAVOR={{flavor}}
-
-# Build a fat APK (all ABIs in one file)
-build-production-apk:
-    ./scripts/build_android.sh && flutter build apk --flavor production --dart-define=APP_FLAVOR=production
-
-build-staging-apk:
-    ./scripts/build_android.sh && flutter build apk --flavor staging --dart-define=APP_FLAVOR=staging
-
 # Build per-ABI split APKs (separate .apk per architecture)
 build-split-apk flavor="production":
     ./scripts/build_android.sh && flutter build apk --flavor {{flavor}} --split-per-abi --dart-define=APP_FLAVOR={{flavor}}
@@ -272,12 +262,6 @@ build-split-apk flavor="production":
 # Build an Android App Bundle (per-ABI splitting handled by Play Store)
 build-aab flavor="production":
     ./scripts/build_android.sh && flutter build appbundle --flavor {{flavor}} --dart-define=APP_FLAVOR={{flavor}}
-
-# Release builds
-build-release-apk: (build-split-apk "production")
-build-release-aab: (build-aab "production")
-
-when-apk: build-staging-apk
 
 # Build versioned release artifacts for all platforms (APKs + IPA) into build/releases/
 # Produces split APKs with .sha256 sidecar files, an IPA (macOS only), and build_info.txt
