@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
+import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart' show leadingVariant;
@@ -88,10 +89,10 @@ class ChatMessageBubble extends StatelessWidget {
         : null;
 
     final showStatus = showTail || _deliveryStatusType == ChatStatusType.failed;
-
     return WnMessageBubble(
       direction: isOwnMessage ? MessageDirection.outgoing : MessageDirection.incoming,
       isDeleted: message.isDeleted,
+      deletedLabel: message.isDeleted ? context.l10n.thisMessageWasDeleted : null,
       showTail: showTail,
       content: message.content.isNotEmpty ? message.content : null,
       mediaContent: message.mediaAttachments.isNotEmpty

@@ -121,13 +121,25 @@ void main() {
     });
 
     group('deleted message', () {
-      testWidgets('renders nothing when message is deleted', (tester) async {
+      testWidgets('renders deleted message style when message is deleted', (tester) async {
         await mountWidget(
           ChatMessageBubble(message: _message(isDeleted: true), isOwnMessage: false),
           tester,
         );
 
-        expect(find.byType(SizedBox), findsOneWidget);
+        expect(
+          find.textContaining('This message was deleted.', findRichText: true),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('hides original message body', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(message: _message(isDeleted: true), isOwnMessage: false),
+          tester,
+        );
+
+        expect(find.textContaining('Hello world', findRichText: true), findsNothing);
       });
     });
 

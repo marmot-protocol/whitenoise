@@ -79,13 +79,54 @@ void main() {
     });
 
     group('deleted message', () {
-      testWidgets('renders nothing when deleted', (tester) async {
+      testWidgets('renders deleted message style when deleted', (tester) async {
         await mountWidget(
-          const WnMessageBubble(direction: MessageDirection.incoming, isDeleted: true),
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: true,
+            deletedLabel: 'This message was deleted.',
+          ),
           tester,
         );
 
-        expect(find.byType(SizedBox), findsOneWidget);
+        expect(find.text('This message was deleted.'), findsOneWidget);
+      });
+
+      testWidgets('does not trigger onLongPress even when callback is provided', (tester) async {
+        var called = false;
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: true,
+            deletedLabel: 'This message was deleted.',
+            onLongPress: () => called = true,
+          ),
+          tester,
+        );
+
+        await tester.longPress(find.text('This message was deleted.'));
+        await tester.pump();
+
+        expect(called, isFalse);
+      });
+
+      testWidgets('is not swipeable even when onHorizontalDragEnd is provided', (tester) async {
+        var called = false;
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: true,
+            deletedLabel: 'This message was deleted.',
+            content: 'Deleted',
+            onHorizontalDragEnd: () => called = true,
+          ),
+          tester,
+        );
+
+        await tester.drag(find.text('This message was deleted.'), const Offset(200, 0));
+        await tester.pump();
+
+        expect(called, isFalse);
       });
     });
 
@@ -494,6 +535,37 @@ void main() {
 
         expect(find.text('12:29'), findsNothing);
       });
+
+      testWidgets('renders timestamp for deleted message when showTail is true', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: true,
+            deletedLabel: 'This message was deleted.',
+            showTail: true,
+            timestamp: '12:29',
+          ),
+          tester,
+        );
+
+        expect(find.textContaining('12:29', findRichText: true), findsOneWidget);
+      });
+
+      testWidgets('does not render timestamp for deleted message when showTail is false', (
+        tester,
+      ) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: true,
+            deletedLabel: 'This message was deleted.',
+            timestamp: '12:29',
+          ),
+          tester,
+        );
+
+        expect(find.textContaining('12:29', findRichText: true), findsNothing);
+      });
     });
 
     group('chat status', () {
@@ -550,6 +622,23 @@ void main() {
           const WnMessageBubble(
             direction: MessageDirection.outgoing,
             isDeleted: false,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('chat_status_icon')), findsNothing);
+        expect(find.byType(WnChatStatus), findsNothing);
+      });
+
+      testWidgets('does not show status icon for deleted outgoing bubble', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: true,
+            deletedLabel: 'This message was deleted.',
+            showTail: true,
+            timestamp: '12:00',
             content: 'Hello',
           ),
           tester,
@@ -1013,6 +1102,7 @@ void main() {
           const WnMessageBubble(
             direction: MessageDirection.incoming,
             isDeleted: true,
+            deletedLabel: 'This message was deleted.',
             showTail: true,
           ),
           tester,
@@ -1222,6 +1312,35 @@ void main() {
         );
 
         expect(find.byKey(const Key('status_tap_area')), findsNothing);
+      });
+    });
+
+    group('deleted bubble border', () {
+      testWidgets('has a shape decoration', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: true,
+            deletedLabel: 'Deleted',
+          ),
+          tester,
+        );
+        final container = tester.widget<Container>(
+          find.byKey(const Key('deleted_bubble_border')),
+        );
+        expect(container.decoration, isA<ShapeDecoration>());
+      });
+
+      testWidgets('non-deleted bubble has no shape decoration', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+          ),
+          tester,
+        );
+        expect(find.byKey(const Key('deleted_bubble_border')), findsNothing);
       });
     });
 
