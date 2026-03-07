@@ -329,6 +329,28 @@ class _VariantColumn extends StatelessWidget {
           showTail: true,
           mediaContent: mediaPlaceholder,
         ),
+        _Variant(
+          label: 'Deleted — with tail',
+          direction: direction,
+          isDeleted: true,
+          showTail: true,
+        ),
+        _Variant(
+          label: 'Deleted — no tail',
+          direction: direction,
+          isDeleted: true,
+          showTail: false,
+        ),
+        if (isIncoming)
+          _Variant(
+            label: 'Deleted — avatar + name',
+            direction: direction,
+            isDeleted: true,
+            showTail: true,
+            avatar: _sampleAvatar(context),
+            senderName: 'Trent Reznor',
+            senderNameColor: avatarColorSet.border,
+          ),
       ],
     );
   }
@@ -339,6 +361,7 @@ class _Variant extends StatelessWidget {
     required this.label,
     required this.direction,
     required this.showTail,
+    this.isDeleted = false,
     this.content,
     this.replyContent,
     this.mediaContent,
@@ -351,6 +374,7 @@ class _Variant extends StatelessWidget {
   final String label;
   final MessageDirection direction;
   final bool showTail;
+  final bool isDeleted;
   final String? content;
   final Widget? replyContent;
   final Widget? mediaContent;
@@ -378,7 +402,8 @@ class _Variant extends StatelessWidget {
           const SizedBox(height: 4),
           WnMessageBubble(
             direction: direction,
-            isDeleted: false,
+            isDeleted: isDeleted,
+            deletedLabel: isDeleted ? 'This message was deleted.' : null,
             showTail: showTail,
             content: content,
             replyContent: replyContent,
