@@ -7,14 +7,14 @@ import 'package:whitenoise/widgets/wn_message_bubble.dart' show BubbleLeadingVar
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
-ChatMessage _msg(String pubkey, DateTime createdAt) => ChatMessage(
+ChatMessage _msg(String pubkey, DateTime createdAt, {bool isDeleted = false}) => ChatMessage(
   id: pubkey + createdAt.toIso8601String(),
   pubkey: pubkey,
   content: 'test',
   createdAt: createdAt,
   tags: const [],
   isReply: false,
-  isDeleted: false,
+  isDeleted: isDeleted,
   contentTokens: const [],
   reactions: const ReactionSummary(byEmoji: [], userReactions: []),
   mediaAttachments: const [],
@@ -168,6 +168,78 @@ void main() {
       final current = _msg(testPubkeyB, base);
       final next = _msg(testPubkeyB, base.add(const Duration(minutes: 5)));
       expect(shouldShowTail(current: current, next: next), isTrue);
+    });
+
+    group('when next message is deleted', () {
+      test('returns true for non-deleted current', () {
+        final current = _msg(testPubkeyB, base);
+        final next = _msg(testPubkeyB, base.add(const Duration(minutes: 1)), isDeleted: true);
+        expect(shouldShowTail(current: current, next: next), isTrue);
+      });
+
+      test('returns false when both are deleted', () {
+        final current = _msg(testPubkeyB, base, isDeleted: true);
+        final next = _msg(testPubkeyB, base.add(const Duration(minutes: 1)), isDeleted: true);
+        expect(shouldShowTail(current: current, next: next), isFalse);
+      });
+    });
+
+    group('when current message is deleted', () {
+      test('returns true when next is not deleted', () {
+        final current = _msg(testPubkeyB, base, isDeleted: true);
+        final next = _msg(testPubkeyB, base.add(const Duration(minutes: 1)));
+        expect(shouldShowTail(current: current, next: next), isTrue);
+      });
+
+      test('returns false when both are deleted', () {
+        final current = _msg(testPubkeyB, base, isDeleted: true);
+        final next = _msg(testPubkeyB, base.add(const Duration(minutes: 1)), isDeleted: true);
+        expect(shouldShowTail(current: current, next: next), isFalse);
+      });
+    });
+  });
+
+  group('shouldShowAvatar – deleted messages', () {
+    test('returns true when current is not deleted but next is', () {
+      final current = _msg(testPubkeyB, base);
+      final next = _msg(testPubkeyB, base.add(const Duration(minutes: 1)), isDeleted: true);
+      expect(
+        shouldShowAvatar(
+          current: current,
+          next: next,
+          isOwnMessage: false,
+          isGroupChat: true,
+        ),
+        isTrue,
+      );
+    });
+
+    test('returns true when current is deleted but next is not', () {
+      final current = _msg(testPubkeyB, base, isDeleted: true);
+      final next = _msg(testPubkeyB, base.add(const Duration(minutes: 1)));
+      expect(
+        shouldShowAvatar(
+          current: current,
+          next: next,
+          isOwnMessage: false,
+          isGroupChat: true,
+        ),
+        isTrue,
+      );
+    });
+
+    test('returns false when both are deleted same sender within 5 min', () {
+      final current = _msg(testPubkeyB, base, isDeleted: true);
+      final next = _msg(testPubkeyB, base.add(const Duration(minutes: 1)), isDeleted: true);
+      expect(
+        shouldShowAvatar(
+          current: current,
+          next: next,
+          isOwnMessage: false,
+          isGroupChat: true,
+        ),
+        isFalse,
+      );
     });
   });
 }
