@@ -1,6 +1,5 @@
 {
   "@@locale": "en",
-
   "photoCount": "{count, plural, =1{Photo} other{Photos}}",
   "@photoCount": {
     "description": "Label shown in chat list when the last message contains photos",
@@ -10,32 +9,26 @@
       }
     }
   },
-
   "appTitle": "White Noise",
   "@appTitle": {
     "description": "The application title displayed on home screen"
   },
-
   "sloganDecentralized": "Decentralized",
   "@sloganDecentralized": {
     "description": "First slogan word on home screen"
   },
-
   "sloganUncensorable": "Uncensorable",
   "@sloganUncensorable": {
     "description": "Second slogan word on home screen"
   },
-
   "sloganSecureMessaging": "Secure Messaging",
   "@sloganSecureMessaging": {
     "description": "Third slogan word on home screen"
   },
-
   "login": "Login",
   "@login": {
     "description": "Login button text"
   },
-
   "signUp": "Sign Up",
   "@signUp": {
     "description": "Sign up button text"
@@ -45,297 +38,238 @@
   "@loginTitle": {
     "description": "Title on login screen"
   },
-
   "enterPrivateKey": "Enter your private key",
   "@enterPrivateKey": {
     "description": "Label for private key input field"
   },
-
   "nsecPlaceholder": "nsec...",
   "@nsecPlaceholder": {
     "description": "Placeholder text for nsec input"
   },
-
   "setupProfile": "Setup profile",
   "@setupProfile": {
     "description": "Title on signup screen"
   },
-
   "chooseName": "Choose a name",
   "@chooseName": {
     "description": "Label for name input field"
   },
-
   "enterYourName": "Enter your name",
   "@enterYourName": {
     "description": "Placeholder for name input"
   },
-
   "introduceYourself": "Introduce yourself",
   "@introduceYourself": {
     "description": "Label for bio input field"
   },
-
   "writeSomethingAboutYourself": "Write something about yourself",
   "@writeSomethingAboutYourself": {
     "description": "Placeholder for bio input"
   },
-
   "cancel": "Cancel",
   "@cancel": {
     "description": "Cancel button text"
   },
-
   "profileReady": "Your profile is ready!",
   "@profileReady": {
     "description": "Title on onboarding screen after signup"
   },
-
   "startConversationHint": "Start a conversation by adding friends or sharing your profile.",
   "@startConversationHint": {
     "description": "Hint text on onboarding screen"
   },
-
   "share": "Share",
   "@share": {
     "description": "Generic share text"
   },
-
   "shareYourProfile": "Share your profile",
   "@shareYourProfile": {
     "description": "Button text to share profile"
   },
-
   "startChat": "Start a chat",
   "@startChat": {
     "description": "Button text to start a new chat"
   },
-
   "settings": "Settings",
   "@settings": {
     "description": "Settings screen title"
   },
-
   "shareAndConnect": "Share & connect",
   "@shareAndConnect": {
     "description": "Button to share profile and connect with others"
   },
-
   "switchProfile": "Switch profile",
   "@switchProfile": {
     "description": "Button to switch between profiles"
   },
-
   "addNewProfile": "Add a new profile",
   "@addNewProfile": {
     "description": "Title for add profile screen"
   },
-
   "editProfile": "Edit profile",
   "@editProfile": {
     "description": "Settings menu item"
   },
-
   "profileKeys": "Profile keys",
   "@profileKeys": {
     "description": "Settings menu item"
   },
-
   "networkRelays": "Network relays",
   "@networkRelays": {
     "description": "Settings menu item"
   },
-
   "appearance": "Appearance",
   "@appearance": {
     "description": "Settings menu item for appearance"
   },
-
   "privacySecurity": "Privacy & security",
   "@privacySecurity": {
     "description": "Settings menu item for privacy and security"
   },
-
   "donateToWhiteNoise": "Donate to White Noise",
   "@donateToWhiteNoise": {
     "description": "Settings menu item"
   },
-
   "developerSettings": "Developer settings",
   "@developerSettings": {
     "description": "Settings menu item"
   },
-
   "signOut": "Sign out",
   "@signOut": {
     "description": "Settings menu item and button"
   },
-
   "appearanceTitle": "Appearance",
   "@appearanceTitle": {
     "description": "Appearance screen title"
   },
-
   "privacySecurityTitle": "Privacy & security",
   "@privacySecurityTitle": {
     "description": "Privacy and security screen title"
   },
-
   "deleteAllAppData": "Delete All App Data",
   "@deleteAllAppData": {
     "description": "Section title for delete all app data"
   },
-
   "deleteAppData": "Delete app data",
   "@deleteAppData": {
     "description": "Button text to delete all app data"
   },
-
   "deleteAllAppDataDescription": "Erase every profile, key, chat, and local file from this device.",
   "@deleteAllAppDataDescription": {
     "description": "Description for delete all app data action"
   },
-
   "deleteAllAppDataConfirmation": "Delete all app data?",
   "@deleteAllAppDataConfirmation": {
     "description": "Confirmation dialog title for deleting all app data"
   },
-
   "deleteAllAppDataWarning": "This will erase every profile, key, chat, and local file from this device. This cannot be undone.",
   "@deleteAllAppDataWarning": {
     "description": "Warning message in delete all app data confirmation dialog"
   },
-
   "theme": "Theme",
   "@theme": {
     "description": "Theme selector label"
   },
-
   "themeSystem": "System",
   "@themeSystem": {
     "description": "System theme option"
   },
-
   "themeLight": "Light",
   "@themeLight": {
     "description": "Light theme option"
   },
-
   "themeDark": "Dark",
   "@themeDark": {
     "description": "Dark theme option"
   },
-
   "profileKeysTitle": "Profile keys",
   "@profileKeysTitle": {
     "description": "Profile keys screen title"
   },
-
   "publicKey": "Public key",
   "@publicKey": {
     "description": "Public key label"
   },
-
   "publicKeyCopied": "Public key copied to clipboard",
   "@publicKeyCopied": {
     "description": "System notice message when public key is copied"
   },
-
   "publicKeyDescription": "Your public key is your identifier on Nostr. Share it so others can find, recognize, and connect with you.",
   "@publicKeyDescription": {
     "description": "Description of public key"
   },
-
   "privateKey": "Private Key",
   "@privateKey": {
     "description": "Private key label"
   },
-
   "privateKeyCopied": "Private key copied to clipboard",
   "@privateKeyCopied": {
     "description": "System notice message when private key is copied"
   },
-
   "privateKeyDescription": "Your private key works like a secret password that grants access to your Nostr identity.",
   "@privateKeyDescription": {
     "description": "Description of private key"
   },
-
   "keepPrivateKeySecure": "Keep your private key safe!",
   "@keepPrivateKeySecure": {
     "description": "Warning box title for private key"
   },
-
   "privateKeyWarning": "Don't share your private key publicly, and use it only to log in to other Nostr apps.",
   "@privateKeyWarning": {
     "description": "Warning message about private key"
   },
-
   "nsecOnExternalSigner": "Private key is stored in external signer",
   "@nsecOnExternalSigner": {
     "description": "Title when private key is on external signer"
   },
-
   "nsecOnExternalSignerDescription": "Your private key isn't available in White Noise. Open your signer to view or manage it.",
   "@nsecOnExternalSignerDescription": {
     "description": "Description when private key is on external signer"
   },
-
   "editProfileTitle": "Edit profile",
   "@editProfileTitle": {
     "description": "Edit profile screen title"
   },
-
   "profileName": "Profile name",
   "@profileName": {
     "description": "Profile name input label"
   },
-
   "nostrAddress": "Nostr address",
   "@nostrAddress": {
     "description": "Nostr address input label"
   },
-
   "nostrAddressPlaceholder": "example@whitenoise.chat",
   "@nostrAddressPlaceholder": {
     "description": "Placeholder for Nostr address"
   },
-
   "aboutYou": "About you",
   "@aboutYou": {
     "description": "About input label"
   },
-
   "profileIsPublic": "Profile is public",
   "@profileIsPublic": {
     "description": "Warning box title for public profile"
   },
-
   "profilePublicDescription": "Your profile information will be visible to everyone on the network.",
   "@profilePublicDescription": {
     "description": "Description about public profile visibility"
   },
-
   "discard": "Discard",
   "@discard": {
     "description": "Discard button text"
   },
-
   "discardChanges": "Discard changes",
   "@discardChanges": {
     "description": "Discard changes button text"
   },
-
   "save": "Save",
   "@save": {
     "description": "Save button text"
   },
-
   "profileUpdatedSuccessfully": "Profile updated successfully",
   "@profileUpdatedSuccessfully": {
     "description": "System notice message when profile is updated"
   },
-
   "errorLoadingProfile": "Error loading profile: {error}",
   "@errorLoadingProfile": {
     "description": "Error message when profile fails to load",
@@ -345,7 +279,6 @@
       }
     }
   },
-
   "error": "Error: {error}",
   "@error": {
     "description": "Generic error message",
@@ -355,112 +288,90 @@
       }
     }
   },
-
   "profileLoadError": "Unable to load profile. Please try again.",
   "@profileLoadError": {
     "description": "User-friendly error when profile fails to load"
   },
-
   "failedToLoadPrivateKey": "Could not load private key. Please try again.",
   "@failedToLoadPrivateKey": {
     "description": "User-friendly error when nsec/private key fails to load"
   },
-
   "profileSaveError": "Unable to save profile. Please try again.",
   "@profileSaveError": {
     "description": "User-friendly error when profile fails to save"
   },
-
   "networkRelaysTitle": "Network Relays",
   "@networkRelaysTitle": {
     "description": "Network relays screen title"
   },
-
   "myRelays": "My Relays",
   "@myRelays": {
     "description": "My relays section header"
   },
-
   "myRelaysHelp": "Relays you have defined for use across all your Nostr applications.",
   "@myRelaysHelp": {
     "description": "Help text for my relays"
   },
-
   "inboxRelays": "Inbox Relays",
   "@inboxRelays": {
     "description": "Inbox relays section header"
   },
-
   "inboxRelaysHelp": "Relays used to receive invitations and start secure conversations with new users.",
   "@inboxRelaysHelp": {
     "description": "Help text for inbox relays"
   },
-
   "keyPackageRelays": "Key Package Relays",
   "@keyPackageRelays": {
     "description": "Key package relays section header"
   },
-
   "keyPackageRelaysHelp": "Relays that store your secure key so others can invite you to encrypted conversations.",
   "@keyPackageRelaysHelp": {
     "description": "Help text for key package relays"
   },
-
   "errorLoadingRelays": "Error loading relays",
   "@errorLoadingRelays": {
     "description": "Error message when relays fail to load"
   },
-
   "noRelaysConfigured": "No relays configured",
   "@noRelaysConfigured": {
     "description": "Message when no relays are configured"
   },
-
   "donateTitle": "Donate to White Noise",
   "@donateTitle": {
     "description": "Donate screen title"
   },
-
   "donateDescription": "As a not-for-profit, White Noise exists solely for your privacy and freedom, not for profit. Your support keeps us independent and uncompromised.",
   "@donateDescription": {
     "description": "Donate screen description"
   },
-
   "lightningAddress": "Lightning Address",
   "@lightningAddress": {
     "description": "Lightning address label"
   },
-
   "bitcoinSilentPayment": "Bitcoin Silent Payment",
   "@bitcoinSilentPayment": {
     "description": "Bitcoin silent payment label"
   },
-
   "copiedToClipboardThankYou": "Copied to clipboard. Thank you!",
   "@copiedToClipboardThankYou": {
     "description": "System notice message when donation address is copied"
   },
-
   "shareProfileTitle": "Share profile",
   "@shareProfileTitle": {
     "description": "Share profile screen title"
   },
-
   "scanToConnect": "Scan to connect",
   "@scanToConnect": {
     "description": "Text below QR code"
   },
-
   "signOutTitle": "Sign out",
   "@signOutTitle": {
     "description": "Sign out screen title"
   },
-
   "signOutConfirmation": "Are you sure you want to sign out?",
   "@signOutConfirmation": {
     "description": "Sign out confirmation title"
   },
-
   "signOutWarning": "When you sign out of White Noise, your chats will be deleted from this device and cannot be restored on another device.",
   "@signOutWarning": {
     "description": "Sign out warning first paragraph (chats deleted)"
@@ -469,92 +380,81 @@
   "@signOutWarningBackupKey": {
     "description": "Sign out warning second paragraph (back up key, shown only for local storage)"
   },
-
   "backUpPrivateKey": "Back up your private key",
   "@backUpPrivateKey": {
     "description": "Back up private key section title"
   },
-
   "copyPrivateKeyHint": "Copy your private key to restore your account on another device.",
   "@copyPrivateKeyHint": {
     "description": "Hint for copying private key"
   },
-
   "publicKeyCopyError": "Failed to copy public key. Please try again.",
   "@publicKeyCopyError": {
     "description": "Error message when copying public key (npub) to clipboard fails"
   },
-
   "noChatsYet": "No chats yet",
   "@noChatsYet": {
     "description": "Empty state title for chat list"
   },
-
   "startConversation": "Start a conversation",
   "@startConversation": {
     "description": "Empty state subtitle for chat list"
   },
-
   "welcomeNoticeTitle": "Your profile is ready",
   "@welcomeNoticeTitle": {
     "description": "Title for welcome notice shown on empty chat list after signup"
   },
-
   "welcomeNoticeDescription": "Tap {findPeople} to find your friends. {shareProfile} to connect with people you know, or {startANewChat} using the chat plus icon.",
   "@welcomeNoticeDescription": {
     "description": "Description for welcome notice shown on empty chat list",
     "placeholders": {
-      "findPeople": { "type": "String" },
-      "shareProfile": { "type": "String" },
-      "startANewChat": { "type": "String" }
+      "findPeople": {
+        "type": "String"
+      },
+      "shareProfile": {
+        "type": "String"
+      },
+      "startANewChat": {
+        "type": "String"
+      }
     }
   },
-
   "findPeople": "Find people",
   "@findPeople": {
     "description": "Button text to find/search for people"
   },
-
   "startANewChat": "start a new chat",
   "@startANewChat": {
     "description": "Text for starting a new chat action"
   },
-
   "noMessagesYet": "No messages yet",
   "@noMessagesYet": {
     "description": "Empty state for chat screen"
   },
-
   "messagePlaceholder": "Message",
   "@messagePlaceholder": {
     "description": "Placeholder for message input"
   },
-
   "failedToSendMessage": "Failed to send message. Please try again.",
   "@failedToSendMessage": {
     "description": "Error message when sending message fails"
   },
-
   "invitedToSecureChat": "You are invited to a secure chat",
   "@invitedToSecureChat": {
     "description": "Message when invited to a chat"
   },
-
   "invitedYouToChatSuffix": " invited you to chat",
   "@invitedYouToChatSuffix": {
     "description": "Suffix for system message showing who invited the user to chat (preceded by bold name)"
   },
-
   "decline": "Decline",
   "@decline": {
     "description": "Decline button text"
   },
-
   "accept": "Accept",
   "@accept": {
     "description": "Accept button text"
   },
-
   "failedToAcceptInvitation": "Failed to accept invitation: {error}",
   "@failedToAcceptInvitation": {
     "description": "Error when accepting invitation fails",
@@ -564,7 +464,6 @@
       }
     }
   },
-
   "failedToDeclineInvitation": "Failed to decline invitation: {error}",
   "@failedToDeclineInvitation": {
     "description": "Error when declining invitation fails",
@@ -574,47 +473,38 @@
       }
     }
   },
-
   "startNewChat": "Start new chat",
   "@startNewChat": {
     "description": "User search screen title"
   },
-
   "noResults": "No results",
   "@noResults": {
     "description": "Empty search results message"
   },
-
   "noFollowsYet": "No follows yet",
   "@noFollowsYet": {
     "description": "Message when user has no follows"
   },
-
   "searchByNameOrNpub": "Name or npub1...",
   "@searchByNameOrNpub": {
     "description": "User search field placeholder"
   },
-
   "developerSettingsTitle": "Developer Settings",
   "@developerSettingsTitle": {
     "description": "Developer settings screen title"
   },
-
   "publishNewKeyPackage": "Publish New Key Package",
   "@publishNewKeyPackage": {
     "description": "Button to publish new key package"
   },
-
   "refreshKeyPackages": "Refresh Key Packages",
   "@refreshKeyPackages": {
     "description": "Button to refresh key packages"
   },
-
   "deleteAllKeyPackages": "Delete All Key Packages",
   "@deleteAllKeyPackages": {
     "description": "Button to delete all key packages"
   },
-
   "keyPackagesCount": "Key Packages ({count})",
   "@keyPackagesCount": {
     "description": "Key packages count header",
@@ -624,32 +514,26 @@
       }
     }
   },
-
   "noKeyPackagesFound": "No key packages found",
   "@noKeyPackagesFound": {
     "description": "Message when no key packages exist"
   },
-
   "keyPackagePublished": "Key package published",
   "@keyPackagePublished": {
     "description": "Success message when key package is published"
   },
-
   "keyPackagesRefreshed": "Key packages refreshed",
   "@keyPackagesRefreshed": {
     "description": "Success message when key packages are refreshed"
   },
-
   "keyPackagesDeleted": "All key packages deleted",
   "@keyPackagesDeleted": {
     "description": "Success message when all key packages are deleted"
   },
-
   "keyPackageDeleted": "Key package deleted",
   "@keyPackageDeleted": {
     "description": "Success message when a key package is deleted"
   },
-
   "packageNumber": "Package {number}",
   "@packageNumber": {
     "description": "Key package item title",
@@ -659,27 +543,22 @@
       }
     }
   },
-
   "goBack": "Go back",
   "@goBack": {
     "description": "Go back button text"
   },
-
   "createGroup": "Create group",
   "@createGroup": {
     "description": "Create group button text"
   },
-
   "newGroupChat": "New group chat",
   "@newGroupChat": {
     "description": "Menu item text to start a new group chat"
   },
-
   "selectMembers": "Select Members",
   "@selectMembers": {
     "description": "User selection screen title"
   },
-
   "selectedCount": "{count} selected",
   "@selectedCount": {
     "description": "Number of selected users",
@@ -689,47 +568,38 @@
       }
     }
   },
-
   "clearSelection": "Clear",
   "@clearSelection": {
     "description": "Clear selection button text"
   },
-
   "continueButton": "Continue",
   "@continueButton": {
     "description": "Continue button text"
   },
-
   "setUpGroup": "Set up group",
   "@setUpGroup": {
     "description": "Set up group screen title"
   },
-
   "groupName": "Group Name",
   "@groupName": {
     "description": "Group name label"
   },
-
   "groupNamePlaceholder": "Enter group name",
   "@groupNamePlaceholder": {
     "description": "Group name input placeholder"
   },
-
   "groupDescription": "Group Description",
   "@groupDescription": {
     "description": "Group description label"
   },
-
   "description": "Description",
   "@description": {
     "description": "Generic description label"
   },
-
   "groupDescriptionPlaceholder": "What is this group for?",
   "@groupDescriptionPlaceholder": {
     "description": "Group description input placeholder"
   },
-
   "members": "{count} members",
   "@members": {
     "description": "Number of members",
@@ -739,7 +609,6 @@
       }
     }
   },
-
   "invitingMembers": "{count, plural, =1{Inviting member:} other{Inviting members:}}",
   "@invitingMembers": {
     "description": "Label for inviting members in group setup",
@@ -749,12 +618,10 @@
       }
     }
   },
-
   "usersWithoutKeyPackages": "Users without key packages (cannot be added)",
   "@usersWithoutKeyPackages": {
     "description": "Message for users without key packages"
   },
-
   "usersNotOnWhiteNoise": "{count, plural, =1{This user is not on White Noise} other{These users are not on White Noise}}",
   "@usersNotOnWhiteNoise": {
     "description": "Title for users without key packages",
@@ -764,7 +631,6 @@
       }
     }
   },
-
   "usersNotOnWhiteNoiseDescription": "{count, plural, =1{This user cannot be added to the group because they don't have White Noise installed or haven't published their key package yet.} other{These users cannot be added to the group because they don't have White Noise installed or haven't published their key packages yet.}}",
   "@usersNotOnWhiteNoiseDescription": {
     "description": "Description for users without key packages",
@@ -774,128 +640,102 @@
       }
     }
   },
-
   "uploadingImage": "Uploading image...",
   "@uploadingImage": {
     "description": "Uploading image status"
   },
-
   "creatingGroup": "Creating group...",
   "@creatingGroup": {
     "description": "Creating group status"
   },
-
   "groupNameRequired": "Group name is required",
   "@groupNameRequired": {
     "description": "Error message when group name is empty"
   },
-
   "noUsersWithKeyPackages": "No users with key packages to add",
   "@noUsersWithKeyPackages": {
     "description": "Error message when no users have key packages"
   },
-
-
   "createGroupFailed": "Failed to create group",
   "@createGroupFailed": {
     "description": "Error message when group creation fails"
   },
-
   "reportError": "Report error",
   "@reportError": {
     "description": "Report error button text"
   },
-
   "wipMessage": "We're working on this feature. To support development, please donate to White Noise",
   "@wipMessage": {
     "description": "WIP screen message"
   },
-
   "donate": "Donate",
   "@donate": {
     "description": "Donate button text"
   },
-
   "addRelay": "Add Relay",
   "@addRelay": {
     "description": "Add relay sheet title and button"
   },
-
   "enterRelayAddress": "Enter relay address",
   "@enterRelayAddress": {
     "description": "Label for relay address input"
   },
-
   "relayAddressPlaceholder": "wss://relay.example.com",
   "@relayAddressPlaceholder": {
     "description": "Placeholder for relay address input"
   },
-
   "removeRelay": "Remove Relay?",
   "@removeRelay": {
     "description": "Remove relay confirmation title"
   },
-
   "removeRelayConfirmation": "Are you sure you want to remove this relay? This action cannot be undone.",
   "@removeRelayConfirmation": {
     "description": "Remove relay confirmation message"
   },
-
   "remove": "Remove",
   "@remove": {
     "description": "Remove button text"
   },
-
   "messageActions": "Message actions",
   "@messageActions": {
     "description": "Message menu title"
   },
-
   "reply": "Reply",
   "@reply": {
     "description": "Reply button text"
   },
-
   "copyMessage": "Copy",
   "@copyMessage": {
     "description": "Copy message button text"
   },
-
   "delete": "Delete",
   "@delete": {
     "description": "Delete button text"
   },
-
   "failedToDeleteMessage": "Failed to delete message. Please try again.",
   "@failedToDeleteMessage": {
     "description": "Error when deleting message fails"
   },
-
   "failedToSendReaction": "Failed to send reaction. Please try again.",
   "@failedToSendReaction": {
     "description": "Error when sending reaction fails"
   },
-
   "failedToRemoveReaction": "Failed to remove reaction. Please try again.",
   "@failedToRemoveReaction": {
     "description": "Error when removing reaction fails"
   },
-
   "unknownUser": "Unknown user",
   "@unknownUser": {
     "description": "Fallback name for unknown user"
   },
-
   "unknownGroup": "Unknown group",
   "@unknownGroup": {
     "description": "Fallback name for unknown group"
   },
-
   "hasInvitedYouToSecureChat": "Has invited you to a secure chat",
   "@hasInvitedYouToSecureChat": {
     "description": "Invitation subtitle in chat list"
   },
-
   "userInvitedYouToSecureChat": "{name} has invited you to a secure chat",
   "@userInvitedYouToSecureChat": {
     "description": "Invitation subtitle with user name",
@@ -905,32 +745,26 @@
       }
     }
   },
-
   "youHaveBeenInvitedToSecureChat": "You have been invited to a secure chat",
   "@youHaveBeenInvitedToSecureChat": {
     "description": "Generic invitation subtitle"
   },
-
   "language": "Language",
   "@language": {
     "description": "Language selector label"
   },
-
   "languageSystem": "System",
   "@languageSystem": {
     "description": "System language option"
   },
-
   "languageUpdateFailed": "Failed to save language preference. Please try again.",
   "@languageUpdateFailed": {
     "description": "Error message when language update fails to persist"
   },
-
   "timeJustNow": "just now",
   "@timeJustNow": {
     "description": "Relative time for events that happened moments ago"
   },
-
   "timeMinutesAgo": "{count, plural, =1{1 minute ago} other{{count} minutes ago}}",
   "@timeMinutesAgo": {
     "description": "Relative time for minutes ago",
@@ -940,7 +774,6 @@
       }
     }
   },
-
   "timeHoursAgo": "{count, plural, =1{1 hour ago} other{{count} hours ago}}",
   "@timeHoursAgo": {
     "description": "Relative time for hours ago",
@@ -950,7 +783,6 @@
       }
     }
   },
-
   "timeDaysAgo": "{count, plural, =1{yesterday} other{{count} days ago}}",
   "@timeDaysAgo": {
     "description": "Relative time for days ago",
@@ -960,22 +792,18 @@
       }
     }
   },
-
   "profile": "Profile",
   "@profile": {
     "description": "Profile screen title"
   },
-
   "follow": "Follow",
   "@follow": {
     "description": "Follow button text"
   },
-
   "unfollow": "Unfollow",
   "@unfollow": {
     "description": "Unfollow button text"
   },
-
   "chatSearchMatchCount": "{current} of {total, plural, =1{1 match} other{{total} matches}}",
   "@chatSearchMatchCount": {
     "description": "Search match count indicator, e.g. '1 of 3 matches'",
@@ -988,17 +816,14 @@
       }
     }
   },
-
   "failedToStartChat": "Failed to start chat. Please try again.",
   "@failedToStartChat": {
     "description": "Error when starting chat fails"
   },
-
   "inviteToWhiteNoise": "Invite to White Noise",
   "@inviteToWhiteNoise": {
     "description": "Callout title when user is not on White Noise"
   },
-
   "inviteToWhiteNoiseDescription": "{name} isn't on White Noise yet. Share the app to start a secure chat.",
   "@inviteToWhiteNoiseDescription": {
     "description": "Callout description when user is not on White Noise",
@@ -1008,67 +833,54 @@
       }
     }
   },
-
   "inviteMessage": "Join me on White Noise. No phone number. No surveillance. Just real privacy. Download it here: https://www.whitenoise.chat/download",
   "@inviteMessage": {
     "description": "Text shared with users who haven't installed White Noise yet"
   },
-
   "failedToUpdateFollow": "Failed to update follow status. Please try again.",
   "@failedToUpdateFollow": {
     "description": "Error when follow or unfollow action fails"
   },
-
   "imagePickerError": "Failed to pick image. Please try again.",
   "@imagePickerError": {
     "description": "Error message when image picker fails"
   },
-
   "scanNsec": "Scan QR code",
   "@scanNsec": {
     "description": "Title for scan nsec screen"
   },
-
   "scanNsecHint": "Scan your private key QR code to login.",
   "@scanNsecHint": {
     "description": "Hint text on scan nsec screen"
   },
-
   "cameraPermissionDenied": "Camera permission denied",
   "@cameraPermissionDenied": {
     "description": "Error message when camera permission is denied"
   },
-
   "somethingWentWrong": "Something went wrong",
   "@somethingWentWrong": {
     "description": "Generic error message"
   },
-
-"scanNpub": "Scan QR code",
+  "scanNpub": "Scan QR code",
   "@scanNpub": {
     "description": "Title for scan npub screen"
   },
-
   "scanNpubHint": "Scan a contact's QR code.",
   "@scanNpubHint": {
     "description": "Hint text on scan npub screen"
   },
-
   "invalidNpub": "Invalid public key. Please try again.",
   "@invalidNpub": {
     "description": "Error message when scanned npub is invalid"
   },
-
   "you": "You",
   "@you": {
     "description": "Prefix for messages sent by the user"
   },
-
   "timestampNow": "Now",
   "@timestampNow": {
     "description": "Timestamp for events less than 60 seconds ago"
   },
-
   "timestampMinutes": "{count}m",
   "@timestampMinutes": {
     "description": "Timestamp for events 1-59 minutes ago",
@@ -1078,7 +890,6 @@
       }
     }
   },
-
   "timestampHours": "{count}h",
   "@timestampHours": {
     "description": "Timestamp for events 1-12 hours ago",
@@ -1088,127 +899,102 @@
       }
     }
   },
-
   "timestampYesterday": "Yesterday",
   "@timestampYesterday": {
     "description": "Timestamp for events from yesterday"
   },
-
   "weekdayMonday": "Monday",
   "@weekdayMonday": {
     "description": "Monday weekday name"
   },
-
   "weekdayTuesday": "Tuesday",
   "@weekdayTuesday": {
     "description": "Tuesday weekday name"
   },
-
   "weekdayWednesday": "Wednesday",
   "@weekdayWednesday": {
     "description": "Wednesday weekday name"
   },
-
   "weekdayThursday": "Thursday",
   "@weekdayThursday": {
     "description": "Thursday weekday name"
   },
-
   "weekdayFriday": "Friday",
   "@weekdayFriday": {
     "description": "Friday weekday name"
   },
-
   "weekdaySaturday": "Saturday",
   "@weekdaySaturday": {
     "description": "Saturday weekday name"
   },
-
   "weekdaySunday": "Sunday",
   "@weekdaySunday": {
     "description": "Sunday weekday name"
   },
-
   "monthJanShort": "Jan",
   "@monthJanShort": {
     "description": "January short name"
   },
-
   "monthFebShort": "Feb",
   "@monthFebShort": {
     "description": "February short name"
   },
-
   "monthMarShort": "Mar",
   "@monthMarShort": {
     "description": "March short name"
   },
-
   "monthAprShort": "Apr",
   "@monthAprShort": {
     "description": "April short name"
   },
-
   "monthMayShort": "May",
   "@monthMayShort": {
     "description": "May short name"
   },
-
   "monthJunShort": "Jun",
   "@monthJunShort": {
     "description": "June short name"
   },
-
   "monthJulShort": "Jul",
   "@monthJulShort": {
     "description": "July short name"
   },
-
   "monthAugShort": "Aug",
   "@monthAugShort": {
     "description": "August short name"
   },
-
   "monthSepShort": "Sep",
   "@monthSepShort": {
     "description": "September short name"
   },
-
   "monthOctShort": "Oct",
   "@monthOctShort": {
     "description": "October short name"
   },
-
   "monthNovShort": "Nov",
   "@monthNovShort": {
     "description": "November short name"
   },
-
   "monthDecShort": "Dec",
   "@monthDecShort": {
     "description": "December short name"
   },
-  
   "loginWithAmber": "Login with Amber",
   "@loginWithAmber": {
     "description": "Button text to login using the Amber signer app (Android only)"
   },
-
   "signerConnectionError": "Unable to connect to signer. Please try again.",
   "@signerConnectionError": {
     "description": "Error message when connection to external signer fails"
   },
-
   "search": "Search",
   "@search": {
     "description": "Search placeholder text"
   },
-
   "filterChats": "Chats",
   "@filterChats": {
     "description": "Chat list filter chip for chats"
   },
-
   "filterArchive": "Archive",
   "@filterArchive": {
     "description": "Chat list filter chip for archived chats"
@@ -1257,152 +1043,122 @@
   "@signerErrorUnknown": {
     "description": "Android signer generic error message"
   },
-
   "messageNotFound": "Message not found",
   "@messageNotFound": {
     "description": "Text shown in reply preview when the original message is deleted or not available"
   },
-
   "pin": "Pin",
   "@pin": {
     "description": "Pin chat context menu action"
   },
-
   "unpin": "Unpin",
   "@unpin": {
     "description": "Unpin chat context menu action"
   },
-
   "mute": "Mute",
   "@mute": {
     "description": "Mute chat context menu action"
   },
-
   "archive": "Archive",
   "@archive": {
     "description": "Archive chat context menu action"
   },
-
   "failedToPinChat": "Failed to update pin. Please try again.",
   "@failedToPinChat": {
     "description": "Error message when pin/unpin operation fails"
   },
-
   "carouselPrivacyTitle": "Privacy and security",
   "@carouselPrivacyTitle": {
     "description": "Login carousel slide 1 title"
   },
-
   "carouselPrivacyDescription": "Keep your conversations private. Even in case of a breach, your messages remain secure.",
   "@carouselPrivacyDescription": {
     "description": "Login carousel slide 1 description"
   },
-
   "carouselIdentityTitle": "Choose your identity",
   "@carouselIdentityTitle": {
     "description": "Login carousel slide 2 title"
   },
-
   "carouselIdentityDescription": "Chat without revealing your phone number or email. Choose your identity: real name, pseudonym, or anonymous.",
   "@carouselIdentityDescription": {
     "description": "Login carousel slide 2 description"
   },
-
   "carouselDecentralizedTitle": "Decentralized and permissionless",
   "@carouselDecentralizedTitle": {
     "description": "Login carousel slide 3 title"
   },
-
   "carouselDecentralizedDescription": "No central authority controls your communication-no permissions needed, no censorship possible.",
   "@carouselDecentralizedDescription": {
     "description": "Login carousel slide 3 description"
   },
-
   "learnMore": "Learn more",
   "@learnMore": {
     "description": "Learn more button text on signup screen"
   },
-
   "backToSignUp": "Back to sign up",
   "@backToSignUp": {
     "description": "Button to return to signup from carousel"
   },
-
   "deleteAllData": "Delete All Data",
   "@deleteAllData": {
     "description": "Button to delete all application data"
   },
-
   "deleteAllDataConfirmation": "Delete all data?",
   "@deleteAllDataConfirmation": {
     "description": "Confirmation dialog title for delete all data"
   },
-
   "deleteAllDataWarning": "This will permanently delete all your chats, messages, and settings from this device. This action cannot be undone.",
   "@deleteAllDataWarning": {
     "description": "Warning message for delete all data action"
   },
-
   "deleteAllDataError": "Failed to delete all data. Please try again.",
   "@deleteAllDataError": {
     "description": "Error message when data deletion fails"
   },
-
   "chatInformation": "Chat Information",
   "@chatInformation": {
     "description": "Chat information screen title"
   },
-
   "addAsContact": "Add as contact",
   "@addAsContact": {
     "description": "Action label to add a user as contact"
   },
-
   "removeAsContact": "Remove as contact",
   "@removeAsContact": {
     "description": "Action label to remove a user as contact"
   },
-
   "addToGroup": "Add to group",
   "@addToGroup": {
     "description": "Action label to add this user to a group"
   },
-
   "addToAnotherGroup": "Add to another group",
   "@addToAnotherGroup": {
     "description": "Action label to add this user to another group"
   },
-
   "relayResolutionTitle": "Relay Setup",
   "@relayResolutionTitle": {
     "description": "Title for the relay resolution screen"
   },
-
   "relayResolutionDescription": "We couldn't find your relay lists on the network. You can provide a relay where your lists are published, or use our default relays to get started.",
   "@relayResolutionDescription": {
     "description": "Explanation of what happened during relay resolution"
   },
-
   "relayResolutionUseDefaults": "Use default relays",
   "@relayResolutionUseDefaults": {
     "description": "Button text for publishing defaults"
   },
-
   "relayResolutionTryRelay": "Search relay",
   "@relayResolutionTryRelay": {
     "description": "Button text for trying a custom relay"
   },
-
   "relayResolutionRelayPlaceholder": "wss://relay.example.com",
   "@relayResolutionRelayPlaceholder": {
     "description": "Placeholder for relay URL input"
   },
-
   "relayResolutionRelayLabel": "Relay URL",
   "@relayResolutionRelayLabel": {
     "description": "Label for relay URL input"
   },
-
   "relayResolutionNotFound": "No relay lists found on this relay. Try another or use defaults.",
   "@relayResolutionNotFound": {
     "description": "Error when custom relay didn't find lists"
@@ -1412,92 +1168,74 @@
   "@loginErrorInvalidKey": {
     "description": "Error message for LoginInvalidKeyFormat"
   },
-
   "loginErrorNoRelayConnections": "Could not connect to any relays. Please check your connection and try again.",
   "@loginErrorNoRelayConnections": {
     "description": "Error message for LoginNoRelayConnections"
   },
-
   "loginErrorTimeout": "Login timed out. Please try again.",
   "@loginErrorTimeout": {
     "description": "Error message for LoginTimeout"
   },
-
   "loginErrorGeneric": "An error occurred during login. Please try again.",
   "@loginErrorGeneric": {
     "description": "Generic fallback error message for login"
   },
-
   "loginErrorNoLoginInProgress": "No login in progress. Please start over.",
   "@loginErrorNoLoginInProgress": {
     "description": "Error when trying to continue a login that was not started"
   },
-
   "loginErrorInternal": "An internal error occurred. Please try again.",
   "@loginErrorInternal": {
     "description": "Error for internal login failures"
   },
-
   "loginPasteNothingToPaste": "Nothing to paste",
   "@loginPasteNothingToPaste": {
     "description": "Error when clipboard is empty during login paste"
   },
-
   "loginPasteFailed": "Failed to paste from clipboard",
   "@loginPasteFailed": {
     "description": "Error when clipboard paste fails during login"
   },
-
   "openSettings": "Open Settings",
   "@openSettings": {
     "description": "Button text to open device settings"
   },
-
   "scannerError": "Scanner error",
   "@scannerError": {
     "description": "Generic scanner error message"
   },
-
   "scannerErrorDescription": "Something went wrong with the scanner. Please try again.",
   "@scannerErrorDescription": {
     "description": "Description for generic scanner error"
   },
-
   "cameraPermissionDeniedDescription": "Please enable camera access in your device settings to scan QR codes.",
   "@cameraPermissionDeniedDescription": {
     "description": "Description for camera permission denied error"
   },
-
   "retry": "Retry",
   "@retry": {
     "description": "Retry button text"
   },
-
   "groupInformation": "Group Information",
   "@groupInformation": {
     "description": "Group info screen title"
   },
-
   "editGroup": "Edit Group",
   "@editGroup": {
     "description": "Edit group screen title"
   },
-
   "editGroupAction": "Edit group",
   "@editGroupAction": {
     "description": "Button text for editing a group in group info screen"
   },
-
   "groupNameLabel": "Name",
   "@groupNameLabel": {
     "description": "Label for group name input"
   },
-
   "groupDescriptionLabel": "About",
   "@groupDescriptionLabel": {
     "description": "Label for group description input"
   },
-
   "membersCount": "{count, plural, =1{1 Member} other{{count} Members}}",
   "@membersCount": {
     "description": "Member count label for group info",
@@ -1507,117 +1245,94 @@
       }
     }
   },
-
   "adminBadge": "Admin",
   "@adminBadge": {
     "description": "Badge label for admin users in group member list"
   },
-
   "membersLabel": "Members:",
   "@membersLabel": {
     "description": "Section label for group member list"
   },
-
   "memberBadge": "Member",
   "@memberBadge": {
     "description": "Badge label for regular (non-admin) members in a group"
   },
-
   "sendMessage": "Send message",
   "@sendMessage": {
     "description": "Action label to send a message to a user"
   },
-
   "makeAdmin": "Make admin",
   "@makeAdmin": {
     "description": "Action label to make a group member an admin"
   },
-
   "removeAdminRole": "Remove admin",
   "@removeAdminRole": {
     "description": "Action label to remove admin role from a group member"
   },
-
   "removeFromGroup": "Remove from group",
   "@removeFromGroup": {
     "description": "Action label to remove a member from a group"
   },
-
   "removeFromGroupConfirmation": "Remove from group?",
   "@removeFromGroupConfirmation": {
     "description": "Confirmation dialog title for removing a member from group"
   },
-
   "removeFromGroupWarning": "This member will be removed from the group and will no longer be able to see new messages.",
   "@removeFromGroupWarning": {
     "description": "Warning message for removing a member from group"
   },
-
   "makeAdminConfirmation": "Make admin?",
   "@makeAdminConfirmation": {
     "description": "Confirmation dialog title for making a member admin"
   },
-
   "makeAdminWarning": "This member will be able to manage the group, add or remove members, and change group settings.",
   "@makeAdminWarning": {
     "description": "Warning message for making a member admin"
   },
-
   "removeAdminConfirmation": "Remove admin?",
   "@removeAdminConfirmation": {
     "description": "Confirmation dialog title for removing admin role"
   },
-
   "removeAdminWarning": "This member will no longer be able to manage the group, add or remove members, or change group settings.",
   "@removeAdminWarning": {
     "description": "Warning message for removing admin role"
   },
-
   "failedToRemoveFromGroup": "Failed to remove member. Please try again.",
   "@failedToRemoveFromGroup": {
     "description": "Error message when removing a member from group fails"
   },
-
   "failedToMakeAdmin": "Failed to make admin. Please try again.",
   "@failedToMakeAdmin": {
     "description": "Error message when making a member admin fails"
   },
-
   "failedToRemoveAdmin": "Failed to remove admin. Please try again.",
   "@failedToRemoveAdmin": {
     "description": "Error message when removing admin role fails"
   },
-
   "groupUpdatedSuccessfully": "Group updated successfully",
   "@groupUpdatedSuccessfully": {
     "description": "System notice message when group settings are updated"
   },
-
   "groupLoadError": "Unable to load group. Please try again.",
   "@groupLoadError": {
     "description": "User-friendly error when group fails to load"
   },
-
   "groupSaveError": "Unable to save group. Please try again.",
   "@groupSaveError": {
     "description": "User-friendly error when group fails to save"
   },
-
   "failedToFetchGroupMembers": "Failed to load group members. Please try again.",
   "@failedToFetchGroupMembers": {
     "description": "Error message when fetching group members fails"
   },
-
   "failedToAddMembers": "Failed to add members. Please try again.",
   "@failedToAddMembers": {
     "description": "Error message when adding members to group fails"
   },
-
   "groupImageUploadFailed": "Group created, but the image failed to upload.",
   "@groupImageUploadFailed": {
     "description": "Warning message when group is created successfully but image upload fails"
   },
-
   "updateNeeded": "{name} needs update",
   "@updateNeeded": {
     "description": "Callout title when user needs to update their whitenoise app",
@@ -1627,7 +1342,6 @@
       }
     }
   },
-
   "updateNeededDescription": "You can't start a secure chat with {name} yet. They need to update White Noise before secure messaging works.",
   "@updateNeededDescription": {
     "description": "Callout description when user needs to update their whitenoise app",
@@ -1637,7 +1351,6 @@
       }
     }
   },
-
   "addToGroupConfirmation": "Add {userName} to {groupName}?",
   "@addToGroupConfirmation": {
     "description": "Confirmation dialog message for adding user to group",
@@ -1652,73 +1365,58 @@
       }
     }
   },
-
   "unknownInviteToWhiteNoiseDescription": "This user isn't on White Noise yet. Share the app to start a secure chat.",
   "@unknownInviteToWhiteNoiseDescription": {
     "description": "Callout description when unknown user is not on White Noise"
   },
-
   "unknownUserNeedsUpdate": "Update required",
   "@unknownUserNeedsUpdate": {
     "description": "Callout title when user needs to update their whitenoise app and we don't know the user name"
   },
-
   "unknownUserNeedsUpdateDescription": "You can't start a secure chat with this user yet. They need to update White Noise before secure messaging works.",
-
   "@unknownUserNeedsUpdateDescription": {
     "description": "Callout description when user needs to update their whitenoise app and we don't know the user name"
   },
-
   "add": "Add",
   "@add": {
     "description": "Add button text"
   },
-
   "noGroupsAvailable": "No groups available",
   "@noGroupsAvailable": {
     "description": "Message shown when user has no groups to add someone to"
   },
-
   "noAdminGroupsAvailable": "You're not an admin in any groups yet. Create a group to add people.",
   "@noAdminGroupsAvailable": {
     "description": "Message shown when user has no groups where they are admin to add someone to"
   },
-
   "profilesTitle": "Profiles",
   "@profilesTitle": {
     "description": "Title for the switch profile screen"
   },
-
   "noAccountsAvailable": "No accounts available",
   "@noAccountsAvailable": {
     "description": "Message shown when there are no accounts to switch to"
   },
-
   "connectAnotherProfile": "Connect Another Profile",
   "@connectAnotherProfile": {
     "description": "Button text to connect another profile/account"
   },
-
   "rawDebugView": "Raw debug view",
   "@rawDebugView": {
     "description": "Toggle label for raw message debug view in developer settings"
   },
-
   "rawDebugViewDescription": "Show raw message data in chat",
   "@rawDebugViewDescription": {
     "description": "Subtitle for the raw debug view toggle"
   },
-
   "rawDebugViewTitle": "Raw Debug View",
   "@rawDebugViewTitle": {
     "description": "Screen title for the raw message debug screen"
   },
-
   "rawDebugViewGroupId": "Group ID",
   "@rawDebugViewGroupId": {
     "description": "Label for group ID in raw debug view"
   },
-
   "rawDebugViewMessageCount": "{count, plural, =0{No messages} =1{1 message} other{{count} messages}}",
   "@rawDebugViewMessageCount": {
     "description": "Message count shown in raw debug view",
@@ -1728,12 +1426,10 @@
       }
     }
   },
-
   "rawDebugViewCopied": "Copied to clipboard",
   "@rawDebugViewCopied": {
     "description": "Snackbar text after copying a raw message"
   },
-
   "appLogsTitle": "App Logs",
   "@appLogsTitle": {
     "description": "Screen title for the in-app log viewer"
@@ -1782,17 +1478,24 @@
   "@appLogsFilteredCount": {
     "description": "Shown/filtered count when filters active",
     "placeholders": {
-      "shown": {"type": "int"},
-      "total": {"type": "int"}
+      "shown": {
+        "type": "int"
+      },
+      "total": {
+        "type": "int"
+      }
     }
   },
   "invalidRelayUrlScheme": "URL must start with wss:// or ws://",
   "@invalidRelayUrlScheme": {
     "description": "Error message when relay URL doesn't start with wss:// or ws://"
   },
-
   "invalidRelayUrl": "Invalid relay URL",
   "@invalidRelayUrl": {
     "description": "Error message when relay URL is invalid"
+  },
+  "thisMessageWasDeleted": "This message was deleted.",
+  "@thisMessageWasDeleted": {
+    "description": "Text shown inside a deleted message bubble"
   }
 }

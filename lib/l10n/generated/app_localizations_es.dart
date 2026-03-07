@@ -919,7 +919,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se encontraron listas de relés en este relé. Prueba con otro o usa los predeterminados.';
 
   @override
-  String get loginErrorInvalidKey => 'nsec inválido. Asegúrate de haberlo ingresado correctamente.';
+  String get loginErrorInvalidKey => 'Nsec inválida. Asegúrate de haberla ingresado correctamente.';
 
   @override
   String get loginErrorNoRelayConnections =>
@@ -1172,4 +1172,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get invalidRelayUrl => 'URL de relé inválida';
+
+  @override
+  String get thisMessageWasDeleted => 'Este mensaje fue eliminado.';
 }

@@ -337,5 +337,6 @@
   },
   "appLogsFilteredCount": "{shown} из {total}",
   "invalidRelayUrlScheme": "URL должен начинаться с wss:// или ws://",
-  "invalidRelayUrl": "Неверный URL реле"
+  "invalidRelayUrl": "Неверный URL реле",
+  "thisMessageWasDeleted": "Это сообщение было удалено."
 }

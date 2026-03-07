@@ -1161,4 +1161,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get invalidRelayUrl => 'Invalid relay URL';
+
+  @override
+  String get thisMessageWasDeleted => 'This message was deleted.';
 }

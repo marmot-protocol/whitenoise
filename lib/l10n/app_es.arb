@@ -189,7 +189,7 @@
   "scanNsecHint": "Escanea el código QR de tu llave privada para iniciar sesión.",
   "cameraPermissionDenied": "Permiso de cámara denegado",
   "somethingWentWrong": "Algo salió mal",
-"scanNpub": "Escanear código QR",
+  "scanNpub": "Escanear código QR",
   "scanNpubHint": "Escanea el código QR de un contacto.",
   "invalidNpub": "Llave pública inválida. Por favor, inténtalo de nuevo.",
   "timestampNow": "Ahora",
@@ -261,7 +261,7 @@
   "relayResolutionRelayPlaceholder": "wss://rele.ejemplo.com",
   "relayResolutionRelayLabel": "URL del relé",
   "relayResolutionNotFound": "No se encontraron listas de relés en este relé. Prueba con otro o usa los predeterminados.",
-  "loginErrorInvalidKey": "nsec inválido. Asegúrate de haberlo ingresado correctamente.",
+  "loginErrorInvalidKey": "Nsec inválida. Asegúrate de haberla ingresado correctamente.",
   "loginErrorNoRelayConnections": "No se pudo conectar a ningún relé. Verifica tu conexión e inténtalo de nuevo.",
   "loginErrorTimeout": "La conexión ha expirado. Inténtalo de nuevo.",
   "loginErrorGeneric": "Se produjo un error durante el inicio de sesión. Inténtalo de nuevo.",
@@ -337,5 +337,6 @@
   },
   "appLogsFilteredCount": "{shown} de {total}",
   "invalidRelayUrlScheme": "La URL debe comenzar con wss:// o ws://",
-  "invalidRelayUrl": "URL de relé inválida"
+  "invalidRelayUrl": "URL de relé inválida",
+  "thisMessageWasDeleted": "Este mensaje fue eliminado."
 }

@@ -1190,4 +1190,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get invalidRelayUrl => 'Неверный URL реле';
+
+  @override
+  String get thisMessageWasDeleted => 'Это сообщение было удалено.';
 }

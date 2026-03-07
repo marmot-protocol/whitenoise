@@ -1160,4 +1160,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get invalidRelayUrl => 'Geçersiz röle URL\'si';
+
+  @override
+  String get thisMessageWasDeleted => 'Bu mesaj silindi.';
 }

@@ -337,5 +337,6 @@
   },
   "appLogsFilteredCount": "{shown} de {total}",
   "invalidRelayUrlScheme": "O URL deve começar com wss:// ou ws://",
-  "invalidRelayUrl": "URL de relay inválida"
+  "invalidRelayUrl": "URL de relay inválida",
+  "thisMessageWasDeleted": "Esta mensagem foi excluída."
 }

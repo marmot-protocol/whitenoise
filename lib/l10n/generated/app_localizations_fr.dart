@@ -1170,4 +1170,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get invalidRelayUrl => 'URL de relais invalide';
+
+  @override
+  String get thisMessageWasDeleted => 'Ce message a été supprimé.';
 }

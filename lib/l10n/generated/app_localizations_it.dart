@@ -1163,4 +1163,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get invalidRelayUrl => 'URL relay non valida';
+
+  @override
+  String get thisMessageWasDeleted => 'Questo messaggio è stato eliminato.';
 }

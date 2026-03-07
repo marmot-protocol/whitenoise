@@ -2117,6 +2117,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid relay URL'**
   String get invalidRelayUrl;
+
+  /// Text shown inside a deleted message bubble
+  ///
+  /// In en, this message translates to:
+  /// **'This message was deleted.'**
+  String get thisMessageWasDeleted;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
