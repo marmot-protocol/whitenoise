@@ -135,6 +135,14 @@ class _MockApi extends MockWnApi {
     return _MockTag(vec);
   }
 
+  @override
+  String crateApiUtilsEventIdToNeventUri({
+    required String eventIdHex,
+    required String pubkeyHex,
+  }) {
+    return 'nostr:nevent1mock$eventIdHex';
+  }
+
   void emitMessage(ChatMessage message) {
     controller?.add(
       MessageStreamItem.update(
@@ -1216,10 +1224,11 @@ void main() {
         await tester.tap(find.byKey(const Key('send_button')));
         await tester.pumpAndSettle();
 
-        expect(_api.sentMessages.last, 'My reply');
+        expect(_api.sentMessages.last, contains('My reply'));
+        expect(_api.sentMessages.last, startsWith('nostr:nevent1'));
         expect(_api.sentTextMessageTagVecs, isNotEmpty);
         final tagVecs = _api.sentTextMessageTagVecs.last;
-        expect(tagVecs.any((t) => t.isNotEmpty && t[0] == 'e'), isTrue);
+        expect(tagVecs.any((t) => t.isNotEmpty && t[0] == 'q'), isTrue);
       });
 
       testWidgets('cancel reply hides reply preview in input', (tester) async {

@@ -67,6 +67,15 @@ Language languageSystem() => RustLib.instance.api.crateApiUtilsLanguageSystem();
 String languageToString({required Language language}) =>
     RustLib.instance.api.crateApiUtilsLanguageToString(language: language);
 
+/// Build a `nostr:nevent1...` URI from a hex event ID and author pubkey (NIP-C7).
+String eventIdToNeventUri({
+  required String eventIdHex,
+  required String pubkeyHex,
+}) => RustLib.instance.api.crateApiUtilsEventIdToNeventUri(
+  eventIdHex: eventIdHex,
+  pubkeyHex: pubkeyHex,
+);
+
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GroupId>>
 abstract class GroupId implements RustOpaqueInterface {}
 

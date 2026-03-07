@@ -148,3 +148,51 @@ pub fn language_to_string(language: &Language) -> String {
         Language::Turkish => "tr".to_string(),
     }
 }
+
+/// Build a `nostr:nevent1...` URI from a hex event ID and author pubkey (NIP-C7).
+#[frb(sync)]
+pub fn event_id_to_nevent_uri(event_id_hex: &str, pubkey_hex: &str) -> Result<String, ApiError> {
+    let event_id = EventId::from_hex(event_id_hex)?;
+    let pubkey = PublicKey::from_hex(pubkey_hex)?;
+    let nip19 = Nip19Event::new(event_id).author(pubkey);
+    let bech32 = nip19.to_bech32().map_err(|e| ApiError::Other {
+        message: e.to_string(),
+    })?;
+    Ok(format!("nostr:{bech32}"))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    const TEST_EVENT_ID: &str = "121cfe5d97b0a8fa5bbd53754c4b440283dfd887dc8ba9807ea21fcb2e054cc9";
+    const TEST_PUBKEY: &str = "75d737c3472471029c44876b330d2284288a42779b591a2ed4daa1c6c07efaf7";
+
+    #[test]
+    fn test_event_id_to_nevent_uri_produces_valid_uri() {
+        let uri = event_id_to_nevent_uri(TEST_EVENT_ID, TEST_PUBKEY).unwrap();
+        assert!(uri.starts_with("nostr:nevent1"));
+    }
+
+    #[test]
+    fn test_event_id_to_nevent_uri_roundtrip() {
+        let uri = event_id_to_nevent_uri(TEST_EVENT_ID, TEST_PUBKEY).unwrap();
+        let bech32_part = uri.strip_prefix("nostr:").unwrap();
+        let nip19 = Nip19Event::from_bech32(bech32_part).unwrap();
+
+        assert_eq!(nip19.event_id.to_hex(), TEST_EVENT_ID);
+        assert_eq!(nip19.author.unwrap().to_hex(), TEST_PUBKEY);
+    }
+
+    #[test]
+    fn test_event_id_to_nevent_uri_invalid_event_id() {
+        let result = event_id_to_nevent_uri("not_hex", TEST_PUBKEY);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn test_event_id_to_nevent_uri_invalid_pubkey() {
+        let result = event_id_to_nevent_uri(TEST_EVENT_ID, "not_hex");
+        assert!(result.is_err());
+    }
+}
