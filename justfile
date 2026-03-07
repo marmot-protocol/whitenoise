@@ -263,6 +263,8 @@ build-split-apk flavor="production":
 build-aab flavor="production":
     ./scripts/build_android.sh && flutter build appbundle --flavor {{flavor}} --dart-define=APP_FLAVOR={{flavor}}
 
+when-apk: (build-split-apk "staging")
+
 # Build versioned release artifacts for all platforms (APKs + IPA) into build/releases/
 # Produces split APKs with .sha256 sidecar files, an IPA (macOS only), and build_info.txt
 build-release:
