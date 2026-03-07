@@ -32,20 +32,6 @@ This is a secure messaging app that uses the [whitenoise Rust crate](https://git
 - **flutter_hooks** - Ephemeral widget state
 - **go_router** - Navigation/routing
 
-## Git Worktrees
-
-**IMPORTANT:** When starting work on a new feature, bug fix, or issue, use the `/create-git-worktree` command to create an isolated development environment.
-
-```bash
-/create-git-worktree <branch-name>
-```
-
-This creates a worktree in the `trees/` directory at the repository root. Worktrees allow parallel development without affecting the main working directory.
-
-Example: `/create-git-worktree issue-42-fix-login`
-
-After running, you'll be working in `trees/issue-42-fix-login/` on that branch.
-
 ## Directory Structure
 
 ```text
@@ -256,17 +242,6 @@ Screen (watches providers)
 - Structs use `#[frb(non_opaque)]` for Flutter compatibility
 - Errors wrapped in `ApiError` enum using `thiserror`
 - Files in `lib/src/rust/` are auto-generated - DO NOT EDIT manually
-
-## Commit Checklist
-
-**CRITICAL: You MUST run `just precommit` before EVERY commit. No exceptions.**
-
-1. Run `just precommit` and ensure it passes completely
-2. Coverage meets 95% minimum
-3. Update `CHANGELOG.md` for any user-facing changes
-4. Follow existing code patterns and naming conventions
-
-The precommit command runs all checks: formatting, linting, and tests. If it passes, you're good to commit. If it fails, fix the issues before committing.
 
 ## Fixing Bugs
 
