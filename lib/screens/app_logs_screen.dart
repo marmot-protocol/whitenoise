@@ -36,6 +36,8 @@ class AppLogsScreen extends HookConsumerWidget {
     final paused = useState(false);
     final frozenEntries = useState<List<AppLogEntry>>(const []);
     final scrollController = useScrollController();
+    // True while the resume animation is in flight — onScroll ignores offsets.
+    final isAnimating = useRef(false);
 
     // Entries actually shown — frozen snapshot while paused, live otherwise.
     final entries = paused.value ? frozenEntries.value : liveEntries;
@@ -49,6 +51,7 @@ class AppLogsScreen extends HookConsumerWidget {
     useEffect(() {
       void onScroll() {
         if (!scrollController.hasClients) return;
+        if (isAnimating.value) return;
         final offset = scrollController.offset;
         if (!paused.value && offset > _pauseThreshold) {
           paused.value = true;
@@ -75,13 +78,20 @@ class AppLogsScreen extends HookConsumerWidget {
         filter.excludePatterns.isNotEmpty;
 
     void resumeLive() {
-      paused.value = false;
       if (scrollController.hasClients) {
-        scrollController.animateTo(
-          0,
-          duration: const Duration(milliseconds: 250),
-          curve: Curves.easeOutCubic,
-        );
+        isAnimating.value = true;
+        scrollController
+            .animateTo(
+              0,
+              duration: const Duration(milliseconds: 250),
+              curve: Curves.easeOutCubic,
+            )
+            .then((_) {
+              isAnimating.value = false;
+              paused.value = false;
+            });
+      } else {
+        paused.value = false;
       }
     }
 
@@ -233,7 +243,11 @@ class AppLogsScreen extends HookConsumerWidget {
                                 ),
                               if (totalEntries > 0)
                                 TextButton(
-                                  onPressed: () => ref.read(appLogProvider.notifier).clear(),
+                                  onPressed: () {
+                                    ref.read(appLogProvider.notifier).clear();
+                                    paused.value = false;
+                                    frozenEntries.value = const [];
+                                  },
                                   child: Text(context.l10n.appLogsClear),
                                 ),
                             ],
