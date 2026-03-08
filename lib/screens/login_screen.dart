@@ -196,6 +196,7 @@ class LoginScreen extends HookConsumerWidget {
                   curve: Curves.easeOut,
                   padding: EdgeInsets.only(bottom: slateBottomPadding),
                   child: WnSlate(
+                    tag: 'wn-slate-login',
                     header: WnSlateNavigationHeader(
                       title: context.l10n.loginTitle,
                       type: WnSlateNavigationType.back,

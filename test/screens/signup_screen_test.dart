@@ -176,7 +176,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Back to sign up'), findsOneWidget);
-        expect(find.byKey(const Key('back_to_signup_arrow')), findsOneWidget);
+        expect(find.byKey(const Key('back_to_signup_button')), findsOneWidget);
       });
 
       testWidgets('tapping Back to sign up hides carousel', (tester) async {

@@ -14,6 +14,7 @@ import 'package:gap/gap.dart' show Gap;
 import 'package:hooks_riverpod/hooks_riverpod.dart' show HookConsumerWidget, WidgetRef;
 import 'package:unique_names_generator/unique_names_generator.dart';
 import 'package:whitenoise/hooks/use_image_picker.dart';
+import 'package:whitenoise/hooks/use_onboarding_carousel.dart' show onboardingCarouselSlideCount;
 import 'package:whitenoise/hooks/use_signup.dart' show useSignup;
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
@@ -21,6 +22,7 @@ import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart' show WnAvatar, WnAvatarSize;
 import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/widgets/wn_carousel_indicator.dart' show WnCarouselIndicator;
 import 'package:whitenoise/widgets/wn_icon.dart' show WnIcons;
 import 'package:whitenoise/widgets/wn_input.dart' show WnInput;
 import 'package:whitenoise/widgets/wn_input_text_area.dart' show WnInputTextArea;
@@ -66,6 +68,8 @@ class SignupScreen extends HookConsumerWidget {
     );
     final noticeMessage = useState<String?>(null);
     final showCarousel = useState(false);
+    final carouselIndex = useState(0);
+    final carouselAccentColor = useState<Color>(context.colors.accent.cyan.contentSecondary);
 
     final carouselAnimationController = useAnimationController(
       duration: _animationDuration,
@@ -189,6 +193,7 @@ class SignupScreen extends HookConsumerWidget {
                       children: [
                         Flexible(
                           child: WnSlate(
+                            tag: 'wn-slate-signup',
                             header: WnSlateNavigationHeader(
                               title: context.l10n.setupProfile,
                               type: WnSlateNavigationType.back,
@@ -291,22 +296,45 @@ class SignupScreen extends HookConsumerWidget {
                 child: SafeArea(
                   child: Column(
                     children: [
-                      Expanded(
+                      const Spacer(),
+                      WnOnboardingCarousel(
+                        key: const Key('signup_onboarding_carousel'),
+                        height: 260.h,
+                        onSlideChanged: (index, accentColor) {
+                          carouselIndex.value = index;
+                          carouselAccentColor.value = accentColor;
+                        },
+                      ),
+                      SizedBox(height: 16.h),
+                      WnCarouselIndicator(
+                        key: const Key('signup_carousel_indicator'),
+                        itemCount: onboardingCarouselSlideCount,
+                        activeIndex: carouselIndex.value,
+                        activeColor: carouselAccentColor.value,
+                      ),
+                      SizedBox(height: 287.h),
+                      WnSlate(
+                        tag: 'wn-slate-signup-carousel',
                         child: Padding(
-                          padding: EdgeInsets.only(bottom: 80.h),
-                          child: const WnOnboardingCarousel(
-                            key: Key('signup_onboarding_carousel'),
+                          padding: EdgeInsets.symmetric(
+                            vertical: 14.h,
+                            horizontal: 14.w,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              WnButton(
+                                key: const Key('back_to_signup_button'),
+                                text: context.l10n.backToSignUp,
+                                type: WnButtonType.outline,
+                                trailingIcon: WnIcons.arrowDown,
+                                onPressed: closeCarousel,
+                              ),
+                            ],
                           ),
                         ),
                       ),
-                      Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 10.w),
-                        child: _BackToSignUpButton(
-                          key: const Key('back_to_signup_button'),
-                          onTap: closeCarousel,
-                        ),
-                      ),
-                      SizedBox(height: 16.h),
+                      SizedBox(height: 10.h),
                     ],
                   ),
                 ),
@@ -363,51 +391,6 @@ class _LearnMoreButton extends HookWidget {
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BackToSignUpButton extends StatelessWidget {
-  const _BackToSignUpButton({super.key, required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typography = context.typographyScaled;
-    final l10n = context.l10n;
-
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Container(
-        width: double.infinity,
-        padding: EdgeInsets.symmetric(vertical: 16.h),
-        decoration: BoxDecoration(
-          color: colors.backgroundSecondary,
-          borderRadius: BorderRadius.circular(16.r),
-          border: Border.all(color: colors.borderTertiary),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              l10n.backToSignUp,
-              style: typography.medium14.copyWith(
-                color: colors.backgroundContentPrimary,
-              ),
-            ),
-            SizedBox(width: 8.w),
-            Icon(
-              Icons.arrow_downward,
-              key: const Key('back_to_signup_arrow'),
-              size: 16.sp,
-              color: colors.backgroundContentPrimary,
-            ),
-          ],
         ),
       ),
     );
