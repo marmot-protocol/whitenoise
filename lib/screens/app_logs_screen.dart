@@ -14,6 +14,10 @@ import 'package:whitenoise/widgets/wn_search_field.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 
+// How far from the bottom (position 0 in a reversed list) before we consider
+// the user to be "scrolled away" and pause live updates.
+const _pauseThreshold = 80.0;
+
 class AppLogsScreen extends HookConsumerWidget {
   const AppLogsScreen({super.key});
 
@@ -21,12 +25,37 @@ class AppLogsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final typography = context.typographyScaled;
-    final entries = ref.watch(filteredAppLogProvider);
+    final liveEntries = ref.watch(filteredAppLogProvider);
     final totalEntries = ref.watch(appLogProvider).length;
     final filter = ref.watch(appLogFilterProvider);
     final patternController = useTextEditingController();
     final patternFocus = useFocusNode();
     final searchController = useTextEditingController(text: filter.searchQuery);
+
+    // When paused, the list shows a frozen snapshot so the user can read.
+    final paused = useState(false);
+    final frozenEntries = useState<List<AppLogEntry>>(const []);
+    final scrollController = useScrollController();
+
+    // Entries actually shown — frozen snapshot while paused, live otherwise.
+    final entries = paused.value ? frozenEntries.value : liveEntries;
+
+    // Auto-pause when user scrolls away from the bottom; auto-resume at bottom.
+    useEffect(() {
+      void onScroll() {
+        if (!scrollController.hasClients) return;
+        final offset = scrollController.offset;
+        if (!paused.value && offset > _pauseThreshold) {
+          paused.value = true;
+          frozenEntries.value = List.unmodifiable(liveEntries);
+        } else if (paused.value && offset <= _pauseThreshold) {
+          paused.value = false;
+        }
+      }
+
+      scrollController.addListener(onScroll);
+      return () => scrollController.removeListener(onScroll);
+    }, [scrollController, liveEntries, paused]);
 
     useEffect(() {
       if (searchController.text != filter.searchQuery) {
@@ -39,6 +68,17 @@ class AppLogsScreen extends HookConsumerWidget {
         filter.searchQuery.isNotEmpty ||
         filter.includePatterns.isNotEmpty ||
         filter.excludePatterns.isNotEmpty;
+
+    void resumeLive() {
+      paused.value = false;
+      if (scrollController.hasClients) {
+        scrollController.animateTo(
+          0,
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeOutCubic,
+        );
+      }
+    }
 
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
@@ -199,32 +239,44 @@ class AppLogsScreen extends HookConsumerWidget {
                   ),
                 ),
                 Expanded(
-                  child: entries.isEmpty
-                      ? Center(
-                          child: Text(
-                            totalEntries == 0
-                                ? context.l10n.appLogsEmpty
-                                : context.l10n.appLogsFilteredCount(
-                                    entries.length,
-                                    totalEntries,
-                                  ),
-                            style: typography.medium14.copyWith(
-                              color: colors.backgroundContentTertiary,
+                  child: Stack(
+                    children: [
+                      entries.isEmpty
+                          ? Center(
+                              child: Text(
+                                totalEntries == 0
+                                    ? context.l10n.appLogsEmpty
+                                    : context.l10n.appLogsFilteredCount(
+                                        entries.length,
+                                        totalEntries,
+                                      ),
+                                style: typography.medium14.copyWith(
+                                  color: colors.backgroundContentTertiary,
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              key: const Key('app_logs_list'),
+                              controller: scrollController,
+                              reverse: true,
+                              padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+                              itemCount: entries.length,
+                              itemBuilder: (context, index) {
+                                final entry = entries[index];
+                                return _LogEntryTile(
+                                  entry: entry,
+                                  onTap: () => _copyEntry(context, entry),
+                                );
+                              },
                             ),
-                          ),
-                        )
-                      : ListView.builder(
-                          reverse: true,
-                          padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-                          itemCount: entries.length,
-                          itemBuilder: (context, index) {
-                            final entry = entries[index];
-                            return _LogEntryTile(
-                              entry: entry,
-                              onTap: () => _copyEntry(context, entry),
-                            );
-                          },
+                      if (paused.value)
+                        Positioned(
+                          bottom: 16.h,
+                          right: 16.w,
+                          child: _ResumeLiveButton(onTap: resumeLive),
                         ),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -254,6 +306,55 @@ class AppLogsScreen extends HookConsumerWidget {
     if (entry.error != null) buf.writeln('  error: ${entry.error}');
     if (entry.stackTrace != null) buf.writeln('  stackTrace: ${entry.stackTrace}');
     return buf.toString();
+  }
+}
+
+class _ResumeLiveButton extends StatelessWidget {
+  const _ResumeLiveButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+
+    return GestureDetector(
+      key: const Key('app_logs_resume_live'),
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 14.w, vertical: 8.h),
+        decoration: BoxDecoration(
+          color: colors.fillPrimary,
+          borderRadius: BorderRadius.circular(999.r),
+          boxShadow: [
+            BoxShadow(
+              color: colors.backgroundContentPrimary.withValues(alpha: 0.15),
+              blurRadius: 8,
+              offset: const Offset(0, 2),
+            ),
+          ],
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              key: const Key('app_logs_resume_live_icon'),
+              Icons.arrow_downward,
+              size: 14.sp,
+              color: colors.fillContentPrimary,
+            ),
+            Gap(6.w),
+            Text(
+              'Live',
+              style: typography.semiBold12.copyWith(
+                color: colors.fillContentPrimary,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

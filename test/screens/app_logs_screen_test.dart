@@ -224,6 +224,50 @@ void main() {
       expect(find.byType(ListView), findsNothing);
     });
 
+    testWidgets('resume-live button is hidden when list is at the bottom', (tester) async {
+      _entries = [_entry('only entry')];
+      await pumpScreen(tester);
+
+      expect(find.byKey(const Key('app_logs_resume_live')), findsNothing);
+    });
+
+    testWidgets('scrolling up shows resume-live button and freezes the list', (tester) async {
+      // Populate enough entries so the list is scrollable.
+      _entries = List.generate(
+        50,
+        (i) => _entry('log entry $i', time: DateTime(2026, 1, 1, 0, 0, i)),
+      );
+      await pumpScreen(tester);
+
+      // Button should not be visible yet (we are at the bottom).
+      expect(find.byKey(const Key('app_logs_resume_live')), findsNothing);
+
+      // Drag upward (positive delta scrolls a reversed list toward older entries).
+      await tester.drag(find.byKey(const Key('app_logs_list')), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      // Button should now appear.
+      expect(find.byKey(const Key('app_logs_resume_live')), findsOneWidget);
+    });
+
+    testWidgets('tapping resume-live button hides the button', (tester) async {
+      _entries = List.generate(
+        50,
+        (i) => _entry('log entry $i', time: DateTime(2026, 1, 1, 0, 0, i)),
+      );
+      await pumpScreen(tester);
+
+      await tester.drag(find.byKey(const Key('app_logs_list')), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('app_logs_resume_live')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('app_logs_resume_live')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('app_logs_resume_live')), findsNothing);
+    });
+
     testWidgets('tapping log entry copies formatted text and shows snackbar', (tester) async {
       String? clipboardText;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(

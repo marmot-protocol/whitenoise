@@ -36,14 +36,14 @@ void main() {
       expect(entries.last.message, 'first');
     });
 
-    test('add keeps maximum of 1000 entries', () {
-      for (var i = 0; i < 1005; i++) {
+    test('add keeps maximum of 50000 entries', () {
+      for (var i = 0; i < 50005; i++) {
         appLogStore.add(_record('msg_$i'));
       }
 
       final entries = appLogStore.entries;
-      expect(entries, hasLength(1000));
-      expect(entries.first.message, 'msg_1004');
+      expect(entries, hasLength(50000));
+      expect(entries.first.message, 'msg_50004');
       expect(entries.last.message, 'msg_5');
     });
 
