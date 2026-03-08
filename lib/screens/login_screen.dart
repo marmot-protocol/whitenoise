@@ -189,7 +189,11 @@ class LoginScreen extends HookConsumerWidget {
                               AnimatedContainer(
                                 duration: const Duration(milliseconds: 150),
                                 curve: Curves.easeOut,
-                                height: isKeyboardOpen ? 20.h : 205.h,
+                                height: isKeyboardOpen
+                                    ? 20.h
+                                    : isAndroidSignerAvailable
+                                    ? 157.h
+                                    : 205.h,
                               ),
                             ],
                           ),
@@ -244,7 +248,7 @@ class LoginScreen extends HookConsumerWidget {
                             builder: (context, _) {
                               final nsecEmpty = nsecInputController.text.trim().isEmpty;
                               return Column(
-                                spacing: 8.h,
+                                spacing: 12.h,
                                 mainAxisSize: MainAxisSize.min,
                                 crossAxisAlignment: CrossAxisAlignment.stretch,
                                 children: [
