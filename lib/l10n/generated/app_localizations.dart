@@ -2255,6 +2255,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We hit a bump loading the app. It\'s not you, it\'s us and we\'re sorry.\n\nHelp us fix it. Tap below to send this error to our team.'**
   String get fatalErrorDescription;
+
+  /// Report bug menu item and screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Report bug'**
+  String get reportBug;
+
+  /// Introductory description on the report bug screen
+  ///
+  /// In en, this message translates to:
+  /// **'Help us improve White Noise by describing the issue you encountered.'**
+  String get reportBugDescription;
+
+  /// Label for the 'what went wrong' field
+  ///
+  /// In en, this message translates to:
+  /// **'What went wrong?'**
+  String get reportBugWhatWentWrong;
+
+  /// Placeholder for the 'what went wrong' field
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the issue you experienced...'**
+  String get reportBugWhatWentWrongPlaceholder;
+
+  /// Label for the expected behavior field
+  ///
+  /// In en, this message translates to:
+  /// **'What did you expect to happen?'**
+  String get reportBugExpectedBehavior;
+
+  /// Placeholder for the expected behavior field
+  ///
+  /// In en, this message translates to:
+  /// **'Describe what you expected to happen...'**
+  String get reportBugExpectedBehaviorPlaceholder;
+
+  /// Label for the steps to reproduce field
+  ///
+  /// In en, this message translates to:
+  /// **'Steps to reproduce'**
+  String get reportBugStepsToReproduce;
+
+  /// Placeholder for the steps to reproduce field
+  ///
+  /// In en, this message translates to:
+  /// **'1. Go to...\n2. Tap on...\n3. See error'**
+  String get reportBugStepsToReproducePlaceholder;
+
+  /// Label for the frequency selector
+  ///
+  /// In en, this message translates to:
+  /// **'How often does this happen?'**
+  String get reportBugFrequency;
+
+  /// Frequency option: always
+  ///
+  /// In en, this message translates to:
+  /// **'Always'**
+  String get reportBugFrequencyAlways;
+
+  /// Frequency option: often
+  ///
+  /// In en, this message translates to:
+  /// **'Often'**
+  String get reportBugFrequencyOften;
+
+  /// Frequency option: sometimes
+  ///
+  /// In en, this message translates to:
+  /// **'Sometimes'**
+  String get reportBugFrequencySometimes;
+
+  /// Frequency option: rarely
+  ///
+  /// In en, this message translates to:
+  /// **'Rarely'**
+  String get reportBugFrequencyRarely;
+
+  /// Toggle label for including the user's npub
+  ///
+  /// In en, this message translates to:
+  /// **'Include your npub'**
+  String get reportBugIncludeNpub;
+
+  /// Helper text for the include npub toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Lets us follow up with you if needed.'**
+  String get reportBugIncludeNpubDescription;
+
+  /// Toggle label for attaching logs
+  ///
+  /// In en, this message translates to:
+  /// **'Include logs'**
+  String get reportBugIncludeLogs;
+
+  /// Warning text when include logs toggle is on
+  ///
+  /// In en, this message translates to:
+  /// **'Review before sending. Logs may contain message content.'**
+  String get reportBugIncludeLogsDescription;
+
+  /// Title for the log preview section
+  ///
+  /// In en, this message translates to:
+  /// **'Log preview'**
+  String get reportBugLogsPreviewTitle;
+
+  /// Shown in log preview when there are no logs
+  ///
+  /// In en, this message translates to:
+  /// **'No logs captured yet.'**
+  String get reportBugLogsEmpty;
+
+  /// Submit button on the report bug screen
+  ///
+  /// In en, this message translates to:
+  /// **'Send report'**
+  String get reportBugSend;
+
+  /// Button text while the bug report is being sent
+  ///
+  /// In en, this message translates to:
+  /// **'Sending...'**
+  String get reportBugSending;
+
+  /// Success message after sending
+  ///
+  /// In en, this message translates to:
+  /// **'Bug report sent. Thank you!'**
+  String get reportBugSuccess;
+
+  /// Error message when sending fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send report. Please try again.'**
+  String get reportBugError;
+
+  /// Validation error when 'what went wrong' is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe what went wrong.'**
+  String get reportBugWhatWentWrongRequired;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

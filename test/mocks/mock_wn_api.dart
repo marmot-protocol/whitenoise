@@ -51,6 +51,12 @@ class MockWnApi implements RustLibApi {
   KeyPackageStatus userHasKeyPackageStatus = KeyPackageStatus.valid;
   StreamController<UserSearchUpdate>? searchUsersController;
 
+  bool sendBugReportCalled = false;
+  String? lastBugReportWhatWentWrong;
+  String? lastBugReportNpub;
+  String? lastBugReportLogs;
+  bool sendBugReportShouldFail = false;
+
   bool deleteAllDataCalled = false;
   bool deleteAllDataShouldFail = false;
   Duration deleteAllDataDelay = Duration.zero;
@@ -571,7 +577,32 @@ class MockWnApi implements RustLibApi {
     if (shouldFailDeleteDraft) throw Exception('deleteDraft failed');
   }
 
+  @override
+  Future<void> crateApiBugReportSendBugReport({
+    required String whatWentWrong,
+    String? expectedBehavior,
+    String? stepsToReproduce,
+    String? frequency,
+    String? npub,
+    String? logs,
+    required String appVersion,
+    required String platform,
+    required String osVersion,
+    required List<String> relayUrls,
+  }) async {
+    sendBugReportCalled = true;
+    lastBugReportWhatWentWrong = whatWentWrong;
+    lastBugReportNpub = npub;
+    lastBugReportLogs = logs;
+    if (sendBugReportShouldFail) throw Exception('send_bug_report failed');
+  }
+
   void reset() {
+    sendBugReportCalled = false;
+    lastBugReportWhatWentWrong = null;
+    lastBugReportNpub = null;
+    lastBugReportLogs = null;
+    sendBugReportShouldFail = false;
     currentThemeMode = 'system';
     currentLanguage = 'system';
     shouldFailUpdateLanguage = false;

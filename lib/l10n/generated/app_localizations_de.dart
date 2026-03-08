@@ -1261,4 +1261,80 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get fatalErrorDescription =>
       'Es gab ein Problem beim Laden der App. Du bist nicht schuld – wir entschuldigen uns.\n\nHilf uns, es zu beheben. Tippe unten, um diesen Fehler an unser Team zu senden.';
+
+  @override
+  String get reportBug => 'Fehler melden';
+
+  @override
+  String get reportBugDescription =>
+      'Hilf uns, White Noise zu verbessern, indem du das aufgetretene Problem beschreibst.';
+
+  @override
+  String get reportBugWhatWentWrong => 'Was ist schiefgelaufen?';
+
+  @override
+  String get reportBugWhatWentWrongPlaceholder => 'Beschreibe das aufgetretene Problem...';
+
+  @override
+  String get reportBugExpectedBehavior => 'Was hast du erwartet?';
+
+  @override
+  String get reportBugExpectedBehaviorPlaceholder => 'Beschreibe, was du erwartet hast...';
+
+  @override
+  String get reportBugStepsToReproduce => 'Schritte zur Reproduktion';
+
+  @override
+  String get reportBugStepsToReproducePlaceholder =>
+      '1. Gehe zu...\n2. Tippe auf...\n3. Fehler erscheint';
+
+  @override
+  String get reportBugFrequency => 'Wie oft passiert das?';
+
+  @override
+  String get reportBugFrequencyAlways => 'Immer';
+
+  @override
+  String get reportBugFrequencyOften => 'Oft';
+
+  @override
+  String get reportBugFrequencySometimes => 'Manchmal';
+
+  @override
+  String get reportBugFrequencyRarely => 'Selten';
+
+  @override
+  String get reportBugIncludeNpub => 'Dein npub beifügen';
+
+  @override
+  String get reportBugIncludeNpubDescription =>
+      'Ermöglicht es uns, bei Bedarf mit dir Kontakt aufzunehmen.';
+
+  @override
+  String get reportBugIncludeLogs => 'Protokolle beifügen';
+
+  @override
+  String get reportBugIncludeLogsDescription =>
+      'Vor dem Senden überprüfen. Protokolle können Nachrichteninhalte enthalten.';
+
+  @override
+  String get reportBugLogsPreviewTitle => 'Protokollvorschau';
+
+  @override
+  String get reportBugLogsEmpty => 'Noch keine Protokolle erfasst.';
+
+  @override
+  String get reportBugSend => 'Bericht senden';
+
+  @override
+  String get reportBugSending => 'Wird gesendet...';
+
+  @override
+  String get reportBugSuccess => 'Fehlerbericht gesendet. Vielen Dank!';
+
+  @override
+  String get reportBugError => 'Bericht konnte nicht gesendet werden. Bitte versuche es erneut.';
+
+  @override
+  String get reportBugWhatWentWrongRequired => 'Bitte beschreibe, was schiefgelaufen ist.';
 }

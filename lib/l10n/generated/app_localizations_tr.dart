@@ -1230,4 +1230,79 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get fatalErrorDescription =>
       'Uygulama yüklenirken bir sorunla karşılaştık. Sorun sende değil, biziz ve özür dileriz.\n\nDüzeltmemize yardımcı ol. Aşağıya dokunarak bu hatayı ekibimize gönder.';
+
+  @override
+  String get reportBug => 'Hata bildir';
+
+  @override
+  String get reportBugDescription =>
+      'Karşılaştığınız sorunu açıklayarak White Noise\'u geliştirmemize yardımcı olun.';
+
+  @override
+  String get reportBugWhatWentWrong => 'Ne yanlış gitti?';
+
+  @override
+  String get reportBugWhatWentWrongPlaceholder => 'Yaşadığınız sorunu açıklayın...';
+
+  @override
+  String get reportBugExpectedBehavior => 'Ne olmasını bekliyordunuz?';
+
+  @override
+  String get reportBugExpectedBehaviorPlaceholder => 'Ne olmasını beklediğinizi açıklayın...';
+
+  @override
+  String get reportBugStepsToReproduce => 'Yeniden oluşturma adımları';
+
+  @override
+  String get reportBugStepsToReproducePlaceholder =>
+      '1. Şuraya git...\n2. Şuna dokun...\n3. Hatayı gör';
+
+  @override
+  String get reportBugFrequency => 'Bu ne sıklıkla oluyor?';
+
+  @override
+  String get reportBugFrequencyAlways => 'Her zaman';
+
+  @override
+  String get reportBugFrequencyOften => 'Sık sık';
+
+  @override
+  String get reportBugFrequencySometimes => 'Bazen';
+
+  @override
+  String get reportBugFrequencyRarely => 'Nadiren';
+
+  @override
+  String get reportBugIncludeNpub => 'npub\'unuzu ekleyin';
+
+  @override
+  String get reportBugIncludeNpubDescription => 'Gerektiğinde sizinle iletişime geçmemizi sağlar.';
+
+  @override
+  String get reportBugIncludeLogs => 'Günlükleri ekle';
+
+  @override
+  String get reportBugIncludeLogsDescription =>
+      'Göndermeden önce inceleyin. Günlükler mesaj içeriği içerebilir.';
+
+  @override
+  String get reportBugLogsPreviewTitle => 'Günlük önizleme';
+
+  @override
+  String get reportBugLogsEmpty => 'Henüz günlük kaydı yok.';
+
+  @override
+  String get reportBugSend => 'Raporu gönder';
+
+  @override
+  String get reportBugSending => 'Gönderiliyor...';
+
+  @override
+  String get reportBugSuccess => 'Hata raporu gönderildi. Teşekkürler!';
+
+  @override
+  String get reportBugError => 'Rapor gönderilemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get reportBugWhatWentWrongRequired => 'Lütfen neyin yanlış gittiğini açıklayın.';
 }

@@ -1260,4 +1260,79 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get fatalErrorDescription =>
       'У нас возникла проблема при загрузке приложения. Это не вы, а мы, и нам очень жаль.\n\nПомогите нам исправить это. Нажмите ниже, чтобы отправить эту ошибку нашей команде.';
+
+  @override
+  String get reportBug => 'Сообщить об ошибке';
+
+  @override
+  String get reportBugDescription =>
+      'Помогите нам улучшить White Noise, описав обнаруженную проблему.';
+
+  @override
+  String get reportBugWhatWentWrong => 'Что пошло не так?';
+
+  @override
+  String get reportBugWhatWentWrongPlaceholder => 'Опишите возникшую проблему...';
+
+  @override
+  String get reportBugExpectedBehavior => 'Что вы ожидали?';
+
+  @override
+  String get reportBugExpectedBehaviorPlaceholder => 'Опишите, что вы ожидали...';
+
+  @override
+  String get reportBugStepsToReproduce => 'Шаги для воспроизведения';
+
+  @override
+  String get reportBugStepsToReproducePlaceholder =>
+      '1. Перейти к...\n2. Нажать на...\n3. Увидеть ошибку';
+
+  @override
+  String get reportBugFrequency => 'Как часто это происходит?';
+
+  @override
+  String get reportBugFrequencyAlways => 'Всегда';
+
+  @override
+  String get reportBugFrequencyOften => 'Часто';
+
+  @override
+  String get reportBugFrequencySometimes => 'Иногда';
+
+  @override
+  String get reportBugFrequencyRarely => 'Редко';
+
+  @override
+  String get reportBugIncludeNpub => 'Включить ваш npub';
+
+  @override
+  String get reportBugIncludeNpubDescription => 'Позволяет нам связаться с вами при необходимости.';
+
+  @override
+  String get reportBugIncludeLogs => 'Включить журналы';
+
+  @override
+  String get reportBugIncludeLogsDescription =>
+      'Проверьте перед отправкой. Журналы могут содержать содержимое сообщений.';
+
+  @override
+  String get reportBugLogsPreviewTitle => 'Предпросмотр журналов';
+
+  @override
+  String get reportBugLogsEmpty => 'Журналы пока не записаны.';
+
+  @override
+  String get reportBugSend => 'Отправить отчёт';
+
+  @override
+  String get reportBugSending => 'Отправка...';
+
+  @override
+  String get reportBugSuccess => 'Отчёт об ошибке отправлен. Спасибо!';
+
+  @override
+  String get reportBugError => 'Не удалось отправить отчёт. Попробуйте ещё раз.';
+
+  @override
+  String get reportBugWhatWentWrongRequired => 'Пожалуйста, опишите, что пошло не так.';
 }

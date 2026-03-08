@@ -1229,4 +1229,78 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get fatalErrorDescription =>
       'We hit a bump loading the app. It\'s not you, it\'s us and we\'re sorry.\n\nHelp us fix it. Tap below to send this error to our team.';
+
+  @override
+  String get reportBug => 'Report bug';
+
+  @override
+  String get reportBugDescription =>
+      'Help us improve White Noise by describing the issue you encountered.';
+
+  @override
+  String get reportBugWhatWentWrong => 'What went wrong?';
+
+  @override
+  String get reportBugWhatWentWrongPlaceholder => 'Describe the issue you experienced...';
+
+  @override
+  String get reportBugExpectedBehavior => 'What did you expect to happen?';
+
+  @override
+  String get reportBugExpectedBehaviorPlaceholder => 'Describe what you expected to happen...';
+
+  @override
+  String get reportBugStepsToReproduce => 'Steps to reproduce';
+
+  @override
+  String get reportBugStepsToReproducePlaceholder => '1. Go to...\n2. Tap on...\n3. See error';
+
+  @override
+  String get reportBugFrequency => 'How often does this happen?';
+
+  @override
+  String get reportBugFrequencyAlways => 'Always';
+
+  @override
+  String get reportBugFrequencyOften => 'Often';
+
+  @override
+  String get reportBugFrequencySometimes => 'Sometimes';
+
+  @override
+  String get reportBugFrequencyRarely => 'Rarely';
+
+  @override
+  String get reportBugIncludeNpub => 'Include your npub';
+
+  @override
+  String get reportBugIncludeNpubDescription => 'Lets us follow up with you if needed.';
+
+  @override
+  String get reportBugIncludeLogs => 'Include logs';
+
+  @override
+  String get reportBugIncludeLogsDescription =>
+      'Review before sending. Logs may contain message content.';
+
+  @override
+  String get reportBugLogsPreviewTitle => 'Log preview';
+
+  @override
+  String get reportBugLogsEmpty => 'No logs captured yet.';
+
+  @override
+  String get reportBugSend => 'Send report';
+
+  @override
+  String get reportBugSending => 'Sending...';
+
+  @override
+  String get reportBugSuccess => 'Bug report sent. Thank you!';
+
+  @override
+  String get reportBugError => 'Failed to send report. Please try again.';
+
+  @override
+  String get reportBugWhatWentWrongRequired => 'Please describe what went wrong.';
 }

@@ -150,6 +150,12 @@ class SettingsScreen extends HookConsumerWidget {
                 WnMenu(
                   children: [
                     WnMenuItem(
+                      icon: WnIcons.flag,
+                      label: context.l10n.reportBug,
+                      type: WnMenuItemType.secondary,
+                      onTap: () => Routes.pushToReportBug(context),
+                    ),
+                    WnMenuItem(
                       icon: WnIcons.heart,
                       label: context.l10n.donate,
                       type: WnMenuItemType.secondary,

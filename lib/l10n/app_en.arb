@@ -1592,5 +1592,125 @@
   "fatalErrorDescription": "We hit a bump loading the app. It's not you, it's us and we're sorry.\n\nHelp us fix it. Tap below to send this error to our team.",
   "@fatalErrorDescription": {
     "description": "Error callout description on fatal error screen"
+  },
+
+  "reportBug": "Report bug",
+  "@reportBug": {
+    "description": "Report bug menu item and screen title"
+  },
+
+  "reportBugDescription": "Help us improve White Noise by describing the issue you encountered.",
+  "@reportBugDescription": {
+    "description": "Introductory description on the report bug screen"
+  },
+
+  "reportBugWhatWentWrong": "What went wrong?",
+  "@reportBugWhatWentWrong": {
+    "description": "Label for the 'what went wrong' field"
+  },
+
+  "reportBugWhatWentWrongPlaceholder": "Describe the issue you experienced...",
+  "@reportBugWhatWentWrongPlaceholder": {
+    "description": "Placeholder for the 'what went wrong' field"
+  },
+
+  "reportBugExpectedBehavior": "What did you expect to happen?",
+  "@reportBugExpectedBehavior": {
+    "description": "Label for the expected behavior field"
+  },
+
+  "reportBugExpectedBehaviorPlaceholder": "Describe what you expected to happen...",
+  "@reportBugExpectedBehaviorPlaceholder": {
+    "description": "Placeholder for the expected behavior field"
+  },
+
+  "reportBugStepsToReproduce": "Steps to reproduce",
+  "@reportBugStepsToReproduce": {
+    "description": "Label for the steps to reproduce field"
+  },
+
+  "reportBugStepsToReproducePlaceholder": "1. Go to...\n2. Tap on...\n3. See error",
+  "@reportBugStepsToReproducePlaceholder": {
+    "description": "Placeholder for the steps to reproduce field"
+  },
+
+  "reportBugFrequency": "How often does this happen?",
+  "@reportBugFrequency": {
+    "description": "Label for the frequency selector"
+  },
+
+  "reportBugFrequencyAlways": "Always",
+  "@reportBugFrequencyAlways": {
+    "description": "Frequency option: always"
+  },
+
+  "reportBugFrequencyOften": "Often",
+  "@reportBugFrequencyOften": {
+    "description": "Frequency option: often"
+  },
+
+  "reportBugFrequencySometimes": "Sometimes",
+  "@reportBugFrequencySometimes": {
+    "description": "Frequency option: sometimes"
+  },
+
+  "reportBugFrequencyRarely": "Rarely",
+  "@reportBugFrequencyRarely": {
+    "description": "Frequency option: rarely"
+  },
+
+  "reportBugIncludeNpub": "Include your npub",
+  "@reportBugIncludeNpub": {
+    "description": "Toggle label for including the user's npub"
+  },
+
+  "reportBugIncludeNpubDescription": "Lets us follow up with you if needed.",
+  "@reportBugIncludeNpubDescription": {
+    "description": "Helper text for the include npub toggle"
+  },
+
+  "reportBugIncludeLogs": "Include logs",
+  "@reportBugIncludeLogs": {
+    "description": "Toggle label for attaching logs"
+  },
+
+  "reportBugIncludeLogsDescription": "Review before sending. Logs may contain message content.",
+  "@reportBugIncludeLogsDescription": {
+    "description": "Warning text when include logs toggle is on"
+  },
+
+  "reportBugLogsPreviewTitle": "Log preview",
+  "@reportBugLogsPreviewTitle": {
+    "description": "Title for the log preview section"
+  },
+
+  "reportBugLogsEmpty": "No logs captured yet.",
+  "@reportBugLogsEmpty": {
+    "description": "Shown in log preview when there are no logs"
+  },
+
+  "reportBugSend": "Send report",
+  "@reportBugSend": {
+    "description": "Submit button on the report bug screen"
+  },
+
+  "reportBugSending": "Sending...",
+  "@reportBugSending": {
+    "description": "Button text while the bug report is being sent"
+  },
+
+  "reportBugSuccess": "Bug report sent. Thank you!",
+  "@reportBugSuccess": {
+    "description": "Success message after sending"
+  },
+
+  "reportBugError": "Failed to send report. Please try again.",
+  "@reportBugError": {
+    "description": "Error message when sending fails"
+  },
+
+  "reportBugWhatWentWrongRequired": "Please describe what went wrong.",
+  "@reportBugWhatWentWrongRequired": {
+    "description": "Validation error when 'what went wrong' is empty"
   }
 }

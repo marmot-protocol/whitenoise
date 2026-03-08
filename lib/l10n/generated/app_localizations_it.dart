@@ -1234,4 +1234,78 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get fatalErrorDescription =>
       'Abbiamo avuto un problema nel caricamento dell\'app. Non sei tu, siamo noi e ci scusiamo.\n\nAiutaci a risolverlo. Tocca sotto per inviare questo errore al nostro team.';
+
+  @override
+  String get reportBug => 'Segnala un bug';
+
+  @override
+  String get reportBugDescription =>
+      'Aiutaci a migliorare White Noise descrivendo il problema riscontrato.';
+
+  @override
+  String get reportBugWhatWentWrong => 'Cosa è andato storto?';
+
+  @override
+  String get reportBugWhatWentWrongPlaceholder => 'Descrivi il problema riscontrato...';
+
+  @override
+  String get reportBugExpectedBehavior => 'Cosa ti aspettavi?';
+
+  @override
+  String get reportBugExpectedBehaviorPlaceholder => 'Descrivi cosa ti aspettavi che accadesse...';
+
+  @override
+  String get reportBugStepsToReproduce => 'Passaggi per riprodurre';
+
+  @override
+  String get reportBugStepsToReproducePlaceholder => '1. Vai a...\n2. Tocca su...\n3. Vedi errore';
+
+  @override
+  String get reportBugFrequency => 'Quanto spesso succede?';
+
+  @override
+  String get reportBugFrequencyAlways => 'Sempre';
+
+  @override
+  String get reportBugFrequencyOften => 'Spesso';
+
+  @override
+  String get reportBugFrequencySometimes => 'A volte';
+
+  @override
+  String get reportBugFrequencyRarely => 'Raramente';
+
+  @override
+  String get reportBugIncludeNpub => 'Includi il tuo npub';
+
+  @override
+  String get reportBugIncludeNpubDescription => 'Ci permette di ricontattarti se necessario.';
+
+  @override
+  String get reportBugIncludeLogs => 'Includi i registri';
+
+  @override
+  String get reportBugIncludeLogsDescription =>
+      'Controlla prima di inviare. I registri possono contenere contenuti dei messaggi.';
+
+  @override
+  String get reportBugLogsPreviewTitle => 'Anteprima registri';
+
+  @override
+  String get reportBugLogsEmpty => 'Nessun registro acquisito finora.';
+
+  @override
+  String get reportBugSend => 'Invia segnalazione';
+
+  @override
+  String get reportBugSending => 'Invio in corso...';
+
+  @override
+  String get reportBugSuccess => 'Segnalazione bug inviata. Grazie!';
+
+  @override
+  String get reportBugError => 'Invio della segnalazione fallito. Riprova.';
+
+  @override
+  String get reportBugWhatWentWrongRequired => 'Descrivi cosa è andato storto.';
 }

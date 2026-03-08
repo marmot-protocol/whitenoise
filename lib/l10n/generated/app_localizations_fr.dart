@@ -1245,4 +1245,79 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get fatalErrorDescription =>
       'Nous avons eu un problème lors du chargement de l\'app. Ce n\'est pas de votre faute, c\'est la nôtre et nous nous excusons.\n\nAidez-nous à résoudre ce problème. Appuyez ci-dessous pour envoyer cette erreur à notre équipe.';
+
+  @override
+  String get reportBug => 'Signaler un bug';
+
+  @override
+  String get reportBugDescription =>
+      'Aidez-nous à améliorer White Noise en décrivant le problème rencontré.';
+
+  @override
+  String get reportBugWhatWentWrong => 'Que s\'est-il passé ?';
+
+  @override
+  String get reportBugWhatWentWrongPlaceholder => 'Décrivez le problème rencontré...';
+
+  @override
+  String get reportBugExpectedBehavior => 'Que devait-il se passer ?';
+
+  @override
+  String get reportBugExpectedBehaviorPlaceholder => 'Décrivez ce que vous attendiez...';
+
+  @override
+  String get reportBugStepsToReproduce => 'Étapes pour reproduire';
+
+  @override
+  String get reportBugStepsToReproducePlaceholder =>
+      '1. Aller à...\n2. Appuyer sur...\n3. Voir l\'erreur';
+
+  @override
+  String get reportBugFrequency => 'À quelle fréquence cela se produit-il ?';
+
+  @override
+  String get reportBugFrequencyAlways => 'Toujours';
+
+  @override
+  String get reportBugFrequencyOften => 'Souvent';
+
+  @override
+  String get reportBugFrequencySometimes => 'Parfois';
+
+  @override
+  String get reportBugFrequencyRarely => 'Rarement';
+
+  @override
+  String get reportBugIncludeNpub => 'Inclure votre npub';
+
+  @override
+  String get reportBugIncludeNpubDescription => 'Nous permet de vous recontacter si nécessaire.';
+
+  @override
+  String get reportBugIncludeLogs => 'Inclure les journaux';
+
+  @override
+  String get reportBugIncludeLogsDescription =>
+      'Vérifiez avant d\'envoyer. Les journaux peuvent contenir du contenu de messages.';
+
+  @override
+  String get reportBugLogsPreviewTitle => 'Aperçu des journaux';
+
+  @override
+  String get reportBugLogsEmpty => 'Aucun journal capturé pour le moment.';
+
+  @override
+  String get reportBugSend => 'Envoyer le rapport';
+
+  @override
+  String get reportBugSending => 'Envoi en cours...';
+
+  @override
+  String get reportBugSuccess => 'Rapport de bug envoyé. Merci !';
+
+  @override
+  String get reportBugError => 'Échec de l\'envoi du rapport. Veuillez réessayer.';
+
+  @override
+  String get reportBugWhatWentWrongRequired => 'Veuillez décrire ce qui s\'est passé.';
 }
