@@ -40,6 +40,11 @@ class AppLogsScreen extends HookConsumerWidget {
     // Entries actually shown — frozen snapshot while paused, live otherwise.
     final entries = paused.value ? frozenEntries.value : liveEntries;
 
+    // Keep a ref to the latest live entries so the scroll listener can snapshot
+    // them without being included in the effect dependency array.
+    final liveEntriesRef = useRef(liveEntries);
+    liveEntriesRef.value = liveEntries;
+
     // Auto-pause when user scrolls away from the bottom; auto-resume at bottom.
     useEffect(() {
       void onScroll() {
@@ -47,7 +52,7 @@ class AppLogsScreen extends HookConsumerWidget {
         final offset = scrollController.offset;
         if (!paused.value && offset > _pauseThreshold) {
           paused.value = true;
-          frozenEntries.value = List.unmodifiable(liveEntries);
+          frozenEntries.value = List.of(liveEntriesRef.value);
         } else if (paused.value && offset <= _pauseThreshold) {
           paused.value = false;
         }
@@ -55,7 +60,7 @@ class AppLogsScreen extends HookConsumerWidget {
 
       scrollController.addListener(onScroll);
       return () => scrollController.removeListener(onScroll);
-    }, [scrollController, liveEntries, paused]);
+    }, [scrollController, paused]);
 
     useEffect(() {
       if (searchController.text != filter.searchQuery) {
@@ -330,8 +335,8 @@ class _ResumeLiveButton extends StatelessWidget {
           boxShadow: [
             BoxShadow(
               color: colors.backgroundContentPrimary.withValues(alpha: 0.15),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+              blurRadius: 8.r,
+              offset: Offset(0.w, 2.h),
             ),
           ],
         ),
