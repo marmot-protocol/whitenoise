@@ -348,6 +348,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   GroupType dco_decode_group_type(dynamic raw);
 
   @protected
+  GroupWithInfoAndMembership dco_decode_group_with_info_and_membership(
+    dynamic raw,
+  );
+
+  @protected
   int dco_decode_i_32(dynamic raw);
 
   @protected
@@ -391,6 +396,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<GroupInformation> dco_decode_list_group_information(dynamic raw);
+
+  @protected
+  List<GroupWithInfoAndMembership> dco_decode_list_group_with_info_and_membership(dynamic raw);
 
   @protected
   List<LeafNodeInfo> dco_decode_list_leaf_node_info(dynamic raw);
@@ -872,6 +880,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   GroupType sse_decode_group_type(SseDeserializer deserializer);
 
   @protected
+  GroupWithInfoAndMembership sse_decode_group_with_info_and_membership(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   int sse_decode_i_32(SseDeserializer deserializer);
 
   @protected
@@ -919,6 +932,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<GroupInformation> sse_decode_list_group_information(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  List<GroupWithInfoAndMembership> sse_decode_list_group_with_info_and_membership(
     SseDeserializer deserializer,
   );
 
@@ -1506,6 +1524,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_group_type(GroupType self, SseSerializer serializer);
 
   @protected
+  void sse_encode_group_with_info_and_membership(
+    GroupWithInfoAndMembership self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_i_32(int self, SseSerializer serializer);
 
   @protected
@@ -1565,6 +1589,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_list_group_information(
     List<GroupInformation> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_group_with_info_and_membership(
+    List<GroupWithInfoAndMembership> self,
     SseSerializer serializer,
   );
 

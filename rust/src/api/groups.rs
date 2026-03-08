@@ -6,8 +6,8 @@ use mdk_core::prelude::group_types::GroupState as WhitenoiseGroupState;
 use mdk_core::prelude::{NostrGroupConfigData, NostrGroupDataUpdate};
 use nostr_sdk::prelude::*;
 use whitenoise::{
-    GroupInformation as WhitenoiseGroupInformation, GroupType as WhitenoiseGroupType, RelayType,
-    Whitenoise,
+    GroupInformation as WhitenoiseGroupInformation, GroupType as WhitenoiseGroupType,
+    GroupWithInfoAndMembership as WhitenoiseGroupWithInfoAndMembership, RelayType, Whitenoise,
 };
 
 #[frb(non_opaque)]
@@ -358,6 +358,37 @@ pub async fn get_groups_informations(
         .into_iter()
         .map(|info| info.into())
         .collect())
+}
+
+/// A group paired with its metadata and account membership record.
+/// Callers can filter on `info.group_type` to separate DMs from regular groups.
+#[frb(non_opaque)]
+#[derive(Debug, Clone)]
+pub struct GroupWithInfoAndMembership {
+    pub group: Group,
+    pub info: GroupInformation,
+    pub membership: crate::api::account_groups::AccountGroup,
+}
+
+impl From<WhitenoiseGroupWithInfoAndMembership> for GroupWithInfoAndMembership {
+    fn from(w: WhitenoiseGroupWithInfoAndMembership) -> Self {
+        Self {
+            group: w.group.into(),
+            info: w.info.into(),
+            membership: (&w.membership).into(),
+        }
+    }
+}
+
+#[frb]
+pub async fn visible_groups_with_info(
+    account_pubkey: String,
+) -> Result<Vec<GroupWithInfoAndMembership>, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let groups = whitenoise.visible_groups_with_info(&account).await?;
+    Ok(groups.into_iter().map(|g| g.into()).collect())
 }
 
 // Result structure for upload_group_image

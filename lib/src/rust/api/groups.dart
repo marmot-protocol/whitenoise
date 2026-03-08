@@ -7,9 +7,10 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 import '../frb_generated.dart';
 import '../lib.dart';
+import 'account_groups.dart';
 import 'error.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`
 
 Future<List<Group>> activeGroups({required String pubkey}) =>
     RustLib.instance.api.crateApiGroupsActiveGroups(pubkey: pubkey);
@@ -88,6 +89,12 @@ Future<List<GroupInformation>> getGroupsInformations({
 }) => RustLib.instance.api.crateApiGroupsGetGroupsInformations(
   accountPubkey: accountPubkey,
   groupIds: groupIds,
+);
+
+Future<List<GroupWithInfoAndMembership>> visibleGroupsWithInfo({
+  required String accountPubkey,
+}) => RustLib.instance.api.crateApiGroupsVisibleGroupsWithInfo(
+  accountPubkey: accountPubkey,
 );
 
 Future<UploadGroupImageResult> uploadGroupImage({
@@ -278,6 +285,32 @@ enum GroupState {
 enum GroupType {
   directMessage,
   group,
+}
+
+/// A group paired with its metadata and account membership record.
+/// Callers can filter on `info.group_type` to separate DMs from regular groups.
+class GroupWithInfoAndMembership {
+  final Group group;
+  final GroupInformation info;
+  final AccountGroup membership;
+
+  const GroupWithInfoAndMembership({
+    required this.group,
+    required this.info,
+    required this.membership,
+  });
+
+  @override
+  int get hashCode => group.hashCode ^ info.hashCode ^ membership.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GroupWithInfoAndMembership &&
+          runtimeType == other.runtimeType &&
+          group == other.group &&
+          info == other.info &&
+          membership == other.membership;
 }
 
 /// Public information about a leaf node in the ratchet tree

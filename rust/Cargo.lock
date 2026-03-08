@@ -5339,7 +5339,7 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "whitenoise"
 version = "0.2.1"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=e28f9f74a89e1690b926f680f2ddf22536142936#e28f9f74a89e1690b926f680f2ddf22536142936"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=ef98696882210b214e49798fdfab52fa3d3ae0fb#ef98696882210b214e49798fdfab52fa3d3ae0fb"
 dependencies = [
  "android-native-keyring-store",
  "anyhow",
