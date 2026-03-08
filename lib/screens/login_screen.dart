@@ -155,9 +155,17 @@ class LoginScreen extends HookConsumerWidget {
                 Expanded(
                   child: LayoutBuilder(
                     builder: (context, constraints) {
+                      const carouselMaxHeight = 260.0;
+                      final carouselIndicatorSpacing = 16.h;
+                      final carouselIndicatorHeight = 8.h;
+                      final keyboardOpenBottomSpacing = 20.h;
                       final carouselHeight = isKeyboardOpen
-                          ? (constraints.maxHeight - 16.h - 8.h - 20.h).clamp(0.0, 260.h)
-                          : 260.h;
+                          ? (constraints.maxHeight -
+                                    carouselIndicatorSpacing -
+                                    carouselIndicatorHeight -
+                                    keyboardOpenBottomSpacing)
+                                .clamp(0.0, carouselMaxHeight.h)
+                          : carouselMaxHeight.h;
                       return Stack(
                         children: [
                           Column(
