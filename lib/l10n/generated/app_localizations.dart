@@ -2094,6 +2094,12 @@ abstract class AppLocalizations {
   /// **'Clear filters'**
   String get appLogsClearFilters;
 
+  /// Label on the button that resumes live log streaming
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get appLogsLive;
+
   /// Shown/filtered count when filters active
   ///
   /// In en, this message translates to:

@@ -331,6 +331,10 @@
   "appLogsIgnore": "Ignora",
   "appLogsShow": "Mostra",
   "appLogsClearFilters": "Cancella filtri",
+  "appLogsLive": "Live",
+  "@appLogsLive": {
+    "description": "Label on the button that resumes live log streaming"
+  },
   "appLogsFilteredCount": "{shown} di {total}",
   "invalidRelayUrlScheme": "L'URL deve iniziare con wss:// o ws://",
   "invalidRelayUrl": "URL relay non valida"

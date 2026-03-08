@@ -1179,6 +1179,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get appLogsClearFilters => 'Сбросить фильтры';
 
   @override
+  String get appLogsLive => 'Прямой эфир';
+
+  @override
   String appLogsFilteredCount(int shown, int total) {
     return '$shown из $total';
   }

@@ -1158,6 +1158,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get appLogsClearFilters => 'Limpar filtros';
 
   @override
+  String get appLogsLive => 'Ao vivo';
+
+  @override
   String appLogsFilteredCount(int shown, int total) {
     return '$shown de $total';
   }

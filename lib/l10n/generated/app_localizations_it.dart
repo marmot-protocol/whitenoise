@@ -1150,6 +1150,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get appLogsClearFilters => 'Cancella filtri';
 
   @override
+  String get appLogsLive => 'Live';
+
+  @override
   String appLogsFilteredCount(int shown, int total) {
     return '$shown di $total';
   }

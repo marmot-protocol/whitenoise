@@ -1774,6 +1774,10 @@
   "@appLogsClearFilters": {
     "description": "Button to clear all filter rules"
   },
+  "appLogsLive": "Live",
+  "@appLogsLive": {
+    "description": "Label on the button that resumes live log streaming"
+  },
   "appLogsFilteredCount": "{shown} of {total}",
   "@appLogsFilteredCount": {
     "description": "Shown/filtered count when filters active",

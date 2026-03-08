@@ -331,6 +331,10 @@
   "appLogsIgnore": "Игнорировать",
   "appLogsShow": "Показать",
   "appLogsClearFilters": "Сбросить фильтры",
+  "appLogsLive": "Прямой эфир",
+  "@appLogsLive": {
+    "description": "Label on the button that resumes live log streaming"
+  },
   "appLogsFilteredCount": "{shown} из {total}",
   "invalidRelayUrlScheme": "URL должен начинаться с wss:// или ws://",
   "invalidRelayUrl": "Неверный URL реле"

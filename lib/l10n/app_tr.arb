@@ -331,6 +331,10 @@
   "appLogsIgnore": "Yoksay",
   "appLogsShow": "Göster",
   "appLogsClearFilters": "Filtreleri temizle",
+  "appLogsLive": "Canlı",
+  "@appLogsLive": {
+    "description": "Label on the button that resumes live log streaming"
+  },
   "appLogsFilteredCount": "{shown} / {total}",
   "invalidRelayUrlScheme": "URL wss:// veya ws:// ile başlamalıdır",
   "invalidRelayUrl": "Geçersiz röle URL'si"

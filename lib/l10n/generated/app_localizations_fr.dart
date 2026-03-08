@@ -1159,6 +1159,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get appLogsClearFilters => 'Effacer les filtres';
 
   @override
+  String get appLogsLive => 'En direct';
+
+  @override
   String appLogsFilteredCount(int shown, int total) {
     return '$shown sur $total';
   }

@@ -346,7 +346,7 @@ class _ResumeLiveButton extends StatelessWidget {
             ),
             Gap(6.w),
             Text(
-              'Live',
+              context.l10n.appLogsLive,
               style: typography.semiBold12.copyWith(
                 color: colors.fillContentPrimary,
               ),
