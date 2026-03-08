@@ -278,7 +278,7 @@ class AppLogsScreen extends HookConsumerWidget {
                         Positioned(
                           bottom: 16.h,
                           right: 16.w,
-                          child: _ResumeLiveButton(onTap: resumeLive),
+                          child: _AppLogsResumeLiveButton(onTap: resumeLive),
                         ),
                     ],
                   ),
@@ -314,8 +314,8 @@ class AppLogsScreen extends HookConsumerWidget {
   }
 }
 
-class _ResumeLiveButton extends StatelessWidget {
-  const _ResumeLiveButton({required this.onTap});
+class _AppLogsResumeLiveButton extends StatelessWidget {
+  const _AppLogsResumeLiveButton({required this.onTap});
 
   final VoidCallback onTap;
 
