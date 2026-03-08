@@ -17,6 +17,7 @@ import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/widgets/wn_carousel_indicator.dart' show WnCarouselIndicator;
 import 'package:whitenoise/widgets/wn_onboarding_carousel.dart';
 import 'package:whitenoise/widgets/wn_overlay.dart';
 
@@ -663,6 +664,21 @@ void main() {
         await pumpLoginScreen(tester);
         expect(find.byKey(const Key('login_onboarding_carousel')), findsOneWidget);
         expect(find.byType(WnOnboardingCarousel), findsOneWidget);
+      });
+
+      testWidgets('swiping carousel updates indicator active index', (tester) async {
+        await pumpLoginScreen(tester);
+
+        await tester.drag(
+          find.byKey(const Key('login_carousel_page_view')),
+          const Offset(-400, 0),
+        );
+        await tester.pumpAndSettle();
+
+        final indicator = tester.widget<WnCarouselIndicator>(
+          find.byKey(const Key('login_carousel_indicator')),
+        );
+        expect(indicator.activeIndex, 1);
       });
     });
 
