@@ -10,11 +10,13 @@ class FatalErrorScreen extends StatelessWidget {
     required this.error,
     this.stackTrace,
     this.showDiagnostics = isStaging,
+    this.frbBindingsMismatch = false,
   });
 
   final Object error;
   final StackTrace? stackTrace;
   final bool showDiagnostics;
+  final bool frbBindingsMismatch;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +49,7 @@ class FatalErrorScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 16.h),
                     Text(
-                      showDiagnostics ? 'Bindings out of date' : 'Something went wrong',
+                      frbBindingsMismatch ? 'Bindings out of date' : 'Something went wrong',
                       key: const Key('fatal_error_title'),
                       style: TextStyle(
                         color: Colors.white,
@@ -58,7 +60,7 @@ class FatalErrorScreen extends StatelessWidget {
                     ),
                     SizedBox(height: 12.h),
                     Text(
-                      showDiagnostics
+                      frbBindingsMismatch
                           ? 'The Flutter-Rust bridge bindings are out of sync with the compiled Rust library.\n\nRun `just generate` and restart the app.'
                           : 'An unexpected error occurred during startup. Please reinstall the app or contact support.',
                       key: const Key('fatal_error_message'),

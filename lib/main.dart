@@ -47,12 +47,23 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+  var frbBindingsMismatch = false;
   try {
-    await RustLib.init();
+    try {
+      await RustLib.init();
+    } on StateError catch (e) {
+      if (e.message.contains('codegen version') ||
+          e.message.contains('Content hash on Dart side')) {
+        frbBindingsMismatch = true;
+      }
+      rethrow;
+    }
     final container = await initializeAppContainer();
     runApp(UncontrolledProviderScope(container: container, child: const WnApp()));
   } catch (e, stackTrace) {
-    runApp(FatalErrorScreen(error: e, stackTrace: stackTrace));
+    runApp(
+      FatalErrorScreen(error: e, stackTrace: stackTrace, frbBindingsMismatch: frbBindingsMismatch),
+    );
   }
 }
 
