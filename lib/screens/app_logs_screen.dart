@@ -25,27 +25,62 @@ class AppLogsScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final typography = context.typographyScaled;
-    final liveEntries = ref.watch(filteredAppLogProvider);
-    final totalEntries = ref.watch(appLogProvider).length;
+    final liveRawEntries = ref.watch(appLogProvider);
+    final totalEntries = liveRawEntries.length;
     final filter = ref.watch(appLogFilterProvider);
     final patternController = useTextEditingController();
     final patternFocus = useFocusNode();
     final searchController = useTextEditingController(text: filter.searchQuery);
 
-    // When paused, the list shows a frozen snapshot so the user can read.
+    // When paused, the list shows a frozen raw snapshot so filter controls
+    // continue to work while scrolling is locked.
     final paused = useState(false);
-    final frozenEntries = useState<List<AppLogEntry>>(const []);
+    final frozenRawEntries = useState<List<AppLogEntry>>(const []);
     final scrollController = useScrollController();
     // True while the resume animation is in flight — onScroll ignores offsets.
     final isAnimating = useRef(false);
+    // Tracks widget mount state so the animateTo callback doesn't touch state
+    // after disposal.
+    final mountedRef = useRef(true);
+    useEffect(
+      () =>
+          () => mountedRef.value = false,
+      const [],
+    );
 
-    // Entries actually shown — frozen snapshot while paused, live otherwise.
-    final entries = paused.value ? frozenEntries.value : liveEntries;
+    // Apply the active filter to whichever raw source is in use.
+    List<AppLogEntry> applyFilter(List<AppLogEntry> source) {
+      if (filter.searchQuery.isEmpty &&
+          filter.includePatterns.isEmpty &&
+          filter.excludePatterns.isEmpty) {
+        return source;
+      }
+      return source.where((e) {
+        final buf = StringBuffer('${e.level.name} ${e.loggerName} ${e.message}');
+        if (e.error != null) buf.write(' ${e.error}');
+        if (e.stackTrace != null) buf.write(' ${e.stackTrace}');
+        final text = buf.toString().toLowerCase();
+        if (filter.excludePatterns.any((p) => text.contains(p.toLowerCase()))) {
+          return false;
+        }
+        if (filter.includePatterns.isNotEmpty &&
+            !filter.includePatterns.any((p) => text.contains(p.toLowerCase()))) {
+          return false;
+        }
+        if (filter.searchQuery.isNotEmpty && !text.contains(filter.searchQuery.toLowerCase())) {
+          return false;
+        }
+        return true;
+      }).toList();
+    }
 
-    // Keep a ref to the latest live entries so the scroll listener can snapshot
+    // Entries actually shown — filter applied to frozen or live raw source.
+    final entries = applyFilter(paused.value ? frozenRawEntries.value : liveRawEntries);
+
+    // Keep a ref to the latest raw entries so the scroll listener can snapshot
     // them without being included in the effect dependency array.
-    final liveEntriesRef = useRef(liveEntries);
-    liveEntriesRef.value = liveEntries;
+    final liveRawEntriesRef = useRef(liveRawEntries);
+    liveRawEntriesRef.value = liveRawEntries;
 
     // Auto-pause when user scrolls away from the bottom; auto-resume at bottom.
     useEffect(() {
@@ -55,7 +90,7 @@ class AppLogsScreen extends HookConsumerWidget {
         final offset = scrollController.offset;
         if (!paused.value && offset > _pauseThreshold) {
           paused.value = true;
-          frozenEntries.value = List.of(liveEntriesRef.value);
+          frozenRawEntries.value = List.of(liveRawEntriesRef.value);
         } else if (paused.value && offset <= _pauseThreshold) {
           paused.value = false;
         }
@@ -87,6 +122,7 @@ class AppLogsScreen extends HookConsumerWidget {
               curve: Curves.easeOutCubic,
             )
             .then((_) {
+              if (!mountedRef.value) return;
               isAnimating.value = false;
               paused.value = false;
             });
@@ -246,7 +282,7 @@ class AppLogsScreen extends HookConsumerWidget {
                                   onPressed: () {
                                     ref.read(appLogProvider.notifier).clear();
                                     paused.value = false;
-                                    frozenEntries.value = const [];
+                                    frozenRawEntries.value = const [];
                                   },
                                   child: Text(context.l10n.appLogsClear),
                                 ),
