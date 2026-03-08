@@ -10,12 +10,11 @@ import 'package:whitenoise/providers/app_log_filter_provider.dart';
 import 'package:whitenoise/providers/app_log_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_search_field.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 
-// How far from the bottom (position 0 in a reversed list) before we consider
-// the user to be "scrolled away" and pause live updates.
 const _pauseThreshold = 80.0;
 
 class AppLogsScreen extends HookConsumerWidget {
@@ -32,15 +31,10 @@ class AppLogsScreen extends HookConsumerWidget {
     final patternFocus = useFocusNode();
     final searchController = useTextEditingController(text: filter.searchQuery);
 
-    // When paused, the list shows a frozen raw snapshot so filter controls
-    // continue to work while scrolling is locked.
     final paused = useState(false);
     final frozenRawEntries = useState<List<AppLogEntry>>(const []);
     final scrollController = useScrollController();
-    // True while the resume animation is in flight — onScroll ignores offsets.
     final isAnimating = useRef(false);
-    // Tracks widget mount state so the animateTo callback doesn't touch state
-    // after disposal.
     final mountedRef = useRef(true);
     useEffect(
       () =>
@@ -48,7 +42,6 @@ class AppLogsScreen extends HookConsumerWidget {
       const [],
     );
 
-    // Apply the active filter to whichever raw source is in use.
     List<AppLogEntry> applyFilter(List<AppLogEntry> source) {
       if (filter.searchQuery.isEmpty &&
           filter.includePatterns.isEmpty &&
@@ -74,15 +67,11 @@ class AppLogsScreen extends HookConsumerWidget {
       }).toList();
     }
 
-    // Entries actually shown — filter applied to frozen or live raw source.
     final entries = applyFilter(paused.value ? frozenRawEntries.value : liveRawEntries);
 
-    // Keep a ref to the latest raw entries so the scroll listener can snapshot
-    // them without being included in the effect dependency array.
     final liveRawEntriesRef = useRef(liveRawEntries);
     liveRawEntriesRef.value = liveRawEntries;
 
-    // Auto-pause when user scrolls away from the bottom; auto-resume at bottom.
     useEffect(() {
       void onScroll() {
         if (!scrollController.hasClients) return;
@@ -393,9 +382,9 @@ class _AppLogsResumeLiveButton extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Icon(
+            WnIcon(
+              WnIcons.arrowDown,
               key: const Key('app_logs_resume_live_icon'),
-              Icons.arrow_downward,
               size: 14.sp,
               color: colors.fillContentPrimary,
             ),
