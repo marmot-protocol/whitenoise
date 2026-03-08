@@ -10,12 +10,14 @@ void main() {
     WidgetTester tester, {
     Object? error,
     StackTrace? stackTrace,
+    bool showDiagnostics = true,
   }) async {
     setUpTestView(tester);
     await tester.pumpWidget(
       FatalErrorScreen(
         error: error ?? StateError('Content hash mismatch'),
         stackTrace: stackTrace,
+        showDiagnostics: showDiagnostics,
       ),
     );
   }
@@ -45,32 +47,30 @@ void main() {
       });
     });
 
-    // In the test environment APP_FLAVOR is not set, so isStaging defaults to true.
-    // These tests verify the staging / debug variant of the screen.
-    group('staging build (default in tests)', () {
+    group('staging build (showDiagnostics: true)', () {
       testWidgets('title says Bindings out of date', (tester) async {
-        await pumpFatalErrorScreen(tester);
+        await pumpFatalErrorScreen(tester, showDiagnostics: true);
         expect(find.text('Bindings out of date'), findsOneWidget);
       });
 
       testWidgets('message mentions just generate', (tester) async {
-        await pumpFatalErrorScreen(tester);
+        await pumpFatalErrorScreen(tester, showDiagnostics: true);
         expect(find.textContaining('just generate'), findsOneWidget);
       });
 
       testWidgets('shows error detail box', (tester) async {
-        await pumpFatalErrorScreen(tester);
+        await pumpFatalErrorScreen(tester, showDiagnostics: true);
         expect(find.byKey(const Key('fatal_error_detail_box')), findsOneWidget);
       });
 
       testWidgets('shows copy button', (tester) async {
-        await pumpFatalErrorScreen(tester);
+        await pumpFatalErrorScreen(tester, showDiagnostics: true);
         expect(find.byKey(const Key('fatal_error_copy_button')), findsOneWidget);
       });
 
       testWidgets('detail box contains the error message', (tester) async {
         final error = StateError('test content hash mismatch');
-        await pumpFatalErrorScreen(tester, error: error);
+        await pumpFatalErrorScreen(tester, error: error, showDiagnostics: true);
         expect(find.textContaining('test content hash mismatch'), findsOneWidget);
       });
 
@@ -80,6 +80,7 @@ void main() {
           tester,
           error: StateError('hash mismatch'),
           stackTrace: stackTrace,
+          showDiagnostics: true,
         );
         expect(find.textContaining('at main'), findsOneWidget);
       });
@@ -104,12 +105,34 @@ void main() {
         );
 
         final error = StateError('hash mismatch error');
-        await pumpFatalErrorScreen(tester, error: error);
+        await pumpFatalErrorScreen(tester, error: error, showDiagnostics: true);
         await tester.tap(find.byKey(const Key('fatal_error_copy_button')));
         await tester.pump();
 
         expect(clipboardData, isNotEmpty);
         expect(clipboardData.first, contains('hash mismatch error'));
+      });
+    });
+
+    group('production build (showDiagnostics: false)', () {
+      testWidgets('title says Something went wrong', (tester) async {
+        await pumpFatalErrorScreen(tester, showDiagnostics: false);
+        expect(find.text('Something went wrong'), findsOneWidget);
+      });
+
+      testWidgets('message mentions reinstall', (tester) async {
+        await pumpFatalErrorScreen(tester, showDiagnostics: false);
+        expect(find.textContaining('reinstall'), findsOneWidget);
+      });
+
+      testWidgets('does not show error detail box', (tester) async {
+        await pumpFatalErrorScreen(tester, showDiagnostics: false);
+        expect(find.byKey(const Key('fatal_error_detail_box')), findsNothing);
+      });
+
+      testWidgets('does not show copy button', (tester) async {
+        await pumpFatalErrorScreen(tester, showDiagnostics: false);
+        expect(find.byKey(const Key('fatal_error_copy_button')), findsNothing);
       });
     });
 
