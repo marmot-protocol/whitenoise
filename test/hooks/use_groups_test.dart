@@ -15,6 +15,7 @@ GroupWithInfoAndMembership _makeGroupWithInfo({
   String name = 'Test Group',
   String description = '',
   GroupType groupType = GroupType.group,
+  GroupState groupState = GroupState.active,
 }) {
   final now = DateTime.utc(2024);
   return GroupWithInfoAndMembership(
@@ -25,7 +26,7 @@ GroupWithInfoAndMembership _makeGroupWithInfo({
       description: description,
       adminPubkeys: [testPubkeyA],
       epoch: BigInt.zero,
-      state: GroupState.active,
+      state: groupState,
     ),
     info: GroupInformation(
       mlsGroupId: id,
@@ -191,6 +192,46 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(result.error, isNull);
+    });
+
+    testWidgets('does not return inactive groups', (tester) async {
+      _api.groupsList = [
+        _makeGroupWithInfo(id: testGroupId, name: 'Active Group'),
+        _makeGroupWithInfo(
+          id: otherTestGroupId,
+          name: 'Inactive Group',
+          groupState: GroupState.inactive,
+        ),
+      ];
+
+      late GroupsState result;
+      await mountHook(tester, () {
+        result = useGroups(accountPubkey: testPubkeyA);
+        return null;
+      });
+      await tester.pumpAndSettle();
+
+      expect(result.groups.map((g) => g.name), isNot(contains('Inactive Group')));
+    });
+
+    testWidgets('does not return pending groups', (tester) async {
+      _api.groupsList = [
+        _makeGroupWithInfo(id: testGroupId, name: 'Active Group'),
+        _makeGroupWithInfo(
+          id: otherTestGroupId,
+          name: 'Pending Group',
+          groupState: GroupState.pending,
+        ),
+      ];
+
+      late GroupsState result;
+      await mountHook(tester, () {
+        result = useGroups(accountPubkey: testPubkeyA);
+        return null;
+      });
+      await tester.pumpAndSettle();
+
+      expect(result.groups.map((g) => g.name), isNot(contains('Pending Group')));
     });
   });
 }

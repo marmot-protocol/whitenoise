@@ -28,7 +28,11 @@ GroupsState useGroups({
     try {
       final groupsWithInfo = await groups_api.visibleGroupsWithInfo(accountPubkey: accountPubkey);
       final nonDmGroups = groupsWithInfo
-          .where((g) => g.info.groupType != groups_api.GroupType.directMessage)
+          .where(
+            (g) =>
+                g.info.groupType != groups_api.GroupType.directMessage &&
+                g.group.state == groups_api.GroupState.active,
+          )
           .map((g) => g.group)
           .toList();
 
