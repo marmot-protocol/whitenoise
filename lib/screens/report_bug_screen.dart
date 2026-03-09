@@ -43,18 +43,15 @@ class ReportBugScreen extends HookConsumerWidget {
     final logs = ref.watch(appLogProvider);
     final pubkey = ref.watch(authProvider).value;
 
-    final frequencyOptions = useMemoized(
-      () => [
-        WnDropdownOption(value: 'always', label: l10n.reportBugFrequencyAlways),
-        WnDropdownOption(value: 'often', label: l10n.reportBugFrequencyOften),
-        WnDropdownOption(
-          value: 'sometimes',
-          label: l10n.reportBugFrequencySometimes,
-        ),
-        WnDropdownOption(value: 'rarely', label: l10n.reportBugFrequencyRarely),
-      ],
-      [],
-    );
+    final frequencyOptions = [
+      WnDropdownOption(value: 'always', label: l10n.reportBugFrequencyAlways),
+      WnDropdownOption(value: 'often', label: l10n.reportBugFrequencyOften),
+      WnDropdownOption(
+        value: 'sometimes',
+        label: l10n.reportBugFrequencySometimes,
+      ),
+      WnDropdownOption(value: 'rarely', label: l10n.reportBugFrequencyRarely),
+    ];
 
     Future<void> handleSend() async {
       if (whatWentWrong.text.trim().isEmpty) {
@@ -66,6 +63,8 @@ class ReportBugScreen extends HookConsumerWidget {
 
       try {
         final packageInfo = await PackageInfo.fromPlatform();
+
+        if (!context.mounted) return;
 
         await sendBugReport(
           whatWentWrong: whatWentWrong.text.trim(),
@@ -92,14 +91,16 @@ class ReportBugScreen extends HookConsumerWidget {
           relayUrls: [],
         );
 
+        if (!context.mounted) return;
         noticeIsError.value = false;
         noticeMessage.value = l10n.reportBugSuccess;
       } catch (e) {
         debugPrint('send_bug_report failed: $e');
+        if (!context.mounted) return;
         noticeIsError.value = true;
         noticeMessage.value = l10n.reportBugError;
       } finally {
-        isSending.value = false;
+        if (context.mounted) isSending.value = false;
       }
     }
 

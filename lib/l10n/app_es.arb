@@ -375,7 +375,7 @@
   "reportBugFrequencySometimes": "A veces",
   "reportBugFrequencyRarely": "Raramente",
   "reportBugIncludeNpub": "Incluir tu npub",
-  "reportBugIncludeNpubDescription": "Nos permite contactarte si es necesario.",
+  "reportBugIncludeNpubDescription": "Nos permite contactarte si es necesario; dejarlo desactivado mantiene tu informe anónimo.",
   "reportBugIncludeLogs": "Incluir registros",
   "reportBugIncludeLogsDescription": "Revisa antes de enviar. Los registros pueden contener contenido de mensajes.",
   "reportBugLogsPreviewTitle": "Vista previa de registros",
