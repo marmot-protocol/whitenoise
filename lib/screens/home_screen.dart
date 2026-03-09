@@ -23,31 +23,36 @@ class HomeScreen extends StatelessWidget {
         child: Column(
           children: [
             Expanded(
-              child: SingleChildScrollView(
-                child: Column(
-                  children: [
-                    Gap(216.5.h),
-                    SvgPicture.asset(
-                      'assets/svgs/whitenoise.svg',
-                      width: 160.w,
-                      height: 123.h,
-                      colorFilter: ColorFilter.mode(
-                        colors.backgroundContentPrimary,
-                        BlendMode.srcIn,
-                      ),
-                    ),
-                    Gap(24.h),
-                    _RotatingSloganText(
-                      texts: [
-                        context.l10n.sloganDecentralized,
-                        context.l10n.sloganUncensorable,
-                        context.l10n.sloganSecureMessaging,
+              child: LayoutBuilder(
+                builder: (context, constraints) => SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        SvgPicture.asset(
+                          'assets/svgs/whitenoise.svg',
+                          width: 160.w,
+                          height: 123.h,
+                          colorFilter: ColorFilter.mode(
+                            colors.backgroundContentPrimary,
+                            BlendMode.srcIn,
+                          ),
+                        ),
+                        Gap(24.h),
+                        _RotatingSloganText(
+                          texts: [
+                            context.l10n.sloganDecentralized,
+                            context.l10n.sloganUncensorable,
+                            context.l10n.sloganSecureMessaging,
+                          ],
+                          style: typography.bold36.copyWith(
+                            color: colors.backgroundContentTertiary,
+                          ),
+                        ),
                       ],
-                      style: typography.bold36.copyWith(
-                        color: colors.backgroundContentTertiary,
-                      ),
                     ),
-                  ],
+                  ),
                 ),
               ),
             ),
