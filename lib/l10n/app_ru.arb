@@ -355,5 +355,11 @@
   "invalidRelayUrlScheme": "URL должен начинаться с wss:// или ws://",
   "invalidRelayUrl": "Неверный URL реле",
   "thisMessageWasDeleted": "Это сообщение было удалено.",
-  "relayControlStateLoadError": "Не удалось загрузить состояние управления реле. Пожалуйста, попробуйте снова."
+  "relayControlStateLoadError": "Не удалось загрузить состояние управления реле. Пожалуйста, попробуйте снова.",
+  "fatalErrorTitle": "Что-то пошло не так",
+  "fatalErrorMessage": "При запуске произошла непредвиденная ошибка. Переустановите приложение или обратитесь в поддержку.",
+  "fatalErrorBindingsMismatchTitle": "Требуется пересборка приложения",
+  "fatalErrorBindingsMismatchMessage": "Приложение обнаружило внутреннюю ошибку. Если вы разработчик, выполните `just generate` и перезапустите.",
+  "fatalErrorCopyError": "Копировать ошибку",
+  "fatalErrorErrorCopied": "Ошибка скопирована в буфер обмена"
 }

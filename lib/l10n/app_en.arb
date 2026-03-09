@@ -1568,5 +1568,35 @@
   "relayControlStateLoadError": "Failed to load relay control state. Please try again.",
   "@relayControlStateLoadError": {
     "description": "User-friendly error when relay control state fails to load"
+  },
+
+  "fatalErrorTitle": "Something went wrong",
+  "@fatalErrorTitle": {
+    "description": "Title on the fatal error screen for a generic startup failure"
+  },
+
+  "fatalErrorMessage": "An unexpected error occurred during startup. Please reinstall the app or contact support.",
+  "@fatalErrorMessage": {
+    "description": "Body message on the fatal error screen for a generic startup failure"
+  },
+
+  "fatalErrorBindingsMismatchTitle": "App needs rebuilding",
+  "@fatalErrorBindingsMismatchTitle": {
+    "description": "Title on the fatal error screen when Flutter-Rust bridge bindings are out of sync"
+  },
+
+  "fatalErrorBindingsMismatchMessage": "The app encountered an internal error. If you're a developer, run `just generate` and restart.",
+  "@fatalErrorBindingsMismatchMessage": {
+    "description": "Body message on the fatal error screen when Flutter-Rust bridge bindings are out of sync"
+  },
+
+  "fatalErrorCopyError": "Copy error",
+  "@fatalErrorCopyError": {
+    "description": "Button label on the fatal error screen diagnostics box to copy the error to clipboard"
+  },
+
+  "fatalErrorErrorCopied": "Error copied to clipboard",
+  "@fatalErrorErrorCopied": {
+    "description": "System notice shown after copying error details to clipboard on the fatal error screen"
   }
 }

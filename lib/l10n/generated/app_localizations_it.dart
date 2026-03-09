@@ -1218,4 +1218,24 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get relayControlStateLoadError =>
       'Impossibile caricare lo stato di controllo del relay. Per favore, riprova.';
+
+  @override
+  String get fatalErrorTitle => 'Qualcosa è andato storto';
+
+  @override
+  String get fatalErrorMessage =>
+      'Si è verificato un errore imprevisto durante l\'avvio. Reinstalla l\'app o contatta il supporto.';
+
+  @override
+  String get fatalErrorBindingsMismatchTitle => 'L\'app deve essere ricompilata';
+
+  @override
+  String get fatalErrorBindingsMismatchMessage =>
+      'L\'app ha riscontrato un errore interno. Se sei uno sviluppatore, esegui `just generate` e riavvia.';
+
+  @override
+  String get fatalErrorCopyError => 'Copia errore';
+
+  @override
+  String get fatalErrorErrorCopied => 'Errore copiato negli appunti';
 }

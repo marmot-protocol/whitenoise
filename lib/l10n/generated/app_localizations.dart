@@ -2225,6 +2225,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to load relay control state. Please try again.'**
   String get relayControlStateLoadError;
+
+  /// Title on the fatal error screen for a generic startup failure
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong'**
+  String get fatalErrorTitle;
+
+  /// Body message on the fatal error screen for a generic startup failure
+  ///
+  /// In en, this message translates to:
+  /// **'An unexpected error occurred during startup. Please reinstall the app or contact support.'**
+  String get fatalErrorMessage;
+
+  /// Title on the fatal error screen when Flutter-Rust bridge bindings are out of sync
+  ///
+  /// In en, this message translates to:
+  /// **'App needs rebuilding'**
+  String get fatalErrorBindingsMismatchTitle;
+
+  /// Body message on the fatal error screen when Flutter-Rust bridge bindings are out of sync
+  ///
+  /// In en, this message translates to:
+  /// **'The app encountered an internal error. If you\'re a developer, run `just generate` and restart.'**
+  String get fatalErrorBindingsMismatchMessage;
+
+  /// Button label on the fatal error screen diagnostics box to copy the error to clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Copy error'**
+  String get fatalErrorCopyError;
+
+  /// System notice shown after copying error details to clipboard on the fatal error screen
+  ///
+  /// In en, this message translates to:
+  /// **'Error copied to clipboard'**
+  String get fatalErrorErrorCopied;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

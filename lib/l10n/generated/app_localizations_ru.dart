@@ -1244,4 +1244,24 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get relayControlStateLoadError =>
       'Не удалось загрузить состояние управления реле. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get fatalErrorTitle => 'Что-то пошло не так';
+
+  @override
+  String get fatalErrorMessage =>
+      'При запуске произошла непредвиденная ошибка. Переустановите приложение или обратитесь в поддержку.';
+
+  @override
+  String get fatalErrorBindingsMismatchTitle => 'Требуется пересборка приложения';
+
+  @override
+  String get fatalErrorBindingsMismatchMessage =>
+      'Приложение обнаружило внутреннюю ошибку. Если вы разработчик, выполните `just generate` и перезапустите.';
+
+  @override
+  String get fatalErrorCopyError => 'Копировать ошибку';
+
+  @override
+  String get fatalErrorErrorCopied => 'Ошибка скопирована в буфер обмена';
 }

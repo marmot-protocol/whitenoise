@@ -22,6 +22,7 @@ void main() {
         frbBindingsMismatch: frbBindingsMismatch,
       ),
     );
+    await tester.pumpAndSettle();
   }
 
   group('FatalErrorScreen', () {
@@ -50,9 +51,9 @@ void main() {
     });
 
     group('FRB bindings mismatch (frbBindingsMismatch: true)', () {
-      testWidgets('title says Bindings out of date', (tester) async {
+      testWidgets('title says App needs rebuilding', (tester) async {
         await pumpFatalErrorScreen(tester, frbBindingsMismatch: true);
-        expect(find.text('Bindings out of date'), findsOneWidget);
+        expect(find.text('App needs rebuilding'), findsOneWidget);
       });
 
       testWidgets('message mentions just generate', (tester) async {
@@ -120,10 +121,29 @@ void main() {
           frbBindingsMismatch: true,
         );
         await tester.tap(find.byKey(const Key('fatal_error_copy_button')));
-        await tester.pump();
+        await tester.pumpAndSettle();
 
         expect(clipboardData, isNotEmpty);
         expect(clipboardData.first, contains('hash mismatch error'));
+      });
+
+      testWidgets('copy button shows success notice', (tester) async {
+        tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          (MethodCall call) async => null,
+        );
+        addTearDown(
+          () => tester.binding.defaultBinaryMessenger.setMockMethodCallHandler(
+            SystemChannels.platform,
+            null,
+          ),
+        );
+
+        await pumpFatalErrorScreen(tester, showDiagnostics: true, frbBindingsMismatch: true);
+        await tester.tap(find.byKey(const Key('fatal_error_copy_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('fatal_error_copied_notice')), findsOneWidget);
       });
     });
 

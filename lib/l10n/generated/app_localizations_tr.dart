@@ -1214,4 +1214,24 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get relayControlStateLoadError =>
       'Röle kontrol durumu yüklenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get fatalErrorTitle => 'Bir şeyler yanlış gitti';
+
+  @override
+  String get fatalErrorMessage =>
+      'Başlatma sırasında beklenmedik bir hata oluştu. Lütfen uygulamayı yeniden yükleyin veya destek ile iletişime geçin.';
+
+  @override
+  String get fatalErrorBindingsMismatchTitle => 'Uygulama yeniden derlenmeli';
+
+  @override
+  String get fatalErrorBindingsMismatchMessage =>
+      'Uygulama bir iç hatayla karşılaştı. Geliştirici iseniz `just generate` çalıştırın ve yeniden başlatın.';
+
+  @override
+  String get fatalErrorCopyError => 'Hatayı kopyala';
+
+  @override
+  String get fatalErrorErrorCopied => 'Hata panoya kopyalandı';
 }

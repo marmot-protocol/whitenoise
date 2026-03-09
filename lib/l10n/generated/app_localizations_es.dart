@@ -1230,4 +1230,24 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get relayControlStateLoadError =>
       'Error al cargar el estado de relés. Por favor, inténtalo de nuevo.';
+
+  @override
+  String get fatalErrorTitle => 'Algo salió mal';
+
+  @override
+  String get fatalErrorMessage =>
+      'Ocurrió un error inesperado durante el inicio. Por favor, reinstala la aplicación o contacta al soporte.';
+
+  @override
+  String get fatalErrorBindingsMismatchTitle => 'La app necesita reconstruirse';
+
+  @override
+  String get fatalErrorBindingsMismatchMessage =>
+      'La app encontró un error interno. Si eres desarrollador, ejecuta `just generate` y reinicia.';
+
+  @override
+  String get fatalErrorCopyError => 'Copiar error';
+
+  @override
+  String get fatalErrorErrorCopied => 'Error copiado al portapapeles';
 }

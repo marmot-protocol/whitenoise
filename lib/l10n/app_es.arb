@@ -355,5 +355,11 @@
   "invalidRelayUrlScheme": "La URL debe comenzar con wss:// o ws://",
   "invalidRelayUrl": "URL de relé inválida",
   "thisMessageWasDeleted": "Este mensaje fue eliminado.",
-  "relayControlStateLoadError": "Error al cargar el estado de relés. Por favor, inténtalo de nuevo."
+  "relayControlStateLoadError": "Error al cargar el estado de relés. Por favor, inténtalo de nuevo.",
+  "fatalErrorTitle": "Algo salió mal",
+  "fatalErrorMessage": "Ocurrió un error inesperado durante el inicio. Por favor, reinstala la aplicación o contacta al soporte.",
+  "fatalErrorBindingsMismatchTitle": "La app necesita reconstruirse",
+  "fatalErrorBindingsMismatchMessage": "La app encontró un error interno. Si eres desarrollador, ejecuta `just generate` y reinicia.",
+  "fatalErrorCopyError": "Copiar error",
+  "fatalErrorErrorCopied": "Error copiado al portapapeles"
 }

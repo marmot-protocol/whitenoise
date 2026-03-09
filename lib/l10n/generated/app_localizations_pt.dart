@@ -1224,4 +1224,24 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get relayControlStateLoadError =>
       'Falha ao carregar o estado de controle do relay. Por favor, tente novamente.';
+
+  @override
+  String get fatalErrorTitle => 'Algo deu errado';
+
+  @override
+  String get fatalErrorMessage =>
+      'Ocorreu um erro inesperado durante a inicialização. Por favor, reinstale o aplicativo ou entre em contato com o suporte.';
+
+  @override
+  String get fatalErrorBindingsMismatchTitle => 'O app precisa ser reconstruído';
+
+  @override
+  String get fatalErrorBindingsMismatchMessage =>
+      'O app encontrou um erro interno. Se você é desenvolvedor, execute `just generate` e reinicie.';
+
+  @override
+  String get fatalErrorCopyError => 'Copiar erro';
+
+  @override
+  String get fatalErrorErrorCopied => 'Erro copiado para a área de transferência';
 }

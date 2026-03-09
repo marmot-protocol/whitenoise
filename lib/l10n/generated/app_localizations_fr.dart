@@ -1229,4 +1229,24 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get relayControlStateLoadError =>
       'Échec du chargement de l\'état de contrôle du relais. Veuillez réessayer.';
+
+  @override
+  String get fatalErrorTitle => 'Quelque chose s\'est mal passé';
+
+  @override
+  String get fatalErrorMessage =>
+      'Une erreur inattendue s\'est produite au démarrage. Veuillez réinstaller l\'application ou contacter le support.';
+
+  @override
+  String get fatalErrorBindingsMismatchTitle => 'L\'application doit être reconstruite';
+
+  @override
+  String get fatalErrorBindingsMismatchMessage =>
+      'L\'application a rencontré une erreur interne. Si vous êtes développeur, exécutez `just generate` et redémarrez.';
+
+  @override
+  String get fatalErrorCopyError => 'Copier l\'erreur';
+
+  @override
+  String get fatalErrorErrorCopied => 'Erreur copiée dans le presse-papiers';
 }
