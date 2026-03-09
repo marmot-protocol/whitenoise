@@ -41,6 +41,7 @@ import 'package:whitenoise/screens/share_profile_screen.dart' show ShareProfileS
 import 'package:whitenoise/screens/sign_out_screen.dart' show SignOutScreen;
 import 'package:whitenoise/screens/signup_screen.dart' show SignupScreen;
 import 'package:whitenoise/screens/start_chat_screen.dart' show StartChatScreen;
+import 'package:whitenoise/screens/start_support_chat_screen.dart' show StartSupportChatScreen;
 import 'package:whitenoise/screens/switch_profile_screen.dart' show SwitchProfileScreen;
 import 'package:whitenoise/screens/user_search_screen.dart' show UserSearchScreen;
 import 'package:whitenoise/screens/user_selection_screen.dart' show UserSelectionScreen;
@@ -75,6 +76,7 @@ abstract final class Routes {
   static const _network = '/network';
   static const _reportBug = '/report-bug';
   static const _relayResolution = '/relay-resolution';
+  static const _startSupportChat = '/start-support-chat';
   static const _userSearch = '/user-search';
   static const _userSelection = '/user-selection';
   static const _setUpGroup = '/set-up-group';
@@ -274,6 +276,11 @@ abstract final class Routes {
               ),
             );
           },
+        ),
+        GoRoute(
+          path: _startSupportChat,
+          pageBuilder: (context, state) =>
+              _navigationTransition(state: state, child: const StartSupportChatScreen()),
         ),
         GoRoute(
           path: _userSearch,
@@ -540,6 +547,10 @@ abstract final class Routes {
     GoRouter.of(context).push(_addProfile);
   }
 
+  static void pushToStartSupportChat(BuildContext context) {
+    GoRouter.of(context).push(_startSupportChat);
+  }
+
   static void pushToUserSearch(BuildContext context) {
     GoRouter.of(context).push(_userSearch);
   }
@@ -561,6 +572,10 @@ abstract final class Routes {
 
   static void goToChat(BuildContext context, String groupId) {
     GoRouter.of(context).goNamed('chat', pathParameters: {'groupId': groupId});
+  }
+
+  static void goToSupportChat(BuildContext context, String groupId) {
+    goToChat(context, groupId);
   }
 
   static void pushToRelayResolution(
