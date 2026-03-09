@@ -423,6 +423,18 @@ void main() {
 
         expect(find.byType(DebugSqlQueryScreen), findsOneWidget);
       });
+
+      testWidgets('tapping back in app logs screen returns to developer settings', (tester) async {
+        await pumpScreen(tester);
+
+        await tester.tap(find.byKey(const Key('view_logs_row')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('slate_back_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(DeveloperSettingsScreen), findsOneWidget);
+      });
     });
   });
 }

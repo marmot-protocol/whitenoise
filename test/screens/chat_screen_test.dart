@@ -1791,6 +1791,17 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(ChatRawDebugScreen), findsOneWidget);
       });
+
+      testWidgets('back button in raw debug screen returns to chat', (tester) async {
+        await pumpChatScreenWithDebug(tester);
+        await tester.tap(find.byKey(const Key('chat_raw_debug_button')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('slate_back_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ChatRawDebugScreen), findsNothing);
+      });
     });
   });
 }

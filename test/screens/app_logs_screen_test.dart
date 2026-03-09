@@ -317,5 +317,12 @@ void main() {
       final l10n = AppLocalizations.of(context);
       expect(find.text(l10n.rawDebugViewCopied), findsOneWidget);
     });
+
+    testWidgets('renders WARNING log entry', (tester) async {
+      _entries = [_entry('low disk space', level: Level.WARNING)];
+      await pumpScreen(tester);
+
+      expect(find.text('WARNING'), findsOneWidget);
+    });
   });
 }

@@ -368,6 +368,30 @@ void main() {
         expect(getState().users[1].metadata.displayName, 'bob');
       });
 
+      testWidgets('named user sorts before unnamed when named is first in input', (tester) async {
+        api.follows = [
+          _userFactory(testPubkeyA, displayName: 'Alice'),
+          _userFactory(testPubkeyB),
+        ];
+        await pump(tester);
+        await tester.pump();
+
+        expect(getState().users[0].pubkey, testPubkeyA);
+        expect(getState().users[1].pubkey, testPubkeyB);
+      });
+
+      testWidgets('named user sorts before unnamed when named is last in input', (tester) async {
+        api.follows = [
+          _userFactory(testPubkeyB),
+          _userFactory(testPubkeyA, displayName: 'Alice'),
+        ];
+        await pump(tester);
+        await tester.pump();
+
+        expect(getState().users[0].pubkey, testPubkeyA);
+        expect(getState().users[1].pubkey, testPubkeyB);
+      });
+
       testWidgets('preserves sort after periodic refresh', (tester) async {
         api.follows = [
           _userFactory(testPubkeyA),
@@ -880,6 +904,24 @@ void main() {
         expect(getState().users, isEmpty);
         expect(getState().isLoading, isFalse);
         expect(getState().hasSearchQuery, isFalse);
+      });
+
+      testWidgets('recovers gracefully when name search stream emits error', (tester) async {
+        await pump(tester, searchQuery: 'alice');
+        await tester.pump(const Duration(milliseconds: 400));
+        await tester.pump();
+
+        api.searchUsersController!.add(
+          UserSearchUpdate(
+            trigger: const SearchUpdateTrigger.resultsFound(),
+            newResults: [_searchResultFactory(testPubkeyA, displayName: 'Alice')],
+            totalResultCount: BigInt.one,
+          ),
+        );
+        api.searchUsersController!.addError(Exception('network failure'));
+        await tester.pump(const Duration(milliseconds: 50));
+
+        expect(getState().isLoading, isFalse);
       });
     });
   });

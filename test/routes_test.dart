@@ -17,8 +17,10 @@ import 'package:whitenoise/screens/login_screen.dart';
 import 'package:whitenoise/screens/settings_screen.dart';
 import 'package:whitenoise/screens/signup_screen.dart';
 import 'package:whitenoise/screens/user_search_screen.dart';
+import 'package:whitenoise/screens/user_selection_screen.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/src/rust/api/users.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'mocks/mock_wn_api.dart';
 
@@ -471,6 +473,20 @@ void main() {
       Routes.goBack(getContext(tester));
       await tester.pumpAndSettle();
       expect(find.byType(ChatListScreen), findsOneWidget);
+    });
+  });
+
+  group('pushToSetUpGroup', () {
+    testWidgets('shows UserSelectionScreen when selectedUsers is empty', (tester) async {
+      await pumpRouter(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
+        ],
+      );
+      Routes.pushToSetUpGroup(getContext(tester), const <User>[]);
+      await tester.pumpAndSettle();
+      expect(find.byType(UserSelectionScreen), findsOneWidget);
     });
   });
 

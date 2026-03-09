@@ -191,6 +191,39 @@ void main() {
       expect(find.textContaining('Content of msg1'), findsWidgets);
     });
 
+    testWidgets('message card shows media count when message has attachments', (tester) async {
+      final now = DateTime(2024, 1, 15, 12);
+      _api.initialMessages = [
+        _message(
+          'msg_with_media',
+          now,
+          mediaAttachments: [
+            MediaFile(
+              id: 'file1',
+              mlsGroupId: _testGroupId,
+              accountPubkey: testPubkeyA,
+              filePath: '/tmp/file1.jpg',
+              encryptedFileHash: 'hash1',
+              mimeType: 'image/jpeg',
+              mediaType: 'image',
+              blossomUrl: 'https://example.com/file1',
+              nostrKey: 'nostrkey1',
+              createdAt: now,
+            ),
+          ],
+        ),
+      ];
+
+      await pumpDebugScreen(tester);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('raw_message_card_msg_with_media')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(find.byKey(const Key('raw_message_card_msg_with_media')), findsOneWidget);
+    });
+
     testWidgets('displays correct message count with messages', (tester) async {
       final now = DateTime(2024, 1, 15, 12);
       _api.initialMessages = [

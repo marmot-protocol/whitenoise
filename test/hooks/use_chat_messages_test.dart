@@ -1,8 +1,10 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderContainer;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart'
     show ChatMessageQuoteData, ChatMessagesResult, useChatMessages;
+import 'package:whitenoise/providers/message_debug_log_provider.dart' show messageDebugLogProvider;
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
@@ -495,6 +497,24 @@ void main() {
         _api.emitError(Exception('snapshot error test'));
         await tester.pump();
         await tester.pump();
+      });
+
+      testWidgets('logs stream error to debugLog when provided', (tester) async {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+        final debugLog = container.read(messageDebugLogProvider.notifier);
+
+        await mountHook(tester, () => useChatMessages('group1', debugLog: debugLog));
+
+        _api.emitError(Exception('debug log error'));
+        await tester.pump();
+        await Future<void>.microtask(() {});
+        await tester.pump();
+
+        expect(
+          container.read(messageDebugLogProvider).streamLog,
+          isNotEmpty,
+        );
       });
     });
 
