@@ -428,6 +428,7 @@ void main() {
       Routes.goBack(getContext(tester));
       await tester.pumpAndSettle();
       expect(find.byType(StartSupportChatScreen), findsNothing);
+      expect(find.byType(ChatListScreen), findsOneWidget);
     });
   });
 
