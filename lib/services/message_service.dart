@@ -251,7 +251,6 @@ class MessageService {
     return '$neventUri\n$content';
   }
 
-  // e/p/k tags for reactions and deletions (unchanged)
   Future<List<messages_api.Tag>> _eventReferenceTags({
     required String eventId,
     required String eventPubkey,
