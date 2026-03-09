@@ -179,6 +179,28 @@ void main() {
       });
     });
 
+    group('generic startup failure (frbBindingsMismatch: false, showDiagnostics: true)', () {
+      testWidgets('title says Something went wrong', (tester) async {
+        await pumpFatalErrorScreen(tester, showDiagnostics: true);
+        expect(find.text('Something went wrong'), findsOneWidget);
+      });
+
+      testWidgets('message mentions reinstall', (tester) async {
+        await pumpFatalErrorScreen(tester, showDiagnostics: true);
+        expect(find.textContaining('reinstall'), findsOneWidget);
+      });
+
+      testWidgets('shows error detail box', (tester) async {
+        await pumpFatalErrorScreen(tester, showDiagnostics: true);
+        expect(find.byKey(const Key('fatal_error_detail_box')), findsOneWidget);
+      });
+
+      testWidgets('shows copy button', (tester) async {
+        await pumpFatalErrorScreen(tester, showDiagnostics: true);
+        expect(find.byKey(const Key('fatal_error_copy_button')), findsOneWidget);
+      });
+    });
+
     group('accepts any error type', () {
       testWidgets('renders with a generic Exception', (tester) async {
         await pumpFatalErrorScreen(tester, error: Exception('DB init failed'));
