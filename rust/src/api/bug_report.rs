@@ -45,7 +45,9 @@ pub async fn send_bug_report(
         "timestamp": chrono::Utc::now().to_rfc3339(),
         "what_went_wrong": what_went_wrong,
     });
-    let obj = report.as_object_mut().unwrap();
+    let obj = report.as_object_mut().ok_or_else(|| ApiError::Other {
+        message: "Failed to build report object".to_string(),
+    })?;
     if let Some(v) = expected_behavior {
         obj.insert("expected_behavior".into(), json!(v));
     }
@@ -60,7 +62,11 @@ pub async fn send_bug_report(
     }
     if let Some(v) = logs {
         let truncated = if v.len() > MAX_LOG_BYTES {
-            v[..MAX_LOG_BYTES].to_string()
+            let boundary = (0..=MAX_LOG_BYTES)
+                .rev()
+                .find(|&i| v.is_char_boundary(i))
+                .unwrap_or(0);
+            v[..boundary].to_string()
         } else {
             v
         };
@@ -162,12 +168,32 @@ mod tests {
         let mut report = json!({});
         let obj = report.as_object_mut().unwrap();
         let truncated = if big_log.len() > MAX_LOG_BYTES {
-            big_log[..MAX_LOG_BYTES].to_string()
+            let boundary = (0..=MAX_LOG_BYTES)
+                .rev()
+                .find(|&i| big_log.is_char_boundary(i))
+                .unwrap_or(0);
+            big_log[..boundary].to_string()
         } else {
             big_log.clone()
         };
         obj.insert("logs".into(), json!(truncated));
         let logs_val = report["logs"].as_str().unwrap();
         assert_eq!(logs_val.len(), MAX_LOG_BYTES);
+    }
+
+    #[test]
+    fn test_log_truncation_is_char_boundary_safe() {
+        // 3-byte UTF-8 char; MAX_LOG_BYTES may land mid-char
+        let char_3byte = "あ"; // U+3042, 3 bytes
+        let repeat_count = MAX_LOG_BYTES / 3 + 1;
+        let big_log = char_3byte.repeat(repeat_count);
+        assert!(big_log.len() > MAX_LOG_BYTES);
+        let boundary = (0..=MAX_LOG_BYTES)
+            .rev()
+            .find(|&i| big_log.is_char_boundary(i))
+            .unwrap_or(0);
+        let truncated = big_log[..boundary].to_string();
+        assert!(truncated.len() <= MAX_LOG_BYTES);
+        assert!(big_log.is_char_boundary(truncated.len()));
     }
 }

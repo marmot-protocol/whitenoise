@@ -19,6 +19,13 @@ class _MockAuthNotifier extends AuthNotifier {
   }
 }
 
+// TODO(#478): WnInputTextArea's internal Row(mainAxisSize: min) overflows in
+// the 420px test viewport causing rendering exceptions. Drain them so they don't
+// pollute logic-focused tests. Remove this helper once the widget is fixed.
+void drainRenderingExceptions(WidgetTester tester) {
+  while (tester.takeException() != null) {}
+}
+
 void main() {
   late _MockApi mockApi;
 
@@ -45,10 +52,7 @@ void main() {
     );
     Routes.pushToReportBug(tester.element(find.byType(Scaffold)));
     await tester.pumpAndSettle();
-    // WnInputTextArea's internal label Row(mainAxisSize: min) overflows in
-    // the 420px test viewport. Drain the rendering exception so it doesn't
-    // fail logic-focused tests. This is a pre-existing widget issue.
-    while (tester.takeException() != null) {}
+    drainRenderingExceptions(tester);
   }
 
   /// Scroll to bring [target] into view by dragging the scroll view.
@@ -57,7 +61,7 @@ void main() {
     // view from scrolling away from it.
     FocusManager.instance.primaryFocus?.unfocus();
     await tester.pumpAndSettle();
-    while (tester.takeException() != null) {}
+    drainRenderingExceptions(tester);
     await tester.scrollUntilVisible(
       target,
       100.0,
@@ -69,7 +73,7 @@ void main() {
           .first,
     );
     await tester.pumpAndSettle();
-    while (tester.takeException() != null) {}
+    drainRenderingExceptions(tester);
   }
 
   group('ReportBugScreen', () {
@@ -98,7 +102,7 @@ void main() {
       await scrollTo(tester, find.byKey(const Key('report_bug_frequency')));
       await tester.tap(find.text('Select'));
       await tester.pumpAndSettle();
-      while (tester.takeException() != null) {}
+      drainRenderingExceptions(tester);
       expect(find.text('Always'), findsOneWidget);
       expect(find.text('Often'), findsOneWidget);
       expect(find.text('Sometimes'), findsOneWidget);
@@ -122,7 +126,7 @@ void main() {
       await scrollTo(tester, find.text('Send report'));
       await tester.tap(find.text('Send report'));
       await tester.pumpAndSettle();
-      while (tester.takeException() != null) {}
+      drainRenderingExceptions(tester);
       expect(find.text('Please describe what went wrong.'), findsOneWidget);
       expect(mockApi.sendBugReportCalled, isFalse);
     });
@@ -136,7 +140,7 @@ void main() {
       await scrollTo(tester, find.text('Send report'));
       await tester.tap(find.text('Send report'));
       await tester.pumpAndSettle();
-      while (tester.takeException() != null) {}
+      drainRenderingExceptions(tester);
       expect(mockApi.sendBugReportCalled, isTrue);
       expect(
         mockApi.lastBugReportWhatWentWrong,
@@ -153,7 +157,7 @@ void main() {
       await scrollTo(tester, find.text('Send report'));
       await tester.tap(find.text('Send report'));
       await tester.pumpAndSettle();
-      while (tester.takeException() != null) {}
+      drainRenderingExceptions(tester);
       expect(find.text('Bug report sent. Thank you!'), findsOneWidget);
     });
 
@@ -167,7 +171,7 @@ void main() {
       await scrollTo(tester, find.text('Send report'));
       await tester.tap(find.text('Send report'));
       await tester.pumpAndSettle();
-      while (tester.takeException() != null) {}
+      drainRenderingExceptions(tester);
       expect(
         find.text('Failed to send report. Please try again.'),
         findsOneWidget,
@@ -179,7 +183,7 @@ void main() {
       await scrollTo(tester, find.byKey(const Key('include_logs_toggle')));
       await tester.tap(find.byKey(const Key('include_logs_toggle')));
       await tester.pumpAndSettle();
-      while (tester.takeException() != null) {}
+      drainRenderingExceptions(tester);
       await scrollTo(tester, find.text('Log preview'));
       expect(find.text('Log preview'), findsOneWidget);
     });
@@ -189,7 +193,7 @@ void main() {
       await scrollTo(tester, find.byKey(const Key('include_logs_toggle')));
       await tester.tap(find.byKey(const Key('include_logs_toggle')));
       await tester.pumpAndSettle();
-      while (tester.takeException() != null) {}
+      drainRenderingExceptions(tester);
       await tester.enterText(
         find.byKey(const Key('report_bug_what_went_wrong')),
         'Crash on open',
@@ -197,7 +201,7 @@ void main() {
       await scrollTo(tester, find.text('Send report'));
       await tester.tap(find.text('Send report'));
       await tester.pumpAndSettle();
-      while (tester.takeException() != null) {}
+      drainRenderingExceptions(tester);
       expect(mockApi.lastBugReportLogs, isNotNull);
     });
 
@@ -210,7 +214,7 @@ void main() {
       await scrollTo(tester, find.text('Send report'));
       await tester.tap(find.text('Send report'));
       await tester.pumpAndSettle();
-      while (tester.takeException() != null) {}
+      drainRenderingExceptions(tester);
       expect(mockApi.lastBugReportLogs, isNull);
     });
 
@@ -223,7 +227,7 @@ void main() {
       await scrollTo(tester, find.text('Send report'));
       await tester.tap(find.text('Send report'));
       await tester.pumpAndSettle();
-      while (tester.takeException() != null) {}
+      drainRenderingExceptions(tester);
       expect(mockApi.lastBugReportNpub, isNull);
     });
 
@@ -232,7 +236,7 @@ void main() {
       await scrollTo(tester, find.byKey(const Key('include_npub_toggle')));
       await tester.tap(find.byKey(const Key('include_npub_toggle')));
       await tester.pumpAndSettle();
-      while (tester.takeException() != null) {}
+      drainRenderingExceptions(tester);
       await tester.enterText(
         find.byKey(const Key('report_bug_what_went_wrong')),
         'Crash on open',
@@ -240,7 +244,7 @@ void main() {
       await scrollTo(tester, find.text('Send report'));
       await tester.tap(find.text('Send report'));
       await tester.pumpAndSettle();
-      while (tester.takeException() != null) {}
+      drainRenderingExceptions(tester);
       expect(mockApi.lastBugReportNpub, isNotNull);
     });
   });

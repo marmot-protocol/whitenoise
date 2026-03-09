@@ -1274,7 +1274,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportBugIncludeNpub => 'Include your npub';
 
   @override
-  String get reportBugIncludeNpubDescription => 'Lets us follow up with you if needed.';
+  String get reportBugIncludeNpubDescription =>
+      'Lets us follow up with you if needed; leaving this off keeps your report anonymous.';
 
   @override
   String get reportBugIncludeLogs => 'Include logs';

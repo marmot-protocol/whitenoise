@@ -1664,7 +1664,7 @@
     "description": "Toggle label for including the user's npub"
   },
 
-  "reportBugIncludeNpubDescription": "Lets us follow up with you if needed.",
+  "reportBugIncludeNpubDescription": "Lets us follow up with you if needed; leaving this off keeps your report anonymous.",
   "@reportBugIncludeNpubDescription": {
     "description": "Helper text for the include npub toggle"
   },

@@ -2343,7 +2343,7 @@ abstract class AppLocalizations {
   /// Helper text for the include npub toggle
   ///
   /// In en, this message translates to:
-  /// **'Lets us follow up with you if needed.'**
+  /// **'Lets us follow up with you if needed; leaving this off keeps your report anonymous.'**
   String get reportBugIncludeNpubDescription;
 
   /// Toggle label for attaching logs

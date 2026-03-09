@@ -10,6 +10,7 @@ import 'package:whitenoise/providers/app_log_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/bug_report.dart';
+import 'package:whitenoise/src/rust/api/utils.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_callout.dart';
@@ -18,12 +19,6 @@ import 'package:whitenoise/widgets/wn_input_text_area.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
-
-const _kBugReportRelays = [
-  'wss://relay.damus.io',
-  'wss://relay.nostr.band',
-  'wss://nos.lol',
-];
 
 class ReportBugScreen extends HookConsumerWidget {
   const ReportBugScreen({super.key});
@@ -81,7 +76,7 @@ class ReportBugScreen extends HookConsumerWidget {
               ? stepsToReproduce.text.trim()
               : null,
           frequency: frequency.value,
-          npub: includeNpub.value ? pubkey : null,
+          npub: includeNpub.value && pubkey != null ? npubFromHexPubkey(hexPubkey: pubkey) : null,
           logs: includeLogs.value
               ? logs
                     .take(200)
@@ -94,7 +89,7 @@ class ReportBugScreen extends HookConsumerWidget {
           appVersion: '${packageInfo.version}+${packageInfo.buildNumber}',
           platform: Platform.operatingSystem,
           osVersion: Platform.operatingSystemVersion,
-          relayUrls: _kBugReportRelays,
+          relayUrls: [],
         );
 
         noticeIsError.value = false;
@@ -174,14 +169,14 @@ class ReportBugScreen extends HookConsumerWidget {
                     value: frequency.value,
                     onChanged: (v) => frequency.value = v,
                   ),
-                  _ToggleRow(
+                  _ReportBugToggleRow(
                     switchKey: const Key('include_npub_toggle'),
                     label: l10n.reportBugIncludeNpub,
                     description: l10n.reportBugIncludeNpubDescription,
                     value: includeNpub.value,
                     onChanged: (v) => includeNpub.value = v,
                   ),
-                  _ToggleRow(
+                  _ReportBugToggleRow(
                     switchKey: const Key('include_logs_toggle'),
                     label: l10n.reportBugIncludeLogs,
                     description: l10n.reportBugIncludeLogsDescription,
@@ -212,8 +207,8 @@ class ReportBugScreen extends HookConsumerWidget {
   }
 }
 
-class _ToggleRow extends StatelessWidget {
-  const _ToggleRow({
+class _ReportBugToggleRow extends StatelessWidget {
+  const _ReportBugToggleRow({
     required this.switchKey,
     required this.label,
     required this.description,
