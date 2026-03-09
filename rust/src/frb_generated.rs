@@ -43,7 +43,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1560691846;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 307419661;
 
 // Section: executor
 
@@ -4254,6 +4254,44 @@ fn wire__crate__api__users__user_relays_impl(
         },
     )
 }
+fn wire__crate__api__groups__visible_groups_with_info_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "visible_groups_with_info",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_account_pubkey = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::error::ApiError>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::groups::visible_groups_with_info(api_account_pubkey)
+                                .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 
 // Section: related_funcs
 
@@ -4768,6 +4806,12 @@ impl SseDecode for crate::api::error::ApiError {
             }
             12 => {
                 let mut var_message = <String>::sse_decode(deserializer);
+                return crate::api::error::ApiError::LoginKeyringUnavailable {
+                    message: var_message,
+                };
+            }
+            13 => {
+                let mut var_message = <String>::sse_decode(deserializer);
                 return crate::api::error::ApiError::Other {
                     message: var_message,
                 };
@@ -5147,6 +5191,21 @@ impl SseDecode for crate::api::groups::GroupType {
     }
 }
 
+impl SseDecode for crate::api::groups::GroupWithInfoAndMembership {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_group = <crate::api::groups::Group>::sse_decode(deserializer);
+        let mut var_info = <crate::api::groups::GroupInformation>::sse_decode(deserializer);
+        let mut var_membership =
+            <crate::api::account_groups::AccountGroup>::sse_decode(deserializer);
+        return crate::api::groups::GroupWithInfoAndMembership {
+            group: var_group,
+            info: var_info,
+            membership: var_membership,
+        };
+    }
+}
+
 impl SseDecode for i32 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -5310,6 +5369,18 @@ impl SseDecode for Vec<crate::api::groups::GroupInformation> {
             ans_.push(<crate::api::groups::GroupInformation>::sse_decode(
                 deserializer,
             ));
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for Vec<crate::api::groups::GroupWithInfoAndMembership> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = vec![];
+        for idx_ in 0..len_ {
+            ans_.push(<crate::api::groups::GroupWithInfoAndMembership>::sse_decode(deserializer));
         }
         return ans_;
     }
@@ -6363,6 +6434,12 @@ fn pde_ffi_dispatcher_primary_impl(
         }
         106 => wire__crate__api__users__user_metadata_impl(port, ptr, rust_vec_len, data_len),
         107 => wire__crate__api__users__user_relays_impl(port, ptr, rust_vec_len, data_len),
+        108 => wire__crate__api__groups__visible_groups_with_info_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
         _ => unreachable!(),
     }
 }
@@ -6639,8 +6716,11 @@ impl flutter_rust_bridge::IntoDart for crate::api::error::ApiError {
             crate::api::error::ApiError::LoginInternal { message } => {
                 [11.into_dart(), message.into_into_dart().into_dart()].into_dart()
             }
-            crate::api::error::ApiError::Other { message } => {
+            crate::api::error::ApiError::LoginKeyringUnavailable { message } => {
                 [12.into_dart(), message.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::error::ApiError::Other { message } => {
+                [13.into_dart(), message.into_into_dart().into_dart()].into_dart()
             }
             _ => {
                 unimplemented!("");
@@ -7073,6 +7153,28 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::groups::GroupType>
     for crate::api::groups::GroupType
 {
     fn into_into_dart(self) -> crate::api::groups::GroupType {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::groups::GroupWithInfoAndMembership {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.group.into_into_dart().into_dart(),
+            self.info.into_into_dart().into_dart(),
+            self.membership.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::groups::GroupWithInfoAndMembership
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::groups::GroupWithInfoAndMembership>
+    for crate::api::groups::GroupWithInfoAndMembership
+{
+    fn into_into_dart(self) -> crate::api::groups::GroupWithInfoAndMembership {
         self
     }
 }
@@ -8012,8 +8114,12 @@ impl SseEncode for crate::api::error::ApiError {
                 <i32>::sse_encode(11, serializer);
                 <String>::sse_encode(message, serializer);
             }
-            crate::api::error::ApiError::Other { message } => {
+            crate::api::error::ApiError::LoginKeyringUnavailable { message } => {
                 <i32>::sse_encode(12, serializer);
+                <String>::sse_encode(message, serializer);
+            }
+            crate::api::error::ApiError::Other { message } => {
+                <i32>::sse_encode(13, serializer);
                 <String>::sse_encode(message, serializer);
             }
             _ => {
@@ -8286,6 +8392,15 @@ impl SseEncode for crate::api::groups::GroupType {
     }
 }
 
+impl SseEncode for crate::api::groups::GroupWithInfoAndMembership {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::groups::Group>::sse_encode(self.group, serializer);
+        <crate::api::groups::GroupInformation>::sse_encode(self.info, serializer);
+        <crate::api::account_groups::AccountGroup>::sse_encode(self.membership, serializer);
+    }
+}
+
 impl SseEncode for i32 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -8423,6 +8538,16 @@ impl SseEncode for Vec<crate::api::groups::GroupInformation> {
         <i32>::sse_encode(self.len() as _, serializer);
         for item in self {
             <crate::api::groups::GroupInformation>::sse_encode(item, serializer);
+        }
+    }
+}
+
+impl SseEncode for Vec<crate::api::groups::GroupWithInfoAndMembership> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::groups::GroupWithInfoAndMembership>::sse_encode(item, serializer);
         }
     }
 }

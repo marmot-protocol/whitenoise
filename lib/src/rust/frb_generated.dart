@@ -84,7 +84,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => -1560691846;
+  int get rustContentHash => 307419661;
 
   static const kDefaultExternalLibraryLoaderConfig = ExternalLibraryLoaderConfig(
     stem: 'rust_lib_whitenoise',
@@ -520,6 +520,10 @@ abstract class RustLibApi extends BaseApi {
     required String pubkey,
     required RelayType relayType,
     required bool blockingDataSync,
+  });
+
+  Future<List<GroupWithInfoAndMembership>> crateApiGroupsVisibleGroupsWithInfo({
+    required String accountPubkey,
   });
 
   RustArcIncrementStrongCountFnType get rust_arc_increment_strong_count_AppSettings;
@@ -4196,6 +4200,38 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     argNames: ['pubkey', 'relayType', 'blockingDataSync'],
   );
 
+  @override
+  Future<List<GroupWithInfoAndMembership>> crateApiGroupsVisibleGroupsWithInfo({
+    required String accountPubkey,
+  }) {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(accountPubkey, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 108,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_list_group_with_info_and_membership,
+          decodeErrorData: sse_decode_api_error,
+        ),
+        constMeta: kCrateApiGroupsVisibleGroupsWithInfoConstMeta,
+        argValues: [accountPubkey],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiGroupsVisibleGroupsWithInfoConstMeta => const TaskConstMeta(
+    debugName: 'visible_groups_with_info',
+    argNames: ['accountPubkey'],
+  );
+
   Future<void> Function(int, dynamic) encode_DartFn_Inputs_String_Output_String_AnyhowException(
     FutureOr<String> Function(String) raw,
   ) {
@@ -4686,6 +4722,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           message: dco_decode_String(raw[1]),
         );
       case 12:
+        return ApiError_LoginKeyringUnavailable(
+          message: dco_decode_String(raw[1]),
+        );
+      case 13:
         return ApiError_Other(
           message: dco_decode_String(raw[1]),
         );
@@ -5041,6 +5081,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  GroupWithInfoAndMembership dco_decode_group_with_info_and_membership(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 3) throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    return GroupWithInfoAndMembership(
+      group: dco_decode_group(arr[0]),
+      info: dco_decode_group_information(arr[1]),
+      membership: dco_decode_account_group(arr[2]),
+    );
+  }
+
+  @protected
   int dco_decode_i_32(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as int;
@@ -5136,6 +5190,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   List<GroupInformation> dco_decode_list_group_information(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_group_information).toList();
+  }
+
+  @protected
+  List<GroupWithInfoAndMembership> dco_decode_list_group_with_info_and_membership(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_group_with_info_and_membership).toList();
   }
 
   @protected
@@ -6078,6 +6138,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         return ApiError_LoginInternal(message: var_message);
       case 12:
         final var_message = sse_decode_String(deserializer);
+        return ApiError_LoginKeyringUnavailable(message: var_message);
+      case 13:
+        final var_message = sse_decode_String(deserializer);
         return ApiError_Other(message: var_message);
       default:
         throw UnimplementedError('');
@@ -6519,6 +6582,21 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  GroupWithInfoAndMembership sse_decode_group_with_info_and_membership(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    final var_group = sse_decode_group(deserializer);
+    final var_info = sse_decode_group_information(deserializer);
+    final var_membership = sse_decode_account_group(deserializer);
+    return GroupWithInfoAndMembership(
+      group: var_group,
+      info: var_info,
+      membership: var_membership,
+    );
+  }
+
+  @protected
   int sse_decode_i_32(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getInt32();
@@ -6675,6 +6753,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     final ans_ = <GroupInformation>[];
     for (var idx_ = 0; idx_ < len_; ++idx_) {
       ans_.add(sse_decode_group_information(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
+  List<GroupWithInfoAndMembership> sse_decode_list_group_with_info_and_membership(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    final len_ = sse_decode_i_32(deserializer);
+    final ans_ = <GroupWithInfoAndMembership>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_group_with_info_and_membership(deserializer));
     }
     return ans_;
   }
@@ -7871,8 +7963,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case ApiError_LoginInternal(message: final message):
         sse_encode_i_32(11, serializer);
         sse_encode_String(message, serializer);
-      case ApiError_Other(message: final message):
+      case ApiError_LoginKeyringUnavailable(message: final message):
         sse_encode_i_32(12, serializer);
+        sse_encode_String(message, serializer);
+      case ApiError_Other(message: final message):
+        sse_encode_i_32(13, serializer);
         sse_encode_String(message, serializer);
     }
   }
@@ -8229,6 +8324,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_group_with_info_and_membership(
+    GroupWithInfoAndMembership self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_group(self.group, serializer);
+    sse_encode_group_information(self.info, serializer);
+    sse_encode_account_group(self.membership, serializer);
+  }
+
+  @protected
   void sse_encode_i_32(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putInt32(self);
@@ -8363,6 +8469,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_i_32(self.length, serializer);
     for (final item in self) {
       sse_encode_group_information(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_list_group_with_info_and_membership(
+    List<GroupWithInfoAndMembership> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_group_with_info_and_membership(item, serializer);
     }
   }
 
