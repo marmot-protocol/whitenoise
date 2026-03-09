@@ -90,13 +90,15 @@ class _FatalErrorBody extends StatelessWidget {
               ),
               SizedBox(height: 16.h),
               Text(
-                frbBindingsMismatch ? l10n.fatalErrorBindingsMismatchTitle : l10n.fatalErrorTitle,
+                frbBindingsMismatch && showDiagnostics
+                    ? l10n.fatalErrorBindingsMismatchTitle
+                    : l10n.fatalErrorTitle,
                 key: const Key('fatal_error_title'),
                 style: typography.bold24.copyWith(color: colors.backgroundContentPrimary),
               ),
               SizedBox(height: 12.h),
               Text(
-                frbBindingsMismatch
+                frbBindingsMismatch && showDiagnostics
                     ? l10n.fatalErrorBindingsMismatchMessage
                     : l10n.fatalErrorMessage,
                 key: const Key('fatal_error_message'),
@@ -140,7 +142,9 @@ class _ErrorDetailBox extends HookWidget {
 
     Future<void> handleCopy() async {
       await Clipboard.setData(ClipboardData(text: _errorText));
-      copied.value = true;
+      if (context.mounted) {
+        copied.value = true;
+      }
     }
 
     return Column(

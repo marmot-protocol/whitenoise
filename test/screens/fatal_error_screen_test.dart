@@ -51,14 +51,24 @@ void main() {
     });
 
     group('FRB bindings mismatch (frbBindingsMismatch: true)', () {
-      testWidgets('title says App needs rebuilding', (tester) async {
-        await pumpFatalErrorScreen(tester, frbBindingsMismatch: true);
+      testWidgets('title says App needs rebuilding when showDiagnostics is true', (tester) async {
+        await pumpFatalErrorScreen(tester, frbBindingsMismatch: true, showDiagnostics: true);
         expect(find.text('App needs rebuilding'), findsOneWidget);
       });
 
-      testWidgets('message mentions just generate', (tester) async {
-        await pumpFatalErrorScreen(tester, frbBindingsMismatch: true);
+      testWidgets('message mentions just generate when showDiagnostics is true', (tester) async {
+        await pumpFatalErrorScreen(tester, frbBindingsMismatch: true, showDiagnostics: true);
         expect(find.textContaining('just generate'), findsOneWidget);
+      });
+
+      testWidgets('shows generic title when showDiagnostics is false', (tester) async {
+        await pumpFatalErrorScreen(tester, frbBindingsMismatch: true);
+        expect(find.text('Something went wrong'), findsOneWidget);
+      });
+
+      testWidgets('shows generic message when showDiagnostics is false', (tester) async {
+        await pumpFatalErrorScreen(tester, frbBindingsMismatch: true);
+        expect(find.textContaining('reinstall'), findsOneWidget);
       });
 
       testWidgets('shows error detail box when showDiagnostics is true', (tester) async {
