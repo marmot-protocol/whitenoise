@@ -61,7 +61,7 @@ dependencies:
   mobile_scanner: ^7.2.0
   scroll_to_index: ^3.0.1
   crypto: ^3.0.7
-  flutter_local_notifications: ^20.1.0
+  flutter_local_notifications: ^21.0.0
   flutter_foreground_task: ^9.2.1
   permission_handler: ^12.0.0
   unique_names_generator: ^3.0.0
