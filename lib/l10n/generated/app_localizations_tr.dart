@@ -567,6 +567,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get donate => 'Bağış yap';
 
   @override
+  String get chatWithSupport => 'Destek ile sohbet';
+
+  @override
+  String get supportChatWelcomeMessage =>
+      'Merhaba! Aklınızdaki sorunları bildirin - sorular, hatalar veya geri bildirimler. Genellikle birkaç saat içinde yanıt veriyoruz.';
+
+  @override
   String get addRelay => 'Röle Ekle';
 
   @override
@@ -1280,4 +1287,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get reportBugWhatWentWrongRequired => 'Lütfen neyin yanlış gittiğini açıklayın.';
+
+  @override
+  String get failedToStartHelpChat => 'Yardım sohbeti başlatılamadı';
 }

@@ -164,6 +164,8 @@
   "reportError": "Сообщить об ошибке",
   "wipMessage": "Мы работаем над этой функцией. Чтобы поддержать разработку, пожертвуйте на проект White Noise",
   "donate": "Пожертвовать",
+  "chatWithSupport": "Чат с поддержкой",
+  "supportChatWelcomeMessage": "Привет! Расскажите, что у вас на уме - вопросы, баги или отзывы. Обычно мы отвечаем в течение нескольких часов.",
   "addRelay": "Добавить Реле",
   "enterRelayAddress": "Введите адрес реле",
   "relayAddressPlaceholder": "wss://relay.example.com",
@@ -376,5 +378,6 @@
   "reportBugSend": "Отправить отчёт",
   "reportBugSuccess": "Отчёт об ошибке отправлен. Спасибо!",
   "reportBugError": "Не удалось отправить отчёт. Попробуйте ещё раз.",
-  "reportBugWhatWentWrongRequired": "Пожалуйста, опишите, что пошло не так."
+  "reportBugWhatWentWrongRequired": "Пожалуйста, опишите, что пошло не так.",
+  "failedToStartHelpChat": "Не удалось запустить чат поддержки"
 }

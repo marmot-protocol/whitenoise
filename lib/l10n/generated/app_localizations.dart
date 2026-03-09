@@ -1092,6 +1092,18 @@ abstract class AppLocalizations {
   /// **'Donate'**
   String get donate;
 
+  /// Settings menu item to open support chat
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with support'**
+  String get chatWithSupport;
+
+  /// Initial welcome message shown in support chat
+  ///
+  /// In en, this message translates to:
+  /// **'Hi! Tell us what\'s on your mind - questions, bugs, or feedback. We usually reply within a few hours.'**
+  String get supportChatWelcomeMessage;
+
   /// Add relay sheet title and button
   ///
   /// In en, this message translates to:
@@ -2351,6 +2363,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please describe what went wrong.'**
   String get reportBugWhatWentWrongRequired;
+
+  /// Error notice shown when starting a help DM fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to start help chat'**
+  String get failedToStartHelpChat;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

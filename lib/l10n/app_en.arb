@@ -731,6 +731,14 @@
   "@donate": {
     "description": "Donate button text"
   },
+  "chatWithSupport": "Chat with support",
+  "@chatWithSupport": {
+    "description": "Settings menu item to open support chat"
+  },
+  "supportChatWelcomeMessage": "Hi! Tell us what's on your mind - questions, bugs, or feedback. We usually reply within a few hours.",
+  "@supportChatWelcomeMessage": {
+    "description": "Initial welcome message shown in support chat"
+  },
   "addRelay": "Add Relay",
   "@addRelay": {
     "description": "Add relay sheet title and button"
@@ -1672,5 +1680,44 @@
   "reportBugWhatWentWrongRequired": "Please describe what went wrong.",
   "@reportBugWhatWentWrongRequired": {
     "description": "Validation error when 'what went wrong' is empty"
+  },
+  "failedToStartHelpChat": "Failed to start help chat",
+  "@failedToStartHelpChat": {
+    "description": "Error notice shown when starting a help DM fails"
+  },
+  "thisMessageWasDeleted": "This message was deleted.",
+  "@thisMessageWasDeleted": {
+    "description": "Text shown inside a deleted message bubble"
+  },
+  "fatalErrorCopyError": "Copy error",
+  "@fatalErrorCopyError": {
+    "description": "Button label on the fatal error screen diagnostics box to copy the error to clipboard"
+  },
+
+  "fatalErrorErrorCopied": "Error copied to clipboard",
+  "@fatalErrorErrorCopied": {
+    "description": "System notice shown after copying error details to clipboard on the fatal error screen"
+  },
+
+  "fatalErrorTitle": "Oh no!",
+  "@fatalErrorTitle": {
+    "description": "Error callout title on fatal error screen"
+  },
+
+  "fatalErrorDescription": "We hit a bump loading the app. It's not you, it's us and we're sorry.\n\nHelp us fix it. Tap below to send this error to our team.",
+  "@fatalErrorDescription": {
+    "description": "Error callout description on fatal error screen"
+  },
+  "failedToStartHelpChat": "Failed to start help chat",
+  "@failedToStartHelpChat": {
+    "description": "Error notice shown when starting a help DM fails"
+  },
+  "thisMessageWasDeleted": "This message was deleted.",
+  "@thisMessageWasDeleted": {
+    "description": "Text shown inside a deleted message bubble"
+  },
+  "failedToStartHelpChat": "Failed to start help chat",
+  "@failedToStartHelpChat": {
+    "description": "Error notice shown when starting a help DM fails"
   }
 }

@@ -566,6 +566,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get donate => 'Donate';
 
   @override
+  String get chatWithSupport => 'Chat with support';
+
+  @override
+  String get supportChatWelcomeMessage =>
+      'Hi! Tell us what\'s on your mind - questions, bugs, or feedback. We usually reply within a few hours.';
+
+  @override
   String get addRelay => 'Add Relay';
 
   @override
@@ -1279,4 +1286,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get reportBugWhatWentWrongRequired => 'Please describe what went wrong.';
+
+  @override
+  String get failedToStartHelpChat => 'Failed to start help chat';
 }

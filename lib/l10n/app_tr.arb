@@ -164,6 +164,8 @@
   "reportError": "Hata bildir",
   "wipMessage": "Bu özellik üzerinde çalışıyoruz. Geliştirmeyi desteklemek için lütfen White Noise'a bağış yapın",
   "donate": "Bağış yap",
+  "chatWithSupport": "Destek ile sohbet",
+  "supportChatWelcomeMessage": "Merhaba! Aklınızdaki sorunları bildirin - sorular, hatalar veya geri bildirimler. Genellikle birkaç saat içinde yanıt veriyoruz.",
   "addRelay": "Röle Ekle",
   "enterRelayAddress": "Röle adresini girin",
   "relayAddressPlaceholder": "wss://relay.example.com",
@@ -376,5 +378,6 @@
   "reportBugSend": "Raporu gönder",
   "reportBugSuccess": "Hata raporu gönderildi. Teşekkürler!",
   "reportBugError": "Rapor gönderilemedi. Lütfen tekrar deneyin.",
-  "reportBugWhatWentWrongRequired": "Lütfen neyin yanlış gittiğini açıklayın."
+  "reportBugWhatWentWrongRequired": "Lütfen neyin yanlış gittiğini açıklayın.",
+  "failedToStartHelpChat": "Yardım sohbeti başlatılamadı"
 }

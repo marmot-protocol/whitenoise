@@ -585,6 +585,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get donate => 'Пожертвовать';
 
   @override
+  String get chatWithSupport => 'Чат с поддержкой';
+
+  @override
+  String get supportChatWelcomeMessage =>
+      'Привет! Расскажите, что у вас на уме - вопросы, баги или отзывы. Обычно мы отвечаем в течение нескольких часов.';
+
+  @override
   String get addRelay => 'Добавить Реле';
 
   @override
@@ -1311,4 +1318,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get reportBugWhatWentWrongRequired => 'Пожалуйста, опишите, что пошло не так.';
+
+  @override
+  String get failedToStartHelpChat => 'Не удалось запустить чат поддержки';
 }

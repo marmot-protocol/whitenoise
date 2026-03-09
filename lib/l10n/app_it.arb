@@ -164,6 +164,8 @@
   "reportError": "Segnala errore",
   "wipMessage": "Stiamo lavorando su questa funzionalità. Per supportare lo sviluppo, dona a White Noise",
   "donate": "Dona",
+  "chatWithSupport": "Chatta con il supporto",
+  "supportChatWelcomeMessage": "Ciao! Raccontaci cosa hai in mente - domande, bug o feedback. Di solito rispondiamo in poche ore.",
   "addRelay": "Aggiungi Relay",
   "enterRelayAddress": "Inserisci l'indirizzo del relay",
   "relayAddressPlaceholder": "wss://relay.example.com",
@@ -376,5 +378,6 @@
   "reportBugSend": "Invia segnalazione",
   "reportBugSuccess": "Segnalazione bug inviata. Grazie!",
   "reportBugError": "Invio della segnalazione fallito. Riprova.",
-  "reportBugWhatWentWrongRequired": "Descrivi cosa è andato storto."
+  "reportBugWhatWentWrongRequired": "Descrivi cosa è andato storto.",
+  "failedToStartHelpChat": "Failed to start help chat"
 }
