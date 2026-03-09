@@ -20,6 +20,9 @@ import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 
+String _formatLogEntry(AppLogEntry e) =>
+    '${e.timestamp.toIso8601String()} ${e.level.name} ${e.loggerName}: ${e.message}';
+
 class ReportBugScreen extends HookConsumerWidget {
   const ReportBugScreen({super.key});
 
@@ -76,15 +79,7 @@ class ReportBugScreen extends HookConsumerWidget {
               : null,
           frequency: frequency.value,
           npub: includeNpub.value && pubkey != null ? npubFromHexPubkey(hexPubkey: pubkey) : null,
-          logs: includeLogs.value
-              ? logs
-                    .take(200)
-                    .map(
-                      (e) =>
-                          '${e.timestamp.toIso8601String()} ${e.level.name} ${e.loggerName}: ${e.message}',
-                    )
-                    .join('\n')
-              : null,
+          logs: includeLogs.value ? logs.take(200).map(_formatLogEntry).join('\n') : null,
           appVersion: '${packageInfo.version}+${packageInfo.buildNumber}',
           platform: Platform.operatingSystem,
           osVersion: Platform.operatingSystemVersion,
@@ -301,7 +296,7 @@ class _LogPreview extends StatelessWidget {
                   itemBuilder: (context, index) {
                     final entry = logs[index];
                     return Text(
-                      '${entry.timestamp.toIso8601String()} ${entry.level.name} ${entry.loggerName}: ${entry.message}',
+                      _formatLogEntry(entry),
                       style: typography.medium10.copyWith(
                         color: colors.backgroundContentSecondary,
                         fontFamily: 'monospace',
