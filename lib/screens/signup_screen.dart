@@ -193,7 +193,6 @@ class SignupScreen extends HookConsumerWidget {
                       children: [
                         Flexible(
                           child: WnSlate(
-                            tag: 'wn-slate-signup',
                             header: WnSlateNavigationHeader(
                               title: context.l10n.setupProfile,
                               type: WnSlateNavigationType.back,
@@ -314,7 +313,6 @@ class SignupScreen extends HookConsumerWidget {
                       ),
                       SizedBox(height: 287.h),
                       WnSlate(
-                        tag: 'wn-slate-signup-carousel',
                         child: Padding(
                           padding: EdgeInsets.symmetric(
                             vertical: 14.h,
