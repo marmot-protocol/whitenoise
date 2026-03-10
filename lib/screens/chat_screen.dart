@@ -271,7 +271,8 @@ class ChatScreen extends HookConsumerWidget {
                 }
               : null,
           itemBuilder: (context, index) {
-            final message = displayMessages != null ? displayMessages[index] : getMessage(index);
+            final searchResult = displayMessages?[index];
+            final message = searchResult?.message ?? getMessage(index);
             final isOwnMessage = message.pubkey == pubkey;
             final replyPreview = message.isReply ? getChatMessageQuote(message.replyToId) : null;
 
@@ -297,10 +298,20 @@ class ChatScreen extends HookConsumerWidget {
               index: index,
               child: ChatMessageBubble(
                 message: message,
+                highlightSpans: searchResult?.highlightSpans,
                 isOwnMessage: isOwnMessage,
                 currentUserPubkey: pubkey,
+                replyPreview: replyPreview,
+                senderName: senderName,
+                senderPictureUrl: senderPictureUrl,
+                showAvatar: showAvatar,
+                showTail: showTail,
+                isGroupChat: isGroupChat,
                 onLongPress: () => showMessageMenu(message),
                 onReaction: (emoji) => toggleReaction(message, emoji),
+                onReplyTap: replyPreview != null && !replyPreview.isNotFound
+                    ? () => scrollToMessageResult.scrollToMessage(replyPreview.messageId)
+                    : null,
                 onHorizontalDragEnd: () => input.setReplyingTo(message),
                 onRetry: isOwnMessage && message.deliveryStatus is DeliveryStatus_Failed
                     ? () async {
@@ -312,15 +323,6 @@ class ChatScreen extends HookConsumerWidget {
                         }
                       }
                     : null,
-                replyPreview: replyPreview,
-                onReplyTap: replyPreview != null && !replyPreview.isNotFound
-                    ? () => scrollToMessageResult.scrollToMessage(replyPreview.messageId)
-                    : null,
-                senderName: senderName,
-                senderPictureUrl: senderPictureUrl,
-                showAvatar: showAvatar,
-                showTail: showTail,
-                isGroupChat: isGroupChat,
               ),
             );
           },
@@ -373,13 +375,23 @@ class ChatScreen extends HookConsumerWidget {
                             Routes.pushToGroupInfo(context, groupId);
                           }
                         },
-                        trailingWidget: debugViewEnabled
-                            ? WnIconButton(
+                        trailingWidget: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            if (!isSearchActive.value)
+                              WnIconButton(
+                                key: const Key('chat_search_button'),
+                                icon: WnIcons.search,
+                                onPressed: openSearch,
+                              ),
+                            if (debugViewEnabled)
+                              WnIconButton(
                                 key: const Key('chat_raw_debug_button'),
                                 icon: WnIcons.developerSettings,
                                 onPressed: () => Routes.pushToChatRawDebug(context, groupId),
-                              )
-                            : null,
+                              ),
+                          ],
+                        ),
                       ),
                       systemNotice: noticeMessage.value != null
                           ? WnSystemNotice(

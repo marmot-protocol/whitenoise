@@ -9,7 +9,7 @@ final _logger = Logger('useMessageSearch');
 const _searchDebounceMs = 300;
 
 typedef MessageSearchResult = ({
-  List<ChatMessage> results,
+  List<SearchResult> results,
   bool isSearching,
 });
 
@@ -18,7 +18,7 @@ MessageSearchResult useMessageSearch({
   required String groupId,
   required String query,
 }) {
-  final results = useState<List<ChatMessage>>([]);
+  final results = useState<List<SearchResult>>([]);
   final isSearching = useState(false);
   final debouncedQuery = _useDebouncedValue(query, _searchDebounceMs);
 
@@ -33,25 +33,27 @@ MessageSearchResult useMessageSearch({
     var cancelled = false;
 
     searchMessagesInGroup(
-      pubkey: pubkey,
-      groupId: groupId,
-      query: debouncedQuery,
-    ).then((messages) {
-      if (!cancelled) {
-        _logger.info(
-          'search completed groupId=${groupId.substring(0, 8)}… '
-          'query="$debouncedQuery" results=${messages.length}',
-        );
-        results.value = messages;
-        isSearching.value = false;
-      }
-    }).catchError((Object e, StackTrace st) {
-      if (!cancelled) {
-        _logger.severe('search failed query="$debouncedQuery"', e, st);
-        results.value = [];
-        isSearching.value = false;
-      }
-    });
+          pubkey: pubkey,
+          groupId: groupId,
+          query: debouncedQuery,
+        )
+        .then((messages) {
+          if (!cancelled) {
+            _logger.info(
+              'search completed groupId=${groupId.substring(0, 8)}… '
+              'query="$debouncedQuery" results=${messages.length}',
+            );
+            results.value = messages;
+            isSearching.value = false;
+          }
+        })
+        .catchError((Object e, StackTrace st) {
+          if (!cancelled) {
+            _logger.severe('search failed query="$debouncedQuery"', e, st);
+            results.value = [];
+            isSearching.value = false;
+          }
+        });
 
     return () => cancelled = true;
   }, [debouncedQuery, pubkey, groupId]);

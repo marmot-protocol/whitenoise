@@ -9,6 +9,7 @@ use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
 use tracing::{info, warn};
 use whitenoise::whitenoise::message_aggregator::ChatMessageSummary as WhitenoiseChatMessageSummary;
+use whitenoise::whitenoise::message_aggregator::SearchResult as WhitenoiseSearchResult;
 pub use whitenoise::{
     ChatMessage as WhitenoiseChatMessage, DeliveryStatus as WhitenoiseDeliveryStatus,
     EmojiReaction as WhitenoiseEmojiReaction, MediaFile as WhitenoiseMediaFile,
@@ -151,6 +152,41 @@ pub enum MessageStreamItem {
     InitialSnapshot { messages: Vec<ChatMessage> },
     /// Real-time update for a single message
     Update { update: MessageUpdate },
+}
+
+/// Char-index span marking where a query token matched in message content.
+///
+/// Indices are char-based (not byte-based), half-open: `content[start..end]`.
+#[frb(non_opaque)]
+#[derive(Debug, Clone)]
+pub struct HighlightSpan {
+    pub start: i32,
+    pub end: i32,
+}
+
+/// A search result wrapping a matched message with highlight spans.
+#[frb(non_opaque)]
+#[derive(Debug, Clone)]
+pub struct SearchResult {
+    pub message: ChatMessage,
+    /// One span per matched query token, in the order they appear in the content.
+    pub highlight_spans: Vec<HighlightSpan>,
+}
+
+impl From<WhitenoiseSearchResult> for SearchResult {
+    fn from(result: WhitenoiseSearchResult) -> Self {
+        Self {
+            message: (&result.message).into(),
+            highlight_spans: result
+                .highlight_spans
+                .into_iter()
+                .map(|[s, e]| HighlightSpan {
+                    start: s as i32,
+                    end: e as i32,
+                })
+                .collect(),
+        }
+    }
 }
 
 // From implementations to convert from Whitenoise types to Flutter-compatible types
@@ -421,20 +457,23 @@ pub async fn retry_message_publish(
 /// Uses forward-order substring matching: tokens from the query must appear
 /// in the same order within the message content. Case-insensitive.
 /// Supports all Unicode scripts including CJK.
+///
+/// Returns `SearchResult` items containing both the matched message and
+/// `highlight_spans` — char-index `[start, end]` pairs for frontend highlighting.
 #[frb]
 pub async fn search_messages_in_group(
     pubkey: String,
     group_id: String,
     query: String,
     limit: Option<u32>,
-) -> Result<Vec<ChatMessage>, ApiError> {
+) -> Result<Vec<SearchResult>, ApiError> {
     let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let messages = whitenoise
+    let results = whitenoise
         .search_messages_in_group(&pubkey, &group_id, &query, limit)
         .await?;
-    Ok(messages.into_iter().map(|m| m.into()).collect())
+    Ok(results.into_iter().map(|r| r.into()).collect())
 }
 
 /// Fetch a paginated page of messages for a group.

@@ -384,6 +384,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  HighlightSpan dco_decode_highlight_span(dynamic raw);
+
+  @protected
   int dco_decode_i_32(dynamic raw);
 
   @protected
@@ -432,6 +435,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<GroupWithInfoAndMembership> dco_decode_list_group_with_info_and_membership(dynamic raw);
 
   @protected
+  List<HighlightSpan> dco_decode_list_highlight_span(dynamic raw);
+
+  @protected
   List<LeafNodeInfo> dco_decode_list_leaf_node_info(dynamic raw);
 
   @protected
@@ -451,6 +457,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<Relay> dco_decode_list_relay(dynamic raw);
+
+  @protected
+  List<SearchResult> dco_decode_list_search_result(dynamic raw);
 
   @protected
   List<SerializableToken> dco_decode_list_serializable_token(dynamic raw);
@@ -567,6 +576,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Relay dco_decode_relay(dynamic raw);
+
+  @protected
+  SearchResult dco_decode_search_result(dynamic raw);
 
   @protected
   SearchUpdateTrigger dco_decode_search_update_trigger(dynamic raw);
@@ -973,6 +985,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  HighlightSpan sse_decode_highlight_span(SseDeserializer deserializer);
+
+  @protected
   int sse_decode_i_32(SseDeserializer deserializer);
 
   @protected
@@ -1029,6 +1044,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  List<HighlightSpan> sse_decode_list_highlight_span(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   List<LeafNodeInfo> sse_decode_list_leaf_node_info(
     SseDeserializer deserializer,
   );
@@ -1054,6 +1074,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<Relay> sse_decode_list_relay(SseDeserializer deserializer);
+
+  @protected
+  List<SearchResult> sse_decode_list_search_result(
+    SseDeserializer deserializer,
+  );
 
   @protected
   List<SerializableToken> sse_decode_list_serializable_token(
@@ -1196,6 +1221,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Relay sse_decode_relay(SseDeserializer deserializer);
+
+  @protected
+  SearchResult sse_decode_search_result(SseDeserializer deserializer);
 
   @protected
   SearchUpdateTrigger sse_decode_search_update_trigger(
@@ -1696,6 +1724,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_highlight_span(HighlightSpan self, SseSerializer serializer);
+
+  @protected
   void sse_encode_i_32(int self, SseSerializer serializer);
 
   @protected
@@ -1765,6 +1796,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_highlight_span(
+    List<HighlightSpan> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_leaf_node_info(
     List<LeafNodeInfo> self,
     SseSerializer serializer,
@@ -1802,6 +1839,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_list_relay(List<Relay> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_search_result(
+    List<SearchResult> self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_serializable_token(
@@ -1977,6 +2020,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_relay(Relay self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_search_result(SearchResult self, SseSerializer serializer);
 
   @protected
   void sse_encode_search_update_trigger(

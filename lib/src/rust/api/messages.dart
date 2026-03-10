@@ -12,7 +12,7 @@ import 'media_files.dart';
 
 part 'messages.freezed.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
 
 Future<MessageWithTokens> sendMessageToGroup({
   required String pubkey,
@@ -39,6 +39,26 @@ Future<void> retryMessagePublish({
   pubkey: pubkey,
   groupId: groupId,
   eventId: eventId,
+);
+
+/// Search messages within a group by content.
+///
+/// Uses forward-order substring matching: tokens from the query must appear
+/// in the same order within the message content. Case-insensitive.
+/// Supports all Unicode scripts including CJK.
+///
+/// Returns `SearchResult` items containing both the matched message and
+/// `highlight_spans` — char-index `[start, end]` pairs for frontend highlighting.
+Future<List<SearchResult>> searchMessagesInGroup({
+  required String pubkey,
+  required String groupId,
+  required String query,
+  int? limit,
+}) => RustLib.instance.api.crateApiMessagesSearchMessagesInGroup(
+  pubkey: pubkey,
+  groupId: groupId,
+  query: query,
+  limit: limit,
 );
 
 /// Fetch a paginated page of messages for a group.
@@ -276,6 +296,30 @@ class EmojiReaction {
           users == other.users;
 }
 
+/// Char-index span marking where a query token matched in message content.
+///
+/// Indices are char-based (not byte-based), half-open: `content[start..end]`.
+class HighlightSpan {
+  final int start;
+  final int end;
+
+  const HighlightSpan({
+    required this.start,
+    required this.end,
+  });
+
+  @override
+  int get hashCode => start.hashCode ^ end.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is HighlightSpan &&
+          runtimeType == other.runtimeType &&
+          start == other.start &&
+          end == other.end;
+}
+
 @freezed
 sealed class MessageStreamItem with _$MessageStreamItem {
   const MessageStreamItem._();
@@ -376,6 +420,30 @@ class ReactionSummary {
           runtimeType == other.runtimeType &&
           byEmoji == other.byEmoji &&
           userReactions == other.userReactions;
+}
+
+/// A search result wrapping a matched message with highlight spans.
+class SearchResult {
+  final ChatMessage message;
+
+  /// One span per matched query token, in the order they appear in the content.
+  final List<HighlightSpan> highlightSpans;
+
+  const SearchResult({
+    required this.message,
+    required this.highlightSpans,
+  });
+
+  @override
+  int get hashCode => message.hashCode ^ highlightSpans.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is SearchResult &&
+          runtimeType == other.runtimeType &&
+          message == other.message &&
+          highlightSpans == other.highlightSpans;
 }
 
 /// Flutter-compatible serializable token

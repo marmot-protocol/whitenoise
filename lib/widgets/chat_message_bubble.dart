@@ -13,14 +13,10 @@ import 'package:whitenoise/widgets/wn_message_bubble.dart';
 
 class ChatMessageBubble extends StatelessWidget {
   final ChatMessage message;
+  final List<HighlightSpan>? highlightSpans;
   final bool isOwnMessage;
   final String? currentUserPubkey;
-  final VoidCallback? onLongPress;
-  final void Function(String emoji)? onReaction;
   final ChatMessageQuoteData? replyPreview;
-  final VoidCallback? onReplyTap;
-  final VoidCallback? onHorizontalDragEnd;
-  final VoidCallback? onRetry;
   final String? senderName;
   final String? senderPictureUrl;
   final bool showAvatar;
@@ -29,18 +25,19 @@ class ChatMessageBubble extends StatelessWidget {
   final int? contentMaxLines;
   final double bubbleWidthFactor;
   final bool forceTightHeight;
+  final VoidCallback? onLongPress;
+  final void Function(String emoji)? onReaction;
+  final VoidCallback? onReplyTap;
+  final VoidCallback? onHorizontalDragEnd;
+  final VoidCallback? onRetry;
 
   const ChatMessageBubble({
     super.key,
     required this.message,
+    this.highlightSpans,
     required this.isOwnMessage,
     this.currentUserPubkey,
-    this.onLongPress,
-    this.onReaction,
     this.replyPreview,
-    this.onReplyTap,
-    this.onHorizontalDragEnd,
-    this.onRetry,
     this.senderName,
     this.senderPictureUrl,
     this.showAvatar = false,
@@ -49,6 +46,11 @@ class ChatMessageBubble extends StatelessWidget {
     this.contentMaxLines,
     this.bubbleWidthFactor = 0.8,
     this.forceTightHeight = false,
+    this.onLongPress,
+    this.onReaction,
+    this.onReplyTap,
+    this.onHorizontalDragEnd,
+    this.onRetry,
   });
 
   ChatStatusType? get _deliveryStatusType {
@@ -103,6 +105,7 @@ class ChatMessageBubble extends StatelessWidget {
           : null,
       showTail: showTail,
       content: message.content.isNotEmpty ? message.content : null,
+      highlightSpans: highlightSpans,
       mediaContent: message.mediaAttachments.isNotEmpty
           ? ChatMessageMedia(
               key: const Key('message_media'),
@@ -121,9 +124,6 @@ class ChatMessageBubble extends StatelessWidget {
       timestamp: showStatus ? _formatTime(message.createdAt) : null,
       reactions: message.reactions.byEmoji,
       currentUserPubkey: currentUserPubkey,
-      onLongPress: onLongPress,
-      onReaction: onReaction,
-      onHorizontalDragEnd: onHorizontalDragEnd,
       avatar: !isOwnMessage && showAvatar
           ? WnAvatar(
               pictureUrl: senderPictureUrl,
@@ -140,6 +140,9 @@ class ChatMessageBubble extends StatelessWidget {
         isGroupChat: isGroupChat,
       ),
       deliveryStatus: isOwnMessage ? _deliveryStatusType : null,
+      onLongPress: onLongPress,
+      onReaction: onReaction,
+      onHorizontalDragEnd: onHorizontalDragEnd,
       onStatusTap: _deliveryStatusType == ChatStatusType.failed ? onRetry : null,
       contentMaxLines: contentMaxLines,
       bubbleWidthFactor: bubbleWidthFactor,
