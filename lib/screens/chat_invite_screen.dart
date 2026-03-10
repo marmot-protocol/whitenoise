@@ -51,7 +51,7 @@ class ChatInviteScreen extends HookConsumerWidget {
     }
 
     final chatProfile = useChatProfile(context, pubkey, mlsGroupId);
-    final chatMessages = useChatMessages(mlsGroupId);
+    final chatMessages = useChatMessages(mlsGroupId, pubkey: pubkey);
 
     final accountGroup = useMemoized(
       () => account_groups_api.getAccountGroup(

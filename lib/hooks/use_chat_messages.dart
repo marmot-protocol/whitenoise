@@ -26,6 +26,9 @@ typedef ChatMessagesResult = ({
   int? Function(String messageId) getReversedMessageIndex,
   ChatMessage? Function(String messageId) getMessageById,
   bool isLoading,
+  bool isLoadingOlderMessages,
+  bool hasMoreMessages,
+  Future<void> Function() loadOlderMessages,
   String? latestMessageId,
   String? latestMessagePubkey,
   ChatMessageQuoteData? Function(String? replyId) getChatMessageQuote,
@@ -34,6 +37,7 @@ typedef ChatMessagesResult = ({
 
 ChatMessagesResult useChatMessages(
   String groupId, {
+  required String pubkey,
   MessageDebugLogNotifier? debugLog,
 }) {
   final messageIds = useRef<List<String>>([]);
@@ -43,6 +47,15 @@ ChatMessagesResult useChatMessages(
   final metadataSubscriptionsByPubkey = useRef<Map<String, StreamSubscription<FlutterMetadata>>>(
     {},
   );
+  final isLoadingOlderMessages = useState(false);
+  final hasMoreMessages = useState(true);
+  final totalMessageCount = useState(0);
+
+  useEffect(() {
+    hasMoreMessages.value = true;
+    totalMessageCount.value = 0;
+    return null;
+  }, [groupId]);
 
   final stream = useMemoized(
     () {
@@ -188,6 +201,14 @@ ChatMessagesResult useChatMessages(
     [snapshot.connectionState, snapshot.hasData, snapshot.hasError, snapshot.data?.messageCount],
   );
 
+  useEffect(() {
+    final streamCount = snapshot.data?.messageCount ?? 0;
+    if (streamCount > 0) {
+      totalMessageCount.value = messageIds.value.length;
+    }
+    return null;
+  }, [snapshot.data?.messageCount]);
+
   ChatMessage getMessage(int reversedIndex) {
     final length = messageIds.value.length;
     final naturalIndex = length - 1 - reversedIndex;
@@ -286,12 +307,67 @@ ChatMessagesResult useChatMessages(
     };
   }, [groupId]);
 
+  Future<void> loadOlderMessages() async {
+    if (isLoadingOlderMessages.value || !hasMoreMessages.value) return;
+    if (messageIds.value.isEmpty) return;
+
+    final oldestId = messageIds.value.first;
+    final oldestMessage = messagesById.value[oldestId];
+    if (oldestMessage == null) return;
+
+    isLoadingOlderMessages.value = true;
+    _logger.info(
+      'loadOlderMessages groupId=$groupId before=${oldestMessage.createdAt} id=$oldestId',
+    );
+
+    try {
+      final olderMessages = await fetchAggregatedMessagesForGroup(
+        pubkey: pubkey,
+        groupId: groupId,
+        before: oldestMessage.createdAt,
+        beforeMessageId: oldestId,
+      );
+
+      if (olderMessages.isEmpty) {
+        hasMoreMessages.value = false;
+        _logger.info('loadOlderMessages groupId=$groupId: no more messages');
+        return;
+      }
+
+      _logger.info('loadOlderMessages groupId=$groupId: got ${olderMessages.length} messages');
+
+      final newIds = <String>[];
+      for (final msg in olderMessages) {
+        if (!indexById.value.containsKey(msg.id)) {
+          newIds.add(msg.id);
+          messagesById.value[msg.id] = msg;
+        }
+      }
+
+      if (newIds.isNotEmpty) {
+        final combined = [...newIds, ...messageIds.value];
+        messageIds.value = combined;
+        indexById.value = {
+          for (var i = 0; i < combined.length; i++) combined[i]: i,
+        };
+        totalMessageCount.value = combined.length;
+      }
+    } catch (e, st) {
+      _logger.severe('loadOlderMessages FAILED groupId=$groupId', e, st);
+    } finally {
+      isLoadingOlderMessages.value = false;
+    }
+  }
+
   return (
-    messageCount: snapshot.data?.messageCount ?? 0,
+    messageCount: totalMessageCount.value,
     getMessage: getMessage,
     getReversedMessageIndex: getReversedMessageIndex,
     getMessageById: getMessageById,
     isLoading: isLoading,
+    isLoadingOlderMessages: isLoadingOlderMessages.value,
+    hasMoreMessages: hasMoreMessages.value,
+    loadOlderMessages: loadOlderMessages,
     latestMessageId: snapshot.data?.latestMessageId,
     latestMessagePubkey: snapshot.data?.latestMessagePubkey,
     getChatMessageQuote: getChatMessageQuote,

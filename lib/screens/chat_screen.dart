@@ -63,12 +63,16 @@ class ChatScreen extends HookConsumerWidget {
       :getReversedMessageIndex,
       :getMessageById,
       :isLoading,
+      :isLoadingOlderMessages,
+      :hasMoreMessages,
+      :loadOlderMessages,
       :latestMessageId,
       :latestMessagePubkey,
       :getChatMessageQuote,
       :getAuthorMetadata,
     ) = useChatMessages(
       groupId,
+      pubkey: pubkey,
       debugLog: debugLog,
     );
     final chatProfile = useChatProfile(context, pubkey, groupId);
@@ -134,6 +138,8 @@ class ChatScreen extends HookConsumerWidget {
       messageCount: messageCount,
       getMessageId: getMessageIdByIndex,
       getReversedIndex: getReversedMessageIndex,
+      hasMoreMessages: hasMoreMessages,
+      loadOlderMessages: loadOlderMessages,
     );
 
     Future<void> sendMessage(

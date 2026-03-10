@@ -20,6 +20,8 @@ class _TestWidget extends HookWidget {
     this.latestMessageId,
     this.latestMessagePubkey,
     this.onResult,
+    this.hasMoreMessages = false,
+    this.loadOlderMessages,
   });
 
   final AutoScrollController scrollController;
@@ -28,6 +30,8 @@ class _TestWidget extends HookWidget {
   final String? latestMessageId;
   final String? latestMessagePubkey;
   final void Function(ChatScrollResult)? onResult;
+  final bool hasMoreMessages;
+  final Future<void> Function()? loadOlderMessages;
 
   @override
   Widget build(BuildContext context) {
@@ -44,6 +48,8 @@ class _TestWidget extends HookWidget {
         final index = messageIds.indexOf(id);
         return index >= 0 ? index : null;
       },
+      hasMoreMessages: hasMoreMessages,
+      loadOlderMessages: loadOlderMessages ?? () async {},
     );
 
     onResult?.call(result);
@@ -102,6 +108,8 @@ void main() {
     String? latestMessageId,
     String? latestMessagePubkey,
     void Function(ChatScrollResult)? onResult,
+    bool hasMoreMessages = false,
+    Future<void> Function()? loadOlderMessages,
   }) async {
     final ids = messageIds ?? _generateIds(50);
     await tester.pumpWidget(
@@ -112,6 +120,8 @@ void main() {
         latestMessageId: latestMessageId,
         latestMessagePubkey: latestMessagePubkey,
         onResult: onResult,
+        hasMoreMessages: hasMoreMessages,
+        loadOlderMessages: loadOlderMessages,
       ),
     );
     await tester.pumpAndSettle();
@@ -505,6 +515,49 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(scrollController.position.pixels, 0);
+      });
+    });
+
+    group('scroll-to-top triggers loadOlderMessages', () {
+      testWidgets('calls loadOlderMessages when scrolled to top with hasMoreMessages=true', (
+        tester,
+      ) async {
+        _api.lastReadMessageId = 'm50';
+        var loadCalled = false;
+        await pumpScroll(
+          tester,
+          messageIds: _generateIds(50),
+          hasMoreMessages: true,
+          loadOlderMessages: () async {
+            loadCalled = true;
+          },
+        );
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+
+        scrollController.jumpTo(scrollController.position.maxScrollExtent);
+        await tester.pumpAndSettle();
+
+        expect(loadCalled, isTrue);
+      });
+
+      testWidgets('does not call loadOlderMessages when hasMoreMessages=false', (tester) async {
+        _api.lastReadMessageId = 'm50';
+        var loadCalled = false;
+        await pumpScroll(
+          tester,
+          messageIds: _generateIds(50),
+          loadOlderMessages: () async {
+            loadCalled = true;
+          },
+        );
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+
+        scrollController.jumpTo(scrollController.position.maxScrollExtent);
+        await tester.pumpAndSettle();
+
+        expect(loadCalled, isFalse);
       });
     });
   });

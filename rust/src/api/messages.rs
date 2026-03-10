@@ -416,29 +416,51 @@ pub async fn retry_message_publish(
     Ok(())
 }
 
-fn initial_aggregated_messages_page() -> (Option<Timestamp>, Option<String>, Option<u32>) {
-    (None, None, None)
-}
-
+/// Fetch a paginated page of messages for a group.
+///
+/// Returns messages in oldest-first order. Pass the `created_at` and `id` of the
+/// oldest message currently loaded to fetch the preceding page (infinite scroll upward).
+/// Omit `before` and `before_message_id` for the initial load.
 #[frb]
 pub async fn fetch_aggregated_messages_for_group(
     pubkey: String,
     group_id: String,
+    before: Option<DateTime<Utc>>,
+    before_message_id: Option<String>,
+    limit: Option<u32>,
 ) -> Result<Vec<ChatMessage>, ApiError> {
     let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let (before, before_message_id, limit) = initial_aggregated_messages_page();
+    let before_ts = before.map(|dt| Timestamp::from(dt.timestamp() as u64));
     let messages = whitenoise
         .fetch_aggregated_messages_for_group(
             &pubkey,
             &group_id,
-            before,
+            before_ts,
             before_message_id.as_deref(),
             limit,
         )
         .await?;
     Ok(messages.into_iter().map(|m| m.into()).collect())
+}
+
+/// Fetch a single message by its event ID.
+///
+/// Returns `None` if the message does not exist in the cache.
+#[frb]
+pub async fn fetch_message_by_id(
+    pubkey: String,
+    group_id: String,
+    message_id: String,
+) -> Result<Option<ChatMessage>, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let group_id = group_id_from_string(&group_id)?;
+    let message = whitenoise
+        .fetch_message_by_id(&pubkey, &group_id, &message_id)
+        .await?;
+    Ok(message.map(|m| m.into()))
 }
 
 /// Subscribe to real-time message updates for a group.
@@ -587,14 +609,5 @@ mod tests {
     fn test_delivery_status_conversion_retried() {
         let status: DeliveryStatus = WhitenoiseDeliveryStatus::Retried.into();
         assert_eq!(status, DeliveryStatus::Retried);
-    }
-
-    #[test]
-    fn test_initial_aggregated_messages_page_has_no_cursor() {
-        let (before, before_message_id, limit) = initial_aggregated_messages_page();
-
-        assert_eq!(before, None);
-        assert_eq!(before_message_id, None);
-        assert_eq!(limit, None);
     }
 }

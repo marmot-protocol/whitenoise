@@ -42,12 +42,36 @@ Future<void> retryMessagePublish({
   eventId: eventId,
 );
 
+/// Fetch a paginated page of messages for a group.
+///
+/// Returns messages in oldest-first order. Pass the `created_at` and `id` of the
+/// oldest message currently loaded to fetch the preceding page (infinite scroll upward).
+/// Omit `before` and `before_message_id` for the initial load.
 Future<List<ChatMessage>> fetchAggregatedMessagesForGroup({
   required String pubkey,
   required String groupId,
+  DateTime? before,
+  String? beforeMessageId,
+  int? limit,
 }) => RustLib.instance.api.crateApiMessagesFetchAggregatedMessagesForGroup(
   pubkey: pubkey,
   groupId: groupId,
+  before: before,
+  beforeMessageId: beforeMessageId,
+  limit: limit,
+);
+
+/// Fetch a single message by its event ID.
+///
+/// Returns `None` if the message does not exist in the cache.
+Future<ChatMessage?> fetchMessageById({
+  required String pubkey,
+  required String groupId,
+  required String messageId,
+}) => RustLib.instance.api.crateApiMessagesFetchMessageById(
+  pubkey: pubkey,
+  groupId: groupId,
+  messageId: messageId,
 );
 
 /// Subscribe to real-time message updates for a group.

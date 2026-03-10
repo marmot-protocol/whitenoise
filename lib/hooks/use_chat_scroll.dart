@@ -7,6 +7,7 @@ import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:whitenoise/hooks/use_mark_as_read.dart';
 
 const _bottomThreshold = 50.0;
+const _topThreshold = 200.0;
 
 typedef ChatScrollResult = ({
   bool isInitialPositionReady,
@@ -24,6 +25,8 @@ ChatScrollResult useChatScroll({
   required int messageCount,
   required String? Function(int reversedIndex) getMessageId,
   required int? Function(String messageId) getReversedIndex,
+  required bool hasMoreMessages,
+  required Future<void> Function() loadOlderMessages,
 }) {
   final (:firstUnreadIndex, :hasLoadedLastRead, :markMessageAsRead) = useMarkAsRead(
     accountPubkey: accountPubkey,
@@ -120,6 +123,13 @@ ChatScrollResult useChatScroll({
 
       isScrollDownButtonVisible.value = firstUnreadIndex != null && !atBottom;
       hasUserScrolled.value = true;
+
+      final atTop =
+          position.pixels >= position.maxScrollExtent - _topThreshold &&
+          position.maxScrollExtent > 0;
+      if (atTop && hasMoreMessages) {
+        loadOlderMessages();
+      }
 
       debounceTimer.value?.cancel();
       debounceTimer.value = Timer(

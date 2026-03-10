@@ -104,6 +104,9 @@ class _MockApi extends MockWnApi {
   Future<List<ChatMessage>> crateApiMessagesFetchAggregatedMessagesForGroup({
     required String pubkey,
     required String groupId,
+    DateTime? before,
+    String? beforeMessageId,
+    int? limit,
   }) async {
     return [];
   }

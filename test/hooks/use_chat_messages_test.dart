@@ -131,6 +131,29 @@ class _MockApi extends MockWnApi {
     return super.crateApiUsersSubscribeToUser(pubkey: pubkey);
   }
 
+  List<ChatMessage> olderMessagesResponse = [];
+  bool fetchOlderFails = false;
+  ({String? pubkey, String? groupId, DateTime? before, String? beforeMessageId})?
+  lastFetchOlderCall;
+
+  @override
+  Future<List<ChatMessage>> crateApiMessagesFetchAggregatedMessagesForGroup({
+    required String pubkey,
+    required String groupId,
+    DateTime? before,
+    String? beforeMessageId,
+    int? limit,
+  }) async {
+    lastFetchOlderCall = (
+      pubkey: pubkey,
+      groupId: groupId,
+      before: before,
+      beforeMessageId: beforeMessageId,
+    );
+    if (fetchOlderFails) throw Exception('fetch failed');
+    return olderMessagesResponse;
+  }
+
   FlutterMetadata? userMetadataResponse;
   _MetadataMode metadataMode = _MetadataMode.normal;
   final metadataCalls = <({String pubkey, bool blocking})>[];
@@ -164,6 +187,9 @@ class _MockApi extends MockWnApi {
     userMetadataResponse = null;
     metadataMode = _MetadataMode.normal;
     metadataCalls.clear();
+    olderMessagesResponse = [];
+    fetchOlderFails = false;
+    lastFetchOlderCall = null;
   }
 
   @override
@@ -173,7 +199,7 @@ class _MockApi extends MockWnApi {
 final _api = _MockApi();
 
 Future<ChatMessagesResult Function()> _pump(WidgetTester tester, String groupId) async {
-  return await mountHook(tester, () => useChatMessages(groupId));
+  return await mountHook(tester, () => useChatMessages(groupId, pubkey: testPubkeyA));
 }
 
 void main() {
@@ -524,7 +550,10 @@ void main() {
         addTearDown(container.dispose);
         final debugLog = container.read(messageDebugLogProvider.notifier);
 
-        await mountHook(tester, () => useChatMessages('group1', debugLog: debugLog));
+        await mountHook(
+          tester,
+          () => useChatMessages('group1', pubkey: testPubkeyA, debugLog: debugLog),
+        );
 
         _api.emitError(Exception('debug log error'));
         await tester.pump();
@@ -863,6 +892,185 @@ void main() {
         expect(preview!.authorMetadata, isNotNull);
         expect(preview.authorMetadata?.displayName, 'Relay Author');
         expect(_api.metadataCalls.every((c) => !c.blocking), isTrue);
+      });
+    });
+
+    group('pagination', () {
+      group('hasMoreMessages', () {
+        testWidgets('starts as true', (tester) async {
+          final getResult = await _pump(tester, 'group1');
+
+          expect(getResult().hasMoreMessages, isTrue);
+        });
+
+        testWidgets('stays true when loadOlderMessages returns messages', (tester) async {
+          final getResult = await _pump(tester, 'group1');
+
+          _api.emitInitialSnapshot([_message('m2', DateTime(2024, 1, 2))]);
+          await tester.pumpAndSettle();
+
+          _api.olderMessagesResponse = [_message('m1', DateTime(2024))];
+          await getResult().loadOlderMessages();
+          await tester.pumpAndSettle();
+
+          expect(getResult().hasMoreMessages, isTrue);
+        });
+
+        testWidgets('becomes false when loadOlderMessages returns empty', (tester) async {
+          final getResult = await _pump(tester, 'group1');
+
+          _api.emitInitialSnapshot([_message('m1', DateTime(2024))]);
+          await tester.pumpAndSettle();
+
+          _api.olderMessagesResponse = [];
+          await getResult().loadOlderMessages();
+          await tester.pumpAndSettle();
+
+          expect(getResult().hasMoreMessages, isFalse);
+        });
+      });
+
+      group('isLoadingOlderMessages', () {
+        testWidgets('starts as false', (tester) async {
+          final getResult = await _pump(tester, 'group1');
+
+          expect(getResult().isLoadingOlderMessages, isFalse);
+        });
+      });
+
+      group('loadOlderMessages', () {
+        testWidgets('does nothing before initial snapshot', (tester) async {
+          final getResult = await _pump(tester, 'group1');
+
+          await getResult().loadOlderMessages();
+          await tester.pumpAndSettle();
+
+          expect(getResult().messageCount, 0);
+          expect(_api.lastFetchOlderCall, isNull);
+        });
+
+        testWidgets('prepends older messages before existing ones', (tester) async {
+          final getResult = await _pump(tester, 'group1');
+
+          _api.emitInitialSnapshot([_message('m2', DateTime(2024, 1, 2))]);
+          await tester.pumpAndSettle();
+
+          _api.olderMessagesResponse = [_message('m1', DateTime(2024))];
+          await getResult().loadOlderMessages();
+          await tester.pumpAndSettle();
+
+          final result = getResult();
+          expect(result.messageCount, 2);
+          expect(result.getMessage(0).id, 'm2');
+          expect(result.getMessage(1).id, 'm1');
+        });
+
+        testWidgets('passes cursor from oldest loaded message', (tester) async {
+          final getResult = await _pump(tester, 'group1');
+          final oldestDate = DateTime(2024);
+
+          _api.emitInitialSnapshot([
+            _message('m1', oldestDate),
+            _message('m2', DateTime(2024, 1, 2)),
+          ]);
+          await tester.pumpAndSettle();
+
+          _api.olderMessagesResponse = [];
+          await getResult().loadOlderMessages();
+
+          expect(_api.lastFetchOlderCall?.before, oldestDate);
+          expect(_api.lastFetchOlderCall?.beforeMessageId, 'm1');
+        });
+
+        testWidgets('does not load when hasMoreMessages is false', (tester) async {
+          final getResult = await _pump(tester, 'group1');
+
+          _api.emitInitialSnapshot([_message('m1', DateTime(2024))]);
+          await tester.pumpAndSettle();
+
+          _api.olderMessagesResponse = [];
+          await getResult().loadOlderMessages();
+          await tester.pumpAndSettle();
+
+          _api.lastFetchOlderCall = null;
+          await getResult().loadOlderMessages();
+
+          expect(_api.lastFetchOlderCall, isNull);
+        });
+
+        testWidgets('ignores already-loaded messages in response', (tester) async {
+          final getResult = await _pump(tester, 'group1');
+
+          _api.emitInitialSnapshot([_message('m2', DateTime(2024, 1, 2))]);
+          await tester.pumpAndSettle();
+
+          _api.olderMessagesResponse = [
+            _message('m1', DateTime(2024)),
+            _message('m2', DateTime(2024, 1, 2)),
+          ];
+          await getResult().loadOlderMessages();
+          await tester.pumpAndSettle();
+
+          expect(getResult().messageCount, 2);
+        });
+
+        testWidgets('handles fetch errors gracefully', (tester) async {
+          final getResult = await _pump(tester, 'group1');
+
+          _api.emitInitialSnapshot([_message('m1', DateTime(2024))]);
+          await tester.pumpAndSettle();
+
+          _api.fetchOlderFails = true;
+          await getResult().loadOlderMessages();
+          await tester.pumpAndSettle();
+
+          expect(getResult().messageCount, 1);
+          expect(getResult().isLoadingOlderMessages, isFalse);
+          expect(getResult().hasMoreMessages, isTrue);
+        });
+
+        testWidgets('total count includes both older and stream messages', (tester) async {
+          final getResult = await _pump(tester, 'group1');
+
+          _api.emitInitialSnapshot([
+            _message('m3', DateTime(2024, 1, 3)),
+            _message('m4', DateTime(2024, 1, 4)),
+          ]);
+          await tester.pumpAndSettle();
+
+          _api.olderMessagesResponse = [
+            _message('m1', DateTime(2024)),
+            _message('m2', DateTime(2024, 1, 2)),
+          ];
+          await getResult().loadOlderMessages();
+          await tester.pumpAndSettle();
+
+          expect(getResult().messageCount, 4);
+          expect(getResult().getMessage(3).id, 'm1');
+          expect(getResult().getMessage(2).id, 'm2');
+          expect(getResult().getMessage(1).id, 'm3');
+          expect(getResult().getMessage(0).id, 'm4');
+        });
+
+        testWidgets('new stream messages are still appended at newest end', (tester) async {
+          final getResult = await _pump(tester, 'group1');
+
+          _api.emitInitialSnapshot([_message('m2', DateTime(2024, 1, 2))]);
+          await tester.pumpAndSettle();
+
+          _api.olderMessagesResponse = [_message('m1', DateTime(2024))];
+          await getResult().loadOlderMessages();
+          await tester.pumpAndSettle();
+
+          _api.emitNewMessage(_message('m3', DateTime(2024, 1, 3)));
+          await tester.pumpAndSettle();
+
+          final result = getResult();
+          expect(result.messageCount, 3);
+          expect(result.getMessage(0).id, 'm3');
+          expect(result.getMessage(1).id, 'm2');
+          expect(result.getMessage(2).id, 'm1');
+        });
       });
     });
   });

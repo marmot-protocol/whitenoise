@@ -43,20 +43,18 @@ class ChatRawDebugScreen extends HookConsumerWidget {
     final typography = context.typographyScaled;
 
     final debugLog = ref.read(messageDebugLogProvider.notifier);
-    final (
-      :messageCount,
-      :getMessage,
-      :getReversedMessageIndex,
-      :getMessageById,
-      :isLoading,
-      :latestMessageId,
-      :latestMessagePubkey,
-      :getChatMessageQuote,
-      :getAuthorMetadata,
-    ) = useChatMessages(
+    final pubkey = ref.watch(accountPubkeyProvider);
+    final chatMessages = useChatMessages(
       groupId,
+      pubkey: pubkey,
       debugLog: debugLog,
     );
+    final messageCount = chatMessages.messageCount;
+    final getMessage = chatMessages.getMessage;
+    final isLoading = chatMessages.isLoading;
+    final latestMessageId = chatMessages.latestMessageId;
+    final latestMessagePubkey = chatMessages.latestMessagePubkey;
+    final getAuthorMetadata = chatMessages.getAuthorMetadata;
 
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,

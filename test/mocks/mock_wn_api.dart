@@ -277,8 +277,20 @@ class MockWnApi implements RustLibApi {
   Future<List<ChatMessage>> crateApiMessagesFetchAggregatedMessagesForGroup({
     required String pubkey,
     required String groupId,
+    DateTime? before,
+    String? beforeMessageId,
+    int? limit,
   }) async {
     return [];
+  }
+
+  @override
+  Future<ChatMessage?> crateApiMessagesFetchMessageById({
+    required String pubkey,
+    required String groupId,
+    required String messageId,
+  }) async {
+    return null;
   }
 
   @override
