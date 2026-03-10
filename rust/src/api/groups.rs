@@ -16,11 +16,12 @@ const GROUP_CREATION_RELAY_URLS: [&str; 3] = [
     "wss://relay.damus.io",
 ];
 
-fn group_creation_relays() -> Vec<RelayUrl> {
+fn group_creation_relays() -> Result<Vec<RelayUrl>, ApiError> {
     GROUP_CREATION_RELAY_URLS
         .into_iter()
-        .map(|url| RelayUrl::parse(url).expect("group creation relay URLs must be valid"))
-        .collect()
+        .map(RelayUrl::parse)
+        .collect::<Result<Vec<_>, _>>()
+        .map_err(ApiError::from)
 }
 
 #[frb(non_opaque)]
@@ -268,7 +269,7 @@ pub async fn create_group(
         image_key: None,
         image_hash: None,
         image_nonce: None,
-        relays: group_creation_relays(),
+        relays: group_creation_relays()?,
         admins: admin_pubkeys,
     };
 
@@ -507,6 +508,7 @@ mod tests {
     #[test]
     fn group_creation_relays_match_fixed_list() {
         let relays = group_creation_relays()
+            .expect("group creation relay URLs must stay valid")
             .into_iter()
             .map(|relay| relay.to_string())
             .collect::<Vec<_>>();

@@ -521,6 +521,31 @@
     "description": "Developer settings row description for relay state"
   },
 
+  "relayControlStateDumpLabel": "debug_relay_control_state:",
+  "@relayControlStateDumpLabel": {
+    "description": "Technical label shown above the relay control state dump"
+  },
+
+  "relayControlStateSnapshotDescription": "Snapshot of the live relay discovery, inbox, and group planes.",
+  "@relayControlStateSnapshotDescription": {
+    "description": "Description shown above the relay control state dump"
+  },
+
+  "relayControlStateLoading": "Loading...",
+  "@relayControlStateLoading": {
+    "description": "Button label shown while the relay control state dump is loading"
+  },
+
+  "relayControlStateRefreshButton": "Refresh Dump",
+  "@relayControlStateRefreshButton": {
+    "description": "Button label to refresh the relay control state dump"
+  },
+
+  "relayControlStateCopyButton": "Copy Dump",
+  "@relayControlStateCopyButton": {
+    "description": "Button label to copy the relay control state dump"
+  },
+
   "publishNewKeyPackage": "Publish New Key Package",
   "@publishNewKeyPackage": {
     "description": "Button to publish new key package"

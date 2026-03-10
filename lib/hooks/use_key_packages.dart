@@ -31,7 +31,7 @@ class KeyPackagesState {
 
 enum KeyPackageAction { fetch, publish, delete, deleteAll }
 
-typedef KeyPackageResult = ({bool success, KeyPackageAction action});
+typedef KeyPackageResult = ({bool success, KeyPackageAction action, String? error});
 
 ({
   KeyPackagesState state,
@@ -45,67 +45,71 @@ useKeyPackages(String pubkey) {
 
   Future<KeyPackageResult> fetch() async {
     if (state.value.isLoading) {
-      return (success: false, action: KeyPackageAction.fetch);
+      return (success: false, action: KeyPackageAction.fetch, error: null);
     }
     state.value = state.value.copyWith(isLoading: true, clearError: true);
     try {
       final packages = await accounts_api.accountKeyPackages(accountPubkey: pubkey);
       state.value = state.value.copyWith(isLoading: false, packages: packages);
-      return (success: true, action: KeyPackageAction.fetch);
+      return (success: true, action: KeyPackageAction.fetch, error: null);
     } catch (e) {
+      const error = 'Failed to fetch key packages';
       _logger.severe('Failed to fetch key packages', e);
-      state.value = state.value.copyWith(isLoading: false, error: 'Failed to fetch key packages');
-      return (success: false, action: KeyPackageAction.fetch);
+      state.value = state.value.copyWith(isLoading: false, error: error);
+      return (success: false, action: KeyPackageAction.fetch, error: error);
     }
   }
 
   Future<KeyPackageResult> publish() async {
     if (state.value.isLoading) {
-      return (success: false, action: KeyPackageAction.publish);
+      return (success: false, action: KeyPackageAction.publish, error: null);
     }
     state.value = state.value.copyWith(isLoading: true, clearError: true);
     try {
       await accounts_api.publishAccountKeyPackage(accountPubkey: pubkey);
       final packages = await accounts_api.accountKeyPackages(accountPubkey: pubkey);
       state.value = state.value.copyWith(isLoading: false, packages: packages);
-      return (success: true, action: KeyPackageAction.publish);
+      return (success: true, action: KeyPackageAction.publish, error: null);
     } catch (e) {
+      const error = 'Failed to publish key package';
       _logger.severe('Failed to publish key package', e);
-      state.value = state.value.copyWith(isLoading: false, error: 'Failed to publish key package');
-      return (success: false, action: KeyPackageAction.publish);
+      state.value = state.value.copyWith(isLoading: false, error: error);
+      return (success: false, action: KeyPackageAction.publish, error: error);
     }
   }
 
   Future<KeyPackageResult> delete(String id) async {
     if (state.value.isLoading) {
-      return (success: false, action: KeyPackageAction.delete);
+      return (success: false, action: KeyPackageAction.delete, error: null);
     }
     state.value = state.value.copyWith(isLoading: true, clearError: true);
     try {
       await accounts_api.deleteAccountKeyPackage(accountPubkey: pubkey, keyPackageId: id);
       final packages = await accounts_api.accountKeyPackages(accountPubkey: pubkey);
       state.value = state.value.copyWith(isLoading: false, packages: packages);
-      return (success: true, action: KeyPackageAction.delete);
+      return (success: true, action: KeyPackageAction.delete, error: null);
     } catch (e) {
+      const error = 'Failed to delete key package';
       _logger.severe('Failed to delete key package', e);
-      state.value = state.value.copyWith(isLoading: false, error: 'Failed to delete key package');
-      return (success: false, action: KeyPackageAction.delete);
+      state.value = state.value.copyWith(isLoading: false, error: error);
+      return (success: false, action: KeyPackageAction.delete, error: error);
     }
   }
 
   Future<KeyPackageResult> deleteAll() async {
     if (state.value.isLoading) {
-      return (success: false, action: KeyPackageAction.deleteAll);
+      return (success: false, action: KeyPackageAction.deleteAll, error: null);
     }
     state.value = state.value.copyWith(isLoading: true, clearError: true);
     try {
       await accounts_api.deleteAccountKeyPackages(accountPubkey: pubkey);
       state.value = state.value.copyWith(isLoading: false, packages: []);
-      return (success: true, action: KeyPackageAction.deleteAll);
+      return (success: true, action: KeyPackageAction.deleteAll, error: null);
     } catch (e) {
+      const error = 'Failed to delete key packages';
       _logger.severe('Failed to delete all key packages', e);
-      state.value = state.value.copyWith(isLoading: false, error: 'Failed to delete key packages');
-      return (success: false, action: KeyPackageAction.deleteAll);
+      state.value = state.value.copyWith(isLoading: false, error: error);
+      return (success: false, action: KeyPackageAction.deleteAll, error: error);
     }
   }
 

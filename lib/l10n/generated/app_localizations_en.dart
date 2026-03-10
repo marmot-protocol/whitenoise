@@ -399,6 +399,22 @@ class AppLocalizationsEn extends AppLocalizations {
   String get relayStateDescription => 'Inspect the live relay control planes';
 
   @override
+  String get relayControlStateDumpLabel => 'debug_relay_control_state:';
+
+  @override
+  String get relayControlStateSnapshotDescription =>
+      'Snapshot of the live relay discovery, inbox, and group planes.';
+
+  @override
+  String get relayControlStateLoading => 'Loading...';
+
+  @override
+  String get relayControlStateRefreshButton => 'Refresh Dump';
+
+  @override
+  String get relayControlStateCopyButton => 'Copy Dump';
+
+  @override
   String get publishNewKeyPackage => 'Publish New Key Package';
 
   @override

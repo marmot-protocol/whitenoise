@@ -54,8 +54,8 @@ class KeyPackageManagementScreen extends HookConsumerWidget {
         }
         if (result.success) {
           showNotice(getSuccessMessage(result.action));
-        } else if (state.error != null) {
-          showNotice(state.error!, isError: true);
+        } else if (result.error != null) {
+          showNotice(result.error!, isError: true);
         }
       } catch (e) {
         if (context.mounted) {
@@ -71,8 +71,8 @@ class KeyPackageManagementScreen extends HookConsumerWidget {
       }
       if (result.success) {
         showNotice(getSuccessMessage(result.action));
-      } else if (state.error != null) {
-        showNotice(state.error!, isError: true);
+      } else if (result.error != null) {
+        showNotice(result.error!, isError: true);
       }
     }
 

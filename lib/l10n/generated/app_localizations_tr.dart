@@ -279,7 +279,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get donateContributionLetter =>
-      'If you need a contribution acknowledgement letter for a donation, get in touch with us at info@ipf.dev';
+      'Bir bağış için katkı onay mektubuna ihtiyacınız varsa, info@ipf.dev adresinden bizimle iletişime geçin';
 
   @override
   String get lightningAddress => 'Lightning Adresi';
@@ -384,19 +384,35 @@ class AppLocalizationsTr extends AppLocalizations {
   String get searchByNameOrNpub => 'Ad veya npub1...';
 
   @override
-  String get developerSettingsTitle => 'Gelistirici Ayarlari';
+  String get developerSettingsTitle => 'Geliştirici Ayarları';
 
   @override
-  String get keyPackageManagementTitle => 'Anahtar paketi yonetimi';
+  String get keyPackageManagementTitle => 'Anahtar paketi yönetimi';
 
   @override
-  String get keyPackageManagementDescription => 'Hesap anahtar paketlerini yayinla, yenile ve sil';
+  String get keyPackageManagementDescription => 'Hesap anahtar paketlerini yayımla, yenile ve sil';
 
   @override
-  String get relayStateTitle => 'Relay durumu';
+  String get relayStateTitle => 'Röle durumu';
 
   @override
-  String get relayStateDescription => 'Canli relay kontrol duzlemlerini incele';
+  String get relayStateDescription => 'Canlı röle kontrol düzlemlerini incele';
+
+  @override
+  String get relayControlStateDumpLabel => 'debug_relay_control_state:';
+
+  @override
+  String get relayControlStateSnapshotDescription =>
+      'Canlı röle keşfi, gelen kutusu ve grup düzlemlerinin anlık görüntüsü.';
+
+  @override
+  String get relayControlStateLoading => 'Yükleniyor...';
+
+  @override
+  String get relayControlStateRefreshButton => 'Dökümü yenile';
+
+  @override
+  String get relayControlStateCopyButton => 'Dökümü kopyala';
 
   @override
   String get publishNewKeyPackage => 'Yeni Anahtar Paketi Yayınla';

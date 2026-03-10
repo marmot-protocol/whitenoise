@@ -10,6 +10,7 @@ import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_scroll_edge_effect.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 import '../mocks/mock_secure_storage.dart';
 import '../mocks/mock_wn_api.dart';
@@ -204,7 +205,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.text('Failed to publish key package'), findsOneWidget);
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(find.text('Failed to publish key package'), findsNWidgets(2));
     });
 
     testWidgets('refresh success shows notice', (tester) async {
@@ -225,7 +227,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.text('Failed to fetch key packages'), findsOneWidget);
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(find.text('Failed to fetch key packages'), findsNWidgets(2));
     });
 
     testWidgets('delete all success shows notice', (tester) async {
@@ -266,7 +269,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.text('Failed to delete key packages'), findsOneWidget);
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(find.text('Failed to delete key packages'), findsNWidgets(2));
     });
 
     testWidgets('delete key package uses expected id', (tester) async {
@@ -306,7 +310,8 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.text('Failed to delete key package'), findsOneWidget);
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(find.text('Failed to delete key package'), findsNWidgets(2));
     });
 
     testWidgets('shows error message on initial fetch failure', (tester) async {

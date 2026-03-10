@@ -280,7 +280,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get donateContributionLetter =>
-      'If you need a contribution acknowledgement letter for a donation, get in touch with us at info@ipf.dev';
+      'Si vous avez besoin d\'une attestation de don, contactez-nous à info@ipf.dev';
 
   @override
   String get lightningAddress => 'Adresse Lightning';
@@ -385,20 +385,36 @@ class AppLocalizationsFr extends AppLocalizations {
   String get searchByNameOrNpub => 'Nom ou npub1...';
 
   @override
-  String get developerSettingsTitle => 'Parametres Developpeur';
+  String get developerSettingsTitle => 'Paramètres développeur';
 
   @override
-  String get keyPackageManagementTitle => 'Gestion des paquets de cles';
+  String get keyPackageManagementTitle => 'Gestion des paquets de clés';
 
   @override
   String get keyPackageManagementDescription =>
-      'Publier, actualiser et supprimer les paquets de cles du compte';
+      'Publier, actualiser et supprimer les paquets de clés du compte';
 
   @override
-  String get relayStateTitle => 'Etat des relays';
+  String get relayStateTitle => 'État des relais';
 
   @override
-  String get relayStateDescription => 'Inspecter les plans de controle des relays actifs';
+  String get relayStateDescription => 'Inspecter les plans de contrôle des relais actifs';
+
+  @override
+  String get relayControlStateDumpLabel => 'debug_relay_control_state:';
+
+  @override
+  String get relayControlStateSnapshotDescription =>
+      'Instantané des plans actifs de découverte des relais, de boîte de réception et de groupe.';
+
+  @override
+  String get relayControlStateLoading => 'Chargement...';
+
+  @override
+  String get relayControlStateRefreshButton => 'Actualiser l\'export';
+
+  @override
+  String get relayControlStateCopyButton => 'Copier l\'export';
 
   @override
   String get publishNewKeyPackage => 'Publier un Nouveau Paquet de Clés';

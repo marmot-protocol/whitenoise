@@ -822,6 +822,36 @@ abstract class AppLocalizations {
   /// **'Inspect the live relay control planes'**
   String get relayStateDescription;
 
+  /// Technical label shown above the relay control state dump
+  ///
+  /// In en, this message translates to:
+  /// **'debug_relay_control_state:'**
+  String get relayControlStateDumpLabel;
+
+  /// Description shown above the relay control state dump
+  ///
+  /// In en, this message translates to:
+  /// **'Snapshot of the live relay discovery, inbox, and group planes.'**
+  String get relayControlStateSnapshotDescription;
+
+  /// Button label shown while the relay control state dump is loading
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get relayControlStateLoading;
+
+  /// Button label to refresh the relay control state dump
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Dump'**
+  String get relayControlStateRefreshButton;
+
+  /// Button label to copy the relay control state dump
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Dump'**
+  String get relayControlStateCopyButton;
+
   /// Button to publish new key package
   ///
   /// In en, this message translates to:

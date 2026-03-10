@@ -280,7 +280,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get donateContributionLetter =>
-      'If you need a contribution acknowledgement letter for a donation, get in touch with us at info@ipf.dev';
+      'Se você precisar de uma carta de confirmação de contribuição para uma doação, entre em contato conosco em info@ipf.dev';
 
   @override
   String get lightningAddress => 'Endereço Lightning';
@@ -385,7 +385,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get searchByNameOrNpub => 'Nome ou npub1...';
 
   @override
-  String get developerSettingsTitle => 'Configuracoes de Desenvolvedor';
+  String get developerSettingsTitle => 'Configurações de Desenvolvedor';
 
   @override
   String get keyPackageManagementTitle => 'Gerenciamento de pacotes de chaves';
@@ -399,6 +399,22 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get relayStateDescription => 'Inspecionar os planos de controle de relays ativos';
+
+  @override
+  String get relayControlStateDumpLabel => 'debug_relay_control_state:';
+
+  @override
+  String get relayControlStateSnapshotDescription =>
+      'Instantâneo dos planos ativos de descoberta, caixa de entrada e grupos dos relays.';
+
+  @override
+  String get relayControlStateLoading => 'Carregando...';
+
+  @override
+  String get relayControlStateRefreshButton => 'Atualizar dump';
+
+  @override
+  String get relayControlStateCopyButton => 'Copiar dump';
 
   @override
   String get publishNewKeyPackage => 'Publicar Novo Pacote de Chaves';

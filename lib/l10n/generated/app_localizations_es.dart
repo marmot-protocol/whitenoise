@@ -280,7 +280,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get donateContributionLetter =>
-      'If you need a contribution acknowledgement letter for a donation, get in touch with us at info@ipf.dev';
+      'Si necesita una carta de reconocimiento de contribución para una donación, póngase en contacto con nosotros en info@ipf.dev';
 
   @override
   String get lightningAddress => 'Dirección Lightning';
@@ -400,6 +400,22 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get relayStateDescription => 'Inspeccionar los planos de control de relays activos';
+
+  @override
+  String get relayControlStateDumpLabel => 'debug_relay_control_state:';
+
+  @override
+  String get relayControlStateSnapshotDescription =>
+      'Instantánea de los planos activos de descubrimiento de relés, bandeja de entrada y grupos.';
+
+  @override
+  String get relayControlStateLoading => 'Cargando...';
+
+  @override
+  String get relayControlStateRefreshButton => 'Actualizar volcado';
+
+  @override
+  String get relayControlStateCopyButton => 'Copiar volcado';
 
   @override
   String get publishNewKeyPackage => 'Publicar Nuevo Paquete de Llaves';

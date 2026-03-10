@@ -90,7 +90,7 @@ class RelayControlStateScreen extends HookWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'debug_relay_control_state:',
+                        context.l10n.relayControlStateDumpLabel,
                         style: typography.semiBold10.copyWith(
                           color: colors.backgroundContentSecondary,
                           fontFamily: 'monospace',
@@ -98,7 +98,7 @@ class RelayControlStateScreen extends HookWidget {
                       ),
                       SizedBox(height: 8.h),
                       Text(
-                        'Snapshot of the live relay discovery, inbox, and group planes.',
+                        context.l10n.relayControlStateSnapshotDescription,
                         style: typography.medium10.copyWith(
                           color: colors.backgroundContentSecondary,
                           fontFamily: 'monospace',
@@ -113,12 +113,16 @@ class RelayControlStateScreen extends HookWidget {
                           TextButton(
                             key: const Key('relay_control_state_refresh_button'),
                             onPressed: isLoading.value ? null : loadState,
-                            child: Text(isLoading.value ? 'Loading...' : 'Refresh Dump'),
+                            child: Text(
+                              isLoading.value
+                                  ? context.l10n.relayControlStateLoading
+                                  : context.l10n.relayControlStateRefreshButton,
+                            ),
                           ),
                           TextButton(
                             key: const Key('relay_control_state_copy_button'),
                             onPressed: result.value == null ? null : copyDump,
-                            child: const Text('Copy Dump'),
+                            child: Text(context.l10n.relayControlStateCopyButton),
                           ),
                         ],
                       ),

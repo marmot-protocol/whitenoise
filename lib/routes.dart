@@ -190,13 +190,14 @@ abstract final class Routes {
             child: const KeyPackageManagementScreen(),
           ),
         ),
-        GoRoute(
-          path: _relayControlState,
-          pageBuilder: (context, state) => _navigationTransition(
-            state: state,
-            child: const RelayControlStateScreen(),
+        if (isStaging)
+          GoRoute(
+            path: _relayControlState,
+            pageBuilder: (context, state) => _navigationTransition(
+              state: state,
+              child: const RelayControlStateScreen(),
+            ),
           ),
-        ),
         if (isStaging)
           GoRoute(
             path: _appLogs,
@@ -499,6 +500,7 @@ abstract final class Routes {
   }
 
   static void pushToRelayControlState(BuildContext context) {
+    if (!isStaging) return;
     GoRouter.of(context).push(_relayControlState);
   }
 
