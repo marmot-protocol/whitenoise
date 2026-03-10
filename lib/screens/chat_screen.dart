@@ -12,6 +12,7 @@ import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteDa
 import 'package:whitenoise/hooks/use_chat_profile.dart';
 import 'package:whitenoise/hooks/use_chat_scroll.dart';
 import 'package:whitenoise/hooks/use_media_upload.dart';
+import 'package:whitenoise/hooks/use_message_search.dart';
 import 'package:whitenoise/hooks/use_scroll_to_message.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
@@ -27,7 +28,6 @@ import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage, Deliver
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart';
-import 'package:whitenoise/utils/chat_messages_search.dart';
 import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
 import 'package:whitenoise/widgets/chat_message_bubble.dart';
@@ -115,6 +115,12 @@ class ChatScreen extends HookConsumerWidget {
       if (isRemovedFromGroup) inputAreaHeight.value = 0;
       return null;
     }, [isRemovedFromGroup]);
+
+    final search = useMessageSearch(
+      pubkey: pubkey,
+      groupId: groupId,
+      query: isSearchActive.value ? searchQuery.value : '',
+    );
 
     void showNotice(String message) {
       noticeMessage.value = message;
@@ -225,8 +231,8 @@ class ChatScreen extends HookConsumerWidget {
     final slateTopPadding = safeAreaTop + _slateHeight.h + searchBarHeight;
     final listBottomPadding = inputAreaHeight.value + safeAreaBottom + 12.h;
 
-    final displayMessages = isSearchActive.value
-        ? filterMessagesBySearch(List.generate(messageCount, getMessage), searchQuery.value)
+    final displayMessages = isSearchActive.value && searchQuery.value.isNotEmpty
+        ? search.results
         : null;
     final displayCount = displayMessages?.length ?? messageCount;
     final currentMatchIndex = useState(0);
@@ -413,6 +419,7 @@ class ChatScreen extends HookConsumerWidget {
                           controller: searchController,
                           autofocus: true,
                           onChanged: (value) => searchQuery.value = value,
+                          isLoading: search.isSearching,
                         ),
                       ),
                       if (searchQuery.value.isNotEmpty)

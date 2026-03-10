@@ -416,6 +416,27 @@ pub async fn retry_message_publish(
     Ok(())
 }
 
+/// Search messages within a group by content.
+///
+/// Uses forward-order substring matching: tokens from the query must appear
+/// in the same order within the message content. Case-insensitive.
+/// Supports all Unicode scripts including CJK.
+#[frb]
+pub async fn search_messages_in_group(
+    pubkey: String,
+    group_id: String,
+    query: String,
+    limit: Option<u32>,
+) -> Result<Vec<ChatMessage>, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let group_id = group_id_from_string(&group_id)?;
+    let messages = whitenoise
+        .search_messages_in_group(&pubkey, &group_id, &query, limit)
+        .await?;
+    Ok(messages.into_iter().map(|m| m.into()).collect())
+}
+
 /// Fetch a paginated page of messages for a group.
 ///
 /// Returns messages in oldest-first order. Pass the `created_at` and `id` of the

@@ -125,7 +125,7 @@ pub enum ChatListUpdateTrigger {
     NewLastMessage,
     /// The last message in a chat was deleted
     LastMessageDeleted,
-    /// The chat's archive status changed.
+    /// A chat's archive status changed
     ChatArchiveChanged,
     /// This account was removed from the group by an admin.
     RemovedFromGroup,
