@@ -22,7 +22,6 @@ import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/theme.dart';
-import 'package:whitenoise/utils/app_flavor.dart';
 
 // TODO: Remove migration gate and related code in the next release.
 const kDataVersion = 1;

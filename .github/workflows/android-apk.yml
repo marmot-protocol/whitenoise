@@ -146,7 +146,7 @@ jobs:
       run: ./scripts/build_android.sh
 
     - name: Build staging APK
-      run: flutter build apk --flavor staging --split-per-abi --dart-define=APP_FLAVOR=staging --build-number=${{ github.run_number }}
+      run: flutter build apk --flavor staging --split-per-abi --build-number=${{ github.run_number }}
 
     - name: Set artifact name
       env:

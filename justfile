@@ -257,11 +257,11 @@ build-android-quiet:
 
 # Build per-ABI split APKs (separate .apk per architecture)
 build-split-apk flavor="production":
-    ./scripts/build_android.sh && flutter build apk --flavor {{flavor}} --split-per-abi --dart-define=APP_FLAVOR={{flavor}}
+    ./scripts/build_android.sh && flutter build apk --flavor {{flavor}} --split-per-abi
 
 # Build an Android App Bundle (per-ABI splitting handled by Play Store)
 build-aab flavor="production":
-    ./scripts/build_android.sh && flutter build appbundle --flavor {{flavor}} --dart-define=APP_FLAVOR={{flavor}}
+    ./scripts/build_android.sh && flutter build appbundle --flavor {{flavor}}
 
 when-apk: (build-split-apk "staging")
 
@@ -292,15 +292,15 @@ build-ios-quiet:
 
 # Build a production IPA for App Store Connect submission
 build-production-ipa:
-    ./scripts/build_ios.sh && flutter build ipa --flavor production --export-method app-store --dart-define=APP_FLAVOR=production
+    ./scripts/build_ios.sh && flutter build ipa --flavor production --export-method app-store
 
 # Build a staging IPA for App Store Connect submission
 build-staging-ipa:
-    ./scripts/build_ios.sh && flutter build ipa --flavor staging --export-method app-store --dart-define=APP_FLAVOR=staging
+    ./scripts/build_ios.sh && flutter build ipa --flavor staging --export-method app-store
 
 # Build a staging IPA for local device installation (development signing)
 build-staging-ipa-dev:
-    ./scripts/build_ios.sh && flutter build ipa --flavor staging --export-method development --dart-define=APP_FLAVOR=staging
+    ./scripts/build_ios.sh && flutter build ipa --flavor staging --export-method development
 
 # ==============================================================================
 # RUN
@@ -308,18 +308,18 @@ build-staging-ipa-dev:
 
 # Run the app on a connected device (staging flavor by default)
 run flavor="staging":
-    flutter run --flavor {{flavor}} --dart-define=APP_FLAVOR={{flavor}}
+    flutter run --flavor {{flavor}}
 
 # Run the app on a connected device (production flavor)
 run-production:
-    flutter run --flavor production --dart-define=APP_FLAVOR=production
+    flutter run --flavor production
 
 # Build Rust libs and install on connected iOS device
 # Usage: just install-ios <device> [flavor] [extra flags]
 # Example: just install-ios "JG 16e Test"
 # Example: just install-ios "JG 16e Test" production --release
 install-ios device flavor="staging" *FLAGS="":
-    ./scripts/build_ios.sh && flutter run --flavor {{flavor}} --dart-define=APP_FLAVOR={{flavor}} -d "{{device}}" {{FLAGS}}
+    ./scripts/build_ios.sh && flutter run --flavor {{flavor}} -d "{{device}}" {{FLAGS}}
 # ==============================================================================
 # HELPER RECIPES
 # ==============================================================================

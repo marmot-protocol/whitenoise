@@ -129,7 +129,7 @@ jobs:
       run: |
         set +e
         SHARD_INDEX=$(( ${{ matrix.shard }} - 1 ))
-        flutter test --coverage --total-shards 4 --shard-index $SHARD_INDEX --reporter failures-only --dart-define=APP_FLAVOR=staging 2>&1 | tee test-output.txt
+        flutter test --coverage --total-shards 4 --shard-index $SHARD_INDEX --reporter failures-only 2>&1 | tee test-output.txt
         EXIT_CODE=${PIPESTATUS[0]}
         echo "exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
         exit $EXIT_CODE

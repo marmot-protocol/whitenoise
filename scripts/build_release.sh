@@ -120,7 +120,7 @@ if [ "$BUILD_ANDROID" = true ]; then
   ./scripts/build_android.sh
 
   print_info "Building split APKs (production flavor)..."
-  flutter build apk --flavor production --split-per-abi --dart-define=APP_FLAVOR=production
+  flutter build apk --flavor production --split-per-abi
 
   APK_DIR="build/app/outputs/flutter-apk"
 
@@ -164,7 +164,7 @@ if [ "$BUILD_IOS" = true ]; then
   ./scripts/build_ios.sh
 
   print_info "Building IPA (production flavor)..."
-  flutter build ipa --flavor production --export-method app-store --dart-define=APP_FLAVOR=production
+  flutter build ipa --flavor production --export-method app-store
 
   IPA_PATH=$(find build/ios -name "*.ipa" -type f | head -n 1)
 
