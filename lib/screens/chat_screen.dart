@@ -24,7 +24,6 @@ import 'package:whitenoise/services/message_service.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage, DeliveryStatus_Failed;
 import 'package:whitenoise/theme.dart';
-import 'package:whitenoise/utils/app_flavor.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart';
 import 'package:whitenoise/utils/chat_messages_search.dart';
@@ -94,7 +93,7 @@ class ChatScreen extends HookConsumerWidget {
       cancelGroupNotifications: ref.read(notificationServiceProvider).cancelForGroup,
     );
 
-    final debugViewEnabled = isStaging && (ref.watch(debugViewProvider).value ?? false);
+    final debugViewEnabled = ref.watch(debugViewProvider).value ?? false;
 
     final noticeMessage = useState<String?>(null);
     final isSearchActive = useState(false);
@@ -356,7 +355,7 @@ class ChatScreen extends HookConsumerWidget {
                         trailingWidget: debugViewEnabled
                             ? WnIconButton(
                                 key: const Key('chat_raw_debug_button'),
-                                icon: WnIcons.dataUsage,
+                                icon: WnIcons.developerSettings,
                                 onPressed: () => Routes.pushToChatRawDebug(context, groupId),
                               )
                             : null,

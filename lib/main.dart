@@ -30,22 +30,20 @@ const kDataVersionFile = 'data_version';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  if (isStaging) {
-    Logger.root.level = Level.ALL;
-    Logger.root.onRecord.listen((record) {
-      appLogStore.add(record);
-      final buf = StringBuffer('${record.level.name}: ${record.loggerName}: ${record.message}');
-      if (record.error != null) {
-        buf.writeln();
-        buf.write('  error: ${record.error}');
-      }
-      if (record.stackTrace != null) {
-        buf.writeln();
-        buf.write('  stackTrace: ${record.stackTrace}');
-      }
-      debugPrint(buf.toString());
-    });
-  }
+  Logger.root.level = Level.WARNING;
+  Logger.root.onRecord.listen((record) {
+    appLogStore.add(record);
+    final buf = StringBuffer('${record.level.name}: ${record.loggerName}: ${record.message}');
+    if (record.error != null) {
+      buf.writeln();
+      buf.write('  error: ${record.error}');
+    }
+    if (record.stackTrace != null) {
+      buf.writeln();
+      buf.write('  stackTrace: ${record.stackTrace}');
+    }
+    debugPrint(buf.toString());
+  });
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

@@ -45,7 +45,6 @@ import 'package:whitenoise/screens/user_search_screen.dart' show UserSearchScree
 import 'package:whitenoise/screens/user_selection_screen.dart' show UserSelectionScreen;
 import 'package:whitenoise/src/rust/api/metadata.dart' show FlutterMetadata;
 import 'package:whitenoise/src/rust/api/users.dart' show User;
-import 'package:whitenoise/utils/app_flavor.dart' show isStaging;
 import 'package:whitenoise/widgets/wn_slate_content_transition.dart' show WnSlateContentTransition;
 
 abstract final class Routes {
@@ -190,22 +189,20 @@ abstract final class Routes {
             child: const KeyPackageManagementScreen(),
           ),
         ),
-        if (isStaging)
-          GoRoute(
-            path: _relayControlState,
-            pageBuilder: (context, state) => _navigationTransition(
-              state: state,
-              child: const RelayControlStateScreen(),
-            ),
+        GoRoute(
+          path: _relayControlState,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: const RelayControlStateScreen(),
           ),
-        if (isStaging)
-          GoRoute(
-            path: _appLogs,
-            pageBuilder: (context, state) => _navigationTransition(
-              state: state,
-              child: const AppLogsScreen(),
-            ),
+        ),
+        GoRoute(
+          path: _appLogs,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: const AppLogsScreen(),
           ),
+        ),
         GoRoute(
           path: _profileKeys,
           pageBuilder: (context, state) => _navigationTransition(
@@ -392,15 +389,14 @@ abstract final class Routes {
             child: ChatScreen(groupId: state.pathParameters['groupId']!),
           ),
         ),
-        if (isStaging)
-          GoRoute(
-            name: 'chatRawDebug',
-            path: _chatRawDebug,
-            pageBuilder: (context, state) => _navigationTransition(
-              state: state,
-              child: ChatRawDebugScreen(groupId: state.pathParameters['groupId']!),
-            ),
+        GoRoute(
+          name: 'chatRawDebug',
+          path: _chatRawDebug,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: ChatRawDebugScreen(groupId: state.pathParameters['groupId']!),
           ),
+        ),
       ],
     );
   }
@@ -500,12 +496,10 @@ abstract final class Routes {
   }
 
   static void pushToRelayControlState(BuildContext context) {
-    if (!isStaging) return;
     GoRouter.of(context).push(_relayControlState);
   }
 
   static void pushToAppLogs(BuildContext context) {
-    if (!isStaging) return;
     GoRouter.of(context).push(_appLogs);
   }
 
@@ -621,7 +615,6 @@ abstract final class Routes {
   }
 
   static void pushToChatRawDebug(BuildContext context, String groupId) {
-    if (!isStaging) return;
     GoRouter.of(context).pushNamed('chatRawDebug', pathParameters: {'groupId': groupId});
   }
 }

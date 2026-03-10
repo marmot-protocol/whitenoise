@@ -5,11 +5,20 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/providers/app_log_provider.dart';
+import 'package:whitenoise/providers/debug_view_provider.dart';
 import 'package:whitenoise/providers/rust_log_listener_provider.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
-import 'package:whitenoise/utils/app_flavor.dart';
 
 import '../mocks/mock_wn_api.dart';
+
+class _MockDebugViewNotifier extends DebugViewNotifier {
+  _MockDebugViewNotifier(this._enabled);
+
+  final bool _enabled;
+
+  @override
+  Future<bool> build() async => _enabled;
+}
 
 class _MockApi extends MockWnApi {
   StreamController<String>? logsController;
@@ -99,13 +108,30 @@ void main() {
   });
 
   group('rustLogListenerProvider', () {
-    if (!isStaging) {
-      test('requires staging flavor', () {}, skip: 'Set --dart-define=APP_FLAVOR=staging');
-      return;
+    ProviderContainer createContainer({bool debugEnabled = true}) {
+      return ProviderContainer(
+        overrides: [
+          debugViewProvider.overrideWith(
+            () => _MockDebugViewNotifier(debugEnabled),
+          ),
+        ],
+      );
     }
 
+    test('does not subscribe when debug view is disabled', () async {
+      final container = createContainer(debugEnabled: false);
+      addTearDown(container.dispose);
+      final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
+      addTearDown(sub.close);
+
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(api.logsController, isNull);
+    });
+
     test('subscribes using application logs directory', () async {
-      final container = ProviderContainer();
+      final container = createContainer();
       addTearDown(container.dispose);
       final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
       addTearDown(sub.close);
@@ -118,7 +144,7 @@ void main() {
     });
 
     test('forwards rust log lines into app log store', () async {
-      final container = ProviderContainer();
+      final container = createContainer();
       addTearDown(container.dispose);
       final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
       addTearDown(sub.close);
@@ -136,7 +162,7 @@ void main() {
     });
 
     test('forwards stream errors into app log store', () async {
-      final container = ProviderContainer();
+      final container = createContainer();
       addTearDown(container.dispose);
       final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
       addTearDown(sub.close);
@@ -156,7 +182,7 @@ void main() {
     });
 
     test('cancels subscription when disposed before listening starts', () async {
-      final container = ProviderContainer();
+      final container = createContainer();
       final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
       sub.close();
       container.dispose();
@@ -176,7 +202,7 @@ void main() {
         (call) async => throw PlatformException(code: 'ERROR', message: 'No directory'),
       );
 
-      final container = ProviderContainer();
+      final container = createContainer();
       addTearDown(container.dispose);
       final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
       addTearDown(sub.close);
@@ -194,7 +220,7 @@ void main() {
     });
 
     test('handles stream done event', () async {
-      final container = ProviderContainer();
+      final container = createContainer();
       addTearDown(container.dispose);
       final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
       addTearDown(sub.close);
@@ -208,7 +234,7 @@ void main() {
     });
 
     test('cancels subscription when provider is disposed', () async {
-      final container = ProviderContainer();
+      final container = createContainer();
       final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
       addTearDown(sub.close);
       await Future<void>.delayed(Duration.zero);

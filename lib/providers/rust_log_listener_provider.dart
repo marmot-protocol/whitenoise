@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:whitenoise/providers/app_log_provider.dart' show appLogStore;
+import 'package:whitenoise/providers/debug_view_provider.dart' show debugViewProvider;
 import 'package:whitenoise/src/rust/api/logs.dart' as logs_api;
-import 'package:whitenoise/utils/app_flavor.dart';
 
 final _logger = Logger('rustLogListener');
 
@@ -27,10 +27,9 @@ Level parseRustLogLevel(String line) {
   return _levelMap[match.group(1)] ?? Level.INFO;
 }
 
-/// Subscribes to Rust log file and forwards each line to appLogStore.
-/// Only active in staging builds.
 final rustLogListenerProvider = Provider.autoDispose<void>((ref) {
-  if (!isStaging) return;
+  final debugEnabled = ref.watch(debugViewProvider).value ?? false;
+  if (!debugEnabled) return;
 
   StreamSubscription<String>? subscription;
   final disposed = Completer<void>();
