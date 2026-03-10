@@ -315,6 +315,7 @@ ChatMessagesResult useChatMessages(
     final oldestMessage = messagesById.value[oldestId];
     if (oldestMessage == null) return;
 
+    final requestGroupId = groupId;
     isLoadingOlderMessages.value = true;
     _logger.info(
       'loadOlderMessages groupId=$groupId before=${oldestMessage.createdAt} id=$oldestId',
@@ -327,6 +328,8 @@ ChatMessagesResult useChatMessages(
         before: oldestMessage.createdAt,
         beforeMessageId: oldestId,
       );
+
+      if (groupId != requestGroupId) return;
 
       if (olderMessages.isEmpty) {
         hasMoreMessages.value = false;
@@ -351,11 +354,18 @@ ChatMessagesResult useChatMessages(
           for (var i = 0; i < combined.length; i++) combined[i]: i,
         };
         totalMessageCount.value = combined.length;
+      } else {
+        hasMoreMessages.value = false;
+        _logger.info(
+          'loadOlderMessages groupId=$groupId: all ${olderMessages.length} fetched messages already loaded, no more messages',
+        );
       }
     } catch (e, st) {
       _logger.severe('loadOlderMessages FAILED groupId=$groupId', e, st);
     } finally {
-      isLoadingOlderMessages.value = false;
+      if (groupId == requestGroupId) {
+        isLoadingOlderMessages.value = false;
+      }
     }
   }
 

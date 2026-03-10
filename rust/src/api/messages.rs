@@ -432,7 +432,17 @@ pub async fn fetch_aggregated_messages_for_group(
     let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let before_ts = before.map(|dt| Timestamp::from(dt.timestamp() as u64));
+    let before_ts = before
+        .map(|dt| {
+            let ts = dt.timestamp();
+            if ts < 0 {
+                return Err(ApiError::Other {
+                    message: format!("invalid cursor: before timestamp {ts} is before Unix epoch"),
+                });
+            }
+            Ok(Timestamp::from(ts as u64))
+        })
+        .transpose()?;
     let messages = whitenoise
         .fetch_aggregated_messages_for_group(
             &pubkey,

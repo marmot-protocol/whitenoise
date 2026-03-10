@@ -125,8 +125,8 @@ ChatScrollResult useChatScroll({
       hasUserScrolled.value = true;
 
       final atTop =
-          position.pixels >= position.maxScrollExtent - _topThreshold &&
-          position.maxScrollExtent > 0;
+          position.maxScrollExtent > _topThreshold &&
+          position.pixels >= position.maxScrollExtent - _topThreshold;
       if (atTop && hasMoreMessages) {
         loadOlderMessages();
       }
