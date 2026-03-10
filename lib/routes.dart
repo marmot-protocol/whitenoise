@@ -17,7 +17,6 @@ import 'package:whitenoise/screens/chat_invite_screen.dart' show ChatInviteScree
 import 'package:whitenoise/screens/chat_list_screen.dart' show ChatListScreen;
 import 'package:whitenoise/screens/chat_raw_debug_screen.dart' show ChatRawDebugScreen;
 import 'package:whitenoise/screens/chat_screen.dart' show ChatScreen;
-import 'package:whitenoise/screens/debug_sql_query_screen.dart' show DebugSqlQueryScreen;
 import 'package:whitenoise/screens/developer_settings_screen.dart' show DeveloperSettingsScreen;
 import 'package:whitenoise/screens/donate_screen.dart' show DonateScreen;
 import 'package:whitenoise/screens/edit_group_screen.dart' show EditGroupScreen;
@@ -25,10 +24,13 @@ import 'package:whitenoise/screens/edit_profile_screen.dart' show EditProfileScr
 import 'package:whitenoise/screens/group_info_screen.dart' show GroupInfoScreen;
 import 'package:whitenoise/screens/group_member_screen.dart' show GroupMemberScreen;
 import 'package:whitenoise/screens/home_screen.dart' show HomeScreen;
+import 'package:whitenoise/screens/key_package_management_screen.dart'
+    show KeyPackageManagementScreen;
 import 'package:whitenoise/screens/login_screen.dart' show LoginScreen;
 import 'package:whitenoise/screens/network_screen.dart' show NetworkScreen;
 import 'package:whitenoise/screens/privacy_security_screen.dart' show PrivacySecurityScreen;
 import 'package:whitenoise/screens/profile_keys_screen.dart' show ProfileKeysScreen;
+import 'package:whitenoise/screens/relay_control_state_screen.dart' show RelayControlStateScreen;
 import 'package:whitenoise/screens/relay_resolution_screen.dart' show RelayResolutionScreen;
 import 'package:whitenoise/screens/scan_npub_screen.dart' show ScanNpubScreen;
 import 'package:whitenoise/screens/scan_nsec_screen.dart' show ScanNsecScreen;
@@ -61,8 +63,9 @@ abstract final class Routes {
   static const _privacySecurity = '/privacy-security';
   static const _wip = '/wip';
   static const _developerSettings = '/developer-settings';
+  static const _keyPackageManagement = '/key-package-management';
+  static const _relayControlState = '/relay-control-state';
   static const _appLogs = '/app-logs';
-  static const _debugSqlQuery = '/debug-sql-query';
   static const _profileKeys = '/profile-keys';
   static const _shareProfile = '/share-profile';
   static const _editProfile = '/edit-profile';
@@ -180,20 +183,26 @@ abstract final class Routes {
             child: const DeveloperSettingsScreen(),
           ),
         ),
+        GoRoute(
+          path: _keyPackageManagement,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: const KeyPackageManagementScreen(),
+          ),
+        ),
+        GoRoute(
+          path: _relayControlState,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: const RelayControlStateScreen(),
+          ),
+        ),
         if (isStaging)
           GoRoute(
             path: _appLogs,
             pageBuilder: (context, state) => _navigationTransition(
               state: state,
               child: const AppLogsScreen(),
-            ),
-          ),
-        if (isStaging)
-          GoRoute(
-            path: _debugSqlQuery,
-            pageBuilder: (context, state) => _navigationTransition(
-              state: state,
-              child: const DebugSqlQueryScreen(),
             ),
           ),
         GoRoute(
@@ -485,14 +494,17 @@ abstract final class Routes {
     GoRouter.of(context).push(_developerSettings);
   }
 
+  static void pushToKeyPackageManagement(BuildContext context) {
+    GoRouter.of(context).push(_keyPackageManagement);
+  }
+
+  static void pushToRelayControlState(BuildContext context) {
+    GoRouter.of(context).push(_relayControlState);
+  }
+
   static void pushToAppLogs(BuildContext context) {
     if (!isStaging) return;
     GoRouter.of(context).push(_appLogs);
-  }
-
-  static void pushToDebugSqlQuery(BuildContext context) {
-    if (!isStaging) return;
-    GoRouter.of(context).push(_debugSqlQuery);
   }
 
   static void pushToProfileKeys(BuildContext context) {

@@ -49,12 +49,6 @@ pub fn get_default_blossom_server_url() -> String {
 }
 
 #[frb]
-pub async fn debug_query(sql: String) -> Result<String, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
-    whitenoise.debug_query(&sql).await.map_err(ApiError::from)
-}
-
-#[frb]
 pub fn group_id_to_string(group_id: &GroupId) -> String {
     ::hex::encode(group_id.as_slice())
 }

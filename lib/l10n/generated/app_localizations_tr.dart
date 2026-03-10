@@ -278,6 +278,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Kar amacı gütmeyen bir kuruluş olarak White Noise, yalnızca gizliliğiniz ve özgürlüğünüz için var, kar için değil. Desteğiniz bizi bağımsız ve taviz vermeden tutar.';
 
   @override
+  String get donateContributionLetter =>
+      'If you need a contribution acknowledgement letter for a donation, get in touch with us at info@ipf.dev';
+
+  @override
   String get lightningAddress => 'Lightning Adresi';
 
   @override
@@ -380,7 +384,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get searchByNameOrNpub => 'Ad veya npub1...';
 
   @override
-  String get developerSettingsTitle => 'Geliştirici Ayarları';
+  String get developerSettingsTitle => 'Gelistirici Ayarlari';
+
+  @override
+  String get keyPackageManagementTitle => 'Anahtar paketi yonetimi';
+
+  @override
+  String get keyPackageManagementDescription => 'Hesap anahtar paketlerini yayinla, yenile ve sil';
+
+  @override
+  String get relayStateTitle => 'Relay durumu';
+
+  @override
+  String get relayStateDescription => 'Canli relay kontrol duzlemlerini incele';
 
   @override
   String get publishNewKeyPackage => 'Yeni Anahtar Paketi Yayınla';

@@ -20,6 +20,9 @@ class DonateScreen extends HookWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final noticeMessage = useState<String?>(null);
+    final bodyStyle = context.typographyScaled.medium14.copyWith(
+      color: colors.backgroundContentTertiary,
+    );
 
     void showCopiedNotice(String message) {
       noticeMessage.value = message;
@@ -55,9 +58,7 @@ class DonateScreen extends HookWidget {
                 children: [
                   Text(
                     context.l10n.donateDescription,
-                    style: context.typographyScaled.medium14.copyWith(
-                      color: colors.backgroundContentTertiary,
-                    ),
+                    style: bodyStyle,
                   ),
                   WnCopyableField(
                     label: context.l10n.lightningAddress,
@@ -68,6 +69,10 @@ class DonateScreen extends HookWidget {
                     label: context.l10n.bitcoinSilentPayment,
                     value: _bitcoinAddress,
                     onCopied: () => showCopiedNotice(context.l10n.copiedToClipboardThankYou),
+                  ),
+                  Text(
+                    context.l10n.donateContributionLetter,
+                    style: bodyStyle,
                   ),
                 ],
               ),

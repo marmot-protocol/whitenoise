@@ -65,6 +65,18 @@ void main() {
       );
     });
 
+    testWidgets('shows updated donation copy', (tester) async {
+      await pumpDonateScreen(tester);
+
+      expect(find.textContaining('As a 501(c)3 non-profit'), findsOneWidget);
+      expect(
+        find.text(
+          'If you need a contribution acknowledgement letter for a donation, get in touch with us at info@ipf.dev',
+        ),
+        findsOneWidget,
+      );
+    });
+
     group('when copying lightning address', () {
       testWidgets('shows feedback message', (tester) async {
         await pumpDonateScreen(tester);

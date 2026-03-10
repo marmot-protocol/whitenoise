@@ -10,6 +10,7 @@ import '../lib.dart';
 import 'account_groups.dart';
 import 'error.dart';
 
+// These functions are ignored because they are not marked as `pub`: `group_creation_relays`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`
 
 Future<List<Group>> activeGroups({required String pubkey}) =>

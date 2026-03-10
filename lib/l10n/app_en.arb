@@ -340,10 +340,17 @@
   "@donateTitle": {
     "description": "Donate screen title"
   },
-  "donateDescription": "As a not-for-profit, White Noise exists solely for your privacy and freedom, not for profit. Your support keeps us independent and uncompromised.",
+
+  "donateDescription": "As a 501(c)3 non-profit, White Noise exists solely for your privacy and freedom, not for profit. Your support keeps us independent and uncompromised.",
   "@donateDescription": {
     "description": "Donate screen description"
   },
+
+  "donateContributionLetter": "If you need a contribution acknowledgement letter for a donation, get in touch with us at info@ipf.dev",
+  "@donateContributionLetter": {
+    "description": "Donate screen contribution acknowledgement text"
+  },
+
   "lightningAddress": "Lightning Address",
   "@lightningAddress": {
     "description": "Lightning address label"
@@ -493,6 +500,27 @@
   "@developerSettingsTitle": {
     "description": "Developer settings screen title"
   },
+
+  "keyPackageManagementTitle": "Key Package Management",
+  "@keyPackageManagementTitle": {
+    "description": "Key package management screen title and row label"
+  },
+
+  "keyPackageManagementDescription": "Publish, refresh, and delete account key packages",
+  "@keyPackageManagementDescription": {
+    "description": "Developer settings row description for key package management"
+  },
+
+  "relayStateTitle": "Relay State",
+  "@relayStateTitle": {
+    "description": "Developer settings row label and relay state screen title"
+  },
+
+  "relayStateDescription": "Inspect the live relay control planes",
+  "@relayStateDescription": {
+    "description": "Developer settings row description for relay state"
+  },
+
   "publishNewKeyPackage": "Publish New Key Package",
   "@publishNewKeyPackage": {
     "description": "Button to publish new key package"

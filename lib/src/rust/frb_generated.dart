@@ -84,7 +84,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 307419661;
+  int get rustContentHash => -1360479889;
 
   static const kDefaultExternalLibraryLoaderConfig = ExternalLibraryLoaderConfig(
     stem: 'rust_lib_whitenoise',
@@ -165,7 +165,7 @@ abstract class RustLibApi extends BaseApi {
     required String logsDir,
   });
 
-  Future<String> crateApiUtilsDebugQuery({required String sql});
+  Future<String> crateApiRelaysDebugRelayControlState();
 
   Future<AccountGroup> crateApiAccountGroupsDeclineAccountGroup({
     required String accountPubkey,
@@ -1186,12 +1186,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
-  Future<String> crateApiUtilsDebugQuery({required String sql}) {
+  Future<String> crateApiRelaysDebugRelayControlState() {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(sql, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -1203,16 +1202,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_String,
           decodeErrorData: sse_decode_api_error,
         ),
-        constMeta: kCrateApiUtilsDebugQueryConstMeta,
-        argValues: [sql],
+        constMeta: kCrateApiRelaysDebugRelayControlStateConstMeta,
+        argValues: [],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiUtilsDebugQueryConstMeta => const TaskConstMeta(
-    debugName: 'debug_query',
-    argNames: ['sql'],
+  TaskConstMeta get kCrateApiRelaysDebugRelayControlStateConstMeta => const TaskConstMeta(
+    debugName: 'debug_relay_control_state',
+    argNames: [],
   );
 
   @override
@@ -4907,7 +4906,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ChatSummary dco_decode_chat_summary(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 12) throw Exception('unexpected arr length: expect 12 but see ${arr.length}');
+    if (arr.length != 13) throw Exception('unexpected arr length: expect 13 but see ${arr.length}');
     return ChatSummary(
       mlsGroupId: dco_decode_String(arr[0]),
       name: dco_decode_opt_String(arr[1]),
@@ -4918,9 +4917,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       lastMessage: dco_decode_opt_box_autoadd_chat_message_summary(arr[6]),
       pendingConfirmation: dco_decode_bool(arr[7]),
       welcomerPubkey: dco_decode_opt_String(arr[8]),
-      unreadCount: dco_decode_u_64(arr[9]),
-      pinOrder: dco_decode_opt_box_autoadd_i_64(arr[10]),
-      dmPeerPubkey: dco_decode_opt_String(arr[11]),
+      archivedAt: dco_decode_opt_box_autoadd_Chrono_Utc(arr[9]),
+      unreadCount: dco_decode_u_64(arr[10]),
+      pinOrder: dco_decode_opt_box_autoadd_i_64(arr[11]),
+      dmPeerPubkey: dco_decode_opt_String(arr[12]),
     );
   }
 
@@ -6369,6 +6369,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     );
     final var_pendingConfirmation = sse_decode_bool(deserializer);
     final var_welcomerPubkey = sse_decode_opt_String(deserializer);
+    final var_archivedAt = sse_decode_opt_box_autoadd_Chrono_Utc(deserializer);
     final var_unreadCount = sse_decode_u_64(deserializer);
     final var_pinOrder = sse_decode_opt_box_autoadd_i_64(deserializer);
     final var_dmPeerPubkey = sse_decode_opt_String(deserializer);
@@ -6382,6 +6383,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       lastMessage: var_lastMessage,
       pendingConfirmation: var_pendingConfirmation,
       welcomerPubkey: var_welcomerPubkey,
+      archivedAt: var_archivedAt,
       unreadCount: var_unreadCount,
       pinOrder: var_pinOrder,
       dmPeerPubkey: var_dmPeerPubkey,
@@ -8186,6 +8188,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     );
     sse_encode_bool(self.pendingConfirmation, serializer);
     sse_encode_opt_String(self.welcomerPubkey, serializer);
+    sse_encode_opt_box_autoadd_Chrono_Utc(self.archivedAt, serializer);
     sse_encode_u_64(self.unreadCount, serializer);
     sse_encode_opt_box_autoadd_i_64(self.pinOrder, serializer);
     sse_encode_opt_String(self.dmPeerPubkey, serializer);

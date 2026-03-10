@@ -52,8 +52,8 @@ precommit-check:
 
 # Generate Rust bridge code
 generate:
-    @echo "🔄 Generating flutter_rust_bridge code..."
-    flutter_rust_bridge_codegen generate
+	@echo "🔄 Generating flutter_rust_bridge code..."
+	@flutter_rust_bridge_codegen generate > /dev/null 2>&1 || flutter_rust_bridge_codegen generate
 
 # Clean and regenerate Rust bridge code
 regenerate: clean-bridge generate

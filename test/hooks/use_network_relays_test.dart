@@ -13,10 +13,8 @@ class MockApi implements RustLibApi {
   List<Relay> normalRelays = [];
   List<Relay> inboxRelays = [];
   List<Relay> keyPackageRelays = [];
-  List<(String, String)> relayStatuses = [];
   bool shouldThrow = false;
-  bool shouldThrowOnStatusRetry = false;
-  int statusRetryCount = 0;
+  int getAccountRelayStatusesCallCount = 0;
 
   @override
   Future<RelayType> crateApiRelaysRelayTypeNip65() async => MockRelayType('nip65');
@@ -97,12 +95,8 @@ class MockApi implements RustLibApi {
   Future<List<(String, String)>> crateApiRelaysGetAccountRelayStatuses({
     required String pubkey,
   }) async {
-    if (shouldThrow) throw Exception('Network error');
-    statusRetryCount++;
-    if (shouldThrowOnStatusRetry && statusRetryCount > 1) {
-      throw Exception('Retry error');
-    }
-    return relayStatuses;
+    getAccountRelayStatusesCallCount++;
+    return const [];
   }
 
   @override
@@ -142,10 +136,8 @@ void main() {
     mockApi.normalRelays = [];
     mockApi.inboxRelays = [];
     mockApi.keyPackageRelays = [];
-    mockApi.relayStatuses = [];
     mockApi.shouldThrow = false;
-    mockApi.shouldThrowOnStatusRetry = false;
-    mockApi.statusRetryCount = 0;
+    mockApi.getAccountRelayStatusesCallCount = 0;
   });
 
   group('RelayListState', () {
@@ -168,18 +160,16 @@ void main() {
   group('NetworkRelaysState', () {
     test('copyWith preserves values when not provided', () {
       const state = NetworkRelaysState(isAddingRelay: true);
-      final newState = state.copyWith(relayStatuses: {});
+      final newState = state.copyWith();
 
       expect(newState.isAddingRelay, isTrue);
-      expect(newState.relayStatuses, isEmpty);
     });
 
     test('copyWith preserves isRemovingRelay when not provided', () {
       const state = NetworkRelaysState(isRemovingRelay: true);
-      final newState = state.copyWith(relayStatuses: {});
+      final newState = state.copyWith();
 
       expect(newState.isRemovingRelay, isTrue);
-      expect(newState.relayStatuses, isEmpty);
     });
 
     test('updateCategory updates specific category', () {
@@ -247,7 +237,6 @@ void main() {
       mockApi.keyPackageRelays = [
         Relay(url: 'wss://keypackage1.com', createdAt: DateTime.now(), updatedAt: DateTime.now()),
       ];
-      mockApi.relayStatuses = [('wss://relay1.com', 'Connected')];
 
       await pump(tester);
       await hook.fetchAll();
@@ -256,7 +245,7 @@ void main() {
       expect(hook.state.normalRelays.relays.length, 1);
       expect(hook.state.inboxRelays.relays.length, 1);
       expect(hook.state.keyPackageRelays.relays.length, 1);
-      expect(hook.state.relayStatuses['wss://relay1.com'], 'Connected');
+      expect(mockApi.getAccountRelayStatusesCallCount, 0);
     });
 
     testWidgets('sets error on failure for normal relays', (tester) async {
@@ -272,42 +261,33 @@ void main() {
 
   group('addRelay', () {
     testWidgets('adds relay to normal relays', (tester) async {
-      mockApi.relayStatuses = [('wss://newrelay.com', 'Connected')];
-
       await pump(tester);
       await hook.addRelay('wss://newrelay.com', RelayCategory.normal);
       await tester.pump();
 
       expect(hook.state.normalRelays.relays.length, 1);
       expect(hook.state.normalRelays.relays.first.url, 'wss://newrelay.com');
-
-      await tester.pump(const Duration(milliseconds: 600));
+      expect(mockApi.getAccountRelayStatusesCallCount, 0);
     });
 
     testWidgets('adds relay to inbox relays', (tester) async {
-      mockApi.relayStatuses = [('wss://newinbox.com', 'Connected')];
-
       await pump(tester);
       await hook.addRelay('wss://newinbox.com', RelayCategory.inbox);
       await tester.pump();
 
       expect(hook.state.inboxRelays.relays.length, 1);
       expect(hook.state.inboxRelays.relays.first.url, 'wss://newinbox.com');
-
-      await tester.pump(const Duration(milliseconds: 600));
+      expect(mockApi.getAccountRelayStatusesCallCount, 0);
     });
 
     testWidgets('adds relay to key package relays', (tester) async {
-      mockApi.relayStatuses = [('wss://newkeypackage.com', 'Connected')];
-
       await pump(tester);
       await hook.addRelay('wss://newkeypackage.com', RelayCategory.keyPackage);
       await tester.pump();
 
       expect(hook.state.keyPackageRelays.relays.length, 1);
       expect(hook.state.keyPackageRelays.relays.first.url, 'wss://newkeypackage.com');
-
-      await tester.pump(const Duration(milliseconds: 600));
+      expect(mockApi.getAccountRelayStatusesCallCount, 0);
     });
 
     testWidgets('sets error on failure', (tester) async {
@@ -321,11 +301,6 @@ void main() {
     });
 
     testWidgets('does not add relay when already adding', (tester) async {
-      mockApi.relayStatuses = [
-        ('wss://relay1.com', 'Connected'),
-        ('wss://relay2.com', 'Connected'),
-      ];
-
       await pump(tester);
 
       hook.addRelay('wss://relay1.com', RelayCategory.normal);
@@ -333,51 +308,7 @@ void main() {
       await tester.pump();
 
       expect(hook.state.normalRelays.relays.length, 1);
-
-      await tester.pump(const Duration(milliseconds: 600));
-    });
-
-    testWidgets('awaits relay connection after adding until connected', (tester) async {
-      mockApi.relayStatuses = [('wss://newrelay.com', 'Connecting')];
-
-      await pump(tester);
-      await hook.addRelay('wss://newrelay.com', RelayCategory.normal);
-      await tester.pump();
-
-      expect(hook.state.relayStatuses['wss://newrelay.com'], 'Connecting');
-
-      mockApi.relayStatuses = [('wss://newrelay.com', 'Connected')];
-
-      await tester.pump(const Duration(milliseconds: 600));
-
-      expect(hook.state.relayStatuses['wss://newrelay.com'], 'Connected');
-    });
-
-    testWidgets('stops awaiting when status changes from connecting', (tester) async {
-      mockApi.relayStatuses = [('wss://newrelay.com', 'Disconnected')];
-
-      await pump(tester);
-      await hook.addRelay('wss://newrelay.com', RelayCategory.normal);
-      await tester.pump();
-
-      await tester.pump(const Duration(milliseconds: 600));
-
-      expect(hook.state.relayStatuses['wss://newrelay.com'], 'Disconnected');
-    });
-
-    testWidgets('stops awaiting when status fetch throws error', (tester) async {
-      mockApi.relayStatuses = [('wss://newrelay.com', 'Connecting')];
-      mockApi.shouldThrowOnStatusRetry = true;
-
-      await pump(tester);
-      await hook.addRelay('wss://newrelay.com', RelayCategory.normal);
-      await tester.pump();
-
-      expect(hook.state.relayStatuses['wss://newrelay.com'], 'Connecting');
-
-      await tester.pump(const Duration(milliseconds: 600));
-
-      expect(hook.state.relayStatuses['wss://newrelay.com'], 'Connecting');
+      expect(mockApi.getAccountRelayStatusesCallCount, 0);
     });
   });
 

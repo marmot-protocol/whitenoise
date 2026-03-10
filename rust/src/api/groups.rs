@@ -7,8 +7,21 @@ use mdk_core::prelude::{NostrGroupConfigData, NostrGroupDataUpdate};
 use nostr_sdk::prelude::*;
 use whitenoise::{
     GroupInformation as WhitenoiseGroupInformation, GroupType as WhitenoiseGroupType,
-    GroupWithInfoAndMembership as WhitenoiseGroupWithInfoAndMembership, RelayType, Whitenoise,
+    GroupWithInfoAndMembership as WhitenoiseGroupWithInfoAndMembership, Whitenoise,
 };
+
+const GROUP_CREATION_RELAY_URLS: [&str; 3] = [
+    "wss://nos.lol",
+    "wss://relay.primal.net",
+    "wss://relay.damus.io",
+];
+
+fn group_creation_relays() -> Vec<RelayUrl> {
+    GROUP_CREATION_RELAY_URLS
+        .into_iter()
+        .map(|url| RelayUrl::parse(url).expect("group creation relay URLs must be valid"))
+        .collect()
+}
 
 #[frb(non_opaque)]
 #[derive(Debug, Clone)]
@@ -244,8 +257,6 @@ pub async fn create_group(
     let creator_pubkey = PublicKey::parse(&creator_pubkey)?;
     let creator_account = whitenoise.find_account_by_pubkey(&creator_pubkey).await?;
 
-    // Fetch the creator's Nostr relays to include in the group configuration
-    let nostr_relays = creator_account.relays(RelayType::Nip65, whitenoise).await?;
     let admin_pubkeys = admin_pubkeys
         .into_iter()
         .map(|pk| PublicKey::parse(&pk))
@@ -257,7 +268,7 @@ pub async fn create_group(
         image_key: None,
         image_hash: None,
         image_nonce: None,
-        relays: nostr_relays.into_iter().map(|r| r.url).collect(),
+        relays: group_creation_relays(),
         admins: admin_pubkeys,
     };
 
@@ -487,4 +498,19 @@ pub async fn get_ratchet_tree_info(
             })
             .collect(),
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{GROUP_CREATION_RELAY_URLS, group_creation_relays};
+
+    #[test]
+    fn group_creation_relays_match_fixed_list() {
+        let relays = group_creation_relays()
+            .into_iter()
+            .map(|relay| relay.to_string())
+            .collect::<Vec<_>>();
+
+        assert_eq!(relays, GROUP_CREATION_RELAY_URLS);
+    }
 }

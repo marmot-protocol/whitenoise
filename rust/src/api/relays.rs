@@ -50,6 +50,15 @@ pub async fn get_account_relay_statuses(pubkey: String) -> Result<Vec<(String, S
     Ok(converted_statuses)
 }
 
+#[frb]
+pub async fn debug_relay_control_state() -> Result<String, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    whitenoise
+        .debug_relay_control_state()
+        .await
+        .map_err(ApiError::from)
+}
+
 /// Ensures all subscriptions (global and all accounts) are operational.
 ///
 /// This method is designed for periodic background tasks that need to ensure

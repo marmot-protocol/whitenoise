@@ -28,9 +28,6 @@ Future<Tag> tagFromVec({required List<String> vec}) =>
 Future<String> getDefaultBlossomServerUrl() =>
     RustLib.instance.api.crateApiUtilsGetDefaultBlossomServerUrl();
 
-Future<String> debugQuery({required String sql}) =>
-    RustLib.instance.api.crateApiUtilsDebugQuery(sql: sql);
-
 Future<String> groupIdToString({required GroupId groupId}) =>
     RustLib.instance.api.crateApiUtilsGroupIdToString(groupId: groupId);
 

@@ -48,6 +48,13 @@ ChatListResult useChatList(String pubkey) {
                     chatMap.value.remove(id);
                     chatMap.value[id] = update.item;
                   }
+                case ChatListUpdateTrigger.chatArchiveChanged:
+                  if (update.item.archivedAt != null) {
+                    chatMap.value.remove(id);
+                  } else {
+                    chatMap.value.remove(id);
+                    chatMap.value[id] = update.item;
+                  }
               }
               return chatMap.value;
             },

@@ -246,34 +246,6 @@ void main() {
       expect(find.byKey(const Key('slate_back_button')), findsOneWidget);
     });
 
-    testWidgets('executes debug query and shows formatted result', (tester) async {
-      _api.debugQueryResult = '[{"table":"accounts","rows":2}]';
-
-      await pumpDebugScreen(tester);
-      await tester.enterText(
-        find.byKey(const Key('debug_query_input')),
-        'SELECT * FROM accounts;',
-      );
-      await tester.tap(find.byKey(const Key('debug_query_run_button')));
-      await tester.pumpAndSettle();
-
-      expect(_api.lastDebugQuerySql, 'SELECT * FROM accounts;');
-      expect(find.byKey(const Key('debug_query_table')), findsOneWidget);
-      expect(find.byKey(const Key('debug_query_result')), findsOneWidget);
-      expect(find.textContaining('"table": "accounts"'), findsOneWidget);
-    });
-
-    testWidgets('shows debug query errors', (tester) async {
-      _api.shouldFailDebugQuery = true;
-
-      await pumpDebugScreen(tester);
-      await tester.tap(find.byKey(const Key('debug_query_run_button')));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('debug_query_error')), findsOneWidget);
-      expect(find.textContaining('debug query failed'), findsOneWidget);
-    });
-
     testWidgets('renders seeded send log entries and overflow indicator', (tester) async {
       final now = DateTime(2026, 1, 1, 10);
       _seededDebugState = MessageDebugLogState(
@@ -522,74 +494,6 @@ void main() {
       final copyButtons = find.text('Copy');
       expect(copyButtons, findsWidgets);
       await tester.tap(copyButtons.first);
-      await tester.pumpAndSettle();
-
-      expect(find.text('Copied to clipboard'), findsOneWidget);
-    });
-
-    testWidgets('shows error when running empty SQL query', (tester) async {
-      await pumpDebugScreen(tester);
-
-      await tester.scrollUntilVisible(
-        find.byKey(const Key('debug_query_input')),
-        220,
-        scrollable: find.byType(Scrollable).first,
-      );
-
-      await tester.enterText(find.byKey(const Key('debug_query_input')), '   ');
-      await tester.tap(find.byKey(const Key('debug_query_run_button')));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('debug_query_error')), findsOneWidget);
-      expect(find.textContaining('SQL is empty'), findsOneWidget);
-    });
-
-    testWidgets('copy result button copies query result to clipboard', (tester) async {
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-        SystemChannels.platform,
-        (call) async {
-          return null;
-        },
-      );
-      addTearDown(() {
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-          SystemChannels.platform,
-          null,
-        );
-      });
-
-      _api.debugQueryResult = '[{"name":"accounts"}]';
-
-      await pumpDebugScreen(tester);
-
-      final listScrollable = find.byType(Scrollable).first;
-      await tester.scrollUntilVisible(
-        find.text('Run SQL'),
-        220,
-        scrollable: listScrollable,
-      );
-      await tester.pumpAndSettle();
-
-      await tester.enterText(
-        find.byKey(const Key('debug_query_input')),
-        'SELECT name FROM sqlite_master;',
-      );
-      await tester.pumpAndSettle();
-
-      await tester.scrollUntilVisible(
-        find.byKey(const Key('debug_query_run_button')),
-        100,
-        scrollable: listScrollable,
-      );
-      await tester.tap(find.byKey(const Key('debug_query_run_button')));
-      await tester.pumpAndSettle();
-
-      await tester.scrollUntilVisible(
-        find.byKey(const Key('debug_query_copy_button')),
-        100,
-        scrollable: listScrollable,
-      );
-      await tester.tap(find.byKey(const Key('debug_query_copy_button')));
       await tester.pumpAndSettle();
 
       expect(find.text('Copied to clipboard'), findsOneWidget);

@@ -12,11 +12,9 @@ import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
-import 'package:whitenoise/src/rust/api/utils.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/debug_info_pill.dart';
 import 'package:whitenoise/widgets/debug_key_value_row.dart';
-import 'package:whitenoise/widgets/debug_query_result_table.dart';
 import 'package:whitenoise/widgets/debug_section_card.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
@@ -80,7 +78,7 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                   )
                 : ListView.builder(
                     padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 18.h),
-                    itemCount: messageCount == 0 ? messageCount + 6 : messageCount + 5,
+                    itemCount: messageCount == 0 ? messageCount + 5 : messageCount + 4,
                     itemBuilder: (context, index) {
                       if (index == 0) {
                         return Padding(
@@ -96,28 +94,22 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                       if (index == 1) {
                         return Padding(
                           padding: EdgeInsets.only(bottom: 12.h),
-                          child: _DebugQuerySection(groupId: groupId),
+                          child: _SendLogSection(groupId: groupId),
                         );
                       }
                       if (index == 2) {
                         return Padding(
                           padding: EdgeInsets.only(bottom: 12.h),
-                          child: _SendLogSection(groupId: groupId),
+                          child: _StreamLogSection(groupId: groupId),
                         );
                       }
                       if (index == 3) {
                         return Padding(
                           padding: EdgeInsets.only(bottom: 12.h),
-                          child: _StreamLogSection(groupId: groupId),
-                        );
-                      }
-                      if (index == 4) {
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 12.h),
                           child: _RatchetTreeSection(groupId: groupId),
                         );
                       }
-                      if (index == 5 && messageCount == 0) {
+                      if (index == 4 && messageCount == 0) {
                         return Center(
                           child: Padding(
                             padding: EdgeInsets.only(top: 32.h),
@@ -130,7 +122,7 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                           ),
                         );
                       }
-                      final messageIndex = index - 5;
+                      final messageIndex = index - 4;
                       if (messageIndex < 0 || messageIndex >= messageCount) {
                         return const SizedBox.shrink();
                       }
@@ -390,180 +382,6 @@ class _StreamLogSection extends ConsumerWidget {
     if (e.laggedCount != null) parts.add('lagged=${e.laggedCount}');
     if (e.error != null) parts.add('error=${e.error}');
     return parts.join(' ');
-  }
-}
-
-class _DebugQuerySection extends HookWidget {
-  const _DebugQuerySection({required this.groupId});
-
-  final String groupId;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.colors;
-    final typography = context.typographyScaled;
-    final sqlController = useTextEditingController(
-      text: "SELECT name FROM sqlite_master WHERE type = 'table' ORDER BY name;",
-    );
-    final isRunning = useState(false);
-    final result = useState<String?>(null);
-    final error = useState<String?>(null);
-
-    Future<void> runQuery() async {
-      final sql = sqlController.text.trim();
-      if (sql.isEmpty) {
-        error.value = 'debug_query: SQL is empty';
-        result.value = null;
-        return;
-      }
-
-      isRunning.value = true;
-      error.value = null;
-      try {
-        final rawResult = await debugQuery(sql: sql);
-        if (!context.mounted) {
-          return;
-        }
-        result.value = formatDebugQueryResult(rawResult);
-      } catch (e) {
-        if (!context.mounted) {
-          return;
-        }
-        error.value = 'debug_query: $e';
-        result.value = null;
-      } finally {
-        if (context.mounted) {
-          isRunning.value = false;
-        }
-      }
-    }
-
-    Future<void> copyResult() async {
-      if (result.value == null || result.value!.isEmpty) {
-        return;
-      }
-      await _copyDebugText(context, result.value!);
-    }
-
-    return DebugSectionCard(
-      title: 'Debug SQL',
-      subtitle: 'Run SQL against the local debug database',
-      borderColor: colors.accent.violet.border,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          TextField(
-            key: const Key('debug_query_input'),
-            controller: sqlController,
-            minLines: 3,
-            maxLines: 8,
-            style: typography.medium10.copyWith(
-              color: colors.backgroundContentPrimary,
-              fontFamily: 'monospace',
-              height: 1.4,
-            ),
-            decoration: InputDecoration(
-              isDense: true,
-              hintText: 'SELECT * FROM accounts LIMIT 10;',
-              hintStyle: typography.medium10.copyWith(
-                color: colors.backgroundContentTertiary,
-                fontFamily: 'monospace',
-              ),
-              filled: true,
-              fillColor: colors.backgroundPrimary,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6.r),
-                borderSide: BorderSide(
-                  color: colors.backgroundContentTertiary.withValues(alpha: 0.4),
-                ),
-              ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6.r),
-                borderSide: BorderSide(
-                  color: colors.backgroundContentTertiary.withValues(alpha: 0.4),
-                ),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(6.r),
-                borderSide: BorderSide(color: colors.backgroundContentSecondary),
-              ),
-            ),
-          ),
-          SizedBox(height: 10.h),
-          Wrap(
-            spacing: 8.w,
-            runSpacing: 8.h,
-            children: [
-              FilledButton.tonal(
-                key: const Key('debug_query_run_button'),
-                onPressed: isRunning.value ? null : runQuery,
-                style: FilledButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                  visualDensity: VisualDensity.compact,
-                ),
-                child: Text(isRunning.value ? 'Running...' : 'Run SQL'),
-              ),
-              OutlinedButton(
-                key: const Key('debug_query_copy_button'),
-                onPressed: result.value == null ? null : copyResult,
-                style: OutlinedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
-                  visualDensity: VisualDensity.compact,
-                  side: BorderSide(color: colors.borderTertiary),
-                ),
-                child: const Text('Copy Result'),
-              ),
-            ],
-          ),
-          if (error.value != null) ...[
-            SizedBox(height: 6.h),
-            SelectableText(
-              key: const Key('debug_query_error'),
-              error.value!,
-              style: typography.medium10.copyWith(
-                color: colors.fillDestructive,
-                fontFamily: 'monospace',
-                height: 1.4,
-              ),
-            ),
-          ],
-          if (result.value != null) ...[
-            SizedBox(height: 6.h),
-            Builder(
-              builder: (context) {
-                final tableData = parseDebugQueryResultTable(result.value!);
-                if (tableData == null) {
-                  return const SizedBox.shrink();
-                }
-                return Padding(
-                  padding: EdgeInsets.only(bottom: 8.h),
-                  child: DebugQueryResultTable(
-                    data: tableData,
-                    title:
-                        'table (${tableData.rows.length} rows, ${tableData.columns.length} columns):',
-                    tableKey: const Key('debug_query_table'),
-                  ),
-                );
-              },
-            ),
-            Text(
-              'result:',
-              style: typography.semiBold10.copyWith(color: colors.backgroundContentSecondary),
-            ),
-            SizedBox(height: 4.h),
-            SelectableText(
-              key: const Key('debug_query_result'),
-              result.value!,
-              style: typography.medium10.copyWith(
-                color: colors.backgroundContentPrimary,
-                fontFamily: 'monospace',
-                height: 1.4,
-              ),
-            ),
-          ],
-        ],
-      ),
-    );
   }
 }
 

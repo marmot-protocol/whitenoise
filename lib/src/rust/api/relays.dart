@@ -21,6 +21,9 @@ Future<List<(String, String)>> getAccountRelayStatuses({
   required String pubkey,
 }) => RustLib.instance.api.crateApiRelaysGetAccountRelayStatuses(pubkey: pubkey);
 
+Future<String> debugRelayControlState() =>
+    RustLib.instance.api.crateApiRelaysDebugRelayControlState();
+
 /// Ensures all subscriptions (global and all accounts) are operational.
 ///
 /// This method is designed for periodic background tasks that need to ensure

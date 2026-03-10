@@ -279,6 +279,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Como uma organização sem fins lucrativos, o White Noise existe apenas para sua privacidade e liberdade, não para lucro. Seu apoio nos mantém independentes e sem compromissos.';
 
   @override
+  String get donateContributionLetter =>
+      'If you need a contribution acknowledgement letter for a donation, get in touch with us at info@ipf.dev';
+
+  @override
   String get lightningAddress => 'Endereço Lightning';
 
   @override
@@ -381,7 +385,20 @@ class AppLocalizationsPt extends AppLocalizations {
   String get searchByNameOrNpub => 'Nome ou npub1...';
 
   @override
-  String get developerSettingsTitle => 'Configurações de Desenvolvedor';
+  String get developerSettingsTitle => 'Configuracoes de Desenvolvedor';
+
+  @override
+  String get keyPackageManagementTitle => 'Gerenciamento de pacotes de chaves';
+
+  @override
+  String get keyPackageManagementDescription =>
+      'Publicar, atualizar e excluir pacotes de chaves da conta';
+
+  @override
+  String get relayStateTitle => 'Estado dos relays';
+
+  @override
+  String get relayStateDescription => 'Inspecionar os planos de controle de relays ativos';
 
   @override
   String get publishNewKeyPackage => 'Publicar Novo Pacote de Chaves';

@@ -89,14 +89,6 @@ class NetworkScreen extends HookConsumerWidget {
       );
     }
 
-    WnListItemType getRelayType(String? status) {
-      if (status == null) return WnListItemType.warning;
-      final lowerStatus = status.toLowerCase();
-      if (lowerStatus == 'connected') return WnListItemType.success;
-      if (lowerStatus == 'disconnected') return WnListItemType.error;
-      return WnListItemType.warning;
-    }
-
     Widget buildRelayList(RelayListState relayState, RelayCategory category) {
       if (relayState.isLoading && relayState.relays.isEmpty) {
         return const Center(child: CircularProgressIndicator());
@@ -127,11 +119,9 @@ class NetworkScreen extends HookConsumerWidget {
 
       return WnList(
         children: relayState.relays.map((relay) {
-          final status = state.relayStatuses[relay.url];
           return WnListItem(
             key: Key('relay_item_${category.name}_${relay.url}'),
             title: relay.url,
-            type: getRelayType(status),
             actions: [
               WnListItemAction(
                 label: context.l10n.remove,

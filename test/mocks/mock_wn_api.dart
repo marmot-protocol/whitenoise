@@ -59,9 +59,9 @@ class MockWnApi implements RustLibApi {
   LoginResult? loginStartResult;
   LoginResult? loginExternalSignerStartResult;
   bool registerExternalSignerCalled = false;
-  String debugQueryResult = '[]';
-  bool shouldFailDebugQuery = false;
-  String? lastDebugQuerySql;
+  String relayControlStateResult = '{}';
+  bool shouldFailRelayControlState = false;
+  int relayControlStateCallCount = 0;
 
   String? lastReadMessageId;
   final List<String> markedAsReadMessages = [];
@@ -179,12 +179,12 @@ class MockWnApi implements RustLibApi {
   }
 
   @override
-  Future<String> crateApiUtilsDebugQuery({required String sql}) async {
-    lastDebugQuerySql = sql;
-    if (shouldFailDebugQuery) {
-      throw Exception('debug query failed');
+  Future<String> crateApiRelaysDebugRelayControlState() async {
+    relayControlStateCallCount++;
+    if (shouldFailRelayControlState) {
+      throw Exception('relay control dump failed');
     }
-    return debugQueryResult;
+    return relayControlStateResult;
   }
 
   @override
@@ -590,9 +590,9 @@ class MockWnApi implements RustLibApi {
     loginStartResult = null;
     loginExternalSignerStartResult = null;
     registerExternalSignerCalled = false;
-    debugQueryResult = '[]';
-    shouldFailDebugQuery = false;
-    lastDebugQuerySql = null;
+    relayControlStateResult = '{}';
+    shouldFailRelayControlState = false;
+    relayControlStateCallCount = 0;
     lastReadMessageId = null;
     markedAsReadMessages.clear();
     getAccountGroupCallCount = 0;

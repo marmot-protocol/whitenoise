@@ -106,6 +106,9 @@ enum ChatListUpdateTrigger {
 
   /// The last message in a chat was deleted
   lastMessageDeleted,
+
+  /// The chat's archive status changed.
+  chatArchiveChanged,
 }
 
 class ChatSummary {
@@ -139,6 +142,9 @@ class ChatSummary {
   /// `Some` when invited by another user, `None` when the user created the group.
   final String? welcomerPubkey;
 
+  /// When this chat was archived, if at all.
+  final DateTime? archivedAt;
+
   /// Number of unread messages in this chat
   final BigInt unreadCount;
 
@@ -161,6 +167,7 @@ class ChatSummary {
     this.lastMessage,
     required this.pendingConfirmation,
     this.welcomerPubkey,
+    this.archivedAt,
     required this.unreadCount,
     this.pinOrder,
     this.dmPeerPubkey,
@@ -177,6 +184,7 @@ class ChatSummary {
       lastMessage.hashCode ^
       pendingConfirmation.hashCode ^
       welcomerPubkey.hashCode ^
+      archivedAt.hashCode ^
       unreadCount.hashCode ^
       pinOrder.hashCode ^
       dmPeerPubkey.hashCode;
@@ -195,6 +203,7 @@ class ChatSummary {
           lastMessage == other.lastMessage &&
           pendingConfirmation == other.pendingConfirmation &&
           welcomerPubkey == other.welcomerPubkey &&
+          archivedAt == other.archivedAt &&
           unreadCount == other.unreadCount &&
           pinOrder == other.pinOrder &&
           dmPeerPubkey == other.dmPeerPubkey;

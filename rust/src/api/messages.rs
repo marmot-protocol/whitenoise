@@ -416,6 +416,10 @@ pub async fn retry_message_publish(
     Ok(())
 }
 
+fn initial_aggregated_messages_page() -> (Option<Timestamp>, Option<String>, Option<u32>) {
+    (None, None, None)
+}
+
 #[frb]
 pub async fn fetch_aggregated_messages_for_group(
     pubkey: String,
@@ -424,8 +428,15 @@ pub async fn fetch_aggregated_messages_for_group(
     let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
+    let (before, before_message_id, limit) = initial_aggregated_messages_page();
     let messages = whitenoise
-        .fetch_aggregated_messages_for_group(&pubkey, &group_id)
+        .fetch_aggregated_messages_for_group(
+            &pubkey,
+            &group_id,
+            before,
+            before_message_id.as_deref(),
+            limit,
+        )
         .await?;
     Ok(messages.into_iter().map(|m| m.into()).collect())
 }
@@ -576,5 +587,14 @@ mod tests {
     fn test_delivery_status_conversion_retried() {
         let status: DeliveryStatus = WhitenoiseDeliveryStatus::Retried.into();
         assert_eq!(status, DeliveryStatus::Retried);
+    }
+
+    #[test]
+    fn test_initial_aggregated_messages_page_has_no_cursor() {
+        let (before, before_message_id, limit) = initial_aggregated_messages_page();
+
+        assert_eq!(before, None);
+        assert_eq!(before_message_id, None);
+        assert_eq!(limit, None);
     }
 }

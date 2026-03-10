@@ -43,7 +43,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 307419661;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1360479889;
 
 // Section: executor
 
@@ -723,7 +723,7 @@ fn wire__crate__api__create_whitenoise_config_impl(
         },
     )
 }
-fn wire__crate__api__utils__debug_query_impl(
+fn wire__crate__api__relays__debug_relay_control_state_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -731,7 +731,7 @@ fn wire__crate__api__utils__debug_query_impl(
 ) {
     FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
         flutter_rust_bridge::for_generated::TaskInfo {
-            debug_name: "debug_query",
+            debug_name: "debug_relay_control_state",
             port: Some(port_),
             mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
         },
@@ -745,12 +745,11 @@ fn wire__crate__api__utils__debug_query_impl(
             };
             let mut deserializer =
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
-            let api_sql = <String>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
                 transform_result_sse::<_, crate::api::error::ApiError>(
                     (move || async move {
-                        let output_ok = crate::api::utils::debug_query(api_sql).await?;
+                        let output_ok = crate::api::relays::debug_relay_control_state().await?;
                         Ok(output_ok)
                     })()
                     .await,
@@ -4875,6 +4874,7 @@ impl SseDecode for crate::api::chat_list::ChatListUpdateTrigger {
             0 => crate::api::chat_list::ChatListUpdateTrigger::NewGroup,
             1 => crate::api::chat_list::ChatListUpdateTrigger::NewLastMessage,
             2 => crate::api::chat_list::ChatListUpdateTrigger::LastMessageDeleted,
+            3 => crate::api::chat_list::ChatListUpdateTrigger::ChatArchiveChanged,
             _ => unreachable!("Invalid variant for ChatListUpdateTrigger: {}", inner),
         };
     }
@@ -4950,6 +4950,7 @@ impl SseDecode for crate::api::chat_list::ChatSummary {
             <Option<crate::api::messages::ChatMessageSummary>>::sse_decode(deserializer);
         let mut var_pendingConfirmation = <bool>::sse_decode(deserializer);
         let mut var_welcomerPubkey = <Option<String>>::sse_decode(deserializer);
+        let mut var_archivedAt = <Option<chrono::DateTime<chrono::Utc>>>::sse_decode(deserializer);
         let mut var_unreadCount = <u64>::sse_decode(deserializer);
         let mut var_pinOrder = <Option<i64>>::sse_decode(deserializer);
         let mut var_dmPeerPubkey = <Option<String>>::sse_decode(deserializer);
@@ -4963,6 +4964,7 @@ impl SseDecode for crate::api::chat_list::ChatSummary {
             last_message: var_lastMessage,
             pending_confirmation: var_pendingConfirmation,
             welcomer_pubkey: var_welcomerPubkey,
+            archived_at: var_archivedAt,
             unread_count: var_unreadCount,
             pin_order: var_pinOrder,
             dm_peer_pubkey: var_dmPeerPubkey,
@@ -6191,7 +6193,12 @@ fn pde_ffi_dispatcher_primary_impl(
         14 => wire__crate__api__groups__create_group_impl(port, ptr, rust_vec_len, data_len),
         15 => wire__crate__api__accounts__create_identity_impl(port, ptr, rust_vec_len, data_len),
         16 => wire__crate__api__create_whitenoise_config_impl(port, ptr, rust_vec_len, data_len),
-        17 => wire__crate__api__utils__debug_query_impl(port, ptr, rust_vec_len, data_len),
+        17 => wire__crate__api__relays__debug_relay_control_state_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
         18 => wire__crate__api__account_groups__decline_account_group_impl(
             port,
             ptr,
@@ -6791,6 +6798,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::chat_list::ChatListUpdateTrig
             Self::NewGroup => 0.into_dart(),
             Self::NewLastMessage => 1.into_dart(),
             Self::LastMessageDeleted => 2.into_dart(),
+            Self::ChatArchiveChanged => 3.into_dart(),
             _ => unreachable!(),
         }
     }
@@ -6876,6 +6884,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::chat_list::ChatSummary {
             self.last_message.into_into_dart().into_dart(),
             self.pending_confirmation.into_into_dart().into_dart(),
             self.welcomer_pubkey.into_into_dart().into_dart(),
+            self.archived_at.into_into_dart().into_dart(),
             self.unread_count.into_into_dart().into_dart(),
             self.pin_order.into_into_dart().into_dart(),
             self.dm_peer_pubkey.into_into_dart().into_dart(),
@@ -8171,6 +8180,7 @@ impl SseEncode for crate::api::chat_list::ChatListUpdateTrigger {
                 crate::api::chat_list::ChatListUpdateTrigger::NewGroup => 0,
                 crate::api::chat_list::ChatListUpdateTrigger::NewLastMessage => 1,
                 crate::api::chat_list::ChatListUpdateTrigger::LastMessageDeleted => 2,
+                crate::api::chat_list::ChatListUpdateTrigger::ChatArchiveChanged => 3,
                 _ => {
                     unimplemented!("");
                 }
@@ -8229,6 +8239,7 @@ impl SseEncode for crate::api::chat_list::ChatSummary {
         );
         <bool>::sse_encode(self.pending_confirmation, serializer);
         <Option<String>>::sse_encode(self.welcomer_pubkey, serializer);
+        <Option<chrono::DateTime<chrono::Utc>>>::sse_encode(self.archived_at, serializer);
         <u64>::sse_encode(self.unread_count, serializer);
         <Option<i64>>::sse_encode(self.pin_order, serializer);
         <Option<String>>::sse_encode(self.dm_peer_pubkey, serializer);
