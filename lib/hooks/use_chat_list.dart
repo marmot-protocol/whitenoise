@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
+import 'package:whitenoise/profiling/tracer.dart';
 import 'package:whitenoise/src/rust/api/chat_list.dart';
 
 final _logger = Logger('useChatList');
@@ -27,8 +28,10 @@ ChatListResult useChatList(String pubkey) {
               _logger.info(
                 'chatList stream initialSnapshot pubkey=${pubkey.substring(0, 8)}… count=${items.length}',
               );
-              chatMap.value = {for (final c in items.reversed) c.mlsGroupId: c};
-              return chatMap.value;
+              return Tracer.trace('chat_list.initial_snapshot', () {
+                chatMap.value = {for (final c in items.reversed) c.mlsGroupId: c};
+                return chatMap.value;
+              });
             },
             update: (update) {
               final id = update.item.mlsGroupId;
@@ -36,27 +39,29 @@ ChatListResult useChatList(String pubkey) {
                 'chatList stream update pubkey=${pubkey.substring(0, 8)}… '
                 'trigger=${update.trigger.name} groupId=$id',
               );
-              switch (update.trigger) {
-                case ChatListUpdateTrigger.lastMessageDeleted:
-                  chatMap.value[id] = update.item;
-                case ChatListUpdateTrigger.newGroup:
-                  chatMap.value[id] = update.item;
-                case ChatListUpdateTrigger.newLastMessage:
-                  if (update.item.pendingConfirmation) {
+              return Tracer.trace('chat_list.stream_update', () {
+                switch (update.trigger) {
+                  case ChatListUpdateTrigger.lastMessageDeleted:
                     chatMap.value[id] = update.item;
-                  } else {
-                    chatMap.value.remove(id);
+                  case ChatListUpdateTrigger.newGroup:
                     chatMap.value[id] = update.item;
-                  }
-                case ChatListUpdateTrigger.chatArchiveChanged:
-                  if (update.item.archivedAt != null) {
-                    chatMap.value.remove(id);
-                  } else {
-                    chatMap.value.remove(id);
-                    chatMap.value[id] = update.item;
-                  }
-              }
-              return chatMap.value;
+                  case ChatListUpdateTrigger.newLastMessage:
+                    if (update.item.pendingConfirmation) {
+                      chatMap.value[id] = update.item;
+                    } else {
+                      chatMap.value.remove(id);
+                      chatMap.value[id] = update.item;
+                    }
+                  case ChatListUpdateTrigger.chatArchiveChanged:
+                    if (update.item.archivedAt != null) {
+                      chatMap.value.remove(id);
+                    } else {
+                      chatMap.value.remove(id);
+                      chatMap.value[id] = update.item;
+                    }
+                }
+                return chatMap.value;
+              });
             },
           );
         }),
@@ -67,7 +72,10 @@ ChatListResult useChatList(String pubkey) {
   final isLoading = snapshot.connectionState == ConnectionState.waiting;
   return (
     isLoading: isLoading,
-    chats: chatMap.value.values.toList().reversed.toList(),
+    chats: Tracer.trace(
+      'chat_list.build_sorted_list',
+      () => chatMap.value.values.toList().reversed.toList(),
+    ),
     refresh: () => refreshKey.value++,
   );
 }

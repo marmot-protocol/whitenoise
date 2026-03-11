@@ -5,6 +5,7 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
+import 'package:whitenoise/profiling/tracer.dart';
 import 'package:whitenoise/providers/active_chat_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/foreground_service_provider.dart';
@@ -105,16 +106,22 @@ Future<void> handleNotificationUpdate(
   NotificationService notificationService,
   Ref ref,
 ) async {
+  final span = Tracer.begin('notification.handle_update');
+
   final activeChat = ref.read(activeChatProvider);
   if (activeChat == update.mlsGroupId) {
     _logger.fine('Skipping notification for active chat ${update.mlsGroupId}');
+    span.end();
     return;
   }
 
   final locale = ref.read(localeProvider.notifier).resolveLocale();
   final l10n = lookupAppLocalizations(locale);
 
-  final accounts = await accounts_api.getAccounts();
+  final accounts = await Tracer.traceAsync(
+    'notification.get_accounts',
+    () => accounts_api.getAccounts(),
+  );
   final String? receiverName = accounts.length > 1
       ? (update.receiver.displayName ?? l10n.unknownUser)
       : null;
@@ -128,19 +135,27 @@ Future<void> handleNotificationUpdate(
     senderName: senderName,
   );
 
-  await notificationService.show(
-    groupId: update.mlsGroupId,
-    title: title,
-    body: body,
-    receiverPubkey: update.receiver.pubkey,
-    isInvite: isInvite,
+  await Tracer.traceAsync(
+    'notification.show',
+    () => notificationService.show(
+      groupId: update.mlsGroupId,
+      title: title,
+      body: body,
+      receiverPubkey: update.receiver.pubkey,
+      isInvite: isInvite,
+    ),
   );
+
+  span.end();
 }
 
 Future<String?> _resolveSenderName(notifications_api.NotificationUser sender) async {
   if (sender.displayName != null) return sender.displayName;
   try {
-    final metadata = await UserService(sender.pubkey).fetchMetadata();
+    final metadata = await Tracer.traceAsync(
+      'notification.resolve_sender_metadata',
+      () => UserService(sender.pubkey).fetchMetadata(),
+    );
     return presentName(metadata);
   } catch (e) {
     _logger.warning('Failed to fetch sender metadata', e);

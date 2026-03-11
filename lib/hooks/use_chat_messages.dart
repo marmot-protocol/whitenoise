@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
+import 'package:whitenoise/profiling/tracer.dart';
 import 'package:whitenoise/providers/message_debug_log_provider.dart';
 import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
@@ -85,25 +86,27 @@ ChatMessagesResult useChatMessages(
                   ),
                 );
 
-                messageIds.value = [];
-                messagesById.value = {};
-                indexById.value = {};
+                return Tracer.trace('chat_messages.initial_snapshot', () {
+                  messageIds.value = [];
+                  messagesById.value = {};
+                  indexById.value = {};
 
-                for (var i = 0; i < initialChatMessages.length; i++) {
-                  final message = initialChatMessages[i];
-                  messageIds.value.add(message.id);
-                  messagesById.value[message.id] = message;
-                  indexById.value[message.id] = i;
-                }
+                  for (var i = 0; i < initialChatMessages.length; i++) {
+                    final message = initialChatMessages[i];
+                    messageIds.value.add(message.id);
+                    messagesById.value[message.id] = message;
+                    indexById.value[message.id] = i;
+                  }
 
-                final lastMessage = initialChatMessages.isNotEmpty
-                    ? initialChatMessages.last
-                    : null;
-                return (
-                  messageCount: initialChatMessages.length,
-                  latestMessageId: lastMessage?.id,
-                  latestMessagePubkey: lastMessage?.pubkey,
-                );
+                  final lastMessage = initialChatMessages.isNotEmpty
+                      ? initialChatMessages.last
+                      : null;
+                  return (
+                    messageCount: initialChatMessages.length,
+                    latestMessageId: lastMessage?.id,
+                    latestMessagePubkey: lastMessage?.pubkey,
+                  );
+                });
               },
               update: (update) {
                 final message = update.message;
@@ -120,22 +123,24 @@ ChatMessagesResult useChatMessages(
                   ),
                 );
 
-                messagesById.value[message.id] = message;
+                return Tracer.trace('chat_messages.stream_update', () {
+                  messagesById.value[message.id] = message;
 
-                if (update.trigger == UpdateTrigger.newMessage &&
-                    !indexById.value.containsKey(message.id)) {
-                  final newIndex = messageIds.value.length;
-                  messageIds.value.add(message.id);
-                  indexById.value[message.id] = newIndex;
-                }
+                  if (update.trigger == UpdateTrigger.newMessage &&
+                      !indexById.value.containsKey(message.id)) {
+                    final newIndex = messageIds.value.length;
+                    messageIds.value.add(message.id);
+                    indexById.value[message.id] = newIndex;
+                  }
 
-                final lastId = messageIds.value.isNotEmpty ? messageIds.value.last : null;
-                final lastPubkey = lastId != null ? messagesById.value[lastId]?.pubkey : null;
-                return (
-                  messageCount: messageIds.value.length,
-                  latestMessageId: lastId,
-                  latestMessagePubkey: lastPubkey,
-                );
+                  final lastId = messageIds.value.isNotEmpty ? messageIds.value.last : null;
+                  final lastPubkey = lastId != null ? messagesById.value[lastId]?.pubkey : null;
+                  return (
+                    messageCount: messageIds.value.length,
+                    latestMessageId: lastId,
+                    latestMessagePubkey: lastPubkey,
+                  );
+                });
               },
             );
           });
@@ -210,7 +215,10 @@ ChatMessagesResult useChatMessages(
     loadingPubkeys.value.add(pubkey);
     _logger.fine('fetchAuthorMetadata pubkey=${pubkey.substring(0, 8)}…');
     try {
-      final metadata = await UserService(pubkey).fetchMetadata();
+      final metadata = await Tracer.traceAsync(
+        'chat_messages.fetch_author_metadata',
+        () => UserService(pubkey).fetchMetadata(),
+      );
       _logger.fine(
         'fetchAuthorMetadata OK pubkey=${pubkey.substring(0, 8)}… '
         'name=${metadata.name} displayName=${metadata.displayName}',

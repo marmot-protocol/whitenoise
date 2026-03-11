@@ -30,6 +30,7 @@ import 'package:whitenoise/screens/login_screen.dart' show LoginScreen;
 import 'package:whitenoise/screens/network_screen.dart' show NetworkScreen;
 import 'package:whitenoise/screens/privacy_security_screen.dart' show PrivacySecurityScreen;
 import 'package:whitenoise/screens/profile_keys_screen.dart' show ProfileKeysScreen;
+import 'package:whitenoise/screens/profiling_screen.dart' show ProfilingScreen;
 import 'package:whitenoise/screens/relay_control_state_screen.dart' show RelayControlStateScreen;
 import 'package:whitenoise/screens/relay_resolution_screen.dart' show RelayResolutionScreen;
 import 'package:whitenoise/screens/scan_npub_screen.dart' show ScanNpubScreen;
@@ -66,6 +67,7 @@ abstract final class Routes {
   static const _keyPackageManagement = '/key-package-management';
   static const _relayControlState = '/relay-control-state';
   static const _appLogs = '/app-logs';
+  static const _profiling = '/profiling';
   static const _profileKeys = '/profile-keys';
   static const _shareProfile = '/share-profile';
   static const _editProfile = '/edit-profile';
@@ -204,6 +206,14 @@ abstract final class Routes {
             pageBuilder: (context, state) => _navigationTransition(
               state: state,
               child: const AppLogsScreen(),
+            ),
+          ),
+        if (isStaging)
+          GoRoute(
+            path: _profiling,
+            pageBuilder: (context, state) => _navigationTransition(
+              state: state,
+              child: const ProfilingScreen(),
             ),
           ),
         GoRoute(
@@ -623,5 +633,10 @@ abstract final class Routes {
   static void pushToChatRawDebug(BuildContext context, String groupId) {
     if (!isStaging) return;
     GoRouter.of(context).pushNamed('chatRawDebug', pathParameters: {'groupId': groupId});
+  }
+
+  static void pushToProfiling(BuildContext context) {
+    if (!isStaging) return;
+    GoRouter.of(context).push(_profiling);
   }
 }

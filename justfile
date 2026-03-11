@@ -310,6 +310,9 @@ build-staging-ipa-dev:
 run flavor="staging":
     flutter run --flavor {{flavor}} --dart-define=APP_FLAVOR={{flavor}}
 
+run-profiling:
+    flutter run --flavor "staging" --dart-define=APP_FLAVOR=staging --profile
+
 # Run the app on a connected device (production flavor)
 run-production:
     flutter run --flavor production --dart-define=APP_FLAVOR=production

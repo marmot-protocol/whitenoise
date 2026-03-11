@@ -5,6 +5,7 @@ import 'package:flutter/scheduler.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:whitenoise/hooks/use_mark_as_read.dart';
+import 'package:whitenoise/profiling/tracer.dart';
 
 const _bottomThreshold = 50.0;
 
@@ -88,25 +89,30 @@ ChatScrollResult useChatScroll({
 
   useEffect(() {
     void markVisibleMessagesAsRead() {
-      if (!scrollController.hasClients) return;
-      if (!hasUserScrolled.value) return;
-      if (messageCountRef.value == 0) return;
+      Tracer.trace('scroll.mark_visible_as_read', () {
+        if (!scrollController.hasClients) return;
+        if (!hasUserScrolled.value) return;
+        if (messageCountRef.value == 0) return;
 
-      final position = scrollController.position;
+        final position = scrollController.position;
 
-      final int indexToMark;
-      if (position.pixels <= _bottomThreshold) {
-        indexToMark = 0;
-      } else {
-        final lowestVisible = _getLowestVisibleIndex(scrollController);
-        if (lowestVisible == null) return;
-        indexToMark = lowestVisible;
-      }
+        final int indexToMark;
+        if (position.pixels <= _bottomThreshold) {
+          indexToMark = 0;
+        } else {
+          final lowestVisible = Tracer.trace(
+            'scroll.get_lowest_visible_index',
+            () => _getLowestVisibleIndex(scrollController),
+          );
+          if (lowestVisible == null) return;
+          indexToMark = lowestVisible;
+        }
 
-      final messageIdToMark = getMessageIdRef.value(indexToMark);
-      if (messageIdToMark == null) return;
+        final messageIdToMark = getMessageIdRef.value(indexToMark);
+        if (messageIdToMark == null) return;
 
-      markMessageAsRead(messageIdToMark);
+        markMessageAsRead(messageIdToMark);
+      });
     }
 
     void onScrollUpdate() {

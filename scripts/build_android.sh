@@ -150,4 +150,4 @@ cd ..
 
 print_success "All Rust libraries built and copied to Android project"
 print_success "Android build completed successfully!"
-print_success "You can now run 'flutter run' to test the app on Android"
+print_success "You can now run 'just run' to test the app on Android"

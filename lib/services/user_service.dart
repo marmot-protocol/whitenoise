@@ -1,4 +1,5 @@
 import 'package:logging/logging.dart';
+import 'package:whitenoise/profiling/tracer.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/users.dart' as users_api;
 import 'package:whitenoise/src/rust/api/users.dart' show User;
@@ -11,25 +12,41 @@ class UserService {
   const UserService(this.pubkey);
 
   Future<FlutterMetadata> fetchMetadata() async {
-    final userMetadata = await users_api.userMetadata(
-      pubkey: pubkey,
-      blockingDataSync: false,
+    final fast = await Tracer.traceAsync(
+      'user.fetch_metadata_fast',
+      () => users_api.userMetadata(pubkey: pubkey, blockingDataSync: false),
     );
-    if (_isMetadataEmpty(userMetadata)) {
-      return users_api.userMetadata(
-        pubkey: pubkey,
-        blockingDataSync: true,
+
+    if (_isMetadataEmpty(fast)) {
+      final blocking = await Tracer.traceAsync(
+        'user.fetch_metadata_blocking_relay_sync',
+        () => users_api.userMetadata(pubkey: pubkey, blockingDataSync: true),
       );
+      return blocking;
     }
 
-    return userMetadata;
+    return fast;
   }
 
   Future<User?> fetchUser() async {
     try {
-      final user = await users_api.getUser(pubkey: pubkey, blockingDataSync: false);
-      if (!_isMetadataEmpty(user.metadata)) return user;
-      return await users_api.getUser(pubkey: pubkey, blockingDataSync: true);
+      final span = Tracer.begin('user.fetch_user_total');
+
+      final fast = await Tracer.traceAsync(
+        'user.fetch_user_fast',
+        () => users_api.getUser(pubkey: pubkey, blockingDataSync: false),
+      );
+      if (!_isMetadataEmpty(fast.metadata)) {
+        span.end();
+        return fast;
+      }
+
+      final blocking = await Tracer.traceAsync(
+        'user.fetch_user_blocking_relay_sync',
+        () => users_api.getUser(pubkey: pubkey, blockingDataSync: true),
+      );
+      span.end();
+      return blocking;
     } catch (e) {
       _logger.warning('Failed to fetch user', e);
       return null;

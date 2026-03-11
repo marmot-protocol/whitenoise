@@ -1,5 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
+import 'package:whitenoise/profiling/tracer.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart' as account_groups_api;
 
 final _logger = Logger('useMarkAsRead');
@@ -21,9 +22,12 @@ MarkAsReadResult useMarkAsRead({
 
   Future<void> fetchLastReadMessageId() async {
     try {
-      final accountGroup = await account_groups_api.getAccountGroup(
-        accountPubkey: accountPubkey,
-        mlsGroupId: groupId,
+      final accountGroup = await Tracer.traceAsync(
+        'mark_as_read.fetch_last_read',
+        () => account_groups_api.getAccountGroup(
+          accountPubkey: accountPubkey,
+          mlsGroupId: groupId,
+        ),
       );
       lastReadMessageId.value = accountGroup.lastReadMessageId;
     } catch (error) {
@@ -59,8 +63,13 @@ MarkAsReadResult useMarkAsRead({
   void markMessageAsRead(String messageId) {
     if (isMessageRead(messageId)) return;
 
-    account_groups_api
-        .markMessageRead(accountPubkey: accountPubkey, messageId: messageId)
+    Tracer.traceAsync(
+          'mark_as_read.mark',
+          () => account_groups_api.markMessageRead(
+            accountPubkey: accountPubkey,
+            messageId: messageId,
+          ),
+        )
         .then((_) {
           lastReadMessageId.value = messageId;
         })

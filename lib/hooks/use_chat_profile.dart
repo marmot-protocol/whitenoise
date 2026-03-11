@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/hooks/use_route_refresh.dart';
+import 'package:whitenoise/profiling/tracer.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' as groups_api;
 import 'package:whitenoise/src/rust/api/users.dart' as users_api;
 import 'package:whitenoise/utils/avatar_color.dart';
@@ -65,12 +66,15 @@ AsyncSnapshot<ChatProfile> useChatProfile(
 Future<ChatProfile> _fetchChatProfile(String pubkey, String groupId) async {
   _logger.fine('Fetching chat profile for groupId: $groupId');
 
-  final group = await groups_api.getGroup(
-    accountPubkey: pubkey,
-    groupId: groupId,
+  final group = await Tracer.traceAsync(
+    'chat_profile.get_group',
+    () => groups_api.getGroup(accountPubkey: pubkey, groupId: groupId),
   );
 
-  final isDm = await group.isDirectMessageType(accountPubkey: pubkey);
+  final isDm = await Tracer.traceAsync(
+    'chat_profile.is_dm',
+    () => group.isDirectMessageType(accountPubkey: pubkey),
+  );
 
   if (isDm) {
     _logger.info('Fetching DM profile');
@@ -83,9 +87,9 @@ Future<ChatProfile> _fetchChatProfile(String pubkey, String groupId) async {
 
 Future<ChatProfile> _fetchGroupProfile(groups_api.Group group, String pubkey) async {
   _logger.info('Fetching group image path');
-  final imagePath = await groups_api.getGroupImagePath(
-    accountPubkey: pubkey,
-    groupId: group.mlsGroupId,
+  final imagePath = await Tracer.traceAsync(
+    'chat_profile.group_image_path',
+    () => groups_api.getGroupImagePath(accountPubkey: pubkey, groupId: group.mlsGroupId),
   );
   _logger.fine('Group image path fetched');
   return ChatProfile(
@@ -102,9 +106,9 @@ Future<ChatProfile> _fetchDmProfile(
 ) async {
   final groupId = group.mlsGroupId;
   _logger.info('Fetching group members');
-  final memberPubkeys = await groups_api.groupMembers(
-    pubkey: pubkey,
-    groupId: groupId,
+  final memberPubkeys = await Tracer.traceAsync(
+    'chat_profile.dm_members',
+    () => groups_api.groupMembers(pubkey: pubkey, groupId: groupId),
   );
 
   final otherMemberPubkey = memberPubkeys.where((p) => p != pubkey).firstOrNull;
@@ -117,9 +121,9 @@ Future<ChatProfile> _fetchDmProfile(
     );
   }
 
-  final metadata = await users_api.userMetadata(
-    pubkey: otherMemberPubkey,
-    blockingDataSync: false,
+  final metadata = await Tracer.traceAsync(
+    'chat_profile.dm_metadata',
+    () => users_api.userMetadata(pubkey: otherMemberPubkey, blockingDataSync: false),
   );
 
   return ChatProfile(

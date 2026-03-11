@@ -259,7 +259,7 @@ class AndroidSignerService {
     String? currentUser,
     String? id,
   }) async {
-    _logger.info('Requesting NIP-44 decryption from signer');
+    // _logger.info('Requesting NIP-44 decryption from signer');
 
     try {
       final result = await _channel.invokeMethod<Map<Object?, Object?>>('nip44Decrypt', {
@@ -333,7 +333,7 @@ class AndroidSignerService {
         );
       },
       nip44Decrypt: (ciphertext, senderPubkey) async {
-        _logger.fine('NIP-44 decrypting via Android signer...');
+        // _logger.fine('NIP-44 decrypting via Android signer...');
         return nip44Decrypt(
           encryptedText: ciphertext,
           pubkey: senderPubkey,

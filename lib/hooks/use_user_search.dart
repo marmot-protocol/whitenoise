@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
+import 'package:whitenoise/profiling/tracer.dart';
 import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart' as accounts_api;
 import 'package:whitenoise/src/rust/api/user_search.dart' as user_search_api;
@@ -86,7 +87,10 @@ UserSearchState useUserSearch({
   final refreshTick = _usePeriodicTick(_followsRefreshInterval);
 
   final followsFuture = useMemoized(
-    () => accounts_api.accountFollows(pubkey: accountPubkey),
+    () => Tracer.traceAsync(
+      'user_search.fetch_follows',
+      () => accounts_api.accountFollows(pubkey: accountPubkey),
+    ),
     [accountPubkey, refreshTick],
   );
   final followsSnapshot = useFuture(followsFuture);
@@ -153,13 +157,16 @@ UserSearchState useUserSearch({
     StreamSubscription<user_search_api.UserSearchUpdate>? activeSubscription;
 
     void flushResults() {
-      final sorted = results.values.toList()
-        ..sort(
-          (a, b) => _matchQualityRank(a.matchQuality).compareTo(_matchQualityRank(b.matchQuality)),
-        );
-      nameSearchResults.value = sorted.map(_userFromSearchResult).toList();
-      isLoadingNameSearch.value = false;
-      hasPendingFlush = false;
+      Tracer.trace('user_search.flush_results', () {
+        final sorted = results.values.toList()
+          ..sort(
+            (a, b) =>
+                _matchQualityRank(a.matchQuality).compareTo(_matchQualityRank(b.matchQuality)),
+          );
+        nameSearchResults.value = sorted.map(_userFromSearchResult).toList();
+        isLoadingNameSearch.value = false;
+        hasPendingFlush = false;
+      });
     }
 
     void completeRound(Completer<void> completer) {
@@ -184,14 +191,16 @@ UserSearchState useUserSearch({
             )
             .listen(
               (update) {
-                for (final result in update.newResults) {
-                  final existing = results[result.pubkey];
-                  if (existing == null ||
-                      _matchQualityRank(result.matchQuality) <
-                          _matchQualityRank(existing.matchQuality)) {
-                    results[result.pubkey] = result;
+                Tracer.trace('user_search.process_update', () {
+                  for (final result in update.newResults) {
+                    final existing = results[result.pubkey];
+                    if (existing == null ||
+                        _matchQualityRank(result.matchQuality) <
+                            _matchQualityRank(existing.matchQuality)) {
+                      results[result.pubkey] = result;
+                    }
                   }
-                }
+                });
 
                 final isComplete =
                     update.trigger is user_search_api.SearchUpdateTrigger_SearchCompleted;

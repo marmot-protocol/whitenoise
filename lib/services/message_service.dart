@@ -1,5 +1,6 @@
 import 'package:logging/logging.dart';
 import 'package:whitenoise/constants/nostr_event_kinds.dart';
+import 'package:whitenoise/profiling/tracer.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' as messages_api;
 import 'package:whitenoise/src/rust/api/utils.dart' as utils_api;
@@ -15,10 +16,13 @@ class MessageService {
   Future<void> retryMessage({required String eventId}) async {
     _logger.info('retryMessage START groupId=$groupId eventId=$eventId');
     try {
-      await messages_api.retryMessagePublish(
-        pubkey: pubkey,
-        groupId: groupId,
-        eventId: eventId,
+      await Tracer.traceAsync(
+        'message.retry',
+        () => messages_api.retryMessagePublish(
+          pubkey: pubkey,
+          groupId: groupId,
+          eventId: eventId,
+        ),
       );
       _logger.info('retryMessage OK groupId=$groupId eventId=$eventId');
     } catch (e, st) {
@@ -47,7 +51,10 @@ class MessageService {
           ? [await _replyTag(eventId: replyToMessageId, eventPubkey: replyToMessagePubkey)]
           : <messages_api.Tag>[];
 
-      final mediaTags = await _buildMediaTags(mediaFiles: mediaFiles);
+      final mediaTags = await Tracer.traceAsync(
+        'message.build_media_tags',
+        () => _buildMediaTags(mediaFiles: mediaFiles),
+      );
       final allTags = [...replyTags, ...mediaTags];
 
       final message = isReply
@@ -56,12 +63,15 @@ class MessageService {
 
       _logger.info('sendMessage calling Rust API tagsCount=${allTags.length}');
 
-      final result = await messages_api.sendMessageToGroup(
-        pubkey: pubkey,
-        groupId: groupId,
-        message: message,
-        kind: NostrEventKinds.chatMessage,
-        tags: allTags.isEmpty ? null : allTags,
+      final result = await Tracer.traceAsync(
+        'message.send',
+        () => messages_api.sendMessageToGroup(
+          pubkey: pubkey,
+          groupId: groupId,
+          message: message,
+          kind: NostrEventKinds.chatMessage,
+          tags: allTags.isEmpty ? null : allTags,
+        ),
       );
 
       _logger.info(
@@ -98,12 +108,15 @@ class MessageService {
 
       _logger.info('sendTextMessage calling Rust API hasTags=${tags != null}');
 
-      final result = await messages_api.sendMessageToGroup(
-        pubkey: pubkey,
-        groupId: groupId,
-        message: message,
-        kind: NostrEventKinds.chatMessage,
-        tags: tags,
+      final result = await Tracer.traceAsync(
+        'message.send_text',
+        () => messages_api.sendMessageToGroup(
+          pubkey: pubkey,
+          groupId: groupId,
+          message: message,
+          kind: NostrEventKinds.chatMessage,
+          tags: tags,
+        ),
       );
 
       _logger.info(
@@ -132,12 +145,15 @@ class MessageService {
       );
 
       _logger.info('sendReaction calling Rust API');
-      final result = await messages_api.sendMessageToGroup(
-        pubkey: pubkey,
-        groupId: groupId,
-        message: emoji,
-        kind: NostrEventKinds.reaction,
-        tags: tags,
+      final result = await Tracer.traceAsync(
+        'message.send_reaction',
+        () => messages_api.sendMessageToGroup(
+          pubkey: pubkey,
+          groupId: groupId,
+          message: emoji,
+          kind: NostrEventKinds.reaction,
+          tags: tags,
+        ),
       );
       _logger.info(
         'sendReaction OK resultId=${result.id} createdAt=${result.createdAt.toIso8601String()}',
@@ -218,12 +234,15 @@ class MessageService {
       );
 
       _logger.info('_deleteEvent calling Rust API tagsCount=${tags.length}');
-      final result = await messages_api.sendMessageToGroup(
-        pubkey: pubkey,
-        groupId: groupId,
-        message: '',
-        tags: tags,
-        kind: NostrEventKinds.deletion,
+      final result = await Tracer.traceAsync(
+        'message.delete',
+        () => messages_api.sendMessageToGroup(
+          pubkey: pubkey,
+          groupId: groupId,
+          message: '',
+          tags: tags,
+          kind: NostrEventKinds.deletion,
+        ),
       );
       _logger.info(
         '_deleteEvent OK resultId=${result.id} createdAt=${result.createdAt.toIso8601String()}',
