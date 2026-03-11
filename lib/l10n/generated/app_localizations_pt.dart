@@ -363,14 +363,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get accept => 'Aceitar';
 
   @override
-  String failedToAcceptInvitation(String error) {
-    return 'Falha ao aceitar o convite: $error';
-  }
+  String get failedToAcceptInvitation => 'Falha ao aceitar o convite. Tente novamente.';
 
   @override
-  String failedToDeclineInvitation(String error) {
-    return 'Falha ao recusar o convite: $error';
-  }
+  String get failedToDeclineInvitation => 'Falha ao recusar o convite. Tente novamente.';
 
   @override
   String get startNewChat => 'Nova conversa';
@@ -444,6 +440,19 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get keyPackageDeleted => 'Pacote de chaves excluído';
+
+  @override
+  String get keyPackageFetchFailed => 'Falha ao atualizar os pacotes de chaves. Tente novamente.';
+
+  @override
+  String get keyPackagePublishFailed => 'Falha ao publicar o pacote de chaves. Tente novamente.';
+
+  @override
+  String get keyPackageDeleteFailed => 'Falha ao excluir o pacote de chaves. Tente novamente.';
+
+  @override
+  String get keyPackageDeleteAllFailed =>
+      'Falha ao excluir todos os pacotes de chaves. Tente novamente.';
 
   @override
   String packageNumber(int number) {
@@ -1134,13 +1143,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get connectAnotherProfile => 'Conectar outro perfil';
 
   @override
-  String get rawDebugView => 'Vista de depuração bruta';
+  String get rawDebugView => 'Modo de depuração';
 
   @override
   String get rawDebugViewDescription => 'Mostrar dados brutos das mensagens no chat';
 
   @override
-  String get rawDebugViewTitle => 'Vista de Depuração Bruta';
+  String get rawDebugViewTitle => 'Modo de Depuração';
 
   @override
   String get rawDebugViewGroupId => 'ID do Grupo';
@@ -1172,6 +1181,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get appLogsClear => 'Limpar';
 
   @override
+  String get appLogsEraseAll => 'Apagar tudo';
+
+  @override
   String get appLogsEmpty => 'Nenhum registro ainda';
 
   @override
@@ -1198,6 +1210,9 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String get appLogsCopyAll => 'Copiar tudo';
+
+  @override
   String get invalidRelayUrlScheme => 'O URL deve começar com wss:// ou ws://';
 
   @override
@@ -1205,4 +1220,8 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get thisMessageWasDeleted => 'Esta mensagem foi excluída.';
+
+  @override
+  String get relayControlStateLoadError =>
+      'Falha ao carregar o estado de controle do relay. Por favor, tente novamente.';
 }

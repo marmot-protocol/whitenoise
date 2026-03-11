@@ -130,7 +130,7 @@ void main() {
       await hook.fetch();
       await tester.pump();
 
-      expect(hook.state.error, isNotNull);
+      expect(hook.state.hasError, isTrue);
     });
   });
 
@@ -150,7 +150,7 @@ void main() {
       await hook.publish();
       await tester.pump();
 
-      expect(hook.state.error, isNotNull);
+      expect(hook.state.hasError, isTrue);
     });
   });
 
@@ -231,7 +231,7 @@ void main() {
       await hook.delete('pkg1');
       await tester.pump();
 
-      expect(hook.state.error, isNotNull);
+      expect(hook.state.hasError, isTrue);
     });
   });
 
@@ -282,7 +282,7 @@ void main() {
       await hook.deleteAll();
       await tester.pump();
 
-      expect(hook.state.error, isNotNull);
+      expect(hook.state.hasError, isTrue);
     });
   });
 }

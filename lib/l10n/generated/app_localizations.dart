@@ -759,14 +759,14 @@ abstract class AppLocalizations {
   /// Error when accepting invitation fails
   ///
   /// In en, this message translates to:
-  /// **'Failed to accept invitation: {error}'**
-  String failedToAcceptInvitation(String error);
+  /// **'Failed to accept invitation. Please try again.'**
+  String get failedToAcceptInvitation;
 
   /// Error when declining invitation fails
   ///
   /// In en, this message translates to:
-  /// **'Failed to decline invitation: {error}'**
-  String failedToDeclineInvitation(String error);
+  /// **'Failed to decline invitation. Please try again.'**
+  String get failedToDeclineInvitation;
 
   /// User search screen title
   ///
@@ -905,6 +905,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Key package deleted'**
   String get keyPackageDeleted;
+
+  /// Error message when fetching key packages fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to refresh key packages. Please try again.'**
+  String get keyPackageFetchFailed;
+
+  /// Error message when publishing a key package fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to publish key package. Please try again.'**
+  String get keyPackagePublishFailed;
+
+  /// Error message when deleting a key package fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete key package. Please try again.'**
+  String get keyPackageDeleteFailed;
+
+  /// Error message when deleting all key packages fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete all key packages. Please try again.'**
+  String get keyPackageDeleteAllFailed;
 
   /// Key package item title
   ///
@@ -2058,37 +2082,37 @@ abstract class AppLocalizations {
   /// **'Connect Another Profile'**
   String get connectAnotherProfile;
 
-  /// Toggle label for raw message debug view in developer settings
+  /// Toggle label for debug mode in developer settings
   ///
   /// In en, this message translates to:
-  /// **'Raw debug view'**
+  /// **'Debug mode'**
   String get rawDebugView;
 
-  /// Subtitle for the raw debug view toggle
+  /// Subtitle for the debug mode toggle
   ///
   /// In en, this message translates to:
   /// **'Show raw message data in chat'**
   String get rawDebugViewDescription;
 
-  /// Screen title for the raw message debug screen
+  /// Screen title for the debug mode screen
   ///
   /// In en, this message translates to:
-  /// **'Raw Debug View'**
+  /// **'Debug Mode'**
   String get rawDebugViewTitle;
 
-  /// Label for group ID in raw debug view
+  /// Label for group ID in debug mode
   ///
   /// In en, this message translates to:
   /// **'Group ID'**
   String get rawDebugViewGroupId;
 
-  /// Message count shown in raw debug view
+  /// Message count shown in debug mode
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =0{No messages} =1{1 message} other{{count} messages}}'**
   String rawDebugViewMessageCount(int count);
 
-  /// Snackbar text after copying a raw message
+  /// Feedback text after copying debug data
   ///
   /// In en, this message translates to:
   /// **'Copied to clipboard'**
@@ -2112,11 +2136,17 @@ abstract class AppLocalizations {
   /// **'View all Logger output in app'**
   String get appLogsViewLogsDescription;
 
-  /// Button to clear logs
+  /// Button to clear logs (legacy, use appLogsEraseAll)
   ///
   /// In en, this message translates to:
   /// **'Clear'**
   String get appLogsClear;
+
+  /// Button to erase all logs
+  ///
+  /// In en, this message translates to:
+  /// **'Erase all'**
+  String get appLogsEraseAll;
 
   /// Shown when log list is empty
   ///
@@ -2166,6 +2196,12 @@ abstract class AppLocalizations {
   /// **'{shown} of {total}'**
   String appLogsFilteredCount(int shown, int total);
 
+  /// Button to copy all visible logs to clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Copy all'**
+  String get appLogsCopyAll;
+
   /// Error message when relay URL doesn't start with wss:// or ws://
   ///
   /// In en, this message translates to:
@@ -2183,6 +2219,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This message was deleted.'**
   String get thisMessageWasDeleted;
+
+  /// User-friendly error when relay control state fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load relay control state. Please try again.'**
+  String get relayControlStateLoadError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

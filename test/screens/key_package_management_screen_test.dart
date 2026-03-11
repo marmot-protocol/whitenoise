@@ -206,7 +206,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.byType(WnSystemNotice), findsOneWidget);
-      expect(find.text('Failed to publish key package'), findsNWidgets(2));
+      expect(
+        find.text('Failed to publish key package. Please try again.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('refresh success shows notice', (tester) async {
@@ -228,7 +231,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.byType(WnSystemNotice), findsOneWidget);
-      expect(find.text('Failed to fetch key packages'), findsNWidgets(2));
+      expect(
+        find.text('Failed to refresh key packages. Please try again.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('delete all success shows notice', (tester) async {
@@ -270,7 +276,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.byType(WnSystemNotice), findsOneWidget);
-      expect(find.text('Failed to delete key packages'), findsNWidgets(2));
+      expect(
+        find.text('Failed to delete all key packages. Please try again.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('delete key package uses expected id', (tester) async {
@@ -311,7 +320,10 @@ void main() {
       await tester.pump(const Duration(milliseconds: 300));
 
       expect(find.byType(WnSystemNotice), findsOneWidget);
-      expect(find.text('Failed to delete key package'), findsNWidgets(2));
+      expect(
+        find.text('Failed to delete key package. Please try again.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows error message on initial fetch failure', (tester) async {
@@ -319,7 +331,11 @@ void main() {
 
       await pumpScreen(tester);
 
-      expect(find.text('Failed to fetch key packages'), findsOneWidget);
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(
+        find.text('Failed to refresh key packages. Please try again.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('shows scroll edge effects for many key packages', (tester) async {

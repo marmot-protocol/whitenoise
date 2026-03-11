@@ -364,14 +364,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get accept => 'Aceptar';
 
   @override
-  String failedToAcceptInvitation(String error) {
-    return 'Error al aceptar la invitación: $error';
-  }
+  String get failedToAcceptInvitation => 'Error al aceptar la invitación. Inténtalo de nuevo.';
 
   @override
-  String failedToDeclineInvitation(String error) {
-    return 'Error al rechazar la invitación: $error';
-  }
+  String get failedToDeclineInvitation => 'Error al rechazar la invitación. Inténtalo de nuevo.';
 
   @override
   String get startNewChat => 'Iniciar nuevo chat';
@@ -389,17 +385,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get developerSettingsTitle => 'Ajustes de Desarrollador';
 
   @override
-  String get keyPackageManagementTitle => 'Gestion de paquetes de llaves';
+  String get keyPackageManagementTitle => 'Gestión de paquetes de llaves';
 
   @override
   String get keyPackageManagementDescription =>
       'Publicar, actualizar y eliminar paquetes de llaves de la cuenta';
 
   @override
-  String get relayStateTitle => 'Estado de relays';
+  String get relayStateTitle => 'Estado de relés';
 
   @override
-  String get relayStateDescription => 'Inspeccionar los planos de control de relays activos';
+  String get relayStateDescription => 'Inspeccionar los planos de control de relés activos';
 
   @override
   String get relayControlStateDumpLabel => 'debug_relay_control_state:';
@@ -445,6 +441,22 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get keyPackageDeleted => 'Paquete de llaves eliminado';
+
+  @override
+  String get keyPackageFetchFailed =>
+      'Error al actualizar los paquetes de llaves. Inténtalo de nuevo.';
+
+  @override
+  String get keyPackagePublishFailed =>
+      'Error al publicar el paquete de llaves. Inténtalo de nuevo.';
+
+  @override
+  String get keyPackageDeleteFailed =>
+      'Error al eliminar el paquete de llaves. Inténtalo de nuevo.';
+
+  @override
+  String get keyPackageDeleteAllFailed =>
+      'Error al eliminar todos los paquetes de llaves. Inténtalo de nuevo.';
 
   @override
   String packageNumber(int number) {
@@ -1137,13 +1149,13 @@ class AppLocalizationsEs extends AppLocalizations {
   String get connectAnotherProfile => 'Conectar otro perfil';
 
   @override
-  String get rawDebugView => 'Vista de depuración sin procesar';
+  String get rawDebugView => 'Modo de depuración';
 
   @override
   String get rawDebugViewDescription => 'Mostrar datos de mensajes sin procesar en el chat';
 
   @override
-  String get rawDebugViewTitle => 'Vista de Depuración Sin Procesar';
+  String get rawDebugViewTitle => 'Modo de Depuración';
 
   @override
   String get rawDebugViewGroupId => 'ID del Grupo';
@@ -1175,6 +1187,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get appLogsClear => 'Borrar';
 
   @override
+  String get appLogsEraseAll => 'Borrar todo';
+
+  @override
   String get appLogsEmpty => 'Aún no hay registros';
 
   @override
@@ -1201,6 +1216,9 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get appLogsCopyAll => 'Copiar todo';
+
+  @override
   String get invalidRelayUrlScheme => 'La URL debe comenzar con wss:// o ws://';
 
   @override
@@ -1208,4 +1226,8 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get thisMessageWasDeleted => 'Este mensaje fue eliminado.';
+
+  @override
+  String get relayControlStateLoadError =>
+      'Error al cargar el estado de relés. Por favor, inténtalo de nuevo.';
 }

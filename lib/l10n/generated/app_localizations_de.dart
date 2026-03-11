@@ -367,14 +367,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get accept => 'Annehmen';
 
   @override
-  String failedToAcceptInvitation(String error) {
-    return 'Einladung konnte nicht angenommen werden: $error';
-  }
+  String get failedToAcceptInvitation =>
+      'Einladung konnte nicht angenommen werden. Bitte erneut versuchen.';
 
   @override
-  String failedToDeclineInvitation(String error) {
-    return 'Einladung konnte nicht abgelehnt werden: $error';
-  }
+  String get failedToDeclineInvitation =>
+      'Einladung konnte nicht abgelehnt werden. Bitte erneut versuchen.';
 
   @override
   String get startNewChat => 'Neuen Chat starten';
@@ -392,11 +390,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get developerSettingsTitle => 'Entwicklereinstellungen';
 
   @override
-  String get keyPackageManagementTitle => 'Schluesselpaket-Verwaltung';
+  String get keyPackageManagementTitle => 'Schlüsselpaket-Verwaltung';
 
   @override
   String get keyPackageManagementDescription =>
-      'Kontoschluesselpakete veroeffentlichen, aktualisieren und loeschen';
+      'Kontoschlüsselpakete veröffentlichen, aktualisieren und löschen';
 
   @override
   String get relayStateTitle => 'Relay-Status';
@@ -448,6 +446,22 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get keyPackageDeleted => 'Schlüsselpaket gelöscht';
+
+  @override
+  String get keyPackageFetchFailed =>
+      'Schlüsselpakete konnten nicht aktualisiert werden. Bitte erneut versuchen.';
+
+  @override
+  String get keyPackagePublishFailed =>
+      'Schlüsselpaket konnte nicht veröffentlicht werden. Bitte erneut versuchen.';
+
+  @override
+  String get keyPackageDeleteFailed =>
+      'Schlüsselpaket konnte nicht gelöscht werden. Bitte erneut versuchen.';
+
+  @override
+  String get keyPackageDeleteAllFailed =>
+      'Schlüsselpakete konnten nicht gelöscht werden. Bitte erneut versuchen.';
 
   @override
   String packageNumber(int number) {
@@ -1150,13 +1164,13 @@ class AppLocalizationsDe extends AppLocalizations {
   String get connectAnotherProfile => 'Weiteres Profil verbinden';
 
   @override
-  String get rawDebugView => 'Rohe Debug-Ansicht';
+  String get rawDebugView => 'Debug-Modus';
 
   @override
   String get rawDebugViewDescription => 'Rohe Nachrichtendaten im Chat anzeigen';
 
   @override
-  String get rawDebugViewTitle => 'Rohe Debug-Ansicht';
+  String get rawDebugViewTitle => 'Debug-Modus';
 
   @override
   String get rawDebugViewGroupId => 'Gruppen-ID';
@@ -1188,6 +1202,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get appLogsClear => 'Löschen';
 
   @override
+  String get appLogsEraseAll => 'Alles löschen';
+
+  @override
   String get appLogsEmpty => 'Noch keine Logs';
 
   @override
@@ -1214,6 +1231,9 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get appLogsCopyAll => 'Alle kopieren';
+
+  @override
   String get invalidRelayUrlScheme => 'Die URL muss mit wss:// oder ws:// beginnen';
 
   @override
@@ -1221,4 +1241,8 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get thisMessageWasDeleted => 'Diese Nachricht wurde gelöscht.';
+
+  @override
+  String get relayControlStateLoadError =>
+      'Laden des Relay-Status fehlgeschlagen. Bitte erneut versuchen.';
 }

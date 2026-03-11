@@ -363,14 +363,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get accept => 'Принять';
 
   @override
-  String failedToAcceptInvitation(String error) {
-    return 'Не удалось принять приглашение: $error';
-  }
+  String get failedToAcceptInvitation => 'Не удалось принять приглашение. Попробуйте снова.';
 
   @override
-  String failedToDeclineInvitation(String error) {
-    return 'Не удалось отклонить приглашение: $error';
-  }
+  String get failedToDeclineInvitation => 'Не удалось отклонить приглашение. Попробуйте снова.';
 
   @override
   String get startNewChat => 'Новый чат';
@@ -444,6 +440,18 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get keyPackageDeleted => 'Пакет ключей удалён';
+
+  @override
+  String get keyPackageFetchFailed => 'Не удалось обновить пакеты ключей. Попробуйте снова.';
+
+  @override
+  String get keyPackagePublishFailed => 'Не удалось опубликовать пакет ключей. Попробуйте снова.';
+
+  @override
+  String get keyPackageDeleteFailed => 'Не удалось удалить пакет ключей. Попробуйте снова.';
+
+  @override
+  String get keyPackageDeleteAllFailed => 'Не удалось удалить все пакеты ключей. Попробуйте снова.';
 
   @override
   String packageNumber(int number) {
@@ -1153,13 +1161,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get connectAnotherProfile => 'Подключить другой профиль';
 
   @override
-  String get rawDebugView => 'Просмотр отладочных данных';
+  String get rawDebugView => 'Режим отладки';
 
   @override
   String get rawDebugViewDescription => 'Показывать необработанные данные сообщений в чате';
 
   @override
-  String get rawDebugViewTitle => 'Просмотр Отладки';
+  String get rawDebugViewTitle => 'Режим отладки';
 
   @override
   String get rawDebugViewGroupId => 'ID группы';
@@ -1193,6 +1201,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get appLogsClear => 'Очистить';
 
   @override
+  String get appLogsEraseAll => 'Очистить всё';
+
+  @override
   String get appLogsEmpty => 'Пока нет записей';
 
   @override
@@ -1219,6 +1230,9 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
+  String get appLogsCopyAll => 'Копировать все';
+
+  @override
   String get invalidRelayUrlScheme => 'URL должен начинаться с wss:// или ws://';
 
   @override
@@ -1226,4 +1240,8 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get thisMessageWasDeleted => 'Это сообщение было удалено.';
+
+  @override
+  String get relayControlStateLoadError =>
+      'Не удалось загрузить состояние управления реле. Пожалуйста, попробуйте снова.';
 }

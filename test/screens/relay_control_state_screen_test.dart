@@ -46,7 +46,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('relay_control_state_error')), findsOneWidget);
-    expect(find.textContaining('relay control dump failed'), findsOneWidget);
+    expect(find.textContaining('Failed to load relay control state'), findsOneWidget);
   });
 
   testWidgets('copy button is disabled before a result is loaded', (tester) async {

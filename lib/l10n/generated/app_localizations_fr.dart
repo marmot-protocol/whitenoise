@@ -363,14 +363,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get accept => 'Accepter';
 
   @override
-  String failedToAcceptInvitation(String error) {
-    return 'Échec de l\'acceptation de l\'invitation : $error';
-  }
+  String get failedToAcceptInvitation =>
+      'Échec de l\'acceptation de l\'invitation. Veuillez réessayer.';
 
   @override
-  String failedToDeclineInvitation(String error) {
-    return 'Échec du refus de l\'invitation : $error';
-  }
+  String get failedToDeclineInvitation => 'Échec du refus de l\'invitation. Veuillez réessayer.';
 
   @override
   String get startNewChat => 'Nouvelle discussion';
@@ -444,6 +441,22 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get keyPackageDeleted => 'Paquet de clés supprimé';
+
+  @override
+  String get keyPackageFetchFailed =>
+      'Impossible de rafraîchir les paquets de clés. Veuillez réessayer.';
+
+  @override
+  String get keyPackagePublishFailed =>
+      'Impossible de publier le paquet de clés. Veuillez réessayer.';
+
+  @override
+  String get keyPackageDeleteFailed =>
+      'Impossible de supprimer le paquet de clés. Veuillez réessayer.';
+
+  @override
+  String get keyPackageDeleteAllFailed =>
+      'Impossible de supprimer tous les paquets de clés. Veuillez réessayer.';
 
   @override
   String packageNumber(int number) {
@@ -1134,13 +1147,13 @@ class AppLocalizationsFr extends AppLocalizations {
   String get connectAnotherProfile => 'Connecter un autre profil';
 
   @override
-  String get rawDebugView => 'Vue de débogage brute';
+  String get rawDebugView => 'Mode débogage';
 
   @override
   String get rawDebugViewDescription => 'Afficher les données brutes des messages dans le chat';
 
   @override
-  String get rawDebugViewTitle => 'Vue de Débogage Brute';
+  String get rawDebugViewTitle => 'Mode Débogage';
 
   @override
   String get rawDebugViewGroupId => 'ID du Groupe';
@@ -1173,6 +1186,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get appLogsClear => 'Effacer';
 
   @override
+  String get appLogsEraseAll => 'Tout effacer';
+
+  @override
   String get appLogsEmpty => 'Aucun journal pour le moment';
 
   @override
@@ -1199,6 +1215,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get appLogsCopyAll => 'Tout copier';
+
+  @override
   String get invalidRelayUrlScheme => 'L\'URL doit commencer par wss:// ou ws://';
 
   @override
@@ -1206,4 +1225,8 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get thisMessageWasDeleted => 'Ce message a été supprimé.';
+
+  @override
+  String get relayControlStateLoadError =>
+      'Échec du chargement de l\'état de contrôle du relais. Veuillez réessayer.';
 }

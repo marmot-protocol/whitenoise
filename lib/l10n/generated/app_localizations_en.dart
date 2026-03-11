@@ -362,14 +362,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get accept => 'Accept';
 
   @override
-  String failedToAcceptInvitation(String error) {
-    return 'Failed to accept invitation: $error';
-  }
+  String get failedToAcceptInvitation => 'Failed to accept invitation. Please try again.';
 
   @override
-  String failedToDeclineInvitation(String error) {
-    return 'Failed to decline invitation: $error';
-  }
+  String get failedToDeclineInvitation => 'Failed to decline invitation. Please try again.';
 
   @override
   String get startNewChat => 'Start new chat';
@@ -442,6 +438,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get keyPackageDeleted => 'Key package deleted';
+
+  @override
+  String get keyPackageFetchFailed => 'Failed to refresh key packages. Please try again.';
+
+  @override
+  String get keyPackagePublishFailed => 'Failed to publish key package. Please try again.';
+
+  @override
+  String get keyPackageDeleteFailed => 'Failed to delete key package. Please try again.';
+
+  @override
+  String get keyPackageDeleteAllFailed => 'Failed to delete all key packages. Please try again.';
 
   @override
   String packageNumber(int number) {
@@ -1124,13 +1132,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connectAnotherProfile => 'Connect Another Profile';
 
   @override
-  String get rawDebugView => 'Raw debug view';
+  String get rawDebugView => 'Debug mode';
 
   @override
   String get rawDebugViewDescription => 'Show raw message data in chat';
 
   @override
-  String get rawDebugViewTitle => 'Raw Debug View';
+  String get rawDebugViewTitle => 'Debug Mode';
 
   @override
   String get rawDebugViewGroupId => 'Group ID';
@@ -1163,6 +1171,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLogsClear => 'Clear';
 
   @override
+  String get appLogsEraseAll => 'Erase all';
+
+  @override
   String get appLogsEmpty => 'No logs yet';
 
   @override
@@ -1189,6 +1200,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get appLogsCopyAll => 'Copy all';
+
+  @override
   String get invalidRelayUrlScheme => 'URL must start with wss:// or ws://';
 
   @override
@@ -1196,4 +1210,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get thisMessageWasDeleted => 'This message was deleted.';
+
+  @override
+  String get relayControlStateLoadError => 'Failed to load relay control state. Please try again.';
 }

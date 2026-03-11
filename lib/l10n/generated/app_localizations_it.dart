@@ -363,14 +363,10 @@ class AppLocalizationsIt extends AppLocalizations {
   String get accept => 'Accetta';
 
   @override
-  String failedToAcceptInvitation(String error) {
-    return 'Impossibile accettare l\'invito: $error';
-  }
+  String get failedToAcceptInvitation => 'Impossibile accettare l\'invito. Riprova.';
 
   @override
-  String failedToDeclineInvitation(String error) {
-    return 'Impossibile rifiutare l\'invito: $error';
-  }
+  String get failedToDeclineInvitation => 'Impossibile rifiutare l\'invito. Riprova.';
 
   @override
   String get startNewChat => 'Nuova chat';
@@ -444,6 +440,19 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get keyPackageDeleted => 'Pacchetto chiavi eliminato';
+
+  @override
+  String get keyPackageFetchFailed => 'Impossibile aggiornare i pacchetti chiavi. Riprova.';
+
+  @override
+  String get keyPackagePublishFailed => 'Impossibile pubblicare il pacchetto chiavi. Riprova.';
+
+  @override
+  String get keyPackageDeleteFailed => 'Impossibile eliminare il pacchetto chiavi. Riprova.';
+
+  @override
+  String get keyPackageDeleteAllFailed =>
+      'Impossibile eliminare tutti i pacchetti chiavi. Riprova.';
 
   @override
   String packageNumber(int number) {
@@ -1128,13 +1137,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get connectAnotherProfile => 'Collega un altro profilo';
 
   @override
-  String get rawDebugView => 'Vista di debug grezza';
+  String get rawDebugView => 'Modalità debug';
 
   @override
   String get rawDebugViewDescription => 'Mostra i dati grezzi dei messaggi nella chat';
 
   @override
-  String get rawDebugViewTitle => 'Vista di Debug Grezza';
+  String get rawDebugViewTitle => 'Modalità Debug';
 
   @override
   String get rawDebugViewGroupId => 'ID del Gruppo';
@@ -1166,6 +1175,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get appLogsClear => 'Cancella';
 
   @override
+  String get appLogsEraseAll => 'Cancella tutto';
+
+  @override
   String get appLogsEmpty => 'Nessun registro ancora';
 
   @override
@@ -1192,6 +1204,9 @@ class AppLocalizationsIt extends AppLocalizations {
   }
 
   @override
+  String get appLogsCopyAll => 'Copia tutto';
+
+  @override
   String get invalidRelayUrlScheme => 'L\'URL deve iniziare con wss:// o ws://';
 
   @override
@@ -1199,4 +1214,8 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get thisMessageWasDeleted => 'Questo messaggio è stato eliminato.';
+
+  @override
+  String get relayControlStateLoadError =>
+      'Impossibile caricare lo stato di controllo del relay. Per favore, riprova.';
 }

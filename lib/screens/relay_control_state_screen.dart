@@ -2,12 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:logging/logging.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/relays.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
+
+final _logger = Logger('RelayControlStateScreen');
 
 class RelayControlStateScreen extends HookWidget {
   const RelayControlStateScreen({super.key});
@@ -30,11 +33,12 @@ class RelayControlStateScreen extends HookWidget {
           return;
         }
         result.value = dump;
-      } catch (e) {
+      } catch (e, stackTrace) {
+        _logger.severe('Failed to load relay control state dump', e, stackTrace);
         if (!context.mounted) {
           return;
         }
-        error.value = 'relay_control_state: $e';
+        error.value = context.l10n.relayControlStateLoadError;
         result.value = null;
       } finally {
         if (context.mounted) {

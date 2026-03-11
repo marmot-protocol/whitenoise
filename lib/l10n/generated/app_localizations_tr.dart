@@ -362,14 +362,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get accept => 'Kabul et';
 
   @override
-  String failedToAcceptInvitation(String error) {
-    return 'Davet kabul edilemedi: $error';
-  }
+  String get failedToAcceptInvitation => 'Davet kabul edilemedi. Lütfen tekrar deneyin.';
 
   @override
-  String failedToDeclineInvitation(String error) {
-    return 'Davet reddedilemedi: $error';
-  }
+  String get failedToDeclineInvitation => 'Davet reddedilemedi. Lütfen tekrar deneyin.';
 
   @override
   String get startNewChat => 'Yeni sohbet';
@@ -442,6 +438,19 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get keyPackageDeleted => 'Anahtar paketi silindi';
+
+  @override
+  String get keyPackageFetchFailed => 'Anahtar paketleri yenilenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get keyPackagePublishFailed => 'Anahtar paketi yayınlanamadı. Lütfen tekrar deneyin.';
+
+  @override
+  String get keyPackageDeleteFailed => 'Anahtar paketi silinemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get keyPackageDeleteAllFailed =>
+      'Tüm anahtar paketleri silinemedi. Lütfen tekrar deneyin.';
 
   @override
   String packageNumber(int number) {
@@ -1124,13 +1133,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get connectAnotherProfile => 'Başka Profil Bağla';
 
   @override
-  String get rawDebugView => 'Ham hata ayıklama görünümü';
+  String get rawDebugView => 'Hata ayıklama modu';
 
   @override
   String get rawDebugViewDescription => 'Sohbette ham mesaj verilerini göster';
 
   @override
-  String get rawDebugViewTitle => 'Ham Hata Ayıklama Görünümü';
+  String get rawDebugViewTitle => 'Hata Ayıklama Modu';
 
   @override
   String get rawDebugViewGroupId => 'Grup Kimliği';
@@ -1162,6 +1171,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get appLogsClear => 'Temizle';
 
   @override
+  String get appLogsEraseAll => 'Tümünü sil';
+
+  @override
   String get appLogsEmpty => 'Henüz günlük yok';
 
   @override
@@ -1188,6 +1200,9 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String get appLogsCopyAll => 'Tümünü kopyala';
+
+  @override
   String get invalidRelayUrlScheme => 'URL wss:// veya ws:// ile başlamalıdır';
 
   @override
@@ -1195,4 +1210,8 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get thisMessageWasDeleted => 'Bu mesaj silindi.';
+
+  @override
+  String get relayControlStateLoadError =>
+      'Röle kontrol durumu yüklenemedi. Lütfen tekrar deneyin.';
 }

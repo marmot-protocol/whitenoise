@@ -462,23 +462,13 @@
   "@accept": {
     "description": "Accept button text"
   },
-  "failedToAcceptInvitation": "Failed to accept invitation: {error}",
+  "failedToAcceptInvitation": "Failed to accept invitation. Please try again.",
   "@failedToAcceptInvitation": {
-    "description": "Error when accepting invitation fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
+    "description": "Error when accepting invitation fails"
   },
-  "failedToDeclineInvitation": "Failed to decline invitation: {error}",
+  "failedToDeclineInvitation": "Failed to decline invitation. Please try again.",
   "@failedToDeclineInvitation": {
-    "description": "Error when declining invitation fails",
-    "placeholders": {
-      "error": {
-        "type": "String"
-      }
-    }
+    "description": "Error when declining invitation fails"
   },
   "startNewChat": "Start new chat",
   "@startNewChat": {
@@ -586,6 +576,22 @@
   "keyPackageDeleted": "Key package deleted",
   "@keyPackageDeleted": {
     "description": "Success message when a key package is deleted"
+  },
+  "keyPackageFetchFailed": "Failed to refresh key packages. Please try again.",
+  "@keyPackageFetchFailed": {
+    "description": "Error message when fetching key packages fails"
+  },
+  "keyPackagePublishFailed": "Failed to publish key package. Please try again.",
+  "@keyPackagePublishFailed": {
+    "description": "Error message when publishing a key package fails"
+  },
+  "keyPackageDeleteFailed": "Failed to delete key package. Please try again.",
+  "@keyPackageDeleteFailed": {
+    "description": "Error message when deleting a key package fails"
+  },
+  "keyPackageDeleteAllFailed": "Failed to delete all key packages. Please try again.",
+  "@keyPackageDeleteAllFailed": {
+    "description": "Error message when deleting all key packages fails"
   },
   "packageNumber": "Package {number}",
   "@packageNumber": {
@@ -1454,25 +1460,25 @@
   "@connectAnotherProfile": {
     "description": "Button text to connect another profile/account"
   },
-  "rawDebugView": "Raw debug view",
+  "rawDebugView": "Debug mode",
   "@rawDebugView": {
-    "description": "Toggle label for raw message debug view in developer settings"
+    "description": "Toggle label for debug mode in developer settings"
   },
   "rawDebugViewDescription": "Show raw message data in chat",
   "@rawDebugViewDescription": {
-    "description": "Subtitle for the raw debug view toggle"
+    "description": "Subtitle for the debug mode toggle"
   },
-  "rawDebugViewTitle": "Raw Debug View",
+  "rawDebugViewTitle": "Debug Mode",
   "@rawDebugViewTitle": {
-    "description": "Screen title for the raw message debug screen"
+    "description": "Screen title for the debug mode screen"
   },
   "rawDebugViewGroupId": "Group ID",
   "@rawDebugViewGroupId": {
-    "description": "Label for group ID in raw debug view"
+    "description": "Label for group ID in debug mode"
   },
   "rawDebugViewMessageCount": "{count, plural, =0{No messages} =1{1 message} other{{count} messages}}",
   "@rawDebugViewMessageCount": {
-    "description": "Message count shown in raw debug view",
+    "description": "Message count shown in debug mode",
     "placeholders": {
       "count": {
         "type": "int"
@@ -1481,7 +1487,7 @@
   },
   "rawDebugViewCopied": "Copied to clipboard",
   "@rawDebugViewCopied": {
-    "description": "Snackbar text after copying a raw message"
+    "description": "Feedback text after copying debug data"
   },
   "appLogsTitle": "App Logs",
   "@appLogsTitle": {
@@ -1497,7 +1503,11 @@
   },
   "appLogsClear": "Clear",
   "@appLogsClear": {
-    "description": "Button to clear logs"
+    "description": "Button to clear logs (legacy, use appLogsEraseAll)"
+  },
+  "appLogsEraseAll": "Erase all",
+  "@appLogsEraseAll": {
+    "description": "Button to erase all logs"
   },
   "appLogsEmpty": "No logs yet",
   "@appLogsEmpty": {
@@ -1539,6 +1549,10 @@
       }
     }
   },
+  "appLogsCopyAll": "Copy all",
+  "@appLogsCopyAll": {
+    "description": "Button to copy all visible logs to clipboard"
+  },
   "invalidRelayUrlScheme": "URL must start with wss:// or ws://",
   "@invalidRelayUrlScheme": {
     "description": "Error message when relay URL doesn't start with wss:// or ws://"
@@ -1550,5 +1564,9 @@
   "thisMessageWasDeleted": "This message was deleted.",
   "@thisMessageWasDeleted": {
     "description": "Text shown inside a deleted message bubble"
+  },
+  "relayControlStateLoadError": "Failed to load relay control state. Please try again.",
+  "@relayControlStateLoadError": {
+    "description": "User-friendly error when relay control state fails to load"
   }
 }

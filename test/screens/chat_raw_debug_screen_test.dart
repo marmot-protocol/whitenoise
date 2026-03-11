@@ -115,8 +115,7 @@ void main() {
   group('ChatRawDebugScreen', () {
     testWidgets('displays Raw Debug View title', (tester) async {
       await pumpDebugScreen(tester);
-
-      expect(find.text('Raw Debug View'), findsOneWidget);
+      expect(find.text('Debug Mode'), findsOneWidget);
     });
 
     testWidgets('displays group ID', (tester) async {

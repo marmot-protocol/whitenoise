@@ -109,7 +109,7 @@ class ChatInviteScreen extends HookConsumerWidget {
         }
       } catch (e) {
         if (context.mounted) {
-          showNotice(context.l10n.failedToAcceptInvitation(e.toString()));
+          showNotice(context.l10n.failedToAcceptInvitation);
         }
       } finally {
         if (context.mounted) isAccepting.value = false;
@@ -128,7 +128,7 @@ class ChatInviteScreen extends HookConsumerWidget {
         }
       } catch (e) {
         if (context.mounted) {
-          showNotice(context.l10n.failedToDeclineInvitation(e.toString()));
+          showNotice(context.l10n.failedToDeclineInvitation);
         }
       } finally {
         if (context.mounted) isDeclining.value = false;
