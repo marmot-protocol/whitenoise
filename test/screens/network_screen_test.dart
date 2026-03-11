@@ -19,7 +19,6 @@ class _MockApi extends MockWnApi {
   List<Relay> keyPackageRelays = [];
   List<String> addedRelays = [];
   List<String> removedRelays = [];
-  int getAccountRelayStatusesCallCount = 0;
 
   @override
   Future<RelayType> crateApiRelaysRelayTypeNip65() async => MockRelayType('nip65');
@@ -68,14 +67,6 @@ class _MockApi extends MockWnApi {
     if (type == 'inbox') inboxRelays.removeWhere((r) => r.url == url);
     if (type == 'keyPackage') keyPackageRelays.removeWhere((r) => r.url == url);
   }
-
-  @override
-  Future<List<(String, String)>> crateApiRelaysGetAccountRelayStatuses({
-    required String pubkey,
-  }) async {
-    getAccountRelayStatusesCallCount++;
-    return const [];
-  }
 }
 
 class _MockAuthNotifier extends AuthNotifier {
@@ -100,7 +91,6 @@ void main() {
     mockApi.keyPackageRelays = [];
     mockApi.addedRelays = [];
     mockApi.removedRelays = [];
-    mockApi.getAccountRelayStatusesCallCount = 0;
   });
 
   Future<void> pumpNetworkScreen(WidgetTester tester) async {
@@ -297,7 +287,6 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(mockApi.addedRelays.contains('wss://test.relay.com'), isTrue);
-        expect(mockApi.getAccountRelayStatusesCallCount, 0);
       });
     });
 
