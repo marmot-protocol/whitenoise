@@ -23,7 +23,9 @@ class _MockApi extends MockWnApi {
   bool shouldThrowOnPublish = false;
   bool shouldThrowOnDeleteAll = false;
   bool shouldThrowOnDelete = false;
+  bool shouldThrowOnRefreshAfterDelete = false;
   Completer<List<FlutterEvent>>? fetchCompleter;
+  Completer<bool>? deleteKeyPackageCompleter;
 
   @override
   Future<FlutterMetadata> crateApiUsersUserMetadata({
@@ -38,7 +40,7 @@ class _MockApi extends MockWnApi {
     if (fetchCompleter != null) {
       return fetchCompleter!.future;
     }
-    if (shouldThrowOnFetch) {
+    if (shouldThrowOnFetch || shouldThrowOnRefreshAfterDelete) {
       throw Exception('Network error');
     }
     return keyPackages;
@@ -62,6 +64,9 @@ class _MockApi extends MockWnApi {
       throw Exception('delete error');
     }
     deletedKeyPackageId = keyPackageId;
+    if (deleteKeyPackageCompleter != null) {
+      return deleteKeyPackageCompleter!.future;
+    }
     return true;
   }
 
@@ -114,7 +119,9 @@ void main() {
     mockApi.shouldThrowOnPublish = false;
     mockApi.shouldThrowOnDeleteAll = false;
     mockApi.shouldThrowOnDelete = false;
+    mockApi.shouldThrowOnRefreshAfterDelete = false;
     mockApi.fetchCompleter = null;
+    mockApi.deleteKeyPackageCompleter = null;
   });
 
   Future<void> pumpScreen(WidgetTester tester) async {
@@ -349,6 +356,29 @@ void main() {
       expect(effect.type, ScrollEdgeEffectType.slate);
     });
 
+    testWidgets('no error notice during initial loading', (tester) async {
+      mockApi.fetchCompleter = Completer<List<FlutterEvent>>();
+
+      await mountTestApp(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _MockAuthNotifier()),
+          secureStorageProvider.overrideWithValue(MockSecureStorage()),
+        ],
+      );
+      Routes.pushToKeyPackageManagement(tester.element(find.byType(Scaffold)));
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
+
+      expect(find.byType(WnSystemNotice), findsNothing);
+
+      mockApi.fetchCompleter!.complete([]);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(WnSystemNotice), findsNothing);
+    });
+
     testWidgets('shows loading indicator while refreshing packages', (tester) async {
       await pumpScreen(tester);
 
@@ -358,12 +388,82 @@ void main() {
       await tester.pump();
       await tester.pump();
 
-      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byKey(const Key('loading_indicator')), findsOneWidget);
 
       mockApi.fetchCompleter!.complete([]);
       await tester.pumpAndSettle();
 
-      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byKey(const Key('loading_indicator')), findsNothing);
+    });
+
+    testWidgets('delete button shows loading indicator while deleting', (tester) async {
+      mockApi.keyPackages = [
+        FlutterEvent(
+          id: 'pkg1',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackage,
+          tags: const [],
+          content: '',
+        ),
+        FlutterEvent(
+          id: 'pkg2',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackage,
+          tags: const [],
+          content: '',
+        ),
+      ];
+      mockApi.deleteKeyPackageCompleter = Completer<bool>();
+      await pumpScreen(tester);
+
+      await tester.tap(find.byKey(const Key('delete_key_package_pkg1')));
+      await tester.pump();
+
+      final pkg1Card = find.byKey(const Key('key_package_card_pkg1'));
+      final pkg2Card = find.byKey(const Key('key_package_card_pkg2'));
+
+      final loadingInPkg1 = find.descendant(
+        of: pkg1Card,
+        matching: find.byKey(const Key('loading_indicator')),
+      );
+      expect(loadingInPkg1, findsOneWidget);
+
+      final loadingInPkg2 = find.descendant(
+        of: pkg2Card,
+        matching: find.byKey(const Key('loading_indicator')),
+      );
+      expect(loadingInPkg2, findsNothing);
+
+      mockApi.deleteKeyPackageCompleter!.complete(true);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('shows error when delete succeeds but refresh fails', (tester) async {
+      mockApi.keyPackages = [
+        FlutterEvent(
+          id: 'pkg_to_delete',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackage,
+          tags: const [],
+          content: '',
+        ),
+      ];
+      await pumpScreen(tester);
+
+      mockApi.shouldThrowOnRefreshAfterDelete = true;
+
+      await tester.tap(find.byKey(const Key('delete_key_package_pkg_to_delete')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(
+        find.text('Failed to delete key package. Please try again.'),
+        findsOneWidget,
+      );
     });
   });
 }

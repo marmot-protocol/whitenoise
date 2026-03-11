@@ -13,6 +13,7 @@ class WnKeyPackageCard extends StatelessWidget {
     required this.onDelete,
     required this.deleteLabel,
     this.disabled = false,
+    this.loading = false,
     this.deleteButtonKey,
   });
 
@@ -22,6 +23,7 @@ class WnKeyPackageCard extends StatelessWidget {
   final VoidCallback onDelete;
   final String deleteLabel;
   final bool disabled;
+  final bool loading;
   final Key? deleteButtonKey;
 
   @override
@@ -95,6 +97,7 @@ class WnKeyPackageCard extends StatelessWidget {
             type: WnButtonType.destructive,
             size: WnButtonSize.medium,
             disabled: disabled,
+            loading: loading,
             trailingIcon: WnIcons.trashCan,
           ),
         ),
