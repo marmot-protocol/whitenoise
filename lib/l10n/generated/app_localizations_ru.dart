@@ -628,6 +628,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get unknownUser => 'Неизвестный пользователь';
 
   @override
+  String get noName => 'Без имени';
+
+  @override
   String get unknownGroup => 'Неизвестная группа';
 
   @override

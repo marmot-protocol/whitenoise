@@ -613,6 +613,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get unknownUser => 'Usuário desconhecido';
 
   @override
+  String get noName => 'Sem nome';
+
+  @override
   String get unknownGroup => 'Grupo desconhecido';
 
   @override

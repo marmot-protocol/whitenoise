@@ -23,15 +23,22 @@ import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
 class _MockApi extends MockWnApi {
+  bool returnNoName = false;
+
   @override
   Future<FlutterMetadata> crateApiUsersUserMetadata({
     required bool blockingDataSync,
     required String pubkey,
-  }) async => const FlutterMetadata(
-    name: 'Test User',
-    displayName: 'Test Display Name',
-    custom: {},
-  );
+  }) async {
+    if (returnNoName) {
+      return const FlutterMetadata(custom: {});
+    }
+    return const FlutterMetadata(
+      name: 'Test User',
+      displayName: 'Test Display Name',
+      custom: {},
+    );
+  }
 
   @override
   Future<String> crateApiAccountsExportAccountNsec({required String pubkey}) async {
@@ -103,9 +110,9 @@ void main() {
       expect(find.text(testNpubAFormatted), findsOneWidget);
     });
 
-    testWidgets('tapping close icon returns to previous screen', (tester) async {
+    testWidgets('tapping back button returns to previous screen', (tester) async {
       await pumpSettingsScreen(tester);
-      await tester.tap(find.byKey(const Key('slate_close_button')));
+      await tester.tap(find.byKey(const Key('slate_back_button')));
       await tester.pumpAndSettle();
       expect(find.byType(ChatListScreen), findsOneWidget);
     });
@@ -213,6 +220,16 @@ void main() {
 
       final avatar = tester.widget<WnAvatar>(find.byType(WnAvatar));
       expect(avatar.color, AvatarColor.cyan);
+    });
+
+    testWidgets('displays "No name" when user has no display name', (tester) async {
+      mockApi.returnNoName = true;
+
+      await pumpSettingsScreen(tester);
+
+      expect(find.text('No name'), findsOneWidget);
+
+      mockApi.returnNoName = false;
     });
 
     testWidgets('displays app version at the bottom', (tester) async {

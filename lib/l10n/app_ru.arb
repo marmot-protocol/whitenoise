@@ -177,6 +177,7 @@
   "failedToDeleteMessage": "Не удалось удалить сообщение. Попробуйте снова.",
   "failedToSendReaction": "Не удалось отправить реакцию. Попробуйте снова.",
   "failedToRemoveReaction": "Не удалось удалить реакцию. Попробуйте снова.",
+  "noName": "Без имени",
   "unknownUser": "Неизвестный пользователь",
   "unknownGroup": "Неизвестная группа",
   "hasInvitedYouToSecureChat": "Пригласил вас в безопасный чат",

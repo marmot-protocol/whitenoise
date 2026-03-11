@@ -177,6 +177,7 @@
   "failedToDeleteMessage": "Nachricht konnte nicht gelöscht werden. Bitte erneut versuchen.",
   "failedToSendReaction": "Reaktion konnte nicht gesendet werden. Bitte erneut versuchen.",
   "failedToRemoveReaction": "Reaktion konnte nicht entfernt werden. Bitte erneut versuchen.",
+  "noName": "Kein Name",
   "unknownUser": "Unbekannter Benutzer",
   "unknownGroup": "Unbekannte Gruppe",
   "hasInvitedYouToSecureChat": "Hat dich zu einem sicheren Chat eingeladen",

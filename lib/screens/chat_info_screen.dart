@@ -54,54 +54,51 @@ class ChatInfoScreen extends HookConsumerWidget {
         children: [
           const WnOverlay(variant: WnOverlayVariant.light),
           SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.h),
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: WnSlate(
-                  shrinkWrapContent: true,
-                  header: WnSlateNavigationHeader(
-                    title: context.l10n.chatInformation,
-                    onNavigate: () => Routes.goBack(context),
-                  ),
-                  systemNotice: noticeMessage != null
-                      ? WnSystemNotice(
-                          key: ValueKey(noticeMessage),
-                          title: noticeMessage,
-                          type: noticeType,
-                          onDismiss: dismissNotice,
-                        )
-                      : null,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Gap(8.h),
-                        Column(
-                          children: [
-                            WnChatInfoProfileCard(
-                              userPubkey: userPubkey,
-                              metadata: metadata,
-                              onPublicKeyCopied: () =>
-                                  showSuccessNotice(context.l10n.publicKeyCopied),
-                              onPublicKeyCopyError: () =>
-                                  showErrorNotice(context.l10n.publicKeyCopyError),
-                            ),
-                            Gap(12.h),
-                            WnChatInfoActions(
-                              isOwnProfile: isOwnProfile,
-                              isFollowing: isFollowing,
-                              isFollowLoading: followState.isActionLoading,
-                              onFollowTap: handleFollowAction,
-                              onSearchTap: showSearch ? () => GoRouter.of(context).pop(true) : null,
-                              onAddToGroupTap: () => Routes.pushToAddToGroup(context, userPubkey),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: WnSlate(
+                shrinkWrapContent: true,
+                header: WnSlateNavigationHeader(
+                  title: context.l10n.chatInformation,
+                  onNavigate: () => Routes.goBack(context),
+                ),
+                systemNotice: noticeMessage != null
+                    ? WnSystemNotice(
+                        key: ValueKey(noticeMessage),
+                        title: noticeMessage,
+                        type: noticeType,
+                        onDismiss: dismissNotice,
+                      )
+                    : null,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Gap(8.h),
+                      Column(
+                        children: [
+                          WnChatInfoProfileCard(
+                            userPubkey: userPubkey,
+                            metadata: metadata,
+                            onPublicKeyCopied: () =>
+                                showSuccessNotice(context.l10n.publicKeyCopied),
+                            onPublicKeyCopyError: () =>
+                                showErrorNotice(context.l10n.publicKeyCopyError),
+                          ),
+                          Gap(12.h),
+                          WnChatInfoActions(
+                            isOwnProfile: isOwnProfile,
+                            isFollowing: isFollowing,
+                            isFollowLoading: followState.isActionLoading,
+                            onFollowTap: handleFollowAction,
+                            onSearchTap: showSearch ? () => GoRouter.of(context).pop(true) : null,
+                            onAddToGroupTap: () => Routes.pushToAddToGroup(context, userPubkey),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),

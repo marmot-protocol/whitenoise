@@ -1176,6 +1176,12 @@ abstract class AppLocalizations {
   /// **'Unknown user'**
   String get unknownUser;
 
+  /// Placeholder shown when a user has no display name set
+  ///
+  /// In en, this message translates to:
+  /// **'No name'**
+  String get noName;
+
   /// Fallback name for unknown group
   ///
   /// In en, this message translates to:

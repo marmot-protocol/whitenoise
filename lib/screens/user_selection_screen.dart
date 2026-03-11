@@ -45,125 +45,121 @@ class UserSelectionScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: WnSlate(
-            header: WnSlateNavigationHeader(
-              title: context.l10n.newGroupChat,
-              type: WnSlateNavigationType.back,
-              onNavigate: () => Routes.goBack(context),
-            ),
-            footer: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-              child: SizedBox(
-                width: double.infinity,
-                child: WnButton(
-                  onPressed: selectionHook.state.selectedCount > 0
-                      ? () => Routes.pushToSetUpGroup(
-                          context,
-                          selectionHook.state.selectedUsers,
-                        )
-                      : null,
-                  text: context.l10n.continueButton,
-                  size: WnButtonSize.medium,
-                  trailingIcon: WnIcons.arrowRight,
-                ),
+        child: WnSlate(
+          header: WnSlateNavigationHeader(
+            title: context.l10n.newGroupChat,
+            onNavigate: () => Routes.goBack(context),
+          ),
+          footer: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+            child: SizedBox(
+              width: double.infinity,
+              child: WnButton(
+                onPressed: selectionHook.state.selectedCount > 0
+                    ? () => Routes.pushToSetUpGroup(
+                        context,
+                        selectionHook.state.selectedUsers,
+                      )
+                    : null,
+                text: context.l10n.continueButton,
+                size: WnButtonSize.medium,
+                trailingIcon: WnIcons.arrowRight,
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 14.w),
-                  child: WnSearchField(
-                    placeholder: context.l10n.searchByNameOrNpub,
-                    controller: searchController,
-                    onChanged: (value) => searchQuery.value = value,
-                    onScan: () => Routes.pushToScanNpub(context),
-                    isLoading: searchState.isSearching,
-                  ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 14.w),
+                child: WnSearchField(
+                  placeholder: context.l10n.searchByNameOrNpub,
+                  controller: searchController,
+                  onChanged: (value) => searchQuery.value = value,
+                  onScan: () => Routes.pushToScanNpub(context),
+                  isLoading: searchState.isSearching,
                 ),
-                if (selectionHook.state.selectedCount > 0) ...[
-                  Gap(12.h),
-                  SizedBox(
-                    height: 28.h,
-                    child: Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 14.w),
-                      child: ListView.separated(
-                        key: const Key('selected_users_bubbles'),
-                        scrollDirection: Axis.horizontal,
-                        itemCount: selectionHook.state.selectedUsers.length,
-                        separatorBuilder: (_, _) => Gap(6.w),
-                        itemBuilder: (context, index) {
-                          final user = selectionHook.state.selectedUsers[index];
-                          final displayName = presentName(user.metadata);
-                          final formattedPubKey = formatPublicKey(
-                            npubFromHex(user.pubkey) ?? user.pubkey,
-                          );
-                          return WnUserBubble(
-                            key: Key('bubble_${user.pubkey}'),
-                            displayName: displayName ?? formattedPubKey,
-                            pictureUrl: user.metadata.picture,
-                            avatarColor: AvatarColor.fromPubkey(user.pubkey),
-                            onTap: () => selectionHook.actions.toggleUser(user),
-                          );
-                        },
-                      ),
+              ),
+              if (selectionHook.state.selectedCount > 0) ...[
+                Gap(12.h),
+                SizedBox(
+                  height: 28.h,
+                  child: Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 14.w),
+                    child: ListView.separated(
+                      key: const Key('selected_users_bubbles'),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: selectionHook.state.selectedUsers.length,
+                      separatorBuilder: (_, _) => Gap(6.w),
+                      itemBuilder: (context, index) {
+                        final user = selectionHook.state.selectedUsers[index];
+                        final displayName = presentName(user.metadata);
+                        final formattedPubKey = formatPublicKey(
+                          npubFromHex(user.pubkey) ?? user.pubkey,
+                        );
+                        return WnUserBubble(
+                          key: Key('bubble_${user.pubkey}'),
+                          displayName: displayName ?? formattedPubKey,
+                          pictureUrl: user.metadata.picture,
+                          avatarColor: AvatarColor.fromPubkey(user.pubkey),
+                          onTap: () => selectionHook.actions.toggleUser(user),
+                        );
+                      },
                     ),
                   ),
-                  Gap(12.h),
-                ],
-                Expanded(
-                  child: searchState.isLoading
-                      ? Center(
-                          child: CircularProgressIndicator(
-                            color: colors.backgroundContentPrimary,
-                            strokeCap: StrokeCap.round,
-                          ),
-                        )
-                      : searchState.users.isEmpty
-                      ? Center(
-                          child: Text(
-                            searchState.hasSearchQuery
-                                ? context.l10n.noResults
-                                : context.l10n.noFollowsYet,
-                            style: typography.medium14.copyWith(
-                              color: colors.backgroundContentTertiary,
-                            ),
-                          ),
-                        )
-                      : Stack(
-                          children: [
-                            ListView.builder(
-                              padding: EdgeInsets.only(top: 4.h),
-                              itemCount: searchState.users.length,
-                              itemBuilder: (context, index) {
-                                final user = searchState.users[index];
-                                final displayName = presentName(user.metadata);
-                                final formattedPubKey = formatPublicKey(
-                                  npubFromHex(user.pubkey) ?? user.pubkey,
-                                );
-                                final isSelected = selectionHook.state.isSelected(user);
-                                return WnUserItem(
-                                  key: Key(user.pubkey),
-                                  displayName: displayName ?? formattedPubKey,
-                                  npub: formattedPubKey,
-                                  pictureUrl: user.metadata.picture,
-                                  avatarColor: AvatarColor.fromPubkey(user.pubkey),
-                                  size: WnUserItemSize.medium,
-                                  showCheckbox: true,
-                                  isSelected: isSelected,
-                                  onTap: () => selectionHook.actions.toggleUser(user),
-                                );
-                              },
-                            ),
-                            WnFadeOverlay.top(color: colors.backgroundSecondary),
-                            WnFadeOverlay.bottom(color: colors.backgroundSecondary),
-                          ],
-                        ),
                 ),
+                Gap(12.h),
               ],
-            ),
+              Expanded(
+                child: searchState.isLoading
+                    ? Center(
+                        child: CircularProgressIndicator(
+                          color: colors.backgroundContentPrimary,
+                          strokeCap: StrokeCap.round,
+                        ),
+                      )
+                    : searchState.users.isEmpty
+                    ? Center(
+                        child: Text(
+                          searchState.hasSearchQuery
+                              ? context.l10n.noResults
+                              : context.l10n.noFollowsYet,
+                          style: typography.medium14.copyWith(
+                            color: colors.backgroundContentTertiary,
+                          ),
+                        ),
+                      )
+                    : Stack(
+                        children: [
+                          ListView.builder(
+                            padding: EdgeInsets.only(top: 4.h),
+                            itemCount: searchState.users.length,
+                            itemBuilder: (context, index) {
+                              final user = searchState.users[index];
+                              final displayName = presentName(user.metadata);
+                              final formattedPubKey = formatPublicKey(
+                                npubFromHex(user.pubkey) ?? user.pubkey,
+                              );
+                              final isSelected = selectionHook.state.isSelected(user);
+                              return WnUserItem(
+                                key: Key(user.pubkey),
+                                displayName: displayName ?? formattedPubKey,
+                                npub: formattedPubKey,
+                                pictureUrl: user.metadata.picture,
+                                avatarColor: AvatarColor.fromPubkey(user.pubkey),
+                                size: WnUserItemSize.medium,
+                                showCheckbox: true,
+                                isSelected: isSelected,
+                                onTap: () => selectionHook.actions.toggleUser(user),
+                              );
+                            },
+                          ),
+                          WnFadeOverlay.top(color: colors.backgroundSecondary),
+                          WnFadeOverlay.bottom(color: colors.backgroundSecondary),
+                        ],
+                      ),
+              ),
+            ],
           ),
         ),
       ),

@@ -177,6 +177,7 @@
   "failedToDeleteMessage": "Falha ao excluir mensagem. Por favor, tente novamente.",
   "failedToSendReaction": "Falha ao enviar reação. Por favor, tente novamente.",
   "failedToRemoveReaction": "Falha ao remover reação. Por favor, tente novamente.",
+  "noName": "Sem nome",
   "unknownUser": "Usuário desconhecido",
   "unknownGroup": "Grupo desconhecido",
   "hasInvitedYouToSecureChat": "Convidou você para uma conversa segura",

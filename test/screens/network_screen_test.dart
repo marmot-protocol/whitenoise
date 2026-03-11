@@ -335,7 +335,7 @@ void main() {
     });
 
     group('navigation', () {
-      testWidgets('close button is visible', (tester) async {
+      testWidgets('back button is visible', (tester) async {
         await pumpNetworkScreen(tester);
 
         expect(find.byKey(const Key('slate_back_button')), findsOneWidget);

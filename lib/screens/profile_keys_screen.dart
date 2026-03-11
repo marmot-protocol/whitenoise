@@ -49,89 +49,85 @@ class ProfileKeysScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: WnSlate(
-            header: WnSlateNavigationHeader(
-              title: context.l10n.profileKeys,
-              type: WnSlateNavigationType.back,
-              onNavigate: () => Routes.goBack(context),
-            ),
-            systemNotice: noticeMessage != null
-                ? WnSystemNotice(
-                    key: ValueKey(noticeMessage),
-                    title: _noticeMessageL10n(context, noticeMessage),
-                    type: noticeType,
-                    variant: noticeType == WnSystemNoticeType.error
-                        ? WnSystemNoticeVariant.dismissible
-                        : WnSystemNoticeVariant.temporary,
-                    onDismiss: dismissNotice,
-                  )
-                : null,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Gap(24.h),
+        child: WnSlate(
+          header: WnSlateNavigationHeader(
+            title: context.l10n.profileKeys,
+            onNavigate: () => Routes.goBack(context),
+          ),
+          systemNotice: noticeMessage != null
+              ? WnSystemNotice(
+                  key: ValueKey(noticeMessage),
+                  title: _noticeMessageL10n(context, noticeMessage),
+                  type: noticeType,
+                  variant: noticeType == WnSystemNoticeType.error
+                      ? WnSystemNoticeVariant.dismissible
+                      : WnSystemNoticeVariant.temporary,
+                  onDismiss: dismissNotice,
+                )
+              : null,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Gap(24.h),
+                        WnCopyableField(
+                          label: context.l10n.publicKey,
+                          value: npub ?? '',
+                          onCopied: () => showSuccessNotice('publicKeyCopied'),
+                        ),
+                        Gap(4.h),
+                        Text(
+                          context.l10n.publicKeyDescription,
+                          style: typography.medium14.copyWith(
+                            color: colors.backgroundContentSecondary,
+                          ),
+                        ),
+                        if (nsecState.nsecStorage == NsecStorage.local) ...[
+                          Gap(36.h),
                           WnCopyableField(
-                            label: context.l10n.publicKey,
-                            value: npub ?? '',
-                            onCopied: () => showSuccessNotice('publicKeyCopied'),
+                            label: context.l10n.privateKey,
+                            value: nsecState.nsec ?? '',
+                            obscurable: true,
+                            obscured: obscurePrivateKey.value,
+                            onToggleVisibility: togglePrivateKeyVisibility,
+                            onCopied: () {
+                              showSuccessNotice('privateKeyCopied');
+                              scheduleClipboardClear();
+                            },
                           ),
                           Gap(4.h),
                           Text(
-                            context.l10n.publicKeyDescription,
-                            style: typography.medium14.copyWith(
+                            context.l10n.privateKeyDescription,
+                            style: context.typographyScaled.medium14.copyWith(
                               color: colors.backgroundContentSecondary,
                             ),
                           ),
-                          if (nsecState.nsecStorage == NsecStorage.local) ...[
-                            Gap(36.h),
-                            WnCopyableField(
-                              label: context.l10n.privateKey,
-                              value: nsecState.nsec ?? '',
-                              obscurable: true,
-                              obscured: obscurePrivateKey.value,
-                              onToggleVisibility: togglePrivateKeyVisibility,
-                              onCopied: () {
-                                showSuccessNotice('privateKeyCopied');
-                                scheduleClipboardClear();
-                              },
-                            ),
-                            Gap(4.h),
-                            Text(
-                              context.l10n.privateKeyDescription,
-                              style: context.typographyScaled.medium14.copyWith(
-                                color: colors.backgroundContentSecondary,
-                              ),
-                            ),
-                            Gap(12.h),
-                            WnCallout(
-                              title: context.l10n.keepPrivateKeySecure,
-                              description: context.l10n.privateKeyWarning,
-                              type: CalloutType.warning,
-                            ),
-                          ] else if (nsecState.nsecStorage == NsecStorage.externalSigner) ...[
-                            Gap(12.h),
-                            WnCallout(
-                              title: context.l10n.nsecOnExternalSigner,
-                              description: context.l10n.nsecOnExternalSignerDescription,
-                              type: CalloutType.info,
-                            ),
-                          ],
-                          Gap(24.h),
+                          Gap(12.h),
+                          WnCallout(
+                            title: context.l10n.keepPrivateKeySecure,
+                            description: context.l10n.privateKeyWarning,
+                            type: CalloutType.warning,
+                          ),
+                        ] else if (nsecState.nsecStorage == NsecStorage.externalSigner) ...[
+                          Gap(12.h),
+                          WnCallout(
+                            title: context.l10n.nsecOnExternalSigner,
+                            description: context.l10n.nsecOnExternalSignerDescription,
+                            type: CalloutType.info,
+                          ),
                         ],
-                      ),
+                        Gap(24.h),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

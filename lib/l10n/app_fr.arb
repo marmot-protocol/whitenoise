@@ -177,6 +177,7 @@
   "failedToDeleteMessage": "Échec de la suppression du message. Veuillez réessayer.",
   "failedToSendReaction": "Échec de l'envoi de la réaction. Veuillez réessayer.",
   "failedToRemoveReaction": "Échec de la suppression de la réaction. Veuillez réessayer.",
+  "noName": "Sans nom",
   "unknownUser": "Utilisateur inconnu",
   "unknownGroup": "Groupe inconnu",
   "hasInvitedYouToSecureChat": "Vous a invité à une discussion sécurisée",

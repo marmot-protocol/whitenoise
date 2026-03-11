@@ -195,7 +195,6 @@ class SignupScreen extends HookConsumerWidget {
                           child: WnSlate(
                             header: WnSlateNavigationHeader(
                               title: context.l10n.setupProfile,
-                              type: WnSlateNavigationType.back,
                               onNavigate: () => Routes.goBack(context),
                             ),
                             systemNotice: noticeMessage.value != null

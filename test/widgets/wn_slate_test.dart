@@ -24,7 +24,7 @@ void main() {
         final headerFinder = find.byType(WnSlateNavigationHeader);
         expect(headerFinder, findsOneWidget);
         final header = tester.widget<WnSlateNavigationHeader>(headerFinder);
-        expect(header.type, WnSlateNavigationType.close);
+        expect(header.type, WnSlateNavigationType.back);
         expect(header.title, 'Test Title');
       });
 

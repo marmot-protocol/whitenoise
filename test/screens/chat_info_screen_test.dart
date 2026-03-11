@@ -137,7 +137,7 @@ void main() {
       expect(chatInfoSlateFinder(), findsOneWidget);
       expect(find.byType(WnSlateNavigationHeader), findsOneWidget);
       expect(find.text('Chat Information'), findsOneWidget);
-      expect(find.byKey(const Key('slate_close_button')), findsOneWidget);
+      expect(find.byKey(const Key('slate_back_button')), findsOneWidget);
     });
 
     testWidgets('uses light overlay variant', (tester) async {
@@ -320,10 +320,10 @@ void main() {
       expect(find.text('Add to group'), findsWidgets);
     });
 
-    testWidgets('navigates back when close button is pressed', (tester) async {
+    testWidgets('navigates back when back button is pressed', (tester) async {
       await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
 
-      await tester.tap(find.byKey(const Key('slate_close_button')));
+      await tester.tap(find.byKey(const Key('slate_back_button')));
       await tester.pumpAndSettle();
 
       expect(find.text('Chat Information'), findsNothing);

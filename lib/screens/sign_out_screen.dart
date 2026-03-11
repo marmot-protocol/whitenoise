@@ -66,88 +66,84 @@ class SignOutScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: WnSlate(
-            header: WnSlateNavigationHeader(
-              title: context.l10n.signOut,
-              type: WnSlateNavigationType.back,
-              onNavigate: () => Routes.goBack(context),
-            ),
-            systemNotice: noticeMessage != null
-                ? WnSystemNotice(
-                    key: ValueKey(noticeMessage),
-                    title: _noticeMessageL10n(context, noticeMessage),
-                    type: noticeType,
-                    variant: noticeType == WnSystemNoticeType.error
-                        ? WnSystemNoticeVariant.dismissible
-                        : WnSystemNoticeVariant.temporary,
-                    onDismiss: dismissNotice,
-                  )
-                : null,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
+        child: WnSlate(
+          header: WnSlateNavigationHeader(
+            title: context.l10n.signOut,
+            onNavigate: () => Routes.goBack(context),
+          ),
+          systemNotice: noticeMessage != null
+              ? WnSystemNotice(
+                  key: ValueKey(noticeMessage),
+                  title: _noticeMessageL10n(context, noticeMessage),
+                  type: noticeType,
+                  variant: noticeType == WnSystemNoticeType.error
+                      ? WnSystemNoticeVariant.dismissible
+                      : WnSystemNoticeVariant.temporary,
+                  onDismiss: dismissNotice,
+                )
+              : null,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Gap(24.h),
+                        WnCallout(
+                          title: context.l10n.signOutConfirmation,
+                          description: nsecState.nsecStorage == NsecStorage.local
+                              ? '${context.l10n.signOutWarning}\n\n${context.l10n.signOutWarningBackupKey}'
+                              : context.l10n.signOutWarning,
+                          type: CalloutType.warning,
+                        ),
+                        if (nsecState.nsecStorage == NsecStorage.local) ...[
                           Gap(24.h),
-                          WnCallout(
-                            title: context.l10n.signOutConfirmation,
-                            description: nsecState.nsecStorage == NsecStorage.local
-                                ? '${context.l10n.signOutWarning}\n\n${context.l10n.signOutWarningBackupKey}'
-                                : context.l10n.signOutWarning,
-                            type: CalloutType.warning,
-                          ),
-                          if (nsecState.nsecStorage == NsecStorage.local) ...[
-                            Gap(24.h),
-                            Text(
-                              context.l10n.backUpPrivateKey,
-                              style: context.typographyScaled.semiBold16.copyWith(
-                                color: colors.backgroundContentPrimary,
-                              ),
-                            ),
-                            Gap(8.h),
-                            Text(
-                              context.l10n.copyPrivateKeyHint,
-                              style: context.typographyScaled.medium14.copyWith(
-                                color: colors.backgroundContentSecondary,
-                              ),
-                            ),
-                            Gap(16.h),
-                            WnCopyableField(
-                              label: context.l10n.privateKey,
-                              value: nsecState.nsec ?? '',
-                              obscurable: true,
-                              obscured: obscurePrivateKey.value,
-                              onToggleVisibility: togglePrivateKeyVisibility,
-                              onCopied: () {
-                                showSuccessNotice('privateKeyCopied');
-                                scheduleClipboardClear();
-                              },
-                            ),
-                          ],
-                          Gap(32.h),
-                          SizedBox(
-                            width: double.infinity,
-                            child: WnButton(
-                              text: context.l10n.signOut,
-                              onPressed: signOut,
-                              loading: isLoggingOut.value,
-                              size: WnButtonSize.medium,
+                          Text(
+                            context.l10n.backUpPrivateKey,
+                            style: context.typographyScaled.semiBold16.copyWith(
+                              color: colors.backgroundContentPrimary,
                             ),
                           ),
-                          Gap(24.h),
+                          Gap(8.h),
+                          Text(
+                            context.l10n.copyPrivateKeyHint,
+                            style: context.typographyScaled.medium14.copyWith(
+                              color: colors.backgroundContentSecondary,
+                            ),
+                          ),
+                          Gap(16.h),
+                          WnCopyableField(
+                            label: context.l10n.privateKey,
+                            value: nsecState.nsec ?? '',
+                            obscurable: true,
+                            obscured: obscurePrivateKey.value,
+                            onToggleVisibility: togglePrivateKeyVisibility,
+                            onCopied: () {
+                              showSuccessNotice('privateKeyCopied');
+                              scheduleClipboardClear();
+                            },
+                          ),
                         ],
-                      ),
+                        Gap(32.h),
+                        SizedBox(
+                          width: double.infinity,
+                          child: WnButton(
+                            text: context.l10n.signOut,
+                            onPressed: signOut,
+                            loading: isLoggingOut.value,
+                            size: WnButtonSize.medium,
+                          ),
+                        ),
+                        Gap(24.h),
+                      ],
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

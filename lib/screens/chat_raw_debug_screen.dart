@@ -61,83 +61,79 @@ class ChatRawDebugScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: WnSlate(
-            header: WnSlateNavigationHeader(
-              title: context.l10n.rawDebugViewTitle,
-              type: WnSlateNavigationType.back,
-              onNavigate: () => Routes.goBack(context),
-            ),
-            child: isLoading
-                ? Center(
-                    child: CircularProgressIndicator(
-                      strokeCap: StrokeCap.round,
-                      color: colors.backgroundContentPrimary,
-                    ),
-                  )
-                : ListView.builder(
-                    padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 18.h),
-                    itemCount: messageCount == 0 ? messageCount + 5 : messageCount + 4,
-                    itemBuilder: (context, index) {
-                      if (index == 0) {
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 12.h),
-                          child: _DebugHeader(
-                            groupId: groupId,
-                            messageCount: messageCount,
-                            latestMessageId: latestMessageId,
-                            latestMessagePubkey: latestMessagePubkey,
-                          ),
-                        );
-                      }
-                      if (index == 1) {
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 12.h),
-                          child: _SendLogSection(groupId: groupId),
-                        );
-                      }
-                      if (index == 2) {
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 12.h),
-                          child: _StreamLogSection(groupId: groupId),
-                        );
-                      }
-                      if (index == 3) {
-                        return Padding(
-                          padding: EdgeInsets.only(bottom: 12.h),
-                          child: _RatchetTreeSection(groupId: groupId),
-                        );
-                      }
-                      if (index == 4 && messageCount == 0) {
-                        return Center(
-                          child: Padding(
-                            padding: EdgeInsets.only(top: 32.h),
-                            child: Text(
-                              context.l10n.rawDebugViewMessageCount(0),
-                              style: typography.medium14.copyWith(
-                                color: colors.backgroundContentTertiary,
-                              ),
-                            ),
-                          ),
-                        );
-                      }
-                      final messageIndex = index - 4;
-                      if (messageIndex < 0 || messageIndex >= messageCount) {
-                        return const SizedBox.shrink();
-                      }
-                      final message = getMessage(messageIndex);
-                      final authorMetadata = getAuthorMetadata(message.pubkey);
+        child: WnSlate(
+          header: WnSlateNavigationHeader(
+            title: context.l10n.rawDebugViewTitle,
+            onNavigate: () => Routes.goBack(context),
+          ),
+          child: isLoading
+              ? Center(
+                  child: CircularProgressIndicator(
+                    strokeCap: StrokeCap.round,
+                    color: colors.backgroundContentPrimary,
+                  ),
+                )
+              : ListView.builder(
+                  padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 18.h),
+                  itemCount: messageCount == 0 ? messageCount + 5 : messageCount + 4,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
                       return Padding(
-                        padding: EdgeInsets.only(bottom: 8.h),
-                        child: _RawMessageCard(
-                          message: message,
-                          authorMetadata: authorMetadata,
+                        padding: EdgeInsets.only(bottom: 12.h),
+                        child: _DebugHeader(
+                          groupId: groupId,
+                          messageCount: messageCount,
+                          latestMessageId: latestMessageId,
+                          latestMessagePubkey: latestMessagePubkey,
                         ),
                       );
-                    },
-                  ),
-          ),
+                    }
+                    if (index == 1) {
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 12.h),
+                        child: _SendLogSection(groupId: groupId),
+                      );
+                    }
+                    if (index == 2) {
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 12.h),
+                        child: _StreamLogSection(groupId: groupId),
+                      );
+                    }
+                    if (index == 3) {
+                      return Padding(
+                        padding: EdgeInsets.only(bottom: 12.h),
+                        child: _RatchetTreeSection(groupId: groupId),
+                      );
+                    }
+                    if (index == 4 && messageCount == 0) {
+                      return Center(
+                        child: Padding(
+                          padding: EdgeInsets.only(top: 32.h),
+                          child: Text(
+                            context.l10n.rawDebugViewMessageCount(0),
+                            style: typography.medium14.copyWith(
+                              color: colors.backgroundContentTertiary,
+                            ),
+                          ),
+                        ),
+                      );
+                    }
+                    final messageIndex = index - 4;
+                    if (messageIndex < 0 || messageIndex >= messageCount) {
+                      return const SizedBox.shrink();
+                    }
+                    final message = getMessage(messageIndex);
+                    final authorMetadata = getAuthorMetadata(message.pubkey);
+                    return Padding(
+                      padding: EdgeInsets.only(bottom: 8.h),
+                      child: _RawMessageCard(
+                        message: message,
+                        authorMetadata: authorMetadata,
+                      ),
+                    );
+                  },
+                ),
         ),
       ),
     );

@@ -787,6 +787,11 @@
   "@unknownUser": {
     "description": "Fallback name for unknown user"
   },
+  "noName": "No name",
+  "@noName": {
+    "description": "Placeholder shown when a user has no display name set"
+  },
+
   "unknownGroup": "Unknown group",
   "@unknownGroup": {
     "description": "Fallback name for unknown group"

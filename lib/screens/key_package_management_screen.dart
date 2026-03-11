@@ -85,7 +85,6 @@ class KeyPackageManagementScreen extends HookConsumerWidget {
           child: WnSlate(
             header: WnSlateNavigationHeader(
               title: context.l10n.keyPackageManagementTitle,
-              type: WnSlateNavigationType.back,
               onNavigate: () => Routes.goBack(context),
             ),
             systemNotice: noticeMessage.value != null

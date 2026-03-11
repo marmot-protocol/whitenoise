@@ -38,106 +38,101 @@ class ShareProfileScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
-        bottom: false,
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: WnSlate(
-            header: WnSlateNavigationHeader(
-              title: context.l10n.shareProfileTitle,
-              onNavigate: () => Routes.goBack(context),
-            ),
-            systemNotice: noticeMessage != null
-                ? WnSystemNotice(
-                    key: ValueKey(noticeMessage),
-                    title: noticeMessage,
-                    type: noticeType,
-                    onDismiss: dismissNotice,
-                  )
-                : null,
-            child: Column(
-              spacing: 16.h,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Flexible(
-                  child: SingleChildScrollView(
-                    child: Center(
-                      child: Column(
-                        children: [
-                          WnAvatar(
-                            pictureUrl: metadata?.picture,
-                            displayName: displayName,
-                            size: WnAvatarSize.large,
-                            color: AvatarColor.fromPubkey(pubkey),
-                          ),
-                          Gap(8.h),
-                          if (displayName != null)
-                            Text(
-                              displayName,
-                              textAlign: TextAlign.center,
-                              style: typography.semiBold18.copyWith(
-                                color: colors.backgroundContentPrimary,
-                              ),
-                            ),
-                          Gap(16.h),
-                          if (npub != null) ...[
-                            Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16.w),
-                              child: WnCopyCard(
-                                textToDisplay: formatPublicKey(npub),
-                                textToCopy: npub,
-                                onCopySuccess: () =>
-                                    showSuccessNotice(context.l10n.publicKeyCopied),
-                                onCopyError: () => showErrorNotice(
-                                  context.l10n.publicKeyCopyError,
-                                ),
-                                snapToWords: true,
-                              ),
-                            ),
-                            Gap(36.h),
-                            QrImageView(
-                              data: npub,
-                              size: 256.w,
-                              eyeStyle: QrEyeStyle(
-                                eyeShape: QrEyeShape.square,
-                                color: colors.qrCode,
-                              ),
-                              dataModuleStyle: QrDataModuleStyle(
-                                dataModuleShape: QrDataModuleShape.square,
-                                color: colors.qrCode,
-                              ),
-                            ),
-                          ] else
-                            Gap(32.h),
-                          Gap(10.h),
+        child: WnSlate(
+          header: WnSlateNavigationHeader(
+            title: context.l10n.shareProfileTitle,
+            onNavigate: () => Routes.goBack(context),
+          ),
+          systemNotice: noticeMessage != null
+              ? WnSystemNotice(
+                  key: ValueKey(noticeMessage),
+                  title: noticeMessage,
+                  type: noticeType,
+                  onDismiss: dismissNotice,
+                )
+              : null,
+          child: Column(
+            spacing: 16.h,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Center(
+                    child: Column(
+                      children: [
+                        WnAvatar(
+                          pictureUrl: metadata?.picture,
+                          displayName: displayName,
+                          size: WnAvatarSize.large,
+                          color: AvatarColor.fromPubkey(pubkey),
+                        ),
+                        Gap(8.h),
+                        if (displayName != null)
                           Text(
-                            context.l10n.scanToConnect,
+                            displayName,
                             textAlign: TextAlign.center,
-                            style: typography.medium14.copyWith(
-                              color: colors.backgroundContentSecondary,
+                            style: typography.semiBold18.copyWith(
+                              color: colors.backgroundContentPrimary,
                             ),
                           ),
-                          Gap(24.h),
+                        Gap(16.h),
+                        if (npub != null) ...[
                           Padding(
                             padding: EdgeInsets.symmetric(horizontal: 16.w),
-                            child: SizedBox(
-                              width: double.infinity,
-                              child: WnButton(
-                                key: const Key('scan_qr_button'),
-                                text: context.l10n.scanNpub,
-                                type: WnButtonType.outline,
-                                trailingIcon: WnIcons.scan,
-                                size: WnButtonSize.medium,
-                                onPressed: () => Routes.pushToScanNpub(context),
+                            child: WnCopyCard(
+                              textToDisplay: formatPublicKey(npub),
+                              textToCopy: npub,
+                              onCopySuccess: () => showSuccessNotice(context.l10n.publicKeyCopied),
+                              onCopyError: () => showErrorNotice(
+                                context.l10n.publicKeyCopyError,
                               ),
+                              snapToWords: true,
                             ),
                           ),
-                        ],
-                      ),
+                          Gap(36.h),
+                          QrImageView(
+                            data: npub,
+                            size: 256.w,
+                            eyeStyle: QrEyeStyle(
+                              eyeShape: QrEyeShape.square,
+                              color: colors.qrCode,
+                            ),
+                            dataModuleStyle: QrDataModuleStyle(
+                              dataModuleShape: QrDataModuleShape.square,
+                              color: colors.qrCode,
+                            ),
+                          ),
+                        ] else
+                          Gap(32.h),
+                        Gap(10.h),
+                        Text(
+                          context.l10n.scanToConnect,
+                          textAlign: TextAlign.center,
+                          style: typography.medium14.copyWith(
+                            color: colors.backgroundContentSecondary,
+                          ),
+                        ),
+                        Gap(24.h),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 16.w),
+                          child: SizedBox(
+                            width: double.infinity,
+                            child: WnButton(
+                              key: const Key('scan_qr_button'),
+                              text: context.l10n.scanNpub,
+                              type: WnButtonType.outline,
+                              trailingIcon: WnIcons.scan,
+                              size: WnButtonSize.medium,
+                              onPressed: () => Routes.pushToScanNpub(context),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

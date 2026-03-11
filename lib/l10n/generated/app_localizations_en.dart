@@ -609,6 +609,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unknownUser => 'Unknown user';
 
   @override
+  String get noName => 'No name';
+
+  @override
   String get unknownGroup => 'Unknown group';
 
   @override

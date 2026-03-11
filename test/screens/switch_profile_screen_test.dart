@@ -98,12 +98,12 @@ void main() {
 
     testWidgets('tapping header back button goes back', (tester) async {
       await pumpSwitchProfileScreen(tester, testPubkeyA);
-      await tester.tap(find.byKey(const Key('slate_close_button')));
+      await tester.tap(find.byKey(const Key('slate_back_button')));
       await tester.pumpAndSettle();
       expect(find.byType(CircularProgressIndicator), findsNothing);
     });
 
-    testWidgets('tapping close while loading goes back', (tester) async {
+    testWidgets('tapping back while loading goes back', (tester) async {
       final completer = Completer<List<Account>>();
       mockApi.getAccountsCompleter = completer;
       final notifier = _MockAuthNotifier(testPubkeyA);
@@ -121,7 +121,7 @@ void main() {
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
-      await tester.tap(find.byKey(const Key('slate_close_button')));
+      await tester.tap(find.byKey(const Key('slate_back_button')));
       completer.complete([]);
       await tester.pumpAndSettle();
       expect(find.byType(CircularProgressIndicator), findsNothing);

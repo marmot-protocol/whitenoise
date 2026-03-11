@@ -77,7 +77,6 @@ class RelayControlStateScreen extends HookWidget {
           child: WnSlate(
             header: WnSlateNavigationHeader(
               title: context.l10n.relayStateTitle,
-              type: WnSlateNavigationType.back,
               onNavigate: () => Routes.goBack(context),
             ),
             child: ListView(

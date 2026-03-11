@@ -31,25 +31,22 @@ class AddProfileScreen extends ConsumerWidget {
       body: SafeArea(
         child: Align(
           alignment: Alignment.bottomCenter,
-          child: Padding(
-            padding: EdgeInsets.only(bottom: 16.h),
-            child: WnSlate(
-              shrinkWrapContent: true,
-              header: WnSlateNavigationHeader(
-                title: context.l10n.addNewProfile,
-                onNavigate: () => Routes.goBack(context),
-              ),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    WnAuthButtonsContainer(
-                      onLogin: navigateToLogin,
-                      onSignup: navigateToSignup,
-                    ),
-                  ],
-                ),
+          child: WnSlate(
+            shrinkWrapContent: true,
+            header: WnSlateNavigationHeader(
+              title: context.l10n.addNewProfile,
+              onNavigate: () => Routes.goBack(context),
+            ),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  WnAuthButtonsContainer(
+                    onLogin: navigateToLogin,
+                    onSignup: navigateToSignup,
+                  ),
+                ],
               ),
             ),
           ),

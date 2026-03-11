@@ -77,116 +77,111 @@ class EditGroupScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: WnSlate(
-            showTopScrollEffect: true,
-            showBottomScrollEffect: true,
-            header: WnSlateNavigationHeader(
-              title: context.l10n.editGroup,
-              type: WnSlateNavigationType.back,
-              onNavigate: () => Routes.goBack(context),
-            ),
-            systemNotice: noticeMessage.value != null
-                ? WnSystemNotice(
-                    key: ValueKey(noticeMessage.value),
-                    title: noticeMessage.value!,
-                    type: noticeType.value,
-                    onDismiss: dismissNotice,
-                  )
-                : null,
-            footer:
-                state.loadingState != EditGroupLoadingState.loading && state.currentGroup != null
-                ? Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
-                    child: Column(
-                      spacing: 8.h,
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        WnButton(
-                          text: context.l10n.cancel,
-                          type: WnButtonType.outline,
-                          size: WnButtonSize.medium,
-                          onPressed: state.loadingState == EditGroupLoadingState.saving
-                              ? null
-                              : () {
-                                  discardChanges();
-                                  Routes.goBack(context);
-                                },
-                        ),
-                        WnButton(
-                          text: context.l10n.save,
-                          size: WnButtonSize.medium,
-                          onPressed:
-                              state.hasUnsavedChanges &&
-                                  state.loadingState != EditGroupLoadingState.saving
-                              ? () async {
-                                  final success = await saveGroup();
-                                  if (context.mounted) {
-                                    if (success) {
-                                      showNotice(context.l10n.groupUpdatedSuccessfully);
-                                    } else {
-                                      showNotice(
-                                        context.l10n.groupSaveError,
-                                        type: WnSystemNoticeType.error,
-                                      );
-                                    }
+        child: WnSlate(
+          showTopScrollEffect: true,
+          showBottomScrollEffect: true,
+          header: WnSlateNavigationHeader(
+            title: context.l10n.editGroup,
+            onNavigate: () => Routes.goBack(context),
+          ),
+          systemNotice: noticeMessage.value != null
+              ? WnSystemNotice(
+                  key: ValueKey(noticeMessage.value),
+                  title: noticeMessage.value!,
+                  type: noticeType.value,
+                  onDismiss: dismissNotice,
+                )
+              : null,
+          footer: state.loadingState != EditGroupLoadingState.loading && state.currentGroup != null
+              ? Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
+                  child: Column(
+                    spacing: 8.h,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      WnButton(
+                        text: context.l10n.cancel,
+                        type: WnButtonType.outline,
+                        size: WnButtonSize.medium,
+                        onPressed: state.loadingState == EditGroupLoadingState.saving
+                            ? null
+                            : () {
+                                discardChanges();
+                                Routes.goBack(context);
+                              },
+                      ),
+                      WnButton(
+                        text: context.l10n.save,
+                        size: WnButtonSize.medium,
+                        onPressed:
+                            state.hasUnsavedChanges &&
+                                state.loadingState != EditGroupLoadingState.saving
+                            ? () async {
+                                final success = await saveGroup();
+                                if (context.mounted) {
+                                  if (success) {
+                                    showNotice(context.l10n.groupUpdatedSuccessfully);
+                                  } else {
+                                    showNotice(
+                                      context.l10n.groupSaveError,
+                                      type: WnSystemNoticeType.error,
+                                    );
                                   }
                                 }
-                              : null,
-                          loading: state.loadingState == EditGroupLoadingState.saving,
-                        ),
-                      ],
-                    ),
-                  )
-                : null,
-            child: state.error != null && state.currentGroup == null
-                ? Builder(
-                    builder: (context) {
-                      _logger.warning('Group load error: ${state.error}');
-                      return Center(
-                        child: Text(
-                          context.l10n.groupLoadError,
-                          style: context.typographyScaled.medium14.copyWith(
-                            color: colors.fillDestructive,
-                          ),
-                        ),
-                      );
-                    },
-                  )
-                : SingleChildScrollView(
-                    padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Gap(16.h),
-                        Center(
-                          child: WnAvatar(
-                            pictureUrl: state.pictureUrl,
-                            displayName: state.name ?? '',
-                            size: WnAvatarSize.large,
-                            color: AvatarColor.fromPubkey(groupId),
-                            onEditTap: state.loadingState == EditGroupLoadingState.saving
-                                ? null
-                                : pickImage,
-                          ),
-                        ),
-                        Gap(36.h),
-                        WnInput(
-                          label: context.l10n.groupNameLabel,
-                          placeholder: '',
-                          controller: nameController,
-                        ),
-                        Gap(36.h),
-                        WnInputTextArea(
-                          label: context.l10n.groupDescriptionLabel,
-                          placeholder: '',
-                          controller: descriptionController,
-                        ),
-                      ],
-                    ),
+                              }
+                            : null,
+                        loading: state.loadingState == EditGroupLoadingState.saving,
+                      ),
+                    ],
                   ),
-          ),
+                )
+              : null,
+          child: state.error != null && state.currentGroup == null
+              ? Builder(
+                  builder: (context) {
+                    _logger.warning('Group load error: ${state.error}');
+                    return Center(
+                      child: Text(
+                        context.l10n.groupLoadError,
+                        style: context.typographyScaled.medium14.copyWith(
+                          color: colors.fillDestructive,
+                        ),
+                      ),
+                    );
+                  },
+                )
+              : SingleChildScrollView(
+                  padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Gap(16.h),
+                      Center(
+                        child: WnAvatar(
+                          pictureUrl: state.pictureUrl,
+                          displayName: state.name ?? '',
+                          size: WnAvatarSize.large,
+                          color: AvatarColor.fromPubkey(groupId),
+                          onEditTap: state.loadingState == EditGroupLoadingState.saving
+                              ? null
+                              : pickImage,
+                        ),
+                      ),
+                      Gap(36.h),
+                      WnInput(
+                        label: context.l10n.groupNameLabel,
+                        placeholder: '',
+                        controller: nameController,
+                      ),
+                      Gap(36.h),
+                      WnInputTextArea(
+                        label: context.l10n.groupDescriptionLabel,
+                        placeholder: '',
+                        controller: descriptionController,
+                      ),
+                    ],
+                  ),
+                ),
         ),
       ),
     );

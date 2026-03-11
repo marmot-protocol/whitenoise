@@ -613,6 +613,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get unknownUser => 'Utente sconosciuto';
 
   @override
+  String get noName => 'Nessun nome';
+
+  @override
   String get unknownGroup => 'Gruppo sconosciuto';
 
   @override

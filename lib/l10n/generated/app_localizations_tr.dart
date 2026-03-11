@@ -610,6 +610,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get unknownUser => 'Bilinmeyen kullanıcı';
 
   @override
+  String get noName => 'İsim yok';
+
+  @override
   String get unknownGroup => 'Bilinmeyen grup';
 
   @override
