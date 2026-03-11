@@ -16,7 +16,6 @@ import 'package:whitenoise/providers/app_log_provider.dart' show appLogStore;
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
 import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart' show notificationListenerProvider;
-import 'package:whitenoise/providers/rust_log_listener_provider.dart' show rustLogListenerProvider;
 import 'package:whitenoise/providers/theme_provider.dart' show themeProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
@@ -119,7 +118,6 @@ class _WnAppState extends ConsumerState<WnApp> {
     final themeMode = ref.watch(themeProvider).value ?? ThemeMode.system;
     ref.watch(localeProvider);
     ref.watch(notificationListenerProvider);
-    ref.watch(rustLogListenerProvider);
     final locale = ref.read(localeProvider.notifier).resolveLocale();
 
     return ScreenUtilInit(

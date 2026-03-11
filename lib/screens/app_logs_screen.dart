@@ -5,6 +5,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
+import 'package:whitenoise/hooks/use_app_logs.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/app_log_filter_provider.dart';
 import 'package:whitenoise/providers/app_log_provider.dart';
@@ -22,6 +23,7 @@ class AppLogsScreen extends HookConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    useAppLogs();
     final colors = context.colors;
     final typography = context.typographyScaled;
     final liveRawEntries = ref.watch(appLogProvider);
