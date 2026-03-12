@@ -216,7 +216,7 @@ void main() {
       expect(find.text('first'), findsOneWidget);
       expect(find.text('second'), findsOneWidget);
 
-      await tester.tap(find.text('Clear'));
+      await tester.tap(find.byKey(const Key('app_logs_clear')));
       await tester.pumpAndSettle();
 
       expect(find.text('first'), findsNothing);
@@ -323,6 +323,105 @@ void main() {
       await pumpScreen(tester);
 
       expect(find.text('WARNING'), findsOneWidget);
+    });
+
+    testWidgets('copy all button copies all visible entries to clipboard', (tester) async {
+      String? clipboardText;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            clipboardText = call.arguments['text'] as String?;
+          }
+          return null;
+        },
+      );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      _entries = [
+        _entry('first message', time: DateTime(2026, 1, 1, 10)),
+        _entry('second message', time: DateTime(2026, 1, 1, 10, 0, 1)),
+        _entry('third message', time: DateTime(2026, 1, 1, 10, 0, 2)),
+      ];
+
+      await pumpScreen(tester);
+
+      expect(find.byKey(const Key('app_logs_copy_all')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('app_logs_copy_all')));
+      await tester.pumpAndSettle();
+
+      expect(clipboardText, isNotNull);
+      expect(clipboardText, contains('first message'));
+      expect(clipboardText, contains('second message'));
+      expect(clipboardText, contains('third message'));
+
+      final context = tester.element(find.byType(AppLogsScreen));
+      final l10n = AppLocalizations.of(context);
+      expect(find.text(l10n.rawDebugViewCopied), findsOneWidget);
+    });
+
+    testWidgets('copy all button is hidden when no entries', (tester) async {
+      await pumpScreen(tester);
+
+      expect(find.byKey(const Key('app_logs_copy_all')), findsNothing);
+    });
+
+    testWidgets('copy all button copies filtered entries only', (tester) async {
+      String? clipboardText;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            clipboardText = call.arguments['text'] as String?;
+          }
+          return null;
+        },
+      );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      _entries = [
+        _entry('alpha message'),
+        _entry('beta message'),
+        _entry('gamma message'),
+      ];
+
+      await pumpScreen(tester);
+
+      await tester.enterText(find.byKey(const Key('app_logs_search')), 'beta');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('app_logs_copy_all')));
+      await tester.pumpAndSettle();
+
+      expect(clipboardText, isNotNull);
+      expect(clipboardText, contains('beta message'));
+      expect(clipboardText, isNot(contains('alpha message')));
+      expect(clipboardText, isNot(contains('gamma message')));
+    });
+
+    testWidgets('renders SHOUT level with destructive color styling', (tester) async {
+      _entries = [_entry('critical error', level: Level.SHOUT)];
+      await pumpScreen(tester);
+
+      expect(find.text('SHOUT'), findsOneWidget);
+    });
+
+    testWidgets('renders INFO level entry', (tester) async {
+      _entries = [_entry('info message')];
+      await pumpScreen(tester);
+
+      expect(find.text('INFO'), findsOneWidget);
     });
   });
 }

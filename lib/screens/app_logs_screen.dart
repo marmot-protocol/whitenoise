@@ -6,15 +6,18 @@ import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/hooks/use_app_logs.dart';
+import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/app_log_filter_provider.dart';
 import 'package:whitenoise/providers/app_log_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
-import 'package:whitenoise/widgets/wn_search_field.dart';
+import 'package:whitenoise/widgets/wn_input.dart' show WnInput, WnInputTrailingButton;
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 const _pauseThreshold = 80.0;
 
@@ -38,6 +41,7 @@ class AppLogsScreen extends HookConsumerWidget {
     final scrollController = useScrollController();
     final isAnimating = useRef(false);
     final mountedRef = useRef(true);
+    final systemNotice = useSystemNotice();
     useEffect(
       () =>
           () => mountedRef.value = false,
@@ -128,6 +132,14 @@ class AppLogsScreen extends HookConsumerWidget {
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 16.h),
           child: WnSlate(
+            systemNotice: systemNotice.noticeMessage != null
+                ? WnSystemNotice(
+                    title: systemNotice.noticeMessage!,
+                    type: systemNotice.noticeType,
+                    onDismiss: systemNotice.dismissNotice,
+                    autoHideDuration: const Duration(seconds: 2),
+                  )
+                : null,
             header: WnSlateNavigationHeader(
               title: context.l10n.appLogsTitle,
               type: WnSlateNavigationType.back,
@@ -140,142 +152,165 @@ class AppLogsScreen extends HookConsumerWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      WnSearchField(
+                      WnInput(
                         key: const Key('app_logs_search'),
                         placeholder: context.l10n.appLogsSearchPlaceholder,
                         controller: searchController,
                         onChanged: (v) => ref.read(appLogFilterProvider.notifier).setSearch(v),
+                        trailingAction: filter.searchQuery.isNotEmpty
+                            ? WnInputTrailingButton(
+                                icon: WnIcons.closeSmall,
+                                onPressed: () =>
+                                    ref.read(appLogFilterProvider.notifier).setSearch(''),
+                                filled: false,
+                              )
+                            : null,
                       ),
                       Gap(8.h),
-                      Row(
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          Expanded(
-                            child: TextField(
-                              key: const Key('app_logs_pattern_input'),
-                              controller: patternController,
-                              focusNode: patternFocus,
-                              style: typography.medium14.copyWith(
-                                color: colors.backgroundContentPrimary,
+                          Row(
+                            children: [
+                              Expanded(
+                                child: WnInput(
+                                  key: const Key('app_logs_pattern_input'),
+                                  placeholder: context.l10n.appLogsAddPatternPlaceholder,
+                                  controller: patternController,
+                                  focusNode: patternFocus,
+                                  leadingIcon: Icon(
+                                    Icons.filter_list,
+                                    size: 20.sp,
+                                    color: colors.backgroundContentTertiary,
+                                  ),
+                                  onSubmitted: (_) {
+                                    final text = patternController.text;
+                                    if (text.trim().isNotEmpty) {
+                                      ref.read(appLogFilterProvider.notifier).addExclude(text);
+                                      patternController.clear();
+                                    }
+                                  },
+                                  trailingAction: hasFilters
+                                      ? WnInputTrailingButton(
+                                          key: const Key('app_logs_clear_filters'),
+                                          icon: WnIcons.closeSmall,
+                                          onPressed: () =>
+                                              ref.read(appLogFilterProvider.notifier).clearAll(),
+                                          filled: false,
+                                        )
+                                      : null,
+                                ),
                               ),
-                              decoration: InputDecoration(
-                                hintText: context.l10n.appLogsAddPatternPlaceholder,
-                                hintStyle: typography.medium14.copyWith(
-                                  color: colors.backgroundContentTertiary,
-                                ),
-                                filled: true,
-                                fillColor: colors.backgroundPrimary,
-                                contentPadding: EdgeInsets.symmetric(
-                                  vertical: 10.h,
-                                  horizontal: 12.w,
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.r),
-                                  borderSide: BorderSide(color: colors.borderTertiary),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(8.r),
-                                  borderSide: BorderSide(color: colors.borderPrimary),
-                                ),
+                              Gap(8.w),
+                              WnButton(
+                                key: const Key('app_logs_add_ignore'),
+                                text: context.l10n.appLogsIgnore,
+                                onPressed: () {
+                                  final text = patternController.text;
+                                  if (text.trim().isNotEmpty) {
+                                    ref.read(appLogFilterProvider.notifier).addExclude(text);
+                                    patternController.clear();
+                                    patternFocus.unfocus();
+                                  }
+                                },
+                                type: WnButtonType.outline,
+                                size: WnButtonSize.small,
                               ),
-                              onSubmitted: (_) {
-                                final text = patternController.text;
-                                if (text.trim().isNotEmpty) {
-                                  ref.read(appLogFilterProvider.notifier).addExclude(text);
-                                  patternController.clear();
-                                }
-                              },
-                            ),
+                              Gap(8.w),
+                              WnButton(
+                                key: const Key('app_logs_add_show'),
+                                text: context.l10n.appLogsShow,
+                                onPressed: () {
+                                  final text = patternController.text;
+                                  if (text.trim().isNotEmpty) {
+                                    ref.read(appLogFilterProvider.notifier).addInclude(text);
+                                    patternController.clear();
+                                    patternFocus.unfocus();
+                                  }
+                                },
+                                size: WnButtonSize.small,
+                              ),
+                            ],
                           ),
-                          Gap(8.w),
-                          TextButton(
-                            key: const Key('app_logs_add_ignore'),
-                            onPressed: () {
-                              final text = patternController.text;
-                              if (text.trim().isNotEmpty) {
-                                ref.read(appLogFilterProvider.notifier).addExclude(text);
-                                patternController.clear();
-                                patternFocus.unfocus();
-                              }
-                            },
-                            child: Text(context.l10n.appLogsIgnore),
-                          ),
-                          TextButton(
-                            key: const Key('app_logs_add_show'),
-                            onPressed: () {
-                              final text = patternController.text;
-                              if (text.trim().isNotEmpty) {
-                                ref.read(appLogFilterProvider.notifier).addInclude(text);
-                                patternController.clear();
-                                patternFocus.unfocus();
-                              }
-                            },
-                            child: Text(context.l10n.appLogsShow),
-                          ),
-                        ],
-                      ),
-                      if (filter.excludePatterns.isNotEmpty ||
-                          filter.includePatterns.isNotEmpty) ...[
-                        Gap(8.h),
-                        Wrap(
-                          spacing: 6.w,
-                          runSpacing: 6.h,
-                          children: [
-                            ...filter.excludePatterns.map(
-                              (p) => _FilterChip(
-                                key: Key('exclude_$p'),
-                                label: p,
-                                isExclude: true,
-                                onRemove: () =>
-                                    ref.read(appLogFilterProvider.notifier).removeExclude(p),
-                              ),
-                            ),
-                            ...filter.includePatterns.map(
-                              (p) => _FilterChip(
-                                key: Key('include_$p'),
-                                label: p,
-                                isExclude: false,
-                                onRemove: () =>
-                                    ref.read(appLogFilterProvider.notifier).removeInclude(p),
-                              ),
+                          if (filter.excludePatterns.isNotEmpty ||
+                              filter.includePatterns.isNotEmpty) ...[
+                            Gap(8.h),
+                            Wrap(
+                              spacing: 6.w,
+                              runSpacing: 6.h,
+                              children: [
+                                ...filter.excludePatterns.map(
+                                  (p) => _FilterChip(
+                                    key: Key('exclude_$p'),
+                                    label: p,
+                                    isExclude: true,
+                                    onRemove: () =>
+                                        ref.read(appLogFilterProvider.notifier).removeExclude(p),
+                                  ),
+                                ),
+                                ...filter.includePatterns.map(
+                                  (p) => _FilterChip(
+                                    key: Key('include_$p'),
+                                    label: p,
+                                    isExclude: false,
+                                    onRemove: () =>
+                                        ref.read(appLogFilterProvider.notifier).removeInclude(p),
+                                  ),
+                                ),
+                              ],
                             ),
                           ],
-                        ),
-                      ],
+                        ],
+                      ),
                       Gap(8.h),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          if (hasFilters)
-                            TextButton(
-                              key: const Key('app_logs_clear_filters'),
-                              onPressed: () => ref.read(appLogFilterProvider.notifier).clearAll(),
-                              child: Text(context.l10n.appLogsClearFilters),
-                            )
-                          else
-                            const SizedBox.shrink(),
+                          Expanded(
+                            child: hasFilters && totalEntries > 0
+                                ? Padding(
+                                    padding: EdgeInsets.only(right: 8.w),
+                                    child: Text(
+                                      context.l10n.appLogsFilteredCount(
+                                        entries.length,
+                                        totalEntries,
+                                      ),
+                                      style: typography.medium12.copyWith(
+                                        color: colors.backgroundContentTertiary,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  )
+                                : const SizedBox.shrink(),
+                          ),
                           Row(
                             children: [
-                              if (hasFilters && totalEntries > 0)
-                                Padding(
-                                  padding: EdgeInsets.only(right: 8.w),
-                                  child: Text(
-                                    context.l10n.appLogsFilteredCount(
-                                      entries.length,
-                                      totalEntries,
-                                    ),
-                                    style: typography.medium12.copyWith(
-                                      color: colors.backgroundContentTertiary,
-                                    ),
-                                  ),
-                                ),
                               if (totalEntries > 0)
-                                TextButton(
+                                WnButton(
+                                  key: const Key('app_logs_clear'),
+                                  text: context.l10n.appLogsEraseAll,
+                                  leadingIcon: WnIcons.trashCan,
                                   onPressed: () {
                                     ref.read(appLogProvider.notifier).clear();
                                     paused.value = false;
                                     frozenRawEntries.value = const [];
                                   },
-                                  child: Text(context.l10n.appLogsClear),
+                                  type: WnButtonType.outline,
+                                  size: WnButtonSize.small,
+                                ),
+                              if (totalEntries > 0 && entries.isNotEmpty) Gap(8.w),
+                              if (entries.isNotEmpty)
+                                WnButton(
+                                  key: const Key('app_logs_copy_all'),
+                                  text: context.l10n.appLogsCopyAll,
+                                  leadingIcon: WnIcons.copy,
+                                  onPressed: () => _copyAllEntries(
+                                    context,
+                                    entries,
+                                    showSuccessNotice: systemNotice.showSuccessNotice,
+                                  ),
+                                  type: WnButtonType.outline,
+                                  size: WnButtonSize.small,
                                 ),
                             ],
                           ),
@@ -311,7 +346,11 @@ class AppLogsScreen extends HookConsumerWidget {
                                 final entry = entries[index];
                                 return _LogEntryTile(
                                   entry: entry,
-                                  onTap: () => _copyEntry(context, entry),
+                                  onTap: () => _copyEntry(
+                                    context,
+                                    entry,
+                                    showSuccessNotice: systemNotice.showSuccessNotice,
+                                  ),
                                 );
                               },
                             ),
@@ -332,16 +371,30 @@ class AppLogsScreen extends HookConsumerWidget {
     );
   }
 
-  Future<void> _copyEntry(BuildContext context, AppLogEntry entry) async {
+  Future<void> _copyEntry(
+    BuildContext context,
+    AppLogEntry entry, {
+    required void Function(String) showSuccessNotice,
+  }) async {
     final text = _formatEntry(entry);
     await Clipboard.setData(ClipboardData(text: text));
     if (context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(context.l10n.rawDebugViewCopied),
-          duration: const Duration(seconds: 2),
-        ),
-      );
+      showSuccessNotice(context.l10n.rawDebugViewCopied);
+    }
+  }
+
+  Future<void> _copyAllEntries(
+    BuildContext context,
+    List<AppLogEntry> entries, {
+    required void Function(String) showSuccessNotice,
+  }) async {
+    final buffer = StringBuffer();
+    for (final entry in entries) {
+      buffer.write(_formatEntry(entry));
+    }
+    await Clipboard.setData(ClipboardData(text: buffer.toString()));
+    if (context.mounted) {
+      showSuccessNotice(context.l10n.rawDebugViewCopied);
     }
   }
 
@@ -421,39 +474,40 @@ class _FilterChip extends StatelessWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
 
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),
-      decoration: BoxDecoration(
-        color: isExclude
-            ? colors.fillDestructive.withValues(alpha: 0.15)
-            : colors.intentionSuccessContent.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(999.r),
-        border: Border.all(
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onRemove,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+        decoration: BoxDecoration(
           color: isExclude
-              ? colors.fillDestructive.withValues(alpha: 0.4)
-              : colors.intentionSuccessContent.withValues(alpha: 0.4),
-        ),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(
-            isExclude ? '− $label' : '+ $label',
-            style: typography.medium12.copyWith(
-              color: colors.backgroundContentPrimary,
-              fontFamily: 'monospace',
-            ),
+              ? colors.fillDestructive.withValues(alpha: 0.15)
+              : colors.intentionSuccessContent.withValues(alpha: 0.15),
+          borderRadius: BorderRadius.circular(999.r),
+          border: Border.all(
+            color: isExclude
+                ? colors.fillDestructive.withValues(alpha: 0.4)
+                : colors.intentionSuccessContent.withValues(alpha: 0.4),
           ),
-          Gap(4.w),
-          GestureDetector(
-            onTap: onRemove,
-            child: Icon(
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              isExclude ? '− $label' : '+ $label',
+              style: typography.medium10.copyWith(
+                color: colors.backgroundContentPrimary,
+                fontFamily: 'monospace',
+              ),
+            ),
+            Gap(3.w),
+            Icon(
               Icons.close,
-              size: 14.sp,
+              size: 12.sp,
               color: colors.backgroundContentSecondary,
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -472,6 +526,7 @@ class _LogEntryTile extends StatelessWidget {
     final levelColor = _levelColor(colors, entry.level);
 
     return GestureDetector(
+      behavior: HitTestBehavior.opaque,
       onTap: onTap,
       child: Container(
         width: double.infinity,
@@ -514,10 +569,17 @@ class _LogEntryTile extends StatelessWidget {
                     fontFamily: 'monospace',
                   ),
                 ),
+                Gap(6.w),
+                WnIcon(
+                  WnIcons.copy,
+                  key: const Key('app_logs_entry_copy_icon'),
+                  size: 14.sp,
+                  color: colors.backgroundContentTertiary,
+                ),
               ],
             ),
             SizedBox(height: 4.h),
-            SelectableText(
+            Text(
               entry.message,
               style: typography.medium12.copyWith(
                 color: colors.backgroundContentPrimary,
@@ -527,7 +589,7 @@ class _LogEntryTile extends StatelessWidget {
             ),
             if (entry.error != null) ...[
               SizedBox(height: 4.h),
-              SelectableText(
+              Text(
                 'error: ${entry.error}',
                 style: typography.medium10.copyWith(
                   color: colors.fillDestructive,
@@ -538,7 +600,7 @@ class _LogEntryTile extends StatelessWidget {
             ],
             if (entry.stackTrace != null) ...[
               SizedBox(height: 4.h),
-              SelectableText(
+              Text(
                 entry.stackTrace.toString().split('\n').take(5).join('\n'),
                 style: typography.medium10.copyWith(
                   color: colors.backgroundContentTertiary,
