@@ -25,6 +25,7 @@ and this project adheres to Calendar Versioning (CalVer).
 ### Changed
 - Deleted bubbles style [PR #471](https://github.com/marmot-protocol/whitenoise/pull/471)
 - Debug and relay screens improvements [PR #572](https://github.com/marmot-protocol/whitenoise/pull/502)
+- Show an error screen when bridge initialization fails instead of hanging on splash [PR #477](https://github.com/marmot-protocol/whitenoise/pull/477)
 
 ### Deprecated
 

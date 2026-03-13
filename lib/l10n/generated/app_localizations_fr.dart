@@ -1240,4 +1240,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get updateNow => 'Mettre à jour';
+
+  @override
+  String get fatalErrorCopyError => 'Copier l\'erreur';
+
+  @override
+  String get fatalErrorErrorCopied => 'Erreur copiée dans le presse-papiers';
+
+  @override
+  String get fatalErrorTitle => 'Oh non !';
+
+  @override
+  String get fatalErrorDescription =>
+      'Nous avons eu un problème lors du chargement de l\'app. Ce n\'est pas de votre faute, c\'est la nôtre et nous nous excusons.\n\nAidez-nous à résoudre ce problème. Appuyez ci-dessous pour envoyer cette erreur à notre équipe.';
 }

@@ -1235,4 +1235,17 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get updateNow => 'Atualizar agora';
+
+  @override
+  String get fatalErrorCopyError => 'Copiar erro';
+
+  @override
+  String get fatalErrorErrorCopied => 'Erro copiado para a área de transferência';
+
+  @override
+  String get fatalErrorTitle => 'Oh, não!';
+
+  @override
+  String get fatalErrorDescription =>
+      'Tivemos um problema ao carregar o app. Não é você, somos nós e sentimos muito.\n\nNos ajude a corrigir. Toque abaixo para enviar este erro para nossa equipe.';
 }

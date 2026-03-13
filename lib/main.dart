@@ -18,6 +18,7 @@ import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart' show notificationListenerProvider;
 import 'package:whitenoise/providers/theme_provider.dart' show themeProvider;
 import 'package:whitenoise/routes.dart' show Routes;
+import 'package:whitenoise/screens/fatal_error_screen.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/theme.dart';
@@ -46,9 +47,15 @@ Future<void> main() async {
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
-  await RustLib.init();
-  final container = await initializeAppContainer();
-  runApp(UncontrolledProviderScope(container: container, child: const WnApp()));
+  try {
+    await RustLib.init();
+    final container = await initializeAppContainer();
+    runApp(UncontrolledProviderScope(container: container, child: const WnApp()));
+  } catch (e, stackTrace) {
+    runApp(
+      FatalErrorScreen(errorMessage: e.toString(), stackTrace: stackTrace),
+    );
+  }
 }
 
 Future<ProviderContainer> initializeAppContainer() async {

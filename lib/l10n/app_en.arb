@@ -1585,5 +1585,24 @@
   "updateNow": "Update now",
   "@updateNow": {
     "description": "Button label that opens the Zapstore listing for the app update"
+  },
+  "fatalErrorCopyError": "Copy error",
+  "@fatalErrorCopyError": {
+    "description": "Button label on the fatal error screen diagnostics box to copy the error to clipboard"
+  },
+
+  "fatalErrorErrorCopied": "Error copied to clipboard",
+  "@fatalErrorErrorCopied": {
+    "description": "System notice shown after copying error details to clipboard on the fatal error screen"
+  },
+
+  "fatalErrorTitle": "Oh no!",
+  "@fatalErrorTitle": {
+    "description": "Error callout title on fatal error screen"
+  },
+
+  "fatalErrorDescription": "We hit a bump loading the app. It's not you, it's us and we're sorry.\n\nHelp us fix it. Tap below to send this error to our team.",
+  "@fatalErrorDescription": {
+    "description": "Error callout description on fatal error screen"
   }
 }

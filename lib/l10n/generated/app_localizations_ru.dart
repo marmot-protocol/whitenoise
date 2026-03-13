@@ -1255,4 +1255,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get updateNow => 'Обновить сейчас';
+
+  @override
+  String get fatalErrorCopyError => 'Копировать ошибку';
+
+  @override
+  String get fatalErrorErrorCopied => 'Ошибка скопирована в буфер обмена';
+
+  @override
+  String get fatalErrorTitle => 'О нет!';
+
+  @override
+  String get fatalErrorDescription =>
+      'У нас возникла проблема при загрузке приложения. Это не вы, а мы, и нам очень жаль.\n\nПомогите нам исправить это. Нажмите ниже, чтобы отправить эту ошибку нашей команде.';
 }

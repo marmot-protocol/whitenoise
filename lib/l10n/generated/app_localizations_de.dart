@@ -1256,4 +1256,17 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get updateNow => 'Jetzt aktualisieren';
+
+  @override
+  String get fatalErrorCopyError => 'Fehler kopieren';
+
+  @override
+  String get fatalErrorErrorCopied => 'Fehler in die Zwischenablage kopiert';
+
+  @override
+  String get fatalErrorTitle => 'Oh nein!';
+
+  @override
+  String get fatalErrorDescription =>
+      'Es gab ein Problem beim Laden der App. Du bist nicht schuld – wir entschuldigen uns.\n\nHilf uns, es zu beheben. Tippe unten, um diesen Fehler an unser Team zu senden.';
 }

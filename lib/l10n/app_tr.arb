@@ -372,5 +372,8 @@
   "updateNow": "Şimdi güncelle",
   "@updateNow": {
     "description": "Button label that opens the Zapstore listing for the app update"
-  }
-}
+  },
+  "fatalErrorCopyError": "Hatayı kopyala",
+  "fatalErrorErrorCopied": "Hata panoya kopyalandı",
+  "fatalErrorTitle": "Eyvah!",
+  "fatalErrorDescription": "Uygulama yüklenirken bir sorunla karşılaştık. Sorun sende değil, biziz ve özür dileriz.\n\nDüzeltmemize yardımcı ol. Aşağıya dokunarak bu hatayı ekibimize gönder."}

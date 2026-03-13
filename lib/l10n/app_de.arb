@@ -372,5 +372,8 @@
   "updateNow": "Jetzt aktualisieren",
   "@updateNow": {
     "description": "Button label that opens the Zapstore listing for the app update"
-  }
-}
+  },
+  "fatalErrorCopyError": "Fehler kopieren",
+  "fatalErrorErrorCopied": "Fehler in die Zwischenablage kopiert",
+  "fatalErrorTitle": "Oh nein!",
+  "fatalErrorDescription": "Es gab ein Problem beim Laden der App. Du bist nicht schuld – wir entschuldigen uns.\n\nHilf uns, es zu beheben. Tippe unten, um diesen Fehler an unser Team zu senden."}

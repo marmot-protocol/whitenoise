@@ -372,5 +372,8 @@
   "updateNow": "Обновить сейчас",
   "@updateNow": {
     "description": "Button label that opens the Zapstore listing for the app update"
-  }
-}
+  },
+  "fatalErrorCopyError": "Копировать ошибку",
+  "fatalErrorErrorCopied": "Ошибка скопирована в буфер обмена",
+  "fatalErrorTitle": "О нет!",
+  "fatalErrorDescription": "У нас возникла проблема при загрузке приложения. Это не вы, а мы, и нам очень жаль.\n\nПомогите нам исправить это. Нажмите ниже, чтобы отправить эту ошибку нашей команде."}
