@@ -55,6 +55,7 @@ class MockWnApi implements RustLibApi {
   String? lastBugReportWhatWentWrong;
   String? lastBugReportNpub;
   String? lastBugReportLogs;
+  String? lastBugReportAppVersion;
   bool sendBugReportShouldFail = false;
 
   bool deleteAllDataCalled = false;
@@ -594,6 +595,7 @@ class MockWnApi implements RustLibApi {
     lastBugReportWhatWentWrong = whatWentWrong;
     lastBugReportNpub = npub;
     lastBugReportLogs = logs;
+    lastBugReportAppVersion = appVersion;
     if (sendBugReportShouldFail) throw Exception('send_bug_report failed');
   }
 
@@ -602,6 +604,7 @@ class MockWnApi implements RustLibApi {
     lastBugReportWhatWentWrong = null;
     lastBugReportNpub = null;
     lastBugReportLogs = null;
+    lastBugReportAppVersion = null;
     sendBugReportShouldFail = false;
     currentThemeMode = 'system';
     currentLanguage = 'system';

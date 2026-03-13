@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:whitenoise/hooks/use_app_version.dart';
 import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
+import 'package:whitenoise/providers/app_version_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
@@ -27,7 +27,7 @@ class SettingsScreen extends HookConsumerWidget {
     final typography = context.typographyScaled;
     final pubkey = ref.watch(authProvider).value;
     final metadataSnapshot = useUserMetadata(context, pubkey);
-    final versionSnapshot = useAppVersion();
+    final appVersion = ref.watch(appVersionProvider);
 
     if (pubkey == null) {
       return const SizedBox.shrink();
@@ -169,12 +169,12 @@ class SettingsScreen extends HookConsumerWidget {
                     ),
                   ],
                 ),
-                if (versionSnapshot.hasData)
+                if (appVersion.value != null)
                   SizedBox(
                     width: double.infinity,
                     child: Text(
                       key: const Key('app_version_text'),
-                      'v${versionSnapshot.data}',
+                      'v${appVersion.value}',
                       textAlign: TextAlign.center,
                       style: typography.medium12.copyWith(
                         color: colors.backgroundContentSecondary,

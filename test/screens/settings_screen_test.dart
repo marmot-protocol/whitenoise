@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:whitenoise/providers/app_version_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/appearance_screen.dart';
@@ -61,6 +62,7 @@ class _MockAuthNotifier extends AuthNotifier {
 
 void main() {
   late _MockApi mockApi;
+  const appVersion = '1.2.3+45';
 
   setUpAll(() {
     mockApi = _MockApi();
@@ -69,7 +71,7 @@ void main() {
       appName: 'Whitenoise',
       packageName: 'com.example.whitenoise',
       version: '1.2.3',
-      buildNumber: '42',
+      buildNumber: '45',
       buildSignature: '',
     );
   });
@@ -88,6 +90,7 @@ void main() {
       overrides: [
         authProvider.overrideWith(() => mockAuth),
         secureStorageProvider.overrideWithValue(MockSecureStorage()),
+        appVersionProvider.overrideWith((ref) async => appVersion),
       ],
     );
     Routes.pushToSettings(tester.element(find.byType(Scaffold)));
@@ -234,10 +237,8 @@ void main() {
 
     testWidgets('displays app version at the bottom', (tester) async {
       await pumpSettingsScreen(tester);
-      await tester.pump();
 
-      expect(find.byKey(const Key('app_version_text')), findsOneWidget);
-      expect(find.text('v1.2.3'), findsOneWidget);
+      expect(find.text('v1.2.3+45'), findsOneWidget);
     });
   });
 }
