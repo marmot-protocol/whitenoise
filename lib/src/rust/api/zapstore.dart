@@ -10,10 +10,6 @@ import 'error.dart';
 
 /// Fetches the latest version string published on Zapstore for White Noise.
 ///
-/// Queries the Zapstore relay for the kind-32267 software application event,
-/// then extracts the version from the `a` tag pointing at the latest kind-30063
-/// release artifact set (format: `30063:<pubkey>:<identifier>@<version>`).
-///
 /// Returns `None` when no release has been published yet or the relay is unreachable.
 Future<String?> fetchLatestZapstoreVersion() =>
     RustLib.instance.api.crateApiZapstoreFetchLatestZapstoreVersion();
