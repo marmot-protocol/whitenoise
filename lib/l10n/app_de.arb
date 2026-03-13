@@ -355,5 +355,22 @@
   "invalidRelayUrlScheme": "Die URL muss mit wss:// oder ws:// beginnen",
   "invalidRelayUrl": "Ungültige Relay-URL",
   "thisMessageWasDeleted": "Diese Nachricht wurde gelöscht.",
-  "relayControlStateLoadError": "Laden des Relay-Status fehlgeschlagen. Bitte erneut versuchen."
+  "relayControlStateLoadError": "Laden des Relay-Status fehlgeschlagen. Bitte erneut versuchen.",
+  "updateAvailableTitle": "Update verfügbar",
+  "@updateAvailableTitle": {
+    "description": "Title of the update-available banner shown when a newer version is on Zapstore"
+  },
+  "updateAvailableDescription": "Version {version} ist auf Zapstore verfügbar.",
+  "@updateAvailableDescription": {
+    "description": "Body of the update-available banner",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateNow": "Jetzt aktualisieren",
+  "@updateNow": {
+    "description": "Button label that opens the Zapstore listing for the app update"
+  }
 }

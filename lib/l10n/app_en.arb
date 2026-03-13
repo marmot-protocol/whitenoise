@@ -1568,5 +1568,22 @@
   "relayControlStateLoadError": "Failed to load relay control state. Please try again.",
   "@relayControlStateLoadError": {
     "description": "User-friendly error when relay control state fails to load"
+  },
+  "updateAvailableTitle": "Update available",
+  "@updateAvailableTitle": {
+    "description": "Title of the update-available banner shown when a newer version is on Zapstore"
+  },
+  "updateAvailableDescription": "Version {version} is available on Zapstore.",
+  "@updateAvailableDescription": {
+    "description": "Body of the update-available banner",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateNow": "Update now",
+  "@updateNow": {
+    "description": "Button label that opens the Zapstore listing for the app update"
   }
 }

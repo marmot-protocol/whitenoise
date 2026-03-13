@@ -1214,4 +1214,15 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get relayControlStateLoadError =>
       'Röle kontrol durumu yüklenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get updateAvailableTitle => 'Güncelleme mevcut';
+
+  @override
+  String updateAvailableDescription(String version) {
+    return '$version sürümü Zapstore\'da mevcut.';
+  }
+
+  @override
+  String get updateNow => 'Şimdi güncelle';
 }

@@ -1229,4 +1229,15 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get relayControlStateLoadError =>
       'Échec du chargement de l\'état de contrôle du relais. Veuillez réessayer.';
+
+  @override
+  String get updateAvailableTitle => 'Mise à jour disponible';
+
+  @override
+  String updateAvailableDescription(String version) {
+    return 'La version $version est disponible sur Zapstore.';
+  }
+
+  @override
+  String get updateNow => 'Mettre à jour';
 }

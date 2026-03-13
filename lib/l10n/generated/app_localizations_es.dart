@@ -1230,4 +1230,15 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get relayControlStateLoadError =>
       'Error al cargar el estado de relés. Por favor, inténtalo de nuevo.';
+
+  @override
+  String get updateAvailableTitle => 'Actualización disponible';
+
+  @override
+  String updateAvailableDescription(String version) {
+    return 'La versión $version está disponible en Zapstore.';
+  }
+
+  @override
+  String get updateNow => 'Actualizar ahora';
 }

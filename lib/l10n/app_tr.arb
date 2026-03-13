@@ -355,5 +355,22 @@
   "invalidRelayUrlScheme": "URL wss:// veya ws:// ile başlamalıdır",
   "invalidRelayUrl": "Geçersiz röle URL'si",
   "thisMessageWasDeleted": "Bu mesaj silindi.",
-  "relayControlStateLoadError": "Röle kontrol durumu yüklenemedi. Lütfen tekrar deneyin."
+  "relayControlStateLoadError": "Röle kontrol durumu yüklenemedi. Lütfen tekrar deneyin.",
+  "updateAvailableTitle": "Güncelleme mevcut",
+  "@updateAvailableTitle": {
+    "description": "Title of the update-available banner shown when a newer version is on Zapstore"
+  },
+  "updateAvailableDescription": "{version} sürümü Zapstore'da mevcut.",
+  "@updateAvailableDescription": {
+    "description": "Body of the update-available banner",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateNow": "Şimdi güncelle",
+  "@updateNow": {
+    "description": "Button label that opens the Zapstore listing for the app update"
+  }
 }

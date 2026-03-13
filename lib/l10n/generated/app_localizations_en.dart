@@ -1213,4 +1213,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get relayControlStateLoadError => 'Failed to load relay control state. Please try again.';
+
+  @override
+  String get updateAvailableTitle => 'Update available';
+
+  @override
+  String updateAvailableDescription(String version) {
+    return 'Version $version is available on Zapstore.';
+  }
+
+  @override
+  String get updateNow => 'Update now';
 }

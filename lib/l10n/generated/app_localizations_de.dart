@@ -1245,4 +1245,15 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get relayControlStateLoadError =>
       'Laden des Relay-Status fehlgeschlagen. Bitte erneut versuchen.';
+
+  @override
+  String get updateAvailableTitle => 'Update verfügbar';
+
+  @override
+  String updateAvailableDescription(String version) {
+    return 'Version $version ist auf Zapstore verfügbar.';
+  }
+
+  @override
+  String get updateNow => 'Jetzt aktualisieren';
 }

@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/screens/chat_invite_screen.dart';
 import 'package:whitenoise/screens/chat_screen.dart';
@@ -20,6 +21,16 @@ import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
+
+void _setInstalledVersion(String version) {
+  PackageInfo.setMockInitialValues(
+    appName: 'Whitenoise',
+    packageName: 'org.parres.whitenoise',
+    version: version,
+    buildNumber: '1',
+    buildSignature: '',
+  );
+}
 
 ChatSummary _chatSummary({
   required String id,
@@ -104,7 +115,10 @@ final _api = _MockApi();
 
 void main() {
   setUpAll(() => RustLib.initMock(api: _api));
-  setUp(() => _api.reset());
+  setUp(() {
+    _api.reset();
+    _setInstalledVersion('2026.3.5');
+  });
 
   Future<void> pumpChatListScreen(WidgetTester tester) async {
     await mountTestApp(
@@ -334,6 +348,85 @@ void main() {
 
           expect(find.byType(WnSystemNotice), findsOneWidget);
         }
+      });
+    });
+
+    group('update notice', () {
+      testWidgets('shows update notice when a newer version is available', (tester) async {
+        _api.zapstoreVersion = '2026.4.0';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.text('Update available'), findsOneWidget);
+        expect(find.byKey(const Key('update_now_button')), findsOneWidget);
+      });
+
+      testWidgets('shows version in update notice description', (tester) async {
+        _api.zapstoreVersion = '2026.4.0';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.textContaining('2026.4.0'), findsOneWidget);
+      });
+
+      testWidgets('does not show update notice when version matches', (tester) async {
+        _api.zapstoreVersion = '2026.3.5';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.text('Update available'), findsNothing);
+        expect(find.byKey(const Key('update_now_button')), findsNothing);
+      });
+
+      testWidgets('does not show update notice when Zapstore has no release', (tester) async {
+        _api.zapstoreVersion = null;
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.text('Update available'), findsNothing);
+      });
+
+      testWidgets('dismissing update notice hides it', (tester) async {
+        _api.zapstoreVersion = '2026.4.0';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.text('Update available'), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Update available'), findsNothing);
+      });
+
+      testWidgets('update notice takes priority over welcome notice', (tester) async {
+        // No chats → welcome notice would normally show.
+        // Newer version available → update notice should show instead.
+        _api.zapstoreVersion = '2026.4.0';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.text('Update available'), findsOneWidget);
+        expect(find.text('Your profile is ready'), findsNothing);
+      });
+
+      testWidgets('welcome notice shown after update notice is dismissed', (tester) async {
+        // No chats, so welcome notice is also pending.
+        _api.zapstoreVersion = '2026.4.0';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Your profile is ready'), findsOneWidget);
       });
     });
 

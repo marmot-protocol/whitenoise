@@ -2225,6 +2225,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to load relay control state. Please try again.'**
   String get relayControlStateLoadError;
+
+  /// Title of the update-available banner shown when a newer version is on Zapstore
+  ///
+  /// In en, this message translates to:
+  /// **'Update available'**
+  String get updateAvailableTitle;
+
+  /// Body of the update-available banner
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} is available on Zapstore.'**
+  String updateAvailableDescription(String version);
+
+  /// Button label that opens the Zapstore listing for the app update
+  ///
+  /// In en, this message translates to:
+  /// **'Update now'**
+  String get updateNow;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

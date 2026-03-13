@@ -1244,4 +1244,15 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get relayControlStateLoadError =>
       'Не удалось загрузить состояние управления реле. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get updateAvailableTitle => 'Доступно обновление';
+
+  @override
+  String updateAvailableDescription(String version) {
+    return 'Версия $version доступна в Zapstore.';
+  }
+
+  @override
+  String get updateNow => 'Обновить сейчас';
 }

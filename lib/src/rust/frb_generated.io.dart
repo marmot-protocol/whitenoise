@@ -26,6 +26,7 @@ import 'api/signer.dart';
 import 'api/user_search.dart';
 import 'api/users.dart';
 import 'api/utils.dart';
+import 'api/zapstore.dart';
 import 'frb_generated.dart';
 import 'lib.dart';
 

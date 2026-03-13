@@ -609,6 +609,15 @@ class MockWnApi implements RustLibApi {
     shouldFailDeleteDraft = false;
   }
 
+  String? zapstoreVersion;
+  bool zapstoreShouldThrow = false;
+
+  @override
+  Future<String?> crateApiZapstoreFetchLatestZapstoreVersion() async {
+    if (zapstoreShouldThrow) throw Exception('network error');
+    return zapstoreVersion;
+  }
+
   @override
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }

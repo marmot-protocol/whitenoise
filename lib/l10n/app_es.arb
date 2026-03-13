@@ -355,5 +355,22 @@
   "invalidRelayUrlScheme": "La URL debe comenzar con wss:// o ws://",
   "invalidRelayUrl": "URL de relé inválida",
   "thisMessageWasDeleted": "Este mensaje fue eliminado.",
-  "relayControlStateLoadError": "Error al cargar el estado de relés. Por favor, inténtalo de nuevo."
+  "relayControlStateLoadError": "Error al cargar el estado de relés. Por favor, inténtalo de nuevo.",
+  "updateAvailableTitle": "Actualización disponible",
+  "@updateAvailableTitle": {
+    "description": "Title of the update-available banner shown when a newer version is on Zapstore"
+  },
+  "updateAvailableDescription": "La versión {version} está disponible en Zapstore.",
+  "@updateAvailableDescription": {
+    "description": "Body of the update-available banner",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateNow": "Actualizar ahora",
+  "@updateNow": {
+    "description": "Button label that opens the Zapstore listing for the app update"
+  }
 }

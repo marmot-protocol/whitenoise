@@ -355,5 +355,22 @@
   "invalidRelayUrlScheme": "URL должен начинаться с wss:// или ws://",
   "invalidRelayUrl": "Неверный URL реле",
   "thisMessageWasDeleted": "Это сообщение было удалено.",
-  "relayControlStateLoadError": "Не удалось загрузить состояние управления реле. Пожалуйста, попробуйте снова."
+  "relayControlStateLoadError": "Не удалось загрузить состояние управления реле. Пожалуйста, попробуйте снова.",
+  "updateAvailableTitle": "Доступно обновление",
+  "@updateAvailableTitle": {
+    "description": "Title of the update-available banner shown when a newer version is on Zapstore"
+  },
+  "updateAvailableDescription": "Версия {version} доступна в Zapstore.",
+  "@updateAvailableDescription": {
+    "description": "Body of the update-available banner",
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "updateNow": "Обновить сейчас",
+  "@updateNow": {
+    "description": "Button label that opens the Zapstore listing for the app update"
+  }
 }
