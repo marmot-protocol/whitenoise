@@ -144,6 +144,8 @@ class WnDropdownSelector<T> extends HookWidget {
     void toggleDropdown() {
       if (isDisabled) return;
 
+      FocusManager.instance.primaryFocus?.unfocus();
+
       if (controller != null) {
         if (controller.isOpen(effectiveKey)) {
           controller.close();
