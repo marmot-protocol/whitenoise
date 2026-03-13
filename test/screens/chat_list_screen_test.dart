@@ -1,9 +1,10 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
+import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData, ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/simulated_zapstore_version_provider.dart';
 import 'package:whitenoise/screens/chat_invite_screen.dart';
 import 'package:whitenoise/screens/chat_screen.dart';
 import 'package:whitenoise/screens/settings_screen.dart';
@@ -427,6 +428,30 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Your profile is ready'), findsOneWidget);
+      });
+
+      testWidgets('re-enabling simulation after dismiss shows banner again', (tester) async {
+        _api.zapstoreVersion = '2026.4.0';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        // Banner is visible — dismiss it.
+        expect(find.text('Update available'), findsOneWidget);
+        await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
+        await tester.pumpAndSettle();
+        expect(find.text('Update available'), findsNothing);
+
+        // Toggle the simulated version off then back on via the provider.
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(MaterialApp)),
+        );
+        container.read(simulatedZapstoreVersionProvider.notifier).setVersion(null);
+        await tester.pump();
+        container.read(simulatedZapstoreVersionProvider.notifier).setVersion('9999.12.31');
+        await tester.pump();
+
+        expect(find.text('Update available'), findsOneWidget);
       });
     });
 

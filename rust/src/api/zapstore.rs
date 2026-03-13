@@ -38,13 +38,17 @@ pub async fn fetch_latest_zapstore_version() -> Result<Option<String>, ApiError>
     client
         .add_relay(ZAPSTORE_RELAY)
         .await
-        .map_err(|e| ApiError::Other { message: e.to_string() })?;
+        .map_err(|e| ApiError::Other {
+            message: e.to_string(),
+        })?;
     client.connect().await;
 
     let events = client
         .fetch_events(filter, Duration::from_secs(FETCH_TIMEOUT_SECS))
         .await
-        .map_err(|e| ApiError::Other { message: e.to_string() })?;
+        .map_err(|e| ApiError::Other {
+            message: e.to_string(),
+        })?;
 
     client.disconnect().await;
 
@@ -55,22 +59,19 @@ pub async fn fetch_latest_zapstore_version() -> Result<Option<String>, ApiError>
     };
 
     // The `d` tag value is "<identifier>@<version>", e.g. "org.parres.whitenoise@2026.3.5".
-    let version = event
-        .tags
-        .iter()
-        .find_map(|tag| {
-            let vec = tag.as_slice();
-            if vec.first().map(|s| s.as_str()) == Some("d") {
-                vec.get(1).and_then(|d_val| {
-                    d_val
-                        .split_once('@')
-                        .filter(|(identifier, _)| *identifier == ZAPSTORE_APP_IDENTIFIER)
-                        .map(|(_, version)| version.to_string())
-                })
-            } else {
-                None
-            }
-        });
+    let version = event.tags.iter().find_map(|tag| {
+        let vec = tag.as_slice();
+        if vec.first().map(|s| s.as_str()) == Some("d") {
+            vec.get(1).and_then(|d_val| {
+                d_val
+                    .split_once('@')
+                    .filter(|(identifier, _)| *identifier == ZAPSTORE_APP_IDENTIFIER)
+                    .map(|(_, version)| version.to_string())
+            })
+        } else {
+            None
+        }
+    });
 
     Ok(version)
 }
