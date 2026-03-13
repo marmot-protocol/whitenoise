@@ -52,6 +52,10 @@ ChatMessagesResult useChatMessages(
   final totalMessageCount = useState(0);
 
   useEffect(() {
+    messageIds.value = [];
+    messagesById.value = {};
+    indexById.value = {};
+    isLoadingOlderMessages.value = false;
     hasMoreMessages.value = true;
     totalMessageCount.value = 0;
     return null;
