@@ -3,6 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData, ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/simulated_zapstore_version_provider.dart';
 import 'package:whitenoise/screens/chat_invite_screen.dart';
@@ -22,6 +25,20 @@ import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
+
+class _MockUrlLauncher extends UrlLauncherPlatform with MockPlatformInterfaceMixin {
+  final List<({String url, LaunchOptions options})> calls = [];
+  bool returnValue = true;
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    calls.add((url: url, options: options));
+    return returnValue;
+  }
+}
 
 void _setInstalledVersion(String version) {
   PackageInfo.setMockInitialValues(
@@ -52,6 +69,7 @@ class _MockApi extends MockWnApi {
 
   @override
   void reset() {
+    super.reset();
     controller?.close();
     controller = null;
     initialChats = [];
@@ -452,6 +470,63 @@ void main() {
         await tester.pump();
 
         expect(find.text('Update available'), findsOneWidget);
+      });
+
+      testWidgets('tapping Update now launches Zapstore URL with externalApplication mode', (
+        tester,
+      ) async {
+        final mockLauncher = _MockUrlLauncher();
+        UrlLauncherPlatform.instance = mockLauncher;
+
+        _api.zapstoreVersion = '2026.4.0';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.byKey(const Key('update_now_button')), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('update_now_button')));
+        await tester.pump();
+
+        expect(mockLauncher.calls, hasLength(1));
+        expect(
+          mockLauncher.calls.first.url,
+          equals('https://zapstore.dev/apps/org.parres.whitenoise'),
+        );
+        expect(
+          mockLauncher.calls.first.options.mode,
+          equals(PreferredLaunchMode.externalApplication),
+        );
+      });
+
+      testWidgets('tapping Update now falls back to default mode when externalApplication fails', (
+        tester,
+      ) async {
+        final mockLauncher = _MockUrlLauncher()..returnValue = false;
+        UrlLauncherPlatform.instance = mockLauncher;
+
+        _api.zapstoreVersion = '2026.4.0';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.byKey(const Key('update_now_button')), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('update_now_button')));
+        await tester.pump();
+
+        // Two calls: first externalApplication (fails), then fallback with default mode.
+        expect(mockLauncher.calls, hasLength(2));
+        expect(
+          mockLauncher.calls[0].url,
+          equals('https://zapstore.dev/apps/org.parres.whitenoise'),
+        );
+        expect(mockLauncher.calls[0].options.mode, equals(PreferredLaunchMode.externalApplication));
+        expect(
+          mockLauncher.calls[1].url,
+          equals('https://zapstore.dev/apps/org.parres.whitenoise'),
+        );
+        expect(mockLauncher.calls[1].options.mode, equals(PreferredLaunchMode.platformDefault));
       });
     });
 

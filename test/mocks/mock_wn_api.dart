@@ -607,6 +607,8 @@ class MockWnApi implements RustLibApi {
     shouldFailSaveDraft = false;
     deleteDraftCallCount = 0;
     shouldFailDeleteDraft = false;
+    zapstoreVersion = null;
+    zapstoreShouldThrow = false;
   }
 
   String? zapstoreVersion;

@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -53,27 +51,19 @@ void main() {
 
   group('useZapstoreUpdate', () {
     group('when no version is available yet (loading)', () {
-      setUp(() {
-        final completer = Completer<String?>();
-        _api.zapstoreVersion = null;
-        // Simulate slow network by not completing — hook is in loading state.
-        // We don't set zapstoreVersion; the future won't resolve before pump.
-        _setInstalledVersion('2026.3.5');
-        // Replace with a pending completer via a subclass trick isn't needed:
-        // useMemoized runs synchronously but the future resolves async.
-        // availableVersion stays null until the future completes.
-        completer.toString(); // suppress unused warning
-      });
+      testWidgets(
+        'availableVersion is null before future resolves',
+        (tester) async {
+          _setInstalledVersion('2026.3.5');
+          _api.zapstoreVersion = null;
 
-      testWidgets('availableVersion is null before future resolves', (tester) async {
-        _setInstalledVersion('2026.3.5');
-        _api.zapstoreVersion = null;
-
-        await _mountHook(tester);
-        // Do not pump — future hasn't resolved yet.
-        expect(getResult().availableVersion, isNull);
-        expect(getResult().isDismissed, isFalse);
-      });
+          await _mountHook(tester);
+          // Do not pump — future hasn't resolved yet.
+          expect(getResult().availableVersion, isNull);
+          expect(getResult().isDismissed, isFalse);
+        },
+        variant: TargetPlatformVariant.only(TargetPlatform.android),
+      );
     });
 
     group('when Zapstore has a newer version', () {
@@ -82,29 +72,41 @@ void main() {
         _setInstalledVersion('2026.3.5');
       });
 
-      testWidgets('returns the newer version', (tester) async {
-        await _mountHook(tester);
-        await tester.pump();
+      testWidgets(
+        'returns the newer version',
+        (tester) async {
+          await _mountHook(tester);
+          await tester.pump();
 
-        expect(getResult().availableVersion, equals('2026.4.1'));
-      });
+          expect(getResult().availableVersion, equals('2026.4.1'));
+        },
+        variant: TargetPlatformVariant.only(TargetPlatform.android),
+      );
 
-      testWidgets('isDismissed starts false', (tester) async {
-        await _mountHook(tester);
-        await tester.pump();
+      testWidgets(
+        'isDismissed starts false',
+        (tester) async {
+          await _mountHook(tester);
+          await tester.pump();
 
-        expect(getResult().isDismissed, isFalse);
-      });
+          expect(getResult().isDismissed, isFalse);
+        },
+        variant: TargetPlatformVariant.only(TargetPlatform.android),
+      );
 
-      testWidgets('dismiss sets isDismissed to true', (tester) async {
-        await _mountHook(tester);
-        await tester.pump();
+      testWidgets(
+        'dismiss sets isDismissed to true',
+        (tester) async {
+          await _mountHook(tester);
+          await tester.pump();
 
-        getResult().dismiss();
-        await tester.pump();
+          getResult().dismiss();
+          await tester.pump();
 
-        expect(getResult().isDismissed, isTrue);
-      });
+          expect(getResult().isDismissed, isTrue);
+        },
+        variant: TargetPlatformVariant.only(TargetPlatform.android),
+      );
     });
 
     group('when installed version matches Zapstore', () {
@@ -113,12 +115,16 @@ void main() {
         _setInstalledVersion('2026.3.5');
       });
 
-      testWidgets('returns null (no update)', (tester) async {
-        await _mountHook(tester);
-        await tester.pump();
+      testWidgets(
+        'returns null (no update)',
+        (tester) async {
+          await _mountHook(tester);
+          await tester.pump();
 
-        expect(getResult().availableVersion, isNull);
-      });
+          expect(getResult().availableVersion, isNull);
+        },
+        variant: TargetPlatformVariant.only(TargetPlatform.android),
+      );
     });
 
     group('when installed version is newer than Zapstore', () {
@@ -127,12 +133,16 @@ void main() {
         _setInstalledVersion('2026.3.5');
       });
 
-      testWidgets('returns null (no update)', (tester) async {
-        await _mountHook(tester);
-        await tester.pump();
+      testWidgets(
+        'returns null (no update)',
+        (tester) async {
+          await _mountHook(tester);
+          await tester.pump();
 
-        expect(getResult().availableVersion, isNull);
-      });
+          expect(getResult().availableVersion, isNull);
+        },
+        variant: TargetPlatformVariant.only(TargetPlatform.android),
+      );
     });
 
     group('when Zapstore returns null (no release published)', () {
@@ -141,12 +151,16 @@ void main() {
         _setInstalledVersion('2026.3.5');
       });
 
-      testWidgets('returns null', (tester) async {
-        await _mountHook(tester);
-        await tester.pump();
+      testWidgets(
+        'returns null',
+        (tester) async {
+          await _mountHook(tester);
+          await tester.pump();
 
-        expect(getResult().availableVersion, isNull);
-      });
+          expect(getResult().availableVersion, isNull);
+        },
+        variant: TargetPlatformVariant.only(TargetPlatform.android),
+      );
     });
 
     group('when fetch throws', () {
@@ -155,44 +169,60 @@ void main() {
         _setInstalledVersion('2026.3.5');
       });
 
-      testWidgets('availableVersion is null on error', (tester) async {
-        await _mountHook(tester);
-        await tester.pump();
+      testWidgets(
+        'availableVersion is null on error',
+        (tester) async {
+          await _mountHook(tester);
+          await tester.pump();
 
-        expect(getResult().availableVersion, isNull);
-      });
+          expect(getResult().availableVersion, isNull);
+        },
+        variant: TargetPlatformVariant.only(TargetPlatform.android),
+      );
     });
 
     group('version comparison edge cases', () {
-      testWidgets('major segment bump is newer', (tester) async {
-        _api.zapstoreVersion = '2027.1.0';
-        _setInstalledVersion('2026.12.31');
+      testWidgets(
+        'major segment bump is newer',
+        (tester) async {
+          _api.zapstoreVersion = '2027.1.0';
+          _setInstalledVersion('2026.12.31');
 
-        await _mountHook(tester);
-        await tester.pump();
+          await _mountHook(tester);
+          await tester.pump();
 
-        expect(getResult().availableVersion, equals('2027.1.0'));
-      });
+          expect(getResult().availableVersion, equals('2027.1.0'));
+        },
+        variant: TargetPlatformVariant.only(TargetPlatform.android),
+      );
 
-      testWidgets('patch segment bump is newer', (tester) async {
-        _api.zapstoreVersion = '2026.3.6';
-        _setInstalledVersion('2026.3.5');
+      testWidgets(
+        'patch segment bump is newer',
+        (tester) async {
+          _api.zapstoreVersion = '2026.3.6';
+          _setInstalledVersion('2026.3.5');
 
-        await _mountHook(tester);
-        await tester.pump();
+          await _mountHook(tester);
+          await tester.pump();
 
-        expect(getResult().availableVersion, equals('2026.3.6'));
-      });
+          expect(getResult().availableVersion, equals('2026.3.6'));
+        },
+        variant: TargetPlatformVariant.only(TargetPlatform.android),
+      );
 
-      testWidgets('minor segment bump is newer', (tester) async {
-        _api.zapstoreVersion = '2026.4.0';
-        _setInstalledVersion('2026.3.5');
+      testWidgets(
+        'minor segment bump is newer',
+        (tester) async {
+          _api.zapstoreVersion = '2026.4.0';
+          _setInstalledVersion('2026.3.5');
 
-        await _mountHook(tester);
-        await tester.pump();
+          await _mountHook(tester);
+          await tester.pump();
 
-        expect(getResult().availableVersion, equals('2026.4.0'));
-      });
+          expect(getResult().availableVersion, equals('2026.4.0'));
+        },
+        variant: TargetPlatformVariant.only(TargetPlatform.android),
+      );
     });
   });
 }
