@@ -133,7 +133,7 @@ class _MockApi extends MockWnApi {
 
   List<ChatMessage> olderMessagesResponse = [];
   bool fetchOlderFails = false;
-  ({String? pubkey, String? groupId, DateTime? before, String? beforeMessageId})?
+  ({String? pubkey, String? groupId, DateTime? before, String? beforeMessageId, int? limit})?
   lastFetchOlderCall;
 
   @override
@@ -149,6 +149,7 @@ class _MockApi extends MockWnApi {
       groupId: groupId,
       before: before,
       beforeMessageId: beforeMessageId,
+      limit: limit,
     );
     if (fetchOlderFails) throw Exception('fetch failed');
     return olderMessagesResponse;
