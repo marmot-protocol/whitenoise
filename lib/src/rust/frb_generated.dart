@@ -84,7 +84,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.11.1';
 
   @override
-  int get rustContentHash => 1214266279;
+  int get rustContentHash => 696957558;
 
   static const kDefaultExternalLibraryLoaderConfig = ExternalLibraryLoaderConfig(
     stem: 'rust_lib_whitenoise',
@@ -165,7 +165,7 @@ abstract class RustLibApi extends BaseApi {
     required String logsDir,
   });
 
-  Future<String> crateApiUtilsDebugQuery({required String sql});
+  Future<String> crateApiRelaysDebugRelayControlState();
 
   Future<AccountGroup> crateApiAccountGroupsDeclineAccountGroup({
     required String accountPubkey,
@@ -196,6 +196,11 @@ abstract class RustLibApi extends BaseApi {
 
   Future<void> crateApiRelaysEnsureAllSubscriptions();
 
+  String crateApiUtilsEventIdToNeventUri({
+    required String eventIdHex,
+    required String pubkeyHex,
+  });
+
   Future<String> crateApiAccountsExportAccountNsec({required String pubkey});
 
   Future<List<ChatMessage>> crateApiMessagesFetchAggregatedMessagesForGroup({
@@ -222,10 +227,6 @@ abstract class RustLibApi extends BaseApi {
   Future<AccountGroup> crateApiAccountGroupsGetAccountGroup({
     required String accountPubkey,
     required String mlsGroupId,
-  });
-
-  Future<List<(String, String)>> crateApiRelaysGetAccountRelayStatuses({
-    required String pubkey,
   });
 
   Future<List<Account>> crateApiAccountsGetAccounts();
@@ -1190,12 +1191,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
-  Future<String> crateApiUtilsDebugQuery({required String sql}) {
+  Future<String> crateApiRelaysDebugRelayControlState() {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
           final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(sql, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -1207,16 +1207,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeSuccessData: sse_decode_String,
           decodeErrorData: sse_decode_api_error,
         ),
-        constMeta: kCrateApiUtilsDebugQueryConstMeta,
-        argValues: [sql],
+        constMeta: kCrateApiRelaysDebugRelayControlStateConstMeta,
+        argValues: [],
         apiImpl: this,
       ),
     );
   }
 
-  TaskConstMeta get kCrateApiUtilsDebugQueryConstMeta => const TaskConstMeta(
-    debugName: 'debug_query',
-    argNames: ['sql'],
+  TaskConstMeta get kCrateApiRelaysDebugRelayControlStateConstMeta => const TaskConstMeta(
+    debugName: 'debug_relay_control_state',
+    argNames: [],
   );
 
   @override
@@ -1448,6 +1448,35 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
+  String crateApiUtilsEventIdToNeventUri({
+    required String eventIdHex,
+    required String pubkeyHex,
+  }) {
+    return handler.executeSync(
+      SyncTask(
+        callFfi: () {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          sse_encode_String(eventIdHex, serializer);
+          sse_encode_String(pubkeyHex, serializer);
+          return pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 25)!;
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_String,
+          decodeErrorData: sse_decode_api_error,
+        ),
+        constMeta: kCrateApiUtilsEventIdToNeventUriConstMeta,
+        argValues: [eventIdHex, pubkeyHex],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiUtilsEventIdToNeventUriConstMeta => const TaskConstMeta(
+    debugName: 'event_id_to_nevent_uri',
+    argNames: ['eventIdHex', 'pubkeyHex'],
+  );
+
+  @override
   Future<String> crateApiAccountsExportAccountNsec({required String pubkey}) {
     return handler.executeNormal(
       NormalTask(
@@ -1457,7 +1486,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 25,
+            funcId: 26,
             port: port_,
           );
         },
@@ -1497,7 +1526,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 26,
+            funcId: 27,
             port: port_,
           );
         },
@@ -1534,7 +1563,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 27,
+            funcId: 28,
             port: port_,
           );
         },
@@ -1568,7 +1597,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 28,
+            funcId: 29,
             port: port_,
           );
         },
@@ -1598,7 +1627,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 29,
+            funcId: 30,
             port: port_,
           );
         },
@@ -1632,7 +1661,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 30,
+            funcId: 31,
             port: port_,
           );
         },
@@ -1650,38 +1679,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TaskConstMeta get kCrateApiAccountGroupsGetAccountGroupConstMeta => const TaskConstMeta(
     debugName: 'get_account_group',
     argNames: ['accountPubkey', 'mlsGroupId'],
-  );
-
-  @override
-  Future<List<(String, String)>> crateApiRelaysGetAccountRelayStatuses({
-    required String pubkey,
-  }) {
-    return handler.executeNormal(
-      NormalTask(
-        callFfi: (port_) {
-          final serializer = SseSerializer(generalizedFrbRustBinding);
-          sse_encode_String(pubkey, serializer);
-          pdeCallFfi(
-            generalizedFrbRustBinding,
-            serializer,
-            funcId: 31,
-            port: port_,
-          );
-        },
-        codec: SseCodec(
-          decodeSuccessData: sse_decode_list_record_string_string,
-          decodeErrorData: sse_decode_api_error,
-        ),
-        constMeta: kCrateApiRelaysGetAccountRelayStatusesConstMeta,
-        argValues: [pubkey],
-        apiImpl: this,
-      ),
-    );
-  }
-
-  TaskConstMeta get kCrateApiRelaysGetAccountRelayStatusesConstMeta => const TaskConstMeta(
-    debugName: 'get_account_relay_statuses',
-    argNames: ['pubkey'],
   );
 
   @override
@@ -4739,6 +4736,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           message: dco_decode_String(raw[1]),
         );
       case 12:
+        return ApiError_LoginKeyringUnavailable(
+          message: dco_decode_String(raw[1]),
+        );
+      case 13:
         return ApiError_Other(
           message: dco_decode_String(raw[1]),
         );
@@ -4932,7 +4933,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ChatSummary dco_decode_chat_summary(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 12) throw Exception('unexpected arr length: expect 12 but see ${arr.length}');
+    if (arr.length != 13) throw Exception('unexpected arr length: expect 13 but see ${arr.length}');
     return ChatSummary(
       mlsGroupId: dco_decode_String(arr[0]),
       name: dco_decode_opt_String(arr[1]),
@@ -4943,9 +4944,10 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       lastMessage: dco_decode_opt_box_autoadd_chat_message_summary(arr[6]),
       pendingConfirmation: dco_decode_bool(arr[7]),
       welcomerPubkey: dco_decode_opt_String(arr[8]),
-      unreadCount: dco_decode_u_64(arr[9]),
-      pinOrder: dco_decode_opt_box_autoadd_i_64(arr[10]),
-      dmPeerPubkey: dco_decode_opt_String(arr[11]),
+      archivedAt: dco_decode_opt_box_autoadd_Chrono_Utc(arr[9]),
+      unreadCount: dco_decode_u_64(arr[10]),
+      pinOrder: dco_decode_opt_box_autoadd_i_64(arr[11]),
+      dmPeerPubkey: dco_decode_opt_String(arr[12]),
     );
   }
 
@@ -6175,6 +6177,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         return ApiError_LoginInternal(message: var_message);
       case 12:
         final var_message = sse_decode_String(deserializer);
+        return ApiError_LoginKeyringUnavailable(message: var_message);
+      case 13:
+        final var_message = sse_decode_String(deserializer);
         return ApiError_Other(message: var_message);
       default:
         throw UnimplementedError('');
@@ -6417,6 +6422,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     );
     final var_pendingConfirmation = sse_decode_bool(deserializer);
     final var_welcomerPubkey = sse_decode_opt_String(deserializer);
+    final var_archivedAt = sse_decode_opt_box_autoadd_Chrono_Utc(deserializer);
     final var_unreadCount = sse_decode_u_64(deserializer);
     final var_pinOrder = sse_decode_opt_box_autoadd_i_64(deserializer);
     final var_dmPeerPubkey = sse_decode_opt_String(deserializer);
@@ -6430,6 +6436,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       lastMessage: var_lastMessage,
       pendingConfirmation: var_pendingConfirmation,
       welcomerPubkey: var_welcomerPubkey,
+      archivedAt: var_archivedAt,
       unreadCount: var_unreadCount,
       pinOrder: var_pinOrder,
       dmPeerPubkey: var_dmPeerPubkey,
@@ -8035,8 +8042,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case ApiError_LoginInternal(message: final message):
         sse_encode_i_32(11, serializer);
         sse_encode_String(message, serializer);
-      case ApiError_Other(message: final message):
+      case ApiError_LoginKeyringUnavailable(message: final message):
         sse_encode_i_32(12, serializer);
+        sse_encode_String(message, serializer);
+      case ApiError_Other(message: final message):
+        sse_encode_i_32(13, serializer);
         sse_encode_String(message, serializer);
     }
   }
@@ -8270,6 +8280,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     );
     sse_encode_bool(self.pendingConfirmation, serializer);
     sse_encode_opt_String(self.welcomerPubkey, serializer);
+    sse_encode_opt_box_autoadd_Chrono_Utc(self.archivedAt, serializer);
     sse_encode_u_64(self.unreadCount, serializer);
     sse_encode_opt_box_autoadd_i_64(self.pinOrder, serializer);
     sse_encode_opt_String(self.dmPeerPubkey, serializer);
