@@ -371,6 +371,9 @@ void main() {
     });
 
     group('update notice', () {
+      final _originalUrlLauncher = UrlLauncherPlatform.instance;
+      tearDown(() => UrlLauncherPlatform.instance = _originalUrlLauncher);
+
       testWidgets('shows update notice when a newer version is available', (tester) async {
         _api.zapstoreVersion = '2026.4.0';
 
