@@ -356,10 +356,8 @@
   "invalidRelayUrl": "URL de relais invalide",
   "thisMessageWasDeleted": "Ce message a été supprimé.",
   "relayControlStateLoadError": "Échec du chargement de l'état de contrôle du relais. Veuillez réessayer.",
-  "fatalErrorTitle": "Quelque chose s'est mal passé",
-  "fatalErrorMessage": "Une erreur inattendue s'est produite au démarrage. Veuillez réinstaller l'application ou contacter le support.",
-  "fatalErrorBindingsMismatchTitle": "L'application doit être reconstruite",
-  "fatalErrorBindingsMismatchMessage": "L'application a rencontré une erreur interne. Si vous êtes développeur, exécutez `just generate` et redémarrez.",
   "fatalErrorCopyError": "Copier l'erreur",
-  "fatalErrorErrorCopied": "Erreur copiée dans le presse-papiers"
+  "fatalErrorErrorCopied": "Erreur copiée dans le presse-papiers",
+  "fatalErrorTitle": "Oh non !",
+  "fatalErrorDescription": "Nous avons eu un problème lors du chargement de l'app. Ce n'est pas de votre faute, c'est la nôtre et nous nous excusons.\n\nAidez-nous à résoudre ce problème. Appuyez ci-dessous pour envoyer cette erreur à notre équipe."
 }

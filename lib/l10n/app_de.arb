@@ -356,10 +356,8 @@
   "invalidRelayUrl": "Ungültige Relay-URL",
   "thisMessageWasDeleted": "Diese Nachricht wurde gelöscht.",
   "relayControlStateLoadError": "Laden des Relay-Status fehlgeschlagen. Bitte erneut versuchen.",
-  "fatalErrorTitle": "Etwas ist schiefgelaufen",
-  "fatalErrorMessage": "Beim Start ist ein unerwarteter Fehler aufgetreten. Bitte installiere die App neu oder wende dich an den Support.",
-  "fatalErrorBindingsMismatchTitle": "App muss neu erstellt werden",
-  "fatalErrorBindingsMismatchMessage": "Die App hat einen internen Fehler festgestellt. Wenn du Entwickler bist, führe `just generate` aus und starte die App neu.",
   "fatalErrorCopyError": "Fehler kopieren",
-  "fatalErrorErrorCopied": "Fehler in die Zwischenablage kopiert"
+  "fatalErrorErrorCopied": "Fehler in die Zwischenablage kopiert",
+  "fatalErrorTitle": "Oh nein!",
+  "fatalErrorDescription": "Es gab ein Problem beim Laden der App. Du bist nicht schuld – wir entschuldigen uns.\n\nHilf uns, es zu beheben. Tippe unten, um diesen Fehler an unser Team zu senden."
 }

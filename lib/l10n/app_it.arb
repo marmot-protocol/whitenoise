@@ -356,10 +356,8 @@
   "invalidRelayUrl": "URL relay non valida",
   "thisMessageWasDeleted": "Questo messaggio è stato eliminato.",
   "relayControlStateLoadError": "Impossibile caricare lo stato di controllo del relay. Per favore, riprova.",
-  "fatalErrorTitle": "Qualcosa è andato storto",
-  "fatalErrorMessage": "Si è verificato un errore imprevisto durante l'avvio. Reinstalla l'app o contatta il supporto.",
-  "fatalErrorBindingsMismatchTitle": "L'app deve essere ricompilata",
-  "fatalErrorBindingsMismatchMessage": "L'app ha riscontrato un errore interno. Se sei uno sviluppatore, esegui `just generate` e riavvia.",
   "fatalErrorCopyError": "Copia errore",
-  "fatalErrorErrorCopied": "Errore copiato negli appunti"
+  "fatalErrorErrorCopied": "Errore copiato negli appunti",
+  "fatalErrorTitle": "Oh no!",
+  "fatalErrorDescription": "Abbiamo avuto un problema nel caricamento dell'app. Non sei tu, siamo noi e ci scusiamo.\n\nAiutaci a risolverlo. Tocca sotto per inviare questo errore al nostro team."
 }

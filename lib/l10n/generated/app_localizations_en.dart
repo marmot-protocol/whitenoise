@@ -1215,22 +1215,15 @@ class AppLocalizationsEn extends AppLocalizations {
   String get relayControlStateLoadError => 'Failed to load relay control state. Please try again.';
 
   @override
-  String get fatalErrorTitle => 'Something went wrong';
-
-  @override
-  String get fatalErrorMessage =>
-      'An unexpected error occurred during startup. Please reinstall the app or contact support.';
-
-  @override
-  String get fatalErrorBindingsMismatchTitle => 'App needs rebuilding';
-
-  @override
-  String get fatalErrorBindingsMismatchMessage =>
-      'The app encountered an internal error. If you\'re a developer, run `just generate` and restart.';
-
-  @override
   String get fatalErrorCopyError => 'Copy error';
 
   @override
   String get fatalErrorErrorCopied => 'Error copied to clipboard';
+
+  @override
+  String get fatalErrorTitle => 'Oh no!';
+
+  @override
+  String get fatalErrorDescription =>
+      'We hit a bump loading the app. It\'s not you, it\'s us and we\'re sorry.\n\nHelp us fix it. Tap below to send this error to our team.';
 }

@@ -1226,22 +1226,15 @@ class AppLocalizationsPt extends AppLocalizations {
       'Falha ao carregar o estado de controle do relay. Por favor, tente novamente.';
 
   @override
-  String get fatalErrorTitle => 'Algo deu errado';
-
-  @override
-  String get fatalErrorMessage =>
-      'Ocorreu um erro inesperado durante a inicialização. Por favor, reinstale o aplicativo ou entre em contato com o suporte.';
-
-  @override
-  String get fatalErrorBindingsMismatchTitle => 'O app precisa ser reconstruído';
-
-  @override
-  String get fatalErrorBindingsMismatchMessage =>
-      'O app encontrou um erro interno. Se você é desenvolvedor, execute `just generate` e reinicie.';
-
-  @override
   String get fatalErrorCopyError => 'Copiar erro';
 
   @override
   String get fatalErrorErrorCopied => 'Erro copiado para a área de transferência';
+
+  @override
+  String get fatalErrorTitle => 'Oh, não!';
+
+  @override
+  String get fatalErrorDescription =>
+      'Tivemos um problema ao carregar o app. Não é você, somos nós e sentimos muito.\n\nNos ajude a corrigir. Toque abaixo para enviar este erro para nossa equipe.';
 }

@@ -1216,22 +1216,15 @@ class AppLocalizationsTr extends AppLocalizations {
       'Röle kontrol durumu yüklenemedi. Lütfen tekrar deneyin.';
 
   @override
-  String get fatalErrorTitle => 'Bir şeyler yanlış gitti';
-
-  @override
-  String get fatalErrorMessage =>
-      'Başlatma sırasında beklenmedik bir hata oluştu. Lütfen uygulamayı yeniden yükleyin veya destek ile iletişime geçin.';
-
-  @override
-  String get fatalErrorBindingsMismatchTitle => 'Uygulama yeniden derlenmeli';
-
-  @override
-  String get fatalErrorBindingsMismatchMessage =>
-      'Uygulama bir iç hatayla karşılaştı. Geliştirici iseniz `just generate` çalıştırın ve yeniden başlatın.';
-
-  @override
   String get fatalErrorCopyError => 'Hatayı kopyala';
 
   @override
   String get fatalErrorErrorCopied => 'Hata panoya kopyalandı';
+
+  @override
+  String get fatalErrorTitle => 'Eyvah!';
+
+  @override
+  String get fatalErrorDescription =>
+      'Uygulama yüklenirken bir sorunla karşılaştık. Sorun sende değil, biziz ve özür dileriz.\n\nDüzeltmemize yardımcı ol. Aşağıya dokunarak bu hatayı ekibimize gönder.';
 }

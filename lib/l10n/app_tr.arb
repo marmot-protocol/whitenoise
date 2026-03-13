@@ -356,10 +356,8 @@
   "invalidRelayUrl": "Geçersiz röle URL'si",
   "thisMessageWasDeleted": "Bu mesaj silindi.",
   "relayControlStateLoadError": "Röle kontrol durumu yüklenemedi. Lütfen tekrar deneyin.",
-  "fatalErrorTitle": "Bir şeyler yanlış gitti",
-  "fatalErrorMessage": "Başlatma sırasında beklenmedik bir hata oluştu. Lütfen uygulamayı yeniden yükleyin veya destek ile iletişime geçin.",
-  "fatalErrorBindingsMismatchTitle": "Uygulama yeniden derlenmeli",
-  "fatalErrorBindingsMismatchMessage": "Uygulama bir iç hatayla karşılaştı. Geliştirici iseniz `just generate` çalıştırın ve yeniden başlatın.",
   "fatalErrorCopyError": "Hatayı kopyala",
-  "fatalErrorErrorCopied": "Hata panoya kopyalandı"
+  "fatalErrorErrorCopied": "Hata panoya kopyalandı",
+  "fatalErrorTitle": "Eyvah!",
+  "fatalErrorDescription": "Uygulama yüklenirken bir sorunla karşılaştık. Sorun sende değil, biziz ve özür dileriz.\n\nDüzeltmemize yardımcı ol. Aşağıya dokunarak bu hatayı ekibimize gönder."
 }

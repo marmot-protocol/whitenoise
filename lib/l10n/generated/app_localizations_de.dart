@@ -1247,22 +1247,15 @@ class AppLocalizationsDe extends AppLocalizations {
       'Laden des Relay-Status fehlgeschlagen. Bitte erneut versuchen.';
 
   @override
-  String get fatalErrorTitle => 'Etwas ist schiefgelaufen';
-
-  @override
-  String get fatalErrorMessage =>
-      'Beim Start ist ein unerwarteter Fehler aufgetreten. Bitte installiere die App neu oder wende dich an den Support.';
-
-  @override
-  String get fatalErrorBindingsMismatchTitle => 'App muss neu erstellt werden';
-
-  @override
-  String get fatalErrorBindingsMismatchMessage =>
-      'Die App hat einen internen Fehler festgestellt. Wenn du Entwickler bist, führe `just generate` aus und starte die App neu.';
-
-  @override
   String get fatalErrorCopyError => 'Fehler kopieren';
 
   @override
   String get fatalErrorErrorCopied => 'Fehler in die Zwischenablage kopiert';
+
+  @override
+  String get fatalErrorTitle => 'Oh nein!';
+
+  @override
+  String get fatalErrorDescription =>
+      'Es gab ein Problem beim Laden der App. Du bist nicht schuld – wir entschuldigen uns.\n\nHilf uns, es zu beheben. Tippe unten, um diesen Fehler an unser Team zu senden.';
 }
