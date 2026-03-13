@@ -53,6 +53,8 @@ class MockWnApi implements RustLibApi {
 
   bool sendBugReportCalled = false;
   String? lastBugReportWhatWentWrong;
+  String? lastBugReportStepsToReproduce;
+  String? lastBugReportFrequency;
   String? lastBugReportNpub;
   String? lastBugReportLogs;
   String? lastBugReportAppVersion;
@@ -589,10 +591,11 @@ class MockWnApi implements RustLibApi {
     required String appVersion,
     required String platform,
     required String osVersion,
-    required List<String> relayUrls,
   }) async {
     sendBugReportCalled = true;
     lastBugReportWhatWentWrong = whatWentWrong;
+    lastBugReportStepsToReproduce = stepsToReproduce;
+    lastBugReportFrequency = frequency;
     lastBugReportNpub = npub;
     lastBugReportLogs = logs;
     lastBugReportAppVersion = appVersion;
@@ -602,6 +605,8 @@ class MockWnApi implements RustLibApi {
   void reset() {
     sendBugReportCalled = false;
     lastBugReportWhatWentWrong = null;
+    lastBugReportStepsToReproduce = null;
+    lastBugReportFrequency = null;
     lastBugReportNpub = null;
     lastBugReportLogs = null;
     lastBugReportAppVersion = null;

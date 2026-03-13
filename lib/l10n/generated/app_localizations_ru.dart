@@ -1262,7 +1262,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'У нас возникла проблема при загрузке приложения. Это не вы, а мы, и нам очень жаль.\n\nПомогите нам исправить это. Нажмите ниже, чтобы отправить эту ошибку нашей команде.';
 
   @override
-  String get reportBug => 'Сообщить об ошибке';
+  String get reportBug => 'Сообщить о баге';
 
   @override
   String get reportBugDescription =>
@@ -1275,12 +1275,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reportBugWhatWentWrongPlaceholder => 'Опишите возникшую проблему...';
 
   @override
-  String get reportBugExpectedBehavior => 'Что вы ожидали?';
-
-  @override
-  String get reportBugExpectedBehaviorPlaceholder => 'Опишите, что вы ожидали...';
-
-  @override
   String get reportBugStepsToReproduce => 'Шаги для воспроизведения';
 
   @override
@@ -1291,41 +1285,23 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reportBugFrequency => 'Как часто это происходит?';
 
   @override
-  String get reportBugFrequencyAlways => 'Всегда';
+  String get reportBugFrequencyOnce => 'Один раз';
 
   @override
-  String get reportBugFrequencyOften => 'Часто';
+  String get reportBugFrequencyAlways => 'Всегда';
 
   @override
   String get reportBugFrequencySometimes => 'Иногда';
 
   @override
-  String get reportBugFrequencyRarely => 'Редко';
-
-  @override
   String get reportBugIncludeNpub => 'Включить ваш npub';
 
   @override
-  String get reportBugIncludeNpubDescription => 'Позволяет нам связаться с вами при необходимости.';
-
-  @override
-  String get reportBugIncludeLogs => 'Включить журналы';
-
-  @override
-  String get reportBugIncludeLogsDescription =>
-      'Проверьте перед отправкой. Журналы могут содержать содержимое сообщений.';
-
-  @override
-  String get reportBugLogsPreviewTitle => 'Предпросмотр журналов';
-
-  @override
-  String get reportBugLogsEmpty => 'Журналы пока не записаны.';
+  String get reportBugIncludeNpubDescription =>
+      'Позволяет нам связаться с вами при необходимости; оставив выключенным, вы сохраняете анонимность отчёта.';
 
   @override
   String get reportBugSend => 'Отправить отчёт';
-
-  @override
-  String get reportBugSending => 'Отправка...';
 
   @override
   String get reportBugSuccess => 'Отчёт об ошибке отправлен. Спасибо!';

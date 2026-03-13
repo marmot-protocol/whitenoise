@@ -1255,12 +1255,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get reportBugWhatWentWrongPlaceholder => 'Descreva o problema que encontrou...';
 
   @override
-  String get reportBugExpectedBehavior => 'O que esperava que acontecesse?';
-
-  @override
-  String get reportBugExpectedBehaviorPlaceholder => 'Descreva o que esperava que acontecesse...';
-
-  @override
   String get reportBugStepsToReproduce => 'Passos para reproduzir';
 
   @override
@@ -1270,16 +1264,13 @@ class AppLocalizationsPt extends AppLocalizations {
   String get reportBugFrequency => 'Com que frequência isso acontece?';
 
   @override
+  String get reportBugFrequencyOnce => 'Uma vez';
+
+  @override
   String get reportBugFrequencyAlways => 'Sempre';
 
   @override
-  String get reportBugFrequencyOften => 'Frequentemente';
-
-  @override
   String get reportBugFrequencySometimes => 'Às vezes';
-
-  @override
-  String get reportBugFrequencyRarely => 'Raramente';
 
   @override
   String get reportBugIncludeNpub => 'Incluir seu npub';
@@ -1288,23 +1279,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get reportBugIncludeNpubDescription => 'Permite-nos entrar em contato se necessário.';
 
   @override
-  String get reportBugIncludeLogs => 'Incluir registros';
-
-  @override
-  String get reportBugIncludeLogsDescription =>
-      'Revise antes de enviar. Os registros podem conter conteúdo de mensagens.';
-
-  @override
-  String get reportBugLogsPreviewTitle => 'Pré-visualização dos registros';
-
-  @override
-  String get reportBugLogsEmpty => 'Nenhum registro capturado ainda.';
-
-  @override
   String get reportBugSend => 'Enviar relatório';
-
-  @override
-  String get reportBugSending => 'Enviando...';
 
   @override
   String get reportBugSuccess => 'Relatório de bug enviado. Obrigado!';

@@ -1260,12 +1260,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reportBugWhatWentWrongPlaceholder => 'Décrivez le problème rencontré...';
 
   @override
-  String get reportBugExpectedBehavior => 'Que devait-il se passer ?';
-
-  @override
-  String get reportBugExpectedBehaviorPlaceholder => 'Décrivez ce que vous attendiez...';
-
-  @override
   String get reportBugStepsToReproduce => 'Étapes pour reproduire';
 
   @override
@@ -1276,41 +1270,23 @@ class AppLocalizationsFr extends AppLocalizations {
   String get reportBugFrequency => 'À quelle fréquence cela se produit-il ?';
 
   @override
-  String get reportBugFrequencyAlways => 'Toujours';
+  String get reportBugFrequencyOnce => 'Une fois';
 
   @override
-  String get reportBugFrequencyOften => 'Souvent';
+  String get reportBugFrequencyAlways => 'Toujours';
 
   @override
   String get reportBugFrequencySometimes => 'Parfois';
 
   @override
-  String get reportBugFrequencyRarely => 'Rarement';
-
-  @override
   String get reportBugIncludeNpub => 'Inclure votre npub';
 
   @override
-  String get reportBugIncludeNpubDescription => 'Nous permet de vous recontacter si nécessaire.';
-
-  @override
-  String get reportBugIncludeLogs => 'Inclure les journaux';
-
-  @override
-  String get reportBugIncludeLogsDescription =>
-      'Vérifiez avant d\'envoyer. Les journaux peuvent contenir du contenu de messages.';
-
-  @override
-  String get reportBugLogsPreviewTitle => 'Aperçu des journaux';
-
-  @override
-  String get reportBugLogsEmpty => 'Aucun journal capturé pour le moment.';
+  String get reportBugIncludeNpubDescription =>
+      'Nous permet de vous recontacter si nécessaire ; laisser désactivé garantit l\'anonymat de votre signalement.';
 
   @override
   String get reportBugSend => 'Envoyer le rapport';
-
-  @override
-  String get reportBugSending => 'Envoi en cours...';
 
   @override
   String get reportBugSuccess => 'Rapport de bug envoyé. Merci !';

@@ -1245,12 +1245,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get reportBugWhatWentWrongPlaceholder => 'Yaşadığınız sorunu açıklayın...';
 
   @override
-  String get reportBugExpectedBehavior => 'Ne olmasını bekliyordunuz?';
-
-  @override
-  String get reportBugExpectedBehaviorPlaceholder => 'Ne olmasını beklediğinizi açıklayın...';
-
-  @override
   String get reportBugStepsToReproduce => 'Yeniden oluşturma adımları';
 
   @override
@@ -1261,16 +1255,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get reportBugFrequency => 'Bu ne sıklıkla oluyor?';
 
   @override
+  String get reportBugFrequencyOnce => 'Bir kez';
+
+  @override
   String get reportBugFrequencyAlways => 'Her zaman';
 
   @override
-  String get reportBugFrequencyOften => 'Sık sık';
-
-  @override
   String get reportBugFrequencySometimes => 'Bazen';
-
-  @override
-  String get reportBugFrequencyRarely => 'Nadiren';
 
   @override
   String get reportBugIncludeNpub => 'npub\'unuzu ekleyin';
@@ -1279,23 +1270,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get reportBugIncludeNpubDescription => 'Gerektiğinde sizinle iletişime geçmemizi sağlar.';
 
   @override
-  String get reportBugIncludeLogs => 'Günlükleri ekle';
-
-  @override
-  String get reportBugIncludeLogsDescription =>
-      'Göndermeden önce inceleyin. Günlükler mesaj içeriği içerebilir.';
-
-  @override
-  String get reportBugLogsPreviewTitle => 'Günlük önizleme';
-
-  @override
-  String get reportBugLogsEmpty => 'Henüz günlük kaydı yok.';
-
-  @override
   String get reportBugSend => 'Raporu gönder';
-
-  @override
-  String get reportBugSending => 'Gönderiliyor...';
 
   @override
   String get reportBugSuccess => 'Hata raporu gönderildi. Teşekkürler!';

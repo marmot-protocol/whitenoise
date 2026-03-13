@@ -3351,7 +3351,6 @@ fn wire__crate__api__bug_report__send_bug_report_impl(
             let api_app_version = <String>::sse_decode(&mut deserializer);
             let api_platform = <String>::sse_decode(&mut deserializer);
             let api_os_version = <String>::sse_decode(&mut deserializer);
-            let api_relay_urls = <Vec<String>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| async move {
                 transform_result_sse::<_, crate::api::error::ApiError>(
@@ -3366,7 +3365,6 @@ fn wire__crate__api__bug_report__send_bug_report_impl(
                             api_app_version,
                             api_platform,
                             api_os_version,
-                            api_relay_urls,
                         )
                         .await?;
                         Ok(output_ok)

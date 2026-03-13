@@ -1248,7 +1248,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Tuvimos un problema al cargar la app. No eres tú, somos nosotros y lo sentimos.\n\nAyúdanos a solucionarlo. Toca abajo para enviar este error a nuestro equipo.';
 
   @override
-  String get reportBug => 'Reportar error';
+  String get reportBug => 'Informar de un fallo';
 
   @override
   String get reportBugDescription =>
@@ -1261,12 +1261,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get reportBugWhatWentWrongPlaceholder => 'Describe el problema que experimentaste...';
 
   @override
-  String get reportBugExpectedBehavior => '¿Qué esperabas que pasara?';
-
-  @override
-  String get reportBugExpectedBehaviorPlaceholder => 'Describe lo que esperabas que sucediera...';
-
-  @override
   String get reportBugStepsToReproduce => 'Pasos para reproducir';
 
   @override
@@ -1276,41 +1270,23 @@ class AppLocalizationsEs extends AppLocalizations {
   String get reportBugFrequency => '¿Con qué frecuencia ocurre?';
 
   @override
-  String get reportBugFrequencyAlways => 'Siempre';
+  String get reportBugFrequencyOnce => 'Una vez';
 
   @override
-  String get reportBugFrequencyOften => 'A menudo';
+  String get reportBugFrequencyAlways => 'Siempre';
 
   @override
   String get reportBugFrequencySometimes => 'A veces';
 
   @override
-  String get reportBugFrequencyRarely => 'Raramente';
-
-  @override
   String get reportBugIncludeNpub => 'Incluir tu npub';
 
   @override
-  String get reportBugIncludeNpubDescription => 'Nos permite contactarte si es necesario.';
-
-  @override
-  String get reportBugIncludeLogs => 'Incluir registros';
-
-  @override
-  String get reportBugIncludeLogsDescription =>
-      'Revisa antes de enviar. Los registros pueden contener contenido de mensajes.';
-
-  @override
-  String get reportBugLogsPreviewTitle => 'Vista previa de registros';
-
-  @override
-  String get reportBugLogsEmpty => 'Aún no se han capturado registros.';
+  String get reportBugIncludeNpubDescription =>
+      'Nos permite contactarte si es necesario; dejarlo desactivado mantiene tu informe anónimo.';
 
   @override
   String get reportBugSend => 'Enviar reporte';
-
-  @override
-  String get reportBugSending => 'Enviando...';
 
   @override
   String get reportBugSuccess => 'Reporte de error enviado. ¡Gracias!';

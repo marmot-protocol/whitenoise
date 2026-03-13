@@ -1244,12 +1244,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportBugWhatWentWrongPlaceholder => 'Describe the issue you experienced...';
 
   @override
-  String get reportBugExpectedBehavior => 'What did you expect to happen?';
-
-  @override
-  String get reportBugExpectedBehaviorPlaceholder => 'Describe what you expected to happen...';
-
-  @override
   String get reportBugStepsToReproduce => 'Steps to reproduce';
 
   @override
@@ -1259,16 +1253,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportBugFrequency => 'How often does this happen?';
 
   @override
+  String get reportBugFrequencyOnce => 'Once';
+
+  @override
   String get reportBugFrequencyAlways => 'Always';
 
   @override
-  String get reportBugFrequencyOften => 'Often';
-
-  @override
   String get reportBugFrequencySometimes => 'Sometimes';
-
-  @override
-  String get reportBugFrequencyRarely => 'Rarely';
 
   @override
   String get reportBugIncludeNpub => 'Include your npub';
@@ -1278,23 +1269,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'Lets us follow up with you if needed; leaving this off keeps your report anonymous.';
 
   @override
-  String get reportBugIncludeLogs => 'Include logs';
-
-  @override
-  String get reportBugIncludeLogsDescription =>
-      'Review before sending. Logs may contain message content.';
-
-  @override
-  String get reportBugLogsPreviewTitle => 'Log preview';
-
-  @override
-  String get reportBugLogsEmpty => 'No logs captured yet.';
-
-  @override
   String get reportBugSend => 'Send report';
-
-  @override
-  String get reportBugSending => 'Sending...';
 
   @override
   String get reportBugSuccess => 'Bug report sent. Thank you!';

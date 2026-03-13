@@ -18,7 +18,6 @@ Future<void> sendBugReport({
   required String appVersion,
   required String platform,
   required String osVersion,
-  required List<String> relayUrls,
 }) => RustLib.instance.api.crateApiBugReportSendBugReport(
   whatWentWrong: whatWentWrong,
   expectedBehavior: expectedBehavior,
@@ -29,5 +28,4 @@ Future<void> sendBugReport({
   appVersion: appVersion,
   platform: platform,
   osVersion: osVersion,
-  relayUrls: relayUrls,
 );

@@ -2280,18 +2280,6 @@ abstract class AppLocalizations {
   /// **'Describe the issue you experienced...'**
   String get reportBugWhatWentWrongPlaceholder;
 
-  /// Label for the expected behavior field
-  ///
-  /// In en, this message translates to:
-  /// **'What did you expect to happen?'**
-  String get reportBugExpectedBehavior;
-
-  /// Placeholder for the expected behavior field
-  ///
-  /// In en, this message translates to:
-  /// **'Describe what you expected to happen...'**
-  String get reportBugExpectedBehaviorPlaceholder;
-
   /// Label for the steps to reproduce field
   ///
   /// In en, this message translates to:
@@ -2310,29 +2298,23 @@ abstract class AppLocalizations {
   /// **'How often does this happen?'**
   String get reportBugFrequency;
 
+  /// Frequency option: once
+  ///
+  /// In en, this message translates to:
+  /// **'Once'**
+  String get reportBugFrequencyOnce;
+
   /// Frequency option: always
   ///
   /// In en, this message translates to:
   /// **'Always'**
   String get reportBugFrequencyAlways;
 
-  /// Frequency option: often
-  ///
-  /// In en, this message translates to:
-  /// **'Often'**
-  String get reportBugFrequencyOften;
-
   /// Frequency option: sometimes
   ///
   /// In en, this message translates to:
   /// **'Sometimes'**
   String get reportBugFrequencySometimes;
-
-  /// Frequency option: rarely
-  ///
-  /// In en, this message translates to:
-  /// **'Rarely'**
-  String get reportBugFrequencyRarely;
 
   /// Toggle label for including the user's npub
   ///
@@ -2346,41 +2328,11 @@ abstract class AppLocalizations {
   /// **'Lets us follow up with you if needed; leaving this off keeps your report anonymous.'**
   String get reportBugIncludeNpubDescription;
 
-  /// Toggle label for attaching logs
-  ///
-  /// In en, this message translates to:
-  /// **'Include logs'**
-  String get reportBugIncludeLogs;
-
-  /// Warning text when include logs toggle is on
-  ///
-  /// In en, this message translates to:
-  /// **'Review before sending. Logs may contain message content.'**
-  String get reportBugIncludeLogsDescription;
-
-  /// Title for the log preview section
-  ///
-  /// In en, this message translates to:
-  /// **'Log preview'**
-  String get reportBugLogsPreviewTitle;
-
-  /// Shown in log preview when there are no logs
-  ///
-  /// In en, this message translates to:
-  /// **'No logs captured yet.'**
-  String get reportBugLogsEmpty;
-
   /// Submit button on the report bug screen
   ///
   /// In en, this message translates to:
   /// **'Send report'**
   String get reportBugSend;
-
-  /// Button text while the bug report is being sent
-  ///
-  /// In en, this message translates to:
-  /// **'Sending...'**
-  String get reportBugSending;
 
   /// Success message after sending
   ///

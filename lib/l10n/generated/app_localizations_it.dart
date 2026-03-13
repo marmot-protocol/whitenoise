@@ -1249,12 +1249,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get reportBugWhatWentWrongPlaceholder => 'Descrivi il problema riscontrato...';
 
   @override
-  String get reportBugExpectedBehavior => 'Cosa ti aspettavi?';
-
-  @override
-  String get reportBugExpectedBehaviorPlaceholder => 'Descrivi cosa ti aspettavi che accadesse...';
-
-  @override
   String get reportBugStepsToReproduce => 'Passaggi per riprodurre';
 
   @override
@@ -1264,41 +1258,23 @@ class AppLocalizationsIt extends AppLocalizations {
   String get reportBugFrequency => 'Quanto spesso succede?';
 
   @override
-  String get reportBugFrequencyAlways => 'Sempre';
+  String get reportBugFrequencyOnce => 'Una volta';
 
   @override
-  String get reportBugFrequencyOften => 'Spesso';
+  String get reportBugFrequencyAlways => 'Sempre';
 
   @override
   String get reportBugFrequencySometimes => 'A volte';
 
   @override
-  String get reportBugFrequencyRarely => 'Raramente';
-
-  @override
   String get reportBugIncludeNpub => 'Includi il tuo npub';
 
   @override
-  String get reportBugIncludeNpubDescription => 'Ci permette di ricontattarti se necessario.';
-
-  @override
-  String get reportBugIncludeLogs => 'Includi i registri';
-
-  @override
-  String get reportBugIncludeLogsDescription =>
-      'Controlla prima di inviare. I registri possono contenere contenuti dei messaggi.';
-
-  @override
-  String get reportBugLogsPreviewTitle => 'Anteprima registri';
-
-  @override
-  String get reportBugLogsEmpty => 'Nessun registro acquisito finora.';
+  String get reportBugIncludeNpubDescription =>
+      'Ci permette di ricontattarti se necessario; lasciando il toggle disattivato la segnalazione rimane anonima.';
 
   @override
   String get reportBugSend => 'Invia segnalazione';
-
-  @override
-  String get reportBugSending => 'Invio in corso...';
 
   @override
   String get reportBugSuccess => 'Segnalazione bug inviata. Grazie!';

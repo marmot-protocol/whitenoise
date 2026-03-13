@@ -4,6 +4,7 @@ use crate::api::error::ApiError;
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
 use serde_json::{Value, json};
+use tracing::warn;
 
 const BUG_REPORT_EVENT_KIND: u16 = 0xDEAD;
 
@@ -30,7 +31,6 @@ pub async fn send_bug_report(
     app_version: String,
     platform: String,
     os_version: String,
-    relay_urls: Vec<String>,
 ) -> Result<(), ApiError> {
     let ephemeral_keys = Keys::generate();
 
@@ -94,15 +94,13 @@ pub async fn send_bug_report(
             message: e.to_string(),
         })?;
 
-    let relays: Vec<&str> = if relay_urls.is_empty() {
-        DEFAULT_RELAYS.to_vec()
-    } else {
-        relay_urls.iter().map(String::as_str).collect()
-    };
+    let relays: Vec<&str> = DEFAULT_RELAYS.to_vec();
 
     let client = Client::new(ephemeral_keys);
     for url in &relays {
-        client.add_relay(*url).await.ok();
+        if let Err(e) = client.add_relay(*url).await {
+            warn!(%url, error = %e, "Failed to add relay for bug report");
+        }
     }
 
     let connect_output = client.try_connect(Duration::from_secs(10)).await;

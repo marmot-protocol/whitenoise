@@ -441,7 +441,6 @@ abstract class RustLibApi extends BaseApi {
     required String appVersion,
     required String platform,
     required String osVersion,
-    required List<String> relayUrls,
   });
 
   Future<MessageWithTokens> crateApiMessagesSendMessageToGroup({
@@ -3444,7 +3443,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required String appVersion,
     required String platform,
     required String osVersion,
-    required List<String> relayUrls,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -3459,7 +3457,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_String(appVersion, serializer);
           sse_encode_String(platform, serializer);
           sse_encode_String(osVersion, serializer);
-          sse_encode_list_String(relayUrls, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -3482,7 +3479,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           appVersion,
           platform,
           osVersion,
-          relayUrls,
         ],
         apiImpl: this,
       ),
@@ -3501,7 +3497,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       'appVersion',
       'platform',
       'osVersion',
-      'relayUrls',
     ],
   );
 
