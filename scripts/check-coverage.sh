@@ -3,7 +3,7 @@
 #
 # Usage:
 #   ./scripts/check-coverage.sh                    # Just print coverage %
-#   ./scripts/check-coverage.sh --min 80           # Fail if below 80%
+#   ./scripts/check-coverage.sh --min 99           # Fail if below 99%
 #
 # Excludes auto-generated files:
 # - lib/src/rust/ (flutter_rust_bridge)

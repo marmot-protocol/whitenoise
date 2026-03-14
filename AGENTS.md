@@ -85,7 +85,7 @@ just lint
 just test-flutter
 just test-rust
 
-# Run tests with coverage (80% minimum)
+# Run tests with coverage (99% minimum)
 just coverage
 
 # Generate coverage HTML report
@@ -195,7 +195,7 @@ There are three categories of widgets with different naming rules:
 **IMPORTANT: Test coverage is of utmost importance. Never submit a PR that reduces test coverage.**
 
 - Test files mirror source structure with `_test.dart` suffix
-- Minimum coverage requirement: 80%
+- Minimum coverage requirement: 99%
 - Use helpers from `test/test_helpers.dart`:
   - `setUpTestView(tester)` - Configure test view dimensions
   - `mountTestApp(tester, overrides)` - Mount full app with provider overrides
