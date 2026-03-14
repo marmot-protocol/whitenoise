@@ -141,7 +141,7 @@ class _AccountTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final metadataSnapshot = useUserMetadata(context, pubkey);
     final metadata = metadataSnapshot.data;
-    final displayName = presentName(metadata);
+    final displayName = presentName(metadata) ?? context.l10n.noName;
 
     return WnProfileSwitcherItem(
       pubkey: pubkey,

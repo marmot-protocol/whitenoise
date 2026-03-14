@@ -142,7 +142,6 @@ class AppLogsScreen extends HookConsumerWidget {
                 : null,
             header: WnSlateNavigationHeader(
               title: context.l10n.appLogsTitle,
-              type: WnSlateNavigationType.back,
               onNavigate: () => Routes.goBack(context),
             ),
             child: Column(
