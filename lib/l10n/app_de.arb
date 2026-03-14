@@ -356,5 +356,9 @@
   "invalidRelayUrlScheme": "Die URL muss mit wss:// oder ws:// beginnen",
   "invalidRelayUrl": "Ungültige Relay-URL",
   "thisMessageWasDeleted": "Diese Nachricht wurde gelöscht.",
-  "relayControlStateLoadError": "Laden des Relay-Status fehlgeschlagen. Bitte erneut versuchen."
+  "relayControlStateLoadError": "Laden des Relay-Status fehlgeschlagen. Bitte erneut versuchen.",
+  "fatalErrorCopyError": "Fehler kopieren",
+  "fatalErrorErrorCopied": "Fehler in die Zwischenablage kopiert",
+  "fatalErrorTitle": "Oh nein!",
+  "fatalErrorDescription": "Es gab ein Problem beim Laden der App. Du bist nicht schuld – wir entschuldigen uns.\n\nHilf uns, es zu beheben. Tippe unten, um diesen Fehler an unser Team zu senden."
 }

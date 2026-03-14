@@ -1233,4 +1233,17 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get relayControlStateLoadError =>
       'Error al cargar el estado de relés. Por favor, inténtalo de nuevo.';
+
+  @override
+  String get fatalErrorCopyError => 'Copiar error';
+
+  @override
+  String get fatalErrorErrorCopied => 'Error copiado al portapapeles';
+
+  @override
+  String get fatalErrorTitle => '¡Oh, no!';
+
+  @override
+  String get fatalErrorDescription =>
+      'Tuvimos un problema al cargar la app. No eres tú, somos nosotros y lo sentimos.\n\nAyúdanos a solucionarlo. Toca abajo para enviar este error a nuestro equipo.';
 }

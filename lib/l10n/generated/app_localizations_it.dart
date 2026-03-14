@@ -1221,4 +1221,17 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get relayControlStateLoadError =>
       'Impossibile caricare lo stato di controllo del relay. Per favore, riprova.';
+
+  @override
+  String get fatalErrorCopyError => 'Copia errore';
+
+  @override
+  String get fatalErrorErrorCopied => 'Errore copiato negli appunti';
+
+  @override
+  String get fatalErrorTitle => 'Oh no!';
+
+  @override
+  String get fatalErrorDescription =>
+      'Abbiamo avuto un problema nel caricamento dell\'app. Non sei tu, siamo noi e ci scusiamo.\n\nAiutaci a risolverlo. Tocca sotto per inviare questo errore al nostro team.';
 }

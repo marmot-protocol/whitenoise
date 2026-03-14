@@ -356,5 +356,9 @@
   "invalidRelayUrlScheme": "La URL debe comenzar con wss:// o ws://",
   "invalidRelayUrl": "URL de relé inválida",
   "thisMessageWasDeleted": "Este mensaje fue eliminado.",
-  "relayControlStateLoadError": "Error al cargar el estado de relés. Por favor, inténtalo de nuevo."
+  "relayControlStateLoadError": "Error al cargar el estado de relés. Por favor, inténtalo de nuevo.",
+  "fatalErrorCopyError": "Copiar error",
+  "fatalErrorErrorCopied": "Error copiado al portapapeles",
+  "fatalErrorTitle": "¡Oh, no!",
+  "fatalErrorDescription": "Tuvimos un problema al cargar la app. No eres tú, somos nosotros y lo sentimos.\n\nAyúdanos a solucionarlo. Toca abajo para enviar este error a nuestro equipo."
 }

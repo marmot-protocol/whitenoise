@@ -1216,4 +1216,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get relayControlStateLoadError => 'Failed to load relay control state. Please try again.';
+
+  @override
+  String get fatalErrorCopyError => 'Copy error';
+
+  @override
+  String get fatalErrorErrorCopied => 'Error copied to clipboard';
+
+  @override
+  String get fatalErrorTitle => 'Oh no!';
+
+  @override
+  String get fatalErrorDescription =>
+      'We hit a bump loading the app. It\'s not you, it\'s us and we\'re sorry.\n\nHelp us fix it. Tap below to send this error to our team.';
 }

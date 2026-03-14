@@ -356,5 +356,9 @@
   "invalidRelayUrlScheme": "URL wss:// veya ws:// ile başlamalıdır",
   "invalidRelayUrl": "Geçersiz röle URL'si",
   "thisMessageWasDeleted": "Bu mesaj silindi.",
-  "relayControlStateLoadError": "Röle kontrol durumu yüklenemedi. Lütfen tekrar deneyin."
+  "relayControlStateLoadError": "Röle kontrol durumu yüklenemedi. Lütfen tekrar deneyin.",
+  "fatalErrorCopyError": "Hatayı kopyala",
+  "fatalErrorErrorCopied": "Hata panoya kopyalandı",
+  "fatalErrorTitle": "Eyvah!",
+  "fatalErrorDescription": "Uygulama yüklenirken bir sorunla karşılaştık. Sorun sende değil, biziz ve özür dileriz.\n\nDüzeltmemize yardımcı ol. Aşağıya dokunarak bu hatayı ekibimize gönder."
 }

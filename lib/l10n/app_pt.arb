@@ -356,5 +356,9 @@
   "invalidRelayUrlScheme": "O URL deve começar com wss:// ou ws://",
   "invalidRelayUrl": "URL de relay inválida",
   "thisMessageWasDeleted": "Esta mensagem foi excluída.",
-  "relayControlStateLoadError": "Falha ao carregar o estado de controle do relay. Por favor, tente novamente."
+  "relayControlStateLoadError": "Falha ao carregar o estado de controle do relay. Por favor, tente novamente.",
+  "fatalErrorCopyError": "Copiar erro",
+  "fatalErrorErrorCopied": "Erro copiado para a área de transferência",
+  "fatalErrorTitle": "Oh, não!",
+  "fatalErrorDescription": "Tivemos um problema ao carregar o app. Não é você, somos nós e sentimos muito.\n\nNos ajude a corrigir. Toque abaixo para enviar este erro para nossa equipe."
 }
