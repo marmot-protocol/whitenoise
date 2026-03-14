@@ -5339,7 +5339,7 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "whitenoise"
 version = "0.2.1"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=8a4ee4c427cc65b6b9e7cfb9837d9ed15e7fabea#8a4ee4c427cc65b6b9e7cfb9837d9ed15e7fabea"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=afd911f0128631ad7773d9bd9e5d3b211f33fbde#afd911f0128631ad7773d9bd9e5d3b211f33fbde"
 dependencies = [
  "android-native-keyring-store",
  "anyhow",
@@ -5378,7 +5378,19 @@ dependencies = [
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
+ "unicode-normalization",
+ "whitenoise-macros",
  "windows-native-keyring-store",
+]
+
+[[package]]
+name = "whitenoise-macros"
+version = "0.1.0"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=afd911f0128631ad7773d9bd9e5d3b211f33fbde#afd911f0128631ad7773d9bd9e5d3b211f33fbde"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]
