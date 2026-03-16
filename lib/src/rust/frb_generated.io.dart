@@ -12,6 +12,7 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated_io.dart';
 import 'api.dart';
 import 'api/account_groups.dart';
 import 'api/accounts.dart';
+import 'api/bug_report.dart';
 import 'api/chat_list.dart';
 import 'api/drafts.dart';
 import 'api/error.dart';

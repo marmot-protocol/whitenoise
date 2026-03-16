@@ -613,6 +613,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get unknownUser => 'Usuário desconhecido';
 
   @override
+  String get noName => 'Sem nome';
+
+  @override
   String get unknownGroup => 'Grupo desconhecido';
 
   @override
@@ -1248,4 +1251,53 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get fatalErrorDescription =>
       'Tivemos um problema ao carregar o app. Não é você, somos nós e sentimos muito.\n\nNos ajude a corrigir. Toque abaixo para enviar este erro para nossa equipe.';
+
+  @override
+  String get reportBug => 'Reportar bug';
+
+  @override
+  String get reportBugDescription =>
+      'Ajude-nos a melhorar o White Noise descrevendo o problema encontrado.';
+
+  @override
+  String get reportBugWhatWentWrong => 'O que deu errado?';
+
+  @override
+  String get reportBugWhatWentWrongPlaceholder => 'Descreva o problema que encontrou...';
+
+  @override
+  String get reportBugStepsToReproduce => 'Passos para reproduzir';
+
+  @override
+  String get reportBugStepsToReproducePlaceholder => '1. Ir para...\n2. Tocar em...\n3. Ver erro';
+
+  @override
+  String get reportBugFrequency => 'Com que frequência isso acontece?';
+
+  @override
+  String get reportBugFrequencyOnce => 'Uma vez';
+
+  @override
+  String get reportBugFrequencyAlways => 'Sempre';
+
+  @override
+  String get reportBugFrequencySometimes => 'Às vezes';
+
+  @override
+  String get reportBugIncludeNpub => 'Incluir seu npub';
+
+  @override
+  String get reportBugIncludeNpubDescription => 'Permite-nos entrar em contato se necessário.';
+
+  @override
+  String get reportBugSend => 'Enviar relatório';
+
+  @override
+  String get reportBugSuccess => 'Relatório de bug enviado. Obrigado!';
+
+  @override
+  String get reportBugError => 'Falha ao enviar o relatório. Tente novamente.';
+
+  @override
+  String get reportBugWhatWentWrongRequired => 'Descreva o que deu errado.';
 }

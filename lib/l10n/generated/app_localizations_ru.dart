@@ -628,6 +628,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get unknownUser => 'Неизвестный пользователь';
 
   @override
+  String get noName => 'Без имени';
+
+  @override
   String get unknownGroup => 'Неизвестная группа';
 
   @override
@@ -1268,4 +1271,55 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get fatalErrorDescription =>
       'У нас возникла проблема при загрузке приложения. Это не вы, а мы, и нам очень жаль.\n\nПомогите нам исправить это. Нажмите ниже, чтобы отправить эту ошибку нашей команде.';
+
+  @override
+  String get reportBug => 'Сообщить о баге';
+
+  @override
+  String get reportBugDescription =>
+      'Помогите нам улучшить White Noise, описав обнаруженную проблему.';
+
+  @override
+  String get reportBugWhatWentWrong => 'Что пошло не так?';
+
+  @override
+  String get reportBugWhatWentWrongPlaceholder => 'Опишите возникшую проблему...';
+
+  @override
+  String get reportBugStepsToReproduce => 'Шаги для воспроизведения';
+
+  @override
+  String get reportBugStepsToReproducePlaceholder =>
+      '1. Перейти к...\n2. Нажать на...\n3. Увидеть ошибку';
+
+  @override
+  String get reportBugFrequency => 'Как часто это происходит?';
+
+  @override
+  String get reportBugFrequencyOnce => 'Один раз';
+
+  @override
+  String get reportBugFrequencyAlways => 'Всегда';
+
+  @override
+  String get reportBugFrequencySometimes => 'Иногда';
+
+  @override
+  String get reportBugIncludeNpub => 'Включить ваш npub';
+
+  @override
+  String get reportBugIncludeNpubDescription =>
+      'Позволяет нам связаться с вами при необходимости; оставив выключенным, вы сохраняете анонимность отчёта.';
+
+  @override
+  String get reportBugSend => 'Отправить отчёт';
+
+  @override
+  String get reportBugSuccess => 'Отчёт об ошибке отправлен. Спасибо!';
+
+  @override
+  String get reportBugError => 'Не удалось отправить отчёт. Попробуйте ещё раз.';
+
+  @override
+  String get reportBugWhatWentWrongRequired => 'Пожалуйста, опишите, что пошло не так.';
 }

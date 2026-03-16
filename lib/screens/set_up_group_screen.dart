@@ -76,178 +76,173 @@ class SetUpGroupScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: WnSlate(
-            header: WnSlateNavigationHeader(
-              title: context.l10n.setUpGroup,
-              type: WnSlateNavigationType.back,
-              onNavigate: () => Routes.goBack(context),
-            ),
-            systemNotice: noticeMessage != null
-                ? WnSystemNotice(
-                    key: ValueKey(noticeMessage),
-                    title: noticeMessage,
-                    type: noticeType,
-                    onDismiss: dismissNotice,
-                  )
-                : null,
-            footer: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-              child: SizedBox(
-                width: double.infinity,
-                child: WnButton(
-                  onPressed: canCreate ? handleCreateGroup : null,
-                  text: context.l10n.createGroup,
-                  loading:
-                      createGroupHook.state.isCreating || createGroupHook.state.isUploadingImage,
-                  size: WnButtonSize.medium,
-                ),
+        child: WnSlate(
+          header: WnSlateNavigationHeader(
+            title: context.l10n.setUpGroup,
+            onNavigate: () => Routes.goBack(context),
+          ),
+          systemNotice: noticeMessage != null
+              ? WnSystemNotice(
+                  key: ValueKey(noticeMessage),
+                  title: noticeMessage,
+                  type: noticeType,
+                  onDismiss: dismissNotice,
+                )
+              : null,
+          footer: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
+            child: SizedBox(
+              width: double.infinity,
+              child: WnButton(
+                onPressed: canCreate ? handleCreateGroup : null,
+                text: context.l10n.createGroup,
+                loading: createGroupHook.state.isCreating || createGroupHook.state.isUploadingImage,
+                size: WnButtonSize.medium,
               ),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    controller: scrollController,
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Gap(16.h),
-                        Center(
-                          child: Stack(
-                            alignment: Alignment.bottomRight,
-                            children: [
-                              WnAvatar(
-                                size: WnAvatarSize.large,
-                                pictureUrl: createGroupHook.state.selectedImagePath,
-                                displayName: groupNameController.text.trim(),
-                                color: AvatarColor.violet,
-                              ),
-                              Positioned(
-                                right: 4.w,
-                                bottom: 4.h,
-                                child: GestureDetector(
-                                  onTap: handlePickImage,
-                                  child: Container(
-                                    width: 32.w,
-                                    height: 32.h,
-                                    decoration: BoxDecoration(
-                                      color: colors.backgroundContentPrimary,
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: colors.backgroundSecondary,
-                                        width: 2.w,
-                                      ),
-                                    ),
-                                    child: Icon(
-                                      Icons.edit,
-                                      key: const Key('edit_group_image_icon'),
-                                      size: 16.sp,
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: SingleChildScrollView(
+                  controller: scrollController,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Gap(16.h),
+                      Center(
+                        child: Stack(
+                          alignment: Alignment.bottomRight,
+                          children: [
+                            WnAvatar(
+                              size: WnAvatarSize.large,
+                              pictureUrl: createGroupHook.state.selectedImagePath,
+                              displayName: groupNameController.text.trim(),
+                              color: AvatarColor.violet,
+                            ),
+                            Positioned(
+                              right: 4.w,
+                              bottom: 4.h,
+                              child: GestureDetector(
+                                onTap: handlePickImage,
+                                child: Container(
+                                  width: 32.w,
+                                  height: 32.h,
+                                  decoration: BoxDecoration(
+                                    color: colors.backgroundContentPrimary,
+                                    shape: BoxShape.circle,
+                                    border: Border.all(
                                       color: colors.backgroundSecondary,
+                                      width: 2.w,
                                     ),
+                                  ),
+                                  child: Icon(
+                                    Icons.edit,
+                                    key: const Key('edit_group_image_icon'),
+                                    size: 16.sp,
+                                    color: colors.backgroundSecondary,
                                   ),
                                 ),
                               ),
-                            ],
-                          ),
+                            ),
+                          ],
                         ),
-                        Gap(24.h),
+                      ),
+                      Gap(24.h),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 14.w),
+                        child: WnInput(
+                          label: context.l10n.groupName,
+                          controller: groupNameController,
+                          placeholder: context.l10n.groupNamePlaceholder,
+                        ),
+                      ),
+                      Gap(12.h),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 14.w),
+                        child: WnInputTextArea(
+                          label: context.l10n.description,
+                          controller: groupDescriptionController,
+                          placeholder: context.l10n.groupDescriptionPlaceholder,
+                          size: WnInputSize.size44,
+                        ),
+                      ),
+                      Gap(12.h),
+                      if (createGroupHook.state.usersWithKeyPackage.isNotEmpty) ...[
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 14.w),
-                          child: WnInput(
-                            label: context.l10n.groupName,
-                            controller: groupNameController,
-                            placeholder: context.l10n.groupNamePlaceholder,
-                          ),
-                        ),
-                        Gap(12.h),
-                        Padding(
-                          padding: EdgeInsets.symmetric(horizontal: 14.w),
-                          child: WnInputTextArea(
-                            label: context.l10n.description,
-                            controller: groupDescriptionController,
-                            placeholder: context.l10n.groupDescriptionPlaceholder,
-                            size: WnInputSize.size44,
-                          ),
-                        ),
-                        Gap(12.h),
-                        if (createGroupHook.state.usersWithKeyPackage.isNotEmpty) ...[
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 14.w),
-                            child: Text(
-                              context.l10n.invitingMembers(
-                                createGroupHook.state.usersWithKeyPackage.length,
-                              ),
-                              style: typography.medium16.copyWith(
-                                color: colors.backgroundContentSecondary,
-                              ),
+                          child: Text(
+                            context.l10n.invitingMembers(
+                              createGroupHook.state.usersWithKeyPackage.length,
+                            ),
+                            style: typography.medium16.copyWith(
+                              color: colors.backgroundContentSecondary,
                             ),
                           ),
-                          Gap(16.h),
-                          ...createGroupHook.state.usersWithKeyPackage.expand((user) {
-                            final displayName = presentName(user.metadata);
-                            final formattedPubKey = formatPublicKey(
-                              npubFromHex(user.pubkey) ?? user.pubkey,
-                            );
-                            return [
-                              Padding(
+                        ),
+                        Gap(16.h),
+                        ...createGroupHook.state.usersWithKeyPackage.expand((user) {
+                          final displayName = presentName(user.metadata);
+                          final formattedPubKey = formatPublicKey(
+                            npubFromHex(user.pubkey) ?? user.pubkey,
+                          );
+                          return [
+                            Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 14.w),
+                              child: WnUserItem(
+                                key: Key('member_${user.pubkey}'),
+                                displayName: displayName ?? formattedPubKey,
+                                pictureUrl: user.metadata.picture,
+                                avatarColor: AvatarColor.fromPubkey(user.pubkey),
+                              ),
+                            ),
+                            Gap(12.h),
+                          ];
+                        }).toList()..removeLast(),
+                      ],
+                      if (createGroupHook.state.usersWithoutKeyPackage.isNotEmpty) ...[
+                        Gap(12.h),
+                        Padding(
+                          padding: EdgeInsets.symmetric(horizontal: 14.w),
+                          child: Text(
+                            '${context.l10n.usersNotOnWhiteNoise(
+                              createGroupHook.state.usersWithoutKeyPackage.length,
+                            )}:',
+                            style: typography.medium16.copyWith(
+                              color: colors.backgroundContentSecondary,
+                            ),
+                          ),
+                        ),
+                        Gap(16.h),
+                        ...createGroupHook.state.usersWithoutKeyPackage.expand((user) {
+                          final displayName = presentName(user.metadata);
+                          final formattedPubKey = formatPublicKey(
+                            npubFromHex(user.pubkey) ?? user.pubkey,
+                          );
+                          return [
+                            Opacity(
+                              opacity: 0.5,
+                              child: Padding(
                                 padding: EdgeInsets.symmetric(horizontal: 14.w),
                                 child: WnUserItem(
-                                  key: Key('member_${user.pubkey}'),
+                                  key: Key('excluded_${user.pubkey}'),
                                   displayName: displayName ?? formattedPubKey,
                                   pictureUrl: user.metadata.picture,
                                   avatarColor: AvatarColor.fromPubkey(user.pubkey),
                                 ),
                               ),
-                              Gap(12.h),
-                            ];
-                          }).toList()..removeLast(),
-                        ],
-                        if (createGroupHook.state.usersWithoutKeyPackage.isNotEmpty) ...[
-                          Gap(12.h),
-                          Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 14.w),
-                            child: Text(
-                              '${context.l10n.usersNotOnWhiteNoise(
-                                createGroupHook.state.usersWithoutKeyPackage.length,
-                              )}:',
-                              style: typography.medium16.copyWith(
-                                color: colors.backgroundContentSecondary,
-                              ),
                             ),
-                          ),
-                          Gap(16.h),
-                          ...createGroupHook.state.usersWithoutKeyPackage.expand((user) {
-                            final displayName = presentName(user.metadata);
-                            final formattedPubKey = formatPublicKey(
-                              npubFromHex(user.pubkey) ?? user.pubkey,
-                            );
-                            return [
-                              Opacity(
-                                opacity: 0.5,
-                                child: Padding(
-                                  padding: EdgeInsets.symmetric(horizontal: 14.w),
-                                  child: WnUserItem(
-                                    key: Key('excluded_${user.pubkey}'),
-                                    displayName: displayName ?? formattedPubKey,
-                                    pictureUrl: user.metadata.picture,
-                                    avatarColor: AvatarColor.fromPubkey(user.pubkey),
-                                  ),
-                                ),
-                              ),
-                              Gap(12.h),
-                            ];
-                          }).toList()..removeLast(),
-                        ],
-                        Gap(16.h),
+                            Gap(12.h),
+                          ];
+                        }).toList()..removeLast(),
                       ],
-                    ),
+                      Gap(16.h),
+                    ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

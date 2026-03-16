@@ -110,54 +110,50 @@ class AddToGroupScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: WnSlate(
-            header: WnSlateNavigationHeader(
-              title: context.l10n.addToGroup,
-              type: WnSlateNavigationType.back,
-              onNavigate: () => Routes.goBack(context),
-            ),
-            systemNotice: noticeMessage != null
-                ? WnSystemNotice(
-                    key: ValueKey(noticeMessage),
-                    title: noticeMessage,
-                    type: noticeType,
-                    onDismiss: dismissNotice,
-                  )
-                : null,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (groupsState.isLoading || (!groupsState.isLoading && adminGroups.isEmpty))
-                  Expanded(
-                    child: Center(
-                      child: CircularProgressIndicator(
-                        color: colors.backgroundContentPrimary,
-                        strokeCap: StrokeCap.round,
-                      ),
-                    ),
-                  )
-                else
-                  Expanded(
-                    child: ListView.separated(
-                      padding: EdgeInsets.zero,
-                      itemCount: adminGroups.length,
-                      separatorBuilder: (context, index) => Gap(8.h),
-                      itemBuilder: (context, index) {
-                        final group = adminGroups[index];
-                        return WnUserItem(
-                          key: Key('group_${group.mlsGroupId}'),
-                          displayName: group.name.isEmpty ? context.l10n.unknownGroup : group.name,
-                          label: group.description.isNotEmpty ? group.description : null,
-                          size: WnUserItemSize.big,
-                          onTap: () => handleGroupTap(group),
-                        );
-                      },
+        child: WnSlate(
+          header: WnSlateNavigationHeader(
+            title: context.l10n.addToGroup,
+            onNavigate: () => Routes.goBack(context),
+          ),
+          systemNotice: noticeMessage != null
+              ? WnSystemNotice(
+                  key: ValueKey(noticeMessage),
+                  title: noticeMessage,
+                  type: noticeType,
+                  onDismiss: dismissNotice,
+                )
+              : null,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              if (groupsState.isLoading || (!groupsState.isLoading && adminGroups.isEmpty))
+                Expanded(
+                  child: Center(
+                    child: CircularProgressIndicator(
+                      color: colors.backgroundContentPrimary,
+                      strokeCap: StrokeCap.round,
                     ),
                   ),
-              ],
-            ),
+                )
+              else
+                Expanded(
+                  child: ListView.separated(
+                    padding: EdgeInsets.zero,
+                    itemCount: adminGroups.length,
+                    separatorBuilder: (context, index) => Gap(8.h),
+                    itemBuilder: (context, index) {
+                      final group = adminGroups[index];
+                      return WnUserItem(
+                        key: Key('group_${group.mlsGroupId}'),
+                        displayName: group.name.isEmpty ? context.l10n.unknownGroup : group.name,
+                        label: group.description.isNotEmpty ? group.description : null,
+                        size: WnUserItemSize.big,
+                        onTap: () => handleGroupTap(group),
+                      );
+                    },
+                  ),
+                ),
+            ],
           ),
         ),
       ),

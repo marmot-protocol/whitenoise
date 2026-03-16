@@ -173,9 +173,9 @@ void main() {
       expect(find.text('Start new chat'), findsOneWidget);
     });
 
-    testWidgets('displays close button', (tester) async {
+    testWidgets('displays back button', (tester) async {
       await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
-      expect(find.byKey(const Key('slate_close_button')), findsOneWidget);
+      expect(find.byKey(const Key('slate_back_button')), findsOneWidget);
     });
 
     testWidgets('displays avatar', (tester) async {
@@ -372,10 +372,10 @@ void main() {
       });
     });
 
-    group('close button', () {
+    group('back button', () {
       testWidgets('navigates back when tapped', (tester) async {
         await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
-        await tester.tap(find.byKey(const Key('slate_close_button')));
+        await tester.tap(find.byKey(const Key('slate_back_button')));
         await tester.pumpAndSettle();
 
         expect(find.text('Start new chat'), findsNothing);

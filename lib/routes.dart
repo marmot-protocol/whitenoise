@@ -32,6 +32,7 @@ import 'package:whitenoise/screens/privacy_security_screen.dart' show PrivacySec
 import 'package:whitenoise/screens/profile_keys_screen.dart' show ProfileKeysScreen;
 import 'package:whitenoise/screens/relay_control_state_screen.dart' show RelayControlStateScreen;
 import 'package:whitenoise/screens/relay_resolution_screen.dart' show RelayResolutionScreen;
+import 'package:whitenoise/screens/report_bug_screen.dart' show ReportBugScreen;
 import 'package:whitenoise/screens/scan_npub_screen.dart' show ScanNpubScreen;
 import 'package:whitenoise/screens/scan_nsec_screen.dart' show ScanNsecScreen;
 import 'package:whitenoise/screens/set_up_group_screen.dart' show SetUpGroupScreen;
@@ -72,6 +73,7 @@ abstract final class Routes {
   static const _switchProfile = '/switch-profile';
   static const _addProfile = '/add-profile';
   static const _network = '/network';
+  static const _reportBug = '/report-bug';
   static const _relayResolution = '/relay-resolution';
   static const _userSearch = '/user-search';
   static const _userSelection = '/user-selection';
@@ -175,6 +177,13 @@ abstract final class Routes {
           ),
         ),
 
+        GoRoute(
+          path: _reportBug,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: const ReportBugScreen(),
+          ),
+        ),
         GoRoute(
           path: _developerSettings,
           pageBuilder: (context, state) => _navigationTransition(
@@ -473,6 +482,10 @@ abstract final class Routes {
 
   static void pushToWip(BuildContext context) {
     GoRouter.of(context).push(_wip);
+  }
+
+  static void pushToReportBug(BuildContext context) {
+    GoRouter.of(context).push(_reportBug);
   }
 
   static void pushToDonate(BuildContext context) {

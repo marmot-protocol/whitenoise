@@ -609,6 +609,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get unknownUser => 'Unknown user';
 
   @override
+  String get noName => 'No name';
+
+  @override
   String get unknownGroup => 'Unknown group';
 
   @override
@@ -1237,4 +1240,54 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get fatalErrorDescription =>
       'We hit a bump loading the app. It\'s not you, it\'s us and we\'re sorry.\n\nHelp us fix it. Tap below to send this error to our team.';
+
+  @override
+  String get reportBug => 'Report bug';
+
+  @override
+  String get reportBugDescription =>
+      'Help us improve White Noise by describing the issue you encountered.';
+
+  @override
+  String get reportBugWhatWentWrong => 'What went wrong?';
+
+  @override
+  String get reportBugWhatWentWrongPlaceholder => 'Describe the issue you experienced...';
+
+  @override
+  String get reportBugStepsToReproduce => 'Steps to reproduce';
+
+  @override
+  String get reportBugStepsToReproducePlaceholder => '1. Go to...\n2. Tap on...\n3. See error';
+
+  @override
+  String get reportBugFrequency => 'How often does this happen?';
+
+  @override
+  String get reportBugFrequencyOnce => 'Once';
+
+  @override
+  String get reportBugFrequencyAlways => 'Always';
+
+  @override
+  String get reportBugFrequencySometimes => 'Sometimes';
+
+  @override
+  String get reportBugIncludeNpub => 'Include your npub';
+
+  @override
+  String get reportBugIncludeNpubDescription =>
+      'Lets us follow up with you if needed; leaving this off keeps your report anonymous.';
+
+  @override
+  String get reportBugSend => 'Send report';
+
+  @override
+  String get reportBugSuccess => 'Bug report sent. Thank you!';
+
+  @override
+  String get reportBugError => 'Failed to send report. Please try again.';
+
+  @override
+  String get reportBugWhatWentWrongRequired => 'Please describe what went wrong.';
 }

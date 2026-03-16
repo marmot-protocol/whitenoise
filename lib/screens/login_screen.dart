@@ -210,7 +210,6 @@ class LoginScreen extends HookConsumerWidget {
                   child: WnSlate(
                     header: WnSlateNavigationHeader(
                       title: context.l10n.loginTitle,
-                      type: WnSlateNavigationType.back,
                       onNavigate: () => Routes.goBack(context),
                     ),
                     systemNotice: loginWithAndroidSignerState.error != null

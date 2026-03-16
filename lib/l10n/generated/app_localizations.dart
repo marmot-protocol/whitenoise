@@ -1176,6 +1176,12 @@ abstract class AppLocalizations {
   /// **'Unknown user'**
   String get unknownUser;
 
+  /// Placeholder shown when a user has no display name set
+  ///
+  /// In en, this message translates to:
+  /// **'No name'**
+  String get noName;
+
   /// Fallback name for unknown group
   ///
   /// In en, this message translates to:
@@ -2267,6 +2273,102 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'We hit a bump loading the app. It\'s not you, it\'s us and we\'re sorry.\n\nHelp us fix it. Tap below to send this error to our team.'**
   String get fatalErrorDescription;
+
+  /// Report bug menu item and screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Report bug'**
+  String get reportBug;
+
+  /// Introductory description on the report bug screen
+  ///
+  /// In en, this message translates to:
+  /// **'Help us improve White Noise by describing the issue you encountered.'**
+  String get reportBugDescription;
+
+  /// Label for the 'what went wrong' field
+  ///
+  /// In en, this message translates to:
+  /// **'What went wrong?'**
+  String get reportBugWhatWentWrong;
+
+  /// Placeholder for the 'what went wrong' field
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the issue you experienced...'**
+  String get reportBugWhatWentWrongPlaceholder;
+
+  /// Label for the steps to reproduce field
+  ///
+  /// In en, this message translates to:
+  /// **'Steps to reproduce'**
+  String get reportBugStepsToReproduce;
+
+  /// Placeholder for the steps to reproduce field
+  ///
+  /// In en, this message translates to:
+  /// **'1. Go to...\n2. Tap on...\n3. See error'**
+  String get reportBugStepsToReproducePlaceholder;
+
+  /// Label for the frequency selector
+  ///
+  /// In en, this message translates to:
+  /// **'How often does this happen?'**
+  String get reportBugFrequency;
+
+  /// Frequency option: once
+  ///
+  /// In en, this message translates to:
+  /// **'Once'**
+  String get reportBugFrequencyOnce;
+
+  /// Frequency option: always
+  ///
+  /// In en, this message translates to:
+  /// **'Always'**
+  String get reportBugFrequencyAlways;
+
+  /// Frequency option: sometimes
+  ///
+  /// In en, this message translates to:
+  /// **'Sometimes'**
+  String get reportBugFrequencySometimes;
+
+  /// Toggle label for including the user's npub
+  ///
+  /// In en, this message translates to:
+  /// **'Include your npub'**
+  String get reportBugIncludeNpub;
+
+  /// Helper text for the include npub toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Lets us follow up with you if needed; leaving this off keeps your report anonymous.'**
+  String get reportBugIncludeNpubDescription;
+
+  /// Submit button on the report bug screen
+  ///
+  /// In en, this message translates to:
+  /// **'Send report'**
+  String get reportBugSend;
+
+  /// Success message after sending
+  ///
+  /// In en, this message translates to:
+  /// **'Bug report sent. Thank you!'**
+  String get reportBugSuccess;
+
+  /// Error message when sending fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send report. Please try again.'**
+  String get reportBugError;
+
+  /// Validation error when 'what went wrong' is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe what went wrong.'**
+  String get reportBugWhatWentWrongRequired;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

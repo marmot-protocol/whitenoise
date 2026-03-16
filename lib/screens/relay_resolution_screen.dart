@@ -113,7 +113,6 @@ class RelayResolutionScreen extends HookConsumerWidget {
               child: WnSlate(
                 header: WnSlateNavigationHeader(
                   title: context.l10n.relayResolutionTitle,
-                  type: WnSlateNavigationType.back,
                   onNavigate: onCancel,
                 ),
                 systemNotice: relayResolutionState.error != null

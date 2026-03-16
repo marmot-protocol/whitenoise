@@ -30,35 +30,31 @@ class ScanNsecScreen extends StatelessWidget {
             ),
           ),
           SafeArea(
-            child: Padding(
-              padding: EdgeInsets.only(top: 8.h, bottom: 34.h),
-              child: WnSlate(
-                header: WnSlateNavigationHeader(
-                  title: l10n.scanNsec,
-                  type: WnSlateNavigationType.back,
-                  onNavigate: () => Routes.goBack(context),
-                ),
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(
-                        child: WnScanBox(
-                          onBarcodeDetected: (value) => GoRouter.of(context).pop(value),
-                        ),
+            child: WnSlate(
+              header: WnSlateNavigationHeader(
+                title: l10n.scanNsec,
+                onNavigate: () => Routes.goBack(context),
+              ),
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(
+                      child: WnScanBox(
+                        onBarcodeDetected: (value) => GoRouter.of(context).pop(value),
                       ),
-                      Gap(12.h),
-                      Text(
-                        l10n.scanNsecHint,
-                        textAlign: TextAlign.center,
-                        style: context.typographyScaled.medium14.copyWith(
-                          color: colors.backgroundContentSecondary,
-                        ),
+                    ),
+                    Gap(12.h),
+                    Text(
+                      l10n.scanNsecHint,
+                      textAlign: TextAlign.center,
+                      style: context.typographyScaled.medium14.copyWith(
+                        color: colors.backgroundContentSecondary,
                       ),
-                      Gap(12.h),
-                    ],
-                  ),
+                    ),
+                    Gap(12.h),
+                  ],
                 ),
               ),
             ),

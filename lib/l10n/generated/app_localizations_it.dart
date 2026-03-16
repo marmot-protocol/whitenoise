@@ -613,6 +613,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get unknownUser => 'Utente sconosciuto';
 
   @override
+  String get noName => 'Nessun nome';
+
+  @override
   String get unknownGroup => 'Gruppo sconosciuto';
 
   @override
@@ -1242,4 +1245,54 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get fatalErrorDescription =>
       'Abbiamo avuto un problema nel caricamento dell\'app. Non sei tu, siamo noi e ci scusiamo.\n\nAiutaci a risolverlo. Tocca sotto per inviare questo errore al nostro team.';
+
+  @override
+  String get reportBug => 'Segnala un bug';
+
+  @override
+  String get reportBugDescription =>
+      'Aiutaci a migliorare White Noise descrivendo il problema riscontrato.';
+
+  @override
+  String get reportBugWhatWentWrong => 'Cosa è andato storto?';
+
+  @override
+  String get reportBugWhatWentWrongPlaceholder => 'Descrivi il problema riscontrato...';
+
+  @override
+  String get reportBugStepsToReproduce => 'Passaggi per riprodurre';
+
+  @override
+  String get reportBugStepsToReproducePlaceholder => '1. Vai a...\n2. Tocca su...\n3. Vedi errore';
+
+  @override
+  String get reportBugFrequency => 'Quanto spesso succede?';
+
+  @override
+  String get reportBugFrequencyOnce => 'Una volta';
+
+  @override
+  String get reportBugFrequencyAlways => 'Sempre';
+
+  @override
+  String get reportBugFrequencySometimes => 'A volte';
+
+  @override
+  String get reportBugIncludeNpub => 'Includi il tuo npub';
+
+  @override
+  String get reportBugIncludeNpubDescription =>
+      'Ci permette di ricontattarti se necessario; lasciando il toggle disattivato la segnalazione rimane anonima.';
+
+  @override
+  String get reportBugSend => 'Invia segnalazione';
+
+  @override
+  String get reportBugSuccess => 'Segnalazione bug inviata. Grazie!';
+
+  @override
+  String get reportBugError => 'Invio della segnalazione fallito. Riprova.';
+
+  @override
+  String get reportBugWhatWentWrongRequired => 'Descrivi cosa è andato storto.';
 }

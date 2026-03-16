@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:whitenoise/providers/app_version_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/appearance_screen.dart';
@@ -23,15 +24,22 @@ import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
 class _MockApi extends MockWnApi {
+  bool returnNoName = false;
+
   @override
   Future<FlutterMetadata> crateApiUsersUserMetadata({
     required bool blockingDataSync,
     required String pubkey,
-  }) async => const FlutterMetadata(
-    name: 'Test User',
-    displayName: 'Test Display Name',
-    custom: {},
-  );
+  }) async {
+    if (returnNoName) {
+      return const FlutterMetadata(custom: {});
+    }
+    return const FlutterMetadata(
+      name: 'Test User',
+      displayName: 'Test Display Name',
+      custom: {},
+    );
+  }
 
   @override
   Future<String> crateApiAccountsExportAccountNsec({required String pubkey}) async {
@@ -54,6 +62,7 @@ class _MockAuthNotifier extends AuthNotifier {
 
 void main() {
   late _MockApi mockApi;
+  const appVersion = '1.2.3+45';
 
   setUpAll(() {
     mockApi = _MockApi();
@@ -62,7 +71,7 @@ void main() {
       appName: 'Whitenoise',
       packageName: 'com.example.whitenoise',
       version: '1.2.3',
-      buildNumber: '42',
+      buildNumber: '45',
       buildSignature: '',
     );
   });
@@ -81,6 +90,7 @@ void main() {
       overrides: [
         authProvider.overrideWith(() => mockAuth),
         secureStorageProvider.overrideWithValue(MockSecureStorage()),
+        appVersionProvider.overrideWith((ref) async => appVersion),
       ],
     );
     Routes.pushToSettings(tester.element(find.byType(Scaffold)));
@@ -103,9 +113,9 @@ void main() {
       expect(find.text(testNpubAFormatted), findsOneWidget);
     });
 
-    testWidgets('tapping close icon returns to previous screen', (tester) async {
+    testWidgets('tapping back button returns to previous screen', (tester) async {
       await pumpSettingsScreen(tester);
-      await tester.tap(find.byKey(const Key('slate_close_button')));
+      await tester.tap(find.byKey(const Key('slate_back_button')));
       await tester.pumpAndSettle();
       expect(find.byType(ChatListScreen), findsOneWidget);
     });
@@ -215,12 +225,20 @@ void main() {
       expect(avatar.color, AvatarColor.cyan);
     });
 
+    testWidgets('displays "No name" when user has no display name', (tester) async {
+      mockApi.returnNoName = true;
+
+      await pumpSettingsScreen(tester);
+
+      expect(find.text('No name'), findsOneWidget);
+
+      mockApi.returnNoName = false;
+    });
+
     testWidgets('displays app version at the bottom', (tester) async {
       await pumpSettingsScreen(tester);
-      await tester.pump();
 
-      expect(find.byKey(const Key('app_version_text')), findsOneWidget);
-      expect(find.text('v1.2.3'), findsOneWidget);
+      expect(find.text('v1.2.3+45'), findsOneWidget);
     });
   });
 }

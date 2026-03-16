@@ -43,38 +43,34 @@ class AppearanceScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: WnSlate(
-            header: WnSlateNavigationHeader(
-              title: context.l10n.appearanceTitle,
-              type: WnSlateNavigationType.back,
-              onNavigate: () => Routes.goBack(context),
-            ),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-              child: WnDropdownScope(
-                controller: dropdownController,
-                child: Column(
-                  spacing: 24.h,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    WnDropdownSelector<ThemeMode>(
-                      key: const Key('theme_dropdown'),
-                      label: context.l10n.theme,
-                      options: themeOptions,
-                      value: currentThemeMode,
-                      onChanged: (mode) => ref.read(themeProvider.notifier).setThemeMode(mode),
-                    ),
-                    WnDropdownSelector<LocaleSetting>(
-                      key: const Key('language_dropdown'),
-                      label: context.l10n.language,
-                      options: languageOptions,
-                      value: currentLocaleSetting,
-                      onChanged: (setting) => ref.read(localeProvider.notifier).setLocale(setting),
-                    ),
-                  ],
-                ),
+        child: WnSlate(
+          header: WnSlateNavigationHeader(
+            title: context.l10n.appearanceTitle,
+            onNavigate: () => Routes.goBack(context),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+            child: WnDropdownScope(
+              controller: dropdownController,
+              child: Column(
+                spacing: 24.h,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  WnDropdownSelector<ThemeMode>(
+                    key: const Key('theme_dropdown'),
+                    label: context.l10n.theme,
+                    options: themeOptions,
+                    value: currentThemeMode,
+                    onChanged: (mode) => ref.read(themeProvider.notifier).setThemeMode(mode),
+                  ),
+                  WnDropdownSelector<LocaleSetting>(
+                    key: const Key('language_dropdown'),
+                    label: context.l10n.language,
+                    options: languageOptions,
+                    value: currentLocaleSetting,
+                    onChanged: (setting) => ref.read(localeProvider.notifier).setLocale(setting),
+                  ),
+                ],
               ),
             ),
           ),

@@ -53,57 +53,53 @@ class PrivacySecurityScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: WnSlate(
-            header: WnSlateNavigationHeader(
-              title: context.l10n.privacySecurityTitle,
-              type: WnSlateNavigationType.back,
-              onNavigate: () => Routes.goBack(context),
-            ),
-            systemNotice: systemNotice.noticeMessage != null
-                ? WnSystemNotice(
-                    key: ValueKey(systemNotice.noticeMessage),
-                    title: systemNotice.noticeMessage!,
-                    type: systemNotice.noticeType,
-                    variant: WnSystemNoticeVariant.dismissible,
-                    onDismiss: systemNotice.dismissNotice,
-                  )
-                : null,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.deleteAllAppData,
-                    style: typography.semiBold16.copyWith(
-                      color: colors.backgroundContentSecondary,
-                    ),
+        child: WnSlate(
+          header: WnSlateNavigationHeader(
+            title: context.l10n.privacySecurityTitle,
+            onNavigate: () => Routes.goBack(context),
+          ),
+          systemNotice: systemNotice.noticeMessage != null
+              ? WnSystemNotice(
+                  key: ValueKey(systemNotice.noticeMessage),
+                  title: systemNotice.noticeMessage!,
+                  type: systemNotice.noticeType,
+                  variant: WnSystemNoticeVariant.dismissible,
+                  onDismiss: systemNotice.dismissNotice,
+                )
+              : null,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.deleteAllAppData,
+                  style: typography.semiBold16.copyWith(
+                    color: colors.backgroundContentSecondary,
                   ),
-                  SizedBox(height: 8.h),
-                  SizedBox(
-                    width: double.infinity,
-                    child: WnButton(
-                      key: const Key('delete_all_data_button'),
-                      text: context.l10n.deleteAppData,
-                      onPressed: handleDeleteAllData,
-                      type: WnButtonType.destructive,
-                      size: WnButtonSize.medium,
-                      loading: state.isDeleting,
-                      disabled: state.isDeleting,
-                      trailingIcon: WnIcons.trashCan,
-                    ),
+                ),
+                SizedBox(height: 8.h),
+                SizedBox(
+                  width: double.infinity,
+                  child: WnButton(
+                    key: const Key('delete_all_data_button'),
+                    text: context.l10n.deleteAppData,
+                    onPressed: handleDeleteAllData,
+                    type: WnButtonType.destructive,
+                    size: WnButtonSize.medium,
+                    loading: state.isDeleting,
+                    disabled: state.isDeleting,
+                    trailingIcon: WnIcons.trashCan,
                   ),
-                  SizedBox(height: 8.h),
-                  Text(
-                    context.l10n.deleteAllAppDataDescription,
-                    style: typography.medium12.copyWith(
-                      color: colors.backgroundContentSecondary,
-                    ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  context.l10n.deleteAllAppDataDescription,
+                  style: typography.medium12.copyWith(
+                    color: colors.backgroundContentSecondary,
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
           ),
         ),

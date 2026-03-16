@@ -10,7 +10,7 @@ class WnSlateNavigationHeader extends StatelessWidget {
     super.key,
     this.title,
     this.titleWidget,
-    this.type = WnSlateNavigationType.close,
+    this.type = WnSlateNavigationType.back,
     this.onNavigate,
   }) : assert(title != null || titleWidget != null, 'title or titleWidget is required');
 
