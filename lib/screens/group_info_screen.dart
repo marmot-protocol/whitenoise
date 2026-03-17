@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart' show useEffect, useFuture, useMemoized, useState;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_chat_archive.dart';
 import 'package:whitenoise/hooks/use_group_members.dart';
@@ -25,9 +26,10 @@ import 'package:whitenoise/widgets/wn_system_notice.dart';
 import 'package:whitenoise/widgets/wn_user_item.dart';
 
 class GroupInfoScreen extends HookConsumerWidget {
-  const GroupInfoScreen({super.key, required this.groupId});
+  const GroupInfoScreen({super.key, required this.groupId, this.showSearch = true});
 
   final String groupId;
+  final bool showSearch;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -129,6 +131,20 @@ class GroupInfoScreen extends HookConsumerWidget {
                       imagePath: imageSnapshot.data,
                     ),
                     Gap(16.h),
+                    if (showSearch) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        child: WnButton(
+                          key: const Key('group_search_button'),
+                          text: context.l10n.search,
+                          type: WnButtonType.outline,
+                          size: WnButtonSize.medium,
+                          trailingIcon: WnIcons.search,
+                          onPressed: () => GoRouter.of(context).pop(true),
+                        ),
+                      ),
+                      Gap(8.h),
+                    ],
                     if (isAdmin) ...[
                       SizedBox(
                         width: double.infinity,

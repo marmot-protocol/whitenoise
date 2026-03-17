@@ -288,6 +288,37 @@ class _MockApi extends MockWnApi {
   }
 
   @override
+  Future<List<String>> crateApiGroupsGroupAdmins({
+    required String pubkey,
+    required String groupId,
+  }) {
+    return Future.value([]);
+  }
+
+  @override
+  Future<List<SearchResult>> crateApiMessagesSearchMessagesInGroup({
+    required String pubkey,
+    required String groupId,
+    required String query,
+    int? limit,
+  }) async {
+    return initialMessages
+        .where((m) => m.content.toLowerCase().contains(query.toLowerCase()))
+        .map(
+          (m) => SearchResult(
+            message: m,
+            highlightSpans: [
+              HighlightSpan(
+                start: m.content.toLowerCase().indexOf(query.toLowerCase()),
+                end: m.content.toLowerCase().indexOf(query.toLowerCase()) + query.length,
+              ),
+            ],
+          ),
+        )
+        .toList();
+  }
+
+  @override
   Future<MediaFile> crateApiMediaFilesUploadChatMedia({
     required String accountPubkey,
     required String groupId,
@@ -1663,6 +1694,47 @@ void main() {
         await tester.tap(find.byKey(const Key('search_button')));
         await tester.pumpAndSettle();
       }
+
+      Future<void> openGroupSearch(WidgetTester tester) async {
+        await pumpChatScreen(tester);
+        await tester.tap(find.byKey(const Key('header_avatar_tap_area')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('group_search_button')));
+        await tester.pumpAndSettle();
+      }
+
+      group('opened from group info', () {
+        testWidgets('search bar appears after tapping search in group info', (tester) async {
+          await openGroupSearch(tester);
+          expect(find.byKey(const Key('chat_search_bar')), findsOneWidget);
+          expect(find.byKey(const Key('chat_search_field')), findsOneWidget);
+        });
+
+        testWidgets('search bar is not shown before tapping search', (tester) async {
+          await pumpChatScreen(tester);
+          expect(find.byKey(const Key('chat_search_bar')), findsNothing);
+        });
+
+        testWidgets('navigation bar appears when query is entered', (tester) async {
+          _api.initialMessages = [
+            _message('m1', DateTime(2024)),
+            _message('m2', DateTime(2024, 2)),
+          ];
+          await openGroupSearch(tester);
+          await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
+          await tester.pumpAndSettle();
+          expect(find.byKey(const Key('chat_search_navigation')), findsOneWidget);
+        });
+
+        testWidgets('closing search hides search bar', (tester) async {
+          await openGroupSearch(tester);
+          expect(find.byKey(const Key('chat_search_bar')), findsOneWidget);
+
+          await tester.tap(find.byKey(const Key('back_button')));
+          await tester.pumpAndSettle();
+          expect(find.byKey(const Key('chat_search_bar')), findsNothing);
+        });
+      });
 
       testWidgets('search bar is hidden by default', (tester) async {
         await pumpChatScreen(tester);

@@ -372,26 +372,17 @@ class ChatScreen extends HookConsumerWidget {
                             final result = await Routes.pushToChatInfo(context, groupId);
                             if (result == true) openSearch();
                           } else {
-                            Routes.pushToGroupInfo(context, groupId);
+                            final result = await Routes.pushToGroupInfo(context, groupId);
+                            if (result == true) openSearch();
                           }
                         },
-                        trailingWidget: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            if (!isSearchActive.value)
-                              WnIconButton(
-                                key: const Key('chat_search_button'),
-                                icon: WnIcons.search,
-                                onPressed: openSearch,
-                              ),
-                            if (debugViewEnabled)
-                              WnIconButton(
+                        trailingWidget: debugViewEnabled
+                            ? WnIconButton(
                                 key: const Key('chat_raw_debug_button'),
                                 icon: WnIcons.developerSettings,
                                 onPressed: () => Routes.pushToChatRawDebug(context, groupId),
-                              ),
-                          ],
-                        ),
+                              )
+                            : null,
                       ),
                       systemNotice: noticeMessage.value != null
                           ? WnSystemNotice(

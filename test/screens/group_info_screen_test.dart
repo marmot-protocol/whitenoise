@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
@@ -133,7 +135,7 @@ void main() {
       overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
     );
     await tester.pumpAndSettle();
-    Routes.pushToGroupInfo(tester.element(find.byType(Scaffold)), groupId);
+    unawaited(Routes.pushToGroupInfo(tester.element(find.byType(Scaffold)), groupId));
     if (settle) {
       await tester.pumpAndSettle();
     } else {
@@ -390,6 +392,36 @@ void main() {
 
       expect(find.byType(WnSystemNotice), findsOneWidget);
       expect(find.text('Failed to load group members. Please try again.'), findsOneWidget);
+    });
+
+    group('search button', () {
+      testWidgets('shows search button by default', (tester) async {
+        await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+        expect(find.byKey(const Key('group_search_button')), findsOneWidget);
+        expect(find.text('Search'), findsOneWidget);
+      });
+
+      testWidgets('search button appears above edit button when user is admin', (tester) async {
+        _api.adminsList = [_testPubkey];
+        await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+        expect(find.byKey(const Key('group_search_button')), findsOneWidget);
+        expect(find.byKey(const Key('edit_group_button')), findsOneWidget);
+
+        final searchOffset = tester.getTopLeft(find.byKey(const Key('group_search_button')));
+        final editOffset = tester.getTopLeft(find.byKey(const Key('edit_group_button')));
+        expect(searchOffset.dy, lessThan(editOffset.dy));
+      });
+
+      testWidgets('tapping search button pops the screen', (tester) async {
+        await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+        await tester.tap(find.byKey(const Key('group_search_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Group Information'), findsNothing);
+      });
     });
   });
 }

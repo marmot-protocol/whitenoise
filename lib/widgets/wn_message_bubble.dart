@@ -17,10 +17,7 @@ List<TextSpan> _buildHighlightedSpans(
 ) {
   if (spans.isEmpty) return [TextSpan(text: text, style: baseStyle)];
 
-  final highlightStyle = baseStyle.copyWith(
-    backgroundColor: highlightColor,
-    fontWeight: FontWeight.w900,
-  );
+  final highlightStyle = baseStyle.copyWith(backgroundColor: highlightColor);
 
   final result = <TextSpan>[];
   var cursor = 0;
@@ -787,11 +784,7 @@ class WnMessageBubble extends StatelessWidget {
     final textStyle = context.typographyScaled.medium16Compact.copyWith(color: textColor);
     final tsStyle = context.typographyScaled.medium12.copyWith(color: timestampColor);
 
-    final highlightColor = highlightSpans != null
-        ? (_isOutgoing
-              ? Colors.white.withValues(alpha: 0.3)
-              : Colors.yellow.withValues(alpha: 0.35))
-        : null;
+    final highlightColor = highlightSpans != null ? Colors.blue.withValues(alpha: 0.4) : null;
 
     final bubbleContent = _BubbleContent(
       bubbleColor: bubbleColor,

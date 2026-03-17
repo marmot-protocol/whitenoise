@@ -608,8 +608,8 @@ abstract final class Routes {
     GoRouter.of(context).push(_network);
   }
 
-  static void pushToGroupInfo(BuildContext context, String groupId) {
-    GoRouter.of(context).pushNamed('groupInfo', pathParameters: {'groupId': groupId});
+  static Future<bool?> pushToGroupInfo(BuildContext context, String groupId) {
+    return GoRouter.of(context).pushNamed<bool>('groupInfo', pathParameters: {'groupId': groupId});
   }
 
   static void pushToEditGroup(BuildContext context, String groupId) {
