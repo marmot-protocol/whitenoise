@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:whitenoise/hooks/use_support_chat.dart';
 import 'package:whitenoise/hooks/use_user_search.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
@@ -35,6 +36,8 @@ class UserSearchScreen extends HookConsumerWidget {
       searchQuery: searchQuery.value,
     );
 
+    final helpState = useSupportChat(accountPubkey: accountPubkey);
+
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
@@ -60,13 +63,34 @@ class UserSearchScreen extends HookConsumerWidget {
               Gap(12.h),
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 14.w),
-                child: WnMenuItem(
-                  key: const Key('create_group_menu_item'),
-                  label: context.l10n.newGroupChat,
-                  icon: WnIcons.newGroupChat,
-                  onTap: () => Routes.pushToUserSelection(context),
+                child: Column(
+                  children: [
+                    WnMenuItem(
+                      key: const Key('create_group_menu_item'),
+                      label: context.l10n.newGroupChat,
+                      icon: WnIcons.newGroupChat,
+                      onTap: () => Routes.pushToUserSelection(context),
+                    ),
+                    WnMenuItem(
+                      key: const Key('help_and_feedback_menu_item'),
+                      label: context.l10n.chatWithSupport,
+                      icon: WnIcons.helpChat,
+                      onTap: () {
+                        if (helpState.isLoading) {
+                          return;
+                        }
+                        final groupId = helpState.existingGroupId;
+                        if (groupId != null) {
+                          Routes.goToChat(context, groupId);
+                        } else {
+                          Routes.pushToStartSupportChat(context);
+                        }
+                      },
+                    ),
+                  ],
                 ),
               ),
+
               Expanded(
                 child: state.isLoading
                     ? Center(

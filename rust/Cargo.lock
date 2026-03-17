@@ -3819,12 +3819,14 @@ dependencies = [
  "sync_wrapper",
  "tokio",
  "tokio-rustls",
+ "tokio-util",
  "tower",
  "tower-http",
  "tower-service",
  "url",
  "wasm-bindgen",
  "wasm-bindgen-futures",
+ "wasm-streams",
  "web-sys",
 ]
 
@@ -4831,6 +4833,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "tokio-util"
+version = "0.7.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ae9cec805b01e8fc3fd2fe289f89149a9b66dd16786abd8b19cfa7b48cb0098"
+dependencies = [
+ "bytes",
+ "futures-core",
+ "futures-sink",
+ "pin-project-lite",
+ "tokio",
+]
+
+[[package]]
 name = "toml"
 version = "0.8.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5272,6 +5287,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "wasm-streams"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9d1ec4f6517c9e11ae630e200b2b65d193279042e28edd4a2cda233e46670bbb"
+dependencies = [
+ "futures-util",
+ "js-sys",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
 name = "wasmparser"
 version = "0.244.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5339,7 +5367,7 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "whitenoise"
 version = "0.2.1"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=afd911f0128631ad7773d9bd9e5d3b211f33fbde#afd911f0128631ad7773d9bd9e5d3b211f33fbde"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=6239aa582fff71cc22a524d3664d149a99e5cb8b#6239aa582fff71cc22a524d3664d149a99e5cb8b"
 dependencies = [
  "android-native-keyring-store",
  "anyhow",
@@ -5386,7 +5414,7 @@ dependencies = [
 [[package]]
 name = "whitenoise-macros"
 version = "0.1.0"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=afd911f0128631ad7773d9bd9e5d3b211f33fbde#afd911f0128631ad7773d9bd9e5d3b211f33fbde"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=6239aa582fff71cc22a524d3664d149a99e5cb8b#6239aa582fff71cc22a524d3664d149a99e5cb8b"
 dependencies = [
  "proc-macro2",
  "quote",

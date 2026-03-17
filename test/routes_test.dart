@@ -16,6 +16,7 @@ import 'package:whitenoise/screens/home_screen.dart';
 import 'package:whitenoise/screens/login_screen.dart';
 import 'package:whitenoise/screens/settings_screen.dart';
 import 'package:whitenoise/screens/signup_screen.dart';
+import 'package:whitenoise/screens/start_support_chat_screen.dart';
 import 'package:whitenoise/screens/user_search_screen.dart';
 import 'package:whitenoise/screens/user_selection_screen.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
@@ -99,7 +100,7 @@ void main() {
     );
   }
 
-  BuildContext getContext(WidgetTester tester) => tester.element(find.byType(Scaffold));
+  BuildContext getContext(WidgetTester tester) => tester.element(find.byType(Scaffold).first);
 
   group('build', () {
     group('when user is authenticated', () {
@@ -141,6 +142,13 @@ void main() {
       testWidgets('redirects to LoginScreen when accessing /donate', (tester) async {
         await pumpRouter(tester);
         Routes.pushToDonate(getContext(tester));
+        await tester.pumpAndSettle();
+        expect(find.byType(LoginScreen), findsOneWidget);
+      });
+
+      testWidgets('redirects to LoginScreen when accessing /start-support-chat', (tester) async {
+        await pumpRouter(tester);
+        Routes.pushToStartSupportChat(getContext(tester));
         await tester.pumpAndSettle();
         expect(find.byType(LoginScreen), findsOneWidget);
       });
@@ -388,6 +396,38 @@ void main() {
       await tester.pumpAndSettle();
       Routes.goBack(getContext(tester));
       await tester.pumpAndSettle();
+      expect(find.byType(ChatListScreen), findsOneWidget);
+    });
+  });
+
+  group('pushToStartSupportChat', () {
+    testWidgets('pushes StartSupportChatScreen onto stack', (tester) async {
+      await pumpRouter(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
+        ],
+      );
+      Routes.pushToStartSupportChat(getContext(tester));
+      await tester.pumpAndSettle();
+      expect(find.byType(StartSupportChatScreen), findsOneWidget);
+    });
+
+    testWidgets('does not reset navigation stack', (tester) async {
+      await pumpRouter(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
+        ],
+      );
+      Routes.pushToUserSearch(getContext(tester));
+      await tester.pumpAndSettle();
+      Routes.pushToStartSupportChat(getContext(tester));
+      await tester.pumpAndSettle();
+      expect(find.byType(StartSupportChatScreen), findsOneWidget);
+      Routes.goBack(getContext(tester));
+      await tester.pumpAndSettle();
+      expect(find.byType(StartSupportChatScreen), findsNothing);
       expect(find.byType(ChatListScreen), findsOneWidget);
     });
   });
