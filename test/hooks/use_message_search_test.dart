@@ -102,7 +102,7 @@ void main() {
 
     group('with non-empty query', () {
       testWidgets('calls search API with correct parameters after debounce', (tester) async {
-        await pump(tester, pubkey: testPubkeyA, groupId: testGroupId, query: 'hello');
+        await pump(tester, query: 'hello');
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pump();
 
@@ -153,7 +153,7 @@ void main() {
         expect(getState().results.length, 1);
 
         // Re-mount with empty query — results should be cleared immediately
-        await pump(tester, query: '');
+        await pump(tester);
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pump();
 
