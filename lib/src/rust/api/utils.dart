@@ -34,38 +34,30 @@ Future<String> groupIdToString({required GroupId groupId}) =>
 Future<GroupId> groupIdFromString({required String groupId}) =>
     RustLib.instance.api.crateApiUtilsGroupIdFromString(groupId: groupId);
 
-ThemeMode themeModeLight() =>
-    RustLib.instance.api.crateApiUtilsThemeModeLight();
+ThemeMode themeModeLight() => RustLib.instance.api.crateApiUtilsThemeModeLight();
 
 ThemeMode themeModeDark() => RustLib.instance.api.crateApiUtilsThemeModeDark();
 
-ThemeMode themeModeSystem() =>
-    RustLib.instance.api.crateApiUtilsThemeModeSystem();
+ThemeMode themeModeSystem() => RustLib.instance.api.crateApiUtilsThemeModeSystem();
 
 String themeModeToString({required ThemeMode themeMode}) =>
     RustLib.instance.api.crateApiUtilsThemeModeToString(themeMode: themeMode);
 
-Language languageEnglish() =>
-    RustLib.instance.api.crateApiUtilsLanguageEnglish();
+Language languageEnglish() => RustLib.instance.api.crateApiUtilsLanguageEnglish();
 
-Language languageSpanish() =>
-    RustLib.instance.api.crateApiUtilsLanguageSpanish();
+Language languageSpanish() => RustLib.instance.api.crateApiUtilsLanguageSpanish();
 
 Language languageFrench() => RustLib.instance.api.crateApiUtilsLanguageFrench();
 
 Language languageGerman() => RustLib.instance.api.crateApiUtilsLanguageGerman();
 
-Language languageItalian() =>
-    RustLib.instance.api.crateApiUtilsLanguageItalian();
+Language languageItalian() => RustLib.instance.api.crateApiUtilsLanguageItalian();
 
-Language languagePortuguese() =>
-    RustLib.instance.api.crateApiUtilsLanguagePortuguese();
+Language languagePortuguese() => RustLib.instance.api.crateApiUtilsLanguagePortuguese();
 
-Language languageRussian() =>
-    RustLib.instance.api.crateApiUtilsLanguageRussian();
+Language languageRussian() => RustLib.instance.api.crateApiUtilsLanguageRussian();
 
-Language languageTurkish() =>
-    RustLib.instance.api.crateApiUtilsLanguageTurkish();
+Language languageTurkish() => RustLib.instance.api.crateApiUtilsLanguageTurkish();
 
 Language languageSystem() => RustLib.instance.api.crateApiUtilsLanguageSystem();
 
