@@ -2364,11 +2364,11 @@ abstract class AppLocalizations {
   /// **'Please describe what went wrong.'**
   String get reportBugWhatWentWrongRequired;
 
-  /// Error notice shown when starting a help DM fails
+  /// Error notice shown when starting a DM with support account fails
   ///
   /// In en, this message translates to:
-  /// **'Failed to start help chat'**
-  String get failedToStartHelpChat;
+  /// **'Failed to start chat with support'**
+  String get failedToStartSupportChat;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

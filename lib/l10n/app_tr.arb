@@ -379,5 +379,5 @@
   "reportBugSuccess": "Hata raporu gönderildi. Teşekkürler!",
   "reportBugError": "Rapor gönderilemedi. Lütfen tekrar deneyin.",
   "reportBugWhatWentWrongRequired": "Lütfen neyin yanlış gittiğini açıklayın.",
-  "failedToStartHelpChat": "Yardım sohbeti başlatılamadı"
+  "failedToStartSupportChat": "Destek ile sohbet başlatılamadı"
 }

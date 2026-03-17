@@ -1681,9 +1681,9 @@
   "@reportBugWhatWentWrongRequired": {
     "description": "Validation error when 'what went wrong' is empty"
   },
-  "failedToStartHelpChat": "Failed to start help chat",
-  "@failedToStartHelpChat": {
-    "description": "Error notice shown when starting a help DM fails"
+  "failedToStartSupportChat": "Failed to start chat with support",
+  "@failedToStartSupportChat": {
+    "description": "Error notice shown when starting a DM with support account fails"
   },
   "thisMessageWasDeleted": "This message was deleted.",
   "@thisMessageWasDeleted": {
@@ -1703,21 +1703,12 @@
   "@fatalErrorTitle": {
     "description": "Error callout title on fatal error screen"
   },
-
   "fatalErrorDescription": "We hit a bump loading the app. It's not you, it's us and we're sorry.\n\nHelp us fix it. Tap below to send this error to our team.",
   "@fatalErrorDescription": {
     "description": "Error callout description on fatal error screen"
   },
-  "failedToStartHelpChat": "Failed to start help chat",
-  "@failedToStartHelpChat": {
-    "description": "Error notice shown when starting a help DM fails"
-  },
   "thisMessageWasDeleted": "This message was deleted.",
   "@thisMessageWasDeleted": {
     "description": "Text shown inside a deleted message bubble"
-  },
-  "failedToStartHelpChat": "Failed to start help chat",
-  "@failedToStartHelpChat": {
-    "description": "Error notice shown when starting a help DM fails"
   }
 }

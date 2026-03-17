@@ -379,5 +379,5 @@
   "reportBugSuccess": "Reporte de error enviado. ¡Gracias!",
   "reportBugError": "No se pudo enviar el reporte. Por favor, inténtalo de nuevo.",
   "reportBugWhatWentWrongRequired": "Por favor, describe qué salió mal.",
-  "failedToStartHelpChat": "Failed to start help chat"
+  "failedToStartSupportChat": "No se pudo iniciar el chat con soporte"
 }

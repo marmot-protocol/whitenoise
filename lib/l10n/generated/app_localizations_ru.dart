@@ -1320,5 +1320,5 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reportBugWhatWentWrongRequired => 'Пожалуйста, опишите, что пошло не так.';
 
   @override
-  String get failedToStartHelpChat => 'Не удалось запустить чат поддержки';
+  String get failedToStartSupportChat => 'Не удалось запустить чат с поддержкой';
 }

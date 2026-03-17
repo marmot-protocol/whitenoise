@@ -1289,5 +1289,5 @@ class AppLocalizationsTr extends AppLocalizations {
   String get reportBugWhatWentWrongRequired => 'Lütfen neyin yanlış gittiğini açıklayın.';
 
   @override
-  String get failedToStartHelpChat => 'Yardım sohbeti başlatılamadı';
+  String get failedToStartSupportChat => 'Destek ile sohbet başlatılamadı';
 }

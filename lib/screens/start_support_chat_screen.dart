@@ -52,9 +52,9 @@ class StartSupportChatScreen extends HookConsumerWidget {
           Routes.goToSupportChat(context, groupId);
         }
       } catch (e) {
-        _logger.severe('Failed to start help chat: $e');
+        _logger.severe('Failed to start support chat: $e');
         if (context.mounted) {
-          showErrorNotice(context.l10n.failedToStartHelpChat);
+          showErrorNotice(context.l10n.failedToStartSupportChat);
         }
       }
     }

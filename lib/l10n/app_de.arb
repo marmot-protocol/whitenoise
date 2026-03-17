@@ -379,5 +379,5 @@
   "reportBugSuccess": "Fehlerbericht gesendet. Vielen Dank!",
   "reportBugError": "Bericht konnte nicht gesendet werden. Bitte versuche es erneut.",
   "reportBugWhatWentWrongRequired": "Bitte beschreibe, was schiefgelaufen ist.",
-  "failedToStartHelpChat": "Failed to start help chat"
+  "failedToStartSupportChat": "Support-Chat konnte nicht gestartet werden"
 }

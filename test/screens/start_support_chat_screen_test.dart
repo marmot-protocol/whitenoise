@@ -143,7 +143,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(WnSystemNotice), findsOneWidget);
-      expect(find.text('Failed to start help chat'), findsOneWidget);
+      expect(find.text('Failed to start chat with support'), findsOneWidget);
     });
 
     testWidgets('shows loading indicator while sending', (tester) async {

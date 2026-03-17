@@ -379,5 +379,5 @@
   "reportBugSuccess": "Отчёт об ошибке отправлен. Спасибо!",
   "reportBugError": "Не удалось отправить отчёт. Попробуйте ещё раз.",
   "reportBugWhatWentWrongRequired": "Пожалуйста, опишите, что пошло не так.",
-  "failedToStartHelpChat": "Не удалось запустить чат поддержки"
+  "failedToStartSupportChat": "Не удалось запустить чат с поддержкой"
 }
