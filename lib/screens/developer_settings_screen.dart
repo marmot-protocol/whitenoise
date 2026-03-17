@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/debug_view_provider.dart';
-import 'package:whitenoise/providers/simulated_zapstore_version_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_separator.dart';
@@ -64,83 +63,10 @@ class DeveloperSettingsScreen extends HookConsumerWidget {
                     description: context.l10n.relayStateDescription,
                     onTap: () => Routes.pushToRelayControlState(context),
                   ),
-                  const WnSeparator(),
-                  SizedBox(height: 8.h),
-                  const _SimulateUpdateRow(),
                 ],
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _SimulateUpdateRow extends ConsumerWidget {
-  const _SimulateUpdateRow();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final colors = context.colors;
-    final typography = context.typographyScaled;
-    final simulated = ref.watch(simulatedZapstoreVersionProvider);
-    final isActive = simulated != null;
-
-    return InkWell(
-      key: const Key('simulate_update_row'),
-      onTap: () {
-        ref
-            .read(simulatedZapstoreVersionProvider.notifier)
-            .setVersion(isActive ? null : '9999.12.31');
-      },
-      child: SizedBox(
-        height: 56.h,
-        child: Row(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Simulate update banner',
-                      style: typography.medium16.copyWith(
-                        color: colors.backgroundContentPrimary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    Text(
-                      isActive ? 'Active — tap to clear' : 'Shows the update notice in chat list',
-                      style: typography.medium12.copyWith(
-                        color: isActive
-                            ? colors.intentionInfoContent
-                            : colors.backgroundContentSecondary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: EdgeInsets.only(right: 10.w),
-              child: Switch(
-                key: const Key('simulate_update_switch'),
-                value: isActive,
-                onChanged: (_) {
-                  ref
-                      .read(simulatedZapstoreVersionProvider.notifier)
-                      .setVersion(isActive ? null : '9999.12.31');
-                },
-                activeThumbColor: colors.backgroundContentPrimary,
-              ),
-            ),
-          ],
         ),
       ),
     );

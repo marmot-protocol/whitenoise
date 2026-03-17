@@ -8,7 +8,6 @@ import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_zapstore_update.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
-import 'package:whitenoise/providers/simulated_zapstore_version_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/chat_search.dart';
@@ -162,8 +161,7 @@ class ChatListScreen extends HookConsumerWidget {
     final chatListResult = useChatList(pubkey);
     final safeAreaTop = MediaQuery.of(context).padding.top;
     final notice = useSystemNotice();
-    final simulatedVersion = ref.watch(simulatedZapstoreVersionProvider);
-    final updateState = useZapstoreUpdate(simulatedVersion: simulatedVersion);
+    final updateState = useZapstoreUpdate();
     final searchQuery = useState('');
     final welcomeNoticeDismissed = useState(false);
 

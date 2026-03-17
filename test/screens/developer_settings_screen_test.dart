@@ -135,53 +135,5 @@ void main() {
         expect(find.byType(DeveloperSettingsScreen), findsOneWidget);
       });
     });
-
-    group('simulate update banner', () {
-      testWidgets('shows simulate update row', (tester) async {
-        await pumpScreen(tester);
-
-        expect(find.byKey(const Key('simulate_update_row')), findsOneWidget);
-        expect(find.text('Simulate update banner'), findsOneWidget);
-      });
-
-      testWidgets('switch starts off', (tester) async {
-        await pumpScreen(tester);
-
-        final sw = tester.widget<Switch>(find.byKey(const Key('simulate_update_switch')));
-        expect(sw.value, isFalse);
-      });
-
-      testWidgets('tapping row enables the switch', (tester) async {
-        await pumpScreen(tester);
-
-        await tester.tap(find.byKey(const Key('simulate_update_row')));
-        await tester.pumpAndSettle();
-
-        final sw = tester.widget<Switch>(find.byKey(const Key('simulate_update_switch')));
-        expect(sw.value, isTrue);
-      });
-
-      testWidgets('tapping switch enables it', (tester) async {
-        await pumpScreen(tester);
-
-        await tester.tap(find.byKey(const Key('simulate_update_switch')));
-        await tester.pumpAndSettle();
-
-        final sw = tester.widget<Switch>(find.byKey(const Key('simulate_update_switch')));
-        expect(sw.value, isTrue);
-      });
-
-      testWidgets('tapping row twice disables the switch', (tester) async {
-        await pumpScreen(tester);
-
-        await tester.tap(find.byKey(const Key('simulate_update_row')));
-        await tester.pumpAndSettle();
-        await tester.tap(find.byKey(const Key('simulate_update_row')));
-        await tester.pumpAndSettle();
-
-        final sw = tester.widget<Switch>(find.byKey(const Key('simulate_update_switch')));
-        expect(sw.value, isFalse);
-      });
-    });
   });
 }

@@ -3,29 +3,20 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:whitenoise/src/rust/api/zapstore.dart';
 
-({String? availableVersion, bool isDismissed, void Function() dismiss}) useZapstoreUpdate({
-  String? simulatedVersion,
-}) {
+({String? availableVersion, bool isDismissed, void Function() dismiss}) useZapstoreUpdate() {
   final isDismissed = useState(false);
-
-  // Reset dismissed state whenever the simulated version changes — this way
-  // toggling the dev-settings switch off and back on shows the banner again.
-  useEffect(() {
-    isDismissed.value = false;
-    return null;
-  }, [simulatedVersion]);
 
   final future = useMemoized(
     () async {
-      if (simulatedVersion == null && defaultTargetPlatform != TargetPlatform.android) return null;
+      if (defaultTargetPlatform != TargetPlatform.android) return null;
       final installed = (await PackageInfo.fromPlatform()).version;
-      final latest = simulatedVersion ?? await fetchLatestZapstoreVersion();
+      final latest = await fetchLatestZapstoreVersion();
       if (latest != null && _isNewer(latest, installed)) {
         return latest;
       }
       return null;
     },
-    [simulatedVersion],
+    [],
   );
 
   final snapshot = useFuture(future);
