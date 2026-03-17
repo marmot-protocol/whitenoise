@@ -1236,19 +1236,6 @@ class AppLocalizationsPt extends AppLocalizations {
       'Falha ao carregar o estado de controle do relay. Por favor, tente novamente.';
 
   @override
-  String get fatalErrorCopyError => 'Copiar erro';
-
-  @override
-  String get fatalErrorErrorCopied => 'Erro copiado para a área de transferência';
-
-  @override
-  String get fatalErrorTitle => 'Oh, não!';
-
-  @override
-  String get fatalErrorDescription =>
-      'Tivemos um problema ao carregar o app. Não é você, somos nós e sentimos muito.\n\nNos ajude a corrigir. Toque abaixo para enviar este erro para nossa equipe.';
-
-  @override
   String get reportBug => 'Reportar bug';
 
   @override
@@ -1299,4 +1286,17 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get failedToStartSupportChat => 'Falha ao iniciar a conversa com o suporte';
+
+  @override
+  String get fatalErrorTitle => 'Oh, não!';
+
+  @override
+  String get fatalErrorDescription =>
+      'Tivemos um problema ao carregar o app. Não é você, somos nós e sentimos muito.\n\nNos ajude a corrigir. Toque abaixo para enviar este erro para nossa equipe.';
+
+  @override
+  String get fatalErrorCopyError => 'Copiar erro';
+
+  @override
+  String get fatalErrorErrorCopied => 'Erro copiado para a área de transferência';
 }

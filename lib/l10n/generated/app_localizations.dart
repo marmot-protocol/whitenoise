@@ -2244,30 +2244,6 @@ abstract class AppLocalizations {
   /// **'Failed to load relay control state. Please try again.'**
   String get relayControlStateLoadError;
 
-  /// Button label on the fatal error screen diagnostics box to copy the error to clipboard
-  ///
-  /// In en, this message translates to:
-  /// **'Copy error'**
-  String get fatalErrorCopyError;
-
-  /// System notice shown after copying error details to clipboard on the fatal error screen
-  ///
-  /// In en, this message translates to:
-  /// **'Error copied to clipboard'**
-  String get fatalErrorErrorCopied;
-
-  /// Error callout title on fatal error screen
-  ///
-  /// In en, this message translates to:
-  /// **'Oh no!'**
-  String get fatalErrorTitle;
-
-  /// Error callout description on fatal error screen
-  ///
-  /// In en, this message translates to:
-  /// **'We hit a bump loading the app. It\'s not you, it\'s us and we\'re sorry.\n\nHelp us fix it. Tap below to send this error to our team.'**
-  String get fatalErrorDescription;
-
   /// Report bug menu item and screen title
   ///
   /// In en, this message translates to:
@@ -2369,6 +2345,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to start chat with support'**
   String get failedToStartSupportChat;
+
+  /// Error callout title on fatal error screen
+  ///
+  /// In en, this message translates to:
+  /// **'Oh no!'**
+  String get fatalErrorTitle;
+
+  /// Error callout description on fatal error screen
+  ///
+  /// In en, this message translates to:
+  /// **'We hit a bump loading the app. It\'s not you, it\'s us and we\'re sorry.\n\nHelp us fix it. Tap below to send this error to our team.'**
+  String get fatalErrorDescription;
+
+  /// Button label on the fatal error screen diagnostics box to copy the error to clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Copy error'**
+  String get fatalErrorCopyError;
+
+  /// System notice shown after copying error details to clipboard on the fatal error screen
+  ///
+  /// In en, this message translates to:
+  /// **'Error copied to clipboard'**
+  String get fatalErrorErrorCopied;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
