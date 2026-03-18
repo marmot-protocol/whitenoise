@@ -358,6 +358,7 @@
   "invalidRelayUrlScheme": "URL должен начинаться с wss:// или ws://",
   "invalidRelayUrl": "Неверный URL реле",
   "thisMessageWasDeleted": "Это сообщение было удалено.",
+  "youDeletedThisMessage": "Вы удалили это сообщение.",
   "relayControlStateLoadError": "Не удалось загрузить состояние управления реле. Пожалуйста, попробуйте снова.",
   "fatalErrorCopyError": "Копировать ошибку",
   "fatalErrorErrorCopied": "Ошибка скопирована в буфер обмена",

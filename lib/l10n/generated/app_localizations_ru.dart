@@ -1252,6 +1252,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get thisMessageWasDeleted => 'Это сообщение было удалено.';
 
   @override
+  String get youDeletedThisMessage => 'Вы удалили это сообщение.';
+
+  @override
   String get relayControlStateLoadError =>
       'Не удалось загрузить состояние управления реле. Пожалуйста, попробуйте снова.';
 

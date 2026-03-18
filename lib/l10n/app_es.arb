@@ -358,6 +358,7 @@
   "invalidRelayUrlScheme": "La URL debe comenzar con wss:// o ws://",
   "invalidRelayUrl": "URL de relé inválida",
   "thisMessageWasDeleted": "Este mensaje fue eliminado.",
+  "youDeletedThisMessage": "Has eliminado este mensaje.",
   "relayControlStateLoadError": "Error al cargar el estado de relés. Por favor, inténtalo de nuevo.",
   "fatalErrorCopyError": "Copiar error",
   "fatalErrorErrorCopied": "Error copiado al portapapeles",

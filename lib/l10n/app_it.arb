@@ -358,6 +358,7 @@
   "invalidRelayUrlScheme": "L'URL deve iniziare con wss:// o ws://",
   "invalidRelayUrl": "URL relay non valida",
   "thisMessageWasDeleted": "Questo messaggio è stato eliminato.",
+  "youDeletedThisMessage": "Hai eliminato questo messaggio.",
   "relayControlStateLoadError": "Impossibile caricare lo stato di controllo del relay. Per favore, riprova.",
   "fatalErrorCopyError": "Copia errore",
   "fatalErrorErrorCopied": "Errore copiato negli appunti",

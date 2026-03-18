@@ -1222,6 +1222,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get thisMessageWasDeleted => 'This message was deleted.';
 
   @override
+  String get youDeletedThisMessage => 'You deleted this message.';
+
+  @override
   String get relayControlStateLoadError => 'Failed to load relay control state. Please try again.';
 
   @override

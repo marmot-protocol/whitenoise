@@ -1222,6 +1222,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get thisMessageWasDeleted => 'Bu mesaj silindi.';
 
   @override
+  String get youDeletedThisMessage => 'Bu mesajı sildin.';
+
+  @override
   String get relayControlStateLoadError =>
       'Röle kontrol durumu yüklenemedi. Lütfen tekrar deneyin.';
 

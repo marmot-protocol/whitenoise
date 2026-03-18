@@ -358,6 +358,7 @@
   "invalidRelayUrlScheme": "URL wss:// veya ws:// ile başlamalıdır",
   "invalidRelayUrl": "Geçersiz röle URL'si",
   "thisMessageWasDeleted": "Bu mesaj silindi.",
+  "youDeletedThisMessage": "Bu mesajı sildin.",
   "relayControlStateLoadError": "Röle kontrol durumu yüklenemedi. Lütfen tekrar deneyin.",
   "fatalErrorCopyError": "Hatayı kopyala",
   "fatalErrorErrorCopied": "Hata panoya kopyalandı",

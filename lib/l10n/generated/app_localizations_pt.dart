@@ -1232,6 +1232,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get thisMessageWasDeleted => 'Esta mensagem foi excluída.';
 
   @override
+  String get youDeletedThisMessage => 'Você excluiu esta mensagem.';
+
+  @override
   String get relayControlStateLoadError =>
       'Falha ao carregar o estado de controle do relay. Por favor, tente novamente.';
 

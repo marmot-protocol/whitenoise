@@ -1237,6 +1237,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get thisMessageWasDeleted => 'Ce message a été supprimé.';
 
   @override
+  String get youDeletedThisMessage => 'Tu as supprimé ce message.';
+
+  @override
   String get relayControlStateLoadError =>
       'Échec du chargement de l\'état de contrôle du relais. Veuillez réessayer.';
 
