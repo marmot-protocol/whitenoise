@@ -46,9 +46,20 @@ void main() {
   });
 
   group('filteredAppLogProvider', () {
-    test('returns all entries when no filters', () {
+    test('returns filtered entries when no patterns but default levels applied', () {
+      final filtered = container.read(filteredAppLogProvider);
+      expect(filtered.length, 2);
+      expect(filtered.map((e) => e.message), containsAll(['error occurred', 'connection timeout']));
+    });
+
+    test('returns all entries when all levels are applied', () {
+      container.read(appLogFilterProvider.notifier).toggleLevel(Level.INFO);
       final filtered = container.read(filteredAppLogProvider);
       expect(filtered.length, 3);
+      expect(
+        filtered.map((e) => e.message),
+        containsAll(['hello world', 'error occurred', 'connection timeout']),
+      );
     });
 
     test('search filters by substring', () {
@@ -59,6 +70,7 @@ void main() {
     });
 
     test('search is case insensitive', () {
+      container.read(appLogFilterProvider.notifier).toggleLevel(Level.INFO);
       container.read(appLogFilterProvider.notifier).setSearch('HELLO');
       final filtered = container.read(filteredAppLogProvider);
       expect(filtered.length, 1);
@@ -66,6 +78,7 @@ void main() {
     });
 
     test('exclude hides matching entries', () {
+      container.read(appLogFilterProvider.notifier).toggleLevel(Level.INFO);
       container.read(appLogFilterProvider.notifier).addExclude('timeout');
       final filtered = container.read(filteredAppLogProvider);
       expect(filtered.length, 2);
@@ -74,6 +87,7 @@ void main() {
     });
 
     test('include shows only matching entries', () {
+      container.read(appLogFilterProvider.notifier).toggleLevel(Level.INFO);
       container.read(appLogFilterProvider.notifier).addInclude('world');
       final filtered = container.read(filteredAppLogProvider);
       expect(filtered.length, 1);
@@ -81,6 +95,7 @@ void main() {
     });
 
     test('include with multiple patterns shows entries matching any', () {
+      container.read(appLogFilterProvider.notifier).toggleLevel(Level.INFO);
       container.read(appLogFilterProvider.notifier).addInclude('world');
       container.read(appLogFilterProvider.notifier).addInclude('timeout');
       final filtered = container.read(filteredAppLogProvider);
@@ -94,16 +109,52 @@ void main() {
       expect(filtered.length, 0);
     });
 
-    test('clearAll resets all filters', () {
+    test('clearAll resets all filters including levels', () {
       container.read(appLogFilterProvider.notifier).setSearch('x');
       container.read(appLogFilterProvider.notifier).addExclude('y');
+      container.read(appLogFilterProvider.notifier).addInclude('z');
+      container.read(appLogFilterProvider.notifier).toggleLevel(Level.INFO);
       container.read(appLogFilterProvider.notifier).clearAll();
+
       final filter = container.read(appLogFilterProvider);
       expect(filter.searchQuery, '');
       expect(filter.excludePatterns, isEmpty);
       expect(filter.includePatterns, isEmpty);
+      expect(filter.selectedLevels, [Level.WARNING, Level.SEVERE, Level.SHOUT]);
+
       final filtered = container.read(filteredAppLogProvider);
-      expect(filtered.length, 3);
+      expect(filtered.length, 2);
+    });
+  });
+
+  group('AppLogFilterNotifier levels', () {
+    test('toggleLevel toggles individual level', () {
+      final notifier = container.read(appLogFilterProvider.notifier);
+      expect(container.read(appLogFilterProvider).selectedLevels, isNot(contains(Level.INFO)));
+
+      notifier.toggleLevel(Level.INFO);
+      expect(container.read(appLogFilterProvider).selectedLevels, contains(Level.INFO));
+
+      notifier.toggleLevel(Level.INFO);
+      expect(container.read(appLogFilterProvider).selectedLevels, isNot(contains(Level.INFO)));
+    });
+
+    test('toggleLevel on SEVERE toggles both SEVERE and SHOUT', () {
+      final notifier = container.read(appLogFilterProvider.notifier);
+      expect(
+        container.read(appLogFilterProvider).selectedLevels,
+        containsAll([Level.SEVERE, Level.SHOUT]),
+      );
+
+      notifier.toggleLevel(Level.SEVERE);
+      expect(container.read(appLogFilterProvider).selectedLevels, isNot(contains(Level.SEVERE)));
+      expect(container.read(appLogFilterProvider).selectedLevels, isNot(contains(Level.SHOUT)));
+
+      notifier.toggleLevel(Level.SEVERE);
+      expect(
+        container.read(appLogFilterProvider).selectedLevels,
+        containsAll([Level.SEVERE, Level.SHOUT]),
+      );
     });
   });
 

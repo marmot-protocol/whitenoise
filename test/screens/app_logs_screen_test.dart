@@ -116,7 +116,7 @@ void main() {
 
       await pumpScreen(tester);
 
-      expect(find.text('SEVERE'), findsOneWidget);
+      expect(find.text('SEVERE').last, findsOneWidget);
       expect(find.text('rust'), findsOneWidget);
       expect(find.text('failed to send message'), findsOneWidget);
       expect(find.textContaining('error: socket error'), findsOneWidget);
@@ -124,7 +124,10 @@ void main() {
     });
 
     testWidgets('search filters visible logs', (tester) async {
-      _entries = [_entry('alpha event'), _entry('beta event')];
+      _entries = [
+        _entry('alpha event', level: Level.WARNING),
+        _entry('beta event', level: Level.WARNING),
+      ];
       await pumpScreen(tester);
 
       await tester.enterText(find.byKey(const Key('app_logs_search')), 'alpha');
@@ -136,7 +139,10 @@ void main() {
     });
 
     testWidgets('adds and removes exclude/include patterns', (tester) async {
-      _entries = [_entry('network timeout warning'), _entry('auth success')];
+      _entries = [
+        _entry('network timeout warning', level: Level.WARNING),
+        _entry('auth success', level: Level.WARNING),
+      ];
       await pumpScreen(tester);
 
       await tester.enterText(find.byKey(const Key('app_logs_pattern_input')), 'timeout');
@@ -167,7 +173,7 @@ void main() {
     });
 
     testWidgets('submitting pattern input adds exclude filter', (tester) async {
-      _entries = [_entry('alpha'), _entry('beta')];
+      _entries = [_entry('alpha', level: Level.WARNING), _entry('beta', level: Level.WARNING)];
       await pumpScreen(tester);
 
       await tester.enterText(find.byKey(const Key('app_logs_pattern_input')), 'alpha');
@@ -179,7 +185,10 @@ void main() {
     });
 
     testWidgets('clear filters resets search and patterns', (tester) async {
-      _entries = [_entry('foo event'), _entry('bar event')];
+      _entries = [
+        _entry('foo event', level: Level.WARNING),
+        _entry('bar event', level: Level.WARNING),
+      ];
       await pumpScreen(tester);
 
       await tester.enterText(find.byKey(const Key('app_logs_search')), 'foo');
@@ -198,7 +207,10 @@ void main() {
     });
 
     testWidgets('shows filtered count when entries are filtered out', (tester) async {
-      _entries = [_entry('alpha event'), _entry('beta event')];
+      _entries = [
+        _entry('alpha event', level: Level.WARNING),
+        _entry('beta event', level: Level.WARNING),
+      ];
       await pumpScreen(tester);
 
       await tester.enterText(find.byKey(const Key('app_logs_search')), 'nomatch');
@@ -210,7 +222,7 @@ void main() {
     });
 
     testWidgets('clear logs button removes all entries', (tester) async {
-      _entries = [_entry('first'), _entry('second')];
+      _entries = [_entry('first', level: Level.WARNING), _entry('second', level: Level.WARNING)];
       await pumpScreen(tester);
 
       expect(find.text('first'), findsOneWidget);
@@ -225,35 +237,31 @@ void main() {
     });
 
     testWidgets('resume-live button is hidden when list is at the bottom', (tester) async {
-      _entries = [_entry('only entry')];
+      _entries = [_entry('only entry', level: Level.WARNING)];
       await pumpScreen(tester);
 
       expect(find.byKey(const Key('app_logs_resume_live')), findsNothing);
     });
 
     testWidgets('scrolling up shows resume-live button and freezes the list', (tester) async {
-      // Populate enough entries so the list is scrollable.
       _entries = List.generate(
         50,
-        (i) => _entry('log entry $i', time: DateTime(2026, 1, 1, 0, 0, i)),
+        (i) => _entry('log entry $i', level: Level.WARNING, time: DateTime(2026, 1, 1, 0, 0, i)),
       );
       await pumpScreen(tester);
 
-      // Button should not be visible yet (we are at the bottom).
       expect(find.byKey(const Key('app_logs_resume_live')), findsNothing);
 
-      // Drag upward (positive delta scrolls a reversed list toward older entries).
       await tester.drag(find.byKey(const Key('app_logs_list')), const Offset(0, 300));
       await tester.pumpAndSettle();
 
-      // Button should now appear.
       expect(find.byKey(const Key('app_logs_resume_live')), findsOneWidget);
     });
 
     testWidgets('tapping resume-live button hides the button', (tester) async {
       _entries = List.generate(
         50,
-        (i) => _entry('log entry $i', time: DateTime(2026, 1, 1, 0, 0, i)),
+        (i) => _entry('log entry $i', level: Level.WARNING, time: DateTime(2026, 1, 1, 0, 0, i)),
       );
       await pumpScreen(tester);
 
@@ -351,6 +359,9 @@ void main() {
 
       await pumpScreen(tester);
 
+      await tester.tap(find.text('INFO').first);
+      await tester.pumpAndSettle();
+
       expect(find.byKey(const Key('app_logs_copy_all')), findsOneWidget);
 
       await tester.tap(find.byKey(const Key('app_logs_copy_all')));
@@ -391,9 +402,9 @@ void main() {
       });
 
       _entries = [
-        _entry('alpha message'),
-        _entry('beta message'),
-        _entry('gamma message'),
+        _entry('alpha message', level: Level.WARNING),
+        _entry('beta message', level: Level.WARNING),
+        _entry('gamma message', level: Level.WARNING),
       ];
 
       await pumpScreen(tester);
@@ -421,7 +432,31 @@ void main() {
       _entries = [_entry('info message')];
       await pumpScreen(tester);
 
-      expect(find.text('INFO'), findsOneWidget);
+      await tester.tap(find.text('INFO').first);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(of: find.byKey(const Key('app_logs_list')), matching: find.text('INFO')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('INFO logs are hidden by default and appear after enabling INFO level', (
+      tester,
+    ) async {
+      _entries = [
+        _entry('info only'),
+        _entry('warning only', level: Level.WARNING),
+      ];
+      await pumpScreen(tester);
+
+      expect(find.text('warning only'), findsOneWidget);
+      expect(find.text('info only'), findsNothing);
+
+      await tester.tap(find.text('INFO').first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('info only'), findsOneWidget);
     });
   });
 }
