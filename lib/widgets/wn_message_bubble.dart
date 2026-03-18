@@ -584,9 +584,7 @@ class WnMessageBubble extends StatelessWidget {
     final hasSenderName = !_isOutgoing && senderName != null && senderName!.isNotEmpty;
 
     final reactionType = _isOutgoing ? WnReactionType.outgoing : WnReactionType.incoming;
-    final textStyle = isDeleted
-        ? context.typographyScaled.medium16Compact.copyWith(color: textColor)
-        : context.typographyScaled.medium14.copyWith(color: textColor);
+    final textStyle = context.typographyScaled.medium16Compact.copyWith(color: textColor);
     final tsStyle = context.typographyScaled.medium12.copyWith(color: timestampColor);
 
     final bubbleContent = _BubbleContent(
