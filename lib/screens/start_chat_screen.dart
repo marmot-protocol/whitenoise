@@ -23,6 +23,7 @@ import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart' show WnSystemNotice;
 import 'package:whitenoise/widgets/wn_user_profile_card.dart';
+import 'package:whitenoise/utils/logging.dart';
 
 final _logger = Logger('StartChatScreen');
 
@@ -70,13 +71,26 @@ class StartChatScreen extends HookConsumerWidget {
 
     Future<void> startChat() async {
       if (isSelf) return;
+      final stopWatch = Stopwatch()..start();
       try {
         final groupId = await dmState.startDm();
+        logDuration(
+          _logger,
+          'startDm took',
+          stopWatch.elapsedMilliseconds,
+        );
+
         if (context.mounted) {
           Routes.goToChat(context, groupId);
+        } else {
+          _logger.warning('Context not mounted after DM creation. Aborting navigation.');
         }
-      } catch (e) {
-        _logger.severe('Failed to start chat: $e');
+      } catch (e, stackTrace) {
+        _logger.severe(
+          'Failed to start chat after ${stopWatch.elapsedMilliseconds}ms',
+          e,
+          stackTrace,
+        );
         if (context.mounted) {
           showErrorNotice(context.l10n.failedToStartChat);
         }

@@ -2,6 +2,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart' as account_groups_api;
 import 'package:whitenoise/src/rust/api/groups.dart' as groups_api;
+import 'package:whitenoise/utils/logging.dart';
 
 final _logger = Logger('useStartDm');
 
@@ -18,6 +19,7 @@ StartDmState useStartDm({
 
   Future<String> startDm() async {
     isLoading.value = true;
+    final totalStopWatch = Stopwatch()..start();
     try {
       final existingGroupId = await account_groups_api.getDmGroupWithPeer(
         accountPubkey: accountPubkey,
@@ -25,9 +27,20 @@ StartDmState useStartDm({
       );
 
       if (existingGroupId != null) {
+        logDuration(
+          _logger,
+          'getDmGroupWithPeer found existing DM',
+          totalStopWatch.elapsedMilliseconds,
+        );
         return existingGroupId;
+      } else {
+        logDuration(
+          _logger,
+          'getDmGroupWithPeer did not find existing DM in',
+          totalStopWatch.elapsedMilliseconds,
+        );
       }
-
+      final createGroupStopWatch = Stopwatch()..start();
       final group = await groups_api.createGroup(
         creatorPubkey: accountPubkey,
         memberPubkeys: [peerPubkey],
@@ -36,9 +49,19 @@ StartDmState useStartDm({
         groupDescription: '',
         groupType: groups_api.GroupType.directMessage,
       );
+      logDuration(
+        _logger,
+        'createGroup took',
+        createGroupStopWatch.elapsedMilliseconds,
+      );
+      logDuration(
+        _logger,
+        'Total DM creation',
+        totalStopWatch.elapsedMilliseconds,
+      );
       return group.mlsGroupId;
     } catch (e) {
-      _logger.severe('Failed to start DM: $e');
+      _logger.severe('Failed to start DM after ${totalStopWatch.elapsedMilliseconds}ms: $e');
       rethrow;
     } finally {
       isLoading.value = false;

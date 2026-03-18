@@ -17,12 +17,14 @@ class _MockApi extends MockWnApi {
   User? nonBlockingUserResult;
   User? blockingUserResult;
   bool getUserShouldThrow = false;
+  bool getMetadataShouldThrow = false;
 
   @override
   Future<FlutterMetadata> crateApiUsersUserMetadata({
     required String pubkey,
     required bool blockingDataSync,
   }) async {
+    if (getMetadataShouldThrow) throw Exception('Failed to fetch metadata');
     return blockingDataSync ? blockingMetadataResult : nonBlockingMetadataResult;
   }
 
@@ -57,6 +59,7 @@ void main() {
       name: 'blocking_sync_result',
       custom: {},
     );
+    mockApi.getMetadataShouldThrow = false;
     mockApi.nonBlockingUserResult = null;
     mockApi.blockingUserResult = null;
     mockApi.getUserShouldThrow = false;
@@ -131,6 +134,16 @@ void main() {
         final result = await service.fetchMetadata();
 
         expect(result.name, 'blocking_sync_result');
+      });
+    });
+
+    group('when API throws', () {
+      setUp(() {
+        mockApi.getMetadataShouldThrow = true;
+      });
+
+      test('rethrows the exception', () async {
+        expect(() => service.fetchMetadata(), throwsException);
       });
     });
   });

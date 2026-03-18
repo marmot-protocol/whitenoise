@@ -9,6 +9,7 @@ import 'package:whitenoise/src/rust/api/user_search.dart' as user_search_api;
 import 'package:whitenoise/src/rust/api/users.dart' show User;
 import 'package:whitenoise/utils/encoding.dart';
 import 'package:whitenoise/utils/metadata.dart' show presentName;
+import 'package:whitenoise/utils/logging.dart';
 
 final _logger = Logger('useUserSearch');
 
@@ -86,7 +87,19 @@ UserSearchState useUserSearch({
   final refreshTick = _usePeriodicTick(_followsRefreshInterval);
 
   final followsFuture = useMemoized(
-    () => accounts_api.accountFollows(pubkey: accountPubkey),
+    () async {
+      final stopWatch = Stopwatch()..start();
+      try {
+        final follows = await accounts_api.accountFollows(pubkey: accountPubkey);
+        return follows;
+      } finally {
+        logDuration(
+          _logger,
+          'accountFollows for $accountPubkey took',
+          stopWatch.elapsedMilliseconds,
+        );
+      }
+    },
     [accountPubkey, refreshTick],
   );
   final followsSnapshot = useFuture(followsFuture);
