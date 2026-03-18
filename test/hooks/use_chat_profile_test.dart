@@ -37,7 +37,14 @@ class _MockApi extends MockWnApi {
   bool isDm = false;
   String groupName = 'Test Group';
   List<String> members = [_pubkey, _otherPubkey];
-  FlutterMetadata metadata = _metadata;
+  FlutterMetadata localMetadata = _metadata;
+  FlutterMetadata remoteMetadata = _metadata;
+  FlutterMetadata get metadata => localMetadata;
+  set metadata(FlutterMetadata value) {
+    localMetadata = value;
+    remoteMetadata = value;
+  }
+
   bool shouldError = false;
 
   @override
@@ -65,7 +72,7 @@ class _MockApi extends MockWnApi {
   Future<FlutterMetadata> crateApiUsersUserMetadata({
     required String pubkey,
     required bool blockingDataSync,
-  }) => Future.value(metadata);
+  }) => Future.value(blockingDataSync ? remoteMetadata : localMetadata);
 
   @override
   Future<String?> crateApiGroupsGetGroupImagePath({
@@ -133,6 +140,25 @@ void main() {
             const ChatProfile(
               displayName: 'bob',
               color: _otherPubkeyColor,
+              otherMemberPubkey: _otherPubkey,
+              isDm: true,
+            ),
+          );
+        });
+      });
+
+      group('when other member has missing local metadata but remote metadata exists', () {
+        testWidgets('falls back to remote metadata for displayName/picture', (tester) async {
+          _api.metadata = const FlutterMetadata(custom: {});
+          _api.remoteMetadata = _metadata;
+          await _mountHook(tester);
+
+          expect(
+            getResult().data,
+            const ChatProfile(
+              displayName: 'Alice',
+              color: _otherPubkeyColor,
+              pictureUrl: 'https://example.com/alice.jpg',
               otherMemberPubkey: _otherPubkey,
               isDm: true,
             ),

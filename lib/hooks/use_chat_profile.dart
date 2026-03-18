@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/hooks/use_route_refresh.dart';
+import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' as groups_api;
-import 'package:whitenoise/src/rust/api/users.dart' as users_api;
 import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/metadata.dart';
 
@@ -116,11 +116,7 @@ Future<ChatProfile> _fetchDmProfile(
       isDm: true,
     );
   }
-
-  final metadata = await users_api.userMetadata(
-    pubkey: otherMemberPubkey,
-    blockingDataSync: false,
-  );
+  final metadata = await UserService(otherMemberPubkey).fetchMetadata();
 
   return ChatProfile(
     displayName: presentName(metadata),
