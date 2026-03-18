@@ -9,14 +9,16 @@ typedef SupportChatState = ({
   String? existingGroupId,
 });
 
-SupportChatState useSupportChat({required String accountPubkey}) {
-  final future = useMemoized(
-    () => account_groups_api.getDmGroupWithPeer(
+SupportChatState useSupportChat({required String? accountPubkey}) {
+  final future = useMemoized(() {
+    // When auth is missing (e.g. signed out), we don't want to hit the DM-group lookup.
+    if (accountPubkey == null) return Future<String?>.value(null);
+
+    return account_groups_api.getDmGroupWithPeer(
       accountPubkey: accountPubkey,
       peerPubkey: supportPubkey,
-    ),
-    [accountPubkey],
-  );
+    );
+  }, [accountPubkey]);
   final snapshot = useFuture(future);
 
   return (

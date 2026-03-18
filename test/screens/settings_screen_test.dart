@@ -7,6 +7,7 @@ import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/appearance_screen.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
+import 'package:whitenoise/screens/chat_screen.dart';
 import 'package:whitenoise/screens/developer_settings_screen.dart';
 import 'package:whitenoise/screens/donate_screen.dart';
 import 'package:whitenoise/screens/edit_profile_screen.dart';
@@ -15,6 +16,7 @@ import 'package:whitenoise/screens/privacy_security_screen.dart';
 import 'package:whitenoise/screens/profile_keys_screen.dart';
 import 'package:whitenoise/screens/share_profile_screen.dart';
 import 'package:whitenoise/screens/sign_out_screen.dart';
+import 'package:whitenoise/screens/start_support_chat_screen.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
@@ -25,6 +27,7 @@ import '../test_helpers.dart';
 
 class _MockApi extends MockWnApi {
   bool returnNoName = false;
+  String? dmGroupResult;
 
   @override
   Future<FlutterMetadata> crateApiUsersUserMetadata({
@@ -44,6 +47,14 @@ class _MockApi extends MockWnApi {
   @override
   Future<String> crateApiAccountsExportAccountNsec({required String pubkey}) async {
     return 'nsec1test${pubkey.substring(0, 10)}';
+  }
+
+  @override
+  Future<String?> crateApiAccountGroupsGetDmGroupWithPeer({
+    required String accountPubkey,
+    required String peerPubkey,
+  }) async {
+    return dmGroupResult;
   }
 }
 
@@ -78,6 +89,7 @@ void main() {
 
   setUp(() {
     mockApi.reset();
+    mockApi.dmGroupResult = null;
   });
 
   late _MockAuthNotifier mockAuth;
@@ -180,6 +192,10 @@ void main() {
       tester,
     ) async {
       await pumpSettingsScreen(tester);
+      await tester.scrollUntilVisible(
+        find.text('Developer settings'),
+        500,
+      );
       await tester.tap(find.text('Developer settings'));
       await tester.pumpAndSettle();
       expect(find.byType(DeveloperSettingsScreen), findsOneWidget);
@@ -190,6 +206,32 @@ void main() {
       await tester.tap(find.text('Switch profile'));
       await tester.pumpAndSettle();
       expect(find.text('Profiles'), findsOneWidget);
+    });
+
+    testWidgets('displays chat with support menu item', (tester) async {
+      await pumpSettingsScreen(tester);
+      expect(find.byKey(const Key('help_and_support_menu_item')), findsOneWidget);
+      expect(find.text('Chat with support'), findsOneWidget);
+    });
+
+    testWidgets('tapping chat with support starts support chat when no DM exists', (tester) async {
+      mockApi.dmGroupResult = null;
+      await pumpSettingsScreen(tester);
+
+      await tester.tap(find.byKey(const Key('help_and_support_menu_item')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StartSupportChatScreen), findsOneWidget);
+    });
+
+    testWidgets('tapping chat with support opens existing chat when DM exists', (tester) async {
+      mockApi.dmGroupResult = testGroupId;
+      await pumpSettingsScreen(tester);
+
+      await tester.tap(find.byKey(const Key('help_and_support_menu_item')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ChatScreen), findsOneWidget);
     });
 
     testWidgets('renders empty widget when pubkey becomes null', (tester) async {
