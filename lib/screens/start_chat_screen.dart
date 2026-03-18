@@ -12,9 +12,9 @@ import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
-import 'package:whitenoise/src/rust/api/metadata.dart' show FlutterMetadata;
 import 'package:whitenoise/src/rust/api/users.dart' show KeyPackageStatus;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/logging.dart';
 import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_callout.dart';
@@ -23,15 +23,13 @@ import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart' show WnSystemNotice;
 import 'package:whitenoise/widgets/wn_user_profile_card.dart';
-import 'package:whitenoise/utils/logging.dart';
 
 final _logger = Logger('StartChatScreen');
 
 class StartChatScreen extends HookConsumerWidget {
-  const StartChatScreen({super.key, required this.userPubkey, this.initialMetadata});
+  const StartChatScreen({super.key, required this.userPubkey});
 
   final String userPubkey;
-  final FlutterMetadata? initialMetadata;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -59,15 +57,10 @@ class StartChatScreen extends HookConsumerWidget {
       peerPubkey: userPubkey,
     );
 
-    final fetchedMetadata = metadataSnapshot.data;
-    final hasContent = fetchedMetadata != null && presentName(fetchedMetadata) != null;
-    final metadata = hasContent ? fetchedMetadata : (initialMetadata ?? fetchedMetadata);
-    final isLoading =
-        metadataSnapshot.connectionState == ConnectionState.waiting ||
-        keyPackageSnapshot.connectionState == ConnectionState.waiting ||
-        followState.isLoading;
+    final metadata = metadataSnapshot.data;
     final isFollowing = followState.isFollowing;
     final keyPackageStatus = keyPackageSnapshot.data;
+    final isKeyPackageLoading = keyPackageSnapshot.connectionState == ConnectionState.waiting;
 
     Future<void> startChat() async {
       if (isSelf) return;
@@ -106,6 +99,51 @@ class StartChatScreen extends HookConsumerWidget {
           showErrorNotice(context.l10n.failedToUpdateFollow);
         }
       }
+    }
+
+    Widget validActionsColumn() {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: double.infinity,
+            child: WnButton(
+              key: const Key('follow_button'),
+              text: isFollowing ? context.l10n.removeAsContact : context.l10n.addAsContact,
+              type: WnButtonType.outline,
+              size: WnButtonSize.medium,
+              trailingIcon: isFollowing ? WnIcons.userUnfollow : WnIcons.userFollow,
+              loading: followState.isLoading || followState.isActionLoading,
+              onPressed: handleFollowAction,
+            ),
+          ),
+          Gap(8.h),
+          SizedBox(
+            width: double.infinity,
+            child: WnButton(
+              key: const Key('add_to_group_button'),
+              text: context.l10n.addToGroup,
+              type: WnButtonType.outline,
+              size: WnButtonSize.medium,
+              trailingIcon: WnIcons.newGroupChat,
+              onPressed: () => Routes.pushToAddToGroup(context, userPubkey),
+            ),
+          ),
+          Gap(8.h),
+          SizedBox(
+            width: double.infinity,
+            child: WnButton(
+              key: const Key('start_chat_button'),
+              text: context.l10n.sendMessage,
+              size: WnButtonSize.medium,
+              trailingIcon: WnIcons.newChat,
+              loading: dmState.isLoading,
+              onPressed: startChat,
+            ),
+          ),
+        ],
+      );
     }
 
     ({String title, String description}) calloutTitleAndDescription() {
@@ -157,98 +195,68 @@ class StartChatScreen extends HookConsumerWidget {
                     mainAxisSize: MainAxisSize.min,
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      if (isLoading)
-                        Center(
-                          child: Padding(
-                            padding: EdgeInsets.symmetric(vertical: 40.h),
-                            child: CircularProgressIndicator(
-                              color: colors.backgroundContentPrimary,
-                              strokeCap: StrokeCap.round,
+                      WnUserProfileCard(
+                        userPubkey: userPubkey,
+                        metadata: metadata,
+                        onPublicKeyCopied: () => showSuccessNotice(context.l10n.publicKeyCopied),
+                        onPublicKeyCopyError: () =>
+                            showErrorNotice(context.l10n.publicKeyCopyError),
+                      ),
+                      Gap(8.h),
+                      if (isSelf)
+                        ...[]
+                      else if (isKeyPackageLoading)
+                        Stack(
+                          alignment: Alignment.center,
+                          children: [
+                            Visibility(
+                              visible: false,
+                              maintainSize: true,
+                              child: validActionsColumn(),
                             ),
-                          ),
-                        )
-                      else ...[
-                        WnUserProfileCard(
-                          userPubkey: userPubkey,
-                          metadata: metadata,
-                          onPublicKeyCopied: () => showSuccessNotice(context.l10n.publicKeyCopied),
-                          onPublicKeyCopyError: () =>
-                              showErrorNotice(context.l10n.publicKeyCopyError),
-                        ),
-                        Gap(8.h),
-                        if (isSelf)
-                          ...[]
-                        else if (keyPackageStatus == KeyPackageStatus.valid) ...[
-                          SizedBox(
-                            width: double.infinity,
-                            child: WnButton(
-                              key: const Key('follow_button'),
-                              text: isFollowing
-                                  ? context.l10n.removeAsContact
-                                  : context.l10n.addAsContact,
-                              type: WnButtonType.outline,
-                              size: WnButtonSize.medium,
-                              trailingIcon: isFollowing ? WnIcons.userUnfollow : WnIcons.userFollow,
-                              loading: followState.isActionLoading,
-                              onPressed: handleFollowAction,
-                            ),
-                          ),
-                          Gap(8.h),
-                          SizedBox(
-                            width: double.infinity,
-                            child: WnButton(
-                              key: const Key('add_to_group_button'),
-                              text: context.l10n.addToGroup,
-                              type: WnButtonType.outline,
-                              size: WnButtonSize.medium,
-                              trailingIcon: WnIcons.newGroupChat,
-                              onPressed: () => Routes.pushToAddToGroup(context, userPubkey),
-                            ),
-                          ),
-                          Gap(8.h),
-                          SizedBox(
-                            width: double.infinity,
-                            child: WnButton(
-                              key: const Key('start_chat_button'),
-                              text: context.l10n.sendMessage,
-                              size: WnButtonSize.medium,
-                              trailingIcon: WnIcons.newChat,
-                              loading: dmState.isLoading,
-                              onPressed: startChat,
-                            ),
-                          ),
-                        ] else ...[
-                          () {
-                            final callout = calloutTitleAndDescription();
-                            return WnCallout(
-                              title: callout.title,
-                              description: callout.description,
-                              type: CalloutType.info,
-                            );
-                          }(),
-                          if (keyPackageStatus == KeyPackageStatus.notFound ||
-                              keyPackageStatus == null) ...[
-                            Gap(8.h),
-                            SizedBox(
-                              width: double.infinity,
-                              child: WnButton(
-                                key: const Key('invite_button'),
-                                text: context.l10n.share,
-                                size: WnButtonSize.medium,
-                                onPressed: () async {
-                                  try {
-                                    await SharePlus.instance.share(
-                                      ShareParams(
-                                        text: context.l10n.inviteMessage,
-                                      ),
-                                    );
-                                  } catch (e) {
-                                    _logger.severe('Failed to share invite: $e');
-                                  }
-                                },
+                            AnimatedOpacity(
+                              opacity: 1,
+                              duration: const Duration(milliseconds: 200),
+                              child: CircularProgressIndicator(
+                                color: colors.backgroundContentPrimary,
+                                strokeCap: StrokeCap.round,
                               ),
                             ),
                           ],
+                        )
+                      else if (keyPackageStatus == KeyPackageStatus.valid)
+                        validActionsColumn()
+                      else ...[
+                        () {
+                          final callout = calloutTitleAndDescription();
+                          return WnCallout(
+                            title: callout.title,
+                            description: callout.description,
+                            type: CalloutType.info,
+                          );
+                        }(),
+                        if (keyPackageStatus == KeyPackageStatus.notFound ||
+                            keyPackageStatus == null) ...[
+                          Gap(8.h),
+                          SizedBox(
+                            width: double.infinity,
+                            child: WnButton(
+                              key: const Key('invite_button'),
+                              text: context.l10n.share,
+                              size: WnButtonSize.medium,
+                              onPressed: () async {
+                                try {
+                                  await SharePlus.instance.share(
+                                    ShareParams(
+                                      text: context.l10n.inviteMessage,
+                                    ),
+                                  );
+                                } catch (e) {
+                                  _logger.severe('Failed to share invite: $e');
+                                }
+                              },
+                            ),
+                          ),
                         ],
                       ],
                     ],
