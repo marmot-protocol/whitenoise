@@ -279,12 +279,15 @@ class _InviteMessageList extends HookWidget {
       return () => scrollController.removeListener(updateHasMoreBelow);
     }, [scrollController]);
 
-    void scrollToBottom() {
-      scrollController.animateTo(
+    Future<void> scrollToBottom() async {
+      await scrollController.animateTo(
         scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOutCubic,
       );
+      if (scrollController.hasClients) {
+        scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      }
     }
 
     return Stack(
