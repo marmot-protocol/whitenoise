@@ -91,8 +91,9 @@ class SignupScreen extends HookConsumerWidget {
     }
 
     void closeCarousel() {
-      showCarousel.value = false;
-      carouselAnimationController.reverse();
+      carouselAnimationController.reverse().then((_) {
+        showCarousel.value = false;
+      });
     }
 
     useEffect(() {
