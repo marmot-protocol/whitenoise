@@ -9,7 +9,6 @@ import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
 class _MockApi extends MockWnApi {
-  Completer<KeyPackageStatus>? userHasKeyPackageCompleter;
   KeyPackageStatus nonBlockingResult = KeyPackageStatus.valid;
   KeyPackageStatus blockingResult = KeyPackageStatus.valid;
   final userHasKeyPackageCalls = <({String pubkey, bool blocking})>[];

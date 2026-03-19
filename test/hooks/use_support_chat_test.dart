@@ -82,6 +82,7 @@ void main() {
       final state = getResult();
       expect(state.isLoading, isFalse);
       expect(state.existingGroupId, isNull);
+      expect(_api.lastAccountPubkey, isNull);
     });
 
     testWidgets('when API throws returns is loading false and existingGroupId is null', (

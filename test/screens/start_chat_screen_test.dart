@@ -146,6 +146,7 @@ void main() {
   Future<void> pumpStartChatScreen(
     WidgetTester tester, {
     required String userPubkey,
+    bool settle = true,
   }) async {
     setUpTestView(tester);
     await mountTestApp(
@@ -157,7 +158,12 @@ void main() {
       tester.element(find.byType(Scaffold)),
       userPubkey,
     );
-    await tester.pumpAndSettle();
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+    }
   }
 
   group('StartChatScreen', () {
@@ -202,7 +208,7 @@ void main() {
     testWidgets('keeps button layout stable while key package loads', (tester) async {
       _api.userHasKeyPackageCompleter = Completer<KeyPackageStatus>();
 
-      await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+      await pumpStartChatScreen(tester, userPubkey: _otherPubkey, settle: false);
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.byKey(const Key('follow_button')), findsOneWidget);

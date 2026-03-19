@@ -101,7 +101,7 @@ class StartChatScreen extends HookConsumerWidget {
       }
     }
 
-    Widget validActionsColumn() {
+    Widget validActionsColumn({bool showLoadingStates = true}) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -114,7 +114,7 @@ class StartChatScreen extends HookConsumerWidget {
               type: WnButtonType.outline,
               size: WnButtonSize.medium,
               trailingIcon: isFollowing ? WnIcons.userUnfollow : WnIcons.userFollow,
-              loading: followState.isLoading || followState.isActionLoading,
+              loading: showLoadingStates && (followState.isLoading || followState.isActionLoading),
               onPressed: handleFollowAction,
             ),
           ),
@@ -138,7 +138,7 @@ class StartChatScreen extends HookConsumerWidget {
               text: context.l10n.sendMessage,
               size: WnButtonSize.medium,
               trailingIcon: WnIcons.newChat,
-              loading: dmState.isLoading,
+              loading: showLoadingStates && dmState.isLoading,
               onPressed: startChat,
             ),
           ),
@@ -211,8 +211,10 @@ class StartChatScreen extends HookConsumerWidget {
                           children: [
                             Visibility(
                               visible: false,
+                              maintainState: true,
+                              maintainAnimation: true,
                               maintainSize: true,
-                              child: validActionsColumn(),
+                              child: validActionsColumn(showLoadingStates: false),
                             ),
                             AnimatedOpacity(
                               opacity: 1,

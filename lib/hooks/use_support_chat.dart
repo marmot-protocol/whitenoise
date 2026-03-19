@@ -11,8 +11,7 @@ typedef SupportChatState = ({
 
 SupportChatState useSupportChat({required String? accountPubkey}) {
   final future = useMemoized(() {
-    // When auth is missing (e.g. signed out), we don't want to hit the DM-group lookup.
-    if (accountPubkey == null) return Future<String?>.value(null);
+    if (accountPubkey == null) return Future<String?>.value();
 
     return account_groups_api.getDmGroupWithPeer(
       accountPubkey: accountPubkey,
