@@ -14,6 +14,7 @@ import 'package:whitenoise/screens/edit_profile_screen.dart';
 import 'package:whitenoise/screens/network_screen.dart';
 import 'package:whitenoise/screens/privacy_security_screen.dart';
 import 'package:whitenoise/screens/profile_keys_screen.dart';
+import 'package:whitenoise/screens/report_bug_screen.dart';
 import 'package:whitenoise/screens/share_profile_screen.dart';
 import 'package:whitenoise/screens/sign_out_screen.dart';
 import 'package:whitenoise/screens/start_support_chat_screen.dart';
@@ -172,6 +173,13 @@ void main() {
       await tester.tap(find.text('Appearance'));
       await tester.pumpAndSettle();
       expect(find.byType(AppearanceScreen), findsOneWidget);
+    });
+
+    testWidgets('tapping Report bug navigates to ReportBugScreen', (tester) async {
+      await pumpSettingsScreen(tester);
+      await tester.tap(find.text('Report bug'));
+      await tester.pumpAndSettle();
+      expect(find.byType(ReportBugScreen), findsOneWidget);
     });
 
     testWidgets('tapping Donate navigates to Donate screen', (tester) async {

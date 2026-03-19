@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/screens/relay_control_state_screen.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
+import '../mocks/mock_clipboard.dart' show clearClipboardMock, mockClipboard;
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
@@ -65,5 +66,33 @@ void main() {
     await mountWidget(const RelayControlStateScreen(), tester);
 
     expect(find.byKey(const Key('slate_back_button')), findsOneWidget);
+  });
+
+  testWidgets('copy button copies dump to clipboard', (tester) async {
+    final getClipboard = mockClipboard();
+    addTearDown(clearClipboardMock);
+    api.relayControlStateResult = '{"relay":"active"}';
+
+    await mountWidget(const RelayControlStateScreen(), tester);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('relay_control_state_copy_button')));
+    await tester.pumpAndSettle();
+
+    expect(getClipboard(), '{"relay":"active"}');
+  });
+
+  testWidgets('copy button shows snackbar after copying', (tester) async {
+    mockClipboard();
+    addTearDown(clearClipboardMock);
+    api.relayControlStateResult = '{"relay":"active"}';
+
+    await mountWidget(const RelayControlStateScreen(), tester);
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('relay_control_state_copy_button')));
+    await tester.pump();
+
+    expect(find.byType(SnackBar), findsOneWidget);
   });
 }

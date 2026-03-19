@@ -227,6 +227,36 @@ void main() {
       expect(capturedState.error, isNull);
     });
 
+    testWidgets('navigates back without switching when called with current pubkey', (
+      tester,
+    ) async {
+      mockApi.accounts = [
+        Account(
+          accountType: AccountType.local,
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          updatedAt: DateTime.now(),
+        ),
+      ];
+
+      await mountTestApp(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _MockAuthNotifier(testPubkeyA)),
+          secureStorageProvider.overrideWithValue(MockSecureStorage()),
+        ],
+      );
+      Routes.pushToSwitchProfile(tester.element(find.byType(Scaffold)));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Profiles'), findsOneWidget);
+
+      await tester.tap(find.text('Display $testPubkeyA'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Profiles'), findsNothing);
+    });
+
     testWidgets('switchTo sets isSwitching true during operation and clears on success', (
       tester,
     ) async {
