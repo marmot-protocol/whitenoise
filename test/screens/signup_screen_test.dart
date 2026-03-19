@@ -66,14 +66,14 @@ void main() {
   }
 
   group('SignupScreen', () {
-    testWidgets('displays Setup profile title', (tester) async {
+    testWidgets('displays Set up profile title', (tester) async {
       await pumpSignupScreen(tester);
-      expect(find.text('Setup profile'), findsOneWidget);
+      expect(find.text('Set up profile'), findsOneWidget);
     });
 
     testWidgets('displays name input field', (tester) async {
       await pumpSignupScreen(tester);
-      expect(find.text('Choose a name'), findsOneWidget);
+      expect(find.text('Name'), findsOneWidget);
     });
 
     testWidgets('prefills display name field with generated value', (
@@ -98,45 +98,56 @@ void main() {
       expect(nameField.controller?.text, 'Custom Name');
     });
 
-    testWidgets('clears display name when clear button is tapped', (tester) async {
-      await pumpSignupScreen(tester);
-
-      final nameFieldBefore = tester.widget<TextField>(find.byType(TextField).first);
-      expect(nameFieldBefore.controller?.text, isNotEmpty);
-
-      await tester.tap(find.byKey(const Key('signup_display_name_clear_button')));
-      await tester.pump();
-
-      final nameFieldAfter = tester.widget<TextField>(find.byType(TextField).first);
-      expect(nameFieldAfter.controller?.text, isEmpty);
-    });
-
     testWidgets('displays bio input field', (tester) async {
       await pumpSignupScreen(tester);
-      expect(find.text('Introduce yourself'), findsOneWidget);
+      expect(find.text('About'), findsOneWidget);
     });
 
-    testWidgets('displays Cancel button', (tester) async {
+    testWidgets('displays privacy notice in collapsed state', (tester) async {
       await pumpSignupScreen(tester);
-      expect(find.text('Cancel'), findsOneWidget);
+      expect(find.byKey(const Key('signup_privacy_notice')), findsOneWidget);
+      expect(find.text('You control what you share'), findsOneWidget);
+      expect(
+        find.textContaining('Name, photo, and bio are visible'),
+        findsNothing,
+      );
     });
 
-    testWidgets('displays Sign Up button', (tester) async {
+    testWidgets('expands privacy notice on toggle tap', (tester) async {
       await pumpSignupScreen(tester);
-      expect(find.text('Sign Up'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('callout_toggle')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Name, photo, and bio are visible'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('collapses privacy notice on toggle tap', (tester) async {
+      await pumpSignupScreen(tester);
+      await tester.tap(find.byKey(const Key('callout_toggle')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Name, photo, and bio are visible'),
+        findsOneWidget,
+      );
+      await tester.tap(find.byKey(const Key('callout_toggle')));
+      await tester.pumpAndSettle();
+      expect(
+        find.textContaining('Name, photo, and bio are visible'),
+        findsNothing,
+      );
+    });
+
+    testWidgets('displays Create profile button', (tester) async {
+      await pumpSignupScreen(tester);
+      expect(find.text('Create profile'), findsOneWidget);
     });
 
     group('navigation', () {
       testWidgets('tapping back button returns to home screen', (tester) async {
         await pumpSignupScreen(tester);
         await tester.tap(find.byKey(const Key('slate_back_button')));
-        await tester.pumpAndSettle();
-        expect(find.byType(HomeScreen), findsOneWidget);
-      });
-
-      testWidgets('tapping Cancel returns to home screen', (tester) async {
-        await pumpSignupScreen(tester);
-        await tester.tap(find.text('Cancel'));
         await tester.pumpAndSettle();
         expect(find.byType(HomeScreen), findsOneWidget);
       });
@@ -163,12 +174,30 @@ void main() {
         tester,
       ) async {
         await pumpSignupScreen(tester);
-        expect(find.byType(WnOnboardingCarousel), findsNothing);
+
+        final carousel = find.byType(WnOnboardingCarousel);
+        expect(
+          tester
+              .widget<FadeTransition>(
+                find.ancestor(of: carousel, matching: find.byType(FadeTransition)).first,
+              )
+              .opacity
+              .value,
+          0.0,
+        );
 
         await tester.tap(find.byKey(const Key('learn_more_button')));
         await tester.pumpAndSettle();
 
-        expect(find.byType(WnOnboardingCarousel), findsOneWidget);
+        expect(
+          tester
+              .widget<FadeTransition>(
+                find.ancestor(of: carousel, matching: find.byType(FadeTransition)).first,
+              )
+              .opacity
+              .value,
+          1.0,
+        );
       });
 
       testWidgets('carousel shows Back to sign up button', (tester) async {
@@ -185,13 +214,30 @@ void main() {
         await tester.tap(find.byKey(const Key('learn_more_button')));
         await tester.pumpAndSettle();
 
-        expect(find.byType(WnOnboardingCarousel), findsOneWidget);
+        final carousel = find.byType(WnOnboardingCarousel);
+        expect(
+          tester
+              .widget<FadeTransition>(
+                find.ancestor(of: carousel, matching: find.byType(FadeTransition)).first,
+              )
+              .opacity
+              .value,
+          1.0,
+        );
 
         await tester.tap(find.byKey(const Key('back_to_signup_button')));
         await tester.pumpAndSettle();
 
-        expect(find.byType(WnOnboardingCarousel), findsNothing);
-        expect(find.text('Setup profile'), findsOneWidget);
+        expect(
+          tester
+              .widget<FadeTransition>(
+                find.ancestor(of: carousel, matching: find.byType(FadeTransition)).first,
+              )
+              .opacity
+              .value,
+          0.0,
+        );
+        expect(find.text('Set up profile'), findsOneWidget);
       });
 
       testWidgets('tapping outside does not dismiss when carousel is visible', (
@@ -245,7 +291,7 @@ void main() {
       testWidgets('redirects to chat list on success', (tester) async {
         await pumpSignupScreen(tester, overrides: overrides);
         await tester.enterText(find.byType(TextField).first, 'Test User');
-        await tester.tap(find.text('Sign Up'));
+        await tester.tap(find.text('Create profile'));
         await tester.pumpAndSettle();
         expect(find.byType(ChatListScreen), findsOneWidget);
       });
@@ -254,7 +300,7 @@ void main() {
         mockAuth.errorToThrow = Exception('Network error');
         await pumpSignupScreen(tester, overrides: overrides);
         await tester.enterText(find.byType(TextField).first, 'Test User');
-        await tester.tap(find.text('Sign Up'));
+        await tester.tap(find.text('Create profile'));
         await tester.pumpAndSettle();
         expect(find.byType(ChatListScreen), findsNothing);
       });
@@ -293,14 +339,14 @@ void main() {
       ) async {
         await pumpSignupWithSmallScreen(tester);
 
-        expect(find.text('Choose a name'), findsOneWidget);
-        expect(find.text('Sign Up'), findsOneWidget);
+        expect(find.text('Name'), findsOneWidget);
+        expect(find.text('Create profile'), findsOneWidget);
 
         tester.view.viewInsets = const FakeViewPadding(bottom: 300);
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 400));
 
-        expect(find.text('Choose a name'), findsOneWidget);
+        expect(find.text('Name'), findsOneWidget);
       });
 
       testWidgets('scrolls when bio field is focused and keyboard appears', (
@@ -323,7 +369,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(controller.offset, greaterThan(initialOffset));
-        expect(find.text('Choose a name'), findsOneWidget);
+        expect(find.text('Name'), findsOneWidget);
       });
 
       testWidgets('name field remains visible when focused', (
@@ -339,7 +385,7 @@ void main() {
         await tester.pump(const Duration(milliseconds: 400));
         await tester.pumpAndSettle();
 
-        expect(find.text('Choose a name'), findsOneWidget);
+        expect(find.text('Name'), findsOneWidget);
 
         addTearDown(() => tester.view.resetViewInsets());
       });

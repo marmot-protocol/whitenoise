@@ -47,19 +47,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get nsecPlaceholder => 'nsec...';
 
   @override
-  String get setupProfile => 'Setup profile';
+  String get setupProfile => 'Set up profile';
 
   @override
-  String get chooseName => 'Choose a name';
+  String get createProfile => 'Create profile';
+
+  @override
+  String get chooseName => 'Name';
 
   @override
   String get enterYourName => 'Enter your name';
 
   @override
-  String get introduceYourself => 'Introduce yourself';
+  String get introduceYourself => 'About';
 
   @override
-  String get writeSomethingAboutYourself => 'Write something about yourself';
+  String get writeSomethingAboutYourself => 'Introduce yourself';
+
+  @override
+  String get profilePrivacyTitle => 'You control what you share';
+
+  @override
+  String get profilePrivacyDescription =>
+      'Name, photo, and bio are visible on global Nostr network. Use what you\'re comfortable sharing. It stays private unless you add personal details.';
 
   @override
   String get cancel => 'Cancel';

@@ -171,13 +171,19 @@ abstract class AppLocalizations {
   /// Title on signup screen
   ///
   /// In en, this message translates to:
-  /// **'Setup profile'**
+  /// **'Set up profile'**
   String get setupProfile;
+
+  /// Submit button text on signup screen
+  ///
+  /// In en, this message translates to:
+  /// **'Create profile'**
+  String get createProfile;
 
   /// Label for name input field
   ///
   /// In en, this message translates to:
-  /// **'Choose a name'**
+  /// **'Name'**
   String get chooseName;
 
   /// Placeholder for name input
@@ -189,14 +195,26 @@ abstract class AppLocalizations {
   /// Label for bio input field
   ///
   /// In en, this message translates to:
-  /// **'Introduce yourself'**
+  /// **'About'**
   String get introduceYourself;
 
   /// Placeholder for bio input
   ///
   /// In en, this message translates to:
-  /// **'Write something about yourself'**
+  /// **'Introduce yourself'**
   String get writeSomethingAboutYourself;
+
+  /// Title of the privacy notice on signup screen
+  ///
+  /// In en, this message translates to:
+  /// **'You control what you share'**
+  String get profilePrivacyTitle;
+
+  /// Description of the privacy notice on signup screen
+  ///
+  /// In en, this message translates to:
+  /// **'Name, photo, and bio are visible on global Nostr network. Use what you\'re comfortable sharing. It stays private unless you add personal details.'**
+  String get profilePrivacyDescription;
 
   /// Cancel button text
   ///

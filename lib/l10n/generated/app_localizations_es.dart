@@ -50,16 +50,26 @@ class AppLocalizationsEs extends AppLocalizations {
   String get setupProfile => 'Configurar perfil';
 
   @override
-  String get chooseName => 'Elige un nombre';
+  String get createProfile => 'Crear perfil';
+
+  @override
+  String get chooseName => 'Nombre';
 
   @override
   String get enterYourName => 'Introduce tu nombre';
 
   @override
-  String get introduceYourself => 'Preséntate';
+  String get introduceYourself => 'Acerca de';
 
   @override
-  String get writeSomethingAboutYourself => 'Escribe algo sobre ti';
+  String get writeSomethingAboutYourself => 'Preséntate';
+
+  @override
+  String get profilePrivacyTitle => 'Tú controlas lo que compartes';
+
+  @override
+  String get profilePrivacyDescription =>
+      'El nombre, la foto y la biografía son visibles en la red global de Nostr. Usa lo que te resulte cómodo compartir. Se mantiene privado a menos que agregues datos personales.';
 
   @override
   String get cancel => 'Cancelar';

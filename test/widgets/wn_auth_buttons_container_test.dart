@@ -79,7 +79,7 @@ void main() {
       await mountTestApp(tester);
       await tester.tap(find.text('Sign Up'));
       await tester.pumpAndSettle();
-      expect(find.text('Choose a name'), findsOneWidget);
+      expect(find.text('Name'), findsOneWidget);
     });
   });
 }

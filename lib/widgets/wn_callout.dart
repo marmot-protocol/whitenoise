@@ -19,12 +19,16 @@ class WnCallout extends StatelessWidget {
     this.description,
     this.type = CalloutType.neutral,
     this.onDismiss,
+    this.onToggle,
+    this.isExpanded = false,
   });
 
   final String title;
   final String? description;
   final CalloutType type;
   final VoidCallback? onDismiss;
+  final VoidCallback? onToggle;
+  final bool isExpanded;
 
   @override
   Widget build(BuildContext context) {
@@ -33,6 +37,7 @@ class WnCallout extends StatelessWidget {
     final colorScheme = _getColorScheme(colors);
 
     return Container(
+      constraints: BoxConstraints(minHeight: 56.h),
       padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
       decoration: BoxDecoration(
         color: colorScheme.backgroundColor,
@@ -72,6 +77,13 @@ class WnCallout extends StatelessWidget {
                   icon: WnIcons.closeLarge,
                   onPressed: onDismiss,
                 ),
+              if (onToggle != null)
+                WnIconButton(
+                  key: const Key('callout_toggle'),
+                  icon: isExpanded ? WnIcons.chevronUp : WnIcons.chevronDown,
+                  size: WnIconButtonSize.size36,
+                  onPressed: onToggle,
+                ),
             ],
           ),
           if (description != null) ...[
@@ -92,7 +104,7 @@ class WnCallout extends StatelessWidget {
     switch (type) {
       case CalloutType.neutral:
         return _CalloutColorScheme(
-          backgroundColor: colors.fillSecondary,
+          backgroundColor: colors.backgroundSecondary,
           iconColor: colors.backgroundContentPrimary,
           titleColor: colors.backgroundContentPrimary,
           descriptionColor: colors.backgroundContentSecondary,

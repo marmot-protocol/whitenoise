@@ -47,19 +47,29 @@ class AppLocalizationsTr extends AppLocalizations {
   String get nsecPlaceholder => 'nsec...';
 
   @override
-  String get setupProfile => 'Profil ayarla';
+  String get setupProfile => 'Profil oluştur';
 
   @override
-  String get chooseName => 'Bir isim seçin';
+  String get createProfile => 'Profil oluştur';
+
+  @override
+  String get chooseName => 'İsim';
 
   @override
   String get enterYourName => 'Adınızı girin';
 
   @override
-  String get introduceYourself => 'Kendinizi tanıtın';
+  String get introduceYourself => 'Hakkında';
 
   @override
-  String get writeSomethingAboutYourself => 'Kendiniz hakkında bir şeyler yazın';
+  String get writeSomethingAboutYourself => 'Kendinizi tanıtın';
+
+  @override
+  String get profilePrivacyTitle => 'Ne paylaştığınızı siz kontrol edersiniz';
+
+  @override
+  String get profilePrivacyDescription =>
+      'İsim, fotoğraf ve biyografi küresel Nostr ağında görünür. Paylaşırken kendinizi rahat hissedeceğiniz bilgileri kullanın. Kişisel bilgi eklemediğiniz sürece gizli kalır.';
 
   @override
   String get cancel => 'İptal';

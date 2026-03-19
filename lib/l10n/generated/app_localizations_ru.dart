@@ -50,16 +50,26 @@ class AppLocalizationsRu extends AppLocalizations {
   String get setupProfile => 'Настройка профиля';
 
   @override
-  String get chooseName => 'Выберите имя';
+  String get createProfile => 'Создать профиль';
+
+  @override
+  String get chooseName => 'Имя';
 
   @override
   String get enterYourName => 'Введите ваше имя';
 
   @override
-  String get introduceYourself => 'Расскажите о себе';
+  String get introduceYourself => 'О себе';
 
   @override
-  String get writeSomethingAboutYourself => 'Напишите что-нибудь о себе';
+  String get writeSomethingAboutYourself => 'Расскажите о себе';
+
+  @override
+  String get profilePrivacyTitle => 'Вы контролируете, чем делитесь';
+
+  @override
+  String get profilePrivacyDescription =>
+      'Имя, фото и биография видны в глобальной сети Nostr. Используйте то, чем вам комфортно делиться. Информация остаётся приватной, пока вы не добавите личные данные.';
 
   @override
   String get cancel => 'Отмена';

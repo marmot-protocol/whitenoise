@@ -22,8 +22,9 @@ import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart' show WnAvatar, WnAvatarSize;
 import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/widgets/wn_callout.dart';
 import 'package:whitenoise/widgets/wn_carousel_indicator.dart' show WnCarouselIndicator;
-import 'package:whitenoise/widgets/wn_icon.dart' show WnIcons;
+import 'package:whitenoise/widgets/wn_icon.dart' show WnIcon, WnIcons;
 import 'package:whitenoise/widgets/wn_input.dart' show WnInput;
 import 'package:whitenoise/widgets/wn_input_text_area.dart' show WnInputTextArea;
 import 'package:whitenoise/widgets/wn_onboarding_carousel.dart' show WnOnboardingCarousel;
@@ -67,6 +68,7 @@ class SignupScreen extends HookConsumerWidget {
       onImageSelected: onImageSelected,
     );
     final noticeMessage = useState<String?>(null);
+    final privacyNoticeExpanded = useState(false);
     final showCarousel = useState(false);
     final carouselIndex = useState(0);
     final carouselAccentColor = useState<Color>(context.colors.accent.cyan.contentSecondary);
@@ -89,9 +91,8 @@ class SignupScreen extends HookConsumerWidget {
     }
 
     void closeCarousel() {
-      carouselAnimationController.reverse().then((_) {
-        showCarousel.value = false;
-      });
+      showCarousel.value = false;
+      carouselAnimationController.reverse();
     }
 
     useEffect(() {
@@ -163,28 +164,43 @@ class SignupScreen extends HookConsumerWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          if (!showCarousel.value)
-            Positioned.fill(
+          Positioned.fill(
+            child: IgnorePointer(
+              ignoring: showCarousel.value,
               child: GestureDetector(
                 key: const Key('signup_background'),
                 onTap: () => Routes.goBack(context),
                 behavior: HitTestBehavior.translucent,
               ),
             ),
+          ),
           SafeArea(
-            child: Align(
-              alignment: Alignment.topCenter,
-              child: _LearnMoreButton(
-                key: const Key('learn_more_button'),
-                onTap: openCarousel,
-                visible: !showCarousel.value,
+            child: FadeTransition(
+              opacity: CurvedAnimation(
+                parent: ModalRoute.of(context)?.animation ?? kAlwaysCompleteAnimation,
+                curve: const Interval(0.5, 1.0),
+              ),
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: SizedBox(
+                  height: 148.h,
+                  child: Center(
+                    child: _LearnMoreButton(
+                      key: const Key('learn_more_button'),
+                      onTap: openCarousel,
+                      visible: !showCarousel.value,
+                    ),
+                  ),
+                ),
               ),
             ),
           ),
           SafeArea(
             child: Column(
               children: [
-                SizedBox(height: 70.h),
+                SizedBox(
+                  height: (148.h - MediaQuery.of(context).viewInsets.bottom).clamp(0.0, 148.h),
+                ),
                 Expanded(
                   child: SlideTransition(
                     position: slideAnimation,
@@ -205,17 +221,40 @@ class SignupScreen extends HookConsumerWidget {
                                     onDismiss: dismissNotice,
                                   )
                                 : null,
+                            footer: Padding(
+                              padding: EdgeInsets.only(
+                                left: 14.w,
+                                right: 14.w,
+                                bottom: 14.h,
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.stretch,
+                                children: [
+                                  ValueListenableBuilder(
+                                    valueListenable: displayNameController,
+                                    builder: (context, value, child) {
+                                      final hasName = value.text.trim().isNotEmpty;
+                                      return WnButton(
+                                        text: context.l10n.createProfile,
+                                        onPressed: hasName ? onSubmit : null,
+                                        loading: state.isLoading,
+                                        disabled: !hasName || state.isLoading,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
                             child: SingleChildScrollView(
                               controller: scrollController,
                               child: Padding(
                                 padding: EdgeInsets.fromLTRB(
                                   14.w,
-                                  0,
+                                  8.h,
                                   14.w,
                                   14.h,
                                 ),
                                 child: Column(
-                                  spacing: 16.h,
                                   mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
@@ -232,21 +271,27 @@ class SignupScreen extends HookConsumerWidget {
                                         },
                                       ),
                                     ),
+                                    Gap(16.h),
+                                    WnCallout(
+                                      key: const Key('signup_privacy_notice'),
+                                      title: context.l10n.profilePrivacyTitle,
+                                      description: privacyNoticeExpanded.value
+                                          ? context.l10n.profilePrivacyDescription
+                                          : null,
+                                      isExpanded: privacyNoticeExpanded.value,
+                                      onToggle: () {
+                                        privacyNoticeExpanded.value = !privacyNoticeExpanded.value;
+                                      },
+                                    ),
+                                    Gap(16.h),
                                     WnInput(
                                       label: context.l10n.chooseName,
                                       placeholder: context.l10n.enterYourName,
                                       controller: displayNameController,
                                       errorText: state.displayNameError,
                                       onChanged: (_) => clearErrors(),
-                                      inlineActionIcon: WnIcons.closeSmall,
-                                      inlineActionKey: const Key(
-                                        'signup_display_name_clear_button',
-                                      ),
-                                      inlineActionOnPressed: () {
-                                        displayNameController.clear();
-                                        clearErrors();
-                                      },
                                     ),
+                                    Gap(16.h),
                                     WnInputTextArea(
                                       key: const Key('signup_bio_field'),
                                       label: context.l10n.introduceYourself,
@@ -255,31 +300,15 @@ class SignupScreen extends HookConsumerWidget {
                                       focusNode: bioFocusNode,
                                       textInputAction: TextInputAction.done,
                                     ),
-                                    Column(
-                                      spacing: 8.h,
-                                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                                      children: [
-                                        WnButton(
-                                          text: context.l10n.cancel,
-                                          type: WnButtonType.outline,
-                                          onPressed: () => Routes.goBack(context),
-                                          disabled: state.isLoading,
-                                        ),
-                                        WnButton(
-                                          text: context.l10n.signUp,
-                                          onPressed: onSubmit,
-                                          loading: state.isLoading,
-                                          disabled: state.isLoading,
-                                        ),
-                                      ],
-                                    ),
                                   ],
                                 ),
                               ),
                             ),
                           ),
                         ),
-                        Gap(10.h),
+                        SizedBox(
+                          height: MediaQuery.of(context).viewInsets.bottom.clamp(0.0, 16.h),
+                        ),
                       ],
                     ),
                   ),
@@ -287,8 +316,9 @@ class SignupScreen extends HookConsumerWidget {
               ],
             ),
           ),
-          if (showCarousel.value)
-            Positioned.fill(
+          Positioned.fill(
+            child: IgnorePointer(
+              ignoring: !showCarousel.value,
               child: FadeTransition(
                 opacity: fadeAnimation,
                 child: SafeArea(
@@ -312,6 +342,7 @@ class SignupScreen extends HookConsumerWidget {
                       ),
                       SizedBox(height: 287.h),
                       WnSlate(
+                        tag: 'wn-slate-carousel',
                         child: Padding(
                           padding: EdgeInsets.symmetric(
                             vertical: 14.h,
@@ -337,6 +368,7 @@ class SignupScreen extends HookConsumerWidget {
                 ),
               ),
             ),
+          ),
         ],
       ),
     );
@@ -367,26 +399,23 @@ class _LearnMoreButton extends HookWidget {
         child: GestureDetector(
           onTap: onTap,
           behavior: HitTestBehavior.opaque,
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 24.h),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  Icons.arrow_upward,
-                  key: const Key('learn_more_arrow'),
-                  size: 20.sp,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              WnIcon(
+                WnIcons.arrowUp,
+                key: const Key('learn_more_arrow'),
+                size: 20.sp,
+                color: colors.backgroundContentPrimary,
+              ),
+              SizedBox(height: 4.h),
+              Text(
+                l10n.learnMore,
+                style: typography.medium14.copyWith(
                   color: colors.backgroundContentPrimary,
                 ),
-                SizedBox(height: 4.h),
-                Text(
-                  l10n.learnMore,
-                  style: typography.medium14.copyWith(
-                    color: colors.backgroundContentPrimary,
-                  ),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),

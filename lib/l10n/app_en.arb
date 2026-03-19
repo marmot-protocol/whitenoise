@@ -46,11 +46,15 @@
   "@nsecPlaceholder": {
     "description": "Placeholder text for nsec input"
   },
-  "setupProfile": "Setup profile",
+  "setupProfile": "Set up profile",
   "@setupProfile": {
     "description": "Title on signup screen"
   },
-  "chooseName": "Choose a name",
+  "createProfile": "Create profile",
+  "@createProfile": {
+    "description": "Submit button text on signup screen"
+  },
+  "chooseName": "Name",
   "@chooseName": {
     "description": "Label for name input field"
   },
@@ -58,13 +62,21 @@
   "@enterYourName": {
     "description": "Placeholder for name input"
   },
-  "introduceYourself": "Introduce yourself",
+  "introduceYourself": "About",
   "@introduceYourself": {
     "description": "Label for bio input field"
   },
-  "writeSomethingAboutYourself": "Write something about yourself",
+  "writeSomethingAboutYourself": "Introduce yourself",
   "@writeSomethingAboutYourself": {
     "description": "Placeholder for bio input"
+  },
+  "profilePrivacyTitle": "You control what you share",
+  "@profilePrivacyTitle": {
+    "description": "Title of the privacy notice on signup screen"
+  },
+  "profilePrivacyDescription": "Name, photo, and bio are visible on global Nostr network. Use what you're comfortable sharing. It stays private unless you add personal details.",
+  "@profilePrivacyDescription": {
+    "description": "Description of the privacy notice on signup screen"
   },
   "cancel": "Cancel",
   "@cancel": {

@@ -5,7 +5,7 @@ import 'package:whitenoise/widgets/wn_icon.dart';
 
 enum WnIconButtonType { primary, outline, ghost }
 
-enum WnIconButtonSize { size44, size56 }
+enum WnIconButtonSize { size36, size44, size56 }
 
 class WnIconButton extends StatelessWidget {
   const WnIconButton({
@@ -26,8 +26,16 @@ class WnIconButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final dimension = size == WnIconButtonSize.size56 ? 56.w : 44.w;
-    final iconSize = size == WnIconButtonSize.size56 ? 24.w : 18.w;
+    final dimension = switch (size) {
+      WnIconButtonSize.size36 => 36.w,
+      WnIconButtonSize.size44 => 44.w,
+      WnIconButtonSize.size56 => 56.w,
+    };
+    final iconSize = switch (size) {
+      WnIconButtonSize.size36 => 20.w,
+      WnIconButtonSize.size44 => 18.w,
+      WnIconButtonSize.size56 => 24.w,
+    };
     final borderRadius = 8.r;
 
     return SizedBox.square(
