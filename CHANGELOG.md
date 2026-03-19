@@ -38,7 +38,7 @@ and this project adheres to Calendar Versioning (CalVer).
 
 ### Security
 
-## [2026.3.5] - 2026-03-05
+## [2026.3.17] - 2026-03-17
 
 ### Added
 - Show reply preview in message actions, add author color in reply preview in input, swipe to reply [PR #389](https://github.com/marmot-protocol/whitenoise/pull/389)
