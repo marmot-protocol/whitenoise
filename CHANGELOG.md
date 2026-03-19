@@ -35,6 +35,7 @@ and this project adheres to Calendar Versioning (CalVer).
 ### Removed
 
 ### Fixed
+- UI Polish: Signup Screen, Callout, IconButton [PR #519](https://github.com/marmot-protocol/whitenoise/pull/519)
 
 ### Security
 
