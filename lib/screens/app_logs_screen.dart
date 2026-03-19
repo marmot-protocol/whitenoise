@@ -105,10 +105,13 @@ class AppLogsScreen extends HookConsumerWidget {
       return null;
     }, [filter.searchQuery]);
 
+    const defaultLevels = [Level.WARNING, Level.SEVERE, Level.SHOUT];
     final hasFilters =
         filter.searchQuery.isNotEmpty ||
         filter.includePatterns.isNotEmpty ||
-        filter.excludePatterns.isNotEmpty;
+        filter.excludePatterns.isNotEmpty ||
+        filter.selectedLevels.length != defaultLevels.length ||
+        !defaultLevels.every(filter.selectedLevels.contains);
 
     void resumeLive() {
       if (scrollController.hasClients) {

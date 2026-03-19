@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
@@ -29,6 +31,7 @@ import '../test_helpers.dart';
 class _MockApi extends MockWnApi {
   bool returnNoName = false;
   String? dmGroupResult;
+  Completer<String?>? dmGroupCompleter;
 
   @override
   Future<FlutterMetadata> crateApiUsersUserMetadata({
@@ -55,6 +58,7 @@ class _MockApi extends MockWnApi {
     required String accountPubkey,
     required String peerPubkey,
   }) async {
+    if (dmGroupCompleter != null) return dmGroupCompleter!.future;
     return dmGroupResult;
   }
 }
@@ -91,6 +95,7 @@ void main() {
   setUp(() {
     mockApi.reset();
     mockApi.dmGroupResult = null;
+    mockApi.dmGroupCompleter = null;
   });
 
   late _MockAuthNotifier mockAuth;
@@ -240,6 +245,17 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(ChatScreen), findsOneWidget);
+    });
+
+    testWidgets('tapping chat with support does nothing while loading', (tester) async {
+      mockApi.dmGroupCompleter = Completer<String?>();
+      await pumpSettingsScreen(tester);
+
+      await tester.tap(find.byKey(const Key('help_and_support_menu_item')));
+      await tester.pump();
+
+      expect(find.byType(StartSupportChatScreen), findsNothing);
+      expect(find.byType(ChatScreen), findsNothing);
     });
 
     testWidgets('renders empty widget when pubkey becomes null', (tester) async {

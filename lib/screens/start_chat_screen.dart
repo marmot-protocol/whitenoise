@@ -216,13 +216,9 @@ class StartChatScreen extends HookConsumerWidget {
                               maintainSize: true,
                               child: validActionsColumn(showLoadingStates: false),
                             ),
-                            AnimatedOpacity(
-                              opacity: 1,
-                              duration: const Duration(milliseconds: 200),
-                              child: CircularProgressIndicator(
-                                color: colors.backgroundContentPrimary,
-                                strokeCap: StrokeCap.round,
-                              ),
+                            CircularProgressIndicator(
+                              color: colors.backgroundContentPrimary,
+                              strokeCap: StrokeCap.round,
                             ),
                           ],
                         )
