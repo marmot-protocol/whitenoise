@@ -69,7 +69,7 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get profilePrivacyDescription =>
-      'Nome, foto e bio sono visibili sulla rete globale Nostr. Usa ciò che ti senti a tuo agio nel condividere. Resta privato a meno che tu non aggiunga dettagli personali.';
+      'Nome, foto e bio sono visibili sulla rete globale di Nostr. Usa ciò che ti senti a tuo agio nel condividere. Resta privato a meno che tu non aggiunga dettagli personali.';
 
   @override
   String get cancel => 'Annulla';
