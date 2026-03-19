@@ -202,114 +202,118 @@ class SignupScreen extends HookConsumerWidget {
                   height: (148.h - MediaQuery.of(context).viewInsets.bottom).clamp(0.0, 148.h),
                 ),
                 Expanded(
-                  child: SlideTransition(
-                    position: slideAnimation,
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Flexible(
-                          child: WnSlate(
-                            header: WnSlateNavigationHeader(
-                              title: context.l10n.setupProfile,
-                              onNavigate: () => Routes.goBack(context),
-                            ),
-                            systemNotice: noticeMessage.value != null
-                                ? WnSystemNotice(
-                                    key: ValueKey(noticeMessage.value),
-                                    title: noticeMessage.value!,
-                                    type: WnSystemNoticeType.error,
-                                    onDismiss: dismissNotice,
-                                  )
-                                : null,
-                            footer: Padding(
-                              padding: EdgeInsets.only(
-                                left: 14.w,
-                                right: 14.w,
-                                bottom: 14.h,
+                  child: FadeTransition(
+                    opacity: ReverseAnimation(fadeAnimation),
+                    child: SlideTransition(
+                      position: slideAnimation,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Flexible(
+                            child: WnSlate(
+                              header: WnSlateNavigationHeader(
+                                title: context.l10n.setupProfile,
+                                onNavigate: () => Routes.goBack(context),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.stretch,
-                                children: [
-                                  ValueListenableBuilder(
-                                    valueListenable: displayNameController,
-                                    builder: (context, value, child) {
-                                      final hasName = value.text.trim().isNotEmpty;
-                                      return WnButton(
-                                        text: context.l10n.createProfile,
-                                        onPressed: hasName ? onSubmit : null,
-                                        loading: state.isLoading,
-                                        disabled: !hasName || state.isLoading,
-                                      );
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                            child: SingleChildScrollView(
-                              controller: scrollController,
-                              child: Padding(
-                                padding: EdgeInsets.fromLTRB(
-                                  14.w,
-                                  8.h,
-                                  14.w,
-                                  14.h,
+                              systemNotice: noticeMessage.value != null
+                                  ? WnSystemNotice(
+                                      key: ValueKey(noticeMessage.value),
+                                      title: noticeMessage.value!,
+                                      type: WnSystemNoticeType.error,
+                                      onDismiss: dismissNotice,
+                                    )
+                                  : null,
+                              footer: Padding(
+                                padding: EdgeInsets.only(
+                                  left: 14.w,
+                                  right: 14.w,
+                                  bottom: 14.h,
                                 ),
                                 child: Column(
-                                  mainAxisSize: MainAxisSize.min,
                                   crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
-                                    Center(
-                                      child: ValueListenableBuilder(
-                                        valueListenable: displayNameController,
-                                        builder: (context, value, child) {
-                                          return WnAvatar(
-                                            pictureUrl: state.selectedImagePath,
-                                            displayName: value.text,
-                                            size: WnAvatarSize.large,
-                                            onEditTap: state.isLoading ? null : pickImage,
-                                          );
-                                        },
-                                      ),
-                                    ),
-                                    Gap(16.h),
-                                    WnCallout(
-                                      key: const Key('signup_privacy_notice'),
-                                      title: context.l10n.profilePrivacyTitle,
-                                      description: privacyNoticeExpanded.value
-                                          ? context.l10n.profilePrivacyDescription
-                                          : null,
-                                      isExpanded: privacyNoticeExpanded.value,
-                                      onToggle: () {
-                                        privacyNoticeExpanded.value = !privacyNoticeExpanded.value;
+                                    ValueListenableBuilder(
+                                      valueListenable: displayNameController,
+                                      builder: (context, value, child) {
+                                        final hasName = value.text.trim().isNotEmpty;
+                                        return WnButton(
+                                          text: context.l10n.createProfile,
+                                          onPressed: hasName ? onSubmit : null,
+                                          loading: state.isLoading,
+                                          disabled: !hasName || state.isLoading,
+                                        );
                                       },
-                                    ),
-                                    Gap(16.h),
-                                    WnInput(
-                                      label: context.l10n.chooseName,
-                                      placeholder: context.l10n.enterYourName,
-                                      controller: displayNameController,
-                                      errorText: state.displayNameError,
-                                      onChanged: (_) => clearErrors(),
-                                    ),
-                                    Gap(16.h),
-                                    WnInputTextArea(
-                                      key: const Key('signup_bio_field'),
-                                      label: context.l10n.introduceYourself,
-                                      placeholder: context.l10n.writeSomethingAboutYourself,
-                                      controller: bioController,
-                                      focusNode: bioFocusNode,
-                                      textInputAction: TextInputAction.done,
                                     ),
                                   ],
                                 ),
                               ),
+                              child: SingleChildScrollView(
+                                controller: scrollController,
+                                child: Padding(
+                                  padding: EdgeInsets.fromLTRB(
+                                    14.w,
+                                    8.h,
+                                    14.w,
+                                    14.h,
+                                  ),
+                                  child: Column(
+                                    mainAxisSize: MainAxisSize.min,
+                                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                                    children: [
+                                      Center(
+                                        child: ValueListenableBuilder(
+                                          valueListenable: displayNameController,
+                                          builder: (context, value, child) {
+                                            return WnAvatar(
+                                              pictureUrl: state.selectedImagePath,
+                                              displayName: value.text,
+                                              size: WnAvatarSize.large,
+                                              onEditTap: state.isLoading ? null : pickImage,
+                                            );
+                                          },
+                                        ),
+                                      ),
+                                      Gap(16.h),
+                                      WnCallout(
+                                        key: const Key('signup_privacy_notice'),
+                                        title: context.l10n.profilePrivacyTitle,
+                                        description: privacyNoticeExpanded.value
+                                            ? context.l10n.profilePrivacyDescription
+                                            : null,
+                                        isExpanded: privacyNoticeExpanded.value,
+                                        onToggle: () {
+                                          privacyNoticeExpanded.value =
+                                              !privacyNoticeExpanded.value;
+                                        },
+                                      ),
+                                      Gap(16.h),
+                                      WnInput(
+                                        label: context.l10n.chooseName,
+                                        placeholder: context.l10n.enterYourName,
+                                        controller: displayNameController,
+                                        errorText: state.displayNameError,
+                                        onChanged: (_) => clearErrors(),
+                                      ),
+                                      Gap(16.h),
+                                      WnInputTextArea(
+                                        key: const Key('signup_bio_field'),
+                                        label: context.l10n.introduceYourself,
+                                        placeholder: context.l10n.writeSomethingAboutYourself,
+                                        controller: bioController,
+                                        focusNode: bioFocusNode,
+                                        textInputAction: TextInputAction.done,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
                             ),
                           ),
-                        ),
-                        SizedBox(
-                          height: MediaQuery.of(context).viewInsets.bottom.clamp(0.0, 16.h),
-                        ),
-                      ],
+                          SizedBox(
+                            height: MediaQuery.of(context).viewInsets.bottom.clamp(0.0, 16.h),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),
