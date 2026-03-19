@@ -99,7 +99,8 @@ class NotificationUser {
   });
 
   @override
-  int get hashCode => pubkey.hashCode ^ displayName.hashCode ^ pictureUrl.hashCode;
+  int get hashCode =>
+      pubkey.hashCode ^ displayName.hashCode ^ pictureUrl.hashCode;
 
   @override
   bool operator ==(Object other) =>

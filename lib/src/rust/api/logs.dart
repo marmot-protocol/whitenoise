@@ -12,5 +12,7 @@ import 'error.dart';
 
 /// Stream new lines from the Rust log file to Flutter.
 /// Tails the whitenoise log file and emits each new line via the sink.
-Stream<String> subscribeToRustLogs({required String logsBaseDir}) =>
-    RustLib.instance.api.crateApiLogsSubscribeToRustLogs(logsBaseDir: logsBaseDir);
+Stream<String> subscribeToRustLogs({required String logsBaseDir}) => RustLib
+    .instance
+    .api
+    .crateApiLogsSubscribeToRustLogs(logsBaseDir: logsBaseDir);

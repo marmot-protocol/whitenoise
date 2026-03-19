@@ -784,7 +784,7 @@ class WnMessageBubble extends StatelessWidget {
     final textStyle = context.typographyScaled.medium16Compact.copyWith(color: textColor);
     final tsStyle = context.typographyScaled.medium12.copyWith(color: timestampColor);
 
-    final highlightColor = highlightSpans != null ? Colors.blue.withValues(alpha: 0.4) : null;
+    final highlightColor = highlightSpans != null ? colors.intentionInfoContent : null;
 
     final bubbleContent = _BubbleContent(
       bubbleColor: bubbleColor,
