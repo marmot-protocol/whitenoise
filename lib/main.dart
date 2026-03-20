@@ -138,11 +138,14 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
       _logger.info('App resumed, ensuring relay subscriptions are operational');
-      relays_api.ensureAllSubscriptions().then((_) {
-        _logger.info('Relay subscriptions ensured after resume');
-      }).catchError((Object e) {
-        _logger.warning('Failed to ensure relay subscriptions after resume: $e');
-      });
+      relays_api
+          .ensureAllSubscriptions()
+          .then((_) {
+            _logger.info('Relay subscriptions ensured after resume');
+          })
+          .catchError((Object e) {
+            _logger.warning('Failed to ensure relay subscriptions after resume: $e');
+          });
     }
   }
 
