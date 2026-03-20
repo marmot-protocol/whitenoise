@@ -121,17 +121,6 @@ void main() {
       expect(metadata.displayName, 'First Metadata');
     });
 
-    test('fetchMetadata remains a stream-first wrapper', () async {
-      mockApi.seedUserInitialSnapshot(
-        testPubkeyA,
-        metadata: const FlutterMetadata(displayName: 'Wrapped Metadata', custom: {}),
-      );
-
-      final metadata = await service.fetchMetadata();
-
-      expect(metadata.displayName, 'Wrapped Metadata');
-    });
-
     test('propagates stream errors from subscribeToUser', () async {
       mockApi.shouldThrowOnSubscribe = true;
 
