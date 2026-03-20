@@ -20,8 +20,11 @@ import 'package:whitenoise/providers/theme_provider.dart' show themeProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/screens/fatal_error_screen.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
+import 'package:whitenoise/src/rust/api/relays.dart' as relays_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/theme.dart';
+
+final _logger = Logger('WnApp');
 
 // TODO: Remove migration gate and related code in the next release.
 const kDataVersion = 1;
@@ -33,6 +36,7 @@ Future<void> main() async {
   hierarchicalLoggingEnabled = true;
   Logger('useChatList').level = Level.INFO;
   Logger('useChatMessages').level = Level.INFO;
+  Logger('WnApp').level = Level.INFO;
   Logger.root.onRecord.listen((record) {
     appLogStore.add(record);
     final buf = StringBuffer('${record.level.name}: ${record.loggerName}: ${record.message}');
@@ -114,13 +118,32 @@ class WnApp extends ConsumerStatefulWidget {
   ConsumerState<WnApp> createState() => _WnAppState();
 }
 
-class _WnAppState extends ConsumerState<WnApp> {
+class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
   late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
     _router = Routes.build(ref);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      _logger.info('App resumed, ensuring relay subscriptions are operational');
+      relays_api.ensureAllSubscriptions().then((_) {
+        _logger.info('Relay subscriptions ensured after resume');
+      }).catchError((Object e) {
+        _logger.warning('Failed to ensure relay subscriptions after resume: $e');
+      });
+    }
   }
 
   @override
