@@ -45,7 +45,7 @@ class _MockApi extends MockWnApi {
   final Map<String, String> npubToPubkey = {};
   final Set<String> errorPubkeys = {};
   Completer<User>? userCompleter;
-  final userCalls = <({String pubkey, bool blocking})>[];
+  final subscribeCalls = <String>[];
   final followsCalls = <String>[];
   final searchUsersCalls =
       <({String query, String accountPubkey, int radiusStart, int radiusEnd})>[];
@@ -62,12 +62,17 @@ class _MockApi extends MockWnApi {
     required String pubkey,
     required bool blockingDataSync,
   }) {
-    userCalls.add((pubkey: pubkey, blocking: blockingDataSync));
     if (userCompleter != null) return userCompleter!.future;
     if (errorPubkeys.contains(pubkey)) throw Exception('User not found');
     final user = userByPubkey[pubkey];
     if (user == null) throw Exception('User not found');
     return Future.value(user);
+  }
+
+  @override
+  Stream<UserStreamItem> crateApiUsersSubscribeToUser({required String pubkey}) {
+    subscribeCalls.add(pubkey);
+    return super.crateApiUsersSubscribeToUser(pubkey: pubkey);
   }
 
   @override
@@ -106,7 +111,7 @@ class _MockApi extends MockWnApi {
     npubToPubkey.clear();
     errorPubkeys.clear();
     userCompleter = null;
-    userCalls.clear();
+    subscribeCalls.clear();
     followsCalls.clear();
     searchUsersCalls.clear();
   }
@@ -224,12 +229,12 @@ void main() {
           expect(getState().isLoading, isTrue);
         });
 
-        testWidgets('subscribes once for explicit pubkey search', (tester) async {
+        testWidgets('subscribes once to user stream for explicit pubkey search', (tester) async {
           await pump(tester, searchQuery: testNpubC);
           await tester.pump();
 
-          expect(api.userCalls.length, 1);
-          expect(api.userCalls[0].blocking, isFalse);
+          expect(api.subscribeCalls.length, 1);
+          expect(api.subscribeCalls[0], testPubkeyC);
         });
 
         testWidgets('updates the result when the user stream improves later', (tester) async {
@@ -250,7 +255,7 @@ void main() {
           );
           await tester.pump();
 
-          expect(api.userCalls.length, 1);
+          expect(api.subscribeCalls.length, 1);
           expect(getState().users[0].metadata.displayName, 'Synced User');
         });
 
