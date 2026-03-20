@@ -41,6 +41,19 @@ ChatMessagesResult useChatMessages(
   final indexById = useRef<Map<String, int>>({});
   final authorsMetadataByPubkey = useState<Map<String, FlutterMetadata>>({});
   final loadingPubkeys = useRef<Set<String>>({});
+  final lastEventAt = useRef<DateTime?>(null);
+
+  useOnAppLifecycleStateChange((previous, current) {
+    final secsSinceLastEvent = lastEventAt.value != null
+        ? DateTime.now().difference(lastEventAt.value!).inSeconds
+        : null;
+    _logger.info(
+      'LIFECYCLE previous=$previous current=$current '
+      'groupId=$groupId '
+      'secsSinceLastEvent=$secsSinceLastEvent '
+      'messageCount=${messagesById.value.length}',
+    );
+  });
 
   final stream = useMemoized(
     () {
@@ -75,6 +88,7 @@ ChatMessagesResult useChatMessages(
           .map((item) {
             return item.when(
               initialSnapshot: (initialChatMessages) {
+                lastEventAt.value = DateTime.now();
                 _logger.info(
                   'stream initialSnapshot groupId=$groupId count=${initialChatMessages.length}',
                 );
@@ -106,6 +120,7 @@ ChatMessagesResult useChatMessages(
                 );
               },
               update: (update) {
+                lastEventAt.value = DateTime.now();
                 final message = update.message;
                 final triggerName = update.trigger.name;
                 _logger.info(

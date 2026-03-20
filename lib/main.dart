@@ -30,6 +30,9 @@ const kDataVersionFile = 'data_version';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Logger.root.level = Level.WARNING;
+  hierarchicalLoggingEnabled = true;
+  Logger('useChatList').level = Level.INFO;
+  Logger('useChatMessages').level = Level.INFO;
   Logger.root.onRecord.listen((record) {
     appLogStore.add(record);
     final buf = StringBuffer('${record.level.name}: ${record.loggerName}: ${record.message}');

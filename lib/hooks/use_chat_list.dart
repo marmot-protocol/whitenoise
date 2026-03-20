@@ -14,6 +14,19 @@ typedef ChatListResult = ({
 ChatListResult useChatList(String pubkey) {
   final chatMap = useRef(<String, ChatSummary>{});
   final refreshKey = useState(0);
+  final lastEventAt = useRef<DateTime?>(null);
+
+  useOnAppLifecycleStateChange((previous, current) {
+    final secsSinceLastEvent = lastEventAt.value != null
+        ? DateTime.now().difference(lastEventAt.value!).inSeconds
+        : null;
+    _logger.info(
+      'LIFECYCLE previous=$previous current=$current '
+      'pubkey=${pubkey.substring(0, 8)}… '
+      'secsSinceLastEvent=$secsSinceLastEvent '
+      'chatCount=${chatMap.value.length}',
+    );
+  });
 
   final stream = useMemoized(
     () => subscribeToChatList(accountPubkey: pubkey)
@@ -24,6 +37,7 @@ ChatListResult useChatList(String pubkey) {
         .map((item) {
           return item.when(
             initialSnapshot: (items) {
+              lastEventAt.value = DateTime.now();
               _logger.info(
                 'chatList stream initialSnapshot pubkey=${pubkey.substring(0, 8)}… count=${items.length}',
               );
@@ -31,6 +45,7 @@ ChatListResult useChatList(String pubkey) {
               return chatMap.value;
             },
             update: (update) {
+              lastEventAt.value = DateTime.now();
               final id = update.item.mlsGroupId;
               _logger.info(
                 'chatList stream update pubkey=${pubkey.substring(0, 8)}… '
