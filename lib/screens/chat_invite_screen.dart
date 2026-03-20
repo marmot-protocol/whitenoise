@@ -60,17 +60,13 @@ class ChatInviteScreen extends HookConsumerWidget {
       ),
       [pubkey, mlsGroupId],
     );
-    final inviterName = useFuture(
-      useMemoized(
-        () async {
-          final group = await accountGroup;
-          final welcomerPubkey = group.welcomerPubkey;
-          if (welcomerPubkey == null) return null;
-          final metadata = await UserService(welcomerPubkey).fetchMetadata();
-          return presentName(metadata);
-        },
-        [accountGroup],
-      ),
+    final accountGroupSnapshot = useFuture(accountGroup);
+    final inviterName = useStream(
+      useMemoized(() {
+        final welcomerPubkey = accountGroupSnapshot.data?.welcomerPubkey;
+        if (welcomerPubkey == null) return null;
+        return UserService(welcomerPubkey).watchMetadata().map(presentName);
+      }, [accountGroupSnapshot.data?.welcomerPubkey]),
     );
 
     useActiveChat(

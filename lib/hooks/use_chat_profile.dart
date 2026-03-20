@@ -9,6 +9,13 @@ import 'package:whitenoise/utils/metadata.dart';
 
 final _logger = Logger('useChatProfile');
 
+typedef _ChatProfileBase = ({
+  groups_api.Group group,
+  bool isDm,
+  String? groupImagePath,
+  String? otherMemberPubkey,
+});
+
 class ChatProfile {
   final String? displayName;
   final String? pictureUrl;
@@ -55,14 +62,84 @@ AsyncSnapshot<ChatProfile> useChatProfile(
 
   useRouteRefresh(context, () => refreshKey.value++);
 
-  final future = useMemoized(
-    () => _fetchChatProfile(pubkey, groupId),
+  final baseFuture = useMemoized(
+    () => _fetchChatProfileBase(pubkey, groupId),
     [pubkey, groupId, refreshKey.value],
   );
-  return useFuture(future);
+  final baseSnapshot = useFuture(baseFuture);
+  final metadataStream = useMemoized(() {
+    final base = baseSnapshot.data;
+    if (base == null || !base.isDm || base.otherMemberPubkey == null) {
+      return null;
+    }
+    return UserService(base.otherMemberPubkey!).watchMetadata();
+  }, [baseSnapshot.data?.isDm, baseSnapshot.data?.otherMemberPubkey]);
+  final metadataSnapshot = useStream(metadataStream);
+
+  if (baseSnapshot.hasError) {
+    return AsyncSnapshot<ChatProfile>.withError(
+      baseSnapshot.connectionState,
+      baseSnapshot.error!,
+      baseSnapshot.stackTrace ?? StackTrace.empty,
+    );
+  }
+
+  final base = baseSnapshot.data;
+  if (base == null) {
+    return switch (baseSnapshot.connectionState) {
+      ConnectionState.waiting => const AsyncSnapshot<ChatProfile>.waiting(),
+      _ => const AsyncSnapshot<ChatProfile>.nothing(),
+    };
+  }
+
+  if (!base.isDm) {
+    return AsyncSnapshot<ChatProfile>.withData(
+      baseSnapshot.connectionState,
+      ChatProfile(
+        displayName: base.group.name.isEmpty ? null : base.group.name,
+        pictureUrl: base.groupImagePath,
+        color: AvatarColor.fromPubkey(base.group.mlsGroupId),
+        isDm: false,
+      ),
+    );
+  }
+
+  if (base.otherMemberPubkey == null) {
+    return AsyncSnapshot<ChatProfile>.withData(
+      baseSnapshot.connectionState,
+      ChatProfile(
+        color: AvatarColor.fromPubkey(base.group.mlsGroupId),
+        isDm: true,
+      ),
+    );
+  }
+
+  if (metadataSnapshot.hasError) {
+    return AsyncSnapshot<ChatProfile>.withError(
+      metadataSnapshot.connectionState,
+      metadataSnapshot.error!,
+      metadataSnapshot.stackTrace ?? StackTrace.empty,
+    );
+  }
+
+  if (!metadataSnapshot.hasData && metadataSnapshot.connectionState == ConnectionState.waiting) {
+    return const AsyncSnapshot<ChatProfile>.waiting();
+  }
+
+  final metadata = metadataSnapshot.data;
+  return AsyncSnapshot<ChatProfile>.withData(
+    metadataSnapshot.connectionState,
+    ChatProfile(
+      displayName: presentName(metadata),
+      pictureUrl: metadata?.picture,
+      otherMemberPubkey: base.otherMemberPubkey,
+      color: AvatarColor.fromPubkey(base.otherMemberPubkey!),
+      isDm: true,
+    ),
+  );
 }
 
-Future<ChatProfile> _fetchChatProfile(String pubkey, String groupId) async {
+Future<_ChatProfileBase> _fetchChatProfileBase(String pubkey, String groupId) async {
   _logger.fine('Fetching chat profile for groupId: $groupId');
 
   final group = await groups_api.getGroup(
@@ -73,56 +150,30 @@ Future<ChatProfile> _fetchChatProfile(String pubkey, String groupId) async {
   final isDm = await group.isDirectMessageType(accountPubkey: pubkey);
 
   if (isDm) {
-    _logger.info('Fetching DM profile');
-    return await _fetchDmProfile(group, pubkey);
-  } else {
-    _logger.info('Fetching group profile');
-    return await _fetchGroupProfile(group, pubkey);
-  }
-}
+    _logger.info('Fetching DM profile base');
+    final memberPubkeys = await groups_api.groupMembers(
+      pubkey: pubkey,
+      groupId: group.mlsGroupId,
+    );
 
-Future<ChatProfile> _fetchGroupProfile(groups_api.Group group, String pubkey) async {
-  _logger.info('Fetching group image path');
-  final imagePath = await groups_api.getGroupImagePath(
+    return (
+      group: group,
+      isDm: true,
+      groupImagePath: null,
+      otherMemberPubkey: memberPubkeys.where((p) => p != pubkey).firstOrNull,
+    );
+  }
+
+  _logger.info('Fetching group profile base');
+  final groupImagePath = await groups_api.getGroupImagePath(
     accountPubkey: pubkey,
     groupId: group.mlsGroupId,
   );
   _logger.fine('Group image path fetched');
-  return ChatProfile(
-    displayName: group.name.isEmpty ? null : group.name,
-    pictureUrl: imagePath,
-    color: AvatarColor.fromPubkey(group.mlsGroupId),
+  return (
+    group: group,
     isDm: false,
-  );
-}
-
-Future<ChatProfile> _fetchDmProfile(
-  groups_api.Group group,
-  String pubkey,
-) async {
-  final groupId = group.mlsGroupId;
-  _logger.info('Fetching group members');
-  final memberPubkeys = await groups_api.groupMembers(
-    pubkey: pubkey,
-    groupId: groupId,
-  );
-
-  final otherMemberPubkey = memberPubkeys.where((p) => p != pubkey).firstOrNull;
-
-  if (otherMemberPubkey == null) {
-    _logger.warning('No other member found in DM group');
-    return ChatProfile(
-      color: AvatarColor.fromPubkey(groupId),
-      isDm: true,
-    );
-  }
-  final metadata = await UserService(otherMemberPubkey).fetchMetadata();
-
-  return ChatProfile(
-    displayName: presentName(metadata),
-    pictureUrl: metadata.picture,
-    otherMemberPubkey: otherMemberPubkey,
-    color: AvatarColor.fromPubkey(otherMemberPubkey),
-    isDm: true,
+    groupImagePath: groupImagePath,
+    otherMemberPubkey: null,
   );
 }

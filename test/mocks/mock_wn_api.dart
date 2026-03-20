@@ -51,6 +51,8 @@ class MockWnApi implements RustLibApi {
   KeyPackageStatus userHasKeyPackageStatus = KeyPackageStatus.valid;
   Completer<KeyPackageStatus>? userHasKeyPackageCompleter;
   StreamController<UserSearchUpdate>? searchUsersController;
+  final Map<String, StreamController<UserStreamItem>> userStreamControllers = {};
+  final Map<String, User> userStreamUsers = {};
 
   bool sendBugReportCalled = false;
   String? lastBugReportWhatWentWrong;
@@ -98,6 +100,59 @@ class MockWnApi implements RustLibApi {
       return userHasKeyPackageCompleter!.future;
     }
     return userHasKeyPackageStatus;
+  }
+
+  User buildMockUser(
+    String pubkey, {
+    FlutterMetadata metadata = const FlutterMetadata(custom: {}),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    final now = DateTime(2024);
+    return User(
+      pubkey: pubkey,
+      metadata: metadata,
+      createdAt: createdAt ?? now,
+      updatedAt: updatedAt ?? now,
+    );
+  }
+
+  void seedUserInitialSnapshot(
+    String pubkey, {
+    User? user,
+    FlutterMetadata metadata = const FlutterMetadata(custom: {}),
+  }) {
+    userStreamUsers[pubkey] = user ?? buildMockUser(pubkey, metadata: metadata);
+  }
+
+  void emitUserInitialSnapshot(
+    String pubkey, {
+    User? user,
+    FlutterMetadata metadata = const FlutterMetadata(custom: {}),
+  }) {
+    final nextUser = user ?? buildMockUser(pubkey, metadata: metadata);
+    userStreamUsers[pubkey] = nextUser;
+    userStreamControllers[pubkey]?.add(
+      UserStreamItem.initialSnapshot(user: nextUser),
+    );
+  }
+
+  void emitUserUpdate(
+    String pubkey, {
+    required UserUpdateTrigger trigger,
+    User? user,
+    FlutterMetadata metadata = const FlutterMetadata(custom: {}),
+  }) {
+    final nextUser = user ?? buildMockUser(pubkey, metadata: metadata);
+    userStreamUsers[pubkey] = nextUser;
+    userStreamControllers[pubkey]?.add(
+      UserStreamItem.update(
+        update: UserUpdate(
+          trigger: trigger,
+          user: nextUser,
+        ),
+      ),
+    );
   }
 
   @override
@@ -169,6 +224,24 @@ class MockWnApi implements RustLibApi {
     searchUsersController?.close();
     searchUsersController = StreamController<UserSearchUpdate>(sync: true);
     return searchUsersController!.stream;
+  }
+
+  @override
+  Stream<UserStreamItem> crateApiUsersSubscribeToUser({
+    required String pubkey,
+  }) async* {
+    final controller = userStreamControllers.putIfAbsent(
+      pubkey,
+      () => StreamController<UserStreamItem>.broadcast(sync: true),
+    );
+    final initialUser =
+        userStreamUsers[pubkey] ??
+        await crateApiUsersGetUser(
+          pubkey: pubkey,
+          blockingDataSync: false,
+        );
+    yield UserStreamItem.initialSnapshot(user: initialUser);
+    yield* controller.stream;
   }
 
   @override
@@ -260,6 +333,21 @@ class MockWnApi implements RustLibApi {
       displayName: 'Display $pubkey',
       custom: {},
     );
+  }
+
+  @override
+  Future<User> crateApiUsersGetUser({
+    required String pubkey,
+    required bool blockingDataSync,
+  }) async {
+    return userStreamUsers[pubkey] ??
+        buildMockUser(
+          pubkey,
+          metadata: await crateApiUsersUserMetadata(
+            pubkey: pubkey,
+            blockingDataSync: blockingDataSync,
+          ),
+        );
   }
 
   @override
@@ -626,6 +714,11 @@ class MockWnApi implements RustLibApi {
     userHasKeyPackageStatus = KeyPackageStatus.valid;
     searchUsersController?.close();
     searchUsersController = null;
+    for (final controller in userStreamControllers.values) {
+      controller.close();
+    }
+    userStreamControllers.clear();
+    userStreamUsers.clear();
     userHasKeyPackageCompleter = null;
     deleteAllDataCalled = false;
     deleteAllDataShouldFail = false;

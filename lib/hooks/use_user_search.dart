@@ -120,11 +120,11 @@ UserSearchState useUserSearch({
     return npubMap;
   }, [follows]);
 
-  final searchFuture = useMemoized(
-    () => hexPubkeyFromQuery != null ? UserService(hexPubkeyFromQuery).fetchUser() : null,
+  final searchStream = useMemoized(
+    () => hexPubkeyFromQuery != null ? UserService(hexPubkeyFromQuery).watchUser() : null,
     [hexPubkeyFromQuery],
   );
-  final searchSnapshot = useFuture(searchFuture);
+  final searchSnapshot = useStream(searchStream);
   final isLoadingSearch = searchSnapshot.connectionState == ConnectionState.waiting;
 
   final hasSearchQuery = trimmedSearchQuery.isNotEmpty;

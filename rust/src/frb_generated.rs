@@ -43,7 +43,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1270634048;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -474436555;
 
 // Section: executor
 
@@ -3690,6 +3690,47 @@ fn wire__crate__api__logs__subscribe_to_rust_logs_impl(
         },
     )
 }
+fn wire__crate__api__users__subscribe_to_user_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "subscribe_to_user",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_pubkey = <String>::sse_decode(&mut deserializer);
+            let api_sink = <StreamSink<
+                crate::api::users::UserStreamItem,
+                flutter_rust_bridge::for_generated::SseCodec,
+            >>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::error::ApiError>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::users::subscribe_to_user(api_pubkey, api_sink).await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__utils__tag_from_vec_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -4677,6 +4718,16 @@ impl SseDecode
         crate::api::user_search::UserSearchUpdate,
         flutter_rust_bridge::for_generated::SseCodec,
     >
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <String>::sse_decode(deserializer);
+        return StreamSink::deserialize(inner);
+    }
+}
+
+impl SseDecode
+    for StreamSink<crate::api::users::UserStreamItem, flutter_rust_bridge::for_generated::SseCodec>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -6156,6 +6207,51 @@ impl SseDecode for crate::api::user_search::UserSearchUpdate {
     }
 }
 
+impl SseDecode for crate::api::users::UserStreamItem {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut tag_ = <i32>::sse_decode(deserializer);
+        match tag_ {
+            0 => {
+                let mut var_user = <crate::api::users::User>::sse_decode(deserializer);
+                return crate::api::users::UserStreamItem::InitialSnapshot { user: var_user };
+            }
+            1 => {
+                let mut var_update = <crate::api::users::UserUpdate>::sse_decode(deserializer);
+                return crate::api::users::UserStreamItem::Update { update: var_update };
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
+impl SseDecode for crate::api::users::UserUpdate {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_trigger = <crate::api::users::UserUpdateTrigger>::sse_decode(deserializer);
+        let mut var_user = <crate::api::users::User>::sse_decode(deserializer);
+        return crate::api::users::UserUpdate {
+            trigger: var_trigger,
+            user: var_user,
+        };
+    }
+}
+
+impl SseDecode for crate::api::users::UserUpdateTrigger {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::users::UserUpdateTrigger::UserCreated,
+            1 => crate::api::users::UserUpdateTrigger::MetadataChanged,
+            2 => crate::api::users::UserUpdateTrigger::LocalMetadataChanged,
+            _ => unreachable!("Invalid variant for UserUpdateTrigger: {}", inner),
+        };
+    }
+}
+
 impl SseDecode for usize {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -6429,32 +6525,33 @@ fn pde_ffi_dispatcher_primary_impl(
         92 => {
             wire__crate__api__logs__subscribe_to_rust_logs_impl(port, ptr, rust_vec_len, data_len)
         }
-        93 => wire__crate__api__utils__tag_from_vec_impl(port, ptr, rust_vec_len, data_len),
-        98 => wire__crate__api__accounts__unfollow_user_impl(port, ptr, rust_vec_len, data_len),
-        99 => wire__crate__api__accounts__update_account_metadata_impl(
+        93 => wire__crate__api__users__subscribe_to_user_impl(port, ptr, rust_vec_len, data_len),
+        94 => wire__crate__api__utils__tag_from_vec_impl(port, ptr, rust_vec_len, data_len),
+        99 => wire__crate__api__accounts__unfollow_user_impl(port, ptr, rust_vec_len, data_len),
+        100 => wire__crate__api__accounts__update_account_metadata_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        100 => wire__crate__api__update_language_impl(port, ptr, rust_vec_len, data_len),
-        101 => wire__crate__api__update_theme_mode_impl(port, ptr, rust_vec_len, data_len),
-        102 => wire__crate__api__accounts__upload_account_profile_picture_impl(
+        101 => wire__crate__api__update_language_impl(port, ptr, rust_vec_len, data_len),
+        102 => wire__crate__api__update_theme_mode_impl(port, ptr, rust_vec_len, data_len),
+        103 => wire__crate__api__accounts__upload_account_profile_picture_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        103 => {
+        104 => {
             wire__crate__api__media_files__upload_chat_media_impl(port, ptr, rust_vec_len, data_len)
         }
-        104 => wire__crate__api__groups__upload_group_image_impl(port, ptr, rust_vec_len, data_len),
-        105 => {
+        105 => wire__crate__api__groups__upload_group_image_impl(port, ptr, rust_vec_len, data_len),
+        106 => {
             wire__crate__api__users__user_has_key_package_impl(port, ptr, rust_vec_len, data_len)
         }
-        106 => wire__crate__api__users__user_metadata_impl(port, ptr, rust_vec_len, data_len),
-        107 => wire__crate__api__users__user_relays_impl(port, ptr, rust_vec_len, data_len),
-        108 => wire__crate__api__groups__visible_groups_with_info_impl(
+        107 => wire__crate__api__users__user_metadata_impl(port, ptr, rust_vec_len, data_len),
+        108 => wire__crate__api__users__user_relays_impl(port, ptr, rust_vec_len, data_len),
+        109 => wire__crate__api__groups__visible_groups_with_info_impl(
             port,
             ptr,
             rust_vec_len,
@@ -6485,10 +6582,10 @@ fn pde_ffi_dispatcher_sync_impl(
         61 => wire__crate__api__utils__language_to_string_impl(ptr, rust_vec_len, data_len),
         62 => wire__crate__api__utils__language_turkish_impl(ptr, rust_vec_len, data_len),
         73 => wire__crate__api__utils__npub_from_hex_pubkey_impl(ptr, rust_vec_len, data_len),
-        94 => wire__crate__api__utils__theme_mode_dark_impl(ptr, rust_vec_len, data_len),
-        95 => wire__crate__api__utils__theme_mode_light_impl(ptr, rust_vec_len, data_len),
-        96 => wire__crate__api__utils__theme_mode_system_impl(ptr, rust_vec_len, data_len),
-        97 => wire__crate__api__utils__theme_mode_to_string_impl(ptr, rust_vec_len, data_len),
+        95 => wire__crate__api__utils__theme_mode_dark_impl(ptr, rust_vec_len, data_len),
+        96 => wire__crate__api__utils__theme_mode_light_impl(ptr, rust_vec_len, data_len),
+        97 => wire__crate__api__utils__theme_mode_system_impl(ptr, rust_vec_len, data_len),
+        98 => wire__crate__api__utils__theme_mode_to_string_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -7775,6 +7872,73 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::user_search::UserSearchUpdate
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::users::UserStreamItem {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            crate::api::users::UserStreamItem::InitialSnapshot { user } => {
+                [0.into_dart(), user.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::users::UserStreamItem::Update { update } => {
+                [1.into_dart(), update.into_into_dart().into_dart()].into_dart()
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::users::UserStreamItem
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::users::UserStreamItem>
+    for crate::api::users::UserStreamItem
+{
+    fn into_into_dart(self) -> crate::api::users::UserStreamItem {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::users::UserUpdate {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.trigger.into_into_dart().into_dart(),
+            self.user.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::users::UserUpdate {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::users::UserUpdate>
+    for crate::api::users::UserUpdate
+{
+    fn into_into_dart(self) -> crate::api::users::UserUpdate {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::users::UserUpdateTrigger {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::UserCreated => 0.into_dart(),
+            Self::MetadataChanged => 1.into_dart(),
+            Self::LocalMetadataChanged => 2.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::users::UserUpdateTrigger
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::users::UserUpdateTrigger>
+    for crate::api::users::UserUpdateTrigger
+{
+    fn into_into_dart(self) -> crate::api::users::UserUpdateTrigger {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::WhitenoiseConfig {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -8030,6 +8194,15 @@ impl SseEncode
         crate::api::user_search::UserSearchUpdate,
         flutter_rust_bridge::for_generated::SseCodec,
     >
+{
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        unimplemented!("")
+    }
+}
+
+impl SseEncode
+    for StreamSink<crate::api::users::UserStreamItem, flutter_rust_bridge::for_generated::SseCodec>
 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -9182,6 +9355,50 @@ impl SseEncode for crate::api::user_search::UserSearchUpdate {
         <crate::api::user_search::SearchUpdateTrigger>::sse_encode(self.trigger, serializer);
         <Vec<crate::api::user_search::UserSearchResult>>::sse_encode(self.new_results, serializer);
         <u64>::sse_encode(self.total_result_count, serializer);
+    }
+}
+
+impl SseEncode for crate::api::users::UserStreamItem {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        match self {
+            crate::api::users::UserStreamItem::InitialSnapshot { user } => {
+                <i32>::sse_encode(0, serializer);
+                <crate::api::users::User>::sse_encode(user, serializer);
+            }
+            crate::api::users::UserStreamItem::Update { update } => {
+                <i32>::sse_encode(1, serializer);
+                <crate::api::users::UserUpdate>::sse_encode(update, serializer);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
+impl SseEncode for crate::api::users::UserUpdate {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::users::UserUpdateTrigger>::sse_encode(self.trigger, serializer);
+        <crate::api::users::User>::sse_encode(self.user, serializer);
+    }
+}
+
+impl SseEncode for crate::api::users::UserUpdateTrigger {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::users::UserUpdateTrigger::UserCreated => 0,
+                crate::api::users::UserUpdateTrigger::MetadataChanged => 1,
+                crate::api::users::UserUpdateTrigger::LocalMetadataChanged => 2,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
     }
 }
 

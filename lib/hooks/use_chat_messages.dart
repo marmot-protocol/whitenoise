@@ -40,7 +40,9 @@ ChatMessagesResult useChatMessages(
   final messagesById = useRef<Map<String, ChatMessage>>({});
   final indexById = useRef<Map<String, int>>({});
   final authorsMetadataByPubkey = useState<Map<String, FlutterMetadata>>({});
-  final loadingPubkeys = useRef<Set<String>>({});
+  final metadataSubscriptionsByPubkey = useRef<Map<String, StreamSubscription<FlutterMetadata>>>(
+    {},
+  );
 
   final stream = useMemoized(
     () {
@@ -203,38 +205,41 @@ ChatMessagesResult useChatMessages(
     return messagesById.value[messageId];
   }
 
-  Future<void> fetchAuthorMetadata(String pubkey) async {
-    if (authorsMetadataByPubkey.value.containsKey(pubkey)) return;
-    if (loadingPubkeys.value.contains(pubkey)) return;
+  void ensureAuthorMetadataSubscription(String pubkey) {
+    if (metadataSubscriptionsByPubkey.value.containsKey(pubkey)) return;
 
-    loadingPubkeys.value.add(pubkey);
-    _logger.fine('fetchAuthorMetadata pubkey=${pubkey.substring(0, 8)}…');
-    try {
-      final metadata = await UserService(pubkey).fetchMetadata();
-      _logger.fine(
-        'fetchAuthorMetadata OK pubkey=${pubkey.substring(0, 8)}… '
-        'name=${metadata.name} displayName=${metadata.displayName}',
-      );
-      authorsMetadataByPubkey.value = {
-        ...authorsMetadataByPubkey.value,
-        pubkey: metadata,
-      };
-    } catch (e, st) {
-      _logger.severe(
-        'fetchAuthorMetadata FAILED pubkey=${pubkey.substring(0, 8)}…',
-        e,
-        st,
-      );
-    } finally {
-      loadingPubkeys.value.remove(pubkey);
-    }
+    _logger.fine('ensureAuthorMetadataSubscription pubkey=${pubkey.substring(0, 8)}…');
+    final subscription = UserService(pubkey).watchMetadata().listen(
+      (metadata) {
+        _logger.fine(
+          'author metadata update pubkey=${pubkey.substring(0, 8)}… '
+          'name=${metadata.name} displayName=${metadata.displayName}',
+        );
+        authorsMetadataByPubkey.value = {
+          ...authorsMetadataByPubkey.value,
+          pubkey: metadata,
+        };
+      },
+      onError: (Object error, StackTrace stackTrace) {
+        _logger.severe(
+          'author metadata stream failed pubkey=${pubkey.substring(0, 8)}…',
+          error,
+          stackTrace,
+        );
+      },
+    );
+
+    metadataSubscriptionsByPubkey.value = {
+      ...metadataSubscriptionsByPubkey.value,
+      pubkey: subscription,
+    };
   }
 
   FlutterMetadata? getAuthorMetadata(String pubkey) {
     final existingAuthorMetadata = authorsMetadataByPubkey.value[pubkey];
     if (existingAuthorMetadata != null) return existingAuthorMetadata;
 
-    fetchAuthorMetadata(pubkey);
+    ensureAuthorMetadataSubscription(pubkey);
     return null;
   }
 
@@ -260,6 +265,15 @@ ChatMessagesResult useChatMessages(
       isNotFound: false,
     );
   }
+
+  useEffect(() {
+    return () {
+      for (final subscription in metadataSubscriptionsByPubkey.value.values) {
+        subscription.cancel();
+      }
+      metadataSubscriptionsByPubkey.value = {};
+    };
+  }, [groupId]);
 
   return (
     messageCount: snapshot.data?.messageCount ?? 0,

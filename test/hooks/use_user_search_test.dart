@@ -42,7 +42,6 @@ UserSearchResult _searchResultFactory(
 class _MockApi extends MockWnApi {
   Completer<List<User>>? followsCompleter;
   final Map<String, User> userByPubkey = {};
-  final Map<String, User> blockingUserByPubkey = {};
   final Map<String, String> npubToPubkey = {};
   final Set<String> errorPubkeys = {};
   Completer<User>? userCompleter;
@@ -66,9 +65,7 @@ class _MockApi extends MockWnApi {
     userCalls.add((pubkey: pubkey, blocking: blockingDataSync));
     if (userCompleter != null) return userCompleter!.future;
     if (errorPubkeys.contains(pubkey)) throw Exception('User not found');
-    final user = blockingDataSync
-        ? (blockingUserByPubkey[pubkey] ?? userByPubkey[pubkey])
-        : userByPubkey[pubkey];
+    final user = userByPubkey[pubkey];
     if (user == null) throw Exception('User not found');
     return Future.value(user);
   }
@@ -106,7 +103,6 @@ class _MockApi extends MockWnApi {
     super.reset();
     followsCompleter = null;
     userByPubkey.clear();
-    blockingUserByPubkey.clear();
     npubToPubkey.clear();
     errorPubkeys.clear();
     userCompleter = null;
@@ -228,7 +224,7 @@ void main() {
           expect(getState().isLoading, isTrue);
         });
 
-        testWidgets('does not retry with blocking when metadata is complete', (tester) async {
+        testWidgets('subscribes once for explicit pubkey search', (tester) async {
           await pump(tester, searchQuery: testNpubC);
           await tester.pump();
 
@@ -236,19 +232,25 @@ void main() {
           expect(api.userCalls[0].blocking, isFalse);
         });
 
-        testWidgets('retries with blocking when metadata is incomplete', (tester) async {
+        testWidgets('updates the result when the user stream improves later', (tester) async {
           api.userByPubkey[testPubkeyC] = _userFactory(testPubkeyC);
-          api.blockingUserByPubkey[testPubkeyC] = _userFactory(
-            testPubkeyC,
-            displayName: 'Synced User',
-          );
 
           await pump(tester, searchQuery: testNpubC);
           await tester.pump();
 
-          expect(api.userCalls.length, 2);
-          expect(api.userCalls[0].blocking, isFalse);
-          expect(api.userCalls[1].blocking, isTrue);
+          expect(getState().users[0].metadata.displayName, isNull);
+
+          api.emitUserUpdate(
+            testPubkeyC,
+            trigger: UserUpdateTrigger.metadataChanged,
+            user: _userFactory(
+              testPubkeyC,
+              displayName: 'Synced User',
+            ),
+          );
+          await tester.pump();
+
+          expect(api.userCalls.length, 1);
           expect(getState().users[0].metadata.displayName, 'Synced User');
         });
 

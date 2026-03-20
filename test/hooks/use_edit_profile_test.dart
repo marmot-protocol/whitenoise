@@ -7,6 +7,7 @@ import 'package:whitenoise/hooks/use_edit_profile.dart'
     show EditProfileLoadingState, EditProfileState, useEditProfile;
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/src/rust/api/users.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import '../mocks/mock_account_pubkey_notifier.dart';
@@ -19,6 +20,22 @@ class _MockApi implements RustLibApi {
   bool shouldThrowOnUpdate = false;
   bool shouldThrowOnUpload = false;
 
+  FlutterMetadata _currentMetadata() {
+    return updatedMetadata ??
+        const FlutterMetadata(
+          name: 'Test User',
+          displayName: 'Test Display Name',
+          about: 'Test About',
+          nip05: 'test@example.com',
+          picture: 'https://example.com/picture.jpg',
+          banner: 'https://example.com/banner.jpg',
+          website: 'https://example.com',
+          lud06: 'lnurl1test',
+          lud16: 'test@example.com',
+          custom: {'lnurl': 'lnurl1test', 'other_field': 'other_value'},
+        );
+  }
+
   @override
   Future<FlutterMetadata> crateApiUsersUserMetadata({
     required bool blockingDataSync,
@@ -27,20 +44,23 @@ class _MockApi implements RustLibApi {
     if (shouldThrowOnLoad) {
       throw Exception('Load error');
     }
-    if (updatedMetadata != null) {
-      return updatedMetadata!;
+    return _currentMetadata();
+  }
+
+  @override
+  Stream<UserStreamItem> crateApiUsersSubscribeToUser({
+    required String pubkey,
+  }) async* {
+    if (shouldThrowOnLoad) {
+      throw Exception('Load error');
     }
-    return const FlutterMetadata(
-      name: 'Test User',
-      displayName: 'Test Display Name',
-      about: 'Test About',
-      nip05: 'test@example.com',
-      picture: 'https://example.com/picture.jpg',
-      banner: 'https://example.com/banner.jpg',
-      website: 'https://example.com',
-      lud06: 'lnurl1test',
-      lud16: 'test@example.com',
-      custom: {'lnurl': 'lnurl1test', 'other_field': 'other_value'},
+    yield UserStreamItem.initialSnapshot(
+      user: User(
+        pubkey: pubkey,
+        metadata: _currentMetadata(),
+        createdAt: DateTime(2024),
+        updatedAt: DateTime(2024),
+      ),
     );
   }
 
