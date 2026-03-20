@@ -4,8 +4,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
-import 'package:whitenoise/screens/chat_screen.dart';
-import 'package:whitenoise/screens/start_support_chat_screen.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/user_search.dart';
 import 'package:whitenoise/src/rust/api/users.dart';
@@ -420,34 +418,6 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text("Scan a contact's QR code."), findsOneWidget);
-      });
-    });
-
-    group('chat with support', () {
-      testWidgets('displays chat with support menu item', (tester) async {
-        await pumpUserSearchScreen(tester);
-        expect(find.byKey(const Key('help_and_feedback_menu_item')), findsOneWidget);
-        expect(find.text('Chat with support'), findsOneWidget);
-      });
-
-      testWidgets('navigates to existing DM when one exists', (tester) async {
-        _api.dmGroupByPeer['$testPubkeyA|1136006d965b8ffb0e8d0e842750d68a6cd06093957f14bcefb47bb228f0cc35'] =
-            testGroupId;
-        await pumpUserSearchScreen(tester);
-
-        await tester.tap(find.byKey(const Key('help_and_feedback_menu_item')));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(ChatScreen), findsOneWidget);
-      });
-
-      testWidgets('navigates to start help chat when no DM exists', (tester) async {
-        await pumpUserSearchScreen(tester);
-
-        await tester.tap(find.byKey(const Key('help_and_feedback_menu_item')));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(StartSupportChatScreen), findsOneWidget);
       });
     });
   });

@@ -62,16 +62,11 @@ class ChatListTile extends HookConsumerWidget {
     final isPending = chatSummary.pendingConfirmation;
     final hasWelcomer = chatSummary.welcomerPubkey != null;
 
-    final welcomerMetadata = useMemoized(() async {
+    final welcomerStream = useMemoized(() {
       if (!isPending || !hasWelcomer) return null;
-
-      try {
-        return UserService(chatSummary.welcomerPubkey!).fetchMetadata();
-      } catch (_) {
-        return null;
-      }
+      return UserService(chatSummary.welcomerPubkey!).watchMetadata();
     }, [chatSummary.welcomerPubkey, isPending, hasWelcomer]);
-    final welcomerSnapshot = useFuture(welcomerMetadata);
+    final welcomerSnapshot = useStream(welcomerStream);
 
     final hasGroupName = chatSummary.name?.isNotEmpty ?? false;
     final welcomerName = presentName(welcomerSnapshot.data);

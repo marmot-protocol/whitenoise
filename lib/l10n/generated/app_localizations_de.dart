@@ -1253,6 +1253,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get thisMessageWasDeleted => 'Diese Nachricht wurde gelöscht.';
 
   @override
+  String get youDeletedThisMessage => 'Du hast diese Nachricht gelöscht.';
+
+  @override
   String get relayControlStateLoadError =>
       'Laden des Relay-Status fehlgeschlagen. Bitte erneut versuchen.';
 

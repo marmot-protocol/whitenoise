@@ -41,6 +41,19 @@ class _MockAuthNotifier extends AuthNotifier {
   }
 }
 
+class _FailingSwitchAuthNotifier extends AuthNotifier {
+  @override
+  Future<String?> build() async {
+    state = const AsyncData(testPubkeyA);
+    return testPubkeyA;
+  }
+
+  @override
+  Future<void> switchProfile(String pubkey) async {
+    throw Exception('Switch failed');
+  }
+}
+
 Account _makeAccount(String pubkey) => Account(
   pubkey: pubkey,
   accountType: AccountType.local,
@@ -117,6 +130,28 @@ void main() {
       await tester.tap(find.byKey(const Key('slate_back_button')));
       await tester.pumpAndSettle();
       expect(find.byType(SwitchProfileScreen), findsNothing);
+    });
+
+    testWidgets('shows error when switching profile fails', (tester) async {
+      mockApi.accounts = [
+        _makeAccount(testPubkeyA),
+        _makeAccount(testPubkeyB),
+      ];
+
+      await mountTestApp(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _FailingSwitchAuthNotifier()),
+          secureStorageProvider.overrideWithValue(MockSecureStorage()),
+        ],
+      );
+      Routes.pushToSwitchProfile(tester.element(find.byType(Scaffold)));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byType(WnProfileSwitcherItem).at(1));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Failed to switch profile. Please try again.'), findsOneWidget);
     });
 
     testWidgets('displays multiple accounts', (tester) async {

@@ -234,6 +234,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  RustStreamSink<UserStreamItem> dco_decode_StreamSink_user_stream_item_Sse(
+    dynamic raw,
+  );
+
+  @protected
   String dco_decode_String(dynamic raw);
 
   @protected
@@ -294,6 +299,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   MessageUpdate dco_decode_box_autoadd_message_update(dynamic raw);
+
+  @protected
+  User dco_decode_box_autoadd_user(dynamic raw);
+
+  @protected
+  UserUpdate dco_decode_box_autoadd_user_update(dynamic raw);
 
   @protected
   WhitenoiseConfig dco_decode_box_autoadd_whitenoise_config(dynamic raw);
@@ -570,6 +581,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   UserSearchUpdate dco_decode_user_search_update(dynamic raw);
 
   @protected
+  UserStreamItem dco_decode_user_stream_item(dynamic raw);
+
+  @protected
+  UserUpdate dco_decode_user_update(dynamic raw);
+
+  @protected
+  UserUpdateTrigger dco_decode_user_update_trigger(dynamic raw);
+
+  @protected
   BigInt dco_decode_usize(dynamic raw);
 
   @protected
@@ -742,6 +762,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  RustStreamSink<UserStreamItem> sse_decode_StreamSink_user_stream_item_Sse(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   String sse_decode_String(SseDeserializer deserializer);
 
   @protected
@@ -816,6 +841,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   MessageUpdate sse_decode_box_autoadd_message_update(
     SseDeserializer deserializer,
   );
+
+  @protected
+  User sse_decode_box_autoadd_user(SseDeserializer deserializer);
+
+  @protected
+  UserUpdate sse_decode_box_autoadd_user_update(SseDeserializer deserializer);
 
   @protected
   WhitenoiseConfig sse_decode_box_autoadd_whitenoise_config(
@@ -1142,6 +1173,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   UserSearchUpdate sse_decode_user_search_update(SseDeserializer deserializer);
 
   @protected
+  UserStreamItem sse_decode_user_stream_item(SseDeserializer deserializer);
+
+  @protected
+  UserUpdate sse_decode_user_update(SseDeserializer deserializer);
+
+  @protected
+  UserUpdateTrigger sse_decode_user_update_trigger(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   BigInt sse_decode_usize(SseDeserializer deserializer);
 
   @protected
@@ -1352,6 +1394,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_StreamSink_user_stream_item_Sse(
+    RustStreamSink<UserStreamItem> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_String(String self, SseSerializer serializer);
 
   @protected
@@ -1441,6 +1489,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_message_update(
     MessageUpdate self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_user(User self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_user_update(
+    UserUpdate self,
     SseSerializer serializer,
   );
 
@@ -1847,6 +1904,21 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_user_search_update(
     UserSearchUpdate self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_user_stream_item(
+    UserStreamItem self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_user_update(UserUpdate self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_user_update_trigger(
+    UserUpdateTrigger self,
     SseSerializer serializer,
   );
 

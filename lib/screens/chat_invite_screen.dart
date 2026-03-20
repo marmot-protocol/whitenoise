@@ -60,17 +60,13 @@ class ChatInviteScreen extends HookConsumerWidget {
       ),
       [pubkey, mlsGroupId],
     );
-    final inviterName = useFuture(
-      useMemoized(
-        () async {
-          final group = await accountGroup;
-          final welcomerPubkey = group.welcomerPubkey;
-          if (welcomerPubkey == null) return null;
-          final metadata = await UserService(welcomerPubkey).fetchMetadata();
-          return presentName(metadata);
-        },
-        [accountGroup],
-      ),
+    final accountGroupSnapshot = useFuture(accountGroup);
+    final inviterName = useStream(
+      useMemoized(() {
+        final welcomerPubkey = accountGroupSnapshot.data?.welcomerPubkey;
+        if (welcomerPubkey == null) return null;
+        return UserService(welcomerPubkey).watchMetadata().map(presentName);
+      }, [accountGroupSnapshot.data?.welcomerPubkey]),
     );
 
     useActiveChat(
@@ -279,12 +275,15 @@ class _InviteMessageList extends HookWidget {
       return () => scrollController.removeListener(updateHasMoreBelow);
     }, [scrollController]);
 
-    void scrollToBottom() {
-      scrollController.animateTo(
+    Future<void> scrollToBottom() async {
+      await scrollController.animateTo(
         scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOutCubic,
       );
+      if (scrollController.hasClients) {
+        scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      }
     }
 
     return Stack(

@@ -1238,6 +1238,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get thisMessageWasDeleted => 'Este mensaje fue eliminado.';
 
   @override
+  String get youDeletedThisMessage => 'Has eliminado este mensaje.';
+
+  @override
   String get relayControlStateLoadError =>
       'Error al cargar el estado de relés. Por favor, inténtalo de nuevo.';
 

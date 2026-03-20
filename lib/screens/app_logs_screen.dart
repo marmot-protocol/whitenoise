@@ -30,7 +30,6 @@ class AppLogsScreen extends HookConsumerWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final liveRawEntries = ref.watch(appLogProvider);
-    final totalEntries = liveRawEntries.length;
     final filter = ref.watch(appLogFilterProvider);
     final patternController = useTextEditingController();
     final patternFocus = useFocusNode();
@@ -49,12 +48,14 @@ class AppLogsScreen extends HookConsumerWidget {
     );
 
     List<AppLogEntry> applyFilter(List<AppLogEntry> source) {
+      final levelFiltered = source.where((e) => filter.selectedLevels.contains(e.level));
+
       if (filter.searchQuery.isEmpty &&
           filter.includePatterns.isEmpty &&
           filter.excludePatterns.isEmpty) {
-        return source;
+        return levelFiltered.toList();
       }
-      return source.where((e) {
+      return levelFiltered.where((e) {
         final buf = StringBuffer('${e.level.name} ${e.loggerName} ${e.message}');
         if (e.error != null) buf.write(' ${e.error}');
         if (e.stackTrace != null) buf.write(' ${e.stackTrace}');
@@ -73,7 +74,9 @@ class AppLogsScreen extends HookConsumerWidget {
       }).toList();
     }
 
-    final entries = applyFilter(paused.value ? frozenRawEntries.value : liveRawEntries);
+    final rawEntries = paused.value ? frozenRawEntries.value : liveRawEntries;
+    final entries = applyFilter(rawEntries);
+    final totalEntries = rawEntries.length;
 
     final liveRawEntriesRef = useRef(liveRawEntries);
     liveRawEntriesRef.value = liveRawEntries;
@@ -102,10 +105,13 @@ class AppLogsScreen extends HookConsumerWidget {
       return null;
     }, [filter.searchQuery]);
 
+    const defaultLevels = [Level.WARNING, Level.SEVERE, Level.SHOUT];
     final hasFilters =
         filter.searchQuery.isNotEmpty ||
         filter.includePatterns.isNotEmpty ||
-        filter.excludePatterns.isNotEmpty;
+        filter.excludePatterns.isNotEmpty ||
+        filter.selectedLevels.length != defaultLevels.length ||
+        !defaultLevels.every(filter.selectedLevels.contains);
 
     void resumeLive() {
       if (scrollController.hasClients) {
@@ -266,38 +272,43 @@ class AppLogsScreen extends HookConsumerWidget {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Expanded(
-                            child: hasFilters && totalEntries > 0
-                                ? Padding(
-                                    padding: EdgeInsets.only(right: 8.w),
-                                    child: Text(
-                                      context.l10n.appLogsFilteredCount(
-                                        entries.length,
-                                        totalEntries,
-                                      ),
-                                      style: typography.medium12.copyWith(
-                                        color: colors.backgroundContentTertiary,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  )
-                                : const SizedBox.shrink(),
+                            child: SingleChildScrollView(
+                              scrollDirection: Axis.horizontal,
+                              child: Row(
+                                children: [
+                                  _LevelToggle(
+                                    label: 'INFO',
+                                    color: colors.intentionInfoContent,
+                                    isSelected: filter.selectedLevels.contains(Level.INFO),
+                                    onTap: () => ref
+                                        .read(appLogFilterProvider.notifier)
+                                        .toggleLevel(Level.INFO),
+                                  ),
+                                  Gap(4.w),
+                                  _LevelToggle(
+                                    label: 'WARN',
+                                    color: colors.intentionWarningContent,
+                                    isSelected: filter.selectedLevels.contains(Level.WARNING),
+                                    onTap: () => ref
+                                        .read(appLogFilterProvider.notifier)
+                                        .toggleLevel(Level.WARNING),
+                                  ),
+                                  Gap(4.w),
+                                  _LevelToggle(
+                                    label: 'SEVERE',
+                                    color: colors.fillDestructive,
+                                    isSelected: filter.selectedLevels.contains(Level.SEVERE),
+                                    onTap: () => ref
+                                        .read(appLogFilterProvider.notifier)
+                                        .toggleLevel(Level.SEVERE),
+                                  ),
+                                ],
+                              ),
+                            ),
                           ),
+                          Gap(8.w),
                           Row(
                             children: [
-                              if (totalEntries > 0)
-                                WnButton(
-                                  key: const Key('app_logs_clear'),
-                                  text: context.l10n.appLogsEraseAll,
-                                  leadingIcon: WnIcons.trashCan,
-                                  onPressed: () {
-                                    ref.read(appLogProvider.notifier).clear();
-                                    paused.value = false;
-                                    frozenRawEntries.value = const [];
-                                  },
-                                  type: WnButtonType.outline,
-                                  size: WnButtonSize.small,
-                                ),
-                              if (totalEntries > 0 && entries.isNotEmpty) Gap(8.w),
                               if (entries.isNotEmpty)
                                 WnButton(
                                   key: const Key('app_logs_copy_all'),
@@ -311,10 +322,40 @@ class AppLogsScreen extends HookConsumerWidget {
                                   type: WnButtonType.outline,
                                   size: WnButtonSize.small,
                                 ),
+                              if (totalEntries > 0 && entries.isNotEmpty) Gap(8.w),
+                              if (totalEntries > 0)
+                                WnButton(
+                                  key: const Key('app_logs_clear'),
+                                  text: context.l10n.appLogsEraseAll,
+                                  leadingIcon: WnIcons.trashCan,
+                                  onPressed: () {
+                                    ref.read(appLogProvider.notifier).clear();
+                                    paused.value = false;
+                                    frozenRawEntries.value = const [];
+                                  },
+                                  type: WnButtonType.destructive,
+                                  size: WnButtonSize.small,
+                                ),
                             ],
                           ),
                         ],
                       ),
+                      if (hasFilters && totalEntries > 0) ...[
+                        Gap(8.h),
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            context.l10n.appLogsFilteredCount(
+                              entries.length,
+                              totalEntries,
+                            ),
+                            style: typography.medium12.copyWith(
+                              color: colors.backgroundContentTertiary,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
                     ],
                   ),
                 ),
@@ -450,6 +491,48 @@ class _AppLogsResumeLiveButton extends StatelessWidget {
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+}
+
+class _LevelToggle extends StatelessWidget {
+  const _LevelToggle({
+    required this.label,
+    required this.color,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final Color color;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: 6.w, vertical: 2.h),
+        decoration: BoxDecoration(
+          color: isSelected ? color.withValues(alpha: 0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(10.h),
+          border: Border.all(
+            color: isSelected ? color : colors.backgroundContentSecondary.withValues(alpha: 0.3),
+          ),
+        ),
+        child: Text(
+          label,
+          style: typography.medium10.copyWith(
+            color: isSelected ? color : colors.backgroundContentSecondary,
+            fontFamily: 'monospace',
+          ),
         ),
       ),
     );
@@ -620,6 +703,9 @@ class _LogEntryTile extends StatelessWidget {
     }
     if (level == Level.WARNING) {
       return colors.intentionWarningContent;
+    }
+    if (level == Level.INFO) {
+      return colors.intentionInfoContent;
     }
     return colors.backgroundContentSecondary;
   }

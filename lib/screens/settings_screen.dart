@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:whitenoise/hooks/use_support_chat.dart';
 import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/app_version_provider.dart';
@@ -26,6 +27,7 @@ class SettingsScreen extends HookConsumerWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final pubkey = ref.watch(authProvider).value;
+    final helpState = useSupportChat(accountPubkey: pubkey);
     final metadataSnapshot = useUserMetadata(context, pubkey);
     final appVersion = ref.watch(appVersionProvider);
 
@@ -138,6 +140,20 @@ class SettingsScreen extends HookConsumerWidget {
                       icon: WnIcons.appearance,
                       label: context.l10n.appearance,
                       onTap: () => Routes.pushToAppearance(context),
+                    ),
+                    WnMenuItem(
+                      key: const Key('help_and_support_menu_item'),
+                      icon: WnIcons.helpChat,
+                      label: context.l10n.chatWithSupport,
+                      onTap: () {
+                        if (helpState.isLoading) return;
+                        final groupId = helpState.existingGroupId;
+                        if (groupId != null) {
+                          Routes.goToChat(context, groupId);
+                        } else {
+                          Routes.pushToStartSupportChat(context);
+                        }
+                      },
                     ),
                     WnMenuItem(
                       icon: WnIcons.logout,

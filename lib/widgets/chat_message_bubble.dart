@@ -92,7 +92,9 @@ class ChatMessageBubble extends StatelessWidget {
     return WnMessageBubble(
       direction: isOwnMessage ? MessageDirection.outgoing : MessageDirection.incoming,
       isDeleted: message.isDeleted,
-      deletedLabel: message.isDeleted ? context.l10n.thisMessageWasDeleted : null,
+      deletedLabel: message.isDeleted
+          ? (isOwnMessage ? context.l10n.youDeletedThisMessage : context.l10n.thisMessageWasDeleted)
+          : null,
       showTail: showTail,
       content: message.content.isNotEmpty ? message.content : null,
       mediaContent: message.mediaAttachments.isNotEmpty

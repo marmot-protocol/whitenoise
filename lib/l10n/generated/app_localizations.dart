@@ -2238,6 +2238,12 @@ abstract class AppLocalizations {
   /// **'This message was deleted.'**
   String get thisMessageWasDeleted;
 
+  /// Text shown inside a message bubble when the current user deleted it
+  ///
+  /// In en, this message translates to:
+  /// **'You deleted this message.'**
+  String get youDeletedThisMessage;
+
   /// User-friendly error when relay control state fails to load
   ///
   /// In en, this message translates to:

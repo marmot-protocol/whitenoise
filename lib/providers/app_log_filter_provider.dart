@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:logging/logging.dart';
 import 'package:whitenoise/providers/app_log_provider.dart';
 
 class AppLogFilterState {
@@ -6,20 +7,24 @@ class AppLogFilterState {
     this.searchQuery = '',
     this.includePatterns = const [],
     this.excludePatterns = const [],
+    this.selectedLevels = const [Level.WARNING, Level.SEVERE, Level.SHOUT],
   });
 
   final String searchQuery;
   final List<String> includePatterns;
   final List<String> excludePatterns;
+  final List<Level> selectedLevels;
 
   AppLogFilterState copyWith({
     String? searchQuery,
     List<String>? includePatterns,
     List<String>? excludePatterns,
+    List<Level>? selectedLevels,
   }) => AppLogFilterState(
     searchQuery: searchQuery ?? this.searchQuery,
     includePatterns: includePatterns ?? this.includePatterns,
     excludePatterns: excludePatterns ?? this.excludePatterns,
+    selectedLevels: selectedLevels ?? this.selectedLevels,
   );
 }
 
@@ -28,6 +33,22 @@ class AppLogFilterNotifier extends Notifier<AppLogFilterState> {
   AppLogFilterState build() => const AppLogFilterState();
 
   void setSearch(String query) => state = state.copyWith(searchQuery: query);
+
+  void toggleLevel(Level level) {
+    final newLevels = Set<Level>.from(state.selectedLevels);
+    final levelsToToggle = level == Level.SEVERE ? [Level.SEVERE, Level.SHOUT] : [level];
+
+    final isSelected = newLevels.contains(level);
+
+    for (final l in levelsToToggle) {
+      if (isSelected) {
+        newLevels.remove(l);
+      } else {
+        newLevels.add(l);
+      }
+    }
+    state = state.copyWith(selectedLevels: newLevels.toList());
+  }
 
   void addInclude(String pattern) {
     final trimmed = pattern.trim();
@@ -76,13 +97,15 @@ final filteredAppLogProvider = Provider<List<AppLogEntry>>((ref) {
   final entries = ref.watch(appLogProvider);
   final filter = ref.watch(appLogFilterProvider);
 
+  final levelFiltered = entries.where((e) => filter.selectedLevels.contains(e.level));
+
   if (filter.searchQuery.isEmpty &&
       filter.includePatterns.isEmpty &&
       filter.excludePatterns.isEmpty) {
-    return entries;
+    return levelFiltered.toList();
   }
 
-  return entries.where((e) {
+  return levelFiltered.where((e) {
     final text = _entryText(e);
 
     if (filter.excludePatterns.any((p) => _matches(text, p))) return false;

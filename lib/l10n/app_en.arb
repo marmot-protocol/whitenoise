@@ -1578,6 +1578,10 @@
   "@thisMessageWasDeleted": {
     "description": "Text shown inside a deleted message bubble"
   },
+  "youDeletedThisMessage": "You deleted this message.",
+  "@youDeletedThisMessage": {
+    "description": "Text shown inside a message bubble when the current user deleted it"
+  },
   "relayControlStateLoadError": "Failed to load relay control state. Please try again.",
   "@relayControlStateLoadError": {
     "description": "User-friendly error when relay control state fails to load"

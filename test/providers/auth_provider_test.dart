@@ -326,17 +326,13 @@ void main() {
         expect(result.status, LoginStatus.complete);
       });
 
-      test('fetches account metadata without awaiting', () async {
+      test('does not prefetch account metadata', () async {
         await container.read(authProvider.notifier).loginStart('nsec123');
-        expect(mockApi.metadataCalledWithPubkey, testPubkeyB);
-        expect(mockApi.metadataCompleter.isCompleted, isFalse);
+        expect(mockApi.metadataCalledWithPubkey, isNull);
       });
 
-      test('completes login even when metadata fetch fails', () async {
+      test('completes login without metadata prefetch', () async {
         await container.read(authProvider.notifier).loginStart('nsec123');
-        expect(container.read(authProvider).value, testPubkeyB);
-        mockApi.metadataCompleter.completeError(Exception('Network error'));
-        await Future<void>.delayed(Duration.zero);
         expect(container.read(authProvider).value, testPubkeyB);
       });
 
@@ -357,10 +353,9 @@ void main() {
         expect(container.read(authProvider).value, testPubkeyA);
       });
 
-      test('fetches metadata without awaiting', () async {
+      test('does not prefetch metadata', () async {
         await container.read(authProvider.notifier).loginPublishDefaultRelays(testPubkeyA);
-        expect(mockApi.metadataCalledWithPubkey, testPubkeyA);
-        expect(mockApi.metadataCompleter.isCompleted, isFalse);
+        expect(mockApi.metadataCalledWithPubkey, isNull);
       });
 
       test('resets isAddingAccountProvider to false', () async {
@@ -379,12 +374,11 @@ void main() {
         expect(container.read(authProvider).value, testPubkeyA);
       });
 
-      test('fetches metadata without awaiting', () async {
+      test('does not prefetch metadata', () async {
         await container
             .read(authProvider.notifier)
             .loginWithCustomRelay(testPubkeyA, 'wss://relay.example.com');
-        expect(mockApi.metadataCalledWithPubkey, testPubkeyA);
-        expect(mockApi.metadataCompleter.isCompleted, isFalse);
+        expect(mockApi.metadataCalledWithPubkey, isNull);
       });
 
       test('resets isAddingAccountProvider to false', () async {
@@ -412,12 +406,11 @@ void main() {
         expect(container.read(authProvider).value, testPubkeyA);
       });
 
-      test('fetches metadata without awaiting', () async {
+      test('does not prefetch metadata', () async {
         await container
             .read(authProvider.notifier)
             .loginExternalSignerPublishDefaultRelays(testPubkeyA);
-        expect(mockApi.metadataCalledWithPubkey, testPubkeyA);
-        expect(mockApi.metadataCompleter.isCompleted, isFalse);
+        expect(mockApi.metadataCalledWithPubkey, isNull);
       });
 
       test('resets isAddingAccountProvider to false', () async {
@@ -438,12 +431,11 @@ void main() {
         expect(container.read(authProvider).value, testPubkeyA);
       });
 
-      test('fetches metadata without awaiting', () async {
+      test('does not prefetch metadata', () async {
         await container
             .read(authProvider.notifier)
             .loginExternalSignerWithCustomRelay(testPubkeyA, 'wss://relay.example.com');
-        expect(mockApi.metadataCalledWithPubkey, testPubkeyA);
-        expect(mockApi.metadataCompleter.isCompleted, isFalse);
+        expect(mockApi.metadataCalledWithPubkey, isNull);
       });
 
       test('resets isAddingAccountProvider to false', () async {
@@ -626,14 +618,13 @@ void main() {
         expect(mockApi.loginWithSignerPubkey, testPubkeyA);
       });
 
-      test('fetches metadata without awaiting', () async {
+      test('does not prefetch metadata', () async {
         await container
             .read(authProvider.notifier)
             .loginExternalSignerStart(
               pubkey: testPubkeyA,
             );
-        expect(mockApi.metadataCalledWithPubkey, testPubkeyA);
-        expect(mockApi.metadataCompleter.isCompleted, isFalse);
+        expect(mockApi.metadataCalledWithPubkey, isNull);
       });
 
       test('resets isAddingAccountProvider to false', () async {

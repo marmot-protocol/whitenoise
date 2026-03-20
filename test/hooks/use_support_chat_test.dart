@@ -70,6 +70,21 @@ void main() {
       expect(state.existingGroupId, isNull);
     });
 
+    testWidgets('returns null existingGroupId when accountPubkey is null', (
+      tester,
+    ) async {
+      final getResult = await mountHook(
+        tester,
+        () => useSupportChat(accountPubkey: null),
+      );
+      await tester.pumpAndSettle();
+
+      final state = getResult();
+      expect(state.isLoading, isFalse);
+      expect(state.existingGroupId, isNull);
+      expect(_api.lastAccountPubkey, isNull);
+    });
+
     testWidgets('when API throws returns is loading false and existingGroupId is null', (
       tester,
     ) async {
