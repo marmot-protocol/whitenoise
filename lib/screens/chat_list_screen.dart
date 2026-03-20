@@ -164,6 +164,7 @@ class ChatListScreen extends HookConsumerWidget {
     final updateState = useZapstoreUpdate();
     final searchQuery = useState('');
     final welcomeNoticeDismissed = useState(false);
+    final chatListTopPadding = useMemoized(() => ValueNotifier(safeAreaTop + _slateHeight.h));
 
     useEffect(() {
       welcomeNoticeDismissed.value = false;
@@ -175,6 +176,7 @@ class ChatListScreen extends HookConsumerWidget {
     final isLoading = chatListResult.isLoading;
     final isEmpty = chatList.isEmpty && !isLoading;
     final showWelcomeNotice = isEmpty && !welcomeNoticeDismissed.value;
+    final activeUpdateVersion = updateState.isDismissed ? null : updateState.availableVersion;
 
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
@@ -196,43 +198,53 @@ class ChatListScreen extends HookConsumerWidget {
                 ),
               ),
             ),
-          WnChatList(
-            itemCount: filteredChats.length,
-            isLoading: isLoading,
-            isSearchActive: searchQuery.value.isNotEmpty,
-            topPadding: safeAreaTop + _slateHeight.h,
-            header: WnSearchAndFilters(
-              onSearchChanged: (value) => searchQuery.value = value,
-            ),
-            headerHeight: _searchAndFiltersHeight.h,
-            showEmptyState: !showWelcomeNotice && !isLoading,
-            itemBuilder: (context, index) {
-              final chatSummary = filteredChats[index];
-              return ChatListTile(
-                key: Key(chatSummary.mlsGroupId),
-                chatSummary: chatSummary,
-                onChatListChanged: chatListResult.refresh,
-                onError: notice.showErrorNotice,
-              );
-            },
-          ),
-          SafeArea(
-            bottom: false,
-            child: WnSlate(
-              systemNotice: _buildSystemNotice(
-                context,
-                typography,
-                colors,
-                showWelcomeNotice: showWelcomeNotice,
-                updateVersion: updateState.isDismissed ? null : updateState.availableVersion,
-                onUpdateDismiss: updateState.dismiss,
-                onWelcomeDismiss: () {
-                  if (context.mounted) {
-                    welcomeNoticeDismissed.value = true;
-                  }
-                },
+          ValueListenableBuilder<double>(
+            valueListenable: chatListTopPadding,
+            builder: (context, topPadding, _) => WnChatList(
+              itemCount: filteredChats.length,
+              isLoading: isLoading,
+              isSearchActive: searchQuery.value.isNotEmpty,
+              topPadding: topPadding,
+              header: WnSearchAndFilters(
+                onSearchChanged: (value) => searchQuery.value = value,
               ),
-              header: const ChatListHeader(),
+              headerHeight: _searchAndFiltersHeight.h,
+              showEmptyState: !showWelcomeNotice && !isLoading,
+              itemBuilder: (context, index) {
+                final chatSummary = filteredChats[index];
+                return ChatListTile(
+                  key: Key(chatSummary.mlsGroupId),
+                  chatSummary: chatSummary,
+                  onChatListChanged: chatListResult.refresh,
+                  onError: notice.showErrorNotice,
+                );
+              },
+            ),
+          ),
+          _MeasuredSlate(
+            onHeightChanged: (height) {
+              if (chatListTopPadding.value != height) {
+                chatListTopPadding.value = height;
+              }
+            },
+            child: SafeArea(
+              bottom: false,
+              child: WnSlate(
+                systemNotice: _buildSystemNotice(
+                  context,
+                  typography,
+                  colors,
+                  showWelcomeNotice: showWelcomeNotice,
+                  updateVersion: activeUpdateVersion,
+                  onUpdateDismiss: updateState.dismiss,
+                  onWelcomeDismiss: () {
+                    if (context.mounted) {
+                      welcomeNoticeDismissed.value = true;
+                    }
+                  },
+                ),
+                header: const ChatListHeader(),
+              ),
             ),
           ),
           if (notice.noticeMessage != null)
@@ -246,6 +258,40 @@ class ChatListScreen extends HookConsumerWidget {
               ),
             ),
         ],
+      ),
+    );
+  }
+}
+
+class _MeasuredSlate extends StatefulWidget {
+  const _MeasuredSlate({
+    required this.onHeightChanged,
+    required this.child,
+  });
+
+  final ValueChanged<double> onHeightChanged;
+  final Widget child;
+
+  @override
+  State<_MeasuredSlate> createState() => _MeasuredSlateState();
+}
+
+class _MeasuredSlateState extends State<_MeasuredSlate> {
+  final _key = GlobalKey();
+
+  @override
+  Widget build(BuildContext context) {
+    return NotificationListener<SizeChangedLayoutNotification>(
+      onNotification: (_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          final box = _key.currentContext?.findRenderObject() as RenderBox?;
+          if (box == null || !box.hasSize) return;
+          widget.onHeightChanged(box.size.height);
+        });
+        return false;
+      },
+      child: SizeChangedLayoutNotifier(
+        child: SizedBox(key: _key, child: widget.child),
       ),
     );
   }

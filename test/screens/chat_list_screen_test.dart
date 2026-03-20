@@ -425,6 +425,26 @@ void main() {
         expect(find.text('Update available'), findsNothing);
       });
 
+      testWidgets('first chat tile is not hidden behind the update banner', (tester) async {
+        _api.zapstoreVersion = '2026.4.0';
+        _api.initialChats = [
+          _chatSummary(id: testPubkeyA, pendingConfirmation: false, name: 'Alice'),
+        ];
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+        await tester.pumpAndSettle();
+
+        final slateBottom = tester.getBottomLeft(find.byType(WnSlate)).dy;
+        final tileTop = tester.getTopLeft(find.byType(ChatListTile)).dy;
+
+        expect(
+          tileTop,
+          greaterThanOrEqualTo(slateBottom),
+          reason: 'First chat tile should not be hidden under the update banner',
+        );
+      });
+
       testWidgets('update notice takes priority over welcome notice', (tester) async {
         // No chats → welcome notice would normally show.
         // Newer version available → update notice should show instead.
