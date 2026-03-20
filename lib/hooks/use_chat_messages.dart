@@ -205,6 +205,16 @@ ChatMessagesResult useChatMessages(
     return messagesById.value[messageId];
   }
 
+  void removeAuthorMetadataSubscription(String pubkey) {
+    final subscription = metadataSubscriptionsByPubkey.value[pubkey];
+    if (subscription == null) return;
+
+    metadataSubscriptionsByPubkey.value = {
+      ...metadataSubscriptionsByPubkey.value,
+    }..remove(pubkey);
+    unawaited(subscription.cancel());
+  }
+
   void ensureAuthorMetadataSubscription(String pubkey) {
     if (metadataSubscriptionsByPubkey.value.containsKey(pubkey)) return;
 
@@ -226,7 +236,10 @@ ChatMessagesResult useChatMessages(
           error,
           stackTrace,
         );
+        removeAuthorMetadataSubscription(pubkey);
       },
+      onDone: () => removeAuthorMetadataSubscription(pubkey),
+      cancelOnError: true,
     );
 
     metadataSubscriptionsByPubkey.value = {
@@ -237,10 +250,8 @@ ChatMessagesResult useChatMessages(
 
   FlutterMetadata? getAuthorMetadata(String pubkey) {
     final existingAuthorMetadata = authorsMetadataByPubkey.value[pubkey];
-    if (existingAuthorMetadata != null) return existingAuthorMetadata;
-
     ensureAuthorMetadataSubscription(pubkey);
-    return null;
+    return existingAuthorMetadata;
   }
 
   ChatMessageQuoteData? getChatMessageQuote(String? replyId) {

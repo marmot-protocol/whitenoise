@@ -8,7 +8,7 @@ import 'package:whitenoise/providers/message_debug_log_provider.dart' show messa
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
-import 'package:whitenoise/src/rust/api/users.dart' show UserUpdateTrigger;
+import 'package:whitenoise/src/rust/api/users.dart' show UserStreamItem, UserUpdateTrigger;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import '../mocks/mock_wn_api.dart';
@@ -56,6 +56,8 @@ enum _MetadataMode { normal, fail }
 
 class _MockApi extends MockWnApi {
   StreamController<MessageStreamItem>? controller;
+  final userSubscribeCalls = <String>[];
+  final failingUserSubscriptions = <String>{};
 
   void emitInitialSnapshot(List<ChatMessage> messages) {
     controller?.add(MessageStreamItem.initialSnapshot(messages: messages));
@@ -105,6 +107,10 @@ class _MockApi extends MockWnApi {
     controller?.addError(error, stackTrace ?? StackTrace.current);
   }
 
+  void failNextUserSubscription(String pubkey) {
+    failingUserSubscriptions.add(pubkey);
+  }
+
   @override
   Stream<MessageStreamItem> crateApiMessagesSubscribeToGroupMessages({
     required String groupId,
@@ -112,6 +118,17 @@ class _MockApi extends MockWnApi {
     controller?.close();
     controller = StreamController<MessageStreamItem>.broadcast();
     return controller!.stream;
+  }
+
+  @override
+  Stream<UserStreamItem> crateApiUsersSubscribeToUser({
+    required String pubkey,
+  }) {
+    userSubscribeCalls.add(pubkey);
+    if (failingUserSubscriptions.remove(pubkey)) {
+      return Stream.error(Exception('metadata stream failed'));
+    }
+    return super.crateApiUsersSubscribeToUser(pubkey: pubkey);
   }
 
   FlutterMetadata? userMetadataResponse;
@@ -135,6 +152,18 @@ class _MockApi extends MockWnApi {
           StackTrace.current,
         );
     }
+  }
+
+  @override
+  void reset() {
+    super.reset();
+    controller?.close();
+    controller = null;
+    userSubscribeCalls.clear();
+    failingUserSubscriptions.clear();
+    userMetadataResponse = null;
+    metadataMode = _MetadataMode.normal;
+    metadataCalls.clear();
   }
 
   @override
@@ -524,6 +553,36 @@ void main() {
         final preview = getResult().getChatMessageQuote('m1');
         expect(preview, isNotNull);
         expect(preview!.authorMetadata, isNull);
+      });
+
+      testWidgets('retries author metadata subscription after a stream error', (tester) async {
+        const authorPubkey = testPubkeyB;
+        _api.seedUserInitialSnapshot(
+          authorPubkey,
+          metadata: const FlutterMetadata(
+            displayName: 'Recovered Author',
+            custom: {},
+          ),
+        );
+        _api.failNextUserSubscription(authorPubkey);
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([
+          _message('m1', DateTime(2024), pubkey: authorPubkey, content: 'Hello'),
+        ]);
+        await tester.pump();
+
+        expect(getResult().getChatMessageQuote('m1')!.authorMetadata, isNull);
+        await tester.pump();
+
+        expect(_api.userSubscribeCalls, [authorPubkey]);
+
+        expect(getResult().getChatMessageQuote('m1')!.authorMetadata, isNull);
+        await tester.pump();
+
+        final preview = getResult().getChatMessageQuote('m1');
+        expect(_api.userSubscribeCalls, [authorPubkey, authorPubkey]);
+        expect(preview?.authorMetadata?.displayName, 'Recovered Author');
       });
     });
 

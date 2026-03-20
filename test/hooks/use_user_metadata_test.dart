@@ -1,4 +1,4 @@
-import 'dart:async' show Completer, StreamController;
+import 'dart:async' show Completer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -8,6 +8,9 @@ import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/users.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+
+import '../mocks/mock_wn_api.dart';
+import '../test_helpers.dart' show testPubkeyA, testPubkeyB;
 
 const _testMetadata = FlutterMetadata(
   name: 'Sloth',
@@ -92,54 +95,38 @@ class _SecondPage extends StatelessWidget {
 
 enum _MockMode { loading, success, error }
 
-class _MockApi implements RustLibApi {
+class _MockApi extends MockWnApi {
   _MockMode mode = _MockMode.success;
   final calls = <String>[];
-  final Map<String, StreamController<UserStreamItem>> controllers = {};
 
   void emitMetadataUpdate(String pubkey, FlutterMetadata metadata) {
-    controllers[pubkey]?.add(
-      UserStreamItem.update(
-        update: UserUpdate(
-          trigger: UserUpdateTrigger.metadataChanged,
-          user: _user(pubkey, metadata),
-        ),
-      ),
-    );
-  }
-
-  User _user(String pubkey, FlutterMetadata metadata) {
-    return User(
-      pubkey: pubkey,
+    emitUserUpdate(
+      pubkey,
+      trigger: UserUpdateTrigger.metadataChanged,
       metadata: metadata,
-      createdAt: DateTime(2024),
-      updatedAt: DateTime(2024),
     );
   }
 
   @override
   Stream<UserStreamItem> crateApiUsersSubscribeToUser({
     required String pubkey,
-  }) async* {
+  }) {
     calls.add(pubkey);
     if (mode == _MockMode.loading) {
-      yield* Completer<UserStreamItem>().future.asStream();
-      return;
+      return Completer<UserStreamItem>().future.asStream();
     }
     if (mode == _MockMode.error) {
-      throw Exception('fail');
+      return Stream.error(Exception('fail'));
     }
-
-    final controller = controllers.putIfAbsent(
-      pubkey,
-      () => StreamController<UserStreamItem>.broadcast(sync: true),
-    );
-    yield UserStreamItem.initialSnapshot(user: _user(pubkey, _testMetadata));
-    yield* controller.stream;
+    return super.crateApiUsersSubscribeToUser(pubkey: pubkey);
   }
 
   @override
-  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+  void reset() {
+    super.reset();
+    mode = _MockMode.success;
+    calls.clear();
+  }
 }
 
 final _api = _MockApi();
@@ -148,12 +135,9 @@ void main() {
   setUpAll(() => RustLib.initMock(api: _api));
 
   setUp(() {
-    _api.mode = _MockMode.success;
-    _api.calls.clear();
-    for (final controller in _api.controllers.values) {
-      controller.close();
-    }
-    _api.controllers.clear();
+    _api.reset();
+    _api.seedUserInitialSnapshot(testPubkeyA, metadata: _testMetadata);
+    _api.seedUserInitialSnapshot(testPubkeyB, metadata: _testMetadata);
   });
 
   group('useUserMetadata', () {
@@ -161,7 +145,7 @@ void main() {
       setUp(() => _api.mode = _MockMode.loading);
 
       testWidgets('is loading while waiting', (tester) async {
-        await _mountHook(tester, 'pk1');
+        await _mountHook(tester, testPubkeyA);
 
         expect(getResult().connectionState, equals(ConnectionState.waiting));
       });
@@ -169,33 +153,33 @@ void main() {
 
     group('success', () {
       testWidgets('returns expected metadata', (tester) async {
-        await _mountHook(tester, 'pk1');
+        await _mountHook(tester, testPubkeyA);
         await tester.pump();
 
         expect(getResult().data, equals(_testMetadata));
       });
 
       testWidgets('does not resubscribe when rebuilt with same pubkey', (tester) async {
-        await _mountHook(tester, 'pk1');
-        await _mountHook(tester, 'pk1');
+        await _mountHook(tester, testPubkeyA);
+        await _mountHook(tester, testPubkeyA);
 
         expect(_api.calls.length, 1);
       });
 
       testWidgets('resubscribes when pubkey changes', (tester) async {
-        await _mountHook(tester, 'pk1');
-        await _mountHook(tester, 'pk2');
+        await _mountHook(tester, testPubkeyA);
+        await _mountHook(tester, testPubkeyB);
 
         expect(_api.calls.length, 2);
       });
 
       testWidgets('updates when stream publishes new metadata without remounting', (tester) async {
-        await _mountHook(tester, 'pk1');
+        await _mountHook(tester, testPubkeyA);
         await tester.pump();
 
         expect(getResult().data, equals(_testMetadata));
 
-        _api.emitMetadataUpdate('pk1', _updatedMetadata);
+        _api.emitMetadataUpdate(testPubkeyA, _updatedMetadata);
         await tester.pump();
 
         expect(getResult().data, equals(_updatedMetadata));
@@ -206,7 +190,7 @@ void main() {
       setUp(() => _api.mode = _MockMode.error);
 
       testWidgets('returns error on failure', (tester) async {
-        await _mountHook(tester, 'pk1');
+        await _mountHook(tester, testPubkeyA);
         await tester.pump();
 
         expect(getResult().hasError, isTrue);
@@ -217,7 +201,7 @@ void main() {
       setUp(() => _api.mode = _MockMode.success);
 
       testWidgets('resubscribes when route changes', (tester) async {
-        await _mountHookWithNavigation(tester, 'pk1');
+        await _mountHookWithNavigation(tester, testPubkeyA);
         await tester.pumpAndSettle();
         await tester.tap(find.text('push'));
         await tester.pumpAndSettle();

@@ -334,7 +334,6 @@ void main() {
       test('completes login without metadata prefetch', () async {
         await container.read(authProvider.notifier).loginStart('nsec123');
         expect(container.read(authProvider).value, testPubkeyB);
-        expect(container.read(authProvider).value, testPubkeyB);
       });
 
       test('resets isAddingAccountProvider to false', () async {

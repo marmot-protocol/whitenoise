@@ -11,9 +11,10 @@ import 'package:whitenoise/src/rust/api/users.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import '../mocks/mock_account_pubkey_notifier.dart';
+import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
-class _MockApi implements RustLibApi {
+class _MockApi extends MockWnApi {
   FlutterMetadata? updatedMetadata;
   String? updatedPubkey;
   bool shouldThrowOnLoad = false;
@@ -37,30 +38,16 @@ class _MockApi implements RustLibApi {
   }
 
   @override
-  Future<FlutterMetadata> crateApiUsersUserMetadata({
+  Future<User> crateApiUsersGetUser({
     required bool blockingDataSync,
     required String pubkey,
   }) async {
     if (shouldThrowOnLoad) {
       throw Exception('Load error');
     }
-    return _currentMetadata();
-  }
-
-  @override
-  Stream<UserStreamItem> crateApiUsersSubscribeToUser({
-    required String pubkey,
-  }) async* {
-    if (shouldThrowOnLoad) {
-      throw Exception('Load error');
-    }
-    yield UserStreamItem.initialSnapshot(
-      user: User(
-        pubkey: pubkey,
-        metadata: _currentMetadata(),
-        createdAt: DateTime(2024),
-        updatedAt: DateTime(2024),
-      ),
+    return buildMockUser(
+      pubkey,
+      metadata: _currentMetadata(),
     );
   }
 
@@ -93,9 +80,6 @@ class _MockApi implements RustLibApi {
     }
     return 'https://example.com/uploaded.jpg';
   }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
 class _MockFile extends Fake implements File {

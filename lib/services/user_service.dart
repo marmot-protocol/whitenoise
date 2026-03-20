@@ -47,10 +47,6 @@ class UserService {
 
   Future<FlutterMetadata> getInitialMetadata() => watchMetadata().first;
 
-  Future<User> fetchUser() => getInitialUser();
-
-  Future<FlutterMetadata> fetchMetadata() => getInitialMetadata();
-
   User _userFromStreamItem(UserStreamItem item) {
     return item.when(
       initialSnapshot: (user) => user,
