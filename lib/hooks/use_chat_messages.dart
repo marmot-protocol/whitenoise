@@ -267,6 +267,11 @@ ChatMessagesResult useChatMessages(
   }
 
   useEffect(() {
+    for (final subscription in metadataSubscriptionsByPubkey.value.values) {
+      subscription.cancel();
+    }
+    metadataSubscriptionsByPubkey.value = {};
+
     return () {
       for (final subscription in metadataSubscriptionsByPubkey.value.values) {
         subscription.cancel();

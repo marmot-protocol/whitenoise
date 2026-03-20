@@ -52,8 +52,6 @@ MediaFile _mediaFile(String id) => MediaFile(
 
 const _emptyMetadata = FlutterMetadata(custom: {});
 
-enum _MetadataMode { normal, fail }
-
 class _MockApi extends MockWnApi {
   StreamController<MessageStreamItem>? controller;
 
@@ -112,29 +110,6 @@ class _MockApi extends MockWnApi {
     controller?.close();
     controller = StreamController<MessageStreamItem>.broadcast();
     return controller!.stream;
-  }
-
-  FlutterMetadata? userMetadataResponse;
-  _MetadataMode metadataMode = _MetadataMode.normal;
-  final metadataCalls = <({String pubkey, bool blocking})>[];
-
-  @override
-  Future<FlutterMetadata> crateApiUsersUserMetadata({
-    required String pubkey,
-    required bool blockingDataSync,
-  }) {
-    metadataCalls.add((pubkey: pubkey, blocking: blockingDataSync));
-    switch (metadataMode) {
-      case _MetadataMode.normal:
-        return Future.value(
-          userMetadataResponse ?? const FlutterMetadata(displayName: 'Author', custom: {}),
-        );
-      case _MetadataMode.fail:
-        return Future.error(
-          Exception('metadata fetch failed'),
-          StackTrace.current,
-        );
-    }
   }
 
   @override
@@ -509,21 +484,53 @@ void main() {
       });
     });
 
-    group('fetchAuthorMetadata error handling', () {
-      testWidgets('handles metadata fetch failure gracefully', (tester) async {
-        _api.metadataMode = _MetadataMode.fail;
+    group('author metadata stream error handling', () {
+      testWidgets('retains last known metadata and stays stable when author stream errors', (
+        tester,
+      ) async {
+        const authorPubkey = testPubkeyB;
+        _api.seedUserInitialSnapshot(
+          authorPubkey,
+          metadata: const FlutterMetadata(displayName: 'Known Author', custom: {}),
+        );
         final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([
+          _message('m1', DateTime(2024), pubkey: authorPubkey, content: 'Hello'),
+        ]);
+        await tester.pump();
+        getResult().getAuthorMetadata(authorPubkey);
+        await tester.pump();
+
+        expect(getResult().getAuthorMetadata(authorPubkey)?.displayName, 'Known Author');
+
+        _api.userStreamControllers[authorPubkey]?.addError(Exception('metadata stream error'));
+        await tester.pumpAndSettle();
+
+        expect(getResult().getAuthorMetadata(authorPubkey)?.displayName, 'Known Author');
+      });
+    });
+
+    group('subscription cleanup on group change', () {
+      testWidgets('cancels author metadata subscriptions when groupId changes', (tester) async {
+        await _pump(tester, 'group1');
 
         _api.emitInitialSnapshot([
           _message('m1', DateTime(2024), pubkey: testPubkeyB, content: 'Hello'),
         ]);
         await tester.pump();
-        getResult().getChatMessageQuote('m1');
-        await tester.pumpAndSettle();
 
-        final preview = getResult().getChatMessageQuote('m1');
-        expect(preview, isNotNull);
-        expect(preview!.authorMetadata, isNull);
+        final getResult1 = await _pump(tester, 'group1');
+        getResult1().getAuthorMetadata(testPubkeyB);
+        await tester.pump();
+
+        expect(_api.userStreamControllers.containsKey(testPubkeyB), isTrue);
+        expect(_api.userStreamControllers[testPubkeyB]!.hasListener, isTrue);
+
+        await _pump(tester, 'group2');
+        await tester.pump();
+
+        expect(_api.userStreamControllers[testPubkeyB]!.hasListener, isFalse);
       });
     });
 
@@ -728,7 +735,6 @@ void main() {
       });
 
       testWidgets('returns hasMedia true when message has media attachments', (tester) async {
-        _api.userMetadataResponse = const FlutterMetadata(custom: {});
         final getResult = await _pump(tester, 'group1');
 
         _api.emitInitialSnapshot([
@@ -803,7 +809,6 @@ void main() {
         final preview = getResult().getChatMessageQuote('m1');
         expect(preview!.authorMetadata, isNotNull);
         expect(preview.authorMetadata?.displayName, 'Relay Author');
-        expect(_api.metadataCalls.every((c) => !c.blocking), isTrue);
       });
     });
   });
