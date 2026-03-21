@@ -5,10 +5,16 @@ import 'package:gap/gap.dart';
 import 'package:whitenoise/hooks/use_onboarding_carousel.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/theme.dart';
-import 'package:whitenoise/widgets/wn_carousel_indicator.dart';
 
 class WnOnboardingCarousel extends HookWidget {
-  const WnOnboardingCarousel({super.key});
+  const WnOnboardingCarousel({
+    super.key,
+    this.onSlideChanged,
+    this.height,
+  });
+
+  final void Function(int currentIndex, Color accentColor)? onSlideChanged;
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
@@ -36,58 +42,50 @@ class WnOnboardingCarousel extends HookWidget {
 
     final (:pageController, :currentIndex, :onPageChanged, goToPage: _) = useOnboardingCarousel();
 
-    return Center(
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(
-            height: 260.h,
-            child: PageView.builder(
-              key: const Key('login_carousel_page_view'),
-              controller: pageController,
-              onPageChanged: onPageChanged,
-              itemBuilder: (context, index) {
-                final slide = slides[index % slides.length];
-                return Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 36.w),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        slide.title,
-                        style: typography.bold36.copyWith(
-                          color: slide.accentColor,
-                          leadingDistribution: TextLeadingDistribution.proportional,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      Gap(12.h),
-                      Text(
-                        slide.description,
-                        style: typography.medium20.copyWith(
-                          color: colors.backgroundContentSecondary,
-                          leadingDistribution: TextLeadingDistribution.proportional,
-                        ),
-                        textAlign: TextAlign.center,
-                        maxLines: 4,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+    void handlePageChanged(int page) {
+      onPageChanged(page);
+      final index = page % slides.length;
+      onSlideChanged?.call(index, slides[index].accentColor);
+    }
+
+    return SizedBox(
+      height: height ?? 260.h,
+      child: PageView.builder(
+        key: const Key('login_carousel_page_view'),
+        controller: pageController,
+        onPageChanged: handlePageChanged,
+        itemBuilder: (context, index) {
+          final slide = slides[index % slides.length];
+          return Padding(
+            padding: EdgeInsets.symmetric(horizontal: 36.w),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Text(
+                  slide.title,
+                  style: typography.bold36.copyWith(
+                    color: slide.accentColor,
+                    leadingDistribution: TextLeadingDistribution.proportional,
                   ),
-                );
-              },
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Gap(12.h),
+                Text(
+                  slide.description,
+                  style: typography.medium20.copyWith(
+                    color: colors.backgroundContentSecondary,
+                    leadingDistribution: TextLeadingDistribution.proportional,
+                  ),
+                  textAlign: TextAlign.center,
+                  maxLines: 4,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
-          ),
-          Gap(16.h),
-          WnCarouselIndicator(
-            key: const Key('login_carousel_indicator'),
-            itemCount: slides.length,
-            activeIndex: currentIndex,
-            activeColor: slides[currentIndex].accentColor,
-          ),
-        ],
+          );
+        },
       ),
     );
   }

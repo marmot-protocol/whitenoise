@@ -5,7 +5,6 @@ import 'package:whitenoise/providers/is_adding_account_provider.dart';
 import 'package:whitenoise/services/android_signer_service.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart' as accounts_api;
 import 'package:whitenoise/src/rust/api/error.dart';
-import 'package:whitenoise/src/rust/api/users.dart' as users_api;
 
 const _storageKey = 'active_account_pubkey';
 final _logger = Logger('AuthNotifier');
@@ -207,13 +206,6 @@ class AuthNotifier extends AsyncNotifier<String?> {
 
   Future<void> _completeLogin(String pubkey) async {
     final storage = ref.read(secureStorageProvider);
-    () async {
-      try {
-        await users_api.userMetadata(pubkey: pubkey, blockingDataSync: false);
-      } catch (e, stackTrace) {
-        _logger.warning('Failed to fetch user metadata for $pubkey', e, stackTrace);
-      }
-    }();
     await storage.write(key: _storageKey, value: pubkey);
     state = AsyncData(pubkey);
     ref.read(isAddingAccountProvider.notifier).set(false);

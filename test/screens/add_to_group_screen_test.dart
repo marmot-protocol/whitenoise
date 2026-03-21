@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart' show PlatformInt64Util;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/src/rust/api/account_groups.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -16,38 +18,48 @@ import '../test_helpers.dart';
 const _testPubkey = testPubkeyA;
 const _userPubkey = testPubkeyB;
 
-Group _makeGroup({
+GroupWithInfoAndMembership _makeGroupWithInfo({
   required String id,
   String name = 'Test Group',
   String description = '',
   List<String>? adminPubkeys,
-}) => Group(
-  mlsGroupId: id,
-  nostrGroupId: 'nostr_$id',
-  name: name,
-  description: description,
-  adminPubkeys: adminPubkeys ?? [_testPubkey],
-  epoch: BigInt.zero,
-  state: GroupState.active,
-);
+}) {
+  final now = DateTime.utc(2024);
+  return GroupWithInfoAndMembership(
+    group: Group(
+      mlsGroupId: id,
+      nostrGroupId: 'nostr_$id',
+      name: name,
+      description: description,
+      adminPubkeys: adminPubkeys ?? [_testPubkey],
+      epoch: BigInt.zero,
+      state: GroupState.active,
+    ),
+    info: GroupInformation(
+      mlsGroupId: id,
+      groupType: GroupType.group,
+      createdAt: now,
+      updatedAt: now,
+    ),
+    membership: AccountGroup(
+      accountPubkey: _testPubkey,
+      mlsGroupId: id,
+      createdAt: PlatformInt64Util.from(0),
+      updatedAt: PlatformInt64Util.from(0),
+    ),
+  );
+}
 
 class _MockApi extends MockWnApi {
-  List<Group> groupsList = [];
-  bool isDmResult = false;
+  List<GroupWithInfoAndMembership> groupsList = [];
   Exception? addMembersError;
   final addMembersCalls = <({String pubkey, String groupId, List<String> memberPubkeys})>[];
 
   @override
-  Future<List<Group>> crateApiGroupsActiveGroups({required String pubkey}) async {
-    return groupsList;
-  }
-
-  @override
-  Future<bool> crateApiGroupsGroupIsDirectMessageType({
-    required Group that,
+  Future<List<GroupWithInfoAndMembership>> crateApiGroupsVisibleGroupsWithInfo({
     required String accountPubkey,
   }) async {
-    return isDmResult;
+    return groupsList;
   }
 
   @override
@@ -72,7 +84,6 @@ class _MockApi extends MockWnApi {
   void reset() {
     super.reset();
     groupsList = [];
-    isDmResult = false;
     addMembersError = null;
     addMembersCalls.clear();
   }
@@ -108,14 +119,14 @@ void main() {
 
   group('AddToGroupScreen', () {
     testWidgets('displays slate container', (tester) async {
-      _api.groupsList = [_makeGroup(id: testGroupId)];
+      _api.groupsList = [_makeGroupWithInfo(id: testGroupId)];
       await pumpAddToGroupScreen(tester);
 
       expect(find.byType(WnSlate), findsWidgets);
     });
 
     testWidgets('displays header with Add to group title', (tester) async {
-      _api.groupsList = [_makeGroup(id: testGroupId)];
+      _api.groupsList = [_makeGroupWithInfo(id: testGroupId)];
       await pumpAddToGroupScreen(tester);
 
       expect(find.byType(WnSlateNavigationHeader), findsWidgets);
@@ -124,8 +135,8 @@ void main() {
 
     testWidgets('displays list of admin groups', (tester) async {
       _api.groupsList = [
-        _makeGroup(id: testGroupId, name: 'Alpha Group'),
-        _makeGroup(id: otherTestGroupId, name: 'Beta Group'),
+        _makeGroupWithInfo(id: testGroupId, name: 'Alpha Group'),
+        _makeGroupWithInfo(id: otherTestGroupId, name: 'Beta Group'),
       ];
       await pumpAddToGroupScreen(tester);
 
@@ -137,8 +148,12 @@ void main() {
 
     testWidgets('does not display groups where user is not admin', (tester) async {
       _api.groupsList = [
-        _makeGroup(id: testGroupId, name: 'Admin Group', adminPubkeys: [_testPubkey]),
-        _makeGroup(id: otherTestGroupId, name: 'Non-Admin Group', adminPubkeys: [testPubkeyC]),
+        _makeGroupWithInfo(id: testGroupId, name: 'Admin Group', adminPubkeys: [_testPubkey]),
+        _makeGroupWithInfo(
+          id: otherTestGroupId,
+          name: 'Non-Admin Group',
+          adminPubkeys: [testPubkeyC],
+        ),
       ];
       await pumpAddToGroupScreen(tester);
 
@@ -153,7 +168,7 @@ void main() {
     });
 
     testWidgets('shows confirmation dialog when group is tapped', (tester) async {
-      _api.groupsList = [_makeGroup(id: testGroupId, name: 'Alpha Group')];
+      _api.groupsList = [_makeGroupWithInfo(id: testGroupId, name: 'Alpha Group')];
       await pumpAddToGroupScreen(tester);
 
       await tester.tap(find.byKey(const Key('group_$testGroupId')));
@@ -164,7 +179,7 @@ void main() {
     });
 
     testWidgets('calls addMembersToGroup API when confirmed', (tester) async {
-      _api.groupsList = [_makeGroup(id: testGroupId, name: 'Alpha Group')];
+      _api.groupsList = [_makeGroupWithInfo(id: testGroupId, name: 'Alpha Group')];
       await pumpAddToGroupScreen(tester);
 
       await tester.tap(find.byKey(const Key('group_$testGroupId')));
@@ -179,7 +194,7 @@ void main() {
     });
 
     testWidgets('shows error notice when addMembers fails', (tester) async {
-      _api.groupsList = [_makeGroup(id: testGroupId, name: 'Alpha Group')];
+      _api.groupsList = [_makeGroupWithInfo(id: testGroupId, name: 'Alpha Group')];
       _api.addMembersError = Exception('Network error');
       await pumpAddToGroupScreen(tester);
 
@@ -194,7 +209,7 @@ void main() {
     });
 
     testWidgets('does not call API when confirmation is cancelled', (tester) async {
-      _api.groupsList = [_makeGroup(id: testGroupId, name: 'Alpha Group')];
+      _api.groupsList = [_makeGroupWithInfo(id: testGroupId, name: 'Alpha Group')];
       await pumpAddToGroupScreen(tester);
 
       await tester.tap(find.byKey(const Key('group_$testGroupId')));
@@ -207,7 +222,7 @@ void main() {
     });
 
     testWidgets('navigates back when back button is pressed', (tester) async {
-      _api.groupsList = [_makeGroup(id: testGroupId)];
+      _api.groupsList = [_makeGroupWithInfo(id: testGroupId)];
       await pumpAddToGroupScreen(tester);
 
       await tester.tap(find.byKey(const Key('slate_back_button')));
@@ -249,7 +264,7 @@ void main() {
 
     testWidgets('displays group name in list item', (tester) async {
       _api.groupsList = [
-        _makeGroup(id: testGroupId, name: 'Alpha Group', description: 'A great group'),
+        _makeGroupWithInfo(id: testGroupId, name: 'Alpha Group', description: 'A great group'),
       ];
       await pumpAddToGroupScreen(tester);
 
@@ -257,7 +272,7 @@ void main() {
     });
 
     testWidgets('displays Unknown group when group name is empty', (tester) async {
-      _api.groupsList = [_makeGroup(id: testGroupId, name: '')];
+      _api.groupsList = [_makeGroupWithInfo(id: testGroupId, name: '')];
       await pumpAddToGroupScreen(tester);
 
       expect(find.text('Unknown group'), findsOneWidget);

@@ -1,14 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
-import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:whitenoise/providers/app_log_provider.dart' show appLogStore;
 import 'package:whitenoise/src/rust/api/logs.dart' as logs_api;
-import 'package:whitenoise/utils/app_flavor.dart';
 
-final _logger = Logger('rustLogListener');
+final _logger = Logger('appLogs');
 
 final _levelPattern = RegExp(r'\d{4}-\d{2}-\d{2}T[\d:.]+Z\s+(TRACE|DEBUG|INFO|WARN|ERROR)\s');
 
@@ -27,23 +26,14 @@ Level parseRustLogLevel(String line) {
   return _levelMap[match.group(1)] ?? Level.INFO;
 }
 
-/// Subscribes to Rust log file and forwards each line to appLogStore.
-/// Only active in staging builds.
-final rustLogListenerProvider = Provider.autoDispose<void>((ref) {
-  if (!isStaging) return;
+void useAppLogs() {
+  useEffect(() {
+    StreamSubscription<String>? subscription;
+    var disposed = false;
 
-  StreamSubscription<String>? subscription;
-  final disposed = Completer<void>();
-
-  ref.onDispose(() {
-    disposed.complete();
-    subscription?.cancel();
-  });
-
-  unawaited(
     _startListening()
         .then((sub) {
-          if (disposed.isCompleted) {
+          if (disposed) {
             sub.cancel();
           } else {
             subscription = sub;
@@ -51,9 +41,14 @@ final rustLogListenerProvider = Provider.autoDispose<void>((ref) {
         })
         .catchError((Object e, StackTrace st) {
           _logger.severe('failed to start rust log listener', e, st);
-        }),
-  );
-});
+        });
+
+    return () {
+      disposed = true;
+      subscription?.cancel();
+    };
+  }, const []);
+}
 
 Future<StreamSubscription<String>> _startListening() async {
   final dir = await getApplicationDocumentsDirectory();

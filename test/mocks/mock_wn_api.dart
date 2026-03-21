@@ -49,7 +49,19 @@ class MockWnApi implements RustLibApi {
 
   List<User> follows = [];
   KeyPackageStatus userHasKeyPackageStatus = KeyPackageStatus.valid;
+  Completer<KeyPackageStatus>? userHasKeyPackageCompleter;
   StreamController<UserSearchUpdate>? searchUsersController;
+  final Map<String, StreamController<UserStreamItem>> userStreamControllers = {};
+  final Map<String, User> userStreamUsers = {};
+
+  bool sendBugReportCalled = false;
+  String? lastBugReportWhatWentWrong;
+  String? lastBugReportStepsToReproduce;
+  String? lastBugReportFrequency;
+  String? lastBugReportNpub;
+  String? lastBugReportLogs;
+  String? lastBugReportAppVersion;
+  bool sendBugReportShouldFail = false;
 
   bool deleteAllDataCalled = false;
   bool deleteAllDataShouldFail = false;
@@ -59,9 +71,9 @@ class MockWnApi implements RustLibApi {
   LoginResult? loginStartResult;
   LoginResult? loginExternalSignerStartResult;
   bool registerExternalSignerCalled = false;
-  String debugQueryResult = '[]';
-  bool shouldFailDebugQuery = false;
-  String? lastDebugQuerySql;
+  String relayControlStateResult = '{}';
+  bool shouldFailRelayControlState = false;
+  int relayControlStateCallCount = 0;
 
   String? lastReadMessageId;
   final List<String> markedAsReadMessages = [];
@@ -84,7 +96,63 @@ class MockWnApi implements RustLibApi {
     required String pubkey,
     required bool blockingDataSync,
   }) async {
+    if (userHasKeyPackageCompleter != null) {
+      return userHasKeyPackageCompleter!.future;
+    }
     return userHasKeyPackageStatus;
+  }
+
+  User buildMockUser(
+    String pubkey, {
+    FlutterMetadata metadata = const FlutterMetadata(custom: {}),
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) {
+    final now = DateTime(2024);
+    return User(
+      pubkey: pubkey,
+      metadata: metadata,
+      createdAt: createdAt ?? now,
+      updatedAt: updatedAt ?? now,
+    );
+  }
+
+  void seedUserInitialSnapshot(
+    String pubkey, {
+    User? user,
+    FlutterMetadata metadata = const FlutterMetadata(custom: {}),
+  }) {
+    userStreamUsers[pubkey] = user ?? buildMockUser(pubkey, metadata: metadata);
+  }
+
+  void emitUserInitialSnapshot(
+    String pubkey, {
+    User? user,
+    FlutterMetadata metadata = const FlutterMetadata(custom: {}),
+  }) {
+    final nextUser = user ?? buildMockUser(pubkey, metadata: metadata);
+    userStreamUsers[pubkey] = nextUser;
+    userStreamControllers[pubkey]?.add(
+      UserStreamItem.initialSnapshot(user: nextUser),
+    );
+  }
+
+  void emitUserUpdate(
+    String pubkey, {
+    required UserUpdateTrigger trigger,
+    User? user,
+    FlutterMetadata metadata = const FlutterMetadata(custom: {}),
+  }) {
+    final nextUser = user ?? buildMockUser(pubkey, metadata: metadata);
+    userStreamUsers[pubkey] = nextUser;
+    userStreamControllers[pubkey]?.add(
+      UserStreamItem.update(
+        update: UserUpdate(
+          trigger: trigger,
+          user: nextUser,
+        ),
+      ),
+    );
   }
 
   @override
@@ -159,6 +227,24 @@ class MockWnApi implements RustLibApi {
   }
 
   @override
+  Stream<UserStreamItem> crateApiUsersSubscribeToUser({
+    required String pubkey,
+  }) async* {
+    final controller = userStreamControllers.putIfAbsent(
+      pubkey,
+      () => StreamController<UserStreamItem>.broadcast(sync: true),
+    );
+    final initialUser =
+        userStreamUsers[pubkey] ??
+        await crateApiUsersGetUser(
+          pubkey: pubkey,
+          blockingDataSync: false,
+        );
+    yield UserStreamItem.initialSnapshot(user: initialUser);
+    yield* controller.stream;
+  }
+
+  @override
   String crateApiUtilsNpubFromHexPubkey({required String hexPubkey}) {
     if (shouldFailNpubConversion) {
       throw Exception('Invalid hex pubkey');
@@ -179,12 +265,12 @@ class MockWnApi implements RustLibApi {
   }
 
   @override
-  Future<String> crateApiUtilsDebugQuery({required String sql}) async {
-    lastDebugQuerySql = sql;
-    if (shouldFailDebugQuery) {
-      throw Exception('debug query failed');
+  Future<String> crateApiRelaysDebugRelayControlState() async {
+    relayControlStateCallCount++;
+    if (shouldFailRelayControlState) {
+      throw Exception('relay control dump failed');
     }
-    return debugQueryResult;
+    return relayControlStateResult;
   }
 
   @override
@@ -247,6 +333,21 @@ class MockWnApi implements RustLibApi {
       displayName: 'Display $pubkey',
       custom: {},
     );
+  }
+
+  @override
+  Future<User> crateApiUsersGetUser({
+    required String pubkey,
+    required bool blockingDataSync,
+  }) async {
+    return userStreamUsers[pubkey] ??
+        buildMockUser(
+          pubkey,
+          metadata: await crateApiUsersUserMetadata(
+            pubkey: pubkey,
+            blockingDataSync: blockingDataSync,
+          ),
+        );
   }
 
   @override
@@ -571,7 +672,37 @@ class MockWnApi implements RustLibApi {
     if (shouldFailDeleteDraft) throw Exception('deleteDraft failed');
   }
 
+  @override
+  Future<void> crateApiBugReportSendBugReport({
+    required String whatWentWrong,
+    String? expectedBehavior,
+    String? stepsToReproduce,
+    String? frequency,
+    String? npub,
+    String? logs,
+    required String appVersion,
+    required String platform,
+    required String osVersion,
+  }) async {
+    sendBugReportCalled = true;
+    lastBugReportWhatWentWrong = whatWentWrong;
+    lastBugReportStepsToReproduce = stepsToReproduce;
+    lastBugReportFrequency = frequency;
+    lastBugReportNpub = npub;
+    lastBugReportLogs = logs;
+    lastBugReportAppVersion = appVersion;
+    if (sendBugReportShouldFail) throw Exception('send_bug_report failed');
+  }
+
   void reset() {
+    sendBugReportCalled = false;
+    lastBugReportWhatWentWrong = null;
+    lastBugReportStepsToReproduce = null;
+    lastBugReportFrequency = null;
+    lastBugReportNpub = null;
+    lastBugReportLogs = null;
+    lastBugReportAppVersion = null;
+    sendBugReportShouldFail = false;
     currentThemeMode = 'system';
     currentLanguage = 'system';
     shouldFailUpdateLanguage = false;
@@ -583,6 +714,12 @@ class MockWnApi implements RustLibApi {
     userHasKeyPackageStatus = KeyPackageStatus.valid;
     searchUsersController?.close();
     searchUsersController = null;
+    for (final controller in userStreamControllers.values) {
+      controller.close();
+    }
+    userStreamControllers.clear();
+    userStreamUsers.clear();
+    userHasKeyPackageCompleter = null;
     deleteAllDataCalled = false;
     deleteAllDataShouldFail = false;
     deleteAllDataDelay = Duration.zero;
@@ -590,9 +727,9 @@ class MockWnApi implements RustLibApi {
     loginStartResult = null;
     loginExternalSignerStartResult = null;
     registerExternalSignerCalled = false;
-    debugQueryResult = '[]';
-    shouldFailDebugQuery = false;
-    lastDebugQuerySql = null;
+    relayControlStateResult = '{}';
+    shouldFailRelayControlState = false;
+    relayControlStateCallCount = 0;
     lastReadMessageId = null;
     markedAsReadMessages.clear();
     getAccountGroupCallCount = 0;
@@ -607,6 +744,17 @@ class MockWnApi implements RustLibApi {
     shouldFailSaveDraft = false;
     deleteDraftCallCount = 0;
     shouldFailDeleteDraft = false;
+    zapstoreVersion = null;
+    zapstoreShouldThrow = false;
+  }
+
+  String? zapstoreVersion;
+  bool zapstoreShouldThrow = false;
+
+  @override
+  Future<String?> crateApiZapstoreFetchLatestZapstoreVersion() async {
+    if (zapstoreShouldThrow) throw Exception('network error');
+    return zapstoreVersion;
   }
 
   @override

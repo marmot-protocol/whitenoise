@@ -38,7 +38,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get signUp => 'Kayıt Ol';
 
   @override
-  String get loginTitle => 'Giriş Yap';
+  String get loginTitle => 'Özel anahtarınızı girin';
 
   @override
   String get enterPrivateKey => 'Özel anahtarınızı girin';
@@ -278,6 +278,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Kar amacı gütmeyen bir kuruluş olarak White Noise, yalnızca gizliliğiniz ve özgürlüğünüz için var, kar için değil. Desteğiniz bizi bağımsız ve taviz vermeden tutar.';
 
   @override
+  String get donateContributionLetter =>
+      'Bir bağış için katkı onay mektubuna ihtiyacınız varsa, info@ipf.dev adresinden bizimle iletişime geçin';
+
+  @override
   String get lightningAddress => 'Lightning Adresi';
 
   @override
@@ -349,20 +353,19 @@ class AppLocalizationsTr extends AppLocalizations {
   String get invitedToSecureChat => 'Güvenli bir sohbete davet edildiniz';
 
   @override
+  String get invitedYouToChatSuffix => ' sizi sohbete davet etti';
+
+  @override
   String get decline => 'Reddet';
 
   @override
   String get accept => 'Kabul et';
 
   @override
-  String failedToAcceptInvitation(String error) {
-    return 'Davet kabul edilemedi: $error';
-  }
+  String get failedToAcceptInvitation => 'Davet kabul edilemedi. Lütfen tekrar deneyin.';
 
   @override
-  String failedToDeclineInvitation(String error) {
-    return 'Davet reddedilemedi: $error';
-  }
+  String get failedToDeclineInvitation => 'Davet reddedilemedi. Lütfen tekrar deneyin.';
 
   @override
   String get startNewChat => 'Yeni sohbet';
@@ -378,6 +381,34 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get developerSettingsTitle => 'Geliştirici Ayarları';
+
+  @override
+  String get keyPackageManagementTitle => 'Anahtar paketi yönetimi';
+
+  @override
+  String get keyPackageManagementDescription => 'Hesap anahtar paketlerini yayımla, yenile ve sil';
+
+  @override
+  String get relayStateTitle => 'Röle durumu';
+
+  @override
+  String get relayStateDescription => 'Canlı röle kontrol düzlemlerini incele';
+
+  @override
+  String get relayControlStateDumpLabel => 'debug_relay_control_state:';
+
+  @override
+  String get relayControlStateSnapshotDescription =>
+      'Canlı röle keşfi, gelen kutusu ve grup düzlemlerinin anlık görüntüsü.';
+
+  @override
+  String get relayControlStateLoading => 'Yükleniyor...';
+
+  @override
+  String get relayControlStateRefreshButton => 'Dökümü yenile';
+
+  @override
+  String get relayControlStateCopyButton => 'Dökümü kopyala';
 
   @override
   String get publishNewKeyPackage => 'Yeni Anahtar Paketi Yayınla';
@@ -407,6 +438,19 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get keyPackageDeleted => 'Anahtar paketi silindi';
+
+  @override
+  String get keyPackageFetchFailed => 'Anahtar paketleri yenilenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get keyPackagePublishFailed => 'Anahtar paketi yayınlanamadı. Lütfen tekrar deneyin.';
+
+  @override
+  String get keyPackageDeleteFailed => 'Anahtar paketi silinemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get keyPackageDeleteAllFailed =>
+      'Tüm anahtar paketleri silinemedi. Lütfen tekrar deneyin.';
 
   @override
   String packageNumber(int number) {
@@ -516,14 +560,18 @@ class AppLocalizationsTr extends AppLocalizations {
   String get reportError => 'Hata bildir';
 
   @override
-  String get workInProgress => 'Bunun üzerinde çalışıyoruz';
-
-  @override
   String get wipMessage =>
       'Bu özellik üzerinde çalışıyoruz. Geliştirmeyi desteklemek için lütfen White Noise\'a bağış yapın';
 
   @override
   String get donate => 'Bağış yap';
+
+  @override
+  String get chatWithSupport => 'Destek ile sohbet';
+
+  @override
+  String get supportChatWelcomeMessage =>
+      'Merhaba! Aklınızdaki sorunları bildirin - sorular, hatalar veya geri bildirimler. Genellikle birkaç saat içinde yanıt veriyoruz.';
 
   @override
   String get addRelay => 'Röle Ekle';
@@ -567,6 +615,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get unknownUser => 'Bilinmeyen kullanıcı';
+
+  @override
+  String get noName => 'İsim yok';
 
   @override
   String get unknownGroup => 'Bilinmeyen grup';
@@ -911,8 +962,7 @@ class AppLocalizationsTr extends AppLocalizations {
       'Bu rölede röle listesi bulunamadı. Başka bir tane deneyin veya varsayılanları kullanın.';
 
   @override
-  String get loginErrorInvalidKey =>
-      'Geçersiz özel anahtar biçimi. Lütfen kontrol edip tekrar deneyin.';
+  String get loginErrorInvalidKey => 'Geçersiz nsec. Doğru girdiğinizden emin olun.';
 
   @override
   String get loginErrorNoRelayConnections =>
@@ -1093,13 +1143,13 @@ class AppLocalizationsTr extends AppLocalizations {
   String get connectAnotherProfile => 'Başka Profil Bağla';
 
   @override
-  String get rawDebugView => 'Ham hata ayıklama görünümü';
+  String get rawDebugView => 'Hata ayıklama modu';
 
   @override
   String get rawDebugViewDescription => 'Sohbette ham mesaj verilerini göster';
 
   @override
-  String get rawDebugViewTitle => 'Ham Hata Ayıklama Görünümü';
+  String get rawDebugViewTitle => 'Hata Ayıklama Modu';
 
   @override
   String get rawDebugViewGroupId => 'Grup Kimliği';
@@ -1131,6 +1181,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get appLogsClear => 'Temizle';
 
   @override
+  String get appLogsEraseAll => 'Tümünü sil';
+
+  @override
   String get appLogsEmpty => 'Henüz günlük yok';
 
   @override
@@ -1149,13 +1202,106 @@ class AppLocalizationsTr extends AppLocalizations {
   String get appLogsClearFilters => 'Filtreleri temizle';
 
   @override
+  String get appLogsLive => 'Canlı';
+
+  @override
   String appLogsFilteredCount(int shown, int total) {
     return '$shown / $total';
   }
+
+  @override
+  String get appLogsCopyAll => 'Tümünü kopyala';
 
   @override
   String get invalidRelayUrlScheme => 'URL wss:// veya ws:// ile başlamalıdır';
 
   @override
   String get invalidRelayUrl => 'Geçersiz röle URL\'si';
+
+  @override
+  String get thisMessageWasDeleted => 'Bu mesaj silindi.';
+
+  @override
+  String get youDeletedThisMessage => 'Bu mesajı sildin.';
+
+  @override
+  String get relayControlStateLoadError =>
+      'Röle kontrol durumu yüklenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get updateAvailableTitle => 'Güncelleme mevcut';
+
+  @override
+  String updateAvailableDescription(String version) {
+    return '$version sürümü Zapstore\'da mevcut.';
+  }
+
+  @override
+  String get updateNow => 'Şimdi güncelle';
+
+  @override
+  String get fatalErrorCopyError => 'Hatayı kopyala';
+
+  @override
+  String get fatalErrorErrorCopied => 'Hata panoya kopyalandı';
+
+  @override
+  String get fatalErrorTitle => 'Eyvah!';
+
+  @override
+  String get fatalErrorDescription =>
+      'Uygulama yüklenirken bir sorunla karşılaştık. Sorun sende değil, biziz ve özür dileriz.\n\nDüzeltmemize yardımcı ol. Aşağıya dokunarak bu hatayı ekibimize gönder.';
+
+  @override
+  String get reportBug => 'Hata bildir';
+
+  @override
+  String get reportBugDescription =>
+      'Karşılaştığınız sorunu açıklayarak White Noise\'u geliştirmemize yardımcı olun.';
+
+  @override
+  String get reportBugWhatWentWrong => 'Ne yanlış gitti?';
+
+  @override
+  String get reportBugWhatWentWrongPlaceholder => 'Yaşadığınız sorunu açıklayın...';
+
+  @override
+  String get reportBugStepsToReproduce => 'Yeniden oluşturma adımları';
+
+  @override
+  String get reportBugStepsToReproducePlaceholder =>
+      '1. Şuraya git...\n2. Şuna dokun...\n3. Hatayı gör';
+
+  @override
+  String get reportBugFrequency => 'Bu ne sıklıkla oluyor?';
+
+  @override
+  String get reportBugFrequencyOnce => 'Bir kez';
+
+  @override
+  String get reportBugFrequencyAlways => 'Her zaman';
+
+  @override
+  String get reportBugFrequencySometimes => 'Bazen';
+
+  @override
+  String get reportBugIncludeNpub => 'npub\'unuzu ekleyin';
+
+  @override
+  String get reportBugIncludeNpubDescription => 'Gerektiğinde sizinle iletişime geçmemizi sağlar.';
+
+  @override
+  String get reportBugSend => 'Raporu gönder';
+
+  @override
+  String get reportBugSuccess => 'Hata raporu gönderildi. Teşekkürler!';
+
+  @override
+  String get reportBugError => 'Rapor gönderilemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get reportBugWhatWentWrongRequired => 'Lütfen neyin yanlış gittiğini açıklayın.';
+
+  @override
+  String get failedToStartSupportChat => 'Destek ile sohbet başlatılamadı';
 }

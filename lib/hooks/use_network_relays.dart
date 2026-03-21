@@ -34,13 +34,11 @@ class RelayListState {
 
 class NetworkRelaysState {
   final Map<RelayCategory, RelayListState> categoryStates;
-  final Map<String, String> relayStatuses;
   final bool isAddingRelay;
   final bool isRemovingRelay;
 
   const NetworkRelaysState({
     this.categoryStates = const {},
-    this.relayStatuses = const {},
     this.isAddingRelay = false,
     this.isRemovingRelay = false,
   });
@@ -52,13 +50,11 @@ class NetworkRelaysState {
 
   NetworkRelaysState copyWith({
     Map<RelayCategory, RelayListState>? categoryStates,
-    Map<String, String>? relayStatuses,
     bool? isAddingRelay,
     bool? isRemovingRelay,
   }) {
     return NetworkRelaysState(
       categoryStates: categoryStates ?? this.categoryStates,
-      relayStatuses: relayStatuses ?? this.relayStatuses,
       isAddingRelay: isAddingRelay ?? this.isAddingRelay,
       isRemovingRelay: isRemovingRelay ?? this.isRemovingRelay,
     );
@@ -83,14 +79,6 @@ class NetworkRelaysState {
 })
 useNetworkRelays(String pubkey) {
   final state = useState(const NetworkRelaysState());
-  final isMountedRef = useRef(true);
-
-  useEffect(() {
-    isMountedRef.value = true;
-    return () {
-      isMountedRef.value = false;
-    };
-  }, const []);
 
   Future<accounts_api.RelayType> getRelayType(RelayCategory category) async {
     return switch (category) {
@@ -106,19 +94,6 @@ useNetworkRelays(String pubkey) {
   ) {
     final currentState = state.value.getCategory(category);
     state.value = state.value.updateCategory(category, updater(currentState));
-  }
-
-  Future<void> fetchRelayStatuses() async {
-    try {
-      final statuses = await relays_api.getAccountRelayStatuses(pubkey: pubkey);
-      final statusMap = <String, String>{};
-      for (final (url, status) in statuses) {
-        statusMap[url] = status;
-      }
-      state.value = state.value.copyWith(relayStatuses: statusMap);
-    } catch (e) {
-      _logger.severe('Failed to fetch relay statuses', e);
-    }
   }
 
   Future<void> fetchRelaysForCategory(RelayCategory category) async {
@@ -148,39 +123,7 @@ useNetworkRelays(String pubkey) {
       fetchRelaysForCategory(RelayCategory.normal),
       fetchRelaysForCategory(RelayCategory.inbox),
       fetchRelaysForCategory(RelayCategory.keyPackage),
-      fetchRelayStatuses(),
     ]);
-  }
-
-  void awaitRelayConnection(String url) async {
-    const maxAttempts = 10;
-    const retryInterval = Duration(milliseconds: 500);
-
-    for (var i = 0; i < maxAttempts; i++) {
-      await Future.delayed(retryInterval);
-
-      if (!isMountedRef.value) return;
-
-      try {
-        final statuses = await relays_api.getAccountRelayStatuses(pubkey: pubkey);
-        final statusMap = <String, String>{};
-        for (final (relayUrl, status) in statuses) {
-          statusMap[relayUrl] = status;
-        }
-
-        if (!isMountedRef.value) return;
-
-        state.value = state.value.copyWith(relayStatuses: statusMap);
-
-        final currentStatus = statusMap[url];
-        if (currentStatus != null && currentStatus.toLowerCase() != 'connecting') {
-          break;
-        }
-      } catch (e) {
-        _logger.warning('Failed to poll relay status', e);
-        break;
-      }
-    }
   }
 
   Future<void> addRelay(String url, RelayCategory category) async {
@@ -192,9 +135,6 @@ useNetworkRelays(String pubkey) {
       final relayType = await getRelayType(category);
       await accounts_api.addAccountRelay(pubkey: pubkey, url: url, relayType: relayType);
       await fetchRelaysForCategory(category);
-      await fetchRelayStatuses();
-
-      awaitRelayConnection(url);
     } catch (e) {
       _logger.severe('Failed to add relay', e);
       updateCategoryState(
@@ -215,7 +155,6 @@ useNetworkRelays(String pubkey) {
       final relayType = await getRelayType(category);
       await accounts_api.removeAccountRelay(pubkey: pubkey, url: url, relayType: relayType);
       await fetchRelaysForCategory(category);
-      await fetchRelayStatuses();
     } catch (e) {
       _logger.severe('Failed to remove relay', e);
       updateCategoryState(

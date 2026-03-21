@@ -1,11 +1,14 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderContainer;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart'
     show ChatMessageQuoteData, ChatMessagesResult, useChatMessages;
+import 'package:whitenoise/providers/message_debug_log_provider.dart' show messageDebugLogProvider;
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/src/rust/api/users.dart' show UserStreamItem, UserUpdateTrigger;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import '../mocks/mock_wn_api.dart';
@@ -49,10 +52,12 @@ MediaFile _mediaFile(String id) => MediaFile(
 
 const _emptyMetadata = FlutterMetadata(custom: {});
 
-enum _MetadataMode { normal, emptyThenSuccess, fail }
+enum _MetadataMode { normal, fail }
 
 class _MockApi extends MockWnApi {
   StreamController<MessageStreamItem>? controller;
+  final userSubscribeCalls = <String>[];
+  final failingUserSubscriptions = <String>{};
 
   void emitInitialSnapshot(List<ChatMessage> messages) {
     controller?.add(MessageStreamItem.initialSnapshot(messages: messages));
@@ -90,8 +95,20 @@ class _MockApi extends MockWnApi {
     );
   }
 
+  void emitDeliveryStatusChanged(ChatMessage message) {
+    controller?.add(
+      MessageStreamItem.update(
+        update: MessageUpdate(trigger: UpdateTrigger.deliveryStatusChanged, message: message),
+      ),
+    );
+  }
+
   void emitError(Object error, [StackTrace? stackTrace]) {
     controller?.addError(error, stackTrace ?? StackTrace.current);
+  }
+
+  void failNextUserSubscription(String pubkey) {
+    failingUserSubscriptions.add(pubkey);
   }
 
   @override
@@ -101,6 +118,17 @@ class _MockApi extends MockWnApi {
     controller?.close();
     controller = StreamController<MessageStreamItem>.broadcast();
     return controller!.stream;
+  }
+
+  @override
+  Stream<UserStreamItem> crateApiUsersSubscribeToUser({
+    required String pubkey,
+  }) {
+    userSubscribeCalls.add(pubkey);
+    if (failingUserSubscriptions.remove(pubkey)) {
+      return Stream.error(Exception('metadata stream failed'));
+    }
+    return super.crateApiUsersSubscribeToUser(pubkey: pubkey);
   }
 
   FlutterMetadata? userMetadataResponse;
@@ -118,18 +146,24 @@ class _MockApi extends MockWnApi {
         return Future.value(
           userMetadataResponse ?? const FlutterMetadata(displayName: 'Author', custom: {}),
         );
-      case _MetadataMode.emptyThenSuccess:
-        return blockingDataSync
-            ? Future.value(
-                userMetadataResponse ?? const FlutterMetadata(displayName: 'Author', custom: {}),
-              )
-            : Future.value(_emptyMetadata);
       case _MetadataMode.fail:
         return Future.error(
           Exception('metadata fetch failed'),
           StackTrace.current,
         );
     }
+  }
+
+  @override
+  void reset() {
+    super.reset();
+    controller?.close();
+    controller = null;
+    userSubscribeCalls.clear();
+    failingUserSubscriptions.clear();
+    userMetadataResponse = null;
+    metadataMode = _MetadataMode.normal;
+    metadataCalls.clear();
   }
 
   @override
@@ -146,11 +180,7 @@ void main() {
   setUpAll(() => RustLib.initMock(api: _api));
 
   setUp(() {
-    _api.controller?.close();
-    _api.controller = null;
-    _api.userMetadataResponse = null;
-    _api.metadataMode = _MetadataMode.normal;
-    _api.metadataCalls.clear();
+    _api.reset();
   });
 
   group('useChatMessages', () {
@@ -488,6 +518,24 @@ void main() {
         await tester.pump();
         await tester.pump();
       });
+
+      testWidgets('logs stream error to debugLog when provided', (tester) async {
+        final container = ProviderContainer();
+        addTearDown(container.dispose);
+        final debugLog = container.read(messageDebugLogProvider.notifier);
+
+        await mountHook(tester, () => useChatMessages('group1', debugLog: debugLog));
+
+        _api.emitError(Exception('debug log error'));
+        await tester.pump();
+        await Future<void>.microtask(() {});
+        await tester.pump();
+
+        expect(
+          container.read(messageDebugLogProvider).streamLog,
+          isNotEmpty,
+        );
+      });
     });
 
     group('fetchAuthorMetadata error handling', () {
@@ -505,6 +553,36 @@ void main() {
         final preview = getResult().getChatMessageQuote('m1');
         expect(preview, isNotNull);
         expect(preview!.authorMetadata, isNull);
+      });
+
+      testWidgets('retries author metadata subscription after a stream error', (tester) async {
+        const authorPubkey = testPubkeyB;
+        _api.seedUserInitialSnapshot(
+          authorPubkey,
+          metadata: const FlutterMetadata(
+            displayName: 'Recovered Author',
+            custom: {},
+          ),
+        );
+        _api.failNextUserSubscription(authorPubkey);
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([
+          _message('m1', DateTime(2024), pubkey: authorPubkey, content: 'Hello'),
+        ]);
+        await tester.pump();
+
+        expect(getResult().getChatMessageQuote('m1')!.authorMetadata, isNull);
+        await tester.pump();
+
+        expect(_api.userSubscribeCalls, [authorPubkey]);
+
+        expect(getResult().getChatMessageQuote('m1')!.authorMetadata, isNull);
+        await tester.pump();
+
+        final preview = getResult().getChatMessageQuote('m1');
+        expect(_api.userSubscribeCalls, [authorPubkey, authorPubkey]);
+        expect(preview?.authorMetadata?.displayName, 'Recovered Author');
       });
     });
 
@@ -557,6 +635,42 @@ void main() {
         final result = getResult();
         expect(result.messageCount, 1);
         expect(result.getMessage(0).content, 'updated');
+      });
+    });
+
+    group('deliveryStatusChanged', () {
+      testWidgets('updates message data in place', (tester) async {
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([
+          _message('m1', DateTime(2024), content: 'hello'),
+          _message('m2', DateTime(2024, 1, 2), content: 'world'),
+        ]);
+        await tester.pumpAndSettle();
+
+        _api.emitDeliveryStatusChanged(_message('m1', DateTime(2024), content: 'hello-updated'));
+        await tester.pumpAndSettle();
+
+        final result = getResult();
+        expect(result.messageCount, 2);
+        expect(result.getMessageById('m1')?.content, 'hello-updated');
+      });
+
+      testWidgets('does not change message order', (tester) async {
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([
+          _message('m1', DateTime(2024)),
+          _message('m2', DateTime(2024, 1, 2)),
+        ]);
+        await tester.pumpAndSettle();
+
+        _api.emitDeliveryStatusChanged(_message('m1', DateTime(2024)));
+        await tester.pumpAndSettle();
+
+        final result = getResult();
+        expect(result.getMessage(0).id, 'm2');
+        expect(result.getMessage(1).id, 'm1');
       });
     });
 
@@ -645,10 +759,13 @@ void main() {
 
       testWidgets('returns preview when message is found', (tester) async {
         const authorPubkey = testPubkeyB;
-        _api.userMetadataResponse = const FlutterMetadata(
-          displayName: 'Original Author',
-          name: 'author',
-          custom: {},
+        _api.seedUserInitialSnapshot(
+          authorPubkey,
+          metadata: const FlutterMetadata(
+            displayName: 'Original Author',
+            name: 'author',
+            custom: {},
+          ),
         );
         final getResult = await _pump(tester, 'group1');
 
@@ -657,7 +774,7 @@ void main() {
         ]);
         await tester.pump();
         getResult().getChatMessageQuote('m1');
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         final preview = getResult().getChatMessageQuote('m1');
         expect(preview, isNotNull);
@@ -693,9 +810,12 @@ void main() {
 
       testWidgets('rebuilds with author metadata after async fetch completes', (tester) async {
         const authorPubkey = testPubkeyB;
-        _api.userMetadataResponse = const FlutterMetadata(
-          displayName: 'Async Author',
-          custom: {},
+        _api.seedUserInitialSnapshot(
+          authorPubkey,
+          metadata: const FlutterMetadata(
+            displayName: 'Async Author',
+            custom: {},
+          ),
         );
         final getResult = await _pump(tester, 'group1');
 
@@ -707,21 +827,16 @@ void main() {
         final previewBefore = getResult().getChatMessageQuote('m1');
         expect(previewBefore!.authorMetadata, isNull);
 
-        await tester.pumpAndSettle();
+        await tester.pump();
 
         final previewAfter = getResult().getChatMessageQuote('m1');
         expect(previewAfter!.authorMetadata, isNotNull);
         expect(previewAfter.authorMetadata?.displayName, 'Async Author');
       });
 
-      testWidgets('fetches metadata from relays when local cache is empty', (tester) async {
+      testWidgets('updates author metadata when the user stream emits later', (tester) async {
         const authorPubkey = testPubkeyB;
-        _api.metadataMode = _MetadataMode.emptyThenSuccess;
-        _api.userMetadataResponse = const FlutterMetadata(
-          displayName: 'Relay Author',
-          name: 'relay_author',
-          custom: {},
-        );
+        _api.seedUserInitialSnapshot(authorPubkey);
         final getResult = await _pump(tester, 'group1');
 
         _api.emitInitialSnapshot([
@@ -729,12 +844,25 @@ void main() {
         ]);
         await tester.pump();
         getResult().getChatMessageQuote('m1');
-        await tester.pumpAndSettle();
+        await tester.pump();
+
+        expect(getResult().getChatMessageQuote('m1')!.authorMetadata, _emptyMetadata);
+
+        _api.emitUserUpdate(
+          authorPubkey,
+          trigger: UserUpdateTrigger.metadataChanged,
+          metadata: const FlutterMetadata(
+            displayName: 'Relay Author',
+            name: 'relay_author',
+            custom: {},
+          ),
+        );
+        await tester.pump();
 
         final preview = getResult().getChatMessageQuote('m1');
         expect(preview!.authorMetadata, isNotNull);
         expect(preview.authorMetadata?.displayName, 'Relay Author');
-        expect(_api.metadataCalls.any((c) => c.blocking), isTrue);
+        expect(_api.metadataCalls.every((c) => !c.blocking), isTrue);
       });
     });
   });

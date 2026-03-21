@@ -112,12 +112,12 @@ void main() {
 
     testWidgets('displays back button', (tester) async {
       await pumpAddProfileScreen(tester);
-      expect(find.byKey(const Key('slate_close_button')), findsOneWidget);
+      expect(find.byKey(const Key('slate_back_button')), findsOneWidget);
     });
 
     testWidgets('tapping back button returns to previous screen', (tester) async {
       await pumpAddProfileScreen(tester);
-      await tester.tap(find.byKey(const Key('slate_close_button')));
+      await tester.tap(find.byKey(const Key('slate_back_button')));
       await tester.pumpAndSettle();
       expect(find.byType(AddProfileScreen), findsNothing);
     });

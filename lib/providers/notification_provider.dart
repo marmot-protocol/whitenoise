@@ -140,7 +140,7 @@ Future<void> handleNotificationUpdate(
 Future<String?> _resolveSenderName(notifications_api.NotificationUser sender) async {
   if (sender.displayName != null) return sender.displayName;
   try {
-    final metadata = await UserService(sender.pubkey).fetchMetadata();
+    final metadata = await UserService(sender.pubkey).getInitialMetadata();
     return presentName(metadata);
   } catch (e) {
     _logger.warning('Failed to fetch sender metadata', e);

@@ -27,6 +27,9 @@ class _TextWithTimestamp extends StatelessWidget {
     required this.textStyle,
     required this.tsStyle,
     required this.isOutgoing,
+    required this.showDeliveryStatus,
+    this.deliveryStatus,
+    this.onStatusTap,
   });
 
   final String content;
@@ -34,10 +37,38 @@ class _TextWithTimestamp extends StatelessWidget {
   final TextStyle textStyle;
   final TextStyle tsStyle;
   final bool isOutgoing;
+  final bool showDeliveryStatus;
+  final ChatStatusType? deliveryStatus;
+  final VoidCallback? onStatusTap;
 
   @override
   Widget build(BuildContext context) {
-    final reservedWidth = _timestampReservedWidth(timestamp, tsStyle, isOutgoing);
+    final reservedWidth = _timestampReservedWidth(
+      timestamp,
+      tsStyle,
+      isOutgoing,
+      showDeliveryStatus,
+    );
+
+    Widget statusRow = Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(timestamp, style: tsStyle),
+        if (showDeliveryStatus && isOutgoing) ...[
+          SizedBox(width: _chatStatusGap.w),
+          WnChatStatus(status: deliveryStatus ?? ChatStatusType.sending),
+        ],
+      ],
+    );
+
+    if (onStatusTap != null) {
+      statusRow = GestureDetector(
+        key: const Key('status_tap_area'),
+        behavior: HitTestBehavior.opaque,
+        onTap: onStatusTap,
+        child: statusRow,
+      );
+    }
 
     return Stack(
       children: [
@@ -49,20 +80,7 @@ class _TextWithTimestamp extends StatelessWidget {
             ],
           ),
         ),
-        Positioned(
-          bottom: 0,
-          right: 0,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(timestamp, style: tsStyle),
-              if (isOutgoing) ...[
-                SizedBox(width: _chatStatusGap.w),
-                const WnChatStatus(status: ChatStatusType.sent),
-              ],
-            ],
-          ),
-        ),
+        Positioned(bottom: 0, right: 0, child: statusRow),
       ],
     );
   }
@@ -110,7 +128,12 @@ BorderRadius _bubbleBorderRadius({
   );
 }
 
-double _timestampReservedWidth(String timestamp, TextStyle tsStyle, bool isOutgoing) {
+double _timestampReservedWidth(
+  String timestamp,
+  TextStyle tsStyle,
+  bool isOutgoing,
+  bool showDeliveryStatus,
+) {
   final painter = TextPainter(
     text: TextSpan(text: timestamp, style: tsStyle),
     textDirection: TextDirection.ltr,
@@ -118,7 +141,9 @@ double _timestampReservedWidth(String timestamp, TextStyle tsStyle, bool isOutgo
   try {
     painter.layout();
     final tsWidth = painter.width;
-    final statusWidth = isOutgoing ? (_chatStatusGap.w + _chatStatusW.w) : 0.0;
+    final statusWidth = (showDeliveryStatus && isOutgoing)
+        ? (_chatStatusGap.w + _chatStatusW.w)
+        : 0.0;
     return _timestampMinPadding.w + tsWidth + statusWidth;
   } finally {
     painter.dispose();
@@ -187,6 +212,9 @@ class _BubbleContent extends StatelessWidget {
     required this.reactionType,
     required this.currentUserPubkey,
     required this.onReaction,
+    required this.showDeliveryStatus,
+    this.deliveryStatus,
+    this.onStatusTap,
   });
 
   final Color bubbleColor;
@@ -208,6 +236,31 @@ class _BubbleContent extends StatelessWidget {
   final WnReactionType reactionType;
   final String? currentUserPubkey;
   final void Function(String emoji)? onReaction;
+  final bool showDeliveryStatus;
+  final ChatStatusType? deliveryStatus;
+  final VoidCallback? onStatusTap;
+
+  Widget _buildTimestampRow() {
+    Widget row = Row(
+      mainAxisAlignment: MainAxisAlignment.end,
+      children: [
+        Text(timestamp!, style: tsStyle),
+        if (showDeliveryStatus && isOutgoing) ...[
+          SizedBox(width: _chatStatusGap.w),
+          WnChatStatus(status: deliveryStatus ?? ChatStatusType.sending),
+        ],
+      ],
+    );
+    if (onStatusTap != null) {
+      row = GestureDetector(
+        key: const Key('status_tap_area'),
+        behavior: HitTestBehavior.opaque,
+        onTap: onStatusTap,
+        child: row,
+      );
+    }
+    return row;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -248,21 +301,15 @@ class _BubbleContent extends StatelessWidget {
               textStyle: textStyle,
               tsStyle: tsStyle,
               isOutgoing: isOutgoing,
+              showDeliveryStatus: showDeliveryStatus,
+              deliveryStatus: deliveryStatus,
+              onStatusTap: onStatusTap,
             )
           else if (hasText)
             Text(content!, style: textStyle)
           else if (hasTimestamp) ...[
             SizedBox(height: 2.h),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.end,
-              children: [
-                Text(timestamp!, style: tsStyle),
-                if (isOutgoing) ...[
-                  SizedBox(width: _chatStatusGap.w),
-                  const WnChatStatus(status: ChatStatusType.sent),
-                ],
-              ],
-            ),
+            _buildTimestampRow(),
           ],
           if (hasReactions) ...[
             SizedBox(height: 8.h),
@@ -288,9 +335,169 @@ class _BubbleContent extends StatelessWidget {
   }
 }
 
+class _BubbleInner extends StatelessWidget {
+  const _BubbleInner({
+    required this.onHorizontalDragEnd,
+    required this.onLongPress,
+    required this.bubbleContent,
+    required this.showTail,
+    required this.isOutgoing,
+    required this.tailOverhang,
+    required this.tailW,
+    required this.tailH,
+    required this.bubbleColor,
+  });
+
+  final VoidCallback? onHorizontalDragEnd;
+  final VoidCallback? onLongPress;
+  final Widget bubbleContent;
+  final bool showTail;
+  final bool isOutgoing;
+  final double tailOverhang;
+  final double tailW;
+  final double tailH;
+  final Color bubbleColor;
+
+  @override
+  Widget build(BuildContext context) {
+    Widget child = GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onLongPress: onLongPress,
+      child: bubbleContent,
+    );
+    if (onHorizontalDragEnd != null) {
+      child = _SwipeableBubble(onSwipeReply: onHorizontalDragEnd!, child: child);
+    }
+
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        child,
+        if (showTail)
+          Positioned(
+            bottom: 0,
+            left: isOutgoing ? null : -tailOverhang,
+            right: isOutgoing ? -tailOverhang : null,
+            child: CustomPaint(
+              size: Size(tailW, tailH),
+              painter: _BubbleTailPainter(color: bubbleColor, incoming: !isOutgoing),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _DeletedBubbleBorder extends ShapeBorder {
+  final bool isOutgoing;
+  final bool showTail;
+  final double radius;
+  final double tailH;
+  final double tailOverhang;
+  final BorderSide side;
+
+  const _DeletedBubbleBorder({
+    required this.isOutgoing,
+    required this.showTail,
+    required this.radius,
+    required this.tailH,
+    required this.tailOverhang,
+    this.side = BorderSide.none,
+  });
+
+  @override
+  EdgeInsetsGeometry get dimensions => EdgeInsets.all(side.width);
+
+  @override
+  Path getInnerPath(Rect rect, {TextDirection? textDirection}) {
+    return _getPath(rect.deflate(side.width));
+  }
+
+  @override
+  Path getOuterPath(Rect rect, {TextDirection? textDirection}) {
+    return _getPath(rect);
+  }
+
+  Path _getPath(Rect rect) {
+    final r = radius;
+    final innerRect = EdgeInsets.only(
+      left: showTail && !isOutgoing ? tailOverhang : 0,
+      right: showTail && isOutgoing ? tailOverhang : 0,
+    ).deflateRect(rect);
+
+    final path = Path();
+    if (showTail) {
+      if (isOutgoing) {
+        path.moveTo(innerRect.left + r, innerRect.top);
+        path.lineTo(innerRect.right - r, innerRect.top);
+        path.arcToPoint(Offset(innerRect.right, innerRect.top + r), radius: Radius.circular(r));
+        path.lineTo(innerRect.right, innerRect.bottom - tailH);
+
+        path.lineTo(innerRect.right + tailOverhang, innerRect.bottom);
+        path.lineTo(innerRect.left + r, innerRect.bottom);
+
+        path.arcToPoint(Offset(innerRect.left, innerRect.bottom - r), radius: Radius.circular(r));
+        path.lineTo(innerRect.left, innerRect.top + r);
+        path.arcToPoint(Offset(innerRect.left + r, innerRect.top), radius: Radius.circular(r));
+      } else {
+        path.moveTo(innerRect.right - r, innerRect.top);
+        path.lineTo(innerRect.left + r, innerRect.top);
+        path.arcToPoint(
+          Offset(innerRect.left, innerRect.top + r),
+          radius: Radius.circular(r),
+          clockwise: false,
+        );
+        path.lineTo(innerRect.left, innerRect.bottom - tailH);
+
+        path.lineTo(innerRect.left - tailOverhang, innerRect.bottom);
+        path.lineTo(innerRect.right - r, innerRect.bottom);
+
+        path.arcToPoint(
+          Offset(innerRect.right, innerRect.bottom - r),
+          radius: Radius.circular(r),
+          clockwise: false,
+        );
+        path.lineTo(innerRect.right, innerRect.top + r);
+        path.arcToPoint(
+          Offset(innerRect.right - r, innerRect.top),
+          radius: Radius.circular(r),
+          clockwise: false,
+        );
+      }
+      path.close();
+      return path;
+    } else {
+      path.addRRect(RRect.fromRectAndRadius(innerRect, Radius.circular(r)));
+      return path;
+    }
+  }
+
+  @override
+  void paint(Canvas canvas, Rect rect, {TextDirection? textDirection}) {
+    if (side.style == BorderStyle.none) return;
+
+    final paint = side.toPaint();
+    final path = _getPath(rect.deflate(side.width / 2));
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  ShapeBorder scale(double t) {
+    return _DeletedBubbleBorder(
+      isOutgoing: isOutgoing,
+      showTail: showTail,
+      radius: radius * t,
+      tailH: tailH * t,
+      tailOverhang: tailOverhang * t,
+      side: side.scale(t),
+    );
+  }
+}
+
 class WnMessageBubble extends StatelessWidget {
   final MessageDirection direction;
   final bool isDeleted;
+  final String? deletedLabel;
   final bool showTail;
   final String? content;
   final Widget? mediaContent;
@@ -305,11 +512,14 @@ class WnMessageBubble extends StatelessWidget {
   final String? senderName;
   final Color? senderNameColor;
   final BubbleLeadingVariant leadingVariant;
+  final ChatStatusType? deliveryStatus;
+  final VoidCallback? onStatusTap;
 
   const WnMessageBubble({
     super.key,
     required this.direction,
     required this.isDeleted,
+    this.deletedLabel,
     this.showTail = false,
     this.content,
     this.mediaContent,
@@ -324,22 +534,30 @@ class WnMessageBubble extends StatelessWidget {
     this.senderName,
     this.senderNameColor,
     this.leadingVariant = BubbleLeadingVariant.none,
+    this.deliveryStatus,
+    this.onStatusTap,
   });
 
   bool get _isOutgoing => direction == MessageDirection.outgoing;
 
+  static Widget _wrapBubbleInner({required bool hasMedia, required Widget child}) {
+    if (hasMedia) return child;
+    return IntrinsicWidth(child: child);
+  }
+
   @override
   Widget build(BuildContext context) {
-    if (isDeleted) {
-      return const SizedBox.shrink();
-    }
-
     final colors = context.colors;
-    final bubbleColor = _isOutgoing ? colors.fillPrimary : colors.backgroundTertiary;
-    final textColor = _isOutgoing ? colors.fillContentPrimary : colors.backgroundContentPrimary;
+    final bubbleColor = isDeleted
+        ? Colors.transparent
+        : _isOutgoing
+        ? colors.fillPrimary
+        : colors.backgroundTertiary;
+    final textColor = isDeleted || !_isOutgoing
+        ? colors.backgroundContentPrimary
+        : colors.fillContentPrimary;
     final timestampColor = colors.backgroundContentTertiary;
 
-    final viewportWidth = MediaQuery.sizeOf(context).width;
     final hasAvatar = !_isOutgoing && avatar != null;
     final avatarColW = hasAvatar ? 44.w : 0.0;
     final leadingIndent = switch (leadingVariant) {
@@ -347,20 +565,26 @@ class WnMessageBubble extends StatelessWidget {
       BubbleLeadingVariant.tail => _tailOverhang.w,
       BubbleLeadingVariant.avatar => 44.w + _tailOverhang.w,
     };
-    final maxBubbleWidth = (viewportWidth - 20.w - avatarColW - leadingIndent) * 0.8;
 
     final tailW = _tailW.w;
     final tailH = _tailH.h;
     final tailOverhang = _tailOverhang.w;
     final radius = 8.r;
 
-    final hasText = content != null && content!.isNotEmpty;
-    final hasTimestamp = timestamp != null;
-    final hasReactions = reactions.isNotEmpty;
+    final actualContent = isDeleted ? deletedLabel : content;
+    final hasText = actualContent != null && actualContent.isNotEmpty;
+    final actualMediaContent = isDeleted ? null : mediaContent;
+    final actualReplyContent = isDeleted ? null : replyContent;
+    final actualReactions = isDeleted ? <EmojiReaction>[] : reactions;
+    final actualTimestamp = isDeleted ? (showTail ? timestamp : null) : timestamp;
+    final actualDeliveryStatus = isDeleted ? null : deliveryStatus;
+
+    final hasTimestamp = actualTimestamp != null;
+    final hasReactions = actualReactions.isNotEmpty;
     final hasSenderName = !_isOutgoing && senderName != null && senderName!.isNotEmpty;
 
     final reactionType = _isOutgoing ? WnReactionType.outgoing : WnReactionType.incoming;
-    final textStyle = context.typographyScaled.medium14.copyWith(color: textColor);
+    final textStyle = context.typographyScaled.medium16Compact.copyWith(color: textColor);
     final tsStyle = context.typographyScaled.medium12.copyWith(color: timestampColor);
 
     final bubbleContent = _BubbleContent(
@@ -373,91 +597,111 @@ class WnMessageBubble extends StatelessWidget {
       hasSenderName: hasSenderName,
       senderName: senderName,
       senderNameColor: senderNameColor,
-      replyContent: replyContent,
-      mediaContent: mediaContent,
+      replyContent: actualReplyContent,
+      mediaContent: actualMediaContent,
       hasText: hasText,
       hasTimestamp: hasTimestamp,
-      content: content,
-      timestamp: timestamp,
+      content: actualContent,
+      timestamp: actualTimestamp,
       textStyle: textStyle,
       tsStyle: tsStyle,
       isOutgoing: _isOutgoing,
       hasReactions: hasReactions,
-      reactions: reactions,
+      reactions: actualReactions,
       reactionType: reactionType,
       currentUserPubkey: currentUserPubkey,
       onReaction: onReaction,
+      showDeliveryStatus: !isDeleted,
+      deliveryStatus: actualDeliveryStatus,
+      onStatusTap: isDeleted ? null : onStatusTap,
     );
 
-    final bubble = Align(
-      alignment: _isOutgoing ? Alignment.centerRight : Alignment.centerLeft,
-      child: ConstrainedBox(
-        constraints: BoxConstraints(maxWidth: maxBubbleWidth),
-        child: Padding(
-          padding: EdgeInsets.only(
-            left: showTail && !_isOutgoing ? tailOverhang : 0,
-            right: _isOutgoing && showTail ? tailOverhang : 0,
-          ),
-          child: IntrinsicWidth(
-            child: Stack(
-              clipBehavior: Clip.none,
-              children: [
-                if (onHorizontalDragEnd != null)
-                  _SwipeableBubble(
-                    onSwipeReply: onHorizontalDragEnd!,
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque,
-                      onLongPress: onLongPress,
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final baseMaxBubbleWidth = (constraints.maxWidth - avatarColW - leadingIndent) * 0.8;
+        final maxBubbleWidth = _isOutgoing && !showTail
+            ? baseMaxBubbleWidth - tailOverhang
+            : baseMaxBubbleWidth;
+
+        final bubble = Align(
+          alignment: _isOutgoing ? Alignment.centerRight : Alignment.centerLeft,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: maxBubbleWidth),
+            child: isDeleted
+                ? Container(
+                    key: const Key('deleted_bubble_border'),
+                    padding: EdgeInsets.only(
+                      left: showTail && !_isOutgoing ? tailOverhang : 0,
+                      right: _isOutgoing && showTail ? tailOverhang : 0,
+                    ),
+                    decoration: ShapeDecoration(
+                      shape: _DeletedBubbleBorder(
+                        isOutgoing: _isOutgoing,
+                        showTail: showTail,
+                        radius: radius,
+                        tailH: tailH,
+                        tailOverhang: tailOverhang,
+                        side: BorderSide(color: colors.borderPrimary),
+                      ),
+                    ),
+                    child: _wrapBubbleInner(
+                      hasMedia: actualMediaContent != null,
                       child: bubbleContent,
                     ),
                   )
-                else
-                  GestureDetector(
-                    behavior: HitTestBehavior.opaque,
-                    onLongPress: onLongPress,
-                    child: bubbleContent,
-                  ),
-                if (showTail)
-                  Positioned(
-                    bottom: 0,
-                    left: _isOutgoing ? null : -tailOverhang,
-                    right: _isOutgoing ? -tailOverhang : null,
-                    child: CustomPaint(
-                      size: Size(tailW, tailH),
-                      painter: _BubbleTailPainter(
-                        color: bubbleColor,
-                        incoming: !_isOutgoing,
+                : Padding(
+                    key: const Key('bubble_tail_padding'),
+                    padding: EdgeInsets.only(
+                      left: showTail && !_isOutgoing ? tailOverhang : 0,
+                      right: _isOutgoing && showTail ? tailOverhang : 0,
+                    ),
+                    child: _wrapBubbleInner(
+                      hasMedia: mediaContent != null,
+                      child: _BubbleInner(
+                        onHorizontalDragEnd: onHorizontalDragEnd,
+                        onLongPress: onLongPress,
+                        bubbleContent: bubbleContent,
+                        showTail: showTail,
+                        isOutgoing: _isOutgoing,
+                        tailOverhang: tailOverhang,
+                        tailW: tailW,
+                        tailH: tailH,
+                        bubbleColor: bubbleColor,
                       ),
                     ),
                   ),
-              ],
-            ),
           ),
-        ),
-      ),
-    );
+        );
 
-    final bottomMargin = showTail ? 12.h : 4.h;
+        final bottomMargin = showTail ? 12.h : 4.h;
 
-    if (!hasAvatar) {
-      return Padding(
-        padding: EdgeInsets.only(left: leadingIndent, bottom: bottomMargin),
-        child: bubble,
-      );
-    }
+        if (!hasAvatar) {
+          final trailingIndent = _isOutgoing && !showTail ? tailOverhang : 0.0;
+          return Padding(
+            key: const Key('bubble_outer_padding'),
+            padding: EdgeInsets.only(
+              left: leadingIndent,
+              right: trailingIndent,
+              bottom: bottomMargin,
+            ),
+            child: bubble,
+          );
+        }
 
-    return Padding(
-      padding: EdgeInsets.only(bottom: bottomMargin),
-      child: Row(
-        key: const Key('bubble_avatar_row'),
-        crossAxisAlignment: CrossAxisAlignment.end,
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          SizedBox(width: 36.w, child: avatar),
-          SizedBox(width: 8.w),
-          Flexible(child: bubble),
-        ],
-      ),
+        return Padding(
+          padding: EdgeInsets.only(bottom: bottomMargin),
+          child: Row(
+            key: const Key('bubble_avatar_row'),
+            crossAxisAlignment: CrossAxisAlignment.end,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(width: 36.w, child: avatar),
+              SizedBox(width: 8.w),
+              Flexible(child: bubble),
+            ],
+          ),
+        );
+      },
     );
   }
 }

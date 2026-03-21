@@ -240,5 +240,37 @@ void main() {
 
       expect(find.byKey(const Key('blurhash_placeholder')), findsOneWidget);
     });
+
+    testWidgets('placeholder and image have the same size', (tester) async {
+      final tempDir = Directory.systemTemp.createTempSync('chat_media_size_test');
+      final tempFile = File('${tempDir.path}/test.png');
+      tempFile.writeAsBytesSync(_minimalPng);
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      final completer = Completer<MediaFile>();
+      _api.downloadCompleter = completer;
+
+      await mountWidget(
+        ChatMessageMedia(
+          mediaFiles: [
+            _mediaFile(
+              blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+            ),
+          ],
+        ),
+        tester,
+      );
+
+      final placeholderSize = tester
+          .renderObject<RenderBox>(find.byKey(const Key('blurhash_placeholder')))
+          .size;
+
+      completer.complete(_mediaFile(filePath: tempFile.path));
+      await tester.pumpAndSettle();
+
+      final imageSize = tester.renderObject<RenderBox>(find.byKey(const Key('media_image'))).size;
+
+      expect(imageSize, placeholderSize);
+    });
   });
 }

@@ -3,12 +3,46 @@
 All notable changes to this project will be documented in this file.
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
-and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+and this project adheres to Calendar Versioning (CalVer).
+<!-- ## Template
+
+### Added
+
+### Changed
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security -->
 
 ## Unreleased
 
 ### Added
+- Add bug report screen with NIP-44 encrypted anonymous reports [PR #478](https://github.com/marmot-protocol/whitenoise/pull/478)
+- Chat with support [PR #486](https://github.com/marmot-protocol/whitenoise/pull/486)
+
+### Changed
+- Deleted bubbles style [PR #471](https://github.com/marmot-protocol/whitenoise/pull/471)
+- Debug and relay screens improvements [PR #572](https://github.com/marmot-protocol/whitenoise/pull/502)
+- UI Polish: Slate & Settings Screen [PR #504](https://github.com/marmot-protocol/whitenoise/pull/504)
+- Show an error screen when bridge initialization fails instead of hanging on splash [PR #477](https://github.com/marmot-protocol/whitenoise/pull/477)
+
+### Deprecated
+
+### Removed
+
+### Fixed
+
+### Security
+
+## [2026.3.5] - 2026-03-05
+
+### Added
 - Show reply preview in message actions, add author color in reply preview in input, swipe to reply [PR #389](https://github.com/marmot-protocol/whitenoise/pull/389)
+- Chat system message in invite screen [#408](https://github.com/marmot-protocol/whitenoise/pull/408)
 - Show photo/photos label with image icon in chat list when last message is media-only [PR #414](https://github.com/marmot-protocol/whitenoise/pull/414)
 - Add clear option to relay inputs [PR #412](https://github.com/marmot-protocol/whitenoise/pull/412)
 
@@ -19,8 +53,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Removed
 
-
 ### Fixed
+- UI Polish: Login Screen [PR #459](https://github.com/marmot-protocol/whitenoise/pull/459)
+- UI Polish: Home Screen [PR #441](https://github.com/marmot-protocol/whitenoise/pull/441)
 - Fix focus on reply [PR #389](https://github.com/marmot-protocol/whitenoise/pull/389)
 - Fix npubs middle ellipsis by adding snap to words option [PR #388](https://github.com/marmot-protocol/whitenoise/pull/388)
 - Fix onboarding carousel text appearing cut off [PR #404](https://github.com/marmot-protocol/whitenoise/pull/404)
@@ -29,6 +64,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix positioning of error notice in chat screen [PR #409](https://github.com/marmot-protocol/whitenoise/pull/409)
 - Fix bio field looking cut in signup form by adding automatic scroll [PR #435](https://github.com/marmot-protocol/whitenoise/pull/435)
 - Fix base design size [#433](https://github.com/marmot-protocol/whitenoise/pull/433)
+- Fix messages bubbles and handle manual retry [PR #442](https://github.com/marmot-protocol/whitenoise/pull/442)
+- Fix chat invite avatar navigating to wip screen for group chats and hide search for unaccepted dm chat info  [#452](https://github.com/marmot-protocol/whitenoise/pull/452)
+- Fix self-profile flow: hide current user from search results and block self actions on start chat screen [PR #443](https://github.com/marmot-protocol/whitenoise/pull/443)
+
 ### Security
 
 ## [0.3.0] - 2026-02-23

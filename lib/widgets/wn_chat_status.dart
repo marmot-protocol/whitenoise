@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 
-enum ChatStatusType { sent, delivered, read, failed, request, unreadCount }
+enum ChatStatusType { sending, sent, read, failed, request, unreadCount }
 
 class WnChatStatus extends HookWidget {
   const WnChatStatus({
@@ -22,8 +22,8 @@ class WnChatStatus extends HookWidget {
 
     final icon = useMemoized(() {
       return switch (status) {
-        ChatStatusType.sent => WnIcons.checkmarkDashed,
-        ChatStatusType.delivered => WnIcons.checkmarkOutline,
+        ChatStatusType.sending => WnIcons.checkmarkDashed,
+        ChatStatusType.sent => WnIcons.checkmarkOutline,
         ChatStatusType.read => WnIcons.checkmarkFilled,
         ChatStatusType.failed => WnIcons.error,
         ChatStatusType.request => WnIcons.addFilled,

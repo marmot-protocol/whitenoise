@@ -20,6 +20,9 @@ class DonateScreen extends HookWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final noticeMessage = useState<String?>(null);
+    final bodyStyle = context.typographyScaled.medium14.copyWith(
+      color: colors.backgroundContentTertiary,
+    );
 
     void showCopiedNotice(String message) {
       noticeMessage.value = message;
@@ -32,45 +35,43 @@ class DonateScreen extends HookWidget {
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: WnSlate(
-            header: WnSlateNavigationHeader(
-              title: context.l10n.donateToWhiteNoise,
-              type: WnSlateNavigationType.back,
-              onNavigate: () => Routes.goBack(context),
-            ),
-            systemNotice: noticeMessage.value != null
-                ? WnSystemNotice(
-                    key: ValueKey(noticeMessage.value),
-                    title: noticeMessage.value!,
-                    onDismiss: dismissNotice,
-                  )
-                : null,
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-              child: Column(
-                spacing: 24.h,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    context.l10n.donateDescription,
-                    style: context.typographyScaled.medium14.copyWith(
-                      color: colors.backgroundContentTertiary,
-                    ),
-                  ),
-                  WnCopyableField(
-                    label: context.l10n.lightningAddress,
-                    value: _lightningAddress,
-                    onCopied: () => showCopiedNotice(context.l10n.copiedToClipboardThankYou),
-                  ),
-                  WnCopyableField(
-                    label: context.l10n.bitcoinSilentPayment,
-                    value: _bitcoinAddress,
-                    onCopied: () => showCopiedNotice(context.l10n.copiedToClipboardThankYou),
-                  ),
-                ],
-              ),
+        child: WnSlate(
+          header: WnSlateNavigationHeader(
+            title: context.l10n.donateToWhiteNoise,
+            onNavigate: () => Routes.goBack(context),
+          ),
+          systemNotice: noticeMessage.value != null
+              ? WnSystemNotice(
+                  key: ValueKey(noticeMessage.value),
+                  title: noticeMessage.value!,
+                  onDismiss: dismissNotice,
+                )
+              : null,
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+            child: Column(
+              spacing: 24.h,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  context.l10n.donateDescription,
+                  style: bodyStyle,
+                ),
+                WnCopyableField(
+                  label: context.l10n.lightningAddress,
+                  value: _lightningAddress,
+                  onCopied: () => showCopiedNotice(context.l10n.copiedToClipboardThankYou),
+                ),
+                WnCopyableField(
+                  label: context.l10n.bitcoinSilentPayment,
+                  value: _bitcoinAddress,
+                  onCopied: () => showCopiedNotice(context.l10n.copiedToClipboardThankYou),
+                ),
+                Text(
+                  context.l10n.donateContributionLetter,
+                  style: bodyStyle,
+                ),
+              ],
             ),
           ),
         ),

@@ -2,6 +2,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/screens/chat_invite_screen.dart';
 import 'package:whitenoise/screens/chat_screen.dart';
@@ -20,6 +24,30 @@ import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
+
+class _MockUrlLauncher extends UrlLauncherPlatform with MockPlatformInterfaceMixin {
+  final List<({String url, LaunchOptions options})> calls = [];
+  bool returnValue = true;
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    calls.add((url: url, options: options));
+    return returnValue;
+  }
+}
+
+void _setInstalledVersion(String version) {
+  PackageInfo.setMockInitialValues(
+    appName: 'Whitenoise',
+    packageName: 'org.parres.whitenoise',
+    version: version,
+    buildNumber: '1',
+    buildSignature: '',
+  );
+}
 
 ChatSummary _chatSummary({
   required String id,
@@ -40,6 +68,7 @@ class _MockApi extends MockWnApi {
 
   @override
   void reset() {
+    super.reset();
     controller?.close();
     controller = null;
     initialChats = [];
@@ -104,7 +133,10 @@ final _api = _MockApi();
 
 void main() {
   setUpAll(() => RustLib.initMock(api: _api));
-  setUp(() => _api.reset());
+  setUp(() {
+    _api.reset();
+    _setInstalledVersion('2026.3.5');
+  });
 
   Future<void> pumpChatListScreen(WidgetTester tester) async {
     await mountTestApp(
@@ -334,6 +366,165 @@ void main() {
 
           expect(find.byType(WnSystemNotice), findsOneWidget);
         }
+      });
+    });
+
+    group('update notice', () {
+      final originalUrlLauncher = UrlLauncherPlatform.instance;
+      tearDown(() => UrlLauncherPlatform.instance = originalUrlLauncher);
+
+      testWidgets('shows update notice when a newer version is available', (tester) async {
+        _api.zapstoreVersion = '2026.4.0';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.text('Update available'), findsOneWidget);
+        expect(find.byKey(const Key('update_now_button')), findsOneWidget);
+      });
+
+      testWidgets('shows version in update notice description', (tester) async {
+        _api.zapstoreVersion = '2026.4.0';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.textContaining('2026.4.0'), findsOneWidget);
+      });
+
+      testWidgets('does not show update notice when version matches', (tester) async {
+        _api.zapstoreVersion = '2026.3.5';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.text('Update available'), findsNothing);
+        expect(find.byKey(const Key('update_now_button')), findsNothing);
+      });
+
+      testWidgets('does not show update notice when Zapstore has no release', (tester) async {
+        _api.zapstoreVersion = null;
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.text('Update available'), findsNothing);
+      });
+
+      testWidgets('dismissing update notice hides it', (tester) async {
+        _api.zapstoreVersion = '2026.4.0';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.text('Update available'), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Update available'), findsNothing);
+      });
+
+      testWidgets('first chat tile is not hidden behind the update banner', (tester) async {
+        _api.zapstoreVersion = '2026.4.0';
+        _api.initialChats = [
+          _chatSummary(id: testPubkeyA, pendingConfirmation: false, name: 'Alice'),
+        ];
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+        await tester.pumpAndSettle();
+
+        final slateBottom = tester.getBottomLeft(find.byType(WnSlate)).dy;
+        final tileTop = tester.getTopLeft(find.byType(ChatListTile)).dy;
+
+        expect(
+          tileTop,
+          greaterThanOrEqualTo(slateBottom),
+          reason: 'First chat tile should not be hidden under the update banner',
+        );
+      });
+
+      testWidgets('update notice takes priority over welcome notice', (tester) async {
+        // No chats → welcome notice would normally show.
+        // Newer version available → update notice should show instead.
+        _api.zapstoreVersion = '2026.4.0';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.text('Update available'), findsOneWidget);
+        expect(find.text('Your profile is ready'), findsNothing);
+      });
+
+      testWidgets('welcome notice shown after update notice is dismissed', (tester) async {
+        // No chats, so welcome notice is also pending.
+        _api.zapstoreVersion = '2026.4.0';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Your profile is ready'), findsOneWidget);
+      });
+
+      testWidgets('tapping Update now launches Zapstore URL with externalApplication mode', (
+        tester,
+      ) async {
+        final mockLauncher = _MockUrlLauncher();
+        UrlLauncherPlatform.instance = mockLauncher;
+
+        _api.zapstoreVersion = '2026.4.0';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.byKey(const Key('update_now_button')), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('update_now_button')));
+        await tester.pump();
+
+        expect(mockLauncher.calls, hasLength(1));
+        expect(
+          mockLauncher.calls.first.url,
+          equals('https://zapstore.dev/apps/org.parres.whitenoise'),
+        );
+        expect(
+          mockLauncher.calls.first.options.mode,
+          equals(PreferredLaunchMode.externalApplication),
+        );
+      });
+
+      testWidgets('tapping Update now falls back to default mode when externalApplication fails', (
+        tester,
+      ) async {
+        final mockLauncher = _MockUrlLauncher()..returnValue = false;
+        UrlLauncherPlatform.instance = mockLauncher;
+
+        _api.zapstoreVersion = '2026.4.0';
+
+        await pumpChatListScreen(tester);
+        await tester.pump();
+
+        expect(find.byKey(const Key('update_now_button')), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('update_now_button')));
+        await tester.pump();
+
+        // Two calls: first externalApplication (fails), then fallback with default mode.
+        expect(mockLauncher.calls, hasLength(2));
+        expect(
+          mockLauncher.calls[0].url,
+          equals('https://zapstore.dev/apps/org.parres.whitenoise'),
+        );
+        expect(mockLauncher.calls[0].options.mode, equals(PreferredLaunchMode.externalApplication));
+        expect(
+          mockLauncher.calls[1].url,
+          equals('https://zapstore.dev/apps/org.parres.whitenoise'),
+        );
+        expect(mockLauncher.calls[1].options.mode, equals(PreferredLaunchMode.platformDefault));
       });
     });
 

@@ -55,7 +55,7 @@ extension ApiErrorPatterns on ApiError {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ApiError_Whitenoise value)?  whitenoise,TResult Function( ApiError_InvalidKey value)?  invalidKey,TResult Function( ApiError_NostrUrl value)?  nostrUrl,TResult Function( ApiError_NostrTag value)?  nostrTag,TResult Function( ApiError_NostrEvent value)?  nostrEvent,TResult Function( ApiError_NostrParse value)?  nostrParse,TResult Function( ApiError_NostrHex value)?  nostrHex,TResult Function( ApiError_LoginInvalidKeyFormat value)?  loginInvalidKeyFormat,TResult Function( ApiError_LoginNoRelayConnections value)?  loginNoRelayConnections,TResult Function( ApiError_LoginTimeout value)?  loginTimeout,TResult Function( ApiError_LoginNoLoginInProgress value)?  loginNoLoginInProgress,TResult Function( ApiError_LoginInternal value)?  loginInternal,TResult Function( ApiError_Other value)?  other,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ApiError_Whitenoise value)?  whitenoise,TResult Function( ApiError_InvalidKey value)?  invalidKey,TResult Function( ApiError_NostrUrl value)?  nostrUrl,TResult Function( ApiError_NostrTag value)?  nostrTag,TResult Function( ApiError_NostrEvent value)?  nostrEvent,TResult Function( ApiError_NostrParse value)?  nostrParse,TResult Function( ApiError_NostrHex value)?  nostrHex,TResult Function( ApiError_LoginInvalidKeyFormat value)?  loginInvalidKeyFormat,TResult Function( ApiError_LoginNoRelayConnections value)?  loginNoRelayConnections,TResult Function( ApiError_LoginTimeout value)?  loginTimeout,TResult Function( ApiError_LoginNoLoginInProgress value)?  loginNoLoginInProgress,TResult Function( ApiError_LoginInternal value)?  loginInternal,TResult Function( ApiError_LoginKeyringUnavailable value)?  loginKeyringUnavailable,TResult Function( ApiError_Other value)?  other,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case ApiError_Whitenoise() when whitenoise != null:
@@ -70,7 +70,8 @@ return loginInvalidKeyFormat(_that);case ApiError_LoginNoRelayConnections() when
 return loginNoRelayConnections(_that);case ApiError_LoginTimeout() when loginTimeout != null:
 return loginTimeout(_that);case ApiError_LoginNoLoginInProgress() when loginNoLoginInProgress != null:
 return loginNoLoginInProgress(_that);case ApiError_LoginInternal() when loginInternal != null:
-return loginInternal(_that);case ApiError_Other() when other != null:
+return loginInternal(_that);case ApiError_LoginKeyringUnavailable() when loginKeyringUnavailable != null:
+return loginKeyringUnavailable(_that);case ApiError_Other() when other != null:
 return other(_that);case _:
   return orElse();
 
@@ -89,7 +90,7 @@ return other(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ApiError_Whitenoise value)  whitenoise,required TResult Function( ApiError_InvalidKey value)  invalidKey,required TResult Function( ApiError_NostrUrl value)  nostrUrl,required TResult Function( ApiError_NostrTag value)  nostrTag,required TResult Function( ApiError_NostrEvent value)  nostrEvent,required TResult Function( ApiError_NostrParse value)  nostrParse,required TResult Function( ApiError_NostrHex value)  nostrHex,required TResult Function( ApiError_LoginInvalidKeyFormat value)  loginInvalidKeyFormat,required TResult Function( ApiError_LoginNoRelayConnections value)  loginNoRelayConnections,required TResult Function( ApiError_LoginTimeout value)  loginTimeout,required TResult Function( ApiError_LoginNoLoginInProgress value)  loginNoLoginInProgress,required TResult Function( ApiError_LoginInternal value)  loginInternal,required TResult Function( ApiError_Other value)  other,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ApiError_Whitenoise value)  whitenoise,required TResult Function( ApiError_InvalidKey value)  invalidKey,required TResult Function( ApiError_NostrUrl value)  nostrUrl,required TResult Function( ApiError_NostrTag value)  nostrTag,required TResult Function( ApiError_NostrEvent value)  nostrEvent,required TResult Function( ApiError_NostrParse value)  nostrParse,required TResult Function( ApiError_NostrHex value)  nostrHex,required TResult Function( ApiError_LoginInvalidKeyFormat value)  loginInvalidKeyFormat,required TResult Function( ApiError_LoginNoRelayConnections value)  loginNoRelayConnections,required TResult Function( ApiError_LoginTimeout value)  loginTimeout,required TResult Function( ApiError_LoginNoLoginInProgress value)  loginNoLoginInProgress,required TResult Function( ApiError_LoginInternal value)  loginInternal,required TResult Function( ApiError_LoginKeyringUnavailable value)  loginKeyringUnavailable,required TResult Function( ApiError_Other value)  other,}){
 final _that = this;
 switch (_that) {
 case ApiError_Whitenoise():
@@ -104,7 +105,8 @@ return loginInvalidKeyFormat(_that);case ApiError_LoginNoRelayConnections():
 return loginNoRelayConnections(_that);case ApiError_LoginTimeout():
 return loginTimeout(_that);case ApiError_LoginNoLoginInProgress():
 return loginNoLoginInProgress(_that);case ApiError_LoginInternal():
-return loginInternal(_that);case ApiError_Other():
+return loginInternal(_that);case ApiError_LoginKeyringUnavailable():
+return loginKeyringUnavailable(_that);case ApiError_Other():
 return other(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
@@ -119,7 +121,7 @@ return other(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ApiError_Whitenoise value)?  whitenoise,TResult? Function( ApiError_InvalidKey value)?  invalidKey,TResult? Function( ApiError_NostrUrl value)?  nostrUrl,TResult? Function( ApiError_NostrTag value)?  nostrTag,TResult? Function( ApiError_NostrEvent value)?  nostrEvent,TResult? Function( ApiError_NostrParse value)?  nostrParse,TResult? Function( ApiError_NostrHex value)?  nostrHex,TResult? Function( ApiError_LoginInvalidKeyFormat value)?  loginInvalidKeyFormat,TResult? Function( ApiError_LoginNoRelayConnections value)?  loginNoRelayConnections,TResult? Function( ApiError_LoginTimeout value)?  loginTimeout,TResult? Function( ApiError_LoginNoLoginInProgress value)?  loginNoLoginInProgress,TResult? Function( ApiError_LoginInternal value)?  loginInternal,TResult? Function( ApiError_Other value)?  other,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ApiError_Whitenoise value)?  whitenoise,TResult? Function( ApiError_InvalidKey value)?  invalidKey,TResult? Function( ApiError_NostrUrl value)?  nostrUrl,TResult? Function( ApiError_NostrTag value)?  nostrTag,TResult? Function( ApiError_NostrEvent value)?  nostrEvent,TResult? Function( ApiError_NostrParse value)?  nostrParse,TResult? Function( ApiError_NostrHex value)?  nostrHex,TResult? Function( ApiError_LoginInvalidKeyFormat value)?  loginInvalidKeyFormat,TResult? Function( ApiError_LoginNoRelayConnections value)?  loginNoRelayConnections,TResult? Function( ApiError_LoginTimeout value)?  loginTimeout,TResult? Function( ApiError_LoginNoLoginInProgress value)?  loginNoLoginInProgress,TResult? Function( ApiError_LoginInternal value)?  loginInternal,TResult? Function( ApiError_LoginKeyringUnavailable value)?  loginKeyringUnavailable,TResult? Function( ApiError_Other value)?  other,}){
 final _that = this;
 switch (_that) {
 case ApiError_Whitenoise() when whitenoise != null:
@@ -134,7 +136,8 @@ return loginInvalidKeyFormat(_that);case ApiError_LoginNoRelayConnections() when
 return loginNoRelayConnections(_that);case ApiError_LoginTimeout() when loginTimeout != null:
 return loginTimeout(_that);case ApiError_LoginNoLoginInProgress() when loginNoLoginInProgress != null:
 return loginNoLoginInProgress(_that);case ApiError_LoginInternal() when loginInternal != null:
-return loginInternal(_that);case ApiError_Other() when other != null:
+return loginInternal(_that);case ApiError_LoginKeyringUnavailable() when loginKeyringUnavailable != null:
+return loginKeyringUnavailable(_that);case ApiError_Other() when other != null:
 return other(_that);case _:
   return null;
 
@@ -152,7 +155,7 @@ return other(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String message)?  whitenoise,TResult Function( String message)?  invalidKey,TResult Function( String message)?  nostrUrl,TResult Function( String message)?  nostrTag,TResult Function( String message)?  nostrEvent,TResult Function( String message)?  nostrParse,TResult Function( String message)?  nostrHex,TResult Function( String message)?  loginInvalidKeyFormat,TResult Function()?  loginNoRelayConnections,TResult Function( String message)?  loginTimeout,TResult Function()?  loginNoLoginInProgress,TResult Function( String message)?  loginInternal,TResult Function( String message)?  other,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String message)?  whitenoise,TResult Function( String message)?  invalidKey,TResult Function( String message)?  nostrUrl,TResult Function( String message)?  nostrTag,TResult Function( String message)?  nostrEvent,TResult Function( String message)?  nostrParse,TResult Function( String message)?  nostrHex,TResult Function( String message)?  loginInvalidKeyFormat,TResult Function()?  loginNoRelayConnections,TResult Function( String message)?  loginTimeout,TResult Function()?  loginNoLoginInProgress,TResult Function( String message)?  loginInternal,TResult Function( String message)?  loginKeyringUnavailable,TResult Function( String message)?  other,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case ApiError_Whitenoise() when whitenoise != null:
 return whitenoise(_that.message);case ApiError_InvalidKey() when invalidKey != null:
@@ -166,7 +169,8 @@ return loginInvalidKeyFormat(_that.message);case ApiError_LoginNoRelayConnection
 return loginNoRelayConnections();case ApiError_LoginTimeout() when loginTimeout != null:
 return loginTimeout(_that.message);case ApiError_LoginNoLoginInProgress() when loginNoLoginInProgress != null:
 return loginNoLoginInProgress();case ApiError_LoginInternal() when loginInternal != null:
-return loginInternal(_that.message);case ApiError_Other() when other != null:
+return loginInternal(_that.message);case ApiError_LoginKeyringUnavailable() when loginKeyringUnavailable != null:
+return loginKeyringUnavailable(_that.message);case ApiError_Other() when other != null:
 return other(_that.message);case _:
   return orElse();
 
@@ -185,7 +189,7 @@ return other(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String message)  whitenoise,required TResult Function( String message)  invalidKey,required TResult Function( String message)  nostrUrl,required TResult Function( String message)  nostrTag,required TResult Function( String message)  nostrEvent,required TResult Function( String message)  nostrParse,required TResult Function( String message)  nostrHex,required TResult Function( String message)  loginInvalidKeyFormat,required TResult Function()  loginNoRelayConnections,required TResult Function( String message)  loginTimeout,required TResult Function()  loginNoLoginInProgress,required TResult Function( String message)  loginInternal,required TResult Function( String message)  other,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String message)  whitenoise,required TResult Function( String message)  invalidKey,required TResult Function( String message)  nostrUrl,required TResult Function( String message)  nostrTag,required TResult Function( String message)  nostrEvent,required TResult Function( String message)  nostrParse,required TResult Function( String message)  nostrHex,required TResult Function( String message)  loginInvalidKeyFormat,required TResult Function()  loginNoRelayConnections,required TResult Function( String message)  loginTimeout,required TResult Function()  loginNoLoginInProgress,required TResult Function( String message)  loginInternal,required TResult Function( String message)  loginKeyringUnavailable,required TResult Function( String message)  other,}) {final _that = this;
 switch (_that) {
 case ApiError_Whitenoise():
 return whitenoise(_that.message);case ApiError_InvalidKey():
@@ -199,7 +203,8 @@ return loginInvalidKeyFormat(_that.message);case ApiError_LoginNoRelayConnection
 return loginNoRelayConnections();case ApiError_LoginTimeout():
 return loginTimeout(_that.message);case ApiError_LoginNoLoginInProgress():
 return loginNoLoginInProgress();case ApiError_LoginInternal():
-return loginInternal(_that.message);case ApiError_Other():
+return loginInternal(_that.message);case ApiError_LoginKeyringUnavailable():
+return loginKeyringUnavailable(_that.message);case ApiError_Other():
 return other(_that.message);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -214,7 +219,7 @@ return other(_that.message);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String message)?  whitenoise,TResult? Function( String message)?  invalidKey,TResult? Function( String message)?  nostrUrl,TResult? Function( String message)?  nostrTag,TResult? Function( String message)?  nostrEvent,TResult? Function( String message)?  nostrParse,TResult? Function( String message)?  nostrHex,TResult? Function( String message)?  loginInvalidKeyFormat,TResult? Function()?  loginNoRelayConnections,TResult? Function( String message)?  loginTimeout,TResult? Function()?  loginNoLoginInProgress,TResult? Function( String message)?  loginInternal,TResult? Function( String message)?  other,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String message)?  whitenoise,TResult? Function( String message)?  invalidKey,TResult? Function( String message)?  nostrUrl,TResult? Function( String message)?  nostrTag,TResult? Function( String message)?  nostrEvent,TResult? Function( String message)?  nostrParse,TResult? Function( String message)?  nostrHex,TResult? Function( String message)?  loginInvalidKeyFormat,TResult? Function()?  loginNoRelayConnections,TResult? Function( String message)?  loginTimeout,TResult? Function()?  loginNoLoginInProgress,TResult? Function( String message)?  loginInternal,TResult? Function( String message)?  loginKeyringUnavailable,TResult? Function( String message)?  other,}) {final _that = this;
 switch (_that) {
 case ApiError_Whitenoise() when whitenoise != null:
 return whitenoise(_that.message);case ApiError_InvalidKey() when invalidKey != null:
@@ -228,7 +233,8 @@ return loginInvalidKeyFormat(_that.message);case ApiError_LoginNoRelayConnection
 return loginNoRelayConnections();case ApiError_LoginTimeout() when loginTimeout != null:
 return loginTimeout(_that.message);case ApiError_LoginNoLoginInProgress() when loginNoLoginInProgress != null:
 return loginNoLoginInProgress();case ApiError_LoginInternal() when loginInternal != null:
-return loginInternal(_that.message);case ApiError_Other() when other != null:
+return loginInternal(_that.message);case ApiError_LoginKeyringUnavailable() when loginKeyringUnavailable != null:
+return loginKeyringUnavailable(_that.message);case ApiError_Other() when other != null:
 return other(_that.message);case _:
   return null;
 
@@ -953,6 +959,72 @@ class _$ApiError_LoginInternalCopyWithImpl<$Res>
 /// with the given fields replaced by the non-null parameter values.
 @pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
   return _then(ApiError_LoginInternal(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class ApiError_LoginKeyringUnavailable extends ApiError {
+  const ApiError_LoginKeyringUnavailable({required this.message}): super._();
+  
+
+ final  String message;
+
+/// Create a copy of ApiError
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ApiError_LoginKeyringUnavailableCopyWith<ApiError_LoginKeyringUnavailable> get copyWith => _$ApiError_LoginKeyringUnavailableCopyWithImpl<ApiError_LoginKeyringUnavailable>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ApiError_LoginKeyringUnavailable&&(identical(other.message, message) || other.message == message));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message);
+
+@override
+String toString() {
+  return 'ApiError.loginKeyringUnavailable(message: $message)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ApiError_LoginKeyringUnavailableCopyWith<$Res> implements $ApiErrorCopyWith<$Res> {
+  factory $ApiError_LoginKeyringUnavailableCopyWith(ApiError_LoginKeyringUnavailable value, $Res Function(ApiError_LoginKeyringUnavailable) _then) = _$ApiError_LoginKeyringUnavailableCopyWithImpl;
+@useResult
+$Res call({
+ String message
+});
+
+
+
+
+}
+/// @nodoc
+class _$ApiError_LoginKeyringUnavailableCopyWithImpl<$Res>
+    implements $ApiError_LoginKeyringUnavailableCopyWith<$Res> {
+  _$ApiError_LoginKeyringUnavailableCopyWithImpl(this._self, this._then);
+
+  final ApiError_LoginKeyringUnavailable _self;
+  final $Res Function(ApiError_LoginKeyringUnavailable) _then;
+
+/// Create a copy of ApiError
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
+  return _then(ApiError_LoginKeyringUnavailable(
 message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
 as String,
   ));

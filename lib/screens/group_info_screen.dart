@@ -80,70 +80,67 @@ class GroupInfoScreen extends HookConsumerWidget {
         children: [
           const WnOverlay(variant: WnOverlayVariant.light),
           SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.h),
-              child: WnSlate(
-                showTopScrollEffect: true,
-                header: WnSlateNavigationHeader(
-                  title: context.l10n.groupInformation,
-                  onNavigate: () => Routes.goBack(context),
-                ),
-                systemNotice: noticeMessage != null
-                    ? WnSystemNotice(
-                        key: ValueKey(noticeMessage),
-                        title: noticeMessage,
-                        type: noticeType,
-                        onDismiss: dismissNotice,
-                      )
-                    : null,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Gap(8.h),
-                      WnGroupInfoCard(
-                        groupId: groupId,
-                        name: group?.name,
-                        description: group?.description,
-                        imagePath: imageSnapshot.data,
-                      ),
-                      Gap(16.h),
-                      if (isAdmin) ...[
-                        SizedBox(
-                          width: double.infinity,
-                          child: WnButton(
-                            key: const Key('edit_group_button'),
-                            text: context.l10n.editGroupAction,
-                            trailingIcon: WnIcons.editSettings,
-                            size: WnButtonSize.medium,
-                            onPressed: () => Routes.pushToEditGroup(context, groupId),
-                          ),
-                        ),
-                        Gap(16.h),
-                      ],
-                      Text(
-                        context.l10n.membersLabel,
-                        key: const Key('members_label'),
-                        style: typography.medium16.copyWith(
-                          color: colors.backgroundContentSecondary,
+            child: WnSlate(
+              showTopScrollEffect: true,
+              header: WnSlateNavigationHeader(
+                title: context.l10n.groupInformation,
+                onNavigate: () => Routes.goBack(context),
+              ),
+              systemNotice: noticeMessage != null
+                  ? WnSystemNotice(
+                      key: ValueKey(noticeMessage),
+                      title: noticeMessage,
+                      type: noticeType,
+                      onDismiss: dismissNotice,
+                    )
+                  : null,
+              child: Padding(
+                padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Gap(8.h),
+                    WnGroupInfoCard(
+                      groupId: groupId,
+                      name: group?.name,
+                      description: group?.description,
+                      imagePath: imageSnapshot.data,
+                    ),
+                    Gap(16.h),
+                    if (isAdmin) ...[
+                      SizedBox(
+                        width: double.infinity,
+                        child: WnButton(
+                          key: const Key('edit_group_button'),
+                          text: context.l10n.editGroupAction,
+                          trailingIcon: WnIcons.editSettings,
+                          size: WnButtonSize.medium,
+                          onPressed: () => Routes.pushToEditGroup(context, groupId),
                         ),
                       ),
                       Gap(16.h),
-                      ...membersState.members.map(
-                        (pubkey) => Padding(
-                          padding: EdgeInsets.only(bottom: 8.h),
-                          child: _GroupMemberItem(
-                            key: Key('member_$pubkey'),
-                            pubkey: pubkey,
-                            isAdmin: membersState.admins.contains(pubkey),
-                            groupId: groupId,
-                          ),
-                        ),
-                      ),
                     ],
-                  ),
+                    Text(
+                      context.l10n.membersLabel,
+                      key: const Key('members_label'),
+                      style: typography.medium16.copyWith(
+                        color: colors.backgroundContentSecondary,
+                      ),
+                    ),
+                    Gap(16.h),
+                    ...membersState.members.map(
+                      (pubkey) => Padding(
+                        padding: EdgeInsets.only(bottom: 8.h),
+                        child: _GroupMemberItem(
+                          key: Key('member_$pubkey'),
+                          pubkey: pubkey,
+                          isAdmin: membersState.admins.contains(pubkey),
+                          groupId: groupId,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),

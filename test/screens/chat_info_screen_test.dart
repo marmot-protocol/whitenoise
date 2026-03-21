@@ -103,13 +103,19 @@ void main() {
     WidgetTester tester, {
     required String userPubkey,
     bool settle = true,
+    bool showSearch = true,
   }) async {
     await mountTestApp(
       tester,
       overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
     );
     await tester.pumpAndSettle();
-    unawaited(Routes.pushToChatInfo(tester.element(find.byType(Scaffold)), userPubkey));
+    final context = tester.element(find.byType(Scaffold));
+    if (showSearch) {
+      unawaited(Routes.pushToChatInfo(context, userPubkey));
+    } else {
+      unawaited(Routes.pushToInviteInfo(context, userPubkey));
+    }
     if (settle) {
       await tester.pumpAndSettle();
     } else {
@@ -131,7 +137,7 @@ void main() {
       expect(chatInfoSlateFinder(), findsOneWidget);
       expect(find.byType(WnSlateNavigationHeader), findsOneWidget);
       expect(find.text('Chat Information'), findsOneWidget);
-      expect(find.byKey(const Key('slate_close_button')), findsOneWidget);
+      expect(find.byKey(const Key('slate_back_button')), findsOneWidget);
     });
 
     testWidgets('uses light overlay variant', (tester) async {
@@ -314,10 +320,10 @@ void main() {
       expect(find.text('Add to group'), findsWidgets);
     });
 
-    testWidgets('navigates back when close button is pressed', (tester) async {
+    testWidgets('navigates back when back button is pressed', (tester) async {
       await pumpChatInfoScreen(tester, userPubkey: _otherPubkey);
 
-      await tester.tap(find.byKey(const Key('slate_close_button')));
+      await tester.tap(find.byKey(const Key('slate_back_button')));
       await tester.pumpAndSettle();
 
       expect(find.text('Chat Information'), findsNothing);
@@ -328,6 +334,14 @@ void main() {
 
       expect(find.text('Archive'), findsNothing);
       expect(find.text('Delete chat'), findsNothing);
+    });
+
+    testWidgets('hides search button when opened from invite', (tester) async {
+      await pumpChatInfoScreen(tester, userPubkey: _otherPubkey, showSearch: false);
+
+      expect(find.byKey(const Key('search_button')), findsNothing);
+      expect(find.byKey(const Key('contact_button')), findsOneWidget);
+      expect(find.byKey(const Key('add_to_group_button')), findsOneWidget);
     });
   });
 }

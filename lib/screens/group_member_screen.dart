@@ -159,138 +159,134 @@ class GroupMemberScreen extends HookConsumerWidget {
         children: [
           const WnOverlay(variant: WnOverlayVariant.light),
           SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(vertical: 16.h),
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: WnSlate(
-                  shrinkWrapContent: true,
-                  header: WnSlateNavigationHeader(
-                    titleWidget: Text.rich(
-                      TextSpan(
-                        children: [
-                          TextSpan(
-                            text: displayName,
-                            style: context.typographyScaled.semiBold16.copyWith(
-                              color: context.colors.backgroundContentPrimary,
-                            ),
-                          ),
-                          TextSpan(
-                            text: ' - $roleLabel',
-                            style: context.typographyScaled.semiBold16.copyWith(
-                              color: context.colors.backgroundContentSecondary,
-                            ),
-                          ),
-                        ],
-                      ),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    type: WnSlateNavigationType.back,
-                    onNavigate: () => Routes.goBack(context),
-                  ),
-                  systemNotice: noticeMessage != null
-                      ? WnSystemNotice(
-                          key: ValueKey(noticeMessage),
-                          title: noticeMessage,
-                          type: noticeType,
-                          onDismiss: dismissNotice,
-                        )
-                      : null,
-                  child: Padding(
-                    padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: WnSlate(
+                shrinkWrapContent: true,
+                header: WnSlateNavigationHeader(
+                  titleWidget: Text.rich(
+                    TextSpan(
                       children: [
-                        Gap(8.h),
-                        WnChatInfoProfileCard(
-                          userPubkey: memberPubkey,
-                          metadata: metadata,
-                          onPublicKeyCopied: () => showSuccessNotice(context.l10n.publicKeyCopied),
-                          onPublicKeyCopyError: () =>
-                              showErrorNotice(context.l10n.publicKeyCopyError),
+                        TextSpan(
+                          text: displayName,
+                          style: context.typographyScaled.semiBold16.copyWith(
+                            color: context.colors.backgroundContentPrimary,
+                          ),
                         ),
-                        if (!isOwnProfile) ...[
-                          Gap(8.h),
-                          SizedBox(
-                            width: double.infinity,
-                            child: WnButton(
-                              key: const Key('send_message_button'),
-                              text: context.l10n.sendMessage,
-                              type: WnButtonType.outline,
-                              size: WnButtonSize.medium,
-                              trailingIcon: WnIcons.newChat,
-                              loading: dmState.isLoading,
-                              onPressed: handleSendMessage,
-                            ),
+                        TextSpan(
+                          text: ' - $roleLabel',
+                          style: context.typographyScaled.semiBold16.copyWith(
+                            color: context.colors.backgroundContentSecondary,
                           ),
-                          Gap(8.h),
-                          SizedBox(
-                            width: double.infinity,
-                            child: WnButton(
-                              key: const Key('follow_button'),
-                              text: followState.isFollowing
-                                  ? context.l10n.removeAsContact
-                                  : context.l10n.addAsContact,
-                              type: WnButtonType.outline,
-                              size: WnButtonSize.medium,
-                              trailingIcon: followState.isFollowing
-                                  ? WnIcons.userUnfollow
-                                  : WnIcons.userFollow,
-                              loading: followState.isActionLoading,
-                              onPressed: handleFollowAction,
-                            ),
-                          ),
-                          Gap(8.h),
-                          SizedBox(
-                            width: double.infinity,
-                            child: WnButton(
-                              key: const Key('add_to_another_group_button'),
-                              text: context.l10n.addToAnotherGroup,
-                              type: WnButtonType.outline,
-                              size: WnButtonSize.medium,
-                              trailingIcon: WnIcons.newGroupChat,
-                              onPressed: () => Routes.pushToAddToGroup(context, memberPubkey),
-                            ),
-                          ),
-                          if (isCurrentUserAdmin) ...[
-                            Gap(8.h),
-                            SizedBox(
-                              width: double.infinity,
-                              child: isMemberAdmin
-                                  ? WnButton(
-                                      key: const Key('remove_admin_button'),
-                                      text: context.l10n.removeAdminRole,
-                                      type: WnButtonType.outline,
-                                      size: WnButtonSize.medium,
-                                      trailingIcon: WnIcons.removeAdmin,
-                                      onPressed: handleRemoveAdmin,
-                                    )
-                                  : WnButton(
-                                      key: const Key('make_admin_button'),
-                                      text: context.l10n.makeAdmin,
-                                      type: WnButtonType.outline,
-                                      size: WnButtonSize.medium,
-                                      trailingIcon: WnIcons.makeAdmin,
-                                      onPressed: handleMakeAdmin,
-                                    ),
-                            ),
-                            Gap(8.h),
-                            SizedBox(
-                              width: double.infinity,
-                              child: WnButton(
-                                key: const Key('remove_from_group_button'),
-                                text: context.l10n.removeFromGroup,
-                                type: WnButtonType.destructive,
-                                size: WnButtonSize.medium,
-                                trailingIcon: WnIcons.removeCircle,
-                                onPressed: handleRemoveFromGroup,
-                              ),
-                            ),
-                          ],
-                        ],
+                        ),
                       ],
                     ),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  onNavigate: () => Routes.goBack(context),
+                ),
+                systemNotice: noticeMessage != null
+                    ? WnSystemNotice(
+                        key: ValueKey(noticeMessage),
+                        title: noticeMessage,
+                        type: noticeType,
+                        onDismiss: dismissNotice,
+                      )
+                    : null,
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Gap(8.h),
+                      WnChatInfoProfileCard(
+                        userPubkey: memberPubkey,
+                        metadata: metadata,
+                        onPublicKeyCopied: () => showSuccessNotice(context.l10n.publicKeyCopied),
+                        onPublicKeyCopyError: () =>
+                            showErrorNotice(context.l10n.publicKeyCopyError),
+                      ),
+                      if (!isOwnProfile) ...[
+                        Gap(8.h),
+                        SizedBox(
+                          width: double.infinity,
+                          child: WnButton(
+                            key: const Key('send_message_button'),
+                            text: context.l10n.sendMessage,
+                            type: WnButtonType.outline,
+                            size: WnButtonSize.medium,
+                            trailingIcon: WnIcons.newChat,
+                            loading: dmState.isLoading,
+                            onPressed: handleSendMessage,
+                          ),
+                        ),
+                        Gap(8.h),
+                        SizedBox(
+                          width: double.infinity,
+                          child: WnButton(
+                            key: const Key('follow_button'),
+                            text: followState.isFollowing
+                                ? context.l10n.removeAsContact
+                                : context.l10n.addAsContact,
+                            type: WnButtonType.outline,
+                            size: WnButtonSize.medium,
+                            trailingIcon: followState.isFollowing
+                                ? WnIcons.userUnfollow
+                                : WnIcons.userFollow,
+                            loading: followState.isActionLoading,
+                            onPressed: handleFollowAction,
+                          ),
+                        ),
+                        Gap(8.h),
+                        SizedBox(
+                          width: double.infinity,
+                          child: WnButton(
+                            key: const Key('add_to_another_group_button'),
+                            text: context.l10n.addToAnotherGroup,
+                            type: WnButtonType.outline,
+                            size: WnButtonSize.medium,
+                            trailingIcon: WnIcons.newGroupChat,
+                            onPressed: () => Routes.pushToAddToGroup(context, memberPubkey),
+                          ),
+                        ),
+                        if (isCurrentUserAdmin) ...[
+                          Gap(8.h),
+                          SizedBox(
+                            width: double.infinity,
+                            child: isMemberAdmin
+                                ? WnButton(
+                                    key: const Key('remove_admin_button'),
+                                    text: context.l10n.removeAdminRole,
+                                    type: WnButtonType.outline,
+                                    size: WnButtonSize.medium,
+                                    trailingIcon: WnIcons.removeAdmin,
+                                    onPressed: handleRemoveAdmin,
+                                  )
+                                : WnButton(
+                                    key: const Key('make_admin_button'),
+                                    text: context.l10n.makeAdmin,
+                                    type: WnButtonType.outline,
+                                    size: WnButtonSize.medium,
+                                    trailingIcon: WnIcons.makeAdmin,
+                                    onPressed: handleMakeAdmin,
+                                  ),
+                          ),
+                          Gap(8.h),
+                          SizedBox(
+                            width: double.infinity,
+                            child: WnButton(
+                              key: const Key('remove_from_group_button'),
+                              text: context.l10n.removeFromGroup,
+                              type: WnButtonType.destructive,
+                              size: WnButtonSize.medium,
+                              trailingIcon: WnIcons.removeCircle,
+                              onPressed: handleRemoveFromGroup,
+                            ),
+                          ),
+                        ],
+                      ],
+                    ],
                   ),
                 ),
               ),

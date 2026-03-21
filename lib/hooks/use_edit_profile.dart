@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/services/profile_service.dart';
+import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart' as accounts_api;
 import 'package:whitenoise/src/rust/api/metadata.dart';
-import 'package:whitenoise/src/rust/api/users.dart' as users_api;
 import 'package:whitenoise/utils/metadata.dart';
 
 final _logger = Logger('useEditProfile');
@@ -97,10 +97,7 @@ useEditProfile(String pubkey) {
       clearError: true,
     );
     try {
-      final metadata = await users_api.userMetadata(
-        pubkey: pubkey,
-        blockingDataSync: false,
-      );
+      final metadata = await UserService(pubkey).getInitialMetadata();
       final displayName = presentName(metadata) ?? '';
       final about = metadata.about ?? '';
       final nip05 = metadata.nip05 ?? '';

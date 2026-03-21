@@ -1,46 +1,52 @@
 import 'package:flutter/material.dart' show Key;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
+import 'package:whitenoise/widgets/wn_icon.dart';
 import '../test_helpers.dart' show mountWidget;
 
 void main() {
   group('WnChatStatus tests', () {
     group('Icon status types', () {
-      testWidgets('displays checkmark_dashed icon for sent status', (WidgetTester tester) async {
+      testWidgets('displays checkmark_dashed icon for sending status', (WidgetTester tester) async {
+        await mountWidget(const WnChatStatus(status: ChatStatusType.sending), tester);
+
+        expect(find.byKey(const Key('chat_status_icon')), findsOneWidget);
+        final icon = tester.widget<WnIcon>(find.byKey(const Key('chat_status_wn_icon')));
+        expect(icon.icon, WnIcons.checkmarkDashed);
+      });
+
+      testWidgets('displays checkmark_outline icon for sent status', (
+        WidgetTester tester,
+      ) async {
         await mountWidget(const WnChatStatus(status: ChatStatusType.sent), tester);
 
         expect(find.byKey(const Key('chat_status_icon')), findsOneWidget);
-        expect(find.byKey(const Key('chat_status_wn_icon')), findsOneWidget);
-      });
-
-      testWidgets('displays checkmark_outline icon for delivered status', (
-        WidgetTester tester,
-      ) async {
-        await mountWidget(const WnChatStatus(status: ChatStatusType.delivered), tester);
-
-        expect(find.byKey(const Key('chat_status_icon')), findsOneWidget);
-        expect(find.byKey(const Key('chat_status_wn_icon')), findsOneWidget);
+        final icon = tester.widget<WnIcon>(find.byKey(const Key('chat_status_wn_icon')));
+        expect(icon.icon, WnIcons.checkmarkOutline);
       });
 
       testWidgets('displays checkmark_filled icon for read status', (WidgetTester tester) async {
         await mountWidget(const WnChatStatus(status: ChatStatusType.read), tester);
 
         expect(find.byKey(const Key('chat_status_icon')), findsOneWidget);
-        expect(find.byKey(const Key('chat_status_wn_icon')), findsOneWidget);
+        final icon = tester.widget<WnIcon>(find.byKey(const Key('chat_status_wn_icon')));
+        expect(icon.icon, WnIcons.checkmarkFilled);
       });
 
       testWidgets('displays error icon for failed status', (WidgetTester tester) async {
         await mountWidget(const WnChatStatus(status: ChatStatusType.failed), tester);
 
         expect(find.byKey(const Key('chat_status_icon')), findsOneWidget);
-        expect(find.byKey(const Key('chat_status_wn_icon')), findsOneWidget);
+        final icon = tester.widget<WnIcon>(find.byKey(const Key('chat_status_wn_icon')));
+        expect(icon.icon, WnIcons.error);
       });
 
       testWidgets('displays add_filled icon for request status', (WidgetTester tester) async {
         await mountWidget(const WnChatStatus(status: ChatStatusType.request), tester);
 
         expect(find.byKey(const Key('chat_status_icon')), findsOneWidget);
-        expect(find.byKey(const Key('chat_status_wn_icon')), findsOneWidget);
+        final icon = tester.widget<WnIcon>(find.byKey(const Key('chat_status_wn_icon')));
+        expect(icon.icon, WnIcons.addFilled);
       });
     });
 
@@ -129,7 +135,7 @@ void main() {
 
     group('Widget structure', () {
       testWidgets('icon status has correct widget structure', (WidgetTester tester) async {
-        await mountWidget(const WnChatStatus(status: ChatStatusType.sent), tester);
+        await mountWidget(const WnChatStatus(status: ChatStatusType.sending), tester);
 
         expect(find.byType(WnChatStatus), findsOneWidget);
         expect(find.byKey(const Key('chat_status_wn_icon')), findsOneWidget);
@@ -148,9 +154,9 @@ void main() {
     });
 
     group('Key parameter', () {
-      testWidgets('respects custom key for sent status', (WidgetTester tester) async {
+      testWidgets('respects custom key for sending status', (WidgetTester tester) async {
         await mountWidget(
-          const WnChatStatus(key: Key('custom_chat_status'), status: ChatStatusType.sent),
+          const WnChatStatus(key: Key('custom_chat_status'), status: ChatStatusType.sending),
           tester,
         );
 

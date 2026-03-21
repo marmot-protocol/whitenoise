@@ -572,6 +572,40 @@ void main() {
       expect(find.byKey(const Key('dropdown_icon')), findsOneWidget);
       expect(selectedValue, isNull);
     });
+
+    testWidgets('unfocuses current field when opening dropdown', (tester) async {
+      final focusNode = FocusNode();
+
+      await mountWidget(
+        Column(
+          children: [
+            TextField(
+              key: const Key('focus_target'),
+              focusNode: focusNode,
+            ),
+            WnDropdownSelector<String>(
+              label: 'Test',
+              options: const [
+                WnDropdownOption(value: 'a', label: 'Option A'),
+                WnDropdownOption(value: 'b', label: 'Option B'),
+              ],
+              value: 'a',
+              onChanged: (_) {},
+            ),
+          ],
+        ),
+        tester,
+      );
+
+      await tester.tap(find.byKey(const Key('focus_target')));
+      await tester.pump();
+      expect(focusNode.hasFocus, isTrue);
+
+      await tester.tap(find.text('Option A'));
+      await tester.pumpAndSettle();
+
+      expect(focusNode.hasFocus, isFalse);
+    });
   });
 
   group('WnDropdownController', () {

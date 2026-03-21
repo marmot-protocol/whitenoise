@@ -49,6 +49,9 @@ sealed class ApiError with _$ApiError implements FrbException {
   const factory ApiError.loginInternal({
     required String message,
   }) = ApiError_LoginInternal;
+  const factory ApiError.loginKeyringUnavailable({
+    required String message,
+  }) = ApiError_LoginKeyringUnavailable;
   const factory ApiError.other({
     required String message,
   }) = ApiError_Other;

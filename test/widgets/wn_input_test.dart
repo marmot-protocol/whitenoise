@@ -1,6 +1,7 @@
 import 'dart:ui' show PointerDeviceKind;
 
-import 'package:flutter/material.dart' show BoxDecoration, Container, EditableText, Key, TextField;
+import 'package:flutter/material.dart'
+    show BoxDecoration, Container, EditableText, Key, TextField, TextInputAction;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/theme/semantic_colors.dart' show SemanticColors;
 import 'package:whitenoise/widgets/wn_icon.dart' show WnIcon, WnIcons;
@@ -364,6 +365,26 @@ void main() {
         expect(find.byKey(const Key('trailing_action')), findsOneWidget);
       });
     });
+
+    group('with onSubmitted', () {
+      testWidgets('calls callback with current text when submit action received', (
+        tester,
+      ) async {
+        String? submitted;
+        await mountWidget(
+          WnInput(
+            placeholder: 'hint',
+            textInputAction: TextInputAction.done,
+            onSubmitted: (v) => submitted = v,
+          ),
+          tester,
+        );
+        await tester.enterText(find.byKey(const Key('input_field')), 'done');
+        await tester.testTextInput.receiveAction(TextInputAction.done);
+        await tester.pump();
+        expect(submitted, equals('done'));
+      });
+    });
   });
 
   group('WnInputFieldButton', () {
@@ -465,6 +486,31 @@ void main() {
       await tester.tap(find.byType(WnInputTrailingButton));
       await tester.pump();
       expect(pressed, isTrue);
+    });
+
+    testWidgets('defaults to filled style', (tester) async {
+      await mountWidget(
+        WnInputTrailingButton(
+          icon: WnIcons.paste,
+          onPressed: () {},
+        ),
+        tester,
+      );
+      final button = tester.widget<WnInputTrailingButton>(find.byType(WnInputTrailingButton));
+      expect(button.filled, isTrue);
+    });
+
+    testWidgets('renders ghost when filled is false', (tester) async {
+      await mountWidget(
+        WnInputTrailingButton(
+          icon: WnIcons.closeSmall,
+          onPressed: () {},
+          filled: false,
+        ),
+        tester,
+      );
+      final button = tester.widget<WnInputTrailingButton>(find.byType(WnInputTrailingButton));
+      expect(button.filled, isFalse);
     });
   });
 }

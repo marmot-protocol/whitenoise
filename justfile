@@ -52,8 +52,8 @@ precommit-check:
 
 # Generate Rust bridge code
 generate:
-    @echo "🔄 Generating flutter_rust_bridge code..."
-    flutter_rust_bridge_codegen generate
+	@echo "🔄 Generating flutter_rust_bridge code..."
+	@flutter_rust_bridge_codegen generate > /dev/null 2>&1 || flutter_rust_bridge_codegen generate
 
 # Clean and regenerate Rust bridge code
 regenerate: clean-bridge generate
@@ -255,29 +255,15 @@ build-android:
 build-android-quiet:
     @./scripts/build_android.sh > /dev/null 2>&1 && echo "✅ Android build complete" || { echo "❌ Android build failed"; false; }
 
-build-android-apk flavor:
-    ./scripts/build_android.sh && flutter build apk --flavor {{flavor}} --dart-define=APP_FLAVOR={{flavor}}
-
-# Build a fat APK (all ABIs in one file)
-build-production-apk:
-    ./scripts/build_android.sh && flutter build apk --flavor production --dart-define=APP_FLAVOR=production
-
-build-staging-apk:
-    ./scripts/build_android.sh && flutter build apk --flavor staging --dart-define=APP_FLAVOR=staging
-
 # Build per-ABI split APKs (separate .apk per architecture)
 build-split-apk flavor="production":
-    ./scripts/build_android.sh && flutter build apk --flavor {{flavor}} --split-per-abi --dart-define=APP_FLAVOR={{flavor}}
+    ./scripts/build_android.sh && flutter build apk --flavor {{flavor}} --split-per-abi
 
 # Build an Android App Bundle (per-ABI splitting handled by Play Store)
 build-aab flavor="production":
-    ./scripts/build_android.sh && flutter build appbundle --flavor {{flavor}} --dart-define=APP_FLAVOR={{flavor}}
+    ./scripts/build_android.sh && flutter build appbundle --flavor {{flavor}}
 
-# Release builds
-build-release-apk: (build-split-apk "production")
-build-release-aab: (build-aab "production")
-
-when-apk: build-staging-apk
+when-apk: (build-split-apk "staging")
 
 # Build versioned release artifacts for all platforms (APKs + IPA) into build/releases/
 # Produces split APKs with .sha256 sidecar files, an IPA (macOS only), and build_info.txt
@@ -306,15 +292,15 @@ build-ios-quiet:
 
 # Build a production IPA for App Store Connect submission
 build-production-ipa:
-    ./scripts/build_ios.sh && flutter build ipa --flavor production --export-method app-store --dart-define=APP_FLAVOR=production
+    ./scripts/build_ios.sh && flutter build ipa --flavor production --export-method app-store
 
 # Build a staging IPA for App Store Connect submission
 build-staging-ipa:
-    ./scripts/build_ios.sh && flutter build ipa --flavor staging --export-method app-store --dart-define=APP_FLAVOR=staging
+    ./scripts/build_ios.sh && flutter build ipa --flavor staging --export-method app-store
 
 # Build a staging IPA for local device installation (development signing)
 build-staging-ipa-dev:
-    ./scripts/build_ios.sh && flutter build ipa --flavor staging --export-method development --dart-define=APP_FLAVOR=staging
+    ./scripts/build_ios.sh && flutter build ipa --flavor staging --export-method development
 
 # ==============================================================================
 # RUN
@@ -322,18 +308,18 @@ build-staging-ipa-dev:
 
 # Run the app on a connected device (staging flavor by default)
 run flavor="staging":
-    flutter run --flavor {{flavor}} --dart-define=APP_FLAVOR={{flavor}}
+    flutter run --flavor {{flavor}}
 
 # Run the app on a connected device (production flavor)
 run-production:
-    flutter run --flavor production --dart-define=APP_FLAVOR=production
+    flutter run --flavor production
 
 # Build Rust libs and install on connected iOS device
 # Usage: just install-ios <device> [flavor] [extra flags]
 # Example: just install-ios "JG 16e Test"
 # Example: just install-ios "JG 16e Test" production --release
 install-ios device flavor="staging" *FLAGS="":
-    ./scripts/build_ios.sh && flutter run --flavor {{flavor}} --dart-define=APP_FLAVOR={{flavor}} -d "{{device}}" {{FLAGS}}
+    ./scripts/build_ios.sh && flutter run --flavor {{flavor}} -d "{{device}}" {{FLAGS}}
 # ==============================================================================
 # HELPER RECIPES
 # ==============================================================================

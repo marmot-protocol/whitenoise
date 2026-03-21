@@ -42,7 +42,6 @@ UserSearchResult _searchResultFactory(
 class _MockApi extends MockWnApi {
   Completer<List<User>>? followsCompleter;
   final Map<String, User> userByPubkey = {};
-  final Map<String, User> blockingUserByPubkey = {};
   final Map<String, String> npubToPubkey = {};
   final Set<String> errorPubkeys = {};
   Completer<User>? userCompleter;
@@ -66,9 +65,7 @@ class _MockApi extends MockWnApi {
     userCalls.add((pubkey: pubkey, blocking: blockingDataSync));
     if (userCompleter != null) return userCompleter!.future;
     if (errorPubkeys.contains(pubkey)) throw Exception('User not found');
-    final user = blockingDataSync
-        ? (blockingUserByPubkey[pubkey] ?? userByPubkey[pubkey])
-        : userByPubkey[pubkey];
+    final user = userByPubkey[pubkey];
     if (user == null) throw Exception('User not found');
     return Future.value(user);
   }
@@ -106,7 +103,6 @@ class _MockApi extends MockWnApi {
     super.reset();
     followsCompleter = null;
     userByPubkey.clear();
-    blockingUserByPubkey.clear();
     npubToPubkey.clear();
     errorPubkeys.clear();
     userCompleter = null;
@@ -186,6 +182,14 @@ void main() {
         expect(api.followsCalls.length, 1);
         expect(api.followsCalls[0], 'my_account');
       });
+
+      testWidgets('excludes account pubkey from follows list', (tester) async {
+        await pump(tester, accountPubkey: testPubkeyA);
+        await tester.pump();
+
+        expect(getState().users.length, 1);
+        expect(getState().users[0].pubkey, testPubkeyB);
+      });
     });
 
     group('npub search', () {
@@ -220,7 +224,7 @@ void main() {
           expect(getState().isLoading, isTrue);
         });
 
-        testWidgets('does not retry with blocking when metadata is complete', (tester) async {
+        testWidgets('subscribes once for explicit pubkey search', (tester) async {
           await pump(tester, searchQuery: testNpubC);
           await tester.pump();
 
@@ -228,19 +232,25 @@ void main() {
           expect(api.userCalls[0].blocking, isFalse);
         });
 
-        testWidgets('retries with blocking when metadata is incomplete', (tester) async {
+        testWidgets('updates the result when the user stream improves later', (tester) async {
           api.userByPubkey[testPubkeyC] = _userFactory(testPubkeyC);
-          api.blockingUserByPubkey[testPubkeyC] = _userFactory(
-            testPubkeyC,
-            displayName: 'Synced User',
-          );
 
           await pump(tester, searchQuery: testNpubC);
           await tester.pump();
 
-          expect(api.userCalls.length, 2);
-          expect(api.userCalls[0].blocking, isFalse);
-          expect(api.userCalls[1].blocking, isTrue);
+          expect(getState().users[0].metadata.displayName, isNull);
+
+          api.emitUserUpdate(
+            testPubkeyC,
+            trigger: UserUpdateTrigger.metadataChanged,
+            user: _userFactory(
+              testPubkeyC,
+              displayName: 'Synced User',
+            ),
+          );
+          await tester.pump();
+
+          expect(api.userCalls.length, 1);
           expect(getState().users[0].metadata.displayName, 'Synced User');
         });
 
@@ -248,6 +258,17 @@ void main() {
           api.errorPubkeys.add(testPubkeyC);
 
           await pump(tester, searchQuery: testNpubC);
+          await tester.pump();
+
+          expect(getState().users, isEmpty);
+          expect(getState().isLoading, isFalse);
+        });
+
+        testWidgets('returns empty list when searching own npub', (tester) async {
+          api.npubToPubkey[testNpubA] = testPubkeyA;
+          api.userByPubkey[testPubkeyA] = _userFactory(testPubkeyA, displayName: 'Me');
+
+          await pump(tester, accountPubkey: testPubkeyA, searchQuery: testNpubA);
           await tester.pump();
 
           expect(getState().users, isEmpty);
@@ -366,6 +387,30 @@ void main() {
 
         expect(getState().users[0].metadata.displayName, 'Alice');
         expect(getState().users[1].metadata.displayName, 'bob');
+      });
+
+      testWidgets('named user sorts before unnamed when named is first in input', (tester) async {
+        api.follows = [
+          _userFactory(testPubkeyA, displayName: 'Alice'),
+          _userFactory(testPubkeyB),
+        ];
+        await pump(tester);
+        await tester.pump();
+
+        expect(getState().users[0].pubkey, testPubkeyA);
+        expect(getState().users[1].pubkey, testPubkeyB);
+      });
+
+      testWidgets('named user sorts before unnamed when named is last in input', (tester) async {
+        api.follows = [
+          _userFactory(testPubkeyB),
+          _userFactory(testPubkeyA, displayName: 'Alice'),
+        ];
+        await pump(tester);
+        await tester.pump();
+
+        expect(getState().users[0].pubkey, testPubkeyA);
+        expect(getState().users[1].pubkey, testPubkeyB);
       });
 
       testWidgets('preserves sort after periodic refresh', (tester) async {
@@ -880,6 +925,24 @@ void main() {
         expect(getState().users, isEmpty);
         expect(getState().isLoading, isFalse);
         expect(getState().hasSearchQuery, isFalse);
+      });
+
+      testWidgets('recovers gracefully when name search stream emits error', (tester) async {
+        await pump(tester, searchQuery: 'alice');
+        await tester.pump(const Duration(milliseconds: 400));
+        await tester.pump();
+
+        api.searchUsersController!.add(
+          UserSearchUpdate(
+            trigger: const SearchUpdateTrigger.resultsFound(),
+            newResults: [_searchResultFactory(testPubkeyA, displayName: 'Alice')],
+            totalResultCount: BigInt.one,
+          ),
+        );
+        api.searchUsersController!.addError(Exception('network failure'));
+        await tester.pump(const Duration(milliseconds: 50));
+
+        expect(getState().isLoading, isFalse);
       });
     });
   });

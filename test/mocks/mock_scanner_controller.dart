@@ -62,7 +62,10 @@ class MockScannerController implements MobileScannerController {
   bool get autoStart => false;
 
   @override
-  Future<void> start({CameraFacing? cameraDirection}) async {
+  Future<void> start({
+    CameraFacing? cameraDirection,
+    CameraLensType? cameraLensType,
+  }) async {
     startCalled = true;
     startCallCount++;
     if (startException != null) throw startException!;

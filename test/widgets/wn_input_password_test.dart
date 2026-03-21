@@ -115,11 +115,21 @@ void main() {
     });
 
     group('visibility toggle', () {
-      testWidgets('shows visibility toggle by default', (tester) async {
+      testWidgets('hidden when field is empty', (tester) async {
         await mountWidget(
           const WnInputPassword(label: 'Password', placeholder: 'hint'),
           tester,
         );
+        expect(find.byKey(const Key('visibility_toggle')), findsNothing);
+      });
+
+      testWidgets('shows visibility toggle when field has text', (tester) async {
+        await mountWidget(
+          const WnInputPassword(label: 'Password', placeholder: 'hint'),
+          tester,
+        );
+        await tester.enterText(find.byKey(const Key('password_field')), 'secret');
+        await tester.pump();
         expect(find.byKey(const Key('visibility_toggle')), findsOneWidget);
       });
 
@@ -189,20 +199,25 @@ void main() {
         expect(find.byKey(const Key('scan_button')), findsOneWidget);
       });
 
-      testWidgets('shows scan button alongside visibility toggle when onScan provided', (
-        tester,
-      ) async {
-        await mountWidget(
-          WnInputPassword(
-            label: 'Password',
-            placeholder: 'hint',
-            onScan: () {},
-          ),
+      testWidgets(
+        'shows scan button alongside visibility toggle when onScan provided and field has text',
+        (
           tester,
-        );
-        expect(find.byKey(const Key('scan_button')), findsOneWidget);
-        expect(find.byKey(const Key('visibility_toggle')), findsOneWidget);
-      });
+        ) async {
+          await mountWidget(
+            WnInputPassword(
+              label: 'Password',
+              placeholder: 'hint',
+              onScan: () {},
+            ),
+            tester,
+          );
+          await tester.enterText(find.byKey(const Key('password_field')), 'secret');
+          await tester.pump();
+          expect(find.byKey(const Key('scan_button')), findsOneWidget);
+          expect(find.byKey(const Key('visibility_toggle')), findsOneWidget);
+        },
+      );
 
       testWidgets('scan button remains visible when filled', (tester) async {
         await mountWidget(

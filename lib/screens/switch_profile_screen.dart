@@ -28,27 +28,24 @@ class SwitchProfileScreen extends HookConsumerWidget {
       return Scaffold(
         backgroundColor: colors.backgroundPrimary,
         body: SafeArea(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 16.h),
-            child: WnSlate(
-              header: WnSlateNavigationHeader(
-                title: context.l10n.profilesTitle,
-                onNavigate: () => Routes.goBack(context),
-              ),
-              child: Padding(
-                padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Center(
-                        child: CircularProgressIndicator(
-                          color: colors.backgroundContentPrimary,
-                        ),
+          child: WnSlate(
+            header: WnSlateNavigationHeader(
+              title: context.l10n.profilesTitle,
+              onNavigate: () => Routes.goBack(context),
+            ),
+            child: Padding(
+              padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Center(
+                      child: CircularProgressIndicator(
+                        color: colors.backgroundContentPrimary,
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
             ),
           ),
@@ -61,67 +58,64 @@ class SwitchProfileScreen extends HookConsumerWidget {
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: WnSlate(
-            header: WnSlateNavigationHeader(
-              title: context.l10n.profilesTitle,
-              onNavigate: () => Routes.goBack(context),
-            ),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  if (state.error != null) ...[
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w),
-                      child: Text(
-                        state.error!,
-                        style: typography.medium14.copyWith(
-                          color: colors.fillDestructive,
-                        ),
+        child: WnSlate(
+          header: WnSlateNavigationHeader(
+            title: context.l10n.profilesTitle,
+            onNavigate: () => Routes.goBack(context),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                if (state.error != null) ...[
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 16.w),
+                    child: Text(
+                      state.error!,
+                      style: typography.medium14.copyWith(
+                        color: colors.fillDestructive,
                       ),
                     ),
-                    Gap(12.h),
-                  ],
-                  Expanded(
-                    child: accountsList.isEmpty
-                        ? Center(
-                            child: Text(
-                              context.l10n.noAccountsAvailable,
-                              style: typography.medium16.copyWith(
-                                color: colors.backgroundContentSecondary,
-                              ),
-                            ),
-                          )
-                        : ListView.separated(
-                            padding: EdgeInsets.zero,
-                            itemCount: accountsList.length,
-                            separatorBuilder: (context, index) => Gap(8.h),
-                            itemBuilder: (context, index) {
-                              final account = accountsList[index];
-                              final isCurrentAccount = account.pubkey == currentPubkey;
-
-                              return _AccountTile(
-                                pubkey: account.pubkey,
-                                isCurrent: isCurrentAccount,
-                                isSwitching: state.isSwitching,
-                                onTap: () => switchTo(account.pubkey),
-                              );
-                            },
-                          ),
                   ),
-                  Gap(16.h),
-                  SizedBox(
-                    width: double.infinity,
-                    child: WnButton(
-                      text: context.l10n.connectAnotherProfile,
-                      onPressed: () => Routes.pushToAddProfile(context),
-                    ),
-                  ),
+                  Gap(12.h),
                 ],
-              ),
+                Expanded(
+                  child: accountsList.isEmpty
+                      ? Center(
+                          child: Text(
+                            context.l10n.noAccountsAvailable,
+                            style: typography.medium16.copyWith(
+                              color: colors.backgroundContentSecondary,
+                            ),
+                          ),
+                        )
+                      : ListView.separated(
+                          padding: EdgeInsets.zero,
+                          itemCount: accountsList.length,
+                          separatorBuilder: (context, index) => Gap(8.h),
+                          itemBuilder: (context, index) {
+                            final account = accountsList[index];
+                            final isCurrentAccount = account.pubkey == currentPubkey;
+
+                            return _AccountTile(
+                              pubkey: account.pubkey,
+                              isCurrent: isCurrentAccount,
+                              isSwitching: state.isSwitching,
+                              onTap: () => switchTo(account.pubkey),
+                            );
+                          },
+                        ),
+                ),
+                Gap(16.h),
+                SizedBox(
+                  width: double.infinity,
+                  child: WnButton(
+                    text: context.l10n.connectAnotherProfile,
+                    onPressed: () => Routes.pushToAddProfile(context),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
@@ -147,7 +141,7 @@ class _AccountTile extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final metadataSnapshot = useUserMetadata(context, pubkey);
     final metadata = metadataSnapshot.data;
-    final displayName = presentName(metadata);
+    final displayName = presentName(metadata) ?? context.l10n.noName;
 
     return WnProfileSwitcherItem(
       pubkey: pubkey,

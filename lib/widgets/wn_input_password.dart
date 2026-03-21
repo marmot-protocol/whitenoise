@@ -148,9 +148,7 @@ class WnInputPassword extends HookWidget {
                 textInputAction: textInputAction,
                 style: typography.medium14.copyWith(
                   color: enabled
-                      ? (_hasError
-                            ? colors.backgroundContentDestructive
-                            : colors.backgroundContentPrimary)
+                      ? colors.backgroundContentPrimary
                       : colors.backgroundContentTertiary,
                 ),
                 decoration: InputDecoration(
@@ -193,16 +191,17 @@ class WnInputPassword extends HookWidget {
               filled: false,
             ),
           ),
-        IgnorePointer(
-          ignoring: !enabled,
-          child: WnInputFieldButton(
-            key: const Key('visibility_toggle'),
-            icon: isVisible.value ? WnIcons.viewOff : WnIcons.view,
-            onPressed: () => isVisible.value = !isVisible.value,
-            buttonSize: btnSize,
-            filled: false,
+        if (!isEmpty)
+          IgnorePointer(
+            ignoring: !enabled,
+            child: WnInputFieldButton(
+              key: const Key('visibility_toggle'),
+              icon: isVisible.value ? WnIcons.viewOff : WnIcons.view,
+              onPressed: () => isVisible.value = !isVisible.value,
+              buttonSize: btnSize,
+              filled: false,
+            ),
           ),
-        ),
       ],
     );
   }
@@ -212,55 +211,23 @@ class WnInputPassword extends HookWidget {
     bool isEmpty,
     TextEditingController effectiveController,
   ) {
-    final buttonWidth = size.height.w;
-    final buttonHeight = size.height.h;
-    final iconSize = 18.w;
-
     if (isEmpty && onPaste != null) {
-      return GestureDetector(
+      return WnInputTrailingButton(
         key: const Key('paste_button'),
-        onTap: onPaste,
-        child: Container(
-          width: buttonWidth,
-          height: buttonHeight,
-          decoration: BoxDecoration(
-            color: colors.fillSecondary,
-            borderRadius: BorderRadius.circular(8.r),
-            border: Border.all(color: colors.borderTertiary),
-          ),
-          child: Center(
-            child: WnIcon(
-              WnIcons.paste,
-              size: iconSize,
-              color: colors.backgroundContentPrimary,
-            ),
-          ),
-        ),
+        icon: WnIcons.paste,
+        onPressed: onPaste!,
+        size: size,
       );
     }
 
-    return GestureDetector(
+    return WnInputTrailingButton(
       key: const Key('clear_button'),
-      onTap: () {
+      icon: WnIcons.closeSmall,
+      onPressed: () {
         effectiveController.clear();
         onChanged?.call('');
       },
-      child: Container(
-        width: buttonWidth,
-        height: buttonHeight,
-        decoration: BoxDecoration(
-          color: colors.fillSecondary,
-          borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(color: colors.borderTertiary),
-        ),
-        child: Center(
-          child: WnIcon(
-            WnIcons.closeSmall,
-            size: iconSize,
-            color: colors.backgroundContentPrimary,
-          ),
-        ),
-      ),
+      size: size,
     );
   }
 

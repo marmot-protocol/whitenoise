@@ -1,19 +1,25 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:whitenoise/providers/app_version_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/appearance_screen.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
+import 'package:whitenoise/screens/chat_screen.dart';
 import 'package:whitenoise/screens/developer_settings_screen.dart';
 import 'package:whitenoise/screens/donate_screen.dart';
 import 'package:whitenoise/screens/edit_profile_screen.dart';
 import 'package:whitenoise/screens/network_screen.dart';
 import 'package:whitenoise/screens/privacy_security_screen.dart';
 import 'package:whitenoise/screens/profile_keys_screen.dart';
+import 'package:whitenoise/screens/report_bug_screen.dart';
 import 'package:whitenoise/screens/share_profile_screen.dart';
 import 'package:whitenoise/screens/sign_out_screen.dart';
+import 'package:whitenoise/screens/start_support_chat_screen.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
@@ -23,19 +29,37 @@ import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
 class _MockApi extends MockWnApi {
+  bool returnNoName = false;
+  String? dmGroupResult;
+  Completer<String?>? dmGroupCompleter;
+
   @override
   Future<FlutterMetadata> crateApiUsersUserMetadata({
     required bool blockingDataSync,
     required String pubkey,
-  }) async => const FlutterMetadata(
-    name: 'Test User',
-    displayName: 'Test Display Name',
-    custom: {},
-  );
+  }) async {
+    if (returnNoName) {
+      return const FlutterMetadata(custom: {});
+    }
+    return const FlutterMetadata(
+      name: 'Test User',
+      displayName: 'Test Display Name',
+      custom: {},
+    );
+  }
 
   @override
   Future<String> crateApiAccountsExportAccountNsec({required String pubkey}) async {
     return 'nsec1test${pubkey.substring(0, 10)}';
+  }
+
+  @override
+  Future<String?> crateApiAccountGroupsGetDmGroupWithPeer({
+    required String accountPubkey,
+    required String peerPubkey,
+  }) async {
+    if (dmGroupCompleter != null) return dmGroupCompleter!.future;
+    return dmGroupResult;
   }
 }
 
@@ -54,6 +78,7 @@ class _MockAuthNotifier extends AuthNotifier {
 
 void main() {
   late _MockApi mockApi;
+  const appVersion = '1.2.3+45';
 
   setUpAll(() {
     mockApi = _MockApi();
@@ -62,13 +87,15 @@ void main() {
       appName: 'Whitenoise',
       packageName: 'com.example.whitenoise',
       version: '1.2.3',
-      buildNumber: '42',
+      buildNumber: '45',
       buildSignature: '',
     );
   });
 
   setUp(() {
     mockApi.reset();
+    mockApi.dmGroupResult = null;
+    mockApi.dmGroupCompleter = null;
   });
 
   late _MockAuthNotifier mockAuth;
@@ -81,6 +108,7 @@ void main() {
       overrides: [
         authProvider.overrideWith(() => mockAuth),
         secureStorageProvider.overrideWithValue(MockSecureStorage()),
+        appVersionProvider.overrideWith((ref) async => appVersion),
       ],
     );
     Routes.pushToSettings(tester.element(find.byType(Scaffold)));
@@ -103,9 +131,9 @@ void main() {
       expect(find.text(testNpubAFormatted), findsOneWidget);
     });
 
-    testWidgets('tapping close icon returns to previous screen', (tester) async {
+    testWidgets('tapping back button returns to previous screen', (tester) async {
       await pumpSettingsScreen(tester);
-      await tester.tap(find.byKey(const Key('slate_close_button')));
+      await tester.tap(find.byKey(const Key('slate_back_button')));
       await tester.pumpAndSettle();
       expect(find.byType(ChatListScreen), findsOneWidget);
     });
@@ -152,6 +180,13 @@ void main() {
       expect(find.byType(AppearanceScreen), findsOneWidget);
     });
 
+    testWidgets('tapping Report bug navigates to ReportBugScreen', (tester) async {
+      await pumpSettingsScreen(tester);
+      await tester.tap(find.text('Report bug'));
+      await tester.pumpAndSettle();
+      expect(find.byType(ReportBugScreen), findsOneWidget);
+    });
+
     testWidgets('tapping Donate navigates to Donate screen', (tester) async {
       await pumpSettingsScreen(tester);
       await tester.tap(find.text('Donate'));
@@ -170,6 +205,10 @@ void main() {
       tester,
     ) async {
       await pumpSettingsScreen(tester);
+      await tester.scrollUntilVisible(
+        find.text('Developer settings'),
+        500,
+      );
       await tester.tap(find.text('Developer settings'));
       await tester.pumpAndSettle();
       expect(find.byType(DeveloperSettingsScreen), findsOneWidget);
@@ -180,6 +219,43 @@ void main() {
       await tester.tap(find.text('Switch profile'));
       await tester.pumpAndSettle();
       expect(find.text('Profiles'), findsOneWidget);
+    });
+
+    testWidgets('displays chat with support menu item', (tester) async {
+      await pumpSettingsScreen(tester);
+      expect(find.byKey(const Key('help_and_support_menu_item')), findsOneWidget);
+      expect(find.text('Chat with support'), findsOneWidget);
+    });
+
+    testWidgets('tapping chat with support starts support chat when no DM exists', (tester) async {
+      mockApi.dmGroupResult = null;
+      await pumpSettingsScreen(tester);
+
+      await tester.tap(find.byKey(const Key('help_and_support_menu_item')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(StartSupportChatScreen), findsOneWidget);
+    });
+
+    testWidgets('tapping chat with support opens existing chat when DM exists', (tester) async {
+      mockApi.dmGroupResult = testGroupId;
+      await pumpSettingsScreen(tester);
+
+      await tester.tap(find.byKey(const Key('help_and_support_menu_item')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ChatScreen), findsOneWidget);
+    });
+
+    testWidgets('tapping chat with support does nothing while loading', (tester) async {
+      mockApi.dmGroupCompleter = Completer<String?>();
+      await pumpSettingsScreen(tester);
+
+      await tester.tap(find.byKey(const Key('help_and_support_menu_item')));
+      await tester.pump();
+
+      expect(find.byType(StartSupportChatScreen), findsNothing);
+      expect(find.byType(ChatScreen), findsNothing);
     });
 
     testWidgets('renders empty widget when pubkey becomes null', (tester) async {
@@ -215,12 +291,20 @@ void main() {
       expect(avatar.color, AvatarColor.cyan);
     });
 
+    testWidgets('displays "No name" when user has no display name', (tester) async {
+      mockApi.returnNoName = true;
+
+      await pumpSettingsScreen(tester);
+
+      expect(find.text('No name'), findsOneWidget);
+
+      mockApi.returnNoName = false;
+    });
+
     testWidgets('displays app version at the bottom', (tester) async {
       await pumpSettingsScreen(tester);
-      await tester.pump();
 
-      expect(find.byKey(const Key('app_version_text')), findsOneWidget);
-      expect(find.text('v1.2.3'), findsOneWidget);
+      expect(find.text('v1.2.3+45'), findsOneWidget);
     });
   });
 }

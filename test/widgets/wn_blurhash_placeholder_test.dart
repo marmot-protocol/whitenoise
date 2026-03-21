@@ -38,16 +38,52 @@ void main() {
         tester,
       );
 
-      final container = tester.widget<Container>(find.byKey(const Key('neutral_placeholder')));
-      expect(container.constraints?.maxWidth, 100);
-      expect(container.constraints?.maxHeight, 150);
+      final sizedBox = tester.widget<SizedBox>(find.byKey(const Key('neutral_placeholder')));
+      expect(sizedBox.width, 100);
+      expect(sizedBox.height, 150);
     });
 
-    testWidgets('uses default height when not provided', (tester) async {
-      await mountWidget(const WnBlurhashPlaceholder(), tester);
+    testWidgets('expands to fill available space when no dimensions provided', (tester) async {
+      await mountWidget(
+        const SizedBox(
+          width: 200,
+          height: 200,
+          child: WnBlurhashPlaceholder(),
+        ),
+        tester,
+      );
 
-      final container = tester.widget<Container>(find.byKey(const Key('neutral_placeholder')));
-      expect(container.constraints?.maxHeight, 200);
+      expect(find.byKey(const Key('neutral_placeholder')), findsOneWidget);
+      final sizedBox = tester.widget<SizedBox>(find.byKey(const Key('neutral_placeholder')));
+      expect(sizedBox.width, double.infinity);
+      expect(sizedBox.height, double.infinity);
+      final renderBox = tester.renderObject<RenderBox>(
+        find.byKey(const Key('neutral_placeholder')),
+      );
+      expect(renderBox.size, const Size(200, 200));
+    });
+
+    testWidgets('uses default height when only width is provided', (tester) async {
+      await mountWidget(const WnBlurhashPlaceholder(width: 100), tester);
+
+      final sizedBox = tester.widget<SizedBox>(find.byKey(const Key('neutral_placeholder')));
+      expect(sizedBox.width, 100);
+      expect(sizedBox.height, greaterThan(0));
+    });
+
+    testWidgets('blurhash expands when no dimensions provided', (tester) async {
+      await mountWidget(
+        const SizedBox(
+          width: 150,
+          height: 150,
+          child: WnBlurhashPlaceholder(blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'),
+        ),
+        tester,
+      );
+
+      expect(find.byType(BlurHash), findsOneWidget);
+      final renderBox = tester.renderObject<RenderBox>(find.byType(BlurHash));
+      expect(renderBox.size, const Size(150, 150));
     });
   });
 }

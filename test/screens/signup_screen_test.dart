@@ -11,6 +11,7 @@ import 'package:whitenoise/screens/home_screen.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/wn_carousel_indicator.dart' show WnCarouselIndicator;
 import 'package:whitenoise/widgets/wn_onboarding_carousel.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 
@@ -176,7 +177,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Back to sign up'), findsOneWidget);
-        expect(find.byKey(const Key('back_to_signup_arrow')), findsOneWidget);
+        expect(find.byKey(const Key('back_to_signup_button')), findsOneWidget);
       });
 
       testWidgets('tapping Back to sign up hides carousel', (tester) async {
@@ -205,6 +206,27 @@ void main() {
 
         expect(find.byType(WnOnboardingCarousel), findsOneWidget);
         expect(find.byType(HomeScreen), findsNothing);
+      });
+
+      testWidgets('swiping carousel updates indicator active index', (
+        tester,
+      ) async {
+        await pumpSignupScreen(tester);
+        await tester.tap(find.byKey(const Key('learn_more_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(WnOnboardingCarousel), findsOneWidget);
+
+        await tester.drag(
+          find.byKey(const Key('login_carousel_page_view')),
+          const Offset(-400, 0),
+        );
+        await tester.pumpAndSettle();
+
+        final indicator = tester.widget<WnCarouselIndicator>(
+          find.byKey(const Key('signup_carousel_indicator')),
+        );
+        expect(indicator.activeIndex, 1);
       });
     });
 

@@ -13,22 +13,22 @@ class WnBlurhashPlaceholder extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final size = Size(width ?? double.infinity, height ?? 200.h);
+    final useExpand = width == null && height == null;
 
-    if (blurhash == null || blurhash!.isEmpty) {
-      return Container(
-        key: const Key('neutral_placeholder'),
-        width: size.width,
-        height: size.height,
-        color: colors.fillSecondary,
-      );
+    final hasValidBlurhash = blurhash != null && blurhash!.isNotEmpty;
+    final key = Key(hasValidBlurhash ? 'blurhash_placeholder' : 'neutral_placeholder');
+    final child = hasValidBlurhash
+        ? BlurHash(hash: blurhash!)
+        : ColoredBox(color: colors.fillSecondary);
+
+    if (useExpand) {
+      return SizedBox.expand(key: key, child: child);
     }
-
     return SizedBox(
-      key: const Key('blurhash_placeholder'),
-      width: size.width,
-      height: size.height,
-      child: BlurHash(hash: blurhash!),
+      key: key,
+      width: width ?? double.infinity,
+      height: height ?? 200.h,
+      child: child,
     );
   }
 }

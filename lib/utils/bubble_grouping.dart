@@ -19,6 +19,7 @@ bool shouldShowAvatar({
   if (isOwnMessage) return false;
   if (!isGroupChat) return false;
   if (next == null) return true;
+  if (current.isDeleted != next.isDeleted) return true;
   if (next.pubkey != current.pubkey) return true;
   return next.createdAt.difference(current.createdAt).abs().inMinutes >= 5;
 }
@@ -28,6 +29,7 @@ bool shouldShowTail({
   required ChatMessage? next,
 }) {
   if (next == null) return true;
+  if (current.isDeleted != next.isDeleted) return true;
   if (next.pubkey != current.pubkey) return true;
   return next.createdAt.difference(current.createdAt).abs().inMinutes >= 5;
 }

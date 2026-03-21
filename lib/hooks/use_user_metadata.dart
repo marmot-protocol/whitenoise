@@ -12,9 +12,9 @@ AsyncSnapshot<FlutterMetadata> useUserMetadata(
 
   useRouteRefresh(context, () => refreshKey.value++);
 
-  final future = useMemoized(
-    () => pubkey != null ? UserService(pubkey).fetchMetadata() : null,
+  final stream = useMemoized(
+    () => pubkey != null ? UserService(pubkey).watchMetadata() : null,
     [pubkey, refreshKey.value],
   );
-  return useFuture(future);
+  return useStream(stream);
 }

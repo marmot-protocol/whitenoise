@@ -26,18 +26,18 @@ GroupsState useGroups({
     isLoading.value = true;
     error.value = null;
     try {
-      final activeGroups = await groups_api.activeGroups(pubkey: accountPubkey);
-      final nonDirectMessageGroups = <groups_api.Group>[];
-
-      for (final group in activeGroups) {
-        final isDirectMessage = await group.isDirectMessageType(accountPubkey: accountPubkey);
-        if (!isDirectMessage) {
-          nonDirectMessageGroups.add(group);
-        }
-      }
+      final groupsWithInfo = await groups_api.visibleGroupsWithInfo(accountPubkey: accountPubkey);
+      final nonDmGroups = groupsWithInfo
+          .where(
+            (g) =>
+                g.info.groupType != groups_api.GroupType.directMessage &&
+                g.group.state == groups_api.GroupState.active,
+          )
+          .map((g) => g.group)
+          .toList();
 
       if (token != fetchCounter.value) return;
-      groups.value = nonDirectMessageGroups;
+      groups.value = nonDmGroups;
     } catch (e) {
       if (token != fetchCounter.value) return;
       _logger.severe('Failed to fetch groups: $e');

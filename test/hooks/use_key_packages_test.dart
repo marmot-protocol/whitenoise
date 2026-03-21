@@ -13,13 +13,20 @@ import '../test_helpers.dart';
 class MockApi implements RustLibApi {
   List<FlutterEvent> keyPackages = [];
   bool shouldThrow = false;
+  bool shouldThrowOnRefresh = false;
   Completer<void>? publishCompleter;
+  Completer<void>? fetchCompleter;
+  Completer<void>? deleteCompleter;
+  Completer<void>? deleteAllCompleter;
 
   @override
   Future<List<FlutterEvent>> crateApiAccountsAccountKeyPackages({
     required String accountPubkey,
   }) async {
-    if (shouldThrow) throw Exception('Network error');
+    if (fetchCompleter != null) {
+      await fetchCompleter!.future;
+    }
+    if (shouldThrow || shouldThrowOnRefresh) throw Exception('Network error');
     return keyPackages;
   }
 
@@ -48,6 +55,9 @@ class MockApi implements RustLibApi {
     required String accountPubkey,
     required String keyPackageId,
   }) async {
+    if (deleteCompleter != null) {
+      await deleteCompleter!.future;
+    }
     if (shouldThrow) throw Exception('Network error');
     keyPackages.removeWhere((p) => p.id == keyPackageId);
     return true;
@@ -57,6 +67,9 @@ class MockApi implements RustLibApi {
   Future<BigInt> crateApiAccountsDeleteAccountKeyPackages({
     required String accountPubkey,
   }) async {
+    if (deleteAllCompleter != null) {
+      await deleteAllCompleter!.future;
+    }
     if (shouldThrow) throw Exception('Network error');
     final count = keyPackages.length;
     keyPackages.clear();
@@ -69,10 +82,10 @@ class MockApi implements RustLibApi {
 
 late ({
   KeyPackagesState state,
-  Future<void> Function() fetch,
-  Future<void> Function() publish,
-  Future<void> Function(String id) delete,
-  Future<void> Function() deleteAll,
+  Future<KeyPackageResult> Function() fetch,
+  Future<KeyPackageResult> Function() publish,
+  Future<KeyPackageResult> Function(String id) delete,
+  Future<KeyPackageResult> Function() deleteAll,
 })
 hook;
 
@@ -100,7 +113,11 @@ void main() {
   setUp(() {
     mockApi.keyPackages = [];
     mockApi.shouldThrow = false;
+    mockApi.shouldThrowOnRefresh = false;
     mockApi.publishCompleter = null;
+    mockApi.fetchCompleter = null;
+    mockApi.deleteCompleter = null;
+    mockApi.deleteAllCompleter = null;
   });
 
   group('fetch', () {
@@ -123,6 +140,24 @@ void main() {
       expect(hook.state.packages.length, 1);
     });
 
+    testWidgets('sets activeAction to fetch while loading', (tester) async {
+      mockApi.fetchCompleter = Completer<void>();
+
+      await _pump(tester);
+      final future = hook.fetch();
+      await tester.pump();
+
+      expect(hook.state.isLoading, isTrue);
+      expect(hook.state.activeAction, KeyPackageAction.fetch);
+
+      mockApi.fetchCompleter!.complete();
+      await future;
+      await tester.pump();
+
+      expect(hook.state.isLoading, isFalse);
+      expect(hook.state.activeAction, isNull);
+    });
+
     testWidgets('sets error on failure', (tester) async {
       mockApi.shouldThrow = true;
 
@@ -130,7 +165,8 @@ void main() {
       await hook.fetch();
       await tester.pump();
 
-      expect(hook.state.error, isNotNull);
+      expect(hook.state.hasError, isTrue);
+      expect(hook.state.activeAction, isNull);
     });
   });
 
@@ -143,6 +179,24 @@ void main() {
       expect(hook.state.packages.length, 1);
     });
 
+    testWidgets('sets activeAction to publish while loading', (tester) async {
+      mockApi.publishCompleter = Completer<void>();
+
+      await _pump(tester);
+      final future = hook.publish();
+      await tester.pump();
+
+      expect(hook.state.isLoading, isTrue);
+      expect(hook.state.activeAction, KeyPackageAction.publish);
+
+      mockApi.publishCompleter!.complete();
+      await future;
+      await tester.pump();
+
+      expect(hook.state.isLoading, isFalse);
+      expect(hook.state.activeAction, isNull);
+    });
+
     testWidgets('sets error on failure', (tester) async {
       mockApi.shouldThrow = true;
 
@@ -150,7 +204,20 @@ void main() {
       await hook.publish();
       await tester.pump();
 
-      expect(hook.state.error, isNotNull);
+      expect(hook.state.hasError, isTrue);
+      expect(hook.state.activeAction, isNull);
+    });
+
+    testWidgets('returns success when publish succeeds but refresh fails', (tester) async {
+      mockApi.shouldThrowOnRefresh = true;
+
+      await _pump(tester);
+      final result = await hook.publish();
+      await tester.pump();
+
+      expect(result.success, isTrue);
+      expect(hook.state.isLoading, isFalse);
+      expect(hook.state.hasError, isFalse);
     });
   });
 
@@ -231,16 +298,100 @@ void main() {
       await hook.delete('pkg1');
       await tester.pump();
 
-      expect(hook.state.error, isNotNull);
+      expect(hook.state.hasError, isTrue);
+    });
+
+    testWidgets('returns failure when delete succeeds but refresh fails', (tester) async {
+      mockApi.keyPackages = [
+        FlutterEvent(
+          id: 'pkg1',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackage,
+          tags: [],
+          content: '',
+        ),
+      ];
+
+      await _pump(tester);
+      await hook.fetch();
+      await tester.pump();
+      expect(hook.state.packages.length, 1);
+
+      mockApi.shouldThrowOnRefresh = true;
+      final result = await hook.delete('pkg1');
+      await tester.pump();
+
+      expect(result.success, isFalse);
+      expect(result.action, KeyPackageAction.delete);
+      expect(hook.state.isLoading, isFalse);
+    });
+
+    testWidgets('sets deletingId while deleting specific package', (tester) async {
+      mockApi.keyPackages = [
+        FlutterEvent(
+          id: 'pkg1',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackage,
+          tags: [],
+          content: '',
+        ),
+        FlutterEvent(
+          id: 'pkg2',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackage,
+          tags: [],
+          content: '',
+        ),
+      ];
+
+      await _pump(tester);
+      await hook.fetch();
+      await tester.pump();
+
+      final deleteCompleter = Completer<void>();
+      mockApi.deleteCompleter = deleteCompleter;
+
+      final future = hook.delete('pkg1');
+      await tester.pump();
+
+      expect(hook.state.deletingId, 'pkg1');
+      expect(hook.state.isLoading, isTrue);
+
+      deleteCompleter.complete();
+      await future;
+      await tester.pump();
+
+      expect(hook.state.deletingId, isNull);
+      expect(hook.state.isLoading, isFalse);
     });
   });
 
   group('copyWith', () {
-    test('preserves isLoading when not provided', () {
-      const state = KeyPackagesState(isLoading: true);
+    test('preserves status when not provided', () {
+      const state = KeyPackagesState(status: KeyPackagesLoading(KeyPackageAction.fetch));
       final newState = state.copyWith(packages: []);
 
       expect(newState.isLoading, isTrue);
+      expect(newState.activeAction, KeyPackageAction.fetch);
+    });
+
+    test('transitions from loading to idle', () {
+      const state = KeyPackagesState(status: KeyPackagesLoading(KeyPackageAction.fetch));
+      final newState = state.copyWith(status: const KeyPackagesIdle());
+
+      expect(newState.isLoading, isFalse);
+      expect(newState.activeAction, isNull);
+    });
+
+    test('transitions from loading to error', () {
+      const state = KeyPackagesState(status: KeyPackagesLoading(KeyPackageAction.publish));
+      final newState = state.copyWith(status: const KeyPackagesError());
+
+      expect(newState.hasError, isTrue);
+      expect(newState.activeAction, isNull);
     });
   });
 
@@ -275,6 +426,24 @@ void main() {
       expect(hook.state.packages, isEmpty);
     });
 
+    testWidgets('sets activeAction to deleteAll while loading', (tester) async {
+      mockApi.deleteAllCompleter = Completer<void>();
+
+      await _pump(tester);
+      final future = hook.deleteAll();
+      await tester.pump();
+
+      expect(hook.state.isLoading, isTrue);
+      expect(hook.state.activeAction, KeyPackageAction.deleteAll);
+
+      mockApi.deleteAllCompleter!.complete();
+      await future;
+      await tester.pump();
+
+      expect(hook.state.isLoading, isFalse);
+      expect(hook.state.activeAction, isNull);
+    });
+
     testWidgets('sets error on failure', (tester) async {
       mockApi.shouldThrow = true;
 
@@ -282,7 +451,8 @@ void main() {
       await hook.deleteAll();
       await tester.pump();
 
-      expect(hook.state.error, isNotNull);
+      expect(hook.state.hasError, isTrue);
+      expect(hook.state.activeAction, isNull);
     });
   });
 }

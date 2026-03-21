@@ -33,6 +33,7 @@ void main() {
         await mountWidget(
           WnSlateNavigationHeader(
             title: 'Test Title',
+            type: WnSlateNavigationType.close,
             onNavigate: () {},
           ),
           tester,
@@ -49,6 +50,7 @@ void main() {
         await mountWidget(
           WnSlateNavigationHeader(
             title: 'Test Title',
+            type: WnSlateNavigationType.close,
             onNavigate: () => tapped = true,
           ),
           tester,
@@ -92,7 +94,6 @@ void main() {
         await mountWidget(
           WnSlateNavigationHeader(
             title: 'Test Title',
-            type: WnSlateNavigationType.back,
             onNavigate: () {},
           ),
           tester,
@@ -109,7 +110,6 @@ void main() {
         await mountWidget(
           WnSlateNavigationHeader(
             title: 'Test Title',
-            type: WnSlateNavigationType.back,
             onNavigate: () => tapped = true,
           ),
           tester,

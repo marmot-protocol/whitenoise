@@ -1,5 +1,3 @@
-import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_network_relays.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
@@ -7,16 +5,14 @@ import 'package:whitenoise/src/rust/api/relays.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import '../mocks/mock_relay_type.dart';
+import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
-class MockApi implements RustLibApi {
+class MockApi extends MockWnApi {
   List<Relay> normalRelays = [];
   List<Relay> inboxRelays = [];
   List<Relay> keyPackageRelays = [];
-  List<(String, String)> relayStatuses = [];
   bool shouldThrow = false;
-  bool shouldThrowOnStatusRetry = false;
-  int statusRetryCount = 0;
 
   @override
   Future<RelayType> crateApiRelaysRelayTypeNip65() async => MockRelayType('nip65');
@@ -92,42 +88,6 @@ class MockApi implements RustLibApi {
         break;
     }
   }
-
-  @override
-  Future<List<(String, String)>> crateApiRelaysGetAccountRelayStatuses({
-    required String pubkey,
-  }) async {
-    if (shouldThrow) throw Exception('Network error');
-    statusRetryCount++;
-    if (shouldThrowOnStatusRetry && statusRetryCount > 1) {
-      throw Exception('Retry error');
-    }
-    return relayStatuses;
-  }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
-}
-
-late ({
-  NetworkRelaysState state,
-  Future<void> Function() fetchAll,
-  Future<void> Function(String url, RelayCategory category) addRelay,
-  Future<void> Function(String url, RelayCategory category) removeRelay,
-})
-hook;
-
-Future<void> pump(WidgetTester tester) async {
-  await tester.pumpWidget(
-    MaterialApp(
-      home: HookBuilder(
-        builder: (context) {
-          hook = useNetworkRelays(testPubkeyA);
-          return const SizedBox();
-        },
-      ),
-    ),
-  );
 }
 
 late MockApi mockApi;
@@ -142,10 +102,7 @@ void main() {
     mockApi.normalRelays = [];
     mockApi.inboxRelays = [];
     mockApi.keyPackageRelays = [];
-    mockApi.relayStatuses = [];
     mockApi.shouldThrow = false;
-    mockApi.shouldThrowOnStatusRetry = false;
-    mockApi.statusRetryCount = 0;
   });
 
   group('RelayListState', () {
@@ -168,18 +125,16 @@ void main() {
   group('NetworkRelaysState', () {
     test('copyWith preserves values when not provided', () {
       const state = NetworkRelaysState(isAddingRelay: true);
-      final newState = state.copyWith(relayStatuses: {});
+      final newState = state.copyWith();
 
       expect(newState.isAddingRelay, isTrue);
-      expect(newState.relayStatuses, isEmpty);
     });
 
     test('copyWith preserves isRemovingRelay when not provided', () {
       const state = NetworkRelaysState(isRemovingRelay: true);
-      final newState = state.copyWith(relayStatuses: {});
+      final newState = state.copyWith();
 
       expect(newState.isRemovingRelay, isTrue);
-      expect(newState.relayStatuses, isEmpty);
     });
 
     test('updateCategory updates specific category', () {
@@ -247,137 +202,73 @@ void main() {
       mockApi.keyPackageRelays = [
         Relay(url: 'wss://keypackage1.com', createdAt: DateTime.now(), updatedAt: DateTime.now()),
       ];
-      mockApi.relayStatuses = [('wss://relay1.com', 'Connected')];
 
-      await pump(tester);
-      await hook.fetchAll();
+      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
+      await getHook().fetchAll();
       await tester.pump();
 
-      expect(hook.state.normalRelays.relays.length, 1);
-      expect(hook.state.inboxRelays.relays.length, 1);
-      expect(hook.state.keyPackageRelays.relays.length, 1);
-      expect(hook.state.relayStatuses['wss://relay1.com'], 'Connected');
+      expect(getHook().state.normalRelays.relays.length, 1);
+      expect(getHook().state.inboxRelays.relays.length, 1);
+      expect(getHook().state.keyPackageRelays.relays.length, 1);
     });
 
     testWidgets('sets error on failure for normal relays', (tester) async {
       mockApi.shouldThrow = true;
 
-      await pump(tester);
-      await hook.fetchAll();
+      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
+      await getHook().fetchAll();
       await tester.pump();
 
-      expect(hook.state.normalRelays.error, isNotNull);
+      expect(getHook().state.normalRelays.error, isNotNull);
     });
   });
 
   group('addRelay', () {
     testWidgets('adds relay to normal relays', (tester) async {
-      mockApi.relayStatuses = [('wss://newrelay.com', 'Connected')];
-
-      await pump(tester);
-      await hook.addRelay('wss://newrelay.com', RelayCategory.normal);
+      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
+      await getHook().addRelay('wss://newrelay.com', RelayCategory.normal);
       await tester.pump();
 
-      expect(hook.state.normalRelays.relays.length, 1);
-      expect(hook.state.normalRelays.relays.first.url, 'wss://newrelay.com');
-
-      await tester.pump(const Duration(milliseconds: 600));
+      expect(getHook().state.normalRelays.relays.length, 1);
+      expect(getHook().state.normalRelays.relays.first.url, 'wss://newrelay.com');
     });
 
     testWidgets('adds relay to inbox relays', (tester) async {
-      mockApi.relayStatuses = [('wss://newinbox.com', 'Connected')];
-
-      await pump(tester);
-      await hook.addRelay('wss://newinbox.com', RelayCategory.inbox);
+      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
+      await getHook().addRelay('wss://newinbox.com', RelayCategory.inbox);
       await tester.pump();
 
-      expect(hook.state.inboxRelays.relays.length, 1);
-      expect(hook.state.inboxRelays.relays.first.url, 'wss://newinbox.com');
-
-      await tester.pump(const Duration(milliseconds: 600));
+      expect(getHook().state.inboxRelays.relays.length, 1);
+      expect(getHook().state.inboxRelays.relays.first.url, 'wss://newinbox.com');
     });
 
     testWidgets('adds relay to key package relays', (tester) async {
-      mockApi.relayStatuses = [('wss://newkeypackage.com', 'Connected')];
-
-      await pump(tester);
-      await hook.addRelay('wss://newkeypackage.com', RelayCategory.keyPackage);
+      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
+      await getHook().addRelay('wss://newkeypackage.com', RelayCategory.keyPackage);
       await tester.pump();
 
-      expect(hook.state.keyPackageRelays.relays.length, 1);
-      expect(hook.state.keyPackageRelays.relays.first.url, 'wss://newkeypackage.com');
-
-      await tester.pump(const Duration(milliseconds: 600));
+      expect(getHook().state.keyPackageRelays.relays.length, 1);
+      expect(getHook().state.keyPackageRelays.relays.first.url, 'wss://newkeypackage.com');
     });
 
     testWidgets('sets error on failure', (tester) async {
       mockApi.shouldThrow = true;
 
-      await pump(tester);
-      await hook.addRelay('wss://newrelay.com', RelayCategory.normal);
+      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
+      await getHook().addRelay('wss://newrelay.com', RelayCategory.normal);
       await tester.pump();
 
-      expect(hook.state.normalRelays.error, isNotNull);
+      expect(getHook().state.normalRelays.error, isNotNull);
     });
 
     testWidgets('does not add relay when already adding', (tester) async {
-      mockApi.relayStatuses = [
-        ('wss://relay1.com', 'Connected'),
-        ('wss://relay2.com', 'Connected'),
-      ];
+      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
 
-      await pump(tester);
-
-      hook.addRelay('wss://relay1.com', RelayCategory.normal);
-      await hook.addRelay('wss://relay2.com', RelayCategory.normal);
+      getHook().addRelay('wss://relay1.com', RelayCategory.normal);
+      await getHook().addRelay('wss://relay2.com', RelayCategory.normal);
       await tester.pump();
 
-      expect(hook.state.normalRelays.relays.length, 1);
-
-      await tester.pump(const Duration(milliseconds: 600));
-    });
-
-    testWidgets('awaits relay connection after adding until connected', (tester) async {
-      mockApi.relayStatuses = [('wss://newrelay.com', 'Connecting')];
-
-      await pump(tester);
-      await hook.addRelay('wss://newrelay.com', RelayCategory.normal);
-      await tester.pump();
-
-      expect(hook.state.relayStatuses['wss://newrelay.com'], 'Connecting');
-
-      mockApi.relayStatuses = [('wss://newrelay.com', 'Connected')];
-
-      await tester.pump(const Duration(milliseconds: 600));
-
-      expect(hook.state.relayStatuses['wss://newrelay.com'], 'Connected');
-    });
-
-    testWidgets('stops awaiting when status changes from connecting', (tester) async {
-      mockApi.relayStatuses = [('wss://newrelay.com', 'Disconnected')];
-
-      await pump(tester);
-      await hook.addRelay('wss://newrelay.com', RelayCategory.normal);
-      await tester.pump();
-
-      await tester.pump(const Duration(milliseconds: 600));
-
-      expect(hook.state.relayStatuses['wss://newrelay.com'], 'Disconnected');
-    });
-
-    testWidgets('stops awaiting when status fetch throws error', (tester) async {
-      mockApi.relayStatuses = [('wss://newrelay.com', 'Connecting')];
-      mockApi.shouldThrowOnStatusRetry = true;
-
-      await pump(tester);
-      await hook.addRelay('wss://newrelay.com', RelayCategory.normal);
-      await tester.pump();
-
-      expect(hook.state.relayStatuses['wss://newrelay.com'], 'Connecting');
-
-      await tester.pump(const Duration(milliseconds: 600));
-
-      expect(hook.state.relayStatuses['wss://newrelay.com'], 'Connecting');
+      expect(getHook().state.normalRelays.relays.length, 1);
     });
   });
 
@@ -387,16 +278,16 @@ void main() {
         Relay(url: 'wss://relay1.com', createdAt: DateTime.now(), updatedAt: DateTime.now()),
       ];
 
-      await pump(tester);
-      await hook.fetchAll();
+      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
+      await getHook().fetchAll();
       await tester.pump();
 
-      expect(hook.state.normalRelays.relays.length, 1);
+      expect(getHook().state.normalRelays.relays.length, 1);
 
-      await hook.removeRelay('wss://relay1.com', RelayCategory.normal);
+      await getHook().removeRelay('wss://relay1.com', RelayCategory.normal);
       await tester.pump();
 
-      expect(hook.state.normalRelays.relays, isEmpty);
+      expect(getHook().state.normalRelays.relays, isEmpty);
     });
 
     testWidgets('removes relay from inbox relays', (tester) async {
@@ -404,16 +295,16 @@ void main() {
         Relay(url: 'wss://inbox1.com', createdAt: DateTime.now(), updatedAt: DateTime.now()),
       ];
 
-      await pump(tester);
-      await hook.fetchAll();
+      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
+      await getHook().fetchAll();
       await tester.pump();
 
-      expect(hook.state.inboxRelays.relays.length, 1);
+      expect(getHook().state.inboxRelays.relays.length, 1);
 
-      await hook.removeRelay('wss://inbox1.com', RelayCategory.inbox);
+      await getHook().removeRelay('wss://inbox1.com', RelayCategory.inbox);
       await tester.pump();
 
-      expect(hook.state.inboxRelays.relays, isEmpty);
+      expect(getHook().state.inboxRelays.relays, isEmpty);
     });
 
     testWidgets('sets error on failure', (tester) async {
@@ -421,15 +312,15 @@ void main() {
         Relay(url: 'wss://relay1.com', createdAt: DateTime.now(), updatedAt: DateTime.now()),
       ];
 
-      await pump(tester);
-      await hook.fetchAll();
+      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
+      await getHook().fetchAll();
       await tester.pump();
 
       mockApi.shouldThrow = true;
-      await hook.removeRelay('wss://relay1.com', RelayCategory.normal);
+      await getHook().removeRelay('wss://relay1.com', RelayCategory.normal);
       await tester.pump();
 
-      expect(hook.state.normalRelays.error, isNotNull);
+      expect(getHook().state.normalRelays.error, isNotNull);
     });
 
     testWidgets('does not remove relay when already removing', (tester) async {
@@ -438,17 +329,17 @@ void main() {
         Relay(url: 'wss://relay2.com', createdAt: DateTime.now(), updatedAt: DateTime.now()),
       ];
 
-      await pump(tester);
-      await hook.fetchAll();
+      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
+      await getHook().fetchAll();
       await tester.pump();
 
-      expect(hook.state.normalRelays.relays.length, 2);
+      expect(getHook().state.normalRelays.relays.length, 2);
 
-      hook.removeRelay('wss://relay1.com', RelayCategory.normal);
-      await hook.removeRelay('wss://relay2.com', RelayCategory.normal);
+      getHook().removeRelay('wss://relay1.com', RelayCategory.normal);
+      await getHook().removeRelay('wss://relay2.com', RelayCategory.normal);
       await tester.pump();
 
-      expect(hook.state.normalRelays.relays.length, 1);
+      expect(getHook().state.normalRelays.relays.length, 1);
     });
   });
 }

@@ -1,15 +1,15 @@
 import 'dart:async';
 
+import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logging/logging.dart';
+import 'package:whitenoise/hooks/use_app_logs.dart';
 import 'package:whitenoise/providers/app_log_provider.dart';
-import 'package:whitenoise/providers/rust_log_listener_provider.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
-import 'package:whitenoise/utils/app_flavor.dart';
 
 import '../mocks/mock_wn_api.dart';
+import '../test_helpers.dart';
 
 class _MockApi extends MockWnApi {
   StreamController<String>? logsController;
@@ -98,35 +98,23 @@ void main() {
     });
   });
 
-  group('rustLogListenerProvider', () {
-    if (!isStaging) {
-      test('requires staging flavor', () {}, skip: 'Set --dart-define=APP_FLAVOR=staging');
-      return;
-    }
-
-    test('subscribes using application logs directory', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
-      addTearDown(sub.close);
-
-      await Future<void>.delayed(Duration.zero);
-      await Future<void>.delayed(Duration.zero);
+  group('useAppLogs', () {
+    testWidgets('subscribes using application logs directory', (tester) async {
+      await mountHook(tester, useAppLogs);
+      await tester.pump();
+      await tester.pump();
 
       expect(api.lastLogsBaseDir, '/tmp/wn_test_docs/whitenoise/logs');
       expect(api.logsController?.hasListener, isTrue);
     });
 
-    test('forwards rust log lines into app log store', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
-      addTearDown(sub.close);
+    testWidgets('forwards rust log lines into app log store', (tester) async {
+      await mountHook(tester, useAppLogs);
+      await tester.pump();
+      await tester.pump();
 
-      await Future<void>.delayed(Duration.zero);
-      await Future<void>.delayed(Duration.zero);
       api.logsController?.add('2026-03-01T12:00:00.000000Z WARN rust::network: connection lost');
-      await Future<void>.delayed(Duration.zero);
+      await tester.pump();
 
       expect(appLogStore.entries, hasLength(1));
       final entry = appLogStore.entries.single;
@@ -135,17 +123,13 @@ void main() {
       expect(entry.message, contains('connection lost'));
     });
 
-    test('forwards stream errors into app log store', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
-      addTearDown(sub.close);
-
-      await Future<void>.delayed(Duration.zero);
-      await Future<void>.delayed(Duration.zero);
+    testWidgets('forwards stream errors into app log store', (tester) async {
+      await mountHook(tester, useAppLogs);
+      await tester.pump();
+      await tester.pump();
 
       api.logsController?.addError(Exception('boom'));
-      await Future<void>.delayed(Duration.zero);
+      await tester.pump();
 
       expect(appLogStore.entries, hasLength(1));
       final entry = appLogStore.entries.single;
@@ -155,68 +139,60 @@ void main() {
       expect(entry.message, contains('boom'));
     });
 
-    test('cancels subscription when disposed before listening starts', () async {
-      final container = ProviderContainer();
-      final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
-      sub.close();
-      container.dispose();
+    testWidgets('cancels subscription when widget is unmounted before listening starts', (
+      tester,
+    ) async {
+      await mountHook(tester, useAppLogs);
+      await tester.pumpWidget(const SizedBox());
 
-      await Future<void>.delayed(Duration.zero);
-      await Future<void>.delayed(Duration.zero);
-      await Future<void>.delayed(Duration.zero);
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
 
       if (api.logsController != null) {
         expect(api.logsController?.hasListener, isFalse);
       }
     });
 
-    test('handles _startListening failure gracefully', () async {
+    testWidgets('handles _startListening failure gracefully', (tester) async {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         pathProviderChannel,
         (call) async => throw PlatformException(code: 'ERROR', message: 'No directory'),
       );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          pathProviderChannel,
+          (call) async => '/tmp/wn_test_docs',
+        );
+      });
 
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
-      addTearDown(sub.close);
-
-      await Future<void>.delayed(Duration.zero);
-      await Future<void>.delayed(Duration.zero);
-      await Future<void>.delayed(Duration.zero);
+      await mountHook(tester, useAppLogs);
+      await tester.pump();
+      await tester.pump();
+      await tester.pump();
 
       expect(api.logsController, isNull);
-
-      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-        pathProviderChannel,
-        (call) async => '/tmp/wn_test_docs',
-      );
     });
 
-    test('handles stream done event', () async {
-      final container = ProviderContainer();
-      addTearDown(container.dispose);
-      final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
-      addTearDown(sub.close);
-
-      await Future<void>.delayed(Duration.zero);
-      await Future<void>.delayed(Duration.zero);
+    testWidgets('handles stream done event', (tester) async {
+      await mountHook(tester, useAppLogs);
+      await tester.pump();
+      await tester.pump();
 
       expect(api.logsController, isNotNull);
       await api.logsController!.close();
-      await Future<void>.delayed(Duration.zero);
+      await tester.pump();
     });
 
-    test('cancels subscription when provider is disposed', () async {
-      final container = ProviderContainer();
-      final sub = container.listen(rustLogListenerProvider, (_, _) {}, fireImmediately: true);
-      addTearDown(sub.close);
-      await Future<void>.delayed(Duration.zero);
-      await Future<void>.delayed(Duration.zero);
+    testWidgets('cancels subscription when widget is unmounted', (tester) async {
+      await mountHook(tester, useAppLogs);
+      await tester.pump();
+      await tester.pump();
 
       expect(api.logsController?.hasListener, isTrue);
-      container.dispose();
-      await Future<void>.delayed(Duration.zero);
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
 
       expect(api.logsController?.hasListener, isFalse);
     });

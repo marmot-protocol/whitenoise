@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
 
-const _maxEntries = 1000;
+const _maxEntries = 50000;
 
 class AppLogEntry {
   const AppLogEntry({

@@ -78,6 +78,11 @@ if ! test -d "rust"; then
   print_error "rust directory not found"
   exit 1
 fi
+
+IOS_DEPLOYMENT_TARGET="${IOS_DEPLOYMENT_TARGET:-13.0}"
+export IPHONEOS_DEPLOYMENT_TARGET="$IOS_DEPLOYMENT_TARGET"
+print_step "Using iOS deployment target $IPHONEOS_DEPLOYMENT_TARGET"
+
 cd rust
 
 if [ "$BUILD_MODE" = "all" ] || [ "$BUILD_MODE" = "device" ]; then

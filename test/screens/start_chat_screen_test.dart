@@ -146,7 +146,7 @@ void main() {
   Future<void> pumpStartChatScreen(
     WidgetTester tester, {
     required String userPubkey,
-    FlutterMetadata? initialMetadata,
+    bool settle = true,
   }) async {
     setUpTestView(tester);
     await mountTestApp(
@@ -157,9 +157,13 @@ void main() {
     Routes.pushToStartChat(
       tester.element(find.byType(Scaffold)),
       userPubkey,
-      metadata: initialMetadata,
     );
-    await tester.pumpAndSettle();
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 500));
+    }
   }
 
   group('StartChatScreen', () {
@@ -173,9 +177,9 @@ void main() {
       expect(find.text('Start new chat'), findsOneWidget);
     });
 
-    testWidgets('displays close button', (tester) async {
+    testWidgets('displays back button', (tester) async {
       await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
-      expect(find.byKey(const Key('slate_close_button')), findsOneWidget);
+      expect(find.byKey(const Key('slate_back_button')), findsOneWidget);
     });
 
     testWidgets('displays avatar', (tester) async {
@@ -199,6 +203,32 @@ void main() {
       await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
       expect(find.byKey(const Key('start_chat_button')), findsOneWidget);
       expect(find.text('Send message'), findsOneWidget);
+    });
+
+    testWidgets('keeps button layout stable while key package loads', (tester) async {
+      _api.userHasKeyPackageCompleter = Completer<KeyPackageStatus>();
+
+      await pumpStartChatScreen(tester, userPubkey: _otherPubkey, settle: false);
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byKey(const Key('follow_button')), findsOneWidget);
+      expect(find.byKey(const Key('add_to_group_button')), findsOneWidget);
+      expect(find.byKey(const Key('start_chat_button')), findsOneWidget);
+
+      _api.userHasKeyPackageCompleter!.complete(KeyPackageStatus.valid);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(CircularProgressIndicator), findsNothing);
+      expect(find.byKey(const Key('follow_button')), findsOneWidget);
+      expect(find.byKey(const Key('add_to_group_button')), findsOneWidget);
+      expect(find.byKey(const Key('start_chat_button')), findsOneWidget);
+    });
+
+    testWidgets('does not show self action buttons for own profile', (tester) async {
+      await pumpStartChatScreen(tester, userPubkey: _testPubkey);
+      expect(find.byKey(const Key('follow_button')), findsNothing);
+      expect(find.byKey(const Key('add_to_group_button')), findsNothing);
+      expect(find.byKey(const Key('start_chat_button')), findsNothing);
     });
 
     testWidgets('does not show invite button when user has valid key package', (tester) async {
@@ -232,17 +262,34 @@ void main() {
       });
     });
 
-    group('with initialMetadata', () {
-      testWidgets('displays name from initialMetadata when API returns empty', (tester) async {
-        await pumpStartChatScreen(
-          tester,
-          userPubkey: _otherPubkey,
-          initialMetadata: const FlutterMetadata(
-            displayName: 'Bob',
-            custom: {},
-          ),
-        );
-        expect(find.text('Bob'), findsOneWidget);
+    group('with fetched metadata but no name', () {
+      const missingNameMetadata = FlutterMetadata(
+        about: 'I love Nostr!',
+        nip05: 'alice@example.com',
+        picture: '/tmp/does-not-exist.png',
+        custom: {},
+      );
+
+      setUp(() {
+        _api.metadata = missingNameMetadata;
+      });
+
+      testWidgets('still displays about', (tester) async {
+        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        expect(find.text('I love Nostr!'), findsOneWidget);
+      });
+
+      testWidgets('still displays nip05', (tester) async {
+        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        expect(find.text('alice@example.com'), findsOneWidget);
+      });
+
+      testWidgets('passes picture url to avatar', (tester) async {
+        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        expect(find.byType(WnAvatar), findsOneWidget);
+
+        final avatar = tester.widget<WnAvatar>(find.byType(WnAvatar));
+        expect(avatar.pictureUrl, '/tmp/does-not-exist.png');
       });
     });
 
@@ -365,10 +412,10 @@ void main() {
       });
     });
 
-    group('close button', () {
+    group('back button', () {
       testWidgets('navigates back when tapped', (tester) async {
         await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
-        await tester.tap(find.byKey(const Key('slate_close_button')));
+        await tester.tap(find.byKey(const Key('slate_back_button')));
         await tester.pumpAndSettle();
 
         expect(find.text('Start new chat'), findsNothing);
@@ -440,7 +487,6 @@ void main() {
         expect(shareCalls.length, 1);
         expect(shareCalls[0].method, 'share');
 
-        // Verify the invite message text is included in the share call arguments
         final args = shareCalls[0].arguments as Map<dynamic, dynamic>;
         expect(
           args['text'],

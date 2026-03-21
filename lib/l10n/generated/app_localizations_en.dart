@@ -38,7 +38,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get signUp => 'Sign Up';
 
   @override
-  String get loginTitle => 'Login';
+  String get loginTitle => 'Enter your private key';
 
   @override
   String get enterPrivateKey => 'Enter your private key';
@@ -275,7 +275,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get donateDescription =>
-      'As a not-for-profit, White Noise exists solely for your privacy and freedom, not for profit. Your support keeps us independent and uncompromised.';
+      'As a 501(c)3 non-profit, White Noise exists solely for your privacy and freedom, not for profit. Your support keeps us independent and uncompromised.';
+
+  @override
+  String get donateContributionLetter =>
+      'If you need a contribution acknowledgement letter for a donation, get in touch with us at info@ipf.dev';
 
   @override
   String get lightningAddress => 'Lightning Address';
@@ -349,20 +353,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get invitedToSecureChat => 'You are invited to a secure chat';
 
   @override
+  String get invitedYouToChatSuffix => ' invited you to chat';
+
+  @override
   String get decline => 'Decline';
 
   @override
   String get accept => 'Accept';
 
   @override
-  String failedToAcceptInvitation(String error) {
-    return 'Failed to accept invitation: $error';
-  }
+  String get failedToAcceptInvitation => 'Failed to accept invitation. Please try again.';
 
   @override
-  String failedToDeclineInvitation(String error) {
-    return 'Failed to decline invitation: $error';
-  }
+  String get failedToDeclineInvitation => 'Failed to decline invitation. Please try again.';
 
   @override
   String get startNewChat => 'Start new chat';
@@ -378,6 +381,34 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get developerSettingsTitle => 'Developer Settings';
+
+  @override
+  String get keyPackageManagementTitle => 'Key Package Management';
+
+  @override
+  String get keyPackageManagementDescription => 'Publish, refresh, and delete account key packages';
+
+  @override
+  String get relayStateTitle => 'Relay State';
+
+  @override
+  String get relayStateDescription => 'Inspect the live relay control planes';
+
+  @override
+  String get relayControlStateDumpLabel => 'debug_relay_control_state:';
+
+  @override
+  String get relayControlStateSnapshotDescription =>
+      'Snapshot of the live relay discovery, inbox, and group planes.';
+
+  @override
+  String get relayControlStateLoading => 'Loading...';
+
+  @override
+  String get relayControlStateRefreshButton => 'Refresh Dump';
+
+  @override
+  String get relayControlStateCopyButton => 'Copy Dump';
 
   @override
   String get publishNewKeyPackage => 'Publish New Key Package';
@@ -407,6 +438,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get keyPackageDeleted => 'Key package deleted';
+
+  @override
+  String get keyPackageFetchFailed => 'Failed to refresh key packages. Please try again.';
+
+  @override
+  String get keyPackagePublishFailed => 'Failed to publish key package. Please try again.';
+
+  @override
+  String get keyPackageDeleteFailed => 'Failed to delete key package. Please try again.';
+
+  @override
+  String get keyPackageDeleteAllFailed => 'Failed to delete all key packages. Please try again.';
 
   @override
   String packageNumber(int number) {
@@ -516,14 +559,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get reportError => 'Report error';
 
   @override
-  String get workInProgress => 'We\'re working on this';
-
-  @override
   String get wipMessage =>
       'We\'re working on this feature. To support development, please donate to White Noise';
 
   @override
   String get donate => 'Donate';
+
+  @override
+  String get chatWithSupport => 'Chat with support';
+
+  @override
+  String get supportChatWelcomeMessage =>
+      'Hi! Tell us what\'s on your mind - questions, bugs, or feedback. We usually reply within a few hours.';
 
   @override
   String get addRelay => 'Add Relay';
@@ -567,6 +614,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get unknownUser => 'Unknown user';
+
+  @override
+  String get noName => 'No name';
 
   @override
   String get unknownGroup => 'Unknown group';
@@ -911,7 +961,7 @@ class AppLocalizationsEn extends AppLocalizations {
       'No relay lists found on this relay. Try another or use defaults.';
 
   @override
-  String get loginErrorInvalidKey => 'Invalid private key format. Please check and try again.';
+  String get loginErrorInvalidKey => 'Invalid nsec. Make sure you entered it correctly.';
 
   @override
   String get loginErrorNoRelayConnections =>
@@ -1092,13 +1142,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get connectAnotherProfile => 'Connect Another Profile';
 
   @override
-  String get rawDebugView => 'Raw debug view';
+  String get rawDebugView => 'Debug mode';
 
   @override
   String get rawDebugViewDescription => 'Show raw message data in chat';
 
   @override
-  String get rawDebugViewTitle => 'Raw Debug View';
+  String get rawDebugViewTitle => 'Debug Mode';
 
   @override
   String get rawDebugViewGroupId => 'Group ID';
@@ -1131,6 +1181,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLogsClear => 'Clear';
 
   @override
+  String get appLogsEraseAll => 'Erase all';
+
+  @override
   String get appLogsEmpty => 'No logs yet';
 
   @override
@@ -1149,13 +1202,105 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appLogsClearFilters => 'Clear filters';
 
   @override
+  String get appLogsLive => 'Live';
+
+  @override
   String appLogsFilteredCount(int shown, int total) {
     return '$shown of $total';
   }
+
+  @override
+  String get appLogsCopyAll => 'Copy all';
 
   @override
   String get invalidRelayUrlScheme => 'URL must start with wss:// or ws://';
 
   @override
   String get invalidRelayUrl => 'Invalid relay URL';
+
+  @override
+  String get thisMessageWasDeleted => 'This message was deleted.';
+
+  @override
+  String get youDeletedThisMessage => 'You deleted this message.';
+
+  @override
+  String get relayControlStateLoadError => 'Failed to load relay control state. Please try again.';
+
+  @override
+  String get updateAvailableTitle => 'Update available';
+
+  @override
+  String updateAvailableDescription(String version) {
+    return 'Version $version is available on Zapstore.';
+  }
+
+  @override
+  String get updateNow => 'Update now';
+
+  @override
+  String get fatalErrorCopyError => 'Copy error';
+
+  @override
+  String get fatalErrorErrorCopied => 'Error copied to clipboard';
+
+  @override
+  String get fatalErrorTitle => 'Oh no!';
+
+  @override
+  String get fatalErrorDescription =>
+      'We hit a bump loading the app. It\'s not you, it\'s us and we\'re sorry.\n\nHelp us fix it. Tap below to send this error to our team.';
+
+  @override
+  String get reportBug => 'Report bug';
+
+  @override
+  String get reportBugDescription =>
+      'Help us improve White Noise by describing the issue you encountered.';
+
+  @override
+  String get reportBugWhatWentWrong => 'What went wrong?';
+
+  @override
+  String get reportBugWhatWentWrongPlaceholder => 'Describe the issue you experienced...';
+
+  @override
+  String get reportBugStepsToReproduce => 'Steps to reproduce';
+
+  @override
+  String get reportBugStepsToReproducePlaceholder => '1. Go to...\n2. Tap on...\n3. See error';
+
+  @override
+  String get reportBugFrequency => 'How often does this happen?';
+
+  @override
+  String get reportBugFrequencyOnce => 'Once';
+
+  @override
+  String get reportBugFrequencyAlways => 'Always';
+
+  @override
+  String get reportBugFrequencySometimes => 'Sometimes';
+
+  @override
+  String get reportBugIncludeNpub => 'Include your npub';
+
+  @override
+  String get reportBugIncludeNpubDescription =>
+      'Lets us follow up with you if needed; leaving this off keeps your report anonymous.';
+
+  @override
+  String get reportBugSend => 'Send report';
+
+  @override
+  String get reportBugSuccess => 'Bug report sent. Thank you!';
+
+  @override
+  String get reportBugError => 'Failed to send report. Please try again.';
+
+  @override
+  String get reportBugWhatWentWrongRequired => 'Please describe what went wrong.';
+
+  @override
+  String get failedToStartSupportChat => 'Failed to start chat with support';
 }

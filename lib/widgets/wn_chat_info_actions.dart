@@ -12,7 +12,7 @@ class WnChatInfoActions extends StatelessWidget {
     required this.isFollowing,
     required this.isFollowLoading,
     required this.onFollowTap,
-    required this.onSearchTap,
+    this.onSearchTap,
     required this.onAddToGroupTap,
   });
 
@@ -20,7 +20,7 @@ class WnChatInfoActions extends StatelessWidget {
   final bool isFollowing;
   final bool isFollowLoading;
   final VoidCallback onFollowTap;
-  final VoidCallback onSearchTap;
+  final VoidCallback? onSearchTap;
   final VoidCallback onAddToGroupTap;
 
   @override
@@ -30,15 +30,17 @@ class WnChatInfoActions extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        WnButton(
-          key: const Key('search_button'),
-          text: context.l10n.search,
-          type: WnButtonType.outline,
-          size: WnButtonSize.medium,
-          trailingIcon: WnIcons.search,
-          onPressed: onSearchTap,
-        ),
-        Gap(8.h),
+        if (onSearchTap != null) ...[
+          WnButton(
+            key: const Key('search_button'),
+            text: context.l10n.search,
+            type: WnButtonType.outline,
+            size: WnButtonSize.medium,
+            trailingIcon: WnIcons.search,
+            onPressed: onSearchTap,
+          ),
+          Gap(8.h),
+        ],
         if (!isOwnProfile) ...[
           WnButton(
             key: const Key('contact_button'),

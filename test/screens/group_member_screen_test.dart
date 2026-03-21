@@ -494,7 +494,7 @@ void main() {
       expect(find.text('Failed to copy public key. Please try again.'), findsOneWidget);
     });
 
-    testWidgets('navigates back when close button is pressed', (tester) async {
+    testWidgets('navigates back when back button is pressed', (tester) async {
       _api.adminsList = [_testPubkey];
       await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
 

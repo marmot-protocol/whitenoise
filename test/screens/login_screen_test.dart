@@ -17,6 +17,7 @@ import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/widgets/wn_carousel_indicator.dart' show WnCarouselIndicator;
 import 'package:whitenoise/widgets/wn_onboarding_carousel.dart';
 import 'package:whitenoise/widgets/wn_overlay.dart';
 
@@ -164,7 +165,8 @@ void main() {
 
       testWidgets('tapping outside slate returns to home screen', (tester) async {
         await pumpLoginScreen(tester);
-        await tester.tap(find.byKey(const Key('login_background')));
+        final topLeft = tester.getTopLeft(find.byKey(const Key('login_background')));
+        await tester.tapAt(topLeft + const Offset(10, 10));
         await tester.pumpAndSettle();
         expect(find.byType(HomeScreen), findsOneWidget);
       });
@@ -658,23 +660,26 @@ void main() {
         expect(find.byKey(const Key('login_carousel_indicator')), findsOneWidget);
       });
 
-      testWidgets('carousel uses smaller bottom padding when signer is unavailable', (
-        tester,
-      ) async {
+      testWidgets('renders carousel widget', (tester) async {
         await pumpLoginScreen(tester);
-        final padding = tester.widget<Padding>(find.byKey(const Key('login_carousel_padding')));
-        expect(padding.padding.resolve(TextDirection.ltr).bottom, lessThan(200));
+        expect(find.byKey(const Key('login_onboarding_carousel')), findsOneWidget);
+        expect(find.byType(WnOnboardingCarousel), findsOneWidget);
       });
 
-      testWidgets(
-        'carousel uses larger bottom padding when signer is available',
-        (tester) async {
-          await pumpLoginScreen(tester, signerAvailable: true);
-          final padding = tester.widget<Padding>(find.byKey(const Key('login_carousel_padding')));
-          expect(padding.padding.resolve(TextDirection.ltr).bottom, greaterThan(200));
-        },
-        variant: TargetPlatformVariant.only(TargetPlatform.android),
-      );
+      testWidgets('swiping carousel updates indicator active index', (tester) async {
+        await pumpLoginScreen(tester);
+
+        await tester.drag(
+          find.byKey(const Key('login_carousel_page_view')),
+          const Offset(-400, 0),
+        );
+        await tester.pumpAndSettle();
+
+        final indicator = tester.widget<WnCarouselIndicator>(
+          find.byKey(const Key('login_carousel_indicator')),
+        );
+        expect(indicator.activeIndex, 1);
+      });
     });
 
     group('keyboard overlay', () {

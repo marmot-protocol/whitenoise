@@ -12,6 +12,7 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated_io.dart';
 import 'api.dart';
 import 'api/account_groups.dart';
 import 'api/accounts.dart';
+import 'api/bug_report.dart';
 import 'api/chat_list.dart';
 import 'api/drafts.dart';
 import 'api/error.dart';
@@ -26,6 +27,7 @@ import 'api/signer.dart';
 import 'api/user_search.dart';
 import 'api/users.dart';
 import 'api/utils.dart';
+import 'api/zapstore.dart';
 import 'frb_generated.dart';
 import 'lib.dart';
 
@@ -232,6 +234,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  RustStreamSink<UserStreamItem> dco_decode_StreamSink_user_stream_item_Sse(
+    dynamic raw,
+  );
+
+  @protected
   String dco_decode_String(dynamic raw);
 
   @protected
@@ -265,6 +272,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ChatMessageSummary dco_decode_box_autoadd_chat_message_summary(dynamic raw);
 
   @protected
+  DeliveryStatus dco_decode_box_autoadd_delivery_status(dynamic raw);
+
+  @protected
   Draft dco_decode_box_autoadd_draft(dynamic raw);
 
   @protected
@@ -291,6 +301,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   MessageUpdate dco_decode_box_autoadd_message_update(dynamic raw);
 
   @protected
+  User dco_decode_box_autoadd_user(dynamic raw);
+
+  @protected
+  UserUpdate dco_decode_box_autoadd_user_update(dynamic raw);
+
+  @protected
   WhitenoiseConfig dco_decode_box_autoadd_whitenoise_config(dynamic raw);
 
   @protected
@@ -310,6 +326,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ChatSummary dco_decode_chat_summary(dynamic raw);
+
+  @protected
+  DeliveryStatus dco_decode_delivery_status(dynamic raw);
 
   @protected
   Draft dco_decode_draft(dynamic raw);
@@ -340,6 +359,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   GroupType dco_decode_group_type(dynamic raw);
+
+  @protected
+  GroupWithInfoAndMembership dco_decode_group_with_info_and_membership(
+    dynamic raw,
+  );
 
   @protected
   int dco_decode_i_32(dynamic raw);
@@ -385,6 +409,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<GroupInformation> dco_decode_list_group_information(dynamic raw);
+
+  @protected
+  List<GroupWithInfoAndMembership> dco_decode_list_group_with_info_and_membership(dynamic raw);
 
   @protected
   List<LeafNodeInfo> dco_decode_list_leaf_node_info(dynamic raw);
@@ -465,6 +492,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ChatMessageSummary? dco_decode_opt_box_autoadd_chat_message_summary(
     dynamic raw,
   );
+
+  @protected
+  DeliveryStatus? dco_decode_opt_box_autoadd_delivery_status(dynamic raw);
 
   @protected
   Draft? dco_decode_opt_box_autoadd_draft(dynamic raw);
@@ -549,6 +579,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   UserSearchUpdate dco_decode_user_search_update(dynamic raw);
+
+  @protected
+  UserStreamItem dco_decode_user_stream_item(dynamic raw);
+
+  @protected
+  UserUpdate dco_decode_user_update(dynamic raw);
+
+  @protected
+  UserUpdateTrigger dco_decode_user_update_trigger(dynamic raw);
 
   @protected
   BigInt dco_decode_usize(dynamic raw);
@@ -723,6 +762,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  RustStreamSink<UserStreamItem> sse_decode_StreamSink_user_stream_item_Sse(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   String sse_decode_String(SseDeserializer deserializer);
 
   @protected
@@ -756,6 +800,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ChatMessageSummary sse_decode_box_autoadd_chat_message_summary(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  DeliveryStatus sse_decode_box_autoadd_delivery_status(
     SseDeserializer deserializer,
   );
 
@@ -794,6 +843,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  User sse_decode_box_autoadd_user(SseDeserializer deserializer);
+
+  @protected
+  UserUpdate sse_decode_box_autoadd_user_update(SseDeserializer deserializer);
+
+  @protected
   WhitenoiseConfig sse_decode_box_autoadd_whitenoise_config(
     SseDeserializer deserializer,
   );
@@ -821,6 +876,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ChatSummary sse_decode_chat_summary(SseDeserializer deserializer);
+
+  @protected
+  DeliveryStatus sse_decode_delivery_status(SseDeserializer deserializer);
 
   @protected
   Draft sse_decode_draft(SseDeserializer deserializer);
@@ -853,6 +911,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   GroupType sse_decode_group_type(SseDeserializer deserializer);
+
+  @protected
+  GroupWithInfoAndMembership sse_decode_group_with_info_and_membership(
+    SseDeserializer deserializer,
+  );
 
   @protected
   int sse_decode_i_32(SseDeserializer deserializer);
@@ -902,6 +965,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<GroupInformation> sse_decode_list_group_information(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  List<GroupWithInfoAndMembership> sse_decode_list_group_with_info_and_membership(
     SseDeserializer deserializer,
   );
 
@@ -1006,6 +1074,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  DeliveryStatus? sse_decode_opt_box_autoadd_delivery_status(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   Draft? sse_decode_opt_box_autoadd_draft(SseDeserializer deserializer);
 
   @protected
@@ -1098,6 +1171,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   UserSearchUpdate sse_decode_user_search_update(SseDeserializer deserializer);
+
+  @protected
+  UserStreamItem sse_decode_user_stream_item(SseDeserializer deserializer);
+
+  @protected
+  UserUpdate sse_decode_user_update(SseDeserializer deserializer);
+
+  @protected
+  UserUpdateTrigger sse_decode_user_update_trigger(
+    SseDeserializer deserializer,
+  );
 
   @protected
   BigInt sse_decode_usize(SseDeserializer deserializer);
@@ -1310,6 +1394,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_StreamSink_user_stream_item_Sse(
+    RustStreamSink<UserStreamItem> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_String(String self, SseSerializer serializer);
 
   @protected
@@ -1351,6 +1441,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_chat_message_summary(
     ChatMessageSummary self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_delivery_status(
+    DeliveryStatus self,
     SseSerializer serializer,
   );
 
@@ -1397,6 +1493,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_user(User self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_user_update(
+    UserUpdate self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_whitenoise_config(
     WhitenoiseConfig self,
     SseSerializer serializer,
@@ -1431,6 +1536,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_chat_summary(ChatSummary self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_delivery_status(
+    DeliveryStatus self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_draft(Draft self, SseSerializer serializer);
@@ -1470,6 +1581,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_group_type(GroupType self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_group_with_info_and_membership(
+    GroupWithInfoAndMembership self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_i_32(int self, SseSerializer serializer);
@@ -1531,6 +1648,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_list_group_information(
     List<GroupInformation> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_group_with_info_and_membership(
+    List<GroupWithInfoAndMembership> self,
     SseSerializer serializer,
   );
 
@@ -1661,6 +1784,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_delivery_status(
+    DeliveryStatus? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_box_autoadd_draft(Draft? self, SseSerializer serializer);
 
   @protected
@@ -1775,6 +1904,21 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_user_search_update(
     UserSearchUpdate self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_user_stream_item(
+    UserStreamItem self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_user_update(UserUpdate self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_user_update_trigger(
+    UserUpdateTrigger self,
     SseSerializer serializer,
   );
 

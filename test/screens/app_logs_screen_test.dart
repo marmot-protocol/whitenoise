@@ -116,7 +116,7 @@ void main() {
 
       await pumpScreen(tester);
 
-      expect(find.text('SEVERE'), findsOneWidget);
+      expect(find.text('SEVERE').last, findsOneWidget);
       expect(find.text('rust'), findsOneWidget);
       expect(find.text('failed to send message'), findsOneWidget);
       expect(find.textContaining('error: socket error'), findsOneWidget);
@@ -124,7 +124,10 @@ void main() {
     });
 
     testWidgets('search filters visible logs', (tester) async {
-      _entries = [_entry('alpha event'), _entry('beta event')];
+      _entries = [
+        _entry('alpha event', level: Level.WARNING),
+        _entry('beta event', level: Level.WARNING),
+      ];
       await pumpScreen(tester);
 
       await tester.enterText(find.byKey(const Key('app_logs_search')), 'alpha');
@@ -136,7 +139,10 @@ void main() {
     });
 
     testWidgets('adds and removes exclude/include patterns', (tester) async {
-      _entries = [_entry('network timeout warning'), _entry('auth success')];
+      _entries = [
+        _entry('network timeout warning', level: Level.WARNING),
+        _entry('auth success', level: Level.WARNING),
+      ];
       await pumpScreen(tester);
 
       await tester.enterText(find.byKey(const Key('app_logs_pattern_input')), 'timeout');
@@ -167,7 +173,7 @@ void main() {
     });
 
     testWidgets('submitting pattern input adds exclude filter', (tester) async {
-      _entries = [_entry('alpha'), _entry('beta')];
+      _entries = [_entry('alpha', level: Level.WARNING), _entry('beta', level: Level.WARNING)];
       await pumpScreen(tester);
 
       await tester.enterText(find.byKey(const Key('app_logs_pattern_input')), 'alpha');
@@ -179,7 +185,10 @@ void main() {
     });
 
     testWidgets('clear filters resets search and patterns', (tester) async {
-      _entries = [_entry('foo event'), _entry('bar event')];
+      _entries = [
+        _entry('foo event', level: Level.WARNING),
+        _entry('bar event', level: Level.WARNING),
+      ];
       await pumpScreen(tester);
 
       await tester.enterText(find.byKey(const Key('app_logs_search')), 'foo');
@@ -198,7 +207,10 @@ void main() {
     });
 
     testWidgets('shows filtered count when entries are filtered out', (tester) async {
-      _entries = [_entry('alpha event'), _entry('beta event')];
+      _entries = [
+        _entry('alpha event', level: Level.WARNING),
+        _entry('beta event', level: Level.WARNING),
+      ];
       await pumpScreen(tester);
 
       await tester.enterText(find.byKey(const Key('app_logs_search')), 'nomatch');
@@ -210,18 +222,58 @@ void main() {
     });
 
     testWidgets('clear logs button removes all entries', (tester) async {
-      _entries = [_entry('first'), _entry('second')];
+      _entries = [_entry('first', level: Level.WARNING), _entry('second', level: Level.WARNING)];
       await pumpScreen(tester);
 
       expect(find.text('first'), findsOneWidget);
       expect(find.text('second'), findsOneWidget);
 
-      await tester.tap(find.text('Clear'));
+      await tester.tap(find.byKey(const Key('app_logs_clear')));
       await tester.pumpAndSettle();
 
       expect(find.text('first'), findsNothing);
       expect(find.text('second'), findsNothing);
       expect(find.byType(ListView), findsNothing);
+    });
+
+    testWidgets('resume-live button is hidden when list is at the bottom', (tester) async {
+      _entries = [_entry('only entry', level: Level.WARNING)];
+      await pumpScreen(tester);
+
+      expect(find.byKey(const Key('app_logs_resume_live')), findsNothing);
+    });
+
+    testWidgets('scrolling up shows resume-live button and freezes the list', (tester) async {
+      _entries = List.generate(
+        50,
+        (i) => _entry('log entry $i', level: Level.WARNING, time: DateTime(2026, 1, 1, 0, 0, i)),
+      );
+      await pumpScreen(tester);
+
+      expect(find.byKey(const Key('app_logs_resume_live')), findsNothing);
+
+      await tester.drag(find.byKey(const Key('app_logs_list')), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('app_logs_resume_live')), findsOneWidget);
+    });
+
+    testWidgets('tapping resume-live button hides the button', (tester) async {
+      _entries = List.generate(
+        50,
+        (i) => _entry('log entry $i', level: Level.WARNING, time: DateTime(2026, 1, 1, 0, 0, i)),
+      );
+      await pumpScreen(tester);
+
+      await tester.drag(find.byKey(const Key('app_logs_list')), const Offset(0, 300));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('app_logs_resume_live')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('app_logs_resume_live')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('app_logs_resume_live')), findsNothing);
     });
 
     testWidgets('tapping log entry copies formatted text and shows snackbar', (tester) async {
@@ -272,6 +324,139 @@ void main() {
       final context = tester.element(find.byType(AppLogsScreen));
       final l10n = AppLocalizations.of(context);
       expect(find.text(l10n.rawDebugViewCopied), findsOneWidget);
+    });
+
+    testWidgets('renders WARNING log entry', (tester) async {
+      _entries = [_entry('low disk space', level: Level.WARNING)];
+      await pumpScreen(tester);
+
+      expect(find.text('WARNING'), findsOneWidget);
+    });
+
+    testWidgets('copy all button copies all visible entries to clipboard', (tester) async {
+      String? clipboardText;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            clipboardText = call.arguments['text'] as String?;
+          }
+          return null;
+        },
+      );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      _entries = [
+        _entry('first message', time: DateTime(2026, 1, 1, 10)),
+        _entry('second message', time: DateTime(2026, 1, 1, 10, 0, 1)),
+        _entry('third message', time: DateTime(2026, 1, 1, 10, 0, 2)),
+      ];
+
+      await pumpScreen(tester);
+
+      await tester.tap(find.text('INFO').first);
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('app_logs_copy_all')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('app_logs_copy_all')));
+      await tester.pumpAndSettle();
+
+      expect(clipboardText, isNotNull);
+      expect(clipboardText, contains('first message'));
+      expect(clipboardText, contains('second message'));
+      expect(clipboardText, contains('third message'));
+
+      final context = tester.element(find.byType(AppLogsScreen));
+      final l10n = AppLocalizations.of(context);
+      expect(find.text(l10n.rawDebugViewCopied), findsOneWidget);
+    });
+
+    testWidgets('copy all button is hidden when no entries', (tester) async {
+      await pumpScreen(tester);
+
+      expect(find.byKey(const Key('app_logs_copy_all')), findsNothing);
+    });
+
+    testWidgets('copy all button copies filtered entries only', (tester) async {
+      String? clipboardText;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        SystemChannels.platform,
+        (call) async {
+          if (call.method == 'Clipboard.setData') {
+            clipboardText = call.arguments['text'] as String?;
+          }
+          return null;
+        },
+      );
+      addTearDown(() {
+        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+          SystemChannels.platform,
+          null,
+        );
+      });
+
+      _entries = [
+        _entry('alpha message', level: Level.WARNING),
+        _entry('beta message', level: Level.WARNING),
+        _entry('gamma message', level: Level.WARNING),
+      ];
+
+      await pumpScreen(tester);
+
+      await tester.enterText(find.byKey(const Key('app_logs_search')), 'beta');
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('app_logs_copy_all')));
+      await tester.pumpAndSettle();
+
+      expect(clipboardText, isNotNull);
+      expect(clipboardText, contains('beta message'));
+      expect(clipboardText, isNot(contains('alpha message')));
+      expect(clipboardText, isNot(contains('gamma message')));
+    });
+
+    testWidgets('renders SHOUT level with destructive color styling', (tester) async {
+      _entries = [_entry('critical error', level: Level.SHOUT)];
+      await pumpScreen(tester);
+
+      expect(find.text('SHOUT'), findsOneWidget);
+    });
+
+    testWidgets('renders INFO level entry', (tester) async {
+      _entries = [_entry('info message')];
+      await pumpScreen(tester);
+
+      await tester.tap(find.text('INFO').first);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(of: find.byKey(const Key('app_logs_list')), matching: find.text('INFO')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('INFO logs are hidden by default and appear after enabling INFO level', (
+      tester,
+    ) async {
+      _entries = [
+        _entry('info only'),
+        _entry('warning only', level: Level.WARNING),
+      ];
+      await pumpScreen(tester);
+
+      expect(find.text('warning only'), findsOneWidget);
+      expect(find.text('info only'), findsNothing);
+
+      await tester.tap(find.text('INFO').first);
+      await tester.pumpAndSettle();
+
+      expect(find.text('info only'), findsOneWidget);
     });
   });
 }

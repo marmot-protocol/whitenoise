@@ -7,40 +7,47 @@ import 'package:whitenoise/hooks/use_edit_profile.dart'
     show EditProfileLoadingState, EditProfileState, useEditProfile;
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/src/rust/api/users.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import '../mocks/mock_account_pubkey_notifier.dart';
+import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
-class _MockApi implements RustLibApi {
+class _MockApi extends MockWnApi {
   FlutterMetadata? updatedMetadata;
   String? updatedPubkey;
   bool shouldThrowOnLoad = false;
   bool shouldThrowOnUpdate = false;
   bool shouldThrowOnUpload = false;
 
+  FlutterMetadata _currentMetadata() {
+    return updatedMetadata ??
+        const FlutterMetadata(
+          name: 'Test User',
+          displayName: 'Test Display Name',
+          about: 'Test About',
+          nip05: 'test@example.com',
+          picture: 'https://example.com/picture.jpg',
+          banner: 'https://example.com/banner.jpg',
+          website: 'https://example.com',
+          lud06: 'lnurl1test',
+          lud16: 'test@example.com',
+          custom: {'lnurl': 'lnurl1test', 'other_field': 'other_value'},
+        );
+  }
+
   @override
-  Future<FlutterMetadata> crateApiUsersUserMetadata({
+  Future<User> crateApiUsersGetUser({
     required bool blockingDataSync,
     required String pubkey,
   }) async {
     if (shouldThrowOnLoad) {
       throw Exception('Load error');
     }
-    if (updatedMetadata != null) {
-      return updatedMetadata!;
-    }
-    return const FlutterMetadata(
-      name: 'Test User',
-      displayName: 'Test Display Name',
-      about: 'Test About',
-      nip05: 'test@example.com',
-      picture: 'https://example.com/picture.jpg',
-      banner: 'https://example.com/banner.jpg',
-      website: 'https://example.com',
-      lud06: 'lnurl1test',
-      lud16: 'test@example.com',
-      custom: {'lnurl': 'lnurl1test', 'other_field': 'other_value'},
+    return buildMockUser(
+      pubkey,
+      metadata: _currentMetadata(),
     );
   }
 
@@ -73,9 +80,6 @@ class _MockApi implements RustLibApi {
     }
     return 'https://example.com/uploaded.jpg';
   }
-
-  @override
-  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
 class _MockFile extends Fake implements File {

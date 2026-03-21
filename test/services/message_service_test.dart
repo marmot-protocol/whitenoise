@@ -20,14 +20,26 @@ class _MockTag implements Tag {
   bool get isDisposed => false;
 }
 
+const _mockNeventPrefix = 'nostr:nevent1mock';
+
 class _MockApi extends MockWnApi {
   final List<({String pubkey, String groupId, String message, int kind, List<Tag>? tags})>
   sentMessages = [];
+  final List<({String pubkey, String groupId, String eventId})> retryAttempts = [];
   bool shouldFailSendMessage = false;
+  bool shouldFailRetry = false;
 
   @override
   Future<Tag> crateApiUtilsTagFromVec({required List<String> vec}) async {
     return _MockTag(vec);
+  }
+
+  @override
+  String crateApiUtilsEventIdToNeventUri({
+    required String eventIdHex,
+    required String pubkeyHex,
+  }) {
+    return '$_mockNeventPrefix$eventIdHex';
   }
 
   @override
@@ -49,6 +61,16 @@ class _MockApi extends MockWnApi {
       tokens: const [],
     );
   }
+
+  @override
+  Future<void> crateApiMessagesRetryMessagePublish({
+    required String pubkey,
+    required String groupId,
+    required String eventId,
+  }) async {
+    retryAttempts.add((pubkey: pubkey, groupId: groupId, eventId: eventId));
+    if (shouldFailRetry) throw Exception('retry failed');
+  }
 }
 
 void main() {
@@ -62,8 +84,47 @@ void main() {
 
   setUp(() {
     mockApi.sentMessages.clear();
+    mockApi.retryAttempts.clear();
     mockApi.shouldFailSendMessage = false;
+    mockApi.shouldFailRetry = false;
     service = const MessageService(pubkey: _testPubkey, groupId: 'group1');
+  });
+
+  group('retryMessage', () {
+    test('calls retry API once', () async {
+      await service.retryMessage(eventId: 'event123');
+
+      expect(mockApi.retryAttempts.length, 1);
+    });
+
+    test('passes correct pubkey from constructor', () async {
+      await service.retryMessage(eventId: 'event123');
+
+      expect(mockApi.retryAttempts.first.pubkey, _testPubkey);
+    });
+
+    test('passes correct groupId from constructor', () async {
+      await service.retryMessage(eventId: 'event123');
+
+      expect(mockApi.retryAttempts.first.groupId, 'group1');
+    });
+
+    test('passes correct eventId argument', () async {
+      await service.retryMessage(eventId: 'event123');
+
+      expect(mockApi.retryAttempts.first.eventId, 'event123');
+    });
+
+    test('rethrows when API call fails', () async {
+      mockApi.shouldFailRetry = true;
+
+      expect(
+        () => service.retryMessage(eventId: 'event123'),
+        throwsA(
+          isA<Exception>().having((e) => e.toString(), 'message', contains('retry failed')),
+        ),
+      );
+    });
   });
 
   group('sendTextMessage', () {
@@ -131,7 +192,7 @@ void main() {
       expect(mockApi.sentMessages.length, 1);
     });
 
-    test('calls API with content when replying', () async {
+    test('prepends nevent URI to content when replying', () async {
       await service.sendTextMessage(
         content: 'Reply content',
         replyToMessageId: testReplyId,
@@ -139,7 +200,10 @@ void main() {
         replyToMessageKind: testReplyKind,
       );
 
-      expect(mockApi.sentMessages.first.message, 'Reply content');
+      expect(
+        mockApi.sentMessages.first.message,
+        '$_mockNeventPrefix$testReplyId\nReply content',
+      );
     });
 
     test('calls API with text message kind (9) when replying', () async {
@@ -153,7 +217,7 @@ void main() {
       expect(mockApi.sentMessages.first.kind, 9);
     });
 
-    test('sends e tag with reply message id', () async {
+    test('sends single q tag with event id and pubkey', () async {
       await service.sendTextMessage(
         content: 'Reply content',
         replyToMessageId: testReplyId,
@@ -162,31 +226,8 @@ void main() {
       );
 
       final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
-      expect(tags[0].vec, ['e', testReplyId]);
-    });
-
-    test('sends p tag with reply message pubkey', () async {
-      await service.sendTextMessage(
-        content: 'Reply content',
-        replyToMessageId: testReplyId,
-        replyToMessagePubkey: testReplyPubkey,
-        replyToMessageKind: testReplyKind,
-      );
-
-      final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
-      expect(tags[1].vec, ['p', testReplyPubkey, '']);
-    });
-
-    test('sends k tag with reply message kind', () async {
-      await service.sendTextMessage(
-        content: 'Reply content',
-        replyToMessageId: testReplyId,
-        replyToMessagePubkey: testReplyPubkey,
-        replyToMessageKind: testReplyKind,
-      );
-
-      final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
-      expect(tags[2].vec, ['k', testReplyKind.toString()]);
+      expect(tags.length, 1);
+      expect(tags[0].vec, ['q', testReplyId, '', testReplyPubkey]);
     });
 
     test('sends no tags when only replyToMessageId provided', () async {
@@ -214,6 +255,15 @@ void main() {
       );
 
       expect(mockApi.sentMessages.first.tags, isNull);
+    });
+
+    test('does not prepend nevent URI when reply params incomplete', () async {
+      await service.sendTextMessage(
+        content: 'Reply content',
+        replyToMessageId: testReplyId,
+      );
+
+      expect(mockApi.sentMessages.first.message, 'Reply content');
     });
   });
 
@@ -643,7 +693,7 @@ void main() {
       const testReplyPubkey = testPubkeyB;
       const testReplyKind = 9;
 
-      test('sends e tag with reply message id', () async {
+      test('sends single q tag with event id and pubkey', () async {
         await service.sendMessage(
           content: 'Reply content',
           replyToMessageId: testReplyId,
@@ -652,10 +702,11 @@ void main() {
         );
 
         final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
-        expect(tags[0].vec, ['e', testReplyId]);
+        expect(tags.length, 1);
+        expect(tags[0].vec, ['q', testReplyId, '', testReplyPubkey]);
       });
 
-      test('sends p tag with reply message pubkey', () async {
+      test('prepends nevent URI to content', () async {
         await service.sendMessage(
           content: 'Reply content',
           replyToMessageId: testReplyId,
@@ -663,20 +714,10 @@ void main() {
           replyToMessageKind: testReplyKind,
         );
 
-        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
-        expect(tags[1].vec, ['p', testReplyPubkey, '']);
-      });
-
-      test('sends k tag with reply message kind', () async {
-        await service.sendMessage(
-          content: 'Reply content',
-          replyToMessageId: testReplyId,
-          replyToMessagePubkey: testReplyPubkey,
-          replyToMessageKind: testReplyKind,
+        expect(
+          mockApi.sentMessages.first.message,
+          '$_mockNeventPrefix$testReplyId\nReply content',
         );
-
-        final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
-        expect(tags[2].vec, ['k', testReplyKind.toString()]);
       });
     });
 
@@ -820,7 +861,7 @@ void main() {
     });
 
     group('with reply and media', () {
-      test('sends both reply tags and media tags', () async {
+      test('sends q tag and imeta tag', () async {
         final media = createMediaFile();
 
         await service.sendMessage(
@@ -832,11 +873,30 @@ void main() {
         );
 
         final tags = mockApi.sentMessages.first.tags!.cast<_MockTag>();
-        expect(tags.length, 4);
-        expect(tags[0].vec[0], 'e');
-        expect(tags[1].vec[0], 'p');
-        expect(tags[2].vec[0], 'k');
-        expect(tags[3].vec[0], 'imeta');
+        expect(tags.length, 2);
+        expect(tags[0].vec[0], 'q');
+        expect(tags[1].vec[0], 'imeta');
+      });
+
+      test('prepends nevent URI to content with media', () async {
+        final media = createMediaFile();
+
+        await service.sendMessage(
+          content: 'Reply with media',
+          replyToMessageId: 'reply_id',
+          replyToMessagePubkey: testPubkeyB,
+          replyToMessageKind: 9,
+          mediaFiles: [media],
+        );
+
+        expect(
+          mockApi.sentMessages.first.message,
+          startsWith(_mockNeventPrefix),
+        );
+        expect(
+          mockApi.sentMessages.first.message,
+          endsWith('\nReply with media'),
+        );
       });
     });
   });

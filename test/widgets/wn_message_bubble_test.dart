@@ -79,13 +79,54 @@ void main() {
     });
 
     group('deleted message', () {
-      testWidgets('renders nothing when deleted', (tester) async {
+      testWidgets('renders deleted message style when deleted', (tester) async {
         await mountWidget(
-          const WnMessageBubble(direction: MessageDirection.incoming, isDeleted: true),
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: true,
+            deletedLabel: 'This message was deleted.',
+          ),
           tester,
         );
 
-        expect(find.byType(SizedBox), findsOneWidget);
+        expect(find.text('This message was deleted.'), findsOneWidget);
+      });
+
+      testWidgets('does not trigger onLongPress even when callback is provided', (tester) async {
+        var called = false;
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: true,
+            deletedLabel: 'This message was deleted.',
+            onLongPress: () => called = true,
+          ),
+          tester,
+        );
+
+        await tester.longPress(find.text('This message was deleted.'));
+        await tester.pump();
+
+        expect(called, isFalse);
+      });
+
+      testWidgets('is not swipeable even when onHorizontalDragEnd is provided', (tester) async {
+        var called = false;
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: true,
+            deletedLabel: 'This message was deleted.',
+            content: 'Deleted',
+            onHorizontalDragEnd: () => called = true,
+          ),
+          tester,
+        );
+
+        await tester.drag(find.text('This message was deleted.'), const Offset(200, 0));
+        await tester.pump();
+
+        expect(called, isFalse);
       });
     });
 
@@ -293,6 +334,23 @@ void main() {
 
         expect(find.byKey(const Key('cancel_quote_button')), findsNothing);
       });
+
+      testWidgets('status row aligns to bubble right edge with wide reply', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            content: 'Hi',
+            timestamp: '12:00',
+            replyContent: SizedBox(width: 250, height: 30),
+          ),
+          tester,
+        );
+
+        final bubbleRect = tester.getRect(find.byType(WnMessageBubble));
+        final statusRight = tester.getTopRight(find.byKey(const Key('chat_status_icon')));
+        expect(statusRight.dx, closeTo(bubbleRect.right, 20));
+      });
     });
 
     group('mediaContent', () {
@@ -347,18 +405,41 @@ void main() {
         expect(find.byKey(const Key('media_widget')), findsOneWidget);
         expect(find.text(''), findsNothing);
       });
+
+      testWidgets('does not use IntrinsicWidth when mediaContent is provided', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            mediaContent: SizedBox(key: Key('media_widget'), width: 100, height: 100),
+          ),
+          tester,
+        );
+
+        expect(find.byType(IntrinsicWidth), findsNothing);
+      });
+
+      testWidgets('uses IntrinsicWidth when mediaContent is null', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        expect(find.byType(IntrinsicWidth), findsOneWidget);
+      });
     });
 
     group('max bubble width', () {
-      // Viewport = 420px (testDesignWidth), column = viewport − 20px = 400px, max = 80% of 400 = 320px.
-      const expectedMaxWidth = (testDesignWidth - 20) * 0.8;
-
       Finder findBubbleConstrainedBox() => find.descendant(
         of: find.byType(WnMessageBubble),
         matching: find.byType(ConstrainedBox),
       );
 
-      testWidgets('is 80% of (viewport − 20px)', (tester) async {
+      testWidgets('is 80% of available width from parent constraints', (tester) async {
         await mountWidget(
           const WnMessageBubble(direction: MessageDirection.incoming, isDeleted: false),
           tester,
@@ -367,7 +448,50 @@ void main() {
         final constrainedBox = tester.widget<ConstrainedBox>(
           findBubbleConstrainedBox().first,
         );
-        expect(constrainedBox.constraints.maxWidth, expectedMaxWidth);
+        expect(constrainedBox.constraints.maxWidth, testDesignWidth * 0.8);
+      });
+
+      testWidgets('adapts to narrower parent constraint', (tester) async {
+        const parentWidth = 300.0;
+        await mountWidget(
+          const SizedBox(
+            width: parentWidth,
+            child: WnMessageBubble(direction: MessageDirection.incoming, isDeleted: false),
+          ),
+          tester,
+        );
+
+        final constrainedBox = tester.widget<ConstrainedBox>(
+          findBubbleConstrainedBox().first,
+        );
+        expect(constrainedBox.constraints.maxWidth, parentWidth * 0.8);
+      });
+
+      testWidgets('short text bubble is narrower than maxBubbleWidth', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            content: 'Hi',
+            timestamp: '12:00',
+          ),
+          tester,
+        );
+
+        final containerRect = tester.getRect(
+          find
+              .descendant(
+                of: find.byType(WnMessageBubble),
+                matching: find.byType(Container),
+              )
+              .first,
+        );
+        final maxBubbleWidth = testDesignWidth * 0.8;
+        expect(
+          containerRect.width,
+          lessThan(maxBubbleWidth),
+          reason: 'short text bubble should shrink-wrap, not fill max width',
+        );
       });
     });
 
@@ -410,6 +534,37 @@ void main() {
         );
 
         expect(find.text('12:29'), findsNothing);
+      });
+
+      testWidgets('renders timestamp for deleted message when showTail is true', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: true,
+            deletedLabel: 'This message was deleted.',
+            showTail: true,
+            timestamp: '12:29',
+          ),
+          tester,
+        );
+
+        expect(find.textContaining('12:29', findRichText: true), findsOneWidget);
+      });
+
+      testWidgets('does not render timestamp for deleted message when showTail is false', (
+        tester,
+      ) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: true,
+            deletedLabel: 'This message was deleted.',
+            timestamp: '12:29',
+          ),
+          tester,
+        );
+
+        expect(find.textContaining('12:29', findRichText: true), findsNothing);
       });
     });
 
@@ -476,6 +631,23 @@ void main() {
         expect(find.byType(WnChatStatus), findsNothing);
       });
 
+      testWidgets('does not show status icon for deleted outgoing bubble', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: true,
+            deletedLabel: 'This message was deleted.',
+            showTail: true,
+            timestamp: '12:00',
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('chat_status_icon')), findsNothing);
+        expect(find.byType(WnChatStatus), findsNothing);
+      });
+
       testWidgets('shows status icon for outgoing with timestamp only', (tester) async {
         await mountWidget(
           const WnMessageBubble(
@@ -514,9 +686,7 @@ void main() {
           tester,
         );
 
-        final padding = tester.widget<Padding>(
-          find.descendant(of: find.byType(WnMessageBubble), matching: find.byType(Padding)).first,
-        );
+        final padding = tester.widget<Padding>(find.byKey(const Key('bubble_outer_padding')));
         expect(padding.padding.resolve(TextDirection.ltr).left, 0.0);
       });
 
@@ -531,9 +701,7 @@ void main() {
           tester,
         );
 
-        final padding = tester.widget<Padding>(
-          find.descendant(of: find.byType(WnMessageBubble), matching: find.byType(Padding)).first,
-        );
+        final padding = tester.widget<Padding>(find.byKey(const Key('bubble_outer_padding')));
         expect(padding.padding.resolve(TextDirection.ltr).left, greaterThan(0));
       });
 
@@ -551,11 +719,7 @@ void main() {
           tester,
         );
         tailIndent = tester
-            .widget<Padding>(
-              find
-                  .descendant(of: find.byType(WnMessageBubble), matching: find.byType(Padding))
-                  .first,
-            )
+            .widget<Padding>(find.byKey(const Key('bubble_outer_padding')))
             .padding
             .resolve(TextDirection.ltr)
             .left;
@@ -570,16 +734,43 @@ void main() {
           tester,
         );
         avatarIndent = tester
-            .widget<Padding>(
-              find
-                  .descendant(of: find.byType(WnMessageBubble), matching: find.byType(Padding))
-                  .first,
-            )
+            .widget<Padding>(find.byKey(const Key('bubble_outer_padding')))
             .padding
             .resolve(TextDirection.ltr)
             .left;
 
         expect(avatarIndent, greaterThan(tailIndent));
+      });
+    });
+
+    group('trailingIndent', () {
+      testWidgets('outgoing bubble without tail has trailing indent', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        final padding = tester.widget<Padding>(find.byKey(const Key('bubble_outer_padding')));
+        expect(padding.padding.resolve(TextDirection.ltr).right, greaterThan(0));
+      });
+
+      testWidgets('outgoing bubble with tail has no trailing indent', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            showTail: true,
+            content: 'Hello',
+          ),
+          tester,
+        );
+
+        final padding = tester.widget<Padding>(find.byKey(const Key('bubble_outer_padding')));
+        expect(padding.padding.resolve(TextDirection.ltr).right, 0.0);
       });
     });
 
@@ -668,7 +859,7 @@ void main() {
       ];
 
       testWidgets(
-        'outgoing: timestamp right edge aligns with bubble right edge when reactions wrap',
+        'outgoing: timestamp is within bubble bounds when reactions wrap',
         (tester) async {
           await mountWidget(
             WnMessageBubble(
@@ -682,21 +873,19 @@ void main() {
             tester,
           );
 
-          final containerRight = tester
-              .getRect(
-                find
-                    .descendant(
-                      of: find.byType(WnMessageBubble),
-                      matching: find.byType(Container),
-                    )
-                    .first,
-              )
-              .right;
-          final tsRight = tester.getRect(find.text('12:00')).right;
+          final containerRect = tester.getRect(
+            find
+                .descendant(
+                  of: find.byType(WnMessageBubble),
+                  matching: find.byType(Container),
+                )
+                .first,
+          );
+          final tsRect = tester.getRect(find.text('12:00'));
           expect(
-            containerRight - tsRight,
-            lessThan(50),
-            reason: 'timestamp must be near the bubble right edge',
+            containerRect.contains(tsRect.center),
+            isTrue,
+            reason: 'timestamp must be visible inside the bubble',
           );
         },
       );
@@ -773,6 +962,34 @@ void main() {
               reason: 'reaction at $rect must be inside container $containerRect',
             );
           }
+        },
+      );
+
+      testWidgets(
+        'outgoing: status aligns to bubble right edge when reactions are wider than text',
+        (tester) async {
+          await mountWidget(
+            WnMessageBubble(
+              direction: MessageDirection.outgoing,
+              isDeleted: false,
+              showTail: true,
+              content: 'Hi',
+              timestamp: '12:00',
+              reactions: manyReactions(),
+            ),
+            tester,
+          );
+
+          final containerRect = tester.getRect(
+            find
+                .descendant(
+                  of: find.byType(WnMessageBubble),
+                  matching: find.byType(Container),
+                )
+                .first,
+          );
+          final statusRight = tester.getTopRight(find.byKey(const Key('chat_status_icon')));
+          expect(statusRight.dx, closeTo(containerRect.right, 12));
         },
       );
     });
@@ -885,6 +1102,7 @@ void main() {
           const WnMessageBubble(
             direction: MessageDirection.incoming,
             isDeleted: true,
+            deletedLabel: 'This message was deleted.',
             showTail: true,
           ),
           tester,
@@ -904,9 +1122,7 @@ void main() {
           tester,
         );
 
-        final padding = tester.widget<Padding>(
-          find.ancestor(of: find.byType(IntrinsicWidth), matching: find.byType(Padding)).first,
-        );
+        final padding = tester.widget<Padding>(find.byKey(const Key('bubble_tail_padding')));
         expect(padding.padding.resolve(TextDirection.ltr).right, greaterThan(0));
       });
 
@@ -920,9 +1136,7 @@ void main() {
           tester,
         );
 
-        final padding = tester.widget<Padding>(
-          find.ancestor(of: find.byType(IntrinsicWidth), matching: find.byType(Padding)).first,
-        );
+        final padding = tester.widget<Padding>(find.byKey(const Key('bubble_tail_padding')));
         expect(padding.padding.resolve(TextDirection.ltr).right, 0.0);
       });
     });
@@ -1039,6 +1253,94 @@ void main() {
 
         final nameText = tester.widget<Text>(find.text('Alice'));
         expect(nameText.style?.color, nameColor);
+      });
+    });
+
+    group('onStatusTap', () {
+      testWidgets('calls onStatusTap when tapping timestamp row (text with timestamp)', (
+        tester,
+      ) async {
+        var called = false;
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            content: 'Failed message',
+            timestamp: '14:30',
+            deliveryStatus: ChatStatusType.failed,
+            onStatusTap: () => called = true,
+          ),
+          tester,
+        );
+
+        await tester.tap(find.byKey(const Key('status_tap_area')));
+        await tester.pump();
+
+        expect(called, isTrue);
+      });
+
+      testWidgets('calls onStatusTap when tapping standalone timestamp row', (tester) async {
+        var called = false;
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            timestamp: '14:30',
+            mediaContent: const SizedBox(width: 100, height: 100),
+            deliveryStatus: ChatStatusType.failed,
+            onStatusTap: () => called = true,
+          ),
+          tester,
+        );
+
+        await tester.tap(find.byKey(const Key('status_tap_area')));
+        await tester.pump();
+
+        expect(called, isTrue);
+      });
+
+      testWidgets('no tap area when onStatusTap is null', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.outgoing,
+            isDeleted: false,
+            content: 'Normal message',
+            timestamp: '14:30',
+            deliveryStatus: ChatStatusType.sending,
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('status_tap_area')), findsNothing);
+      });
+    });
+
+    group('deleted bubble border', () {
+      testWidgets('has a shape decoration', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: true,
+            deletedLabel: 'Deleted',
+          ),
+          tester,
+        );
+        final container = tester.widget<Container>(
+          find.byKey(const Key('deleted_bubble_border')),
+        );
+        expect(container.decoration, isA<ShapeDecoration>());
+      });
+
+      testWidgets('non-deleted bubble has no shape decoration', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'Hello',
+          ),
+          tester,
+        );
+        expect(find.byKey(const Key('deleted_bubble_border')), findsNothing);
       });
     });
 

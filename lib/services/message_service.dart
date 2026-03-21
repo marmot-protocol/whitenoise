@@ -12,6 +12,21 @@ class MessageService {
 
   const MessageService({required this.pubkey, required this.groupId});
 
+  Future<void> retryMessage({required String eventId}) async {
+    _logger.info('retryMessage START groupId=$groupId eventId=$eventId');
+    try {
+      await messages_api.retryMessagePublish(
+        pubkey: pubkey,
+        groupId: groupId,
+        eventId: eventId,
+      );
+      _logger.info('retryMessage OK groupId=$groupId eventId=$eventId');
+    } catch (e, st) {
+      _logger.severe('retryMessage FAILED groupId=$groupId eventId=$eventId', e, st);
+      rethrow;
+    }
+  }
+
   Future<void> sendMessage({
     required String content,
     String? replyToMessageId,
@@ -25,24 +40,26 @@ class MessageService {
     );
 
     try {
-      final replyTags =
-          (replyToMessageId != null && replyToMessagePubkey != null && replyToMessageKind != null)
-          ? await _eventReferenceTags(
-              eventId: replyToMessageId,
-              eventPubkey: replyToMessagePubkey,
-              eventKind: replyToMessageKind,
-            )
+      final isReply =
+          replyToMessageId != null && replyToMessagePubkey != null && replyToMessageKind != null;
+
+      final replyTags = isReply
+          ? [await _replyTag(eventId: replyToMessageId, eventPubkey: replyToMessagePubkey)]
           : <messages_api.Tag>[];
 
       final mediaTags = await _buildMediaTags(mediaFiles: mediaFiles);
       final allTags = [...replyTags, ...mediaTags];
+
+      final message = isReply
+          ? _prependNeventUri(content, replyToMessageId, replyToMessagePubkey)
+          : content;
 
       _logger.info('sendMessage calling Rust API tagsCount=${allTags.length}');
 
       final result = await messages_api.sendMessageToGroup(
         pubkey: pubkey,
         groupId: groupId,
-        message: content,
+        message: message,
         kind: NostrEventKinds.chatMessage,
         tags: allTags.isEmpty ? null : allTags,
       );
@@ -68,21 +85,23 @@ class MessageService {
     );
 
     try {
-      final tags =
-          (replyToMessageId != null && replyToMessagePubkey != null && replyToMessageKind != null)
-          ? await _eventReferenceTags(
-              eventId: replyToMessageId,
-              eventPubkey: replyToMessagePubkey,
-              eventKind: replyToMessageKind,
-            )
+      final isReply =
+          replyToMessageId != null && replyToMessagePubkey != null && replyToMessageKind != null;
+
+      final tags = isReply
+          ? [await _replyTag(eventId: replyToMessageId, eventPubkey: replyToMessagePubkey)]
           : null;
+
+      final message = isReply
+          ? _prependNeventUri(content, replyToMessageId, replyToMessagePubkey)
+          : content;
 
       _logger.info('sendTextMessage calling Rust API hasTags=${tags != null}');
 
       final result = await messages_api.sendMessageToGroup(
         pubkey: pubkey,
         groupId: groupId,
-        message: content,
+        message: message,
         kind: NostrEventKinds.chatMessage,
         tags: tags,
       );
@@ -213,6 +232,23 @@ class MessageService {
       _logger.severe('_deleteEvent FAILED groupId=$groupId eventId=$eventId', e, st);
       rethrow;
     }
+  }
+
+  // NIP-C7: single q tag for replies
+  Future<messages_api.Tag> _replyTag({
+    required String eventId,
+    required String eventPubkey,
+  }) {
+    return utils_api.tagFromVec(vec: ['q', eventId, '', eventPubkey]);
+  }
+
+  // NIP-C7: prepend nostr:nevent1... URI to reply content
+  String _prependNeventUri(String content, String eventId, String eventPubkey) {
+    final neventUri = utils_api.eventIdToNeventUri(
+      eventIdHex: eventId,
+      pubkeyHex: eventPubkey,
+    );
+    return '$neventUri\n$content';
   }
 
   Future<List<messages_api.Tag>> _eventReferenceTags({

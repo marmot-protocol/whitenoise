@@ -8,7 +8,7 @@ import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_info_screen.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/chat_screen.dart';
-import 'package:whitenoise/screens/wip_screen.dart';
+import 'package:whitenoise/screens/group_info_screen.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
@@ -66,6 +66,7 @@ class _MockApi extends MockWnApi {
   FlutterMetadata? userMetadataResponse;
   bool isDm = false;
   List<String> groupMembers = [];
+  String? welcomerPubkey;
 
   @override
   void reset() {
@@ -80,6 +81,7 @@ class _MockApi extends MockWnApi {
     userMetadataResponse = null;
     isDm = false;
     groupMembers = [];
+    welcomerPubkey = null;
   }
 
   void emitMessage(ChatMessage message) {
@@ -139,6 +141,20 @@ class _MockApi extends MockWnApi {
     required String pubkey,
     required String groupId,
   }) async => groupMembers;
+
+  @override
+  Future<AccountGroup> crateApiAccountGroupsGetAccountGroup({
+    required String accountPubkey,
+    required String mlsGroupId,
+  }) async {
+    return AccountGroup(
+      accountPubkey: accountPubkey,
+      mlsGroupId: mlsGroupId,
+      welcomerPubkey: welcomerPubkey,
+      createdAt: PlatformInt64Util.from(0),
+      updatedAt: PlatformInt64Util.from(0),
+    );
+  }
 
   @override
   Future<AccountGroup> crateApiAccountGroupsAcceptAccountGroup({
@@ -280,11 +296,36 @@ void main() {
       });
     });
 
-    group('with no messages', () {
-      testWidgets('shows empty state text', (tester) async {
+    group('inviter system message', () {
+      testWidgets('shows inviter name when welcomerPubkey is set', (tester) async {
+        _api.welcomerPubkey = testPubkeyC;
+        _api.userMetadataResponse = const FlutterMetadata(
+          displayName: 'Alice',
+          custom: {},
+        );
         await pumpInviteScreen(tester);
 
-        expect(find.text('You are invited to a secure chat'), findsOneWidget);
+        expect(find.text('Alice invited you to chat'), findsOneWidget);
+      });
+
+      testWidgets('does not show inviter message when welcomerPubkey is null', (tester) async {
+        _api.welcomerPubkey = null;
+        await pumpInviteScreen(tester);
+
+        expect(find.textContaining('invited you to chat'), findsNothing);
+      });
+
+      testWidgets('shows inviter message even when there are messages', (tester) async {
+        _api.welcomerPubkey = testPubkeyC;
+        _api.userMetadataResponse = const FlutterMetadata(
+          displayName: 'Bob',
+          custom: {},
+        );
+        _api.initialMessages = [_message('m1'), _message('m2')];
+        await pumpInviteScreen(tester);
+
+        expect(find.text('Bob invited you to chat'), findsOneWidget);
+        expect(find.byType(WnMessageBubble), findsNWidgets(2));
       });
     });
 
@@ -297,12 +338,6 @@ void main() {
         await pumpInviteScreen(tester);
 
         expect(find.byType(WnMessageBubble), findsNWidgets(2));
-      });
-
-      testWidgets('hides empty state text', (tester) async {
-        await pumpInviteScreen(tester);
-
-        expect(find.text('You are invited to a secure chat'), findsNothing);
       });
 
       testWidgets('does not display deleted message text', (tester) async {
@@ -388,7 +423,11 @@ void main() {
         ];
         await pumpInviteScreen(tester);
 
-        expect(find.text('Reply Author'), findsOneWidget);
+        final replyPreview = find.byType(ChatMessageQuote);
+        expect(
+          find.descendant(of: replyPreview, matching: find.text('Reply Author')),
+          findsOneWidget,
+        );
       });
 
       testWidgets('displays original message content in reply preview', (tester) async {
@@ -423,6 +462,59 @@ void main() {
 
         expect(find.byType(ChatMessageQuote), findsOneWidget);
         expect(find.text('Message not found'), findsOneWidget);
+      });
+    });
+
+    group('sender info on messages', () {
+      group('when group', () {
+        setUp(() {
+          _api.initialMessages = [_message('m1')];
+        });
+
+        testWidgets('shows sender name', (tester) async {
+          await pumpInviteScreen(tester);
+
+          expect(find.text('Author'), findsOneWidget);
+        });
+
+        testWidgets('shows sender avatar', (tester) async {
+          await pumpInviteScreen(tester);
+
+          expect(find.byType(WnAvatar), findsNWidgets(3));
+        });
+
+        testWidgets('shows Unknown user when metadata has no name', (tester) async {
+          _api.userMetadataResponse = const FlutterMetadata(custom: {});
+          await pumpInviteScreen(tester);
+
+          expect(find.text('Unknown user'), findsOneWidget);
+        });
+      });
+
+      group('when own message in group', () {
+        setUp(() {
+          _api.initialMessages = [_message('m1', pubkey: _testPubkey)];
+        });
+
+        testWidgets('does not show sender name or avatar', (tester) async {
+          await pumpInviteScreen(tester);
+
+          expect(find.byKey(const Key('bubble_avatar_row')), findsNothing);
+        });
+      });
+
+      group('when DM', () {
+        setUp(() {
+          _api.isDm = true;
+          _api.groupMembers = [_testPubkey, testPubkeyB];
+          _api.initialMessages = [_message('m1')];
+        });
+
+        testWidgets('does not show sender avatar', (tester) async {
+          await pumpInviteScreen(tester);
+
+          expect(find.byType(WnAvatar), findsNWidgets(2));
+        });
       });
     });
 
@@ -547,20 +639,20 @@ void main() {
       });
 
       group('when group', () {
-        testWidgets('header avatar navigates to WIP', (tester) async {
+        testWidgets('header avatar navigates to group info', (tester) async {
           await pumpInviteScreen(tester);
           await tester.tap(find.byKey(const Key('header_avatar_tap_area')));
           await tester.pumpAndSettle();
 
-          expect(find.byType(WipScreen), findsOneWidget);
+          expect(find.byType(GroupInfoScreen), findsOneWidget);
         });
 
-        testWidgets('large avatar navigates to WIP', (tester) async {
+        testWidgets('large avatar navigates to group info', (tester) async {
           await pumpInviteScreen(tester);
           await tester.tap(find.byKey(const Key('large_avatar_tap_area')));
           await tester.pumpAndSettle();
 
-          expect(find.byType(WipScreen), findsOneWidget);
+          expect(find.byType(GroupInfoScreen), findsOneWidget);
         });
       });
     });

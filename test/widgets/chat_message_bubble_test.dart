@@ -10,6 +10,7 @@ import 'package:whitenoise/widgets/chat_message_media.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/media_modal.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
+import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_reaction.dart';
 
@@ -56,6 +57,7 @@ ChatMessage _message({
   ReactionSummary reactions = const ReactionSummary(byEmoji: [], userReactions: []),
   List<MediaFile> mediaAttachments = const [],
   DateTime? createdAt,
+  DeliveryStatus? deliveryStatus,
 }) => ChatMessage(
   id: 'msg1',
   pubkey: testPubkeyA,
@@ -69,6 +71,7 @@ ChatMessage _message({
   reactions: reactions,
   mediaAttachments: mediaAttachments,
   kind: 9,
+  deliveryStatus: deliveryStatus,
 );
 
 void main() {
@@ -118,13 +121,54 @@ void main() {
     });
 
     group('deleted message', () {
-      testWidgets('renders nothing when message is deleted', (tester) async {
+      testWidgets('renders deleted message style when message is deleted', (tester) async {
         await mountWidget(
           ChatMessageBubble(message: _message(isDeleted: true), isOwnMessage: false),
           tester,
         );
 
+        expect(
+          find.textContaining('This message was deleted.', findRichText: true),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('hides original message body', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(message: _message(isDeleted: true), isOwnMessage: false),
+          tester,
+        );
+
+        expect(find.textContaining('Hello world', findRichText: true), findsNothing);
+      });
+    });
+
+    group('retried message', () {
+      testWidgets('renders SizedBox.shrink when delivery status is Retried', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(deliveryStatus: const DeliveryStatus.retried()),
+            isOwnMessage: true,
+          ),
+          tester,
+        );
+
         expect(find.byType(SizedBox), findsOneWidget);
+        expect(find.byType(WnMessageBubble), findsNothing);
+      });
+
+      testWidgets('renders WnMessageBubble when delivery status is Retried for non-own message', (
+        tester,
+      ) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(deliveryStatus: const DeliveryStatus.retried()),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+
+        expect(find.byType(WnMessageBubble), findsOneWidget);
       });
     });
 
@@ -292,15 +336,14 @@ void main() {
     });
 
     group('max bubble width', () {
-      // Viewport = 420px (testDesignWidth), column = viewport − 20px = 400px, max = 80% of 400 = 320px.
-      const expectedMaxWidth = (testDesignWidth - 20) * 0.8;
+      const expectedMaxWidth = testDesignWidth * 0.8;
 
       Finder findBubbleConstrainedBox() => find.descendant(
         of: find.byType(WnMessageBubble),
         matching: find.byType(ConstrainedBox),
       );
 
-      testWidgets('is 80% of (viewport − 20px)', (tester) async {
+      testWidgets('is 80% of viewport width', (tester) async {
         await mountWidget(
           ChatMessageBubble(message: _message(), isOwnMessage: false),
           tester,
@@ -391,6 +434,27 @@ void main() {
         );
 
         expect(find.text('14:30'), findsNothing);
+      });
+
+      testWidgets('shows status when delivery status is failed even if showTail is false', (
+        tester,
+      ) async {
+        final createdAt = DateTime(2024, 1, 15, 14, 30);
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(
+              createdAt: createdAt,
+              deliveryStatus: const DeliveryStatus.failed(reason: 'timeout'),
+            ),
+            isOwnMessage: true,
+            showTail: false,
+          ),
+          tester,
+        );
+
+        final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
+        expect(bubble.showTail, isFalse);
+        expect(find.text('14:30'), findsOneWidget);
       });
     });
 
@@ -532,6 +596,91 @@ void main() {
         );
 
         expect(find.byType(ChatMessageMedia), findsOneWidget);
+      });
+    });
+
+    group('delivery status', () {
+      testWidgets('maps Sending to sending status for own message', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(deliveryStatus: const DeliveryStatus.sending()),
+            isOwnMessage: true,
+          ),
+          tester,
+        );
+
+        final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
+        expect(bubble.deliveryStatus, ChatStatusType.sending);
+      });
+
+      testWidgets('maps Sent to sent status for own message', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(deliveryStatus: DeliveryStatus.sent(relayCount: BigInt.from(2))),
+            isOwnMessage: true,
+          ),
+          tester,
+        );
+
+        final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
+        expect(bubble.deliveryStatus, ChatStatusType.sent);
+      });
+
+      testWidgets('maps Failed to failed status for own message', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(deliveryStatus: const DeliveryStatus.failed(reason: 'timeout')),
+            isOwnMessage: true,
+          ),
+          tester,
+        );
+
+        final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
+        expect(bubble.deliveryStatus, ChatStatusType.failed);
+      });
+
+      testWidgets('does not pass delivery status for other user messages', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(deliveryStatus: const DeliveryStatus.sending()),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+
+        final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
+        expect(bubble.deliveryStatus, isNull);
+      });
+
+      testWidgets('passes onRetry as onStatusTap when status is failed', (tester) async {
+        var retryCalled = false;
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(deliveryStatus: const DeliveryStatus.failed(reason: 'timeout')),
+            isOwnMessage: true,
+            onRetry: () => retryCalled = true,
+          ),
+          tester,
+        );
+
+        final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
+        expect(bubble.onStatusTap, isNotNull);
+        bubble.onStatusTap!();
+        expect(retryCalled, isTrue);
+      });
+
+      testWidgets('does not pass onStatusTap when status is not failed', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(deliveryStatus: const DeliveryStatus.sending()),
+            isOwnMessage: true,
+            onRetry: () {},
+          ),
+          tester,
+        );
+
+        final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
+        expect(bubble.onStatusTap, isNull);
       });
     });
 

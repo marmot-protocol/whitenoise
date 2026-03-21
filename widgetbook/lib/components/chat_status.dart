@@ -18,7 +18,7 @@ Widget wnChatStatusShowcase(BuildContext context) {
   final selectedStatus = context.knobs.object.dropdown<ChatStatusType>(
     label: 'Status',
     options: ChatStatusType.values,
-    initialOption: ChatStatusType.sent,
+    initialOption: ChatStatusType.sending,
     labelBuilder: (value) => value.name,
   );
 
@@ -82,14 +82,14 @@ Widget wnChatStatusShowcase(BuildContext context) {
           'Icons showing the delivery state of your last sent message.',
           [
             const _StatusExample(
-              label: 'Sent',
-              description: 'Message sent but not yet delivered',
-              status: ChatStatusType.sent,
+              label: 'Sending',
+              description: 'Message is being sent',
+              status: ChatStatusType.sending,
             ),
             const _StatusExample(
-              label: 'Delivered',
-              description: 'Message delivered to recipient',
-              status: ChatStatusType.delivered,
+              label: 'Sent',
+              description: 'Message sent to relays',
+              status: ChatStatusType.sent,
             ),
             const _StatusExample(
               label: 'Read',

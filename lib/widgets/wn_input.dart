@@ -40,6 +40,7 @@ class WnInput extends HookWidget {
     this.inlineActionKey,
     this.trailingAction,
     this.focusNode,
+    this.onSubmitted,
   });
 
   final String placeholder;
@@ -61,6 +62,7 @@ class WnInput extends HookWidget {
   final Key? inlineActionKey;
   final Widget? trailingAction;
   final FocusNode? focusNode;
+  final void Function(String)? onSubmitted;
 
   bool get _hasInlineAction => inlineActionIcon != null;
 
@@ -205,6 +207,7 @@ class WnInput extends HookWidget {
                     enabled: enabled,
                     readOnly: readOnly,
                     onChanged: onChanged,
+                    onSubmitted: onSubmitted,
                     textInputAction: textInputAction,
                     style: typography.medium14.copyWith(
                       color: enabled
@@ -274,11 +277,13 @@ class WnInputTrailingButton extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.size = WnInputSize.size56,
+    this.filled = true,
   });
 
   final WnIcons icon;
   final VoidCallback onPressed;
   final WnInputSize size;
+  final bool filled;
 
   @override
   Widget build(BuildContext context) {
@@ -293,9 +298,9 @@ class WnInputTrailingButton extends StatelessWidget {
         width: buttonWidth,
         height: buttonHeight,
         decoration: BoxDecoration(
-          color: colors.fillSecondary,
+          color: filled ? colors.fillSecondary : Colors.transparent,
           borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(color: colors.borderTertiary),
+          border: filled ? Border.all(color: colors.borderTertiary) : null,
         ),
         child: Center(
           child: WnIcon(

@@ -17,7 +17,6 @@ class _MockApi extends MockWnApi {
   List<Relay> normalRelays = [];
   List<Relay> inboxRelays = [];
   List<Relay> keyPackageRelays = [];
-  List<(String, String)> relayStatuses = [];
   List<String> addedRelays = [];
   List<String> removedRelays = [];
 
@@ -68,13 +67,6 @@ class _MockApi extends MockWnApi {
     if (type == 'inbox') inboxRelays.removeWhere((r) => r.url == url);
     if (type == 'keyPackage') keyPackageRelays.removeWhere((r) => r.url == url);
   }
-
-  @override
-  Future<List<(String, String)>> crateApiRelaysGetAccountRelayStatuses({
-    required String pubkey,
-  }) async {
-    return relayStatuses;
-  }
 }
 
 class _MockAuthNotifier extends AuthNotifier {
@@ -97,7 +89,6 @@ void main() {
     mockApi.normalRelays = [];
     mockApi.inboxRelays = [];
     mockApi.keyPackageRelays = [];
-    mockApi.relayStatuses = [];
     mockApi.addedRelays = [];
     mockApi.removedRelays = [];
   });
@@ -244,10 +235,6 @@ void main() {
             updatedAt: DateTime.now(),
           ),
         );
-        mockApi.relayStatuses = List.generate(
-          20,
-          (i) => ('wss://relay$i.com', 'connected'),
-        );
 
         await pumpNetworkScreen(tester);
 
@@ -287,8 +274,6 @@ void main() {
       });
 
       testWidgets('adds relay when submitted through bottom sheet', (tester) async {
-        mockApi.relayStatuses = [('wss://test.relay.com', 'Connected')];
-
         await pumpNetworkScreen(tester);
 
         await tester.tap(find.byKey(const Key('add_icon_my_relays')));
@@ -300,7 +285,6 @@ void main() {
 
         await tester.tap(find.byKey(const Key('add_relay_submit_button')));
         await tester.pumpAndSettle();
-        await tester.pump(const Duration(milliseconds: 600));
 
         expect(mockApi.addedRelays.contains('wss://test.relay.com'), isTrue);
       });
@@ -312,10 +296,6 @@ void main() {
           Relay(url: 'wss://relay1.com', createdAt: DateTime.now(), updatedAt: DateTime.now()),
           Relay(url: 'wss://relay2.com', createdAt: DateTime.now(), updatedAt: DateTime.now()),
         ];
-        mockApi.relayStatuses = [
-          ('wss://relay1.com', 'connected'),
-          ('wss://relay2.com', 'disconnected'),
-        ];
 
         await pumpNetworkScreen(tester);
 
@@ -324,28 +304,15 @@ void main() {
         expect(find.text('No relays configured'), findsNWidgets(2));
       });
 
-      testWidgets('shows success icon for connected relays', (tester) async {
+      testWidgets('does not show status icons for relay items', (tester) async {
         mockApi.normalRelays = [
           Relay(url: 'wss://relay1.com', createdAt: DateTime.now(), updatedAt: DateTime.now()),
         ];
-        mockApi.relayStatuses = [('wss://relay1.com', 'connected')];
 
         await pumpNetworkScreen(tester);
 
         expect(find.byKey(const Key('relay_item_normal_wss://relay1.com')), findsOneWidget);
-        expect(find.byKey(const Key('list_item_type_icon')), findsOneWidget);
-      });
-
-      testWidgets('shows error icon for disconnected relays', (tester) async {
-        mockApi.normalRelays = [
-          Relay(url: 'wss://relay1.com', createdAt: DateTime.now(), updatedAt: DateTime.now()),
-        ];
-        mockApi.relayStatuses = [('wss://relay1.com', 'disconnected')];
-
-        await pumpNetworkScreen(tester);
-
-        expect(find.byKey(const Key('relay_item_normal_wss://relay1.com')), findsOneWidget);
-        expect(find.byKey(const Key('list_item_type_icon')), findsOneWidget);
+        expect(find.byKey(const Key('list_item_type_icon')), findsNothing);
       });
 
       testWidgets('removes relay when Remove action is tapped', (tester) async {
@@ -368,7 +335,7 @@ void main() {
     });
 
     group('navigation', () {
-      testWidgets('close button is visible', (tester) async {
+      testWidgets('back button is visible', (tester) async {
         await pumpNetworkScreen(tester);
 
         expect(find.byKey(const Key('slate_back_button')), findsOneWidget);

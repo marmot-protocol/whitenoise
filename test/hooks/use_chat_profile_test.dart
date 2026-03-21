@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_profile.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/src/rust/api/users.dart' show UserUpdateTrigger;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
 import '../mocks/mock_wn_api.dart';
@@ -37,7 +38,13 @@ class _MockApi extends MockWnApi {
   bool isDm = false;
   String groupName = 'Test Group';
   List<String> members = [_pubkey, _otherPubkey];
-  FlutterMetadata metadata = _metadata;
+  FlutterMetadata _currentMetadata = _metadata;
+  FlutterMetadata get metadata => _currentMetadata;
+  set metadata(FlutterMetadata value) {
+    _currentMetadata = value;
+    seedUserInitialSnapshot(_otherPubkey, metadata: value);
+  }
+
   bool shouldError = false;
 
   @override
@@ -65,7 +72,7 @@ class _MockApi extends MockWnApi {
   Future<FlutterMetadata> crateApiUsersUserMetadata({
     required String pubkey,
     required bool blockingDataSync,
-  }) => Future.value(metadata);
+  }) => Future.value(_currentMetadata);
 
   @override
   Future<String?> crateApiGroupsGetGroupImagePath({
@@ -91,12 +98,14 @@ Future<void> _mountHook(WidgetTester tester) async {
     ),
   );
   await tester.pump();
+  await tester.pump();
 }
 
 void main() {
   setUpAll(() => RustLib.initMock(api: _api));
 
   setUp(() {
+    _api.reset();
     _api.isDm = false;
     _api.groupName = 'Test Group';
     _api.members = [_pubkey, _otherPubkey];
@@ -133,6 +142,40 @@ void main() {
             const ChatProfile(
               displayName: 'bob',
               color: _otherPubkeyColor,
+              otherMemberPubkey: _otherPubkey,
+              isDm: true,
+            ),
+          );
+        });
+      });
+
+      group('when other member metadata arrives after the initial snapshot', () {
+        testWidgets('updates the DM profile without remounting', (tester) async {
+          _api.metadata = const FlutterMetadata(custom: {});
+          await _mountHook(tester);
+
+          expect(
+            getResult().data,
+            const ChatProfile(
+              color: _otherPubkeyColor,
+              otherMemberPubkey: _otherPubkey,
+              isDm: true,
+            ),
+          );
+
+          _api.emitUserUpdate(
+            _otherPubkey,
+            trigger: UserUpdateTrigger.metadataChanged,
+            metadata: _metadata,
+          );
+          await tester.pump();
+
+          expect(
+            getResult().data,
+            const ChatProfile(
+              displayName: 'Alice',
+              color: _otherPubkeyColor,
+              pictureUrl: 'https://example.com/alice.jpg',
               otherMemberPubkey: _otherPubkey,
               isDm: true,
             ),

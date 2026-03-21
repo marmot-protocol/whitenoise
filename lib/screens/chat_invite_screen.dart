@@ -12,13 +12,16 @@ import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/active_chat_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart' as account_groups_api;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart';
+import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/widgets/chat_message_bubble.dart';
 import 'package:whitenoise/widgets/chat_scroll_down_button.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/widgets/wn_chat_system_message.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_chat_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
@@ -50,6 +53,22 @@ class ChatInviteScreen extends HookConsumerWidget {
     final chatProfile = useChatProfile(context, pubkey, mlsGroupId);
     final chatMessages = useChatMessages(mlsGroupId);
 
+    final accountGroup = useMemoized(
+      () => account_groups_api.getAccountGroup(
+        accountPubkey: pubkey,
+        mlsGroupId: mlsGroupId,
+      ),
+      [pubkey, mlsGroupId],
+    );
+    final accountGroupSnapshot = useFuture(accountGroup);
+    final inviterName = useStream(
+      useMemoized(() {
+        final welcomerPubkey = accountGroupSnapshot.data?.welcomerPubkey;
+        if (welcomerPubkey == null) return null;
+        return UserService(welcomerPubkey).watchMetadata().map(presentName);
+      }, [accountGroupSnapshot.data?.welcomerPubkey]),
+    );
+
     useActiveChat(
       groupId: mlsGroupId,
       setActiveChat: ref.read(activeChatProvider.notifier).set,
@@ -60,9 +79,9 @@ class ChatInviteScreen extends HookConsumerWidget {
     void handleAvatarTap() {
       final otherPubkey = chatProfile.data?.otherMemberPubkey;
       if (otherPubkey != null) {
-        unawaited(Routes.pushToChatInfo(context, otherPubkey));
+        unawaited(Routes.pushToInviteInfo(context, otherPubkey));
       } else {
-        Routes.pushToWip(context);
+        Routes.pushToGroupInfo(context, mlsGroupId);
       }
     }
 
@@ -86,7 +105,7 @@ class ChatInviteScreen extends HookConsumerWidget {
         }
       } catch (e) {
         if (context.mounted) {
-          showNotice(context.l10n.failedToAcceptInvitation(e.toString()));
+          showNotice(context.l10n.failedToAcceptInvitation);
         }
       } finally {
         if (context.mounted) isAccepting.value = false;
@@ -105,7 +124,7 @@ class ChatInviteScreen extends HookConsumerWidget {
         }
       } catch (e) {
         if (context.mounted) {
-          showNotice(context.l10n.failedToDeclineInvitation(e.toString()));
+          showNotice(context.l10n.failedToDeclineInvitation);
         }
       } finally {
         if (context.mounted) isDeclining.value = false;
@@ -165,6 +184,25 @@ class ChatInviteScreen extends HookConsumerWidget {
                 SizedBox(height: 8.h),
               ],
             ),
+            if (inviterName.data != null && inviterName.data!.isNotEmpty)
+              Padding(
+                padding: EdgeInsets.only(top: 8.h),
+                child: WnChatSystemMessage(
+                  text: '${inviterName.data!}${context.l10n.invitedYouToChatSuffix}',
+                  textSpan: TextSpan(
+                    style: typography.medium14.copyWith(
+                      color: colors.backgroundContentSecondary,
+                    ),
+                    children: [
+                      TextSpan(
+                        text: inviterName.data,
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      TextSpan(text: context.l10n.invitedYouToChatSuffix),
+                    ],
+                  ),
+                ),
+              ),
             Expanded(
               child: chatMessages.isLoading
                   ? Center(
@@ -172,19 +210,10 @@ class ChatInviteScreen extends HookConsumerWidget {
                         color: colors.backgroundContentPrimary,
                       ),
                     )
-                  : chatMessages.messageCount == 0
-                  ? Center(
-                      child: Text(
-                        context.l10n.invitedToSecureChat,
-                        style: typography.medium14.copyWith(
-                          color: colors.backgroundContentTertiary,
-                        ),
-                      ),
-                    )
                   : _InviteMessageList(
                       chatMessages: chatMessages,
                       pubkey: pubkey,
-                      isGroupChat: chatProfile.data?.isDm == false,
+                      isGroupChat: chatProfile.data?.isDm != true,
                     ),
             ),
             WnSlate(
@@ -246,12 +275,15 @@ class _InviteMessageList extends HookWidget {
       return () => scrollController.removeListener(updateHasMoreBelow);
     }, [scrollController]);
 
-    void scrollToBottom() {
-      scrollController.animateTo(
+    Future<void> scrollToBottom() async {
+      await scrollController.animateTo(
         scrollController.position.maxScrollExtent,
         duration: const Duration(milliseconds: 300),
         curve: Curves.easeOutCubic,
       );
+      if (scrollController.hasClients) {
+        scrollController.jumpTo(scrollController.position.maxScrollExtent);
+      }
     }
 
     return Stack(
@@ -277,11 +309,18 @@ class _InviteMessageList extends HookWidget {
               isGroupChat: isGroupChat,
             );
             final showTail = shouldShowTail(current: message, next: nextMessage);
+            final authorMetadata = chatMessages.getAuthorMetadata(message.pubkey);
+            final senderName = isOwnMessage
+                ? context.l10n.you
+                : presentName(authorMetadata) ?? context.l10n.unknownUser;
+            final senderPictureUrl = authorMetadata?.picture;
             return ChatMessageBubble(
               message: message,
               isOwnMessage: isOwnMessage,
               currentUserPubkey: pubkey,
               replyPreview: replyPreview,
+              senderName: senderName,
+              senderPictureUrl: senderPictureUrl,
               showAvatar: showAvatar,
               showTail: showTail,
               isGroupChat: isGroupChat,

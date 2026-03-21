@@ -38,7 +38,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get signUp => 'Регистрация';
 
   @override
-  String get loginTitle => 'Войти';
+  String get loginTitle => 'Введите ваш приватный ключ';
 
   @override
   String get enterPrivateKey => 'Введите ваш приватный ключ';
@@ -279,6 +279,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Как некоммерческая организация, White Noise существует исключительно для вашей конфиденциальности и свободы, а не для прибыли. Ваша поддержка сохраняет нашу независимость и бескомпромиссность.';
 
   @override
+  String get donateContributionLetter =>
+      'Если вам нужно письмо-подтверждение о пожертвовании, свяжитесь с нами по адресу info@ipf.dev';
+
+  @override
   String get lightningAddress => 'Адрес Lightning';
 
   @override
@@ -350,20 +354,19 @@ class AppLocalizationsRu extends AppLocalizations {
   String get invitedToSecureChat => 'Вы приглашены в безопасный чат';
 
   @override
+  String get invitedYouToChatSuffix => ' пригласил вас в чат';
+
+  @override
   String get decline => 'Отклонить';
 
   @override
   String get accept => 'Принять';
 
   @override
-  String failedToAcceptInvitation(String error) {
-    return 'Не удалось принять приглашение: $error';
-  }
+  String get failedToAcceptInvitation => 'Не удалось принять приглашение. Попробуйте снова.';
 
   @override
-  String failedToDeclineInvitation(String error) {
-    return 'Не удалось отклонить приглашение: $error';
-  }
+  String get failedToDeclineInvitation => 'Не удалось отклонить приглашение. Попробуйте снова.';
 
   @override
   String get startNewChat => 'Новый чат';
@@ -378,7 +381,36 @@ class AppLocalizationsRu extends AppLocalizations {
   String get searchByNameOrNpub => 'Имя или npub1...';
 
   @override
-  String get developerSettingsTitle => 'Настройки Разработчика';
+  String get developerSettingsTitle => 'Настройки разработчика';
+
+  @override
+  String get keyPackageManagementTitle => 'Управление пакетами ключей';
+
+  @override
+  String get keyPackageManagementDescription =>
+      'Публиковать, обновлять и удалять пакеты ключей аккаунта';
+
+  @override
+  String get relayStateTitle => 'Состояние реле';
+
+  @override
+  String get relayStateDescription => 'Просмотреть активные плоскости управления реле';
+
+  @override
+  String get relayControlStateDumpLabel => 'debug_relay_control_state:';
+
+  @override
+  String get relayControlStateSnapshotDescription =>
+      'Снимок активных плоскостей обнаружения реле, входящих и групп.';
+
+  @override
+  String get relayControlStateLoading => 'Загрузка...';
+
+  @override
+  String get relayControlStateRefreshButton => 'Обновить дамп';
+
+  @override
+  String get relayControlStateCopyButton => 'Скопировать дамп';
 
   @override
   String get publishNewKeyPackage => 'Опубликовать Новый Пакет Ключей';
@@ -408,6 +440,18 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get keyPackageDeleted => 'Пакет ключей удалён';
+
+  @override
+  String get keyPackageFetchFailed => 'Не удалось обновить пакеты ключей. Попробуйте снова.';
+
+  @override
+  String get keyPackagePublishFailed => 'Не удалось опубликовать пакет ключей. Попробуйте снова.';
+
+  @override
+  String get keyPackageDeleteFailed => 'Не удалось удалить пакет ключей. Попробуйте снова.';
+
+  @override
+  String get keyPackageDeleteAllFailed => 'Не удалось удалить все пакеты ключей. Попробуйте снова.';
 
   @override
   String packageNumber(int number) {
@@ -534,14 +578,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get reportError => 'Сообщить об ошибке';
 
   @override
-  String get workInProgress => 'Мы работаем над этим';
-
-  @override
   String get wipMessage =>
       'Мы работаем над этой функцией. Чтобы поддержать разработку, пожертвуйте на проект White Noise';
 
   @override
   String get donate => 'Пожертвовать';
+
+  @override
+  String get chatWithSupport => 'Чат с поддержкой';
+
+  @override
+  String get supportChatWelcomeMessage =>
+      'Привет! Расскажите, что у вас на уме - вопросы, баги или отзывы. Обычно мы отвечаем в течение нескольких часов.';
 
   @override
   String get addRelay => 'Добавить Реле';
@@ -585,6 +633,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get unknownUser => 'Неизвестный пользователь';
+
+  @override
+  String get noName => 'Без имени';
 
   @override
   String get unknownGroup => 'Неизвестная группа';
@@ -936,8 +987,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'На этом реле не найдено списков. Попробуйте другое или используйте стандартные.';
 
   @override
-  String get loginErrorInvalidKey =>
-      'Неверный формат приватного ключа. Пожалуйста, проверьте и попробуйте снова.';
+  String get loginErrorInvalidKey => 'Неверный nsec. Убедитесь, что вы ввели его правильно.';
 
   @override
   String get loginErrorNoRelayConnections =>
@@ -1121,13 +1171,13 @@ class AppLocalizationsRu extends AppLocalizations {
   String get connectAnotherProfile => 'Подключить другой профиль';
 
   @override
-  String get rawDebugView => 'Просмотр отладочных данных';
+  String get rawDebugView => 'Режим отладки';
 
   @override
   String get rawDebugViewDescription => 'Показывать необработанные данные сообщений в чате';
 
   @override
-  String get rawDebugViewTitle => 'Просмотр Отладки';
+  String get rawDebugViewTitle => 'Режим отладки';
 
   @override
   String get rawDebugViewGroupId => 'ID группы';
@@ -1161,6 +1211,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get appLogsClear => 'Очистить';
 
   @override
+  String get appLogsEraseAll => 'Очистить всё';
+
+  @override
   String get appLogsEmpty => 'Пока нет записей';
 
   @override
@@ -1179,13 +1232,107 @@ class AppLocalizationsRu extends AppLocalizations {
   String get appLogsClearFilters => 'Сбросить фильтры';
 
   @override
+  String get appLogsLive => 'Прямой эфир';
+
+  @override
   String appLogsFilteredCount(int shown, int total) {
     return '$shown из $total';
   }
+
+  @override
+  String get appLogsCopyAll => 'Копировать все';
 
   @override
   String get invalidRelayUrlScheme => 'URL должен начинаться с wss:// или ws://';
 
   @override
   String get invalidRelayUrl => 'Неверный URL реле';
+
+  @override
+  String get thisMessageWasDeleted => 'Это сообщение было удалено.';
+
+  @override
+  String get youDeletedThisMessage => 'Вы удалили это сообщение.';
+
+  @override
+  String get relayControlStateLoadError =>
+      'Не удалось загрузить состояние управления реле. Пожалуйста, попробуйте снова.';
+
+  @override
+  String get updateAvailableTitle => 'Доступно обновление';
+
+  @override
+  String updateAvailableDescription(String version) {
+    return 'Версия $version доступна в Zapstore.';
+  }
+
+  @override
+  String get updateNow => 'Обновить сейчас';
+
+  @override
+  String get fatalErrorCopyError => 'Копировать ошибку';
+
+  @override
+  String get fatalErrorErrorCopied => 'Ошибка скопирована в буфер обмена';
+
+  @override
+  String get fatalErrorTitle => 'О нет!';
+
+  @override
+  String get fatalErrorDescription =>
+      'У нас возникла проблема при загрузке приложения. Это не вы, а мы, и нам очень жаль.\n\nПомогите нам исправить это. Нажмите ниже, чтобы отправить эту ошибку нашей команде.';
+
+  @override
+  String get reportBug => 'Сообщить о баге';
+
+  @override
+  String get reportBugDescription =>
+      'Помогите нам улучшить White Noise, описав обнаруженную проблему.';
+
+  @override
+  String get reportBugWhatWentWrong => 'Что пошло не так?';
+
+  @override
+  String get reportBugWhatWentWrongPlaceholder => 'Опишите возникшую проблему...';
+
+  @override
+  String get reportBugStepsToReproduce => 'Шаги для воспроизведения';
+
+  @override
+  String get reportBugStepsToReproducePlaceholder =>
+      '1. Перейти к...\n2. Нажать на...\n3. Увидеть ошибку';
+
+  @override
+  String get reportBugFrequency => 'Как часто это происходит?';
+
+  @override
+  String get reportBugFrequencyOnce => 'Один раз';
+
+  @override
+  String get reportBugFrequencyAlways => 'Всегда';
+
+  @override
+  String get reportBugFrequencySometimes => 'Иногда';
+
+  @override
+  String get reportBugIncludeNpub => 'Включить ваш npub';
+
+  @override
+  String get reportBugIncludeNpubDescription =>
+      'Позволяет нам связаться с вами при необходимости; оставив выключенным, вы сохраняете анонимность отчёта.';
+
+  @override
+  String get reportBugSend => 'Отправить отчёт';
+
+  @override
+  String get reportBugSuccess => 'Отчёт об ошибке отправлен. Спасибо!';
+
+  @override
+  String get reportBugError => 'Не удалось отправить отчёт. Попробуйте ещё раз.';
+
+  @override
+  String get reportBugWhatWentWrongRequired => 'Пожалуйста, опишите, что пошло не так.';
+
+  @override
+  String get failedToStartSupportChat => 'Не удалось запустить чат с поддержкой';
 }

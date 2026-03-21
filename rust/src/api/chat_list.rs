@@ -36,6 +36,8 @@ pub struct ChatSummary {
     /// Public key (hex) of the user who invited this account to the group.
     /// `Some` when invited by another user, `None` when the user created the group.
     pub welcomer_pubkey: Option<String>,
+    /// When this chat was archived, if at all.
+    pub archived_at: Option<DateTime<Utc>>,
     /// Number of unread messages in this chat
     pub unread_count: u64,
     /// Pin order for chat list sorting.
@@ -61,6 +63,7 @@ impl From<WhitenoiseChatListItem> for ChatSummary {
             last_message: item.last_message.map(|m| m.into()),
             pending_confirmation: item.pending_confirmation,
             welcomer_pubkey: item.welcomer_pubkey.map(|pk| pk.to_hex()),
+            archived_at: item.archived_at,
             unread_count: item.unread_count as u64,
             pin_order: item.pin_order,
             dm_peer_pubkey: item.dm_peer_pubkey.map(|pk| pk.to_hex()),
@@ -78,6 +81,8 @@ pub enum ChatListUpdateTrigger {
     NewLastMessage,
     /// The last message in a chat was deleted
     LastMessageDeleted,
+    /// The chat's archive status changed.
+    ChatArchiveChanged,
 }
 
 impl From<WhitenoiseChatListUpdateTrigger> for ChatListUpdateTrigger {
@@ -86,6 +91,7 @@ impl From<WhitenoiseChatListUpdateTrigger> for ChatListUpdateTrigger {
             WhitenoiseChatListUpdateTrigger::NewGroup => Self::NewGroup,
             WhitenoiseChatListUpdateTrigger::NewLastMessage => Self::NewLastMessage,
             WhitenoiseChatListUpdateTrigger::LastMessageDeleted => Self::LastMessageDeleted,
+            WhitenoiseChatListUpdateTrigger::ChatArchiveChanged => Self::ChatArchiveChanged,
         }
     }
 }
@@ -249,5 +255,12 @@ mod tests {
         let trigger: ChatListUpdateTrigger =
             WhitenoiseChatListUpdateTrigger::LastMessageDeleted.into();
         assert_eq!(trigger, ChatListUpdateTrigger::LastMessageDeleted);
+    }
+
+    #[test]
+    fn test_chat_list_update_trigger_conversion_chat_archive_changed() {
+        let trigger: ChatListUpdateTrigger =
+            WhitenoiseChatListUpdateTrigger::ChatArchiveChanged.into();
+        assert_eq!(trigger, ChatListUpdateTrigger::ChatArchiveChanged);
     }
 }

@@ -32,39 +32,35 @@ class ScanNpubScreen extends HookWidget {
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
-        child: Padding(
-          padding: EdgeInsets.symmetric(vertical: 16.h),
-          child: WnSlate(
-            header: WnSlateNavigationHeader(
-              title: l10n.scanNpub,
-              type: WnSlateNavigationType.back,
-              onNavigate: () => Routes.goBack(context),
-            ),
-            child: Padding(
-              padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  Expanded(
-                    child: WnScanBox(
-                      onBarcodeDetected: onBarcodeDetected,
-                    ),
+        child: WnSlate(
+          header: WnSlateNavigationHeader(
+            title: l10n.scanNpub,
+            onNavigate: () => Routes.goBack(context),
+          ),
+          child: Padding(
+            padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: WnScanBox(
+                    onBarcodeDetected: onBarcodeDetected,
                   ),
-                  Gap(12.h),
-                  Text(
-                    showInvalidNpubError.value ? l10n.invalidNpub : l10n.scanNpubHint,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontSize: 14.sp,
-                      fontWeight: FontWeight.w500,
-                      color: showInvalidNpubError.value
-                          ? colors.backgroundContentDestructive
-                          : colors.backgroundContentSecondary,
-                    ),
+                ),
+                Gap(12.h),
+                Text(
+                  showInvalidNpubError.value ? l10n.invalidNpub : l10n.scanNpubHint,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 14.sp,
+                    fontWeight: FontWeight.w500,
+                    color: showInvalidNpubError.value
+                        ? colors.backgroundContentDestructive
+                        : colors.backgroundContentSecondary,
                   ),
-                  Gap(12.h),
-                ],
-              ),
+                ),
+                Gap(12.h),
+              ],
             ),
           ),
         ),

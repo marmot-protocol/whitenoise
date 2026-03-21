@@ -57,6 +57,7 @@ pub fn create_whitenoise_config(data_dir: String, logs_dir: String) -> Whitenois
 // Declare the modules
 pub mod account_groups;
 pub mod accounts;
+pub mod bug_report;
 pub mod chat_list;
 pub mod drafts;
 pub mod error;
@@ -71,10 +72,12 @@ pub mod signer;
 pub mod user_search;
 pub mod users;
 pub mod utils;
+pub mod zapstore;
 
 // Re-export everything
 pub use account_groups::*;
 pub use accounts::*;
+pub use bug_report::*;
 pub use chat_list::*;
 pub use drafts::*;
 pub use error::*;
@@ -89,6 +92,7 @@ pub use signer::*;
 pub use user_search::*;
 pub use users::*;
 pub use utils::*;
+pub use zapstore::*;
 
 #[frb]
 pub async fn initialize_whitenoise(config: WhitenoiseConfig) -> Result<(), ApiError> {

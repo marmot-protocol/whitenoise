@@ -10,11 +10,11 @@ use nostr_sdk::prelude::*;
 use tracing::{info, warn};
 use whitenoise::whitenoise::message_aggregator::ChatMessageSummary as WhitenoiseChatMessageSummary;
 pub use whitenoise::{
-    ChatMessage as WhitenoiseChatMessage, EmojiReaction as WhitenoiseEmojiReaction,
-    MediaFile as WhitenoiseMediaFile, MessageUpdate as WhitenoiseMessageUpdate,
-    MessageWithTokens as WhitenoiseMessageWithTokens, ReactionSummary as WhitenoiseReactionSummary,
-    SerializableToken as WhitenoiseSerializableToken, UpdateTrigger as WhitenoiseUpdateTrigger,
-    UserReaction as WhitenoiseUserReaction, Whitenoise,
+    ChatMessage as WhitenoiseChatMessage, DeliveryStatus as WhitenoiseDeliveryStatus,
+    EmojiReaction as WhitenoiseEmojiReaction, MediaFile as WhitenoiseMediaFile,
+    MessageUpdate as WhitenoiseMessageUpdate, MessageWithTokens as WhitenoiseMessageWithTokens,
+    ReactionSummary as WhitenoiseReactionSummary, SerializableToken as WhitenoiseSerializableToken,
+    UpdateTrigger as WhitenoiseUpdateTrigger, UserReaction as WhitenoiseUserReaction, Whitenoise,
 };
 
 /// Flutter-compatible message with tokens
@@ -45,6 +45,8 @@ pub struct ChatMessage {
     pub reactions: ReactionSummary,
     pub media_attachments: Vec<MediaFile>,
     pub kind: u16,
+    /// Delivery status for outgoing messages. `None` for incoming messages.
+    pub delivery_status: Option<DeliveryStatus>,
 }
 
 /// Flutter-compatible reaction summary
@@ -82,6 +84,24 @@ pub struct SerializableToken {
     pub content: Option<String>, // None for LineBreak and Whitespace
 }
 
+/// Tracks the delivery state of an outgoing message.
+///
+/// Follows an optimistic UI pattern: the message appears instantly with `Sending`,
+/// then transitions to `Sent` or `Failed` after the background publish completes.
+/// `None` delivery_status on ChatMessage means the message is incoming (from others).
+#[frb]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DeliveryStatus {
+    /// Background publish in progress
+    Sending,
+    /// Published successfully to N relays
+    Sent { relay_count: u64 },
+    /// All publish attempts exhausted
+    Failed { reason: String },
+    /// The user retried this message — excluded from UI snapshots
+    Retried,
+}
+
 #[frb(non_opaque)]
 #[derive(Debug, Clone)]
 pub struct ChatMessageSummary {
@@ -105,6 +125,8 @@ pub enum UpdateTrigger {
     ReactionRemoved,
     /// The message itself was marked as deleted
     MessageDeleted,
+    /// The delivery status of an outgoing message changed (Sending -> Sent or Failed)
+    DeliveryStatusChanged,
 }
 
 /// A real-time update for a group message.
@@ -215,6 +237,27 @@ impl From<WhitenoiseChatMessageSummary> for ChatMessageSummary {
     }
 }
 
+impl From<&WhitenoiseDeliveryStatus> for DeliveryStatus {
+    fn from(status: &WhitenoiseDeliveryStatus) -> Self {
+        match status {
+            WhitenoiseDeliveryStatus::Sending => Self::Sending,
+            WhitenoiseDeliveryStatus::Sent(count) => Self::Sent {
+                relay_count: *count as u64,
+            },
+            WhitenoiseDeliveryStatus::Failed(reason) => Self::Failed {
+                reason: reason.clone(),
+            },
+            WhitenoiseDeliveryStatus::Retried => Self::Retried,
+        }
+    }
+}
+
+impl From<WhitenoiseDeliveryStatus> for DeliveryStatus {
+    fn from(status: WhitenoiseDeliveryStatus) -> Self {
+        (&status).into()
+    }
+}
+
 impl From<&WhitenoiseReactionSummary> for ReactionSummary {
     fn from(reactions: &WhitenoiseReactionSummary) -> Self {
         let by_emoji = reactions
@@ -297,6 +340,7 @@ impl From<&WhitenoiseChatMessage> for ChatMessage {
                 .map(|media_file| media_file.into())
                 .collect(),
             kind: chat_message.kind,
+            delivery_status: chat_message.delivery_status.as_ref().map(|s| s.into()),
         }
     }
 }
@@ -314,6 +358,7 @@ impl From<WhitenoiseUpdateTrigger> for UpdateTrigger {
             WhitenoiseUpdateTrigger::ReactionAdded => Self::ReactionAdded,
             WhitenoiseUpdateTrigger::ReactionRemoved => Self::ReactionRemoved,
             WhitenoiseUpdateTrigger::MessageDeleted => Self::MessageDeleted,
+            WhitenoiseUpdateTrigger::DeliveryStatusChanged => Self::DeliveryStatusChanged,
         }
     }
 }
@@ -321,7 +366,7 @@ impl From<WhitenoiseUpdateTrigger> for UpdateTrigger {
 impl From<&WhitenoiseMessageUpdate> for MessageUpdate {
     fn from(update: &WhitenoiseMessageUpdate) -> Self {
         Self {
-            trigger: update.trigger.clone().into(),
+            trigger: update.trigger.into(),
             message: (&update.message).into(),
         }
     }
@@ -351,6 +396,30 @@ pub async fn send_message_to_group(
     Ok((&message_with_tokens).into())
 }
 
+/// Retry publishing a failed message.
+///
+/// Creates a new message with the same content and marks the original as `Retried`.
+#[frb]
+pub async fn retry_message_publish(
+    pubkey: String,
+    group_id: String,
+    event_id: String,
+) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let group_id = group_id_from_string(&group_id)?;
+    let event_id = EventId::parse(&event_id)?;
+    whitenoise
+        .retry_message_publish(&account, &group_id, &event_id)
+        .await?;
+    Ok(())
+}
+
+fn initial_aggregated_messages_page() -> (Option<Timestamp>, Option<String>, Option<u32>) {
+    (None, None, None)
+}
+
 #[frb]
 pub async fn fetch_aggregated_messages_for_group(
     pubkey: String,
@@ -359,8 +428,15 @@ pub async fn fetch_aggregated_messages_for_group(
     let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
+    let (before, before_message_id, limit) = initial_aggregated_messages_page();
     let messages = whitenoise
-        .fetch_aggregated_messages_for_group(&pubkey, &group_id)
+        .fetch_aggregated_messages_for_group(
+            &pubkey,
+            &group_id,
+            before,
+            before_message_id.as_deref(),
+            limit,
+        )
         .await?;
     Ok(messages.into_iter().map(|m| m.into()).collect())
 }
@@ -476,5 +552,49 @@ mod tests {
     fn test_update_trigger_conversion_message_deleted() {
         let trigger: UpdateTrigger = WhitenoiseUpdateTrigger::MessageDeleted.into();
         assert_eq!(trigger, UpdateTrigger::MessageDeleted);
+    }
+
+    #[test]
+    fn test_update_trigger_conversion_delivery_status_changed() {
+        let trigger: UpdateTrigger = WhitenoiseUpdateTrigger::DeliveryStatusChanged.into();
+        assert_eq!(trigger, UpdateTrigger::DeliveryStatusChanged);
+    }
+
+    #[test]
+    fn test_delivery_status_conversion_sending() {
+        let status: DeliveryStatus = WhitenoiseDeliveryStatus::Sending.into();
+        assert_eq!(status, DeliveryStatus::Sending);
+    }
+
+    #[test]
+    fn test_delivery_status_conversion_sent() {
+        let status: DeliveryStatus = WhitenoiseDeliveryStatus::Sent(3).into();
+        assert_eq!(status, DeliveryStatus::Sent { relay_count: 3 });
+    }
+
+    #[test]
+    fn test_delivery_status_conversion_failed() {
+        let status: DeliveryStatus = WhitenoiseDeliveryStatus::Failed("timeout".to_string()).into();
+        assert_eq!(
+            status,
+            DeliveryStatus::Failed {
+                reason: "timeout".to_string()
+            }
+        );
+    }
+
+    #[test]
+    fn test_delivery_status_conversion_retried() {
+        let status: DeliveryStatus = WhitenoiseDeliveryStatus::Retried.into();
+        assert_eq!(status, DeliveryStatus::Retried);
+    }
+
+    #[test]
+    fn test_initial_aggregated_messages_page_has_no_cursor() {
+        let (before, before_message_id, limit) = initial_aggregated_messages_page();
+
+        assert_eq!(before, None);
+        assert_eq!(before_message_id, None);
+        assert_eq!(limit, None);
     }
 }

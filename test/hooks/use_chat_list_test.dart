@@ -10,12 +10,14 @@ ChatSummary _chatSummary(
   String id,
   DateTime createdAt, {
   bool pendingConfirmation = false,
+  DateTime? archivedAt,
 }) => ChatSummary(
   mlsGroupId: 'mls_$id',
   name: 'Chat $id',
   groupType: GroupType.group,
   createdAt: createdAt,
   pendingConfirmation: pendingConfirmation,
+  archivedAt: archivedAt,
   unreadCount: BigInt.zero,
 );
 
@@ -259,6 +261,43 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(getResult().chats.first.name, 'Updated Name');
+      });
+    });
+
+    group('chatArchiveChanged trigger', () {
+      testWidgets('removes archived chat from active list', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([
+          _chatSummary('c1', DateTime(2024)),
+          _chatSummary('c2', DateTime(2024, 1, 2)),
+        ]);
+        await tester.pumpAndSettle();
+
+        _api.emitUpdate(
+          ChatListUpdateTrigger.chatArchiveChanged,
+          _chatSummary('c2', DateTime(2024, 1, 2), archivedAt: DateTime(2024, 1, 3)),
+        );
+        await tester.pumpAndSettle();
+
+        final ids = getResult().chats.map((c) => c.mlsGroupId).toList();
+        expect(ids, ['mls_c1']);
+      });
+
+      testWidgets('re-adds unarchived chat to the front', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([_chatSummary('c1', DateTime(2024))]);
+        await tester.pumpAndSettle();
+
+        _api.emitUpdate(
+          ChatListUpdateTrigger.chatArchiveChanged,
+          _chatSummary('c2', DateTime(2024, 1, 2)),
+        );
+        await tester.pumpAndSettle();
+
+        final ids = getResult().chats.map((c) => c.mlsGroupId).toList();
+        expect(ids, ['mls_c2', 'mls_c1']);
       });
     });
   });

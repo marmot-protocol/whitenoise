@@ -38,7 +38,7 @@ class AppLocalizationsIt extends AppLocalizations {
   String get signUp => 'Registrati';
 
   @override
-  String get loginTitle => 'Accedi';
+  String get loginTitle => 'Inserisci la tua chiave privata';
 
   @override
   String get enterPrivateKey => 'Inserisci la tua chiave privata';
@@ -279,6 +279,10 @@ class AppLocalizationsIt extends AppLocalizations {
       'Come organizzazione senza scopo di lucro, White Noise esiste unicamente per la tua privacy e libertà, non per profitto. Il tuo supporto ci mantiene indipendenti e senza compromessi.';
 
   @override
+  String get donateContributionLetter =>
+      'Se hai bisogno di una lettera di attestazione per una donazione, contattaci a info@ipf.dev';
+
+  @override
   String get lightningAddress => 'Indirizzo Lightning';
 
   @override
@@ -350,20 +354,19 @@ class AppLocalizationsIt extends AppLocalizations {
   String get invitedToSecureChat => 'Sei stato invitato a una chat sicura';
 
   @override
+  String get invitedYouToChatSuffix => ' ti ha invitato alla chat';
+
+  @override
   String get decline => 'Rifiuta';
 
   @override
   String get accept => 'Accetta';
 
   @override
-  String failedToAcceptInvitation(String error) {
-    return 'Impossibile accettare l\'invito: $error';
-  }
+  String get failedToAcceptInvitation => 'Impossibile accettare l\'invito. Riprova.';
 
   @override
-  String failedToDeclineInvitation(String error) {
-    return 'Impossibile rifiutare l\'invito: $error';
-  }
+  String get failedToDeclineInvitation => 'Impossibile rifiutare l\'invito. Riprova.';
 
   @override
   String get startNewChat => 'Nuova chat';
@@ -379,6 +382,35 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get developerSettingsTitle => 'Impostazioni Sviluppatore';
+
+  @override
+  String get keyPackageManagementTitle => 'Gestione pacchetti chiavi';
+
+  @override
+  String get keyPackageManagementDescription =>
+      'Pubblica, aggiorna ed elimina i pacchetti chiavi dell\'account';
+
+  @override
+  String get relayStateTitle => 'Stato relay';
+
+  @override
+  String get relayStateDescription => 'Ispeziona i piani di controllo relay attivi';
+
+  @override
+  String get relayControlStateDumpLabel => 'debug_relay_control_state:';
+
+  @override
+  String get relayControlStateSnapshotDescription =>
+      'Istantanea dei piani attivi di rilevamento relay, inbox e gruppi.';
+
+  @override
+  String get relayControlStateLoading => 'Caricamento...';
+
+  @override
+  String get relayControlStateRefreshButton => 'Aggiorna dump';
+
+  @override
+  String get relayControlStateCopyButton => 'Copia dump';
 
   @override
   String get publishNewKeyPackage => 'Pubblica Nuovo Pacchetto Chiavi';
@@ -408,6 +440,19 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get keyPackageDeleted => 'Pacchetto chiavi eliminato';
+
+  @override
+  String get keyPackageFetchFailed => 'Impossibile aggiornare i pacchetti chiavi. Riprova.';
+
+  @override
+  String get keyPackagePublishFailed => 'Impossibile pubblicare il pacchetto chiavi. Riprova.';
+
+  @override
+  String get keyPackageDeleteFailed => 'Impossibile eliminare il pacchetto chiavi. Riprova.';
+
+  @override
+  String get keyPackageDeleteAllFailed =>
+      'Impossibile eliminare tutti i pacchetti chiavi. Riprova.';
 
   @override
   String packageNumber(int number) {
@@ -518,14 +563,18 @@ class AppLocalizationsIt extends AppLocalizations {
   String get reportError => 'Segnala errore';
 
   @override
-  String get workInProgress => 'Ci stiamo lavorando';
-
-  @override
   String get wipMessage =>
       'Stiamo lavorando su questa funzionalità. Per supportare lo sviluppo, dona a White Noise';
 
   @override
   String get donate => 'Dona';
+
+  @override
+  String get chatWithSupport => 'Chatta con il supporto';
+
+  @override
+  String get supportChatWelcomeMessage =>
+      'Ciao! Raccontaci cosa hai in mente - domande, bug o feedback. Di solito rispondiamo in poche ore.';
 
   @override
   String get addRelay => 'Aggiungi Relay';
@@ -569,6 +618,9 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get unknownUser => 'Utente sconosciuto';
+
+  @override
+  String get noName => 'Nessun nome';
 
   @override
   String get unknownGroup => 'Gruppo sconosciuto';
@@ -913,7 +965,8 @@ class AppLocalizationsIt extends AppLocalizations {
       'Nessuna lista di relay trovata su questo relay. Prova con un altro o usa quelli predefiniti.';
 
   @override
-  String get loginErrorInvalidKey => 'Formato della chiave privata non valido. Verifica e riprova.';
+  String get loginErrorInvalidKey =>
+      'nsec non valido. Assicurati di averlo inserito correttamente.';
 
   @override
   String get loginErrorNoRelayConnections =>
@@ -1094,13 +1147,13 @@ class AppLocalizationsIt extends AppLocalizations {
   String get connectAnotherProfile => 'Collega un altro profilo';
 
   @override
-  String get rawDebugView => 'Vista di debug grezza';
+  String get rawDebugView => 'Modalità debug';
 
   @override
   String get rawDebugViewDescription => 'Mostra i dati grezzi dei messaggi nella chat';
 
   @override
-  String get rawDebugViewTitle => 'Vista di Debug Grezza';
+  String get rawDebugViewTitle => 'Modalità Debug';
 
   @override
   String get rawDebugViewGroupId => 'ID del Gruppo';
@@ -1132,6 +1185,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get appLogsClear => 'Cancella';
 
   @override
+  String get appLogsEraseAll => 'Cancella tutto';
+
+  @override
   String get appLogsEmpty => 'Nessun registro ancora';
 
   @override
@@ -1150,13 +1206,106 @@ class AppLocalizationsIt extends AppLocalizations {
   String get appLogsClearFilters => 'Cancella filtri';
 
   @override
+  String get appLogsLive => 'Live';
+
+  @override
   String appLogsFilteredCount(int shown, int total) {
     return '$shown di $total';
   }
+
+  @override
+  String get appLogsCopyAll => 'Copia tutto';
 
   @override
   String get invalidRelayUrlScheme => 'L\'URL deve iniziare con wss:// o ws://';
 
   @override
   String get invalidRelayUrl => 'URL relay non valida';
+
+  @override
+  String get thisMessageWasDeleted => 'Questo messaggio è stato eliminato.';
+
+  @override
+  String get youDeletedThisMessage => 'Hai eliminato questo messaggio.';
+
+  @override
+  String get relayControlStateLoadError =>
+      'Impossibile caricare lo stato di controllo del relay. Per favore, riprova.';
+
+  @override
+  String get updateAvailableTitle => 'Aggiornamento disponibile';
+
+  @override
+  String updateAvailableDescription(String version) {
+    return 'La versione $version è disponibile su Zapstore.';
+  }
+
+  @override
+  String get updateNow => 'Aggiorna ora';
+
+  @override
+  String get fatalErrorCopyError => 'Copia errore';
+
+  @override
+  String get fatalErrorErrorCopied => 'Errore copiato negli appunti';
+
+  @override
+  String get fatalErrorTitle => 'Oh no!';
+
+  @override
+  String get fatalErrorDescription =>
+      'Abbiamo avuto un problema nel caricamento dell\'app. Non sei tu, siamo noi e ci scusiamo.\n\nAiutaci a risolverlo. Tocca sotto per inviare questo errore al nostro team.';
+
+  @override
+  String get reportBug => 'Segnala un bug';
+
+  @override
+  String get reportBugDescription =>
+      'Aiutaci a migliorare White Noise descrivendo il problema riscontrato.';
+
+  @override
+  String get reportBugWhatWentWrong => 'Cosa è andato storto?';
+
+  @override
+  String get reportBugWhatWentWrongPlaceholder => 'Descrivi il problema riscontrato...';
+
+  @override
+  String get reportBugStepsToReproduce => 'Passaggi per riprodurre';
+
+  @override
+  String get reportBugStepsToReproducePlaceholder => '1. Vai a...\n2. Tocca su...\n3. Vedi errore';
+
+  @override
+  String get reportBugFrequency => 'Quanto spesso succede?';
+
+  @override
+  String get reportBugFrequencyOnce => 'Una volta';
+
+  @override
+  String get reportBugFrequencyAlways => 'Sempre';
+
+  @override
+  String get reportBugFrequencySometimes => 'A volte';
+
+  @override
+  String get reportBugIncludeNpub => 'Includi il tuo npub';
+
+  @override
+  String get reportBugIncludeNpubDescription =>
+      'Ci permette di ricontattarti se necessario; lasciando il toggle disattivato la segnalazione rimane anonima.';
+
+  @override
+  String get reportBugSend => 'Invia segnalazione';
+
+  @override
+  String get reportBugSuccess => 'Segnalazione bug inviata. Grazie!';
+
+  @override
+  String get reportBugError => 'Invio della segnalazione fallito. Riprova.';
+
+  @override
+  String get reportBugWhatWentWrongRequired => 'Descrivi cosa è andato storto.';
+
+  @override
+  String get failedToStartSupportChat => 'Impossibile avviare la chat con il supporto';
 }

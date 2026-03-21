@@ -22,9 +22,8 @@ import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
 import 'package:whitenoise/services/message_service.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
-import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage;
+import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage, DeliveryStatus_Failed;
 import 'package:whitenoise/theme.dart';
-import 'package:whitenoise/utils/app_flavor.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart';
 import 'package:whitenoise/utils/chat_messages_search.dart';
@@ -94,7 +93,7 @@ class ChatScreen extends HookConsumerWidget {
       cancelGroupNotifications: ref.read(notificationServiceProvider).cancelForGroup,
     );
 
-    final debugViewEnabled = isStaging && (ref.watch(debugViewProvider).value ?? false);
+    final debugViewEnabled = ref.watch(debugViewProvider).value ?? false;
 
     final noticeMessage = useState<String?>(null);
     final isSearchActive = useState(false);
@@ -281,6 +280,16 @@ class ChatScreen extends HookConsumerWidget {
                 onLongPress: () => showMessageMenu(message),
                 onReaction: (emoji) => toggleReaction(message, emoji),
                 onHorizontalDragEnd: () => input.setReplyingTo(message),
+                onRetry: isOwnMessage && message.deliveryStatus is DeliveryStatus_Failed
+                    ? () async {
+                        final failedMsg = context.l10n.failedToSendMessage;
+                        try {
+                          await messageService.retryMessage(eventId: message.id);
+                        } catch (_) {
+                          if (context.mounted) showNotice(failedMsg);
+                        }
+                      }
+                    : null,
                 replyPreview: replyPreview,
                 onReplyTap: replyPreview != null && !replyPreview.isNotFound
                     ? () => scrollToMessageResult.scrollToMessage(replyPreview.messageId)
@@ -346,7 +355,7 @@ class ChatScreen extends HookConsumerWidget {
                         trailingWidget: debugViewEnabled
                             ? WnIconButton(
                                 key: const Key('chat_raw_debug_button'),
-                                icon: WnIcons.dataUsage,
+                                icon: WnIcons.developerSettings,
                                 onPressed: () => Routes.pushToChatRawDebug(context, groupId),
                               )
                             : null,

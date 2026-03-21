@@ -4,6 +4,7 @@
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
+import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 
 import '../frb_generated.dart';
 import 'accounts.dart';
@@ -11,7 +12,12 @@ import 'error.dart';
 import 'metadata.dart';
 import 'relays.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `fmt`, `fmt`, `from`
+part 'users.freezed.dart';
+
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`
+
+Stream<UserStreamItem> subscribeToUser({required String pubkey}) =>
+    RustLib.instance.api.crateApiUsersSubscribeToUser(pubkey: pubkey);
 
 Future<User> getUser({
   required String pubkey,
@@ -78,4 +84,43 @@ class User {
           metadata == other.metadata &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt;
+}
+
+@freezed
+sealed class UserStreamItem with _$UserStreamItem {
+  const UserStreamItem._();
+
+  const factory UserStreamItem.initialSnapshot({
+    required User user,
+  }) = UserStreamItem_InitialSnapshot;
+  const factory UserStreamItem.update({
+    required UserUpdate update,
+  }) = UserStreamItem_Update;
+}
+
+class UserUpdate {
+  final UserUpdateTrigger trigger;
+  final User user;
+
+  const UserUpdate({
+    required this.trigger,
+    required this.user,
+  });
+
+  @override
+  int get hashCode => trigger.hashCode ^ user.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is UserUpdate &&
+          runtimeType == other.runtimeType &&
+          trigger == other.trigger &&
+          user == other.user;
+}
+
+enum UserUpdateTrigger {
+  userCreated,
+  metadataChanged,
+  localMetadataChanged,
 }

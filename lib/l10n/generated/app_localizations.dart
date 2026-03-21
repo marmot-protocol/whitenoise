@@ -153,7 +153,7 @@ abstract class AppLocalizations {
   /// Title on login screen
   ///
   /// In en, this message translates to:
-  /// **'Login'**
+  /// **'Enter your private key'**
   String get loginTitle;
 
   /// Label for private key input field
@@ -597,8 +597,14 @@ abstract class AppLocalizations {
   /// Donate screen description
   ///
   /// In en, this message translates to:
-  /// **'As a not-for-profit, White Noise exists solely for your privacy and freedom, not for profit. Your support keeps us independent and uncompromised.'**
+  /// **'As a 501(c)3 non-profit, White Noise exists solely for your privacy and freedom, not for profit. Your support keeps us independent and uncompromised.'**
   String get donateDescription;
+
+  /// Donate screen contribution acknowledgement text
+  ///
+  /// In en, this message translates to:
+  /// **'If you need a contribution acknowledgement letter for a donation, get in touch with us at info@ipf.dev'**
+  String get donateContributionLetter;
 
   /// Lightning address label
   ///
@@ -732,6 +738,12 @@ abstract class AppLocalizations {
   /// **'You are invited to a secure chat'**
   String get invitedToSecureChat;
 
+  /// Suffix for system message showing who invited the user to chat (preceded by bold name)
+  ///
+  /// In en, this message translates to:
+  /// **' invited you to chat'**
+  String get invitedYouToChatSuffix;
+
   /// Decline button text
   ///
   /// In en, this message translates to:
@@ -747,14 +759,14 @@ abstract class AppLocalizations {
   /// Error when accepting invitation fails
   ///
   /// In en, this message translates to:
-  /// **'Failed to accept invitation: {error}'**
-  String failedToAcceptInvitation(String error);
+  /// **'Failed to accept invitation. Please try again.'**
+  String get failedToAcceptInvitation;
 
   /// Error when declining invitation fails
   ///
   /// In en, this message translates to:
-  /// **'Failed to decline invitation: {error}'**
-  String failedToDeclineInvitation(String error);
+  /// **'Failed to decline invitation. Please try again.'**
+  String get failedToDeclineInvitation;
 
   /// User search screen title
   ///
@@ -785,6 +797,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Developer Settings'**
   String get developerSettingsTitle;
+
+  /// Key package management screen title and row label
+  ///
+  /// In en, this message translates to:
+  /// **'Key Package Management'**
+  String get keyPackageManagementTitle;
+
+  /// Developer settings row description for key package management
+  ///
+  /// In en, this message translates to:
+  /// **'Publish, refresh, and delete account key packages'**
+  String get keyPackageManagementDescription;
+
+  /// Developer settings row label and relay state screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Relay State'**
+  String get relayStateTitle;
+
+  /// Developer settings row description for relay state
+  ///
+  /// In en, this message translates to:
+  /// **'Inspect the live relay control planes'**
+  String get relayStateDescription;
+
+  /// Technical label shown above the relay control state dump
+  ///
+  /// In en, this message translates to:
+  /// **'debug_relay_control_state:'**
+  String get relayControlStateDumpLabel;
+
+  /// Description shown above the relay control state dump
+  ///
+  /// In en, this message translates to:
+  /// **'Snapshot of the live relay discovery, inbox, and group planes.'**
+  String get relayControlStateSnapshotDescription;
+
+  /// Button label shown while the relay control state dump is loading
+  ///
+  /// In en, this message translates to:
+  /// **'Loading...'**
+  String get relayControlStateLoading;
+
+  /// Button label to refresh the relay control state dump
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh Dump'**
+  String get relayControlStateRefreshButton;
+
+  /// Button label to copy the relay control state dump
+  ///
+  /// In en, this message translates to:
+  /// **'Copy Dump'**
+  String get relayControlStateCopyButton;
 
   /// Button to publish new key package
   ///
@@ -839,6 +905,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Key package deleted'**
   String get keyPackageDeleted;
+
+  /// Error message when fetching key packages fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to refresh key packages. Please try again.'**
+  String get keyPackageFetchFailed;
+
+  /// Error message when publishing a key package fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to publish key package. Please try again.'**
+  String get keyPackagePublishFailed;
+
+  /// Error message when deleting a key package fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete key package. Please try again.'**
+  String get keyPackageDeleteFailed;
+
+  /// Error message when deleting all key packages fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete all key packages. Please try again.'**
+  String get keyPackageDeleteAllFailed;
 
   /// Key package item title
   ///
@@ -990,12 +1080,6 @@ abstract class AppLocalizations {
   /// **'Report error'**
   String get reportError;
 
-  /// WIP screen title
-  ///
-  /// In en, this message translates to:
-  /// **'We\'re working on this'**
-  String get workInProgress;
-
   /// WIP screen message
   ///
   /// In en, this message translates to:
@@ -1007,6 +1091,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Donate'**
   String get donate;
+
+  /// Settings menu item to open support chat
+  ///
+  /// In en, this message translates to:
+  /// **'Chat with support'**
+  String get chatWithSupport;
+
+  /// Initial welcome message shown in support chat
+  ///
+  /// In en, this message translates to:
+  /// **'Hi! Tell us what\'s on your mind - questions, bugs, or feedback. We usually reply within a few hours.'**
+  String get supportChatWelcomeMessage;
 
   /// Add relay sheet title and button
   ///
@@ -1091,6 +1187,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Unknown user'**
   String get unknownUser;
+
+  /// Placeholder shown when a user has no display name set
+  ///
+  /// In en, this message translates to:
+  /// **'No name'**
+  String get noName;
 
   /// Fallback name for unknown group
   ///
@@ -1683,7 +1785,7 @@ abstract class AppLocalizations {
   /// Error message for LoginInvalidKeyFormat
   ///
   /// In en, this message translates to:
-  /// **'Invalid private key format. Please check and try again.'**
+  /// **'Invalid nsec. Make sure you entered it correctly.'**
   String get loginErrorInvalidKey;
 
   /// Error message for LoginNoRelayConnections
@@ -1998,37 +2100,37 @@ abstract class AppLocalizations {
   /// **'Connect Another Profile'**
   String get connectAnotherProfile;
 
-  /// Toggle label for raw message debug view in developer settings
+  /// Toggle label for debug mode in developer settings
   ///
   /// In en, this message translates to:
-  /// **'Raw debug view'**
+  /// **'Debug mode'**
   String get rawDebugView;
 
-  /// Subtitle for the raw debug view toggle
+  /// Subtitle for the debug mode toggle
   ///
   /// In en, this message translates to:
   /// **'Show raw message data in chat'**
   String get rawDebugViewDescription;
 
-  /// Screen title for the raw message debug screen
+  /// Screen title for the debug mode screen
   ///
   /// In en, this message translates to:
-  /// **'Raw Debug View'**
+  /// **'Debug Mode'**
   String get rawDebugViewTitle;
 
-  /// Label for group ID in raw debug view
+  /// Label for group ID in debug mode
   ///
   /// In en, this message translates to:
   /// **'Group ID'**
   String get rawDebugViewGroupId;
 
-  /// Message count shown in raw debug view
+  /// Message count shown in debug mode
   ///
   /// In en, this message translates to:
   /// **'{count, plural, =0{No messages} =1{1 message} other{{count} messages}}'**
   String rawDebugViewMessageCount(int count);
 
-  /// Snackbar text after copying a raw message
+  /// Feedback text after copying debug data
   ///
   /// In en, this message translates to:
   /// **'Copied to clipboard'**
@@ -2052,11 +2154,17 @@ abstract class AppLocalizations {
   /// **'View all Logger output in app'**
   String get appLogsViewLogsDescription;
 
-  /// Button to clear logs
+  /// Button to clear logs (legacy, use appLogsEraseAll)
   ///
   /// In en, this message translates to:
   /// **'Clear'**
   String get appLogsClear;
+
+  /// Button to erase all logs
+  ///
+  /// In en, this message translates to:
+  /// **'Erase all'**
+  String get appLogsEraseAll;
 
   /// Shown when log list is empty
   ///
@@ -2094,11 +2202,23 @@ abstract class AppLocalizations {
   /// **'Clear filters'**
   String get appLogsClearFilters;
 
+  /// Label on the button that resumes live log streaming
+  ///
+  /// In en, this message translates to:
+  /// **'Live'**
+  String get appLogsLive;
+
   /// Shown/filtered count when filters active
   ///
   /// In en, this message translates to:
   /// **'{shown} of {total}'**
   String appLogsFilteredCount(int shown, int total);
+
+  /// Button to copy all visible logs to clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Copy all'**
+  String get appLogsCopyAll;
 
   /// Error message when relay URL doesn't start with wss:// or ws://
   ///
@@ -2111,6 +2231,168 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Invalid relay URL'**
   String get invalidRelayUrl;
+
+  /// Text shown inside a deleted message bubble
+  ///
+  /// In en, this message translates to:
+  /// **'This message was deleted.'**
+  String get thisMessageWasDeleted;
+
+  /// Text shown inside a message bubble when the current user deleted it
+  ///
+  /// In en, this message translates to:
+  /// **'You deleted this message.'**
+  String get youDeletedThisMessage;
+
+  /// User-friendly error when relay control state fails to load
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load relay control state. Please try again.'**
+  String get relayControlStateLoadError;
+
+  /// Title of the update-available banner shown when a newer version is on Zapstore
+  ///
+  /// In en, this message translates to:
+  /// **'Update available'**
+  String get updateAvailableTitle;
+
+  /// Body of the update-available banner
+  ///
+  /// In en, this message translates to:
+  /// **'Version {version} is available on Zapstore.'**
+  String updateAvailableDescription(String version);
+
+  /// Button label that opens the Zapstore listing for the app update
+  ///
+  /// In en, this message translates to:
+  /// **'Update now'**
+  String get updateNow;
+
+  /// Button label on the fatal error screen diagnostics box to copy the error to clipboard
+  ///
+  /// In en, this message translates to:
+  /// **'Copy error'**
+  String get fatalErrorCopyError;
+
+  /// System notice shown after copying error details to clipboard on the fatal error screen
+  ///
+  /// In en, this message translates to:
+  /// **'Error copied to clipboard'**
+  String get fatalErrorErrorCopied;
+
+  /// Error callout title on fatal error screen
+  ///
+  /// In en, this message translates to:
+  /// **'Oh no!'**
+  String get fatalErrorTitle;
+
+  /// Error callout description on fatal error screen
+  ///
+  /// In en, this message translates to:
+  /// **'We hit a bump loading the app. It\'s not you, it\'s us and we\'re sorry.\n\nHelp us fix it. Tap below to send this error to our team.'**
+  String get fatalErrorDescription;
+
+  /// Report bug menu item and screen title
+  ///
+  /// In en, this message translates to:
+  /// **'Report bug'**
+  String get reportBug;
+
+  /// Introductory description on the report bug screen
+  ///
+  /// In en, this message translates to:
+  /// **'Help us improve White Noise by describing the issue you encountered.'**
+  String get reportBugDescription;
+
+  /// Label for the 'what went wrong' field
+  ///
+  /// In en, this message translates to:
+  /// **'What went wrong?'**
+  String get reportBugWhatWentWrong;
+
+  /// Placeholder for the 'what went wrong' field
+  ///
+  /// In en, this message translates to:
+  /// **'Describe the issue you experienced...'**
+  String get reportBugWhatWentWrongPlaceholder;
+
+  /// Label for the steps to reproduce field
+  ///
+  /// In en, this message translates to:
+  /// **'Steps to reproduce'**
+  String get reportBugStepsToReproduce;
+
+  /// Placeholder for the steps to reproduce field
+  ///
+  /// In en, this message translates to:
+  /// **'1. Go to...\n2. Tap on...\n3. See error'**
+  String get reportBugStepsToReproducePlaceholder;
+
+  /// Label for the frequency selector
+  ///
+  /// In en, this message translates to:
+  /// **'How often does this happen?'**
+  String get reportBugFrequency;
+
+  /// Frequency option: once
+  ///
+  /// In en, this message translates to:
+  /// **'Once'**
+  String get reportBugFrequencyOnce;
+
+  /// Frequency option: always
+  ///
+  /// In en, this message translates to:
+  /// **'Always'**
+  String get reportBugFrequencyAlways;
+
+  /// Frequency option: sometimes
+  ///
+  /// In en, this message translates to:
+  /// **'Sometimes'**
+  String get reportBugFrequencySometimes;
+
+  /// Toggle label for including the user's npub
+  ///
+  /// In en, this message translates to:
+  /// **'Include your npub'**
+  String get reportBugIncludeNpub;
+
+  /// Helper text for the include npub toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Lets us follow up with you if needed; leaving this off keeps your report anonymous.'**
+  String get reportBugIncludeNpubDescription;
+
+  /// Submit button on the report bug screen
+  ///
+  /// In en, this message translates to:
+  /// **'Send report'**
+  String get reportBugSend;
+
+  /// Success message after sending
+  ///
+  /// In en, this message translates to:
+  /// **'Bug report sent. Thank you!'**
+  String get reportBugSuccess;
+
+  /// Error message when sending fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to send report. Please try again.'**
+  String get reportBugError;
+
+  /// Validation error when 'what went wrong' is empty
+  ///
+  /// In en, this message translates to:
+  /// **'Please describe what went wrong.'**
+  String get reportBugWhatWentWrongRequired;
+
+  /// Error notice shown when starting a DM with support account fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to start chat with support'**
+  String get failedToStartSupportChat;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

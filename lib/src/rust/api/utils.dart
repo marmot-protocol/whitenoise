@@ -28,9 +28,6 @@ Future<Tag> tagFromVec({required List<String> vec}) =>
 Future<String> getDefaultBlossomServerUrl() =>
     RustLib.instance.api.crateApiUtilsGetDefaultBlossomServerUrl();
 
-Future<String> debugQuery({required String sql}) =>
-    RustLib.instance.api.crateApiUtilsDebugQuery(sql: sql);
-
 Future<String> groupIdToString({required GroupId groupId}) =>
     RustLib.instance.api.crateApiUtilsGroupIdToString(groupId: groupId);
 
@@ -66,6 +63,15 @@ Language languageSystem() => RustLib.instance.api.crateApiUtilsLanguageSystem();
 
 String languageToString({required Language language}) =>
     RustLib.instance.api.crateApiUtilsLanguageToString(language: language);
+
+/// Build a `nostr:nevent1...` URI from a hex event ID and author pubkey (NIP-C7).
+String eventIdToNeventUri({
+  required String eventIdHex,
+  required String pubkeyHex,
+}) => RustLib.instance.api.crateApiUtilsEventIdToNeventUri(
+  eventIdHex: eventIdHex,
+  pubkeyHex: pubkeyHex,
+);
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GroupId>>
 abstract class GroupId implements RustOpaqueInterface {}

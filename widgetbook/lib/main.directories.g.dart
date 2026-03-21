@@ -24,6 +24,8 @@ import 'package:whitenoise_widgetbook/components/chat_message_input.dart'
     as _whitenoise_widgetbook_components_chat_message_input;
 import 'package:whitenoise_widgetbook/components/chat_status.dart'
     as _whitenoise_widgetbook_components_chat_status;
+import 'package:whitenoise_widgetbook/components/chat_system_message.dart'
+    as _whitenoise_widgetbook_components_chat_system_message;
 import 'package:whitenoise_widgetbook/components/feedback.dart'
     as _whitenoise_widgetbook_components_feedback;
 import 'package:whitenoise_widgetbook/components/filter_chip.dart'
@@ -62,6 +64,8 @@ import 'package:whitenoise_widgetbook/components/tooltip.dart'
     as _whitenoise_widgetbook_components_tooltip;
 import 'package:whitenoise_widgetbook/components/wn_avatar.dart'
     as _whitenoise_widgetbook_components_wn_avatar;
+import 'package:whitenoise_widgetbook/components/wn_checkbox.dart'
+    as _whitenoise_widgetbook_components_wn_checkbox;
 import 'package:whitenoise_widgetbook/components/wn_copy_card.dart'
     as _whitenoise_widgetbook_components_wn_copy_card;
 import 'package:whitenoise_widgetbook/components/wn_profile_switcher_item.dart'
@@ -177,6 +181,26 @@ final directories = <_widgetbook.WidgetbookNode>[
             name: 'Chat Status',
             builder: _whitenoise_widgetbook_components_chat_status
                 .wnChatStatusShowcase,
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookComponent(
+        name: 'WnChatSystemMessageStory',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Chat System Message',
+            builder: _whitenoise_widgetbook_components_chat_system_message
+                .wnChatSystemMessageShowcase,
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookComponent(
+        name: 'WnCheckboxStory',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Checkbox',
+            builder: _whitenoise_widgetbook_components_wn_checkbox
+                .wnCheckboxShowcase,
           ),
         ],
       ),

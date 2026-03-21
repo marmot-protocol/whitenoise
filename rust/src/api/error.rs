@@ -43,6 +43,9 @@ pub enum ApiError {
     #[error("Login error: {message}")]
     LoginInternal { message: String },
 
+    #[error("Keyring unavailable: {message}")]
+    LoginKeyringUnavailable { message: String },
+
     #[error("Other error: {message}")]
     Other { message: String },
 }
@@ -66,6 +69,9 @@ impl From<whitenoise::LoginError> for ApiError {
             whitenoise::LoginError::Timeout(msg) => Self::LoginTimeout { message: msg },
             whitenoise::LoginError::NoLoginInProgress => Self::LoginNoLoginInProgress,
             whitenoise::LoginError::Internal(msg) => Self::LoginInternal { message: msg },
+            whitenoise::LoginError::KeyringUnavailable(msg) => {
+                Self::LoginKeyringUnavailable { message: msg }
+            }
         }
     }
 }
@@ -150,6 +156,7 @@ impl ApiError {
             ApiError::LoginTimeout { .. } => "LoginTimeout".to_string(),
             ApiError::LoginNoLoginInProgress => "LoginNoLoginInProgress".to_string(),
             ApiError::LoginInternal { .. } => "LoginInternal".to_string(),
+            ApiError::LoginKeyringUnavailable { .. } => "LoginKeyringUnavailable".to_string(),
             ApiError::Other { .. } => "Other".to_string(),
         }
     }
@@ -169,6 +176,7 @@ impl ApiError {
             ApiError::LoginTimeout { message } => message.clone(),
             ApiError::LoginNoLoginInProgress => "No login in progress for this account".to_string(),
             ApiError::LoginInternal { message } => message.clone(),
+            ApiError::LoginKeyringUnavailable { message } => message.clone(),
             ApiError::Other { message } => message.clone(),
         }
     }
