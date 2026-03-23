@@ -8,6 +8,7 @@ import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_zapstore_update.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/chat_search.dart';
@@ -90,11 +91,20 @@ class ChatListScreen extends HookConsumerWidget {
     BuildContext context,
     AppTypography typography,
     SemanticColors colors, {
+    required bool isOffline,
     required bool showWelcomeNotice,
     required String? updateVersion,
     required VoidCallback onUpdateDismiss,
     required VoidCallback onWelcomeDismiss,
   }) {
+    if (isOffline) {
+      return WnSystemNotice(
+        key: const Key('offline_notice'),
+        title: context.l10n.waitingForInternet,
+        type: WnSystemNoticeType.warning,
+        variant: WnSystemNoticeVariant.expanded,
+      );
+    }
     if (updateVersion != null) {
       return WnSystemNotice(
         key: ValueKey('update_notice_$updateVersion'),
@@ -160,6 +170,7 @@ class ChatListScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
+    final isOffline = ref.watch(offlineProvider).value ?? false;
     final typography = context.typographyScaled;
     final pubkey = ref.watch(accountPubkeyProvider);
     final chatListResult = useChatList(pubkey);
@@ -273,6 +284,7 @@ class ChatListScreen extends HookConsumerWidget {
                   typography,
                   colors,
                   showWelcomeNotice: showWelcomeNotice,
+                  isOffline: isOffline,
                   updateVersion: activeUpdateVersion,
                   onUpdateDismiss: updateState.dismiss,
                   onWelcomeDismiss: () {
