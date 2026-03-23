@@ -14,6 +14,7 @@ import 'relays.dart';
 
 part 'users.freezed.dart';
 
+// These functions are ignored because they are not marked as `pub`: `resolve_whitenoise_user`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`
 
 Stream<UserStreamItem> subscribeToUser({required String pubkey}) =>
