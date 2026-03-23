@@ -69,7 +69,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get profilePrivacyDescription =>
-      'Имя, фото и биография видны в глобальной сети Nostr. Используйте то, чем вам комфортно делиться. Информация остаётся приватной, пока вы не добавите личные данные.';
+      'Имя, фото и биография видны в глобальной сети Nostr. Используйте то, чем вам комфортно делиться.';
 
   @override
   String get cancel => 'Отмена';

@@ -17,7 +17,7 @@
   "introduceYourself": "Hakkında",
   "writeSomethingAboutYourself": "Kendinizi tanıtın",
   "profilePrivacyTitle": "Ne paylaştığınızı siz kontrol edersiniz",
-  "profilePrivacyDescription": "İsim, fotoğraf ve biyografi küresel Nostr ağında görünür. Paylaşırken kendinizi rahat hissedeceğiniz bilgileri kullanın. Kişisel bilgi eklemediğiniz sürece gizli kalır.",
+  "profilePrivacyDescription": "İsim, fotoğraf ve biyografi küresel Nostr ağında görünür. Paylaşırken kendinizi rahat hissedeceğiniz bilgileri kullanın.",
   "cancel": "İptal",
   "profileReady": "Profiliniz hazır!",
   "startConversationHint": "Arkadaş ekleyerek veya profilinizi paylaşarak bir sohbet başlatın.",

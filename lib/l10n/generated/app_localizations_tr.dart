@@ -69,7 +69,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get profilePrivacyDescription =>
-      'İsim, fotoğraf ve biyografi küresel Nostr ağında görünür. Paylaşırken kendinizi rahat hissedeceğiniz bilgileri kullanın. Kişisel bilgi eklemediğiniz sürece gizli kalır.';
+      'İsim, fotoğraf ve biyografi küresel Nostr ağında görünür. Paylaşırken kendinizi rahat hissedeceğiniz bilgileri kullanın.';
 
   @override
   String get cancel => 'İptal';
