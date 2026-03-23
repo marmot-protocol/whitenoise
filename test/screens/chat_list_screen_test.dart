@@ -1,4 +1,5 @@
 import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
@@ -7,6 +8,7 @@ import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/screens/chat_invite_screen.dart';
 import 'package:whitenoise/screens/chat_screen.dart';
 import 'package:whitenoise/screens/settings_screen.dart';
@@ -19,9 +21,11 @@ import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/chat_list_header.dart';
 import 'package:whitenoise/widgets/chat_list_tile.dart';
 import 'package:whitenoise/widgets/wn_chat_list.dart';
+import 'package:whitenoise/widgets/wn_icon_button.dart';
 import 'package:whitenoise/widgets/wn_search_and_filters.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
+
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
@@ -224,6 +228,12 @@ void main() {
       await tester.tap(find.byKey(const Key('chat_add_button')));
       await tester.pumpAndSettle();
       expect(find.byType(UserSearchScreen), findsOneWidget);
+    });
+
+    testWidgets('hides no internet notice', (tester) async {
+      await pumpChatListScreen(tester);
+      await tester.pump();
+      expect(find.text('Waiting for internet connection'), findsNothing);
     });
 
     group('without chats', () {
@@ -750,6 +760,32 @@ void main() {
         expect(find.byKey(const Key('filter_chip_chats')), findsOneWidget);
         expect(find.byKey(const Key('filter_chip_archive')), findsOneWidget);
         expect(find.byKey(const Key('filter_chips_row')), findsOneWidget);
+      });
+    });
+    group('when offline', () {
+      mountOfflineTestApp(WidgetTester tester) async {
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+        await tester.pumpAndSettle();
+      }
+
+      testWidgets('shows no internet notice', (tester) async {
+        await mountOfflineTestApp(tester);
+        expect(find.text('Waiting for internet connection'), findsOneWidget);
+      });
+
+      testWidgets('disables start chat button', (tester) async {
+        await mountOfflineTestApp(tester);
+        final startChatButton = tester.widget<WnIconButton>(
+          find.byKey(const Key('chat_add_button')),
+        );
+        expect(startChatButton.disabled, isTrue);
+        expect(startChatButton.onPressed, isNull);
       });
     });
   });
