@@ -177,7 +177,7 @@ jobs:
         path: test-failures
 
     - name: Comment PR with test failures
-      if: github.event_name == 'pull_request' && steps.download_failures.outcome == 'success'
+      if: github.event_name == 'pull_request' && steps.download_failures.outcome == 'success' && github.event.pull_request.head.repo.full_name == github.repository
       uses: actions/github-script@v7
       with:
         script: |
@@ -422,7 +422,7 @@ jobs:
         exit 1
 
     - name: Comment PR with coverage
-      if: github.event_name == 'pull_request' && always() && steps.master_coverage.outputs.baseline != '0'
+      if: github.event_name == 'pull_request' && always() && steps.master_coverage.outputs.baseline != '0' && github.event.pull_request.head.repo.full_name == github.repository
       uses: actions/github-script@v7
       env:
         COVERAGE_PERCENTAGE: ${{ steps.coverage.outputs.percentage }}
