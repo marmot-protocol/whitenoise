@@ -5,7 +5,7 @@ import 'package:flutter/services.dart' show DeviceOrientation, SystemChrome;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart' show FlutterForegroundTask;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart' show ScreenUtilInit;
-import 'package:flutter_secure_storage/flutter_secure_storage.dart' show FlutterSecureStorage;
+import 'package:whitenoise/utils/platform_storage.dart' show PlatformStorage;
 import 'package:go_router/go_router.dart' show GoRouter;
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     show ConsumerStatefulWidget, ConsumerState, ProviderContainer, UncontrolledProviderScope;
@@ -97,7 +97,7 @@ Future<void> _migrateDataIfNeeded(String dataDir) async {
   // Read triggers the internal migration from EncryptedSharedPreferences to
   // the new cipher storage. Then deleteAll clears everything including any
   // keys the migration re-introduced from the old app.
-  const secureStorage = FlutterSecureStorage();
+  const secureStorage = PlatformStorage();
   await secureStorage.readAll();
   await secureStorage.deleteAll();
   await FlutterForegroundTask.clearAllData();

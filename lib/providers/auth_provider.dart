@@ -1,5 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:whitenoise/utils/platform_storage.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/providers/is_adding_account_provider.dart';
 import 'package:whitenoise/services/android_signer_service.dart';
@@ -9,8 +9,8 @@ import 'package:whitenoise/src/rust/api/error.dart';
 const _storageKey = 'active_account_pubkey';
 final _logger = Logger('AuthNotifier');
 
-final secureStorageProvider = Provider<FlutterSecureStorage>(
-  (_) => const FlutterSecureStorage(),
+final secureStorageProvider = Provider<PlatformStorage>(
+  (_) => const PlatformStorage(),
 );
 
 class AuthNotifier extends AsyncNotifier<String?> {
