@@ -100,11 +100,13 @@ jobs:
         if: steps.jnilibs-cache.outputs.cache-hit != 'true'
         run: ./scripts/build_android.sh
 
+      # Signing: decode the base64 keystore (same pattern as gogoadl/github-action-release-apk).
+      # Falls back to debug signing when the secret is absent.
       - name: Decode keystore
-        if: env.KEYSTORE_BASE64 != ''
+        if: env.KEY_STORE_BASE64 != ''
         env:
-          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
-        run: echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/keystore.jks"
+          KEY_STORE_BASE64: ${{ secrets.KEY_STORE_BASE64 }}
+        run: echo "$KEY_STORE_BASE64" | base64 --decode > "$RUNNER_TEMP/keystore.jks"
 
       - name: Set version
         id: version
@@ -117,10 +119,44 @@ jobs:
           echo "code=${BUILD_NUMBER}" >> "$GITHUB_OUTPUT"
 
       - name: Build production APK
-        run: flutter build apk --flavor production --build-name=${{ steps.version.outputs.name }} --build-number=${{ steps.version.outputs.code }}
+        env:
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          ALIAS: ${{ secrets.ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          SIGNING_ARGS=()
+          if [ -f "$RUNNER_TEMP/keystore.jks" ]; then
+            SIGNING_ARGS+=(
+              "-Pandroid.injected.signing.store.file=$RUNNER_TEMP/keystore.jks"
+              "-Pandroid.injected.signing.store.password=$KEY_STORE_PASSWORD"
+              "-Pandroid.injected.signing.key.alias=$ALIAS"
+              "-Pandroid.injected.signing.key.password=$KEY_PASSWORD"
+            )
+          fi
+          flutter build apk --flavor production \
+            --build-name=${{ steps.version.outputs.name }} \
+            --build-number=${{ steps.version.outputs.code }} \
+            "${SIGNING_ARGS[@]}"
 
       - name: Build staging APK
-        run: flutter build apk --flavor staging --build-name=${{ steps.version.outputs.name }} --build-number=${{ steps.version.outputs.code }}
+        env:
+          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          ALIAS: ${{ secrets.ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          SIGNING_ARGS=()
+          if [ -f "$RUNNER_TEMP/keystore.jks" ]; then
+            SIGNING_ARGS+=(
+              "-Pandroid.injected.signing.store.file=$RUNNER_TEMP/keystore.jks"
+              "-Pandroid.injected.signing.store.password=$KEY_STORE_PASSWORD"
+              "-Pandroid.injected.signing.key.alias=$ALIAS"
+              "-Pandroid.injected.signing.key.password=$KEY_PASSWORD"
+            )
+          fi
+          flutter build apk --flavor staging \
+            --build-name=${{ steps.version.outputs.name }} \
+            --build-number=${{ steps.version.outputs.code }} \
+            "${SIGNING_ARGS[@]}"
 
       - name: Upload release
         uses: softprops/action-gh-release@v2
