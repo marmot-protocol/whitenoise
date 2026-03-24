@@ -64,14 +64,19 @@ ChatSummary _chatSummary({
 
 class _MockApi extends MockWnApi {
   StreamController<ChatListStreamItem>? controller;
+  StreamController<ChatListStreamItem>? archivedController;
   List<ChatSummary> initialChats = [];
+  List<ChatSummary> initialArchivedChats = [];
 
   @override
   void reset() {
     super.reset();
     controller?.close();
     controller = null;
+    archivedController?.close();
+    archivedController = null;
     initialChats = [];
+    initialArchivedChats = [];
   }
 
   @override
@@ -84,6 +89,20 @@ class _MockApi extends MockWnApi {
       controller?.add(ChatListStreamItem.initialSnapshot(items: initialChats));
     });
     return controller!.stream;
+  }
+
+  @override
+  Stream<ChatListStreamItem> crateApiChatListSubscribeToArchivedChatList({
+    required String accountPubkey,
+  }) {
+    archivedController?.close();
+    archivedController = StreamController<ChatListStreamItem>.broadcast();
+    Future.microtask(() {
+      archivedController?.add(
+        ChatListStreamItem.initialSnapshot(items: initialArchivedChats),
+      );
+    });
+    return archivedController!.stream;
   }
 
   @override
@@ -238,6 +257,22 @@ void main() {
 
         expect(find.byKey(const Key('welcome_slogan')), findsOneWidget);
         expect(find.textContaining('Decentralized'), findsOneWidget);
+        expect(find.textContaining('uncensorable'), findsOneWidget);
+        expect(find.textContaining('secure messaging'), findsOneWidget);
+      });
+
+      testWidgets('search is not available on pull when chat list is empty', (tester) async {
+        await pumpChatListScreen(tester);
+
+        expect(find.byType(WnSearchAndFilters), findsNothing);
+
+        final gesture = await tester.startGesture(const Offset(200, 400));
+        await gesture.moveBy(const Offset(0, 200));
+        await tester.pump();
+
+        expect(find.byType(WnSearchAndFilters), findsNothing);
+        await gesture.up();
+        await tester.pumpAndSettle();
       });
 
       testWidgets('tapping find people navigates to user search', (tester) async {
@@ -267,13 +302,15 @@ void main() {
         expect(find.byType(WnSystemNotice), findsNothing);
       });
 
-      testWidgets('shows empty state text after dismissing notice', (tester) async {
+      testWidgets('keeps showing slogan after dismissing notice', (tester) async {
         await pumpChatListScreen(tester);
         await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
         await tester.pumpAndSettle();
 
-        expect(find.text('No chats yet'), findsOneWidget);
-        expect(find.text('Start a conversation'), findsOneWidget);
+        expect(find.byKey(const Key('welcome_slogan')), findsOneWidget);
+        expect(find.textContaining('Decentralized'), findsOneWidget);
+        expect(find.text('No chats yet'), findsNothing);
+        expect(find.text('Start a conversation'), findsNothing);
       });
 
       testWidgets('welcome notice reappears after switching accounts', (tester) async {
@@ -607,6 +644,109 @@ void main() {
 
         final widget = tester.widget<WnSearchAndFilters>(find.byType(WnSearchAndFilters));
         expect(widget.onSearchChanged, isNotNull);
+      });
+    });
+
+    group('archive filter', () {
+      setUp(
+        () => _api.initialChats = [
+          _chatSummary(id: testPubkeyA, pendingConfirmation: false, name: 'Alice'),
+        ],
+      );
+
+      testWidgets('filter chips always visible without pull-down', (tester) async {
+        await pumpChatListScreen(tester);
+
+        expect(find.byKey(const Key('filter_chip_chats')), findsOneWidget);
+        expect(find.byKey(const Key('filter_chip_archive')), findsOneWidget);
+      });
+
+      testWidgets('filter chips row always visible', (tester) async {
+        await pumpChatListScreen(tester);
+
+        expect(find.byKey(const Key('filter_chips_row')), findsOneWidget);
+      });
+
+      testWidgets('tapping Archive filter shows archived empty state', (tester) async {
+        await pumpChatListScreen(tester);
+
+        await tester.tap(find.byKey(const Key('filter_chip_archive')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('archived_chats_empty')), findsOneWidget);
+        expect(find.text('No archived chats'), findsOneWidget);
+      });
+
+      testWidgets('tapping Archive filter shows archived chat tiles when available', (
+        tester,
+      ) async {
+        _api.initialArchivedChats = [
+          _chatSummary(id: testPubkeyA, pendingConfirmation: false, name: 'Alice'),
+        ];
+        await pumpChatListScreen(tester);
+
+        await tester.tap(find.byKey(const Key('filter_chip_archive')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('archived_chats_empty')), findsNothing);
+        expect(find.byKey(const Key(testPubkeyA)), findsOneWidget);
+      });
+
+      testWidgets('tapping Chats filter hides archived empty state', (tester) async {
+        await pumpChatListScreen(tester);
+
+        await tester.tap(find.byKey(const Key('filter_chip_archive')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('filter_chip_chats')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('archived_chats_empty')), findsNothing);
+      });
+
+      testWidgets('tapping Chats filter shows chats group', (tester) async {
+        await pumpChatListScreen(tester);
+
+        await tester.tap(find.byKey(const Key('filter_chip_archive')));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key(testPubkeyA)), findsNothing);
+
+        await tester.tap(find.byKey(const Key('filter_chip_chats')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key(testPubkeyA)), findsOneWidget);
+      });
+
+      testWidgets('welcome notice is not shown in archived view', (tester) async {
+        _api.initialChats = [];
+        await pumpChatListScreen(tester);
+
+        await tester.tap(find.byKey(const Key('filter_chip_archive')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('welcome_notice')), findsNothing);
+      });
+
+      testWidgets('chips remain visible with no chats', (tester) async {
+        _api.initialChats = [];
+        await pumpChatListScreen(tester);
+
+        expect(find.byKey(const Key('filter_chip_chats')), findsOneWidget);
+        expect(find.byKey(const Key('filter_chip_archive')), findsOneWidget);
+        expect(find.byKey(const Key('filter_chips_row')), findsOneWidget);
+      });
+
+      testWidgets('chips remain visible in archived empty state', (tester) async {
+        _api.initialChats = [];
+        await pumpChatListScreen(tester);
+
+        await tester.tap(find.byKey(const Key('filter_chip_archive')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('archived_chats_empty')), findsOneWidget);
+        expect(find.byKey(const Key('filter_chip_chats')), findsOneWidget);
+        expect(find.byKey(const Key('filter_chip_archive')), findsOneWidget);
+        expect(find.byKey(const Key('filter_chips_row')), findsOneWidget);
       });
     });
   });

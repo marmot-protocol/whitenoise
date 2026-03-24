@@ -23,7 +23,9 @@ class WnChatList extends HookWidget {
     this.topPadding = 0,
     this.header,
     this.headerHeight = 0,
-    this.showEmptyState = true,
+    this.pinnedHeader,
+    this.pinnedHeaderHeight = 0,
+    this.emptyStateContent,
   });
 
   final int itemCount;
@@ -31,9 +33,14 @@ class WnChatList extends HookWidget {
   final bool isLoading;
   final bool isSearchActive;
   final double topPadding;
+
   final Widget? header;
   final double headerHeight;
-  final bool showEmptyState;
+
+  final Widget? pinnedHeader;
+  final double pinnedHeaderHeight;
+
+  final Widget? emptyStateContent;
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +48,8 @@ class WnChatList extends HookWidget {
     final horizontalPadding = 10.w;
     final canScrollUp = useState(false);
     final hasHeader = header != null && headerHeight > 0;
+    final hasPinnedHeader = pinnedHeader != null && pinnedHeaderHeight > 0;
+
     final headerRevealController = useAnimationController(
       duration: _kAnimationDuration,
     );
@@ -54,28 +63,6 @@ class WnChatList extends HookWidget {
       return Center(
         key: const Key('chat_list_loading'),
         child: CircularProgressIndicator(color: colors.backgroundContentPrimary),
-      );
-    }
-
-    if (itemCount == 0 && showEmptyState && !isSearchActive) {
-      final typography = context.typographyScaled;
-      return Center(
-        key: const Key('chat_list_empty'),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              context.l10n.noChatsYet,
-              style: typography.medium18.copyWith(color: colors.backgroundContentPrimary),
-            ),
-            SizedBox(height: 8.h),
-            Text(
-              context.l10n.startConversation,
-              style: typography.medium14.copyWith(color: colors.backgroundContentTertiary),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
       );
     }
 
@@ -183,7 +170,28 @@ class WnChatList extends HookWidget {
       return false;
     }
 
-    final headerOffset = hasHeader ? headerHeight * headerRevealAnimation : 0.0;
+    final effectiveHeaderHeight = isAnimatingClosed.value
+        ? headerHeight
+        : headerHeight * headerRevealAnimation;
+    final emptyStateTopInset = topPadding + effectiveHeaderHeight + pinnedHeaderHeight;
+    final listPadding = EdgeInsets.only(
+      top:
+          topPadding + effectiveHeaderHeight + pinnedHeaderHeight + (hasPinnedHeader ? 24.h : 16.h),
+      left: horizontalPadding,
+      right: horizontalPadding,
+    );
+
+    if (itemCount == 0 && emptyStateContent != null && !isSearchActive) {
+      if (canScrollUp.value) {
+        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
+          SchedulerBinding.instance.addPostFrameCallback((_) {
+            canScrollUp.value = false;
+          });
+        } else {
+          canScrollUp.value = false;
+        }
+      }
+    }
 
     return NotificationListener<ScrollMetricsNotification>(
       onNotification: (notification) {
@@ -194,14 +202,23 @@ class WnChatList extends HookWidget {
         onNotification: handleScrollNotification,
         child: Stack(
           children: [
-            if (isSearchActive && itemCount == 0)
+            if (itemCount == 0 && emptyStateContent != null && !isSearchActive)
+              Positioned.fill(
+                key: const Key('chat_list_empty'),
+                top: emptyStateTopInset,
+                bottom: pinnedHeaderHeight,
+                child: Center(
+                  child: emptyStateContent,
+                ),
+              )
+            else if (isSearchActive && itemCount == 0)
               Positioned.fill(
                 key: const Key('chat_list_no_results'),
                 child: Center(
                   child: Text(
                     context.l10n.noResults,
-                    style: context.typographyScaled.medium18.copyWith(
-                      color: colors.backgroundContentPrimary,
+                    style: context.typographyScaled.medium16.copyWith(
+                      color: colors.backgroundContentTertiary,
                     ),
                   ),
                 ),
@@ -210,11 +227,7 @@ class WnChatList extends HookWidget {
               ListView.builder(
                 key: const Key('chat_list'),
                 controller: scrollController,
-                padding: EdgeInsets.only(
-                  top: topPadding + headerOffset + 16.h,
-                  left: horizontalPadding,
-                  right: horizontalPadding,
-                ),
+                padding: listPadding,
                 physics: const AlwaysScrollableScrollPhysics(
                   parent: BouncingScrollPhysics(),
                 ),
@@ -234,6 +247,15 @@ class WnChatList extends HookWidget {
                     child: header,
                   ),
                 ),
+              ),
+            if (hasPinnedHeader)
+              Positioned(
+                key: const Key('chat_list_pinned_header'),
+                top: topPadding + effectiveHeaderHeight,
+                left: horizontalPadding,
+                right: horizontalPadding,
+                height: pinnedHeaderHeight,
+                child: pinnedHeader!,
               ),
             if (canScrollUp.value)
               Positioned(
