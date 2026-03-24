@@ -376,6 +376,40 @@ class MockWnApi implements RustLibApi {
     return Stream.value(const ChatListStreamItem.initialSnapshot(items: []));
   }
 
+  bool shouldFailArchiveChat = false;
+  bool shouldFailUnarchiveChat = false;
+  int archiveChatCallCount = 0;
+  int unarchiveChatCallCount = 0;
+  String? lastArchivedGroupId;
+  String? lastUnarchivedGroupId;
+
+  @override
+  Future<void> crateApiAccountGroupsArchiveChat({
+    required String accountPubkey,
+    required String mlsGroupId,
+  }) async {
+    archiveChatCallCount++;
+    lastArchivedGroupId = mlsGroupId;
+    if (shouldFailArchiveChat) throw Exception('archive_chat failed');
+  }
+
+  @override
+  Future<void> crateApiAccountGroupsUnarchiveChat({
+    required String accountPubkey,
+    required String mlsGroupId,
+  }) async {
+    unarchiveChatCallCount++;
+    lastUnarchivedGroupId = mlsGroupId;
+    if (shouldFailUnarchiveChat) throw Exception('unarchive_chat failed');
+  }
+
+  @override
+  Stream<ChatListStreamItem> crateApiChatListSubscribeToArchivedChatList({
+    required String accountPubkey,
+  }) {
+    return Stream.value(const ChatListStreamItem.initialSnapshot(items: []));
+  }
+
   @override
   Future<List<String>> crateApiGroupsGroupMembers({
     required String pubkey,
@@ -773,6 +807,12 @@ class MockWnApi implements RustLibApi {
     shouldFailUpdateNotificationsEnabled = false;
     zapstoreVersion = null;
     zapstoreShouldThrow = false;
+    shouldFailArchiveChat = false;
+    shouldFailUnarchiveChat = false;
+    archiveChatCallCount = 0;
+    unarchiveChatCallCount = 0;
+    lastArchivedGroupId = null;
+    lastUnarchivedGroupId = null;
   }
 
   String? zapstoreVersion;

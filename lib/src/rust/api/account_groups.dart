@@ -46,6 +46,22 @@ Future<String?> getDmGroupWithPeer({
   peerPubkey: peerPubkey,
 );
 
+Future<void> archiveChat({
+  required String accountPubkey,
+  required String mlsGroupId,
+}) => RustLib.instance.api.crateApiAccountGroupsArchiveChat(
+  accountPubkey: accountPubkey,
+  mlsGroupId: mlsGroupId,
+);
+
+Future<void> unarchiveChat({
+  required String accountPubkey,
+  required String mlsGroupId,
+}) => RustLib.instance.api.crateApiAccountGroupsUnarchiveChat(
+  accountPubkey: accountPubkey,
+  mlsGroupId: mlsGroupId,
+);
+
 /// Marks a message as read for the given account.
 ///
 /// Updates the `last_read_message_id` for the account-group pair containing
@@ -83,6 +99,7 @@ class AccountGroup {
   /// - `None` = not pinned (appears after pinned chats)
   /// - `Some(n)` = pinned, lower values appear first
   final PlatformInt64? pinOrder;
+  final PlatformInt64? archivedAt;
   final PlatformInt64 createdAt;
   final PlatformInt64 updatedAt;
 
@@ -94,6 +111,7 @@ class AccountGroup {
     this.welcomerPubkey,
     this.lastReadMessageId,
     this.pinOrder,
+    this.archivedAt,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -107,6 +125,7 @@ class AccountGroup {
       welcomerPubkey.hashCode ^
       lastReadMessageId.hashCode ^
       pinOrder.hashCode ^
+      archivedAt.hashCode ^
       createdAt.hashCode ^
       updatedAt.hashCode;
 
@@ -122,6 +141,7 @@ class AccountGroup {
           welcomerPubkey == other.welcomerPubkey &&
           lastReadMessageId == other.lastReadMessageId &&
           pinOrder == other.pinOrder &&
+          archivedAt == other.archivedAt &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt;
 }
