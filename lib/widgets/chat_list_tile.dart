@@ -8,6 +8,7 @@ import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/services/user_service.dart';
+import 'package:whitenoise/src/rust/api/account_groups.dart' show archiveChat, unarchiveChat;
 import 'package:whitenoise/src/rust/api/chat_list.dart' show ChatSummary, setChatPinOrder;
 import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessageSummary;
@@ -45,12 +46,14 @@ class ChatListTile extends HookConsumerWidget {
   final ChatSummary chatSummary;
   final VoidCallback? onChatListChanged;
   final void Function(String message)? onError;
+  final bool isArchived;
 
   const ChatListTile({
     super.key,
     required this.chatSummary,
     this.onChatListChanged,
     this.onError,
+    this.isArchived = false,
   });
 
   @override
@@ -195,6 +198,33 @@ class ChatListTile extends HookConsumerWidget {
               } catch (e, st) {
                 _logger.severe('Failed to update pin order', e, st);
                 onError?.call(l10n.failedToPinChat);
+              }
+            },
+          ),
+          WnChatListContextMenuAction(
+            id: isArchived ? 'unarchive' : 'archive',
+            label: isArchived ? l10n.unarchive : l10n.archive,
+            icon: isArchived ? WnIcons.unarchive : WnIcons.archive,
+            onTap: () async {
+              try {
+                if (isArchived) {
+                  await unarchiveChat(
+                    accountPubkey: myPubkey,
+                    mlsGroupId: chatSummary.mlsGroupId,
+                  );
+                  onChatListChanged?.call();
+                } else {
+                  await archiveChat(
+                    accountPubkey: myPubkey,
+                    mlsGroupId: chatSummary.mlsGroupId,
+                  );
+                  onChatListChanged?.call();
+                }
+              } catch (e, st) {
+                _logger.severe('Failed to archive/unarchive chat', e, st);
+                onError?.call(
+                  isArchived ? l10n.failedToUnarchiveChat : l10n.failedToArchiveChat,
+                );
               }
             },
           ),
