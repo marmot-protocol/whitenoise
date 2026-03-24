@@ -1,9 +1,12 @@
 import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_list.dart';
 import 'package:whitenoise/src/rust/api/chat_list.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/src/rust/frb_generated.dart';
+
+import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
 ChatSummary _chatSummary(
@@ -23,8 +26,9 @@ ChatSummary _chatSummary(
   unreadCount: BigInt.zero,
 );
 
-class _MockApi implements RustLibApi {
+class _MockApi extends MockWnApi {
   StreamController<ChatListStreamItem>? controller;
+  StreamController<ChatListStreamItem>? archivedController;
 
   void emitInitialSnapshot(List<ChatSummary> items) {
     controller?.add(ChatListStreamItem.initialSnapshot(items: items));
@@ -48,13 +52,28 @@ class _MockApi implements RustLibApi {
   }
 
   @override
-  dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
+  Stream<ChatListStreamItem> crateApiChatListSubscribeToArchivedChatList({
+    required String accountPubkey,
+  }) {
+    archivedController?.close();
+    archivedController = StreamController<ChatListStreamItem>.broadcast();
+    controller = archivedController;
+    return archivedController!.stream;
+  }
 }
 
 final _api = _MockApi();
 
 Future<ChatListResult Function()> _pump(WidgetTester tester, String pubkey) {
-  return mountHook(tester, () => useChatList(pubkey));
+  return _pumpWithArchived(tester, pubkey, archived: false);
+}
+
+Future<ChatListResult Function()> _pumpWithArchived(
+  WidgetTester tester,
+  String pubkey, {
+  required bool archived,
+}) {
+  return mountHook(tester, () => useChatList(pubkey, archived: archived));
 }
 
 void main() {
@@ -62,7 +81,9 @@ void main() {
 
   tearDown(() {
     _api.controller?.close();
+    _api.archivedController?.close();
     _api.controller = null;
+    _api.archivedController = null;
   });
 
   group('useChatList', () {
@@ -326,6 +347,42 @@ void main() {
           chats.firstWhere((c) => c.mlsGroupId == 'mls_c2').removedAt,
           removedAt,
         );
+      });
+    });
+    group('with archived true', () {
+      testWidgets('adds archived chat on archive change', (tester) async {
+        final getResult = await _pumpWithArchived(tester, testPubkeyA, archived: true);
+
+        _api.emitInitialSnapshot([_chatSummary('c1', DateTime(2024), archivedAt: DateTime(2024))]);
+        await tester.pumpAndSettle();
+
+        _api.emitUpdate(
+          ChatListUpdateTrigger.chatArchiveChanged,
+          _chatSummary('c2', DateTime(2024, 1, 2), archivedAt: DateTime(2024, 1, 3)),
+        );
+        await tester.pumpAndSettle();
+
+        final ids = getResult().chats.map((c) => c.mlsGroupId).toList();
+        expect(ids, ['mls_c2', 'mls_c1']);
+      });
+
+      testWidgets('removes chat when unarchived', (tester) async {
+        final getResult = await _pumpWithArchived(tester, testPubkeyA, archived: true);
+
+        _api.emitInitialSnapshot([
+          _chatSummary('c1', DateTime(2024), archivedAt: DateTime(2024)),
+          _chatSummary('c2', DateTime(2024, 1, 2), archivedAt: DateTime(2024, 1, 2)),
+        ]);
+        await tester.pumpAndSettle();
+
+        _api.emitUpdate(
+          ChatListUpdateTrigger.chatArchiveChanged,
+          _chatSummary('c2', DateTime(2024, 1, 2)),
+        );
+        await tester.pumpAndSettle();
+
+        final ids = getResult().chats.map((c) => c.mlsGroupId).toList();
+        expect(ids, ['mls_c1']);
       });
     });
   });
