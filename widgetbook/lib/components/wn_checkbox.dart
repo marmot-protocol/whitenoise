@@ -98,6 +98,17 @@ Widget wnCheckboxShowcase(BuildContext context) {
                 onChanged: _noopOnChanged,
               ),
             ),
+            _CheckboxExample(
+              label: 'Disabled',
+              child: WnCheckbox(
+                label: 'Include your npub',
+                description:
+                    'Disabled checkboxes use reduced opacity and ignore taps.',
+                value: true,
+                enabled: false,
+                onChanged: _noopOnChanged,
+              ),
+            ),
           ],
         ),
       ],
@@ -190,11 +201,13 @@ class _InteractiveCheckbox extends HookWidget {
       label: 'Description',
       initialValue: 'Share your public key with the recipient.',
     );
+    final enabled = context.knobs.boolean(label: 'Enabled', initialValue: true);
 
     return WnCheckbox(
       label: label,
       description: description,
       value: value.value,
+      enabled: enabled,
       onChanged: (v) {
         value.value = v;
       },
