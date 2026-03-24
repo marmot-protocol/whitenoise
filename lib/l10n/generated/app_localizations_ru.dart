@@ -1423,4 +1423,19 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get notificationsSettingsUpdateError =>
       'Не удалось обновить настройки уведомлений. Пожалуйста, попробуйте ещё раз.';
+
+  @override
+  String get saveToGalleryPermissionDenied => 'Разрешение на сохранение изображения отклонено';
+
+  @override
+  String get saveToGalleryNotEnoughSpace => 'Недостаточно места в хранилище';
+
+  @override
+  String get saveToGalleryNotSupportedFormat => 'Формат изображения не поддерживается';
+
+  @override
+  String get saveToGalleryError => 'Не удалось сохранить изображение в галерею';
+
+  @override
+  String get saveToGallerySuccess => 'Изображение сохранено в галерею';
 }

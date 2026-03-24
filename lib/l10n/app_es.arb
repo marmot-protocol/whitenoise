@@ -424,5 +424,10 @@
   "unarchive": "Desarchivar",
   "failedToArchiveChat": "No se pudo archivar el chat. Inténtalo de nuevo.",
   "failedToUnarchiveChat": "No se pudo desarchivar el chat. Inténtalo de nuevo.",
-  "archivedChatsEmpty": "No hay chats archivados"
+  "archivedChatsEmpty": "No hay chats archivados",
+  "saveToGalleryPermissionDenied": "Permiso denegado para guardar imagen",
+  "saveToGalleryNotEnoughSpace": "No hay suficiente espacio de almacenamiento",
+  "saveToGalleryNotSupportedFormat": "Formato de imagen no compatible",
+  "saveToGalleryError": "Error al guardar imagen en la galería",
+  "saveToGallerySuccess": "Imagen guardada en la galería"
 }

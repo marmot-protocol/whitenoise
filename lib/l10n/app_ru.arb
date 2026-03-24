@@ -424,5 +424,10 @@
   "unarchive": "Разархивировать",
   "failedToArchiveChat": "Не удалось архивировать чат. Попробуйте снова.",
   "failedToUnarchiveChat": "Не удалось разархивировать чат. Попробуйте снова.",
-  "archivedChatsEmpty": "Нет архивированных чатов"
+  "archivedChatsEmpty": "Нет архивированных чатов",
+  "saveToGalleryPermissionDenied": "Разрешение на сохранение изображения отклонено",
+  "saveToGalleryNotEnoughSpace": "Недостаточно места в хранилище",
+  "saveToGalleryNotSupportedFormat": "Формат изображения не поддерживается",
+  "saveToGalleryError": "Не удалось сохранить изображение в галерею",
+  "saveToGallerySuccess": "Изображение сохранено в галерею"
 }

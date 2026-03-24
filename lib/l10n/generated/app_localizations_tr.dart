@@ -1393,4 +1393,19 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get notificationsSettingsUpdateError =>
       'Bildirim ayarları güncellenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get saveToGalleryPermissionDenied => 'Görüntüyü kaydetme izni reddedildi';
+
+  @override
+  String get saveToGalleryNotEnoughSpace => 'Yeterli depolama alanı yok';
+
+  @override
+  String get saveToGalleryNotSupportedFormat => 'Görüntü formatı desteklenmiyor';
+
+  @override
+  String get saveToGalleryError => 'Görüntü galeriye kaydedilemedi';
+
+  @override
+  String get saveToGallerySuccess => 'Görüntü galeriye kaydedildi';
 }

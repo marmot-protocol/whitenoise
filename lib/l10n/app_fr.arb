@@ -424,5 +424,10 @@
   "unarchive": "Désarchiver",
   "failedToArchiveChat": "Échec de l'archivage de la discussion. Veuillez réessayer.",
   "failedToUnarchiveChat": "Échec du désarchivage de la discussion. Veuillez réessayer.",
-  "archivedChatsEmpty": "Aucune discussion archivée"
+  "archivedChatsEmpty": "Aucune discussion archivée",
+  "saveToGalleryPermissionDenied": "Permission refusée pour enregistrer l'image",
+  "saveToGalleryNotEnoughSpace": "Espace de stockage insuffisant",
+  "saveToGalleryNotSupportedFormat": "Format d'image non pris en charge",
+  "saveToGalleryError": "Échec de l'enregistrement de l'image dans la galerie",
+  "saveToGallerySuccess": "Image enregistrée dans la galerie"
 }

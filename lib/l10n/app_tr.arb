@@ -424,5 +424,10 @@
   "unarchive": "Arşivden çıkar",
   "failedToArchiveChat": "Sohbet arşivlenemedi. Lütfen tekrar deneyin.",
   "failedToUnarchiveChat": "Sohbet arşivden çıkarılamadı. Lütfen tekrar deneyin.",
-  "archivedChatsEmpty": "Arşivlenmiş sohbet yok"
+  "archivedChatsEmpty": "Arşivlenmiş sohbet yok",
+  "saveToGalleryPermissionDenied": "Görüntüyü kaydetme izni reddedildi",
+  "saveToGalleryNotEnoughSpace": "Yeterli depolama alanı yok",
+  "saveToGalleryNotSupportedFormat": "Görüntü formatı desteklenmiyor",
+  "saveToGalleryError": "Görüntü galeriye kaydedilemedi",
+  "saveToGallerySuccess": "Görüntü galeriye kaydedildi"
 }

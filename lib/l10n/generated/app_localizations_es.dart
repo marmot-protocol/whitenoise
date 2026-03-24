@@ -1409,4 +1409,19 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get notificationsSettingsUpdateError =>
       'No se pudieron actualizar las preferencias de notificaciones. Por favor, inténtalo de nuevo.';
+
+  @override
+  String get saveToGalleryPermissionDenied => 'Permiso denegado para guardar imagen';
+
+  @override
+  String get saveToGalleryNotEnoughSpace => 'No hay suficiente espacio de almacenamiento';
+
+  @override
+  String get saveToGalleryNotSupportedFormat => 'Formato de imagen no compatible';
+
+  @override
+  String get saveToGalleryError => 'Error al guardar imagen en la galería';
+
+  @override
+  String get saveToGallerySuccess => 'Imagen guardada en la galería';
 }
