@@ -3,9 +3,9 @@ use chrono::{DateTime, TimeZone, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
 use whitenoise::{
-    Account as WhitenoiseAccount, AccountType as WhitenoiseAccountType, ImageType,
-    LoginResult as WhitenoiseLoginResult, LoginStatus as WhitenoiseLoginStatus, RelayType,
-    Whitenoise,
+    Account as WhitenoiseAccount, AccountSettings as WhitenoiseAccountSettings,
+    AccountType as WhitenoiseAccountType, ImageType, LoginResult as WhitenoiseLoginResult,
+    LoginStatus as WhitenoiseLoginStatus, RelayType, Whitenoise,
 };
 
 /// The type of account authentication.
@@ -387,4 +387,41 @@ pub async fn is_following_user(
         .is_following_user(&account, &user_pubkey)
         .await
         .map_err(ApiError::from)
+}
+
+#[frb(non_opaque)]
+#[derive(Debug, Clone)]
+pub struct AccountSettings {
+    pub notifications_enabled: bool,
+}
+
+impl From<WhitenoiseAccountSettings> for AccountSettings {
+    fn from(s: WhitenoiseAccountSettings) -> Self {
+        Self {
+            notifications_enabled: s.notifications_enabled,
+        }
+    }
+}
+
+#[frb]
+pub async fn account_settings(pubkey: String) -> Result<AccountSettings, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let settings = whitenoise.account_settings(&account).await?;
+    Ok(settings.into())
+}
+
+#[frb]
+pub async fn update_notifications_enabled(
+    pubkey: String,
+    enabled: bool,
+) -> Result<AccountSettings, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let settings = whitenoise
+        .update_notifications_enabled(&account, enabled)
+        .await?;
+    Ok(settings.into())
 }

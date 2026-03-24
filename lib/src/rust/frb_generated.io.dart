@@ -248,6 +248,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   AccountGroup dco_decode_account_group(dynamic raw);
 
   @protected
+  AccountSettings dco_decode_account_settings(dynamic raw);
+
+  @protected
   AccountType dco_decode_account_type(dynamic raw);
 
   @protected
@@ -774,6 +777,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   AccountGroup sse_decode_account_group(SseDeserializer deserializer);
+
+  @protected
+  AccountSettings sse_decode_account_settings(SseDeserializer deserializer);
 
   @protected
   AccountType sse_decode_account_type(SseDeserializer deserializer);
@@ -1407,6 +1413,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_account_group(AccountGroup self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_account_settings(
+    AccountSettings self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_account_type(AccountType self, SseSerializer serializer);
