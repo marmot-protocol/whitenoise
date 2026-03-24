@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/chat_screen.dart';
@@ -189,6 +190,44 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(ChatListScreen), findsOneWidget);
+    });
+
+    group('when offline', () {
+      Future<void> pumpOffline(WidgetTester tester) async {
+        setUpTestView(tester);
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+        await tester.pumpAndSettle();
+        Routes.pushToStartSupportChat(tester.element(find.byType(Scaffold)));
+        await tester.pumpAndSettle();
+      }
+
+      testWidgets('displays offline notice', (tester) async {
+        await pumpOffline(tester);
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+        expect(find.text('Waiting for internet connection'), findsOneWidget);
+      });
+
+      testWidgets('send message button is disabled', (tester) async {
+        await pumpOffline(tester);
+        final button = tester.widget<WnButton>(
+          find.byKey(const Key('start_support_chat_button')),
+        );
+        expect(button.disabled, isTrue);
+      });
+
+      testWidgets('send message button onPressed is null', (tester) async {
+        await pumpOffline(tester);
+        final button = tester.widget<WnButton>(
+          find.byKey(const Key('start_support_chat_button')),
+        );
+        expect(button.onPressed, isNull);
+      });
     });
 
     group('public key copy', () {
