@@ -1353,4 +1353,19 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Du kannst gespeicherte Nachrichten noch lesen, aber keine neuen senden oder empfangen. Du kannst den Chat jederzeit archivieren oder löschen.';
+
+  @override
+  String get saveToGalleryPermissionDenied => 'Speicherberechtigung verweigert';
+
+  @override
+  String get saveToGalleryNotEnoughSpace => 'Nicht genügend Speicherplatz';
+
+  @override
+  String get saveToGalleryNotSupportedFormat => 'Bildformat nicht unterstützt';
+
+  @override
+  String get saveToGalleryError => 'Bild konnte nicht gespeichert werden';
+
+  @override
+  String get saveToGallerySuccess => 'Bild in Galerie gespeichert';
 }

@@ -1337,4 +1337,19 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Vous pouvez toujours consulter les messages enregistrés, mais vous ne pouvez plus en envoyer ni en recevoir. Vous pouvez archiver ou supprimer la discussion à tout moment.';
+
+  @override
+  String get saveToGalleryPermissionDenied => 'Permission refusée pour enregistrer l\'image';
+
+  @override
+  String get saveToGalleryNotEnoughSpace => 'Espace de stockage insuffisant';
+
+  @override
+  String get saveToGalleryNotSupportedFormat => 'Format d\'image non pris en charge';
+
+  @override
+  String get saveToGalleryError => 'Échec de l\'enregistrement de l\'image dans la galerie';
+
+  @override
+  String get saveToGallerySuccess => 'Image enregistrée dans la galerie';
 }

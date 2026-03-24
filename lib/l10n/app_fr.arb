@@ -402,5 +402,10 @@
   "reportBugWhatWentWrongRequired": "Veuillez décrire ce qui s'est passé.",
   "failedToStartSupportChat": "Échec du démarrage du chat avec le support",
   "removedFromGroup": "Vous avez été retiré de ce groupe",
-  "removedFromGroupDescription": "Vous pouvez toujours consulter les messages enregistrés, mais vous ne pouvez plus en envoyer ni en recevoir. Vous pouvez archiver ou supprimer la discussion à tout moment."
+  "removedFromGroupDescription": "Vous pouvez toujours consulter les messages enregistrés, mais vous ne pouvez plus en envoyer ni en recevoir. Vous pouvez archiver ou supprimer la discussion à tout moment.",
+  "saveToGalleryPermissionDenied": "Permission refusée pour enregistrer l'image",
+  "saveToGalleryNotEnoughSpace": "Espace de stockage insuffisant",
+  "saveToGalleryNotSupportedFormat": "Format d'image non pris en charge",
+  "saveToGalleryError": "Échec de l'enregistrement de l'image dans la galerie",
+  "saveToGallerySuccess": "Image enregistrée dans la galerie"
 }

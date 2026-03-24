@@ -1330,4 +1330,19 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Você ainda pode ver as mensagens salvas, mas não pode enviar ou receber novas. Você pode arquivar ou excluir a conversa a qualquer momento.';
+
+  @override
+  String get saveToGalleryPermissionDenied => 'Permissão negada para salvar imagem';
+
+  @override
+  String get saveToGalleryNotEnoughSpace => 'Espaço de armazenamento insuficiente';
+
+  @override
+  String get saveToGalleryNotSupportedFormat => 'Formato de imagem não suportado';
+
+  @override
+  String get saveToGalleryError => 'Falha ao salvar imagem na galeria';
+
+  @override
+  String get saveToGallerySuccess => 'Imagem salva na galeria';
 }

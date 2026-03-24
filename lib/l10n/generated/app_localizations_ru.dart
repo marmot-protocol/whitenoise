@@ -1352,4 +1352,19 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Вы можете просматривать сохранённые сообщения, но не можете отправлять или получать новые. Вы можете архивировать или удалить чат в любое время.';
+
+  @override
+  String get saveToGalleryPermissionDenied => 'Разрешение на сохранение изображения отклонено';
+
+  @override
+  String get saveToGalleryNotEnoughSpace => 'Недостаточно места в хранилище';
+
+  @override
+  String get saveToGalleryNotSupportedFormat => 'Формат изображения не поддерживается';
+
+  @override
+  String get saveToGalleryError => 'Не удалось сохранить изображение в галерею';
+
+  @override
+  String get saveToGallerySuccess => 'Изображение сохранено в галерею';
 }

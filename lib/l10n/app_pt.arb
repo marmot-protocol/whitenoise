@@ -402,5 +402,10 @@
   "reportBugWhatWentWrongRequired": "Descreva o que deu errado.",
   "failedToStartSupportChat": "Falha ao iniciar a conversa com o suporte",
   "removedFromGroup": "Você foi removido deste grupo",
-  "removedFromGroupDescription": "Você ainda pode ver as mensagens salvas, mas não pode enviar ou receber novas. Você pode arquivar ou excluir a conversa a qualquer momento."
+  "removedFromGroupDescription": "Você ainda pode ver as mensagens salvas, mas não pode enviar ou receber novas. Você pode arquivar ou excluir a conversa a qualquer momento.",
+  "saveToGalleryPermissionDenied": "Permissão negada para salvar imagem",
+  "saveToGalleryNotEnoughSpace": "Espaço de armazenamento insuficiente",
+  "saveToGalleryNotSupportedFormat": "Formato de imagem não suportado",
+  "saveToGalleryError": "Falha ao salvar imagem na galeria",
+  "saveToGallerySuccess": "Imagem salva na galeria"
 }

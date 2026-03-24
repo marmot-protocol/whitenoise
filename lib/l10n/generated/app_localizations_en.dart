@@ -1320,4 +1320,19 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'You can still view saved messages, but you can\'t send or receive new ones. You can archive or delete the chat anytime.';
+
+  @override
+  String get saveToGalleryPermissionDenied => 'Permission denied to save image';
+
+  @override
+  String get saveToGalleryNotEnoughSpace => 'Not enough storage space';
+
+  @override
+  String get saveToGalleryNotSupportedFormat => 'Image format not supported';
+
+  @override
+  String get saveToGalleryError => 'Failed to save image to gallery';
+
+  @override
+  String get saveToGallerySuccess => 'Image saved to gallery';
 }

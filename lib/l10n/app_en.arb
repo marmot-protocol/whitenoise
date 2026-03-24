@@ -1741,5 +1741,25 @@
   "removedFromGroupDescription": "You can still view saved messages, but you can't send or receive new ones. You can archive or delete the chat anytime.",
   "@removedFromGroupDescription": {
     "description": "Notice description shown when the user has been removed from the group"
+  },
+  "saveToGalleryPermissionDenied": "Permission denied to save image",
+  "@saveToGalleryPermissionDenied": {
+    "description": "Error message when permission is denied to save to gallery"
+  },
+  "saveToGalleryNotEnoughSpace": "Not enough storage space",
+  "@saveToGalleryNotEnoughSpace": {
+    "description": "Error message when there's not enough space to save image"
+  },
+  "saveToGalleryNotSupportedFormat": "Image format not supported",
+  "@saveToGalleryNotSupportedFormat": {
+    "description": "Error message when image format is not supported"
+  },
+  "saveToGalleryError": "Failed to save image to gallery",
+  "@saveToGalleryError": {
+    "description": "Generic error message when saving to gallery fails"
+  },
+  "saveToGallerySuccess": "Image saved to gallery",
+  "@saveToGallerySuccess": {
+    "description": "Success message when image is saved to gallery"
   }
 }

@@ -402,5 +402,10 @@
   "reportBugWhatWentWrongRequired": "Lütfen neyin yanlış gittiğini açıklayın.",
   "failedToStartSupportChat": "Destek ile sohbet başlatılamadı",
   "removedFromGroup": "Bu gruptan çıkarıldınız",
-  "removedFromGroupDescription": "Kaydedilmiş mesajları görüntüleyebilirsiniz, ancak yeni mesaj gönderemez veya alamazsınız. Sohbeti istediğiniz zaman arşivleyebilir veya silebilirsiniz."
+  "removedFromGroupDescription": "Kaydedilmiş mesajları görüntüleyebilirsiniz, ancak yeni mesaj gönderemez veya alamazsınız. Sohbeti istediğiniz zaman arşivleyebilir veya silebilirsiniz.",
+  "saveToGalleryPermissionDenied": "Görüntüyü kaydetme izni reddedildi",
+  "saveToGalleryNotEnoughSpace": "Yeterli depolama alanı yok",
+  "saveToGalleryNotSupportedFormat": "Görüntü formatı desteklenmiyor",
+  "saveToGalleryError": "Görüntü galeriye kaydedilemedi",
+  "saveToGallerySuccess": "Görüntü galeriye kaydedildi"
 }
