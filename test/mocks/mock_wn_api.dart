@@ -91,6 +91,10 @@ class MockWnApi implements RustLibApi {
   int deleteDraftCallCount = 0;
   bool shouldFailDeleteDraft = false;
 
+  bool mockNotificationsEnabled = true;
+  bool shouldFailAccountSettings = false;
+  bool shouldFailUpdateNotificationsEnabled = false;
+
   @override
   Future<KeyPackageStatus> crateApiUsersUserHasKeyPackage({
     required String pubkey,
@@ -694,6 +698,26 @@ class MockWnApi implements RustLibApi {
     if (sendBugReportShouldFail) throw Exception('send_bug_report failed');
   }
 
+  @override
+  Future<AccountSettings> crateApiAccountsAccountSettings({
+    required String pubkey,
+  }) async {
+    if (shouldFailAccountSettings) throw Exception('Failed to get account settings');
+    return AccountSettings(notificationsEnabled: mockNotificationsEnabled);
+  }
+
+  @override
+  Future<AccountSettings> crateApiAccountsUpdateNotificationsEnabled({
+    required String pubkey,
+    required bool enabled,
+  }) async {
+    if (shouldFailUpdateNotificationsEnabled) {
+      throw Exception('Failed to update notifications enabled');
+    }
+    mockNotificationsEnabled = enabled;
+    return AccountSettings(notificationsEnabled: mockNotificationsEnabled);
+  }
+
   void reset() {
     sendBugReportCalled = false;
     lastBugReportWhatWentWrong = null;
@@ -744,6 +768,9 @@ class MockWnApi implements RustLibApi {
     shouldFailSaveDraft = false;
     deleteDraftCallCount = 0;
     shouldFailDeleteDraft = false;
+    mockNotificationsEnabled = true;
+    shouldFailAccountSettings = false;
+    shouldFailUpdateNotificationsEnabled = false;
     zapstoreVersion = null;
     zapstoreShouldThrow = false;
   }
