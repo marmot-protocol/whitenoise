@@ -71,5 +71,7 @@
 		<false/>
 		<key>NSCameraUsageDescription</key>
 		<string>Camera access is required to scan QR codes</string>
+		<key>NSPhotoLibraryAddUsageDescription</key>
+		<string>White Noise needs access to save images to your photo library.</string>
 	</dict>
 </plist>
