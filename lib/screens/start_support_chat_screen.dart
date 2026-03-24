@@ -9,13 +9,14 @@ import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
-import 'package:whitenoise/widgets/wn_system_notice.dart' show WnSystemNotice;
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 import 'package:whitenoise/widgets/wn_user_profile_card.dart';
 
 final _logger = Logger('StartSupportChatScreen');
@@ -27,6 +28,7 @@ class StartSupportChatScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final accountPubkey = ref.watch(accountPubkeyProvider);
+    final isOffline = ref.watch(offlineProvider).value ?? false;
 
     final metadataSnapshot = useUserMetadata(context, supportPubkey);
     final (
@@ -79,14 +81,21 @@ class StartSupportChatScreen extends HookConsumerWidget {
                     title: context.l10n.chatWithSupport,
                     onNavigate: () => Routes.goBack(context),
                   ),
-                  systemNotice: noticeMessage != null
+                  systemNotice: (noticeMessage != null
                       ? WnSystemNotice(
                           key: ValueKey(noticeMessage),
                           title: noticeMessage,
                           type: noticeType,
                           onDismiss: dismissNotice,
                         )
-                      : null,
+                      : isOffline
+                      ? WnSystemNotice(
+                          key: const Key('offline_notice'),
+                          title: context.l10n.waitingForInternet,
+                          type: WnSystemNoticeType.warning,
+                          variant: WnSystemNoticeVariant.expanded,
+                        )
+                      : null),
                   child: Padding(
                     padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
                     child: Column(
@@ -109,8 +118,9 @@ class StartSupportChatScreen extends HookConsumerWidget {
                             metadata: metadata,
                             onPublicKeyCopied: () =>
                                 showSuccessNotice(context.l10n.publicKeyCopied),
-                            onPublicKeyCopyError: () =>
-                                showErrorNotice(context.l10n.publicKeyCopyError),
+                            onPublicKeyCopyError: () => showErrorNotice(
+                              context.l10n.publicKeyCopyError,
+                            ),
                           ),
                           Gap(8.h),
                           SizedBox(
@@ -121,7 +131,8 @@ class StartSupportChatScreen extends HookConsumerWidget {
                               size: WnButtonSize.medium,
                               trailingIcon: WnIcons.newChat,
                               loading: dmState.isLoading,
-                              onPressed: startChat,
+                              disabled: isOffline,
+                              onPressed: isOffline ? null : startChat,
                             ),
                           ),
                         ],
