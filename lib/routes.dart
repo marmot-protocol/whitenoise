@@ -28,6 +28,8 @@ import 'package:whitenoise/screens/key_package_management_screen.dart'
     show KeyPackageManagementScreen;
 import 'package:whitenoise/screens/login_screen.dart' show LoginScreen;
 import 'package:whitenoise/screens/network_screen.dart' show NetworkScreen;
+import 'package:whitenoise/screens/notification_settings_screen.dart'
+    show NotificationSettingsScreen;
 import 'package:whitenoise/screens/privacy_security_screen.dart' show PrivacySecurityScreen;
 import 'package:whitenoise/screens/profile_keys_screen.dart' show ProfileKeysScreen;
 import 'package:whitenoise/screens/relay_control_state_screen.dart' show RelayControlStateScreen;
@@ -60,6 +62,7 @@ abstract final class Routes {
   static const _settings = '/settings';
   static const _donate = '/donate';
   static const _appearance = '/appearance';
+  static const _notificationSettings = '/notification-settings';
   static const _privacySecurity = '/privacy-security';
   static const _wip = '/wip';
   static const _developerSettings = '/developer-settings';
@@ -168,6 +171,13 @@ abstract final class Routes {
           pageBuilder: (context, state) => _navigationTransition(
             state: state,
             child: const AppearanceScreen(),
+          ),
+        ),
+        GoRoute(
+          path: _notificationSettings,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: const NotificationSettingsScreen(),
           ),
         ),
         GoRoute(
@@ -499,6 +509,10 @@ abstract final class Routes {
 
   static void pushToAppearance(BuildContext context) {
     GoRouter.of(context).push(_appearance);
+  }
+
+  static void pushToNotificationSettings(BuildContext context) {
+    GoRouter.of(context).push(_notificationSettings);
   }
 
   static void pushToPrivacySecurity(BuildContext context) {
