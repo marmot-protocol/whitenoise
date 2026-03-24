@@ -1,0 +1,133 @@
+name: Release APK
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Build & Release APKs
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+          cache: gradle
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.41.4'
+          channel: stable
+          cache: true
+
+      - name: Cache Flutter dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-cache-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-cache-
+
+      - name: Cache pre-built Android native libraries
+        id: jnilibs-cache
+        uses: actions/cache@v4
+        with:
+          path: android/app/src/main/jniLibs
+          key: ${{ runner.os }}-jnilibs-${{ hashFiles('rust/Cargo.toml', 'rust/Cargo.lock', 'rust/src/**', 'scripts/build_android.sh', 'scripts/build_openssl_android.sh', 'scripts/setup_android_config.sh') }}
+
+      - name: Setup Rust
+        if: steps.jnilibs-cache.outputs.cache-hit != 'true'
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
+
+      - name: Cache Rust dependencies
+        if: steps.jnilibs-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            rust/target
+          key: ${{ runner.os }}-cargo-android-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-cargo-android-
+
+      - name: Cache OpenSSL for Android
+        if: steps.jnilibs-cache.outputs.cache-hit != 'true'
+        uses: actions/cache@v4
+        with:
+          path: rust/target/openssl/install
+          key: ${{ runner.os }}-openssl-android-${{ hashFiles('scripts/build_openssl_android.sh') }}
+
+      - name: Cache Android SDK & NDK
+        id: android-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            /usr/local/lib/android/sdk/ndk/27.0.12077973
+            /usr/local/lib/android/sdk/build-tools
+            /usr/local/lib/android/sdk/platforms
+          key: ${{ runner.os }}-android-ndk-27.0.12077973
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android NDK
+        if: steps.android-cache.outputs.cache-hit != 'true'
+        run: echo "y" | sdkmanager --install "ndk;27.0.12077973"
+
+      - name: Set NDK environment
+        if: steps.jnilibs-cache.outputs.cache-hit != 'true'
+        run: echo "ANDROID_NDK_HOME=$ANDROID_HOME/ndk/27.0.12077973" >> $GITHUB_ENV
+
+      - name: Install Flutter dependencies
+        run: flutter pub get
+
+      - name: Build Rust libraries for Android
+        if: steps.jnilibs-cache.outputs.cache-hit != 'true'
+        run: ./scripts/build_android.sh
+
+      - name: Decode keystore
+        if: ${{ secrets.KEYSTORE_BASE64 != '' }}
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: echo "$KEYSTORE_BASE64" | base64 --decode > "$RUNNER_TEMP/keystore.jks"
+
+      - name: Set version
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          PREV_CODE=$(gh release list --repo "${{ github.repository }}" --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null | grep -oP '\+\K\d+$' || echo "0")
+          BUILD_NUMBER=$((PREV_CODE + 1))
+          echo "name=$(date -u +'%Y.%-m.%-d')" >> "$GITHUB_OUTPUT"
+          echo "code=${BUILD_NUMBER}" >> "$GITHUB_OUTPUT"
+
+      - name: Build production APK
+        run: flutter build apk --flavor production --build-name=${{ steps.version.outputs.name }} --build-number=${{ steps.version.outputs.code }}
+
+      - name: Build staging APK
+        run: flutter build apk --flavor staging --build-name=${{ steps.version.outputs.name }} --build-number=${{ steps.version.outputs.code }}
+
+      - name: Upload release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.name }}+${{ steps.version.outputs.code }}
+          name: ${{ steps.version.outputs.name }}+${{ steps.version.outputs.code }}
+          body: Built from ${{ github.sha }}.
+          files: |
+            build/app/outputs/flutter-apk/app-production-release.apk
+            build/app/outputs/flutter-apk/app-staging-release.apk

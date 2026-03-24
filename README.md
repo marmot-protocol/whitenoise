@@ -4,6 +4,8 @@
 
 A secure, private, and decentralized chat app using the [marmot protocol 🦫](https://github.com/marmot-protocol/marmot) to build secure messaging with MLS and Nostr
 
+[<img src="https://raw.githubusercontent.com/ImranR98/Obtainium/main/assets/graphics/badge_obtainium.png" height="80" alt="Get it on Obtainium">](https://apps.obtainium.imranr.dev/redirect.html?r=obtainium://add/https://github.com/futpib-bot/whitenoise)
+
 ## 📱 Supported Platforms
 
 ![Supported Platforms](https://blossom.primal.net/f03868727daf86f5d7d28d0e1286595381195f2d5e11b67c0d07e0b6fd8643fe.png)
