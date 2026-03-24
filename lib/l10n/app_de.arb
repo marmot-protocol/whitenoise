@@ -2,6 +2,7 @@
   "photoCount": "{count, plural, =1{Foto} other{Fotos}}",
   "@@locale": "de",
   "appTitle": "White Noise",
+  "sloganFull": "Dezentralisiert, Unzensierbar,\nSichere Nachrichten.",
   "sloganDecentralized": "Dezentralisiert",
   "sloganUncensorable": "Unzensierbar",
   "sloganSecureMessaging": "Sichere Nachrichten",
@@ -408,5 +409,9 @@
   "notifications": "Benachrichtigungen",
   "notificationsDescription": "Push-Benachrichtigungen für neue Nachrichten erhalten",
   "notificationsSettingsLoadError": "Benachrichtigungseinstellungen konnten nicht geladen werden. Bitte versuche es erneut.",
-  "notificationsSettingsUpdateError": "Benachrichtigungseinstellungen konnten nicht aktualisiert werden. Bitte versuche es erneut."
+  "notificationsSettingsUpdateError": "Benachrichtigungseinstellungen konnten nicht aktualisiert werden. Bitte versuche es erneut.",
+  "unarchive": "Dearchivieren",
+  "failedToArchiveChat": "Chat konnte nicht archiviert werden. Bitte versuche es erneut.",
+  "failedToUnarchiveChat": "Chat konnte nicht dearchiviert werden. Bitte versuche es erneut.",
+  "archivedChatsEmpty": "Keine archivierten Chats"
 }

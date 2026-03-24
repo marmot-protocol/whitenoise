@@ -23,6 +23,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get appTitle => 'White Noise';
 
   @override
+  String get sloganFull => 'Decentralizzato, Incensurabile,\nMessaggistica Sicura.';
+
+  @override
   String get sloganDecentralized => 'Decentralizzato';
 
   @override
@@ -892,6 +895,18 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get archive => 'Archivia';
+
+  @override
+  String get unarchive => 'Rimuovi dall\'archivio';
+
+  @override
+  String get failedToArchiveChat => 'Impossibile archiviare la chat. Riprova.';
+
+  @override
+  String get failedToUnarchiveChat => 'Impossibile rimuovere la chat dall\'archivio. Riprova.';
+
+  @override
+  String get archivedChatsEmpty => 'Nessuna chat archiviata';
 
   @override
   String get failedToPinChat => 'Impossibile aggiornare il fissaggio. Riprova.';

@@ -2,6 +2,7 @@
   "photoCount": "{count, plural, =1{Foto} other{Foto}}",
   "@@locale": "it",
   "appTitle": "White Noise",
+  "sloganFull": "Decentralizzato, Incensurabile,\nMessaggistica Sicura.",
   "sloganDecentralized": "Decentralizzato",
   "sloganUncensorable": "Incensurabile",
   "sloganSecureMessaging": "Messaggistica Sicura",
@@ -408,5 +409,9 @@
   "notifications": "Notifiche",
   "notificationsDescription": "Ricevi notifiche push per i nuovi messaggi",
   "notificationsSettingsLoadError": "Impossibile caricare le impostazioni delle notifiche. Riprova.",
-  "notificationsSettingsUpdateError": "Impossibile aggiornare le impostazioni delle notifiche. Riprova."
+  "notificationsSettingsUpdateError": "Impossibile aggiornare le impostazioni delle notifiche. Riprova.",
+  "unarchive": "Rimuovi dall'archivio",
+  "failedToArchiveChat": "Impossibile archiviare la chat. Riprova.",
+  "failedToUnarchiveChat": "Impossibile rimuovere la chat dall'archivio. Riprova.",
+  "archivedChatsEmpty": "Nessuna chat archiviata"
 }

@@ -13,6 +13,10 @@
   "@appTitle": {
     "description": "The application title displayed on home screen"
   },
+  "sloganFull": "Decentralized, uncensorable,\nsecure messaging.",
+  "@sloganFull": {
+    "description": "Full welcome slogan on the empty chat list screen"
+  },
   "sloganDecentralized": "Decentralized",
   "@sloganDecentralized": {
     "description": "First slogan word on home screen"
@@ -1146,6 +1150,22 @@
   "archive": "Archive",
   "@archive": {
     "description": "Archive chat context menu action"
+  },
+  "unarchive": "Unarchive",
+  "@unarchive": {
+    "description": "Unarchive chat context menu action"
+  },
+  "failedToArchiveChat": "Failed to archive chat. Please try again.",
+  "@failedToArchiveChat": {
+    "description": "Error message when archive operation fails"
+  },
+  "failedToUnarchiveChat": "Failed to unarchive chat. Please try again.",
+  "@failedToUnarchiveChat": {
+    "description": "Error message when unarchive operation fails"
+  },
+  "archivedChatsEmpty": "No archived chats",
+  "@archivedChatsEmpty": {
+    "description": "Empty state label shown in the archived chats view"
   },
   "failedToPinChat": "Failed to update pin. Please try again.",
   "@failedToPinChat": {

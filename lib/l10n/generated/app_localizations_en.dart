@@ -23,6 +23,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get appTitle => 'White Noise';
 
   @override
+  String get sloganFull => 'Decentralized, uncensorable,\nsecure messaging.';
+
+  @override
   String get sloganDecentralized => 'Decentralized';
 
   @override
@@ -888,6 +891,18 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get archive => 'Archive';
+
+  @override
+  String get unarchive => 'Unarchive';
+
+  @override
+  String get failedToArchiveChat => 'Failed to archive chat. Please try again.';
+
+  @override
+  String get failedToUnarchiveChat => 'Failed to unarchive chat. Please try again.';
+
+  @override
+  String get archivedChatsEmpty => 'No archived chats';
 
   @override
   String get failedToPinChat => 'Failed to update pin. Please try again.';

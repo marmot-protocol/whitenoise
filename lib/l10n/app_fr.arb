@@ -2,6 +2,7 @@
   "photoCount": "{count, plural, =1{Photo} other{Photos}}",
   "@@locale": "fr",
   "appTitle": "White Noise",
+  "sloganFull": "Décentralisé, Incensurable,\nMessagerie Sécurisée.",
   "sloganDecentralized": "Décentralisé",
   "sloganUncensorable": "Incensurable",
   "sloganSecureMessaging": "Messagerie Sécurisée",
@@ -408,5 +409,9 @@
   "notifications": "Notifications",
   "notificationsDescription": "Recevoir des notifications push pour les nouveaux messages",
   "notificationsSettingsLoadError": "Impossible de charger les paramètres de notifications. Veuillez réessayer.",
-  "notificationsSettingsUpdateError": "Impossible de mettre à jour les paramètres de notifications. Veuillez réessayer."
+  "notificationsSettingsUpdateError": "Impossible de mettre à jour les paramètres de notifications. Veuillez réessayer.",
+  "unarchive": "Désarchiver",
+  "failedToArchiveChat": "Échec de l'archivage de la discussion. Veuillez réessayer.",
+  "failedToUnarchiveChat": "Échec du désarchivage de la discussion. Veuillez réessayer.",
+  "archivedChatsEmpty": "Aucune discussion archivée"
 }

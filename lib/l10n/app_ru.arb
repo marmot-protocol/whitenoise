@@ -2,6 +2,7 @@
   "photoCount": "{count, plural, =1{Фото} other{Фото}}",
   "@@locale": "ru",
   "appTitle": "White Noise",
+  "sloganFull": "Децентрализованный, Нецензурируемый,\nБезопасный Мессенджер.",
   "sloganDecentralized": "Децентрализованный",
   "sloganUncensorable": "Нецензурируемый",
   "sloganSecureMessaging": "Безопасный Мессенджер",
@@ -408,5 +409,9 @@
   "notifications": "Уведомления",
   "notificationsDescription": "Получать push-уведомления о новых сообщениях",
   "notificationsSettingsLoadError": "Не удалось загрузить настройки уведомлений. Пожалуйста, попробуйте ещё раз.",
-  "notificationsSettingsUpdateError": "Не удалось обновить настройки уведомлений. Пожалуйста, попробуйте ещё раз."
+  "notificationsSettingsUpdateError": "Не удалось обновить настройки уведомлений. Пожалуйста, попробуйте ещё раз.",
+  "unarchive": "Разархивировать",
+  "failedToArchiveChat": "Не удалось архивировать чат. Попробуйте снова.",
+  "failedToUnarchiveChat": "Не удалось разархивировать чат. Попробуйте снова.",
+  "archivedChatsEmpty": "Нет архивированных чатов"
 }

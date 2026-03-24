@@ -120,6 +120,12 @@ abstract class AppLocalizations {
   /// **'White Noise'**
   String get appTitle;
 
+  /// Full welcome slogan on the empty chat list screen
+  ///
+  /// In en, this message translates to:
+  /// **'Decentralized, uncensorable,\nsecure messaging.'**
+  String get sloganFull;
+
   /// First slogan word on home screen
   ///
   /// In en, this message translates to:
@@ -1649,6 +1655,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Archive'**
   String get archive;
+
+  /// Unarchive chat context menu action
+  ///
+  /// In en, this message translates to:
+  /// **'Unarchive'**
+  String get unarchive;
+
+  /// Error message when archive operation fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to archive chat. Please try again.'**
+  String get failedToArchiveChat;
+
+  /// Error message when unarchive operation fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to unarchive chat. Please try again.'**
+  String get failedToUnarchiveChat;
+
+  /// Empty state label shown in the archived chats view
+  ///
+  /// In en, this message translates to:
+  /// **'No archived chats'**
+  String get archivedChatsEmpty;
 
   /// Error message when pin/unpin operation fails
   ///

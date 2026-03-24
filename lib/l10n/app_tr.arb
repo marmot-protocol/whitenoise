@@ -2,6 +2,7 @@
   "photoCount": "{count, plural, =1{Fotoğraf} other{Fotoğraflar}}",
   "@@locale": "tr",
   "appTitle": "White Noise",
+  "sloganFull": "Merkezi Olmayan, Sansürlenemez,\nGüvenli Mesajlaşma.",
   "sloganDecentralized": "Merkezi Olmayan",
   "sloganUncensorable": "Sansürlenemez",
   "sloganSecureMessaging": "Güvenli Mesajlaşma",
@@ -408,5 +409,9 @@
   "notifications": "Bildirimler",
   "notificationsDescription": "Yeni mesajlar için push bildirimleri al",
   "notificationsSettingsLoadError": "Bildirim ayarları yüklenemedi. Lütfen tekrar deneyin.",
-  "notificationsSettingsUpdateError": "Bildirim ayarları güncellenemedi. Lütfen tekrar deneyin."
+  "notificationsSettingsUpdateError": "Bildirim ayarları güncellenemedi. Lütfen tekrar deneyin.",
+  "unarchive": "Arşivden çıkar",
+  "failedToArchiveChat": "Sohbet arşivlenemedi. Lütfen tekrar deneyin.",
+  "failedToUnarchiveChat": "Sohbet arşivden çıkarılamadı. Lütfen tekrar deneyin.",
+  "archivedChatsEmpty": "Arşivlenmiş sohbet yok"
 }
