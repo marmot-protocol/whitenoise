@@ -1330,4 +1330,24 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Você ainda pode ver as mensagens salvas, mas não pode enviar ou receber novas. Você pode arquivar ou excluir a conversa a qualquer momento.';
+
+  @override
+  String get notificationSettings => 'Notificações';
+
+  @override
+  String get notificationSettingsTitle => 'Notificações';
+
+  @override
+  String get notifications => 'Notificações';
+
+  @override
+  String get notificationsDescription => 'Receber notificações push para novas mensagens';
+
+  @override
+  String get notificationsSettingsLoadError =>
+      'Não foi possível carregar as configurações de notificações. Tente novamente.';
+
+  @override
+  String get notificationsSettingsUpdateError =>
+      'Não foi possível atualizar as configurações de notificações. Tente novamente.';
 }

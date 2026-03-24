@@ -402,5 +402,11 @@
   "reportBugWhatWentWrongRequired": "Por favor, describe qué salió mal.",
   "failedToStartSupportChat": "No se pudo iniciar el chat con soporte",
   "removedFromGroup": "Te han eliminado de este grupo",
-  "removedFromGroupDescription": "Puedes ver los mensajes guardados, pero no puedes enviar ni recibir nuevos. Puedes archivar o eliminar el chat cuando quieras."
+  "removedFromGroupDescription": "Puedes ver los mensajes guardados, pero no puedes enviar ni recibir nuevos. Puedes archivar o eliminar el chat cuando quieras.",
+  "notificationSettings": "Notificaciones",
+  "notificationSettingsTitle": "Notificaciones",
+  "notifications": "Notificaciones",
+  "notificationsDescription": "Recibir notificaciones push para nuevos mensajes",
+  "notificationsSettingsLoadError": "No se pudieron cargar las preferencias de notificaciones. Por favor, inténtalo de nuevo.",
+  "notificationsSettingsUpdateError": "No se pudieron actualizar las preferencias de notificaciones. Por favor, inténtalo de nuevo."
 }

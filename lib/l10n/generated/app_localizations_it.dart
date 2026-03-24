@@ -1325,4 +1325,24 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Puoi ancora visualizzare i messaggi salvati, ma non puoi inviarne o riceverne di nuovi. Puoi archiviare o eliminare la chat in qualsiasi momento.';
+
+  @override
+  String get notificationSettings => 'Notifiche';
+
+  @override
+  String get notificationSettingsTitle => 'Notifiche';
+
+  @override
+  String get notifications => 'Notifiche';
+
+  @override
+  String get notificationsDescription => 'Ricevi notifiche push per i nuovi messaggi';
+
+  @override
+  String get notificationsSettingsLoadError =>
+      'Impossibile caricare le impostazioni delle notifiche. Riprova.';
+
+  @override
+  String get notificationsSettingsUpdateError =>
+      'Impossibile aggiornare le impostazioni delle notifiche. Riprova.';
 }

@@ -1741,5 +1741,29 @@
   "removedFromGroupDescription": "You can still view saved messages, but you can't send or receive new ones. You can archive or delete the chat anytime.",
   "@removedFromGroupDescription": {
     "description": "Notice description shown when the user has been removed from the group"
+  },
+  "notificationSettings": "Notifications",
+  "@notificationSettings": {
+    "description": "Settings screen menu item label for the notifications screen"
+  },
+  "notificationSettingsTitle": "Notifications",
+  "@notificationSettingsTitle": {
+    "description": "Title of the notifications screen"
+  },
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Label for notifications toggle"
+  },
+  "notificationsDescription": "Receive push notifications for new messages",
+  "@notificationsDescription": {
+    "description": "Description shown below notifications toggle"
+  },
+  "notificationsSettingsLoadError": "Could not load notification settings. Please try again.",
+  "@notificationsSettingsLoadError": {
+    "description": "Error shown when notification settings fail to load"
+  },
+  "notificationsSettingsUpdateError": "Could not update notification settings. Please try again.",
+  "@notificationsSettingsUpdateError": {
+    "description": "Error shown when updating notification settings fails"
   }
 }

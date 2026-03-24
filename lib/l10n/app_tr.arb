@@ -402,5 +402,11 @@
   "reportBugWhatWentWrongRequired": "Lütfen neyin yanlış gittiğini açıklayın.",
   "failedToStartSupportChat": "Destek ile sohbet başlatılamadı",
   "removedFromGroup": "Bu gruptan çıkarıldınız",
-  "removedFromGroupDescription": "Kaydedilmiş mesajları görüntüleyebilirsiniz, ancak yeni mesaj gönderemez veya alamazsınız. Sohbeti istediğiniz zaman arşivleyebilir veya silebilirsiniz."
+  "removedFromGroupDescription": "Kaydedilmiş mesajları görüntüleyebilirsiniz, ancak yeni mesaj gönderemez veya alamazsınız. Sohbeti istediğiniz zaman arşivleyebilir veya silebilirsiniz.",
+  "notificationSettings": "Bildirimler",
+  "notificationSettingsTitle": "Bildirimler",
+  "notifications": "Bildirimler",
+  "notificationsDescription": "Yeni mesajlar için push bildirimleri al",
+  "notificationsSettingsLoadError": "Bildirim ayarları yüklenemedi. Lütfen tekrar deneyin.",
+  "notificationsSettingsUpdateError": "Bildirim ayarları güncellenemedi. Lütfen tekrar deneyin."
 }

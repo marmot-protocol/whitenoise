@@ -402,5 +402,11 @@
   "reportBugWhatWentWrongRequired": "Veuillez décrire ce qui s'est passé.",
   "failedToStartSupportChat": "Échec du démarrage du chat avec le support",
   "removedFromGroup": "Vous avez été retiré de ce groupe",
-  "removedFromGroupDescription": "Vous pouvez toujours consulter les messages enregistrés, mais vous ne pouvez plus en envoyer ni en recevoir. Vous pouvez archiver ou supprimer la discussion à tout moment."
+  "removedFromGroupDescription": "Vous pouvez toujours consulter les messages enregistrés, mais vous ne pouvez plus en envoyer ni en recevoir. Vous pouvez archiver ou supprimer la discussion à tout moment.",
+  "notificationSettings": "Notifications",
+  "notificationSettingsTitle": "Notifications",
+  "notifications": "Notifications",
+  "notificationsDescription": "Recevoir des notifications push pour les nouveaux messages",
+  "notificationsSettingsLoadError": "Impossible de charger les paramètres de notifications. Veuillez réessayer.",
+  "notificationsSettingsUpdateError": "Impossible de mettre à jour les paramètres de notifications. Veuillez réessayer."
 }

@@ -1353,4 +1353,24 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Du kannst gespeicherte Nachrichten noch lesen, aber keine neuen senden oder empfangen. Du kannst den Chat jederzeit archivieren oder löschen.';
+
+  @override
+  String get notificationSettings => 'Benachrichtigungen';
+
+  @override
+  String get notificationSettingsTitle => 'Benachrichtigungen';
+
+  @override
+  String get notifications => 'Benachrichtigungen';
+
+  @override
+  String get notificationsDescription => 'Push-Benachrichtigungen für neue Nachrichten erhalten';
+
+  @override
+  String get notificationsSettingsLoadError =>
+      'Benachrichtigungseinstellungen konnten nicht geladen werden. Bitte versuche es erneut.';
+
+  @override
+  String get notificationsSettingsUpdateError =>
+      'Benachrichtigungseinstellungen konnten nicht aktualisiert werden. Bitte versuche es erneut.';
 }

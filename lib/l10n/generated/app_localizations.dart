@@ -2423,6 +2423,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can still view saved messages, but you can\'t send or receive new ones. You can archive or delete the chat anytime.'**
   String get removedFromGroupDescription;
+
+  /// Settings screen menu item label for the notifications screen
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationSettings;
+
+  /// Title of the notifications screen
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationSettingsTitle;
+
+  /// Label for notifications toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// Description shown below notifications toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Receive push notifications for new messages'**
+  String get notificationsDescription;
+
+  /// Error shown when notification settings fail to load
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load notification settings. Please try again.'**
+  String get notificationsSettingsLoadError;
+
+  /// Error shown when updating notification settings fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update notification settings. Please try again.'**
+  String get notificationsSettingsUpdateError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

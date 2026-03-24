@@ -402,5 +402,11 @@
   "reportBugWhatWentWrongRequired": "Пожалуйста, опишите, что пошло не так.",
   "failedToStartSupportChat": "Не удалось запустить чат с поддержкой",
   "removedFromGroup": "Вы были удалены из этой группы",
-  "removedFromGroupDescription": "Вы можете просматривать сохранённые сообщения, но не можете отправлять или получать новые. Вы можете архивировать или удалить чат в любое время."
+  "removedFromGroupDescription": "Вы можете просматривать сохранённые сообщения, но не можете отправлять или получать новые. Вы можете архивировать или удалить чат в любое время.",
+  "notificationSettings": "Уведомления",
+  "notificationSettingsTitle": "Уведомления",
+  "notifications": "Уведомления",
+  "notificationsDescription": "Получать push-уведомления о новых сообщениях",
+  "notificationsSettingsLoadError": "Не удалось загрузить настройки уведомлений. Пожалуйста, попробуйте ещё раз.",
+  "notificationsSettingsUpdateError": "Не удалось обновить настройки уведомлений. Пожалуйста, попробуйте ещё раз."
 }

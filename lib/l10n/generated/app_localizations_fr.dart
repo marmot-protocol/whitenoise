@@ -1337,4 +1337,25 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Vous pouvez toujours consulter les messages enregistrés, mais vous ne pouvez plus en envoyer ni en recevoir. Vous pouvez archiver ou supprimer la discussion à tout moment.';
+
+  @override
+  String get notificationSettings => 'Notifications';
+
+  @override
+  String get notificationSettingsTitle => 'Notifications';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get notificationsDescription =>
+      'Recevoir des notifications push pour les nouveaux messages';
+
+  @override
+  String get notificationsSettingsLoadError =>
+      'Impossible de charger les paramètres de notifications. Veuillez réessayer.';
+
+  @override
+  String get notificationsSettingsUpdateError =>
+      'Impossible de mettre à jour les paramètres de notifications. Veuillez réessayer.';
 }

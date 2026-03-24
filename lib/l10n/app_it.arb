@@ -402,5 +402,11 @@
   "reportBugWhatWentWrongRequired": "Descrivi cosa è andato storto.",
   "failedToStartSupportChat": "Impossibile avviare la chat con il supporto",
   "removedFromGroup": "Sei stato rimosso da questo gruppo",
-  "removedFromGroupDescription": "Puoi ancora visualizzare i messaggi salvati, ma non puoi inviarne o riceverne di nuovi. Puoi archiviare o eliminare la chat in qualsiasi momento."
+  "removedFromGroupDescription": "Puoi ancora visualizzare i messaggi salvati, ma non puoi inviarne o riceverne di nuovi. Puoi archiviare o eliminare la chat in qualsiasi momento.",
+  "notificationSettings": "Notifiche",
+  "notificationSettingsTitle": "Notifiche",
+  "notifications": "Notifiche",
+  "notificationsDescription": "Ricevi notifiche push per i nuovi messaggi",
+  "notificationsSettingsLoadError": "Impossibile caricare le impostazioni delle notifiche. Riprova.",
+  "notificationsSettingsUpdateError": "Impossibile aggiornare le impostazioni delle notifiche. Riprova."
 }
