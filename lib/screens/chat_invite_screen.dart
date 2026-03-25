@@ -11,6 +11,7 @@ import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/active_chat_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart' as account_groups_api;
@@ -36,6 +37,7 @@ class ChatInviteScreen extends HookConsumerWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final pubkey = ref.watch(accountPubkeyProvider);
+    final isOffline = ref.watch(offlineProvider).value ?? false;
 
     final isAccepting = useState(false);
     final isDeclining = useState(false);
@@ -128,15 +130,23 @@ class ChatInviteScreen extends HookConsumerWidget {
       body: SafeArea(
         child: Column(
           children: [
-            if (noticeMessage.value != null)
-              WnSystemNotice(
-                key: ValueKey(noticeMessage.value),
-                title: noticeMessage.value!,
-                type: WnSystemNoticeType.error,
-                onDismiss: dismissNotice,
-              ),
             WnSlate(
               tag: 'wn-slate-invite-header',
+              systemNotice: isOffline
+                  ? WnSystemNotice(
+                      key: const Key('offline_notice'),
+                      title: context.l10n.waitingForInternet,
+                      type: WnSystemNoticeType.warning,
+                      variant: WnSystemNoticeVariant.expanded,
+                    )
+                  : (noticeMessage.value != null
+                        ? WnSystemNotice(
+                            key: ValueKey(noticeMessage.value),
+                            title: noticeMessage.value!,
+                            type: WnSystemNoticeType.error,
+                            onDismiss: dismissNotice,
+                          )
+                        : null),
               header: WnSlateChatHeader(
                 displayName:
                     chatProfile.data?.displayName ??
@@ -220,13 +230,13 @@ class ChatInviteScreen extends HookConsumerWidget {
                       text: context.l10n.decline,
                       type: WnButtonType.outline,
                       loading: isDeclining.value,
-                      disabled: isProcessing,
+                      disabled: isOffline || isProcessing,
                       onPressed: handleDecline,
                     ),
                     WnButton(
                       text: context.l10n.accept,
                       loading: isAccepting.value,
-                      disabled: isProcessing,
+                      disabled: isOffline || isProcessing,
                       onPressed: handleAccept,
                     ),
                   ],
