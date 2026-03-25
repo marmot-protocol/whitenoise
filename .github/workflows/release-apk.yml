@@ -8,7 +8,7 @@ permissions:
 
 jobs:
   release:
-    name: Build & Release APKs
+    name: Build & Release APK
     runs-on: ubuntu-latest
     timeout-minutes: 60
 
@@ -138,26 +138,6 @@ jobs:
             --build-number=${{ steps.version.outputs.code }} \
             "${SIGNING_ARGS[@]}"
 
-      - name: Build staging APK
-        env:
-          KEY_STORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
-          ALIAS: ${{ secrets.ALIAS }}
-          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
-        run: |
-          SIGNING_ARGS=()
-          if [ -f "$RUNNER_TEMP/keystore.jks" ]; then
-            SIGNING_ARGS+=(
-              "-Pandroid.injected.signing.store.file=$RUNNER_TEMP/keystore.jks"
-              "-Pandroid.injected.signing.store.password=$KEY_STORE_PASSWORD"
-              "-Pandroid.injected.signing.key.alias=$ALIAS"
-              "-Pandroid.injected.signing.key.password=$KEY_PASSWORD"
-            )
-          fi
-          flutter build apk --flavor staging \
-            --build-name=${{ steps.version.outputs.name }} \
-            --build-number=${{ steps.version.outputs.code }} \
-            "${SIGNING_ARGS[@]}"
-
       - name: Upload release
         uses: softprops/action-gh-release@v2
         with:
@@ -166,4 +146,3 @@ jobs:
           body: Built from ${{ github.sha }}.
           files: |
             build/app/outputs/flutter-apk/app-production-release.apk
-            build/app/outputs/flutter-apk/app-staging-release.apk
