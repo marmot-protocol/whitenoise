@@ -14,7 +14,7 @@ class WnChatMessageInput extends StatelessWidget {
     required this.inputStyle,
     required this.onAddTap,
     this.onSend,
-    this.sendEnabled = false,
+    this.actionsEnabled = true,
     this.isFocused = false,
   });
 
@@ -24,7 +24,7 @@ class WnChatMessageInput extends StatelessWidget {
   final TextStyle inputStyle;
   final VoidCallback onAddTap;
   final VoidCallback? onSend;
-  final bool sendEnabled;
+  final bool actionsEnabled;
   final bool isFocused;
 
   @override
@@ -34,10 +34,12 @@ class WnChatMessageInput extends StatelessWidget {
     return Container(
       key: const Key('chat_message_input'),
       decoration: BoxDecoration(
-        color: colors.backgroundPrimary,
+        color: actionsEnabled ? colors.backgroundPrimary : colors.backgroundSecondary,
         borderRadius: BorderRadius.circular(8.r),
         border: Border.all(
-          color: isFocused ? colors.borderPrimary : colors.borderSecondary,
+          color: isFocused
+              ? colors.borderPrimary
+              : (!actionsEnabled ? colors.borderTertiary : colors.borderSecondary),
         ),
       ),
       child: Column(
@@ -56,7 +58,7 @@ class WnChatMessageInput extends StatelessWidget {
             inputStyle: inputStyle,
             onAddTap: onAddTap,
             onSend: onSend,
-            sendEnabled: sendEnabled,
+            actionsEnabled: actionsEnabled,
           ),
         ],
       ),
@@ -71,7 +73,7 @@ class _InputRow extends StatelessWidget {
     required this.inputStyle,
     required this.onAddTap,
     this.onSend,
-    this.sendEnabled = false,
+    this.actionsEnabled = true,
   });
 
   final Widget inputField;
@@ -79,7 +81,7 @@ class _InputRow extends StatelessWidget {
   final TextStyle inputStyle;
   final VoidCallback onAddTap;
   final VoidCallback? onSend;
-  final bool sendEnabled;
+  final bool actionsEnabled;
 
   static double get _inputContentPaddingH => 8.w;
 
@@ -106,21 +108,27 @@ class _InputRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.colors;
+
     final addButton = WnInputFieldButton(
       key: const Key('add_button'),
       icon: WnIcons.addLarge,
-      onPressed: onAddTap,
+      onPressed: actionsEnabled ? onAddTap : () {},
       buttonSize: WnInputFieldButtonSize.size40,
       filled: false,
+      disabled: !actionsEnabled,
+      iconColor: !actionsEnabled
+          ? colors.backgroundContentTertiary
+          : colors.backgroundContentPrimary,
     );
 
     final sendButton = onSend != null
         ? WnIconButton(
             key: const Key('send_button'),
             icon: WnIcons.arrowUp,
-            onPressed: sendEnabled ? onSend : null,
+            onPressed: actionsEnabled ? onSend : null,
             type: WnIconButtonType.primary,
-            disabled: !sendEnabled,
+            disabled: !actionsEnabled,
           )
         : null;
 

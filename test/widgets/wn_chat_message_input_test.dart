@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_chat_message_input.dart';
+import 'package:whitenoise/widgets/wn_icon_button.dart';
 import '../test_helpers.dart';
 
 WnChatMessageInput _buildInput({
@@ -9,7 +11,7 @@ WnChatMessageInput _buildInput({
   String? initialText,
   VoidCallback? onAddTap,
   VoidCallback? onSend,
-  bool sendEnabled = false,
+  bool actionsEnabled = true,
   bool isFocused = false,
 }) {
   final ctrl = controller ?? TextEditingController(text: initialText ?? '');
@@ -19,7 +21,7 @@ WnChatMessageInput _buildInput({
     inputStyle: const TextStyle(fontSize: 14),
     onAddTap: onAddTap ?? () {},
     onSend: onSend,
-    sendEnabled: sendEnabled,
+    actionsEnabled: actionsEnabled,
     isFocused: isFocused,
     inputField: TextField(controller: ctrl),
   );
@@ -82,23 +84,12 @@ void main() {
     });
 
     testWidgets('renders send button when onSend is provided', (tester) async {
-      await mountWidget(_buildInput(onSend: () {}, sendEnabled: true), tester);
+      await mountWidget(_buildInput(onSend: () {}), tester);
 
       expect(find.byKey(const Key('send_button')), findsOneWidget);
     });
 
-    testWidgets('send button fires onSend when enabled', (tester) async {
-      var sent = false;
-      await mountWidget(
-        _buildInput(onSend: () => sent = true, sendEnabled: true),
-        tester,
-      );
-
-      await tester.tap(find.byKey(const Key('send_button')));
-      expect(sent, isTrue);
-    });
-
-    testWidgets('send button does not fire onSend when disabled', (tester) async {
+    testWidgets('send button fires onSend when actionsEnabled', (tester) async {
       var sent = false;
       await mountWidget(
         _buildInput(onSend: () => sent = true),
@@ -106,7 +97,32 @@ void main() {
       );
 
       await tester.tap(find.byKey(const Key('send_button')));
+      expect(sent, isTrue);
+    });
+
+    testWidgets('send button does not fire onSend when actionsEnabled is false', (tester) async {
+      var sent = false;
+      await mountWidget(
+        _buildInput(onSend: () => sent = true, actionsEnabled: false),
+        tester,
+      );
+
+      await tester.tap(find.byKey(const Key('send_button')));
       expect(sent, isFalse);
+    });
+
+    testWidgets('actionsEnabled: false — send button is disabled', (tester) async {
+      await mountWidget(_buildInput(onSend: () {}, actionsEnabled: false), tester);
+
+      expect(tester.widget<WnIconButton>(find.byKey(const Key('send_button'))).disabled, isTrue);
+    });
+
+    testWidgets('actionsEnabled: false — add button tap is a no-op', (tester) async {
+      var tapped = false;
+      await mountWidget(_buildInput(onAddTap: () => tapped = true, actionsEnabled: false), tester);
+
+      await tester.tap(find.byKey(const Key('add_button')));
+      expect(tapped, isFalse);
     });
 
     testWidgets('renders with all slots filled', (tester) async {
@@ -119,7 +135,6 @@ void main() {
           onAddTap: () {},
           inputField: TextField(key: const Key('test_field'), controller: ctrl),
           onSend: () {},
-          sendEnabled: true,
         ),
         tester,
       );
@@ -130,15 +145,12 @@ void main() {
       expect(find.byKey(const Key('send_button')), findsOneWidget);
     });
 
-    testWidgets('uses secondary border when not focused', (tester) async {
-      await mountWidget(_buildInput(), tester);
+    testWidgets('uses tertiary border when actionsEnabled is false', (tester) async {
+      await mountWidget(_buildInput(actionsEnabled: false), tester);
 
-      final container = tester.widget<Container>(
-        find.byKey(const Key('chat_message_input')),
-      );
+      final container = tester.widget<Container>(find.byKey(const Key('chat_message_input')));
       final decoration = container.decoration as BoxDecoration;
-
-      expect(decoration.border, isNotNull);
+      expect(decoration.border?.top.color, SemanticColors.light.borderTertiary);
     });
 
     testWidgets('uses primary border when focused', (tester) async {
@@ -154,7 +166,7 @@ void main() {
 
     testWidgets('always uses stretch alignment with IntrinsicHeight', (tester) async {
       await mountWidget(
-        _buildInput(initialText: 'hello', onSend: () {}, sendEnabled: true),
+        _buildInput(initialText: 'hello', onSend: () {}),
         tester,
       );
 
@@ -178,7 +190,7 @@ void main() {
 
     testWidgets('single-line: buttons use center alignment', (tester) async {
       await mountWidget(
-        _buildInput(initialText: 'hello', onSend: () {}, sendEnabled: true),
+        _buildInput(initialText: 'hello', onSend: () {}),
         tester,
       );
 
@@ -198,7 +210,7 @@ void main() {
       setUpTestView(tester);
       final longText = 'word ' * 40;
       await mountWidget(
-        _buildInput(initialText: longText, onSend: () {}, sendEnabled: true),
+        _buildInput(initialText: longText, onSend: () {}),
         tester,
       );
 

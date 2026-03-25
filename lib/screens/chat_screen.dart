@@ -19,6 +19,7 @@ import 'package:whitenoise/providers/active_chat_provider.dart';
 import 'package:whitenoise/providers/debug_view_provider.dart';
 import 'package:whitenoise/providers/message_debug_log_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
 import 'package:whitenoise/services/message_service.dart';
@@ -57,6 +58,7 @@ class ChatScreen extends HookConsumerWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final pubkey = ref.watch(accountPubkeyProvider);
+    final isOffline = ref.watch(offlineProvider).value ?? false;
     final debugLog = ref.read(messageDebugLogProvider.notifier);
     final (
       :messageCount,
@@ -190,6 +192,7 @@ class ChatScreen extends HookConsumerWidget {
         context,
         message: message,
         pubkey: pubkey,
+        isOffline: isOffline,
         onDelete: () => messageService.deleteTextMessage(
           messageId: message.id,
           messagePubkey: message.pubkey,
@@ -289,9 +292,10 @@ class ChatScreen extends HookConsumerWidget {
                 isOwnMessage: isOwnMessage,
                 currentUserPubkey: pubkey,
                 onLongPress: () => showMessageMenu(message),
-                onReaction: (emoji) => toggleReaction(message, emoji),
+                onReaction: isOffline ? null : (emoji) => toggleReaction(message, emoji),
                 onHorizontalDragEnd: () => input.setReplyingTo(message),
-                onRetry: isOwnMessage && message.deliveryStatus is DeliveryStatus_Failed
+                onRetry:
+                    !isOffline && isOwnMessage && message.deliveryStatus is DeliveryStatus_Failed
                     ? () async {
                         final failedMsg = context.l10n.failedToSendMessage;
                         try {
@@ -371,14 +375,21 @@ class ChatScreen extends HookConsumerWidget {
                               )
                             : null,
                       ),
-                      systemNotice: noticeMessage.value != null
+                      systemNotice: isOffline
                           ? WnSystemNotice(
-                              key: ValueKey(noticeMessage.value),
-                              title: noticeMessage.value!,
-                              type: WnSystemNoticeType.error,
-                              onDismiss: dismissNotice,
+                              key: const Key('offline_notice'),
+                              title: context.l10n.waitingForInternet,
+                              type: WnSystemNoticeType.warning,
+                              variant: WnSystemNoticeVariant.expanded,
                             )
-                          : null,
+                          : (noticeMessage.value != null
+                                ? WnSystemNotice(
+                                    key: ValueKey(noticeMessage.value),
+                                    title: noticeMessage.value!,
+                                    type: WnSystemNoticeType.error,
+                                    onDismiss: dismissNotice,
+                                  )
+                                : null),
                       footer: isRemovedFromGroup
                           ? WnSystemNotice(
                               key: const Key('removed_from_group_notice'),
@@ -484,6 +495,7 @@ class ChatScreen extends HookConsumerWidget {
                         onSend: sendMessage,
                         onError: showNotice,
                         getChatMessageQuote: getChatMessageQuote,
+                        actionsEnabled: !isOffline,
                       ),
                     ),
                   ),
@@ -518,12 +530,14 @@ class _ChatInput extends StatelessWidget {
     required this.onSend,
     required this.onError,
     required this.getChatMessageQuote,
+    this.actionsEnabled = true,
   });
 
   final ChatInputState input;
   final MediaUploadState mediaUpload;
   final String currentUserPubkey;
   final bool isGroupChat;
+  final bool actionsEnabled;
   final Future<void> Function(
     String message,
     ChatMessage? replyingTo,
@@ -539,7 +553,6 @@ class _ChatInput extends StatelessWidget {
     final typography = context.typographyScaled;
     final hasMedia = mediaUpload.items.isNotEmpty;
     final showSend = input.hasContent || hasMedia;
-    final sendEnabled = input.hasContent || (hasMedia && mediaUpload.canSend);
 
     Future<void> handleSend() async {
       final text = input.controller.text.trim();
@@ -603,6 +616,7 @@ class _ChatInput extends StatelessWidget {
         attachmentArea: buildAttachmentArea(),
         controller: input.controller,
         inputStyle: inputStyle,
+        actionsEnabled: actionsEnabled,
         onAddTap: () {
           input.focusNode.unfocus();
           mediaUpload.pickImages();
@@ -632,7 +646,6 @@ class _ChatInput extends StatelessWidget {
           ),
         ),
         onSend: showSend ? handleSend : null,
-        sendEnabled: sendEnabled,
       ),
     );
   }

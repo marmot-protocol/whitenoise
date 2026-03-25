@@ -21,31 +21,38 @@ class WnInputFieldButton extends StatelessWidget {
     required this.onPressed,
     this.buttonSize = WnInputFieldButtonSize.size48,
     this.filled = true,
+    this.disabled = false,
+    this.iconColor,
   });
 
   final WnIcons icon;
   final VoidCallback onPressed;
   final WnInputFieldButtonSize buttonSize;
   final bool filled;
+  final bool disabled;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
 
     return GestureDetector(
-      onTap: onPressed,
-      child: Container(
-        width: buttonSize.dimension.w,
-        height: buttonSize.dimension.h,
-        decoration: BoxDecoration(
-          color: filled ? colors.fillTertiary : Colors.transparent,
-          borderRadius: BorderRadius.circular(8.r),
-        ),
-        child: Center(
-          child: WnIcon(
-            icon,
-            size: buttonSize.iconSize.w,
-            color: colors.backgroundContentPrimary,
+      onTap: disabled ? null : onPressed,
+      child: Opacity(
+        opacity: disabled ? 0.5 : 1.0,
+        child: Container(
+          width: buttonSize.dimension.w,
+          height: buttonSize.dimension.h,
+          decoration: BoxDecoration(
+            color: filled ? colors.fillTertiary : Colors.transparent,
+            borderRadius: BorderRadius.circular(8.r),
+          ),
+          child: Center(
+            child: WnIcon(
+              icon,
+              size: buttonSize.iconSize.w,
+              color: iconColor ?? colors.backgroundContentPrimary,
+            ),
           ),
         ),
       ),
