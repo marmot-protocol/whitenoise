@@ -429,5 +429,6 @@
   "unarchive": "Разархивировать",
   "failedToArchiveChat": "Не удалось архивировать чат. Попробуйте снова.",
   "failedToUnarchiveChat": "Не удалось разархивировать чат. Попробуйте снова.",
-  "archivedChatsEmpty": "Нет архивированных чатов"
+  "archivedChatsEmpty": "Нет архивированных чатов",
+  "waitingForInternet": "Ожидание подключения к интернету"
 }

@@ -429,5 +429,6 @@
   "unarchive": "Désarchiver",
   "failedToArchiveChat": "Échec de l'archivage de la discussion. Veuillez réessayer.",
   "failedToUnarchiveChat": "Échec du désarchivage de la discussion. Veuillez réessayer.",
-  "archivedChatsEmpty": "Aucune discussion archivée"
+  "archivedChatsEmpty": "Aucune discussion archivée",
+  "waitingForInternet": "En attente de connexion internet"
 }

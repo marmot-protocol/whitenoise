@@ -1429,4 +1429,7 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get notificationsSettingsUpdateError =>
       'Не удалось обновить настройки уведомлений. Пожалуйста, попробуйте ещё раз.';
+
+  @override
+  String get waitingForInternet => 'Ожидание подключения к интернету';
 }

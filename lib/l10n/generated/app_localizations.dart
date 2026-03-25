@@ -2567,6 +2567,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not update notification settings. Please try again.'**
   String get notificationsSettingsUpdateError;
+
+  /// Notice shown when the device has no internet connection
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for internet connection'**
+  String get waitingForInternet;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

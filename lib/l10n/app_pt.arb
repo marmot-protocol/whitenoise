@@ -429,5 +429,6 @@
   "unarchive": "Desarquivar",
   "failedToArchiveChat": "Falha ao arquivar a conversa. Tente novamente.",
   "failedToUnarchiveChat": "Falha ao desarquivar a conversa. Tente novamente.",
-  "archivedChatsEmpty": "Nenhuma conversa arquivada"
+  "archivedChatsEmpty": "Nenhuma conversa arquivada",
+  "waitingForInternet": "Aguardando conexão com a internet"
 }

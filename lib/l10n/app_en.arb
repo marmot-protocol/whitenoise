@@ -37,7 +37,6 @@
   "@signUp": {
     "description": "Sign up button text"
   },
-
   "loginTitle": "Enter your private key",
   "@loginTitle": {
     "description": "Title on login screen"
@@ -352,7 +351,6 @@
   "@donateTitle": {
     "description": "Donate screen title"
   },
-
   "donateDescription": "As a 501(c)3 non-profit, White Noise exists solely for your privacy and freedom, not for profit. Your support keeps us independent and uncompromised.",
   "@donateDescription": {
     "description": "Donate screen description"
@@ -372,7 +370,6 @@
   "@donateContributionLetterAfter": {
     "description": "Donate screen contribution acknowledgement text after email link"
   },
-
   "lightningAddress": "Lightning Address",
   "@lightningAddress": {
     "description": "Lightning address label"
@@ -532,52 +529,42 @@
   "@developerSettingsTitle": {
     "description": "Developer settings screen title"
   },
-
   "keyPackageManagementTitle": "Key Package Management",
   "@keyPackageManagementTitle": {
     "description": "Key package management screen title and row label"
   },
-
   "keyPackageManagementDescription": "Publish, refresh, and delete account key packages",
   "@keyPackageManagementDescription": {
     "description": "Developer settings row description for key package management"
   },
-
   "relayStateTitle": "Relay State",
   "@relayStateTitle": {
     "description": "Developer settings row label and relay state screen title"
   },
-
   "relayStateDescription": "Inspect the live relay control planes",
   "@relayStateDescription": {
     "description": "Developer settings row description for relay state"
   },
-
   "relayControlStateDumpLabel": "debug_relay_control_state:",
   "@relayControlStateDumpLabel": {
     "description": "Technical label shown above the relay control state dump"
   },
-
   "relayControlStateSnapshotDescription": "Snapshot of the live relay discovery, inbox, and group planes.",
   "@relayControlStateSnapshotDescription": {
     "description": "Description shown above the relay control state dump"
   },
-
   "relayControlStateLoading": "Loading...",
   "@relayControlStateLoading": {
     "description": "Button label shown while the relay control state dump is loading"
   },
-
   "relayControlStateRefreshButton": "Refresh Dump",
   "@relayControlStateRefreshButton": {
     "description": "Button label to refresh the relay control state dump"
   },
-
   "relayControlStateCopyButton": "Copy Dump",
   "@relayControlStateCopyButton": {
     "description": "Button label to copy the relay control state dump"
   },
-
   "publishNewKeyPackage": "Publish New Key Package",
   "@publishNewKeyPackage": {
     "description": "Button to publish new key package"
@@ -869,7 +856,6 @@
   "@noName": {
     "description": "Placeholder shown when a user has no display name set"
   },
-
   "unknownGroup": "Unknown group",
   "@unknownGroup": {
     "description": "Fallback name for unknown group"
@@ -1321,7 +1307,6 @@
   "@relayResolutionNotFound": {
     "description": "Error when custom relay didn't find lists"
   },
-
   "loginErrorInvalidKey": "Invalid nsec. Make sure you entered it correctly.",
   "@loginErrorInvalidKey": {
     "description": "Error message for LoginInvalidKeyFormat"
@@ -1713,77 +1698,62 @@
   "@reportBug": {
     "description": "Report bug menu item and screen title"
   },
-
   "reportBugDescription": "Help us improve White Noise by describing the issue you encountered.",
   "@reportBugDescription": {
     "description": "Introductory description on the report bug screen"
   },
-
   "reportBugWhatWentWrong": "What went wrong?",
   "@reportBugWhatWentWrong": {
     "description": "Label for the 'what went wrong' field"
   },
-
   "reportBugWhatWentWrongPlaceholder": "Describe the issue you experienced...",
   "@reportBugWhatWentWrongPlaceholder": {
     "description": "Placeholder for the 'what went wrong' field"
   },
-
   "reportBugStepsToReproduce": "Steps to reproduce",
   "@reportBugStepsToReproduce": {
     "description": "Label for the steps to reproduce field"
   },
-
   "reportBugStepsToReproducePlaceholder": "1. Go to...\n2. Tap on...\n3. See error",
   "@reportBugStepsToReproducePlaceholder": {
     "description": "Placeholder for the steps to reproduce field"
   },
-
   "reportBugFrequency": "How often does this happen?",
   "@reportBugFrequency": {
     "description": "Label for the frequency selector"
   },
-
   "reportBugFrequencyOnce": "Once",
   "@reportBugFrequencyOnce": {
     "description": "Frequency option: once"
   },
-
   "reportBugFrequencyAlways": "Always",
   "@reportBugFrequencyAlways": {
     "description": "Frequency option: always"
   },
-
   "reportBugFrequencySometimes": "Sometimes",
   "@reportBugFrequencySometimes": {
     "description": "Frequency option: sometimes"
   },
-
   "reportBugIncludeNpub": "Include your npub",
   "@reportBugIncludeNpub": {
     "description": "Toggle label for including the user's npub"
   },
-
   "reportBugIncludeNpubDescription": "Lets us follow up with you if needed; leaving this off keeps your report anonymous.",
   "@reportBugIncludeNpubDescription": {
     "description": "Helper text for the include npub toggle"
   },
-
   "reportBugSend": "Send report",
   "@reportBugSend": {
     "description": "Submit button on the report bug screen"
   },
-
   "reportBugSuccess": "Bug report sent. Thank you!",
   "@reportBugSuccess": {
     "description": "Success message after sending"
   },
-
   "reportBugError": "Failed to send report. Please try again.",
   "@reportBugError": {
     "description": "Error message when sending fails"
   },
-
   "reportBugWhatWentWrongRequired": "Please describe what went wrong.",
   "@reportBugWhatWentWrongRequired": {
     "description": "Validation error when 'what went wrong' is empty"
@@ -1823,5 +1793,9 @@
   "notificationsSettingsUpdateError": "Could not update notification settings. Please try again.",
   "@notificationsSettingsUpdateError": {
     "description": "Error shown when updating notification settings fails"
+  },
+  "waitingForInternet": "Waiting for internet connection",
+  "@waitingForInternet": {
+    "description": "Notice shown when the device has no internet connection"
   }
 }

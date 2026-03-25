@@ -429,5 +429,6 @@
   "unarchive": "Desarchivar",
   "failedToArchiveChat": "No se pudo archivar el chat. Inténtalo de nuevo.",
   "failedToUnarchiveChat": "No se pudo desarchivar el chat. Inténtalo de nuevo.",
-  "archivedChatsEmpty": "No hay chats archivados"
+  "archivedChatsEmpty": "No hay chats archivados",
+  "waitingForInternet": "Esperando conexión a internet"
 }

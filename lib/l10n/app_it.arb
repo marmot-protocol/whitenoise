@@ -429,5 +429,6 @@
   "unarchive": "Rimuovi dall'archivio",
   "failedToArchiveChat": "Impossibile archiviare la chat. Riprova.",
   "failedToUnarchiveChat": "Impossibile rimuovere la chat dall'archivio. Riprova.",
-  "archivedChatsEmpty": "Nessuna chat archiviata"
+  "archivedChatsEmpty": "Nessuna chat archiviata",
+  "waitingForInternet": "In attesa della connessione a internet"
 }

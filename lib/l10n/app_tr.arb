@@ -429,5 +429,6 @@
   "unarchive": "Arşivden çıkar",
   "failedToArchiveChat": "Sohbet arşivlenemedi. Lütfen tekrar deneyin.",
   "failedToUnarchiveChat": "Sohbet arşivden çıkarılamadı. Lütfen tekrar deneyin.",
-  "archivedChatsEmpty": "Arşivlenmiş sohbet yok"
+  "archivedChatsEmpty": "Arşivlenmiş sohbet yok",
+  "waitingForInternet": "İnternet bağlantısı bekleniyor"
 }

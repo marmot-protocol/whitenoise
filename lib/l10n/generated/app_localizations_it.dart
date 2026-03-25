@@ -1402,4 +1402,7 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get notificationsSettingsUpdateError =>
       'Impossibile aggiornare le impostazioni delle notifiche. Riprova.';
+
+  @override
+  String get waitingForInternet => 'In attesa della connessione a internet';
 }
