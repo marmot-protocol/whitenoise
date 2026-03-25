@@ -6,6 +6,7 @@ import 'package:image_picker_platform_interface/image_picker_platform_interface.
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/debug_view_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_info_screen.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
@@ -379,10 +380,18 @@ void main() {
   });
   setUp(() => _api.reset());
 
-  Future<void> pumpChatScreen(WidgetTester tester) async {
+  Future<void> pumpChatScreen(
+    WidgetTester tester, {
+    List overrides = const [],
+    bool isOffline = false,
+  }) async {
     await mountTestApp(
       tester,
-      overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
+      overrides: [
+        authProvider.overrideWith(() => _MockAuthNotifier()),
+        offlineProvider.overrideWith((ref) => Stream.value(isOffline)),
+        ...overrides,
+      ],
     );
     await tester.pumpAndSettle();
     Routes.goToChat(
@@ -2154,6 +2163,75 @@ void main() {
         await pumpChatScreen(tester);
 
         expect(find.byType(TextField), findsOneWidget);
+      });
+    });
+
+    group('offline state', () {
+      testWidgets('shows offline_notice when offline', (tester) async {
+        await pumpChatScreen(tester, isOffline: true);
+
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+      });
+
+      testWidgets('text field remains enabled when offline', (tester) async {
+        await pumpChatScreen(tester, isOffline: true);
+
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.enabled, isNot(false));
+      });
+
+      testWidgets('send button is not present when offline', (
+        tester,
+      ) async {
+        await pumpChatScreen(tester, isOffline: true);
+
+        await tester.enterText(find.byType(TextField), 'Hello');
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('send_button')), findsNothing);
+      });
+
+      testWidgets('Online does not show offline_notice and enables send button', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.byKey(const Key('offline_notice')), findsNothing);
+
+        await tester.enterText(find.byType(TextField), 'Hello');
+        await tester.pumpAndSettle();
+
+        final sendButton = find.byKey(const Key('send_button'));
+        expect(sendButton, findsOneWidget);
+        await tester.tap(sendButton);
+        await tester.pumpAndSettle();
+        expect(_api.sentMessages, isNotEmpty);
+      });
+
+      group('message actions when offline', () {
+        setUp(() {
+          _api.initialMessages = [
+            _message('m1', DateTime(2024), pubkey: _testPubkey),
+          ];
+        });
+
+        Future<void> openMessageMenuOffline(WidgetTester tester) async {
+          await pumpChatScreen(tester, isOffline: true);
+          await tester.longPress(find.textContaining('Message m1'));
+          await tester.pumpAndSettle();
+        }
+
+        testWidgets('hides delete button for own message', (tester) async {
+          await openMessageMenuOffline(tester);
+
+          expect(find.byType(MessageActionsScreen), findsOneWidget);
+          expect(find.byKey(const Key('delete_button')), findsNothing);
+        });
+
+        testWidgets('hides reactions row', (tester) async {
+          await openMessageMenuOffline(tester);
+
+          expect(find.byKey(const Key('reaction_❤')), findsNothing);
+          expect(find.byKey(const Key('emoji_picker_button')), findsNothing);
+        });
       });
     });
   });
