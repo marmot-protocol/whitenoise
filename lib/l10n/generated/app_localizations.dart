@@ -2411,6 +2411,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to start chat with support'**
   String get failedToStartSupportChat;
+
+  /// Label for the run-in-background toggle in settings
+  ///
+  /// In en, this message translates to:
+  /// **'Run in background'**
+  String get backgroundRunningTitle;
+
+  /// Description for the run-in-background toggle in settings
+  ///
+  /// In en, this message translates to:
+  /// **'Keep White Noise connected to receive messages while the app is in the background'**
+  String get backgroundRunningDescription;
+
+  /// Title of the dialog asking whether to allow background running
+  ///
+  /// In en, this message translates to:
+  /// **'Run in background?'**
+  String get backgroundRunningDialogTitle;
+
+  /// Body of the dialog asking whether to allow background running
+  ///
+  /// In en, this message translates to:
+  /// **'Allow White Noise to run in the background so you receive messages even when the app is closed. You can change this later in Settings.'**
+  String get backgroundRunningDialogMessage;
+
+  /// Confirm button label on the background running dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get backgroundRunningAllow;
+
+  /// Dismiss button label on the background running dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get backgroundRunningNotNow;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

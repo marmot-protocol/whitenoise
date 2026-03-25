@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -8,6 +10,8 @@ import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_zapstore_update.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
+import 'package:whitenoise/providers/background_running_provider.dart';
+import 'package:whitenoise/providers/foreground_service_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/chat_search.dart';
@@ -15,6 +19,7 @@ import 'package:whitenoise/widgets/chat_list_header.dart';
 import 'package:whitenoise/widgets/chat_list_tile.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_chat_list.dart';
+import 'package:whitenoise/widgets/wn_confirmation_slate.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_search_and_filters.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
@@ -170,6 +175,36 @@ class ChatListScreen extends HookConsumerWidget {
       welcomeNoticeDismissed.value = false;
       return null;
     }, [pubkey]);
+
+    // Show the background-running consent dialog on Android when the user
+    // has not yet made a choice (preference value is null).
+    final backgroundPref = ref.watch(backgroundRunningProvider);
+    useEffect(() {
+      if (!Platform.isAndroid) return null;
+      // Only prompt when the async value has loaded and is null (not chosen).
+      if (!backgroundPref.hasValue || backgroundPref.value != null) return null;
+
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!context.mounted) return;
+        final confirmed = await WnConfirmationSlate.show(
+          context: context,
+          title: context.l10n.backgroundRunningDialogTitle,
+          message: context.l10n.backgroundRunningDialogMessage,
+          confirmText: context.l10n.backgroundRunningAllow,
+          cancelText: context.l10n.backgroundRunningNotNow,
+          onConfirmAsync: () async => true,
+        );
+        if (!context.mounted) return;
+        final notifier = ref.read(backgroundRunningProvider.notifier);
+        if (confirmed == true) {
+          await notifier.setEnabled(true);
+          await ref.read(foregroundServiceProvider).requestBatteryOptimizationExemption();
+        } else {
+          await notifier.dismiss();
+        }
+      });
+      return null;
+    }, [backgroundPref.hasValue, backgroundPref.value]);
 
     final chatList = chatListResult.chats;
     final filteredChats = filterChatsBySearch(chatList, searchQuery.value);

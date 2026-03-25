@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/active_chat_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/background_running_provider.dart';
 import 'package:whitenoise/providers/foreground_service_provider.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/routes.dart';
@@ -33,6 +34,9 @@ final notificationListenerProvider = Provider.autoDispose<void>((ref) {
 
   final pubkey = ref.watch(authProvider).value;
   if (pubkey == null) return;
+
+  // Re-run when the user changes their background-running preference.
+  ref.watch(backgroundRunningProvider);
 
   final notificationService = ref.read(notificationServiceProvider);
   final foregroundService = ref.read(foregroundServiceProvider);
@@ -66,7 +70,15 @@ void _initializeAndListen(
       await foregroundService.stop();
       return;
     }
-    await foregroundService.requestBatteryOptimizationExemption();
+
+    // Only request battery-optimisation exemption when the user has
+    // explicitly opted in (true).  When the preference is null the
+    // prompt has not been shown yet; callers are expected to show the
+    // dialog and then call BackgroundRunningNotifier.setEnabled().
+    final backgroundPref = ref.read(backgroundRunningProvider).value;
+    if (backgroundPref == true) {
+      await foregroundService.requestBatteryOptimizationExemption();
+    }
 
     final stream = notifications_api.subscribeToNotifications();
 

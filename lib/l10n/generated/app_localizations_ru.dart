@@ -1345,4 +1345,24 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get failedToStartSupportChat => 'Не удалось запустить чат с поддержкой';
+
+  @override
+  String get backgroundRunningTitle => 'Run in background';
+
+  @override
+  String get backgroundRunningDescription =>
+      'Keep White Noise connected to receive messages while the app is in the background';
+
+  @override
+  String get backgroundRunningDialogTitle => 'Run in background?';
+
+  @override
+  String get backgroundRunningDialogMessage =>
+      'Allow White Noise to run in the background so you receive messages even when the app is closed. You can change this later in Settings.';
+
+  @override
+  String get backgroundRunningAllow => 'Allow';
+
+  @override
+  String get backgroundRunningNotNow => 'Not now';
 }

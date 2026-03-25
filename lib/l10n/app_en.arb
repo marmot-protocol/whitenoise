@@ -1733,5 +1733,29 @@
   "fatalErrorErrorCopied": "Error copied to clipboard",
   "@fatalErrorErrorCopied": {
     "description": "System notice shown after copying error details to clipboard on the fatal error screen"
+  },
+  "backgroundRunningTitle": "Run in background",
+  "@backgroundRunningTitle": {
+    "description": "Label for the run-in-background toggle in settings"
+  },
+  "backgroundRunningDescription": "Keep White Noise connected to receive messages while the app is in the background",
+  "@backgroundRunningDescription": {
+    "description": "Description for the run-in-background toggle in settings"
+  },
+  "backgroundRunningDialogTitle": "Run in background?",
+  "@backgroundRunningDialogTitle": {
+    "description": "Title of the dialog asking whether to allow background running"
+  },
+  "backgroundRunningDialogMessage": "Allow White Noise to run in the background so you receive messages even when the app is closed. You can change this later in Settings.",
+  "@backgroundRunningDialogMessage": {
+    "description": "Body of the dialog asking whether to allow background running"
+  },
+  "backgroundRunningAllow": "Allow",
+  "@backgroundRunningAllow": {
+    "description": "Confirm button label on the background running dialog"
+  },
+  "backgroundRunningNotNow": "Not now",
+  "@backgroundRunningNotNow": {
+    "description": "Dismiss button label on the background running dialog"
   }
 }

@@ -1,3 +1,5 @@
+import 'dart:io' show Platform;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -5,11 +7,14 @@ import 'package:whitenoise/hooks/use_delete_all_data.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/background_running_provider.dart';
+import 'package:whitenoise/providers/foreground_service_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_confirmation_slate.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_separator.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
@@ -23,6 +28,18 @@ class PrivacySecurityScreen extends HookConsumerWidget {
     final typography = context.typographyScaled;
     final (:state, :deleteAllData) = useDeleteAllData();
     final systemNotice = useSystemNotice();
+
+    final backgroundPref = ref.watch(backgroundRunningProvider);
+    // Treat null (not yet chosen) as false for the toggle display.
+    final backgroundEnabled = backgroundPref.value == true;
+
+    Future<void> handleBackgroundToggle(bool value) async {
+      final notifier = ref.read(backgroundRunningProvider.notifier);
+      await notifier.setEnabled(value);
+      if (value) {
+        await ref.read(foregroundServiceProvider).requestBatteryOptimizationExemption();
+      }
+    }
 
     Future<void> handleDeleteAllData() async {
       final result = await WnConfirmationSlate.show(
@@ -72,6 +89,60 @@ class PrivacySecurityScreen extends HookConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                if (Platform.isAndroid) ...[
+                  InkWell(
+                    key: const Key('background_running_toggle_row'),
+                    onTap: () => handleBackgroundToggle(!backgroundEnabled),
+                    child: SizedBox(
+                      height: 56.h,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Padding(
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10.w,
+                                vertical: 8.h,
+                              ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    context.l10n.backgroundRunningTitle,
+                                    style: typography.medium16.copyWith(
+                                      color: colors.backgroundContentPrimary,
+                                    ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    context.l10n.backgroundRunningDescription,
+                                    style: typography.medium12.copyWith(
+                                      color: colors.backgroundContentSecondary,
+                                    ),
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: EdgeInsets.only(right: 10.w),
+                            child: Switch(
+                              key: const Key('background_running_switch'),
+                              value: backgroundEnabled,
+                              onChanged: handleBackgroundToggle,
+                              activeThumbColor: colors.backgroundContentPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const WnSeparator(),
+                  SizedBox(height: 8.h),
+                ],
                 Text(
                   context.l10n.deleteAllAppData,
                   style: typography.semiBold16.copyWith(
