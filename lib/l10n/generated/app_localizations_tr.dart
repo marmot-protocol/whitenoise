@@ -1353,4 +1353,7 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get notificationsSettingsUpdateError =>
       'Bildirim ayarları güncellenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get waitingForInternet => 'İnternet bağlantısı bekleniyor';
 }

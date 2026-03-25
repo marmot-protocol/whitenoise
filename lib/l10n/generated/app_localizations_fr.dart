@@ -1370,4 +1370,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get notificationsSettingsUpdateError =>
       'Impossible de mettre à jour les paramètres de notifications. Veuillez réessayer.';
+
+  @override
+  String get waitingForInternet => 'En attente de connexion internet';
 }
