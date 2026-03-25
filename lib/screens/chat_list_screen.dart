@@ -4,10 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:url_launcher/url_launcher.dart';
 import 'package:whitenoise/hooks/use_chat_list.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
-import 'package:whitenoise/hooks/use_zapstore_update.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/background_running_provider.dart';
@@ -24,8 +22,6 @@ import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_search_and_filters.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
-
-const _zapstoreUrl = 'https://zapstore.dev/apps/org.parres.whitenoise';
 
 const _slateHeight = 80;
 const _searchAndFiltersHeight = 68;
@@ -92,42 +88,8 @@ class ChatListScreen extends HookConsumerWidget {
     AppTypography typography,
     SemanticColors colors, {
     required bool showWelcomeNotice,
-    required String? updateVersion,
-    required VoidCallback onUpdateDismiss,
     required VoidCallback onWelcomeDismiss,
   }) {
-    if (updateVersion != null) {
-      return WnSystemNotice(
-        key: ValueKey('update_notice_$updateVersion'),
-        title: context.l10n.updateAvailableTitle,
-        description: Text(
-          context.l10n.updateAvailableDescription(updateVersion),
-          style: typography.medium12.copyWith(
-            color: colors.intentionInfoContent,
-          ),
-        ),
-        type: WnSystemNoticeType.info,
-        variant: WnSystemNoticeVariant.dismissible,
-        onDismiss: onUpdateDismiss,
-        primaryAction: WnButton(
-          key: const Key('update_now_button'),
-          text: context.l10n.updateNow,
-          size: WnButtonSize.medium,
-          onPressed: () async {
-            final launched = await launchUrl(
-              Uri.parse(_zapstoreUrl),
-              mode: LaunchMode.externalApplication,
-            );
-            if (!launched && context.mounted) {
-              await launchUrl(
-                Uri.parse(_zapstoreUrl),
-              );
-            }
-          },
-        ),
-      );
-    }
-
     if (showWelcomeNotice) {
       return WnSystemNotice(
         key: const Key('welcome_notice'),
@@ -166,7 +128,6 @@ class ChatListScreen extends HookConsumerWidget {
     final chatListResult = useChatList(pubkey);
     final safeAreaTop = MediaQuery.of(context).padding.top;
     final notice = useSystemNotice();
-    final updateState = useZapstoreUpdate();
     final searchQuery = useState('');
     final welcomeNoticeDismissed = useState(false);
     final chatListTopPadding = useMemoized(() => ValueNotifier(safeAreaTop + _slateHeight.h));
@@ -211,7 +172,6 @@ class ChatListScreen extends HookConsumerWidget {
     final isLoading = chatListResult.isLoading;
     final isEmpty = chatList.isEmpty && !isLoading;
     final showWelcomeNotice = isEmpty && !welcomeNoticeDismissed.value;
-    final activeUpdateVersion = updateState.isDismissed ? null : updateState.availableVersion;
 
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
@@ -270,8 +230,6 @@ class ChatListScreen extends HookConsumerWidget {
                   typography,
                   colors,
                   showWelcomeNotice: showWelcomeNotice,
-                  updateVersion: activeUpdateVersion,
-                  onUpdateDismiss: updateState.dismiss,
                   onWelcomeDismiss: () {
                     if (context.mounted) {
                       welcomeNoticeDismissed.value = true;
