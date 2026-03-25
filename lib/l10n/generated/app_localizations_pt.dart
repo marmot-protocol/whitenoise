@@ -1330,4 +1330,7 @@ class AppLocalizationsPt extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Você ainda pode ver as mensagens salvas, mas não pode enviar ou receber novas. Você pode arquivar ou excluir a conversa a qualquer momento.';
+
+  @override
+  String get waitingForInternet => 'Aguardando conexão com a internet';
 }

@@ -402,5 +402,6 @@
   "reportBugWhatWentWrongRequired": "Lütfen neyin yanlış gittiğini açıklayın.",
   "failedToStartSupportChat": "Destek ile sohbet başlatılamadı",
   "removedFromGroup": "Bu gruptan çıkarıldınız",
-  "removedFromGroupDescription": "Kaydedilmiş mesajları görüntüleyebilirsiniz, ancak yeni mesaj gönderemez veya alamazsınız. Sohbeti istediğiniz zaman arşivleyebilir veya silebilirsiniz."
+  "removedFromGroupDescription": "Kaydedilmiş mesajları görüntüleyebilirsiniz, ancak yeni mesaj gönderemez veya alamazsınız. Sohbeti istediğiniz zaman arşivleyebilir veya silebilirsiniz.",
+  "waitingForInternet": "İnternet bağlantısı bekleniyor"
 }

@@ -1325,4 +1325,7 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Puoi ancora visualizzare i messaggi salvati, ma non puoi inviarne o riceverne di nuovi. Puoi archiviare o eliminare la chat in qualsiasi momento.';
+
+  @override
+  String get waitingForInternet => 'In attesa della connessione a internet';
 }

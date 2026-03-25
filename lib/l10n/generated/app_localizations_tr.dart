@@ -1321,4 +1321,7 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Kaydedilmiş mesajları görüntüleyebilirsiniz, ancak yeni mesaj gönderemez veya alamazsınız. Sohbeti istediğiniz zaman arşivleyebilir veya silebilirsiniz.';
+
+  @override
+  String get waitingForInternet => 'İnternet bağlantısı bekleniyor';
 }

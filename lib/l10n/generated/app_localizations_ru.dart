@@ -1352,4 +1352,7 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Вы можете просматривать сохранённые сообщения, но не можете отправлять или получать новые. Вы можете архивировать или удалить чат в любое время.';
+
+  @override
+  String get waitingForInternet => 'Ожидание подключения к интернету';
 }

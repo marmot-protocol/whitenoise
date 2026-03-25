@@ -1337,4 +1337,7 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Puedes ver los mensajes guardados, pero no puedes enviar ni recibir nuevos. Puedes archivar o eliminar el chat cuando quieras.';
+
+  @override
+  String get waitingForInternet => 'Esperando conexión a internet';
 }

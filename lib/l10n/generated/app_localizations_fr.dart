@@ -1337,4 +1337,7 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Vous pouvez toujours consulter les messages enregistrés, mais vous ne pouvez plus en envoyer ni en recevoir. Vous pouvez archiver ou supprimer la discussion à tout moment.';
+
+  @override
+  String get waitingForInternet => 'En attente de connexion internet';
 }

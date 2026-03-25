@@ -2423,6 +2423,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can still view saved messages, but you can\'t send or receive new ones. You can archive or delete the chat anytime.'**
   String get removedFromGroupDescription;
+
+  /// Notice shown when the device hast no internet connection
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting for internet connection'**
+  String get waitingForInternet;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

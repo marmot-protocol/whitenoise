@@ -1320,4 +1320,7 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'You can still view saved messages, but you can\'t send or receive new ones. You can archive or delete the chat anytime.';
+
+  @override
+  String get waitingForInternet => 'Waiting for internet connection';
 }
