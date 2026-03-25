@@ -21,7 +21,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "org.parres.whitenoise"
+        applicationId = "app.whitenoise.futpib"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
         minSdk = flutter.minSdkVersion
@@ -40,7 +40,7 @@ android {
         }
         create("production") {
             dimension = "environment"
-            resValue("string", "app_name", "White Noise")
+            resValue("string", "app_name", "White Noise (futpib)")
         }
     }
 
