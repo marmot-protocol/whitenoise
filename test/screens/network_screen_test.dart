@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/relays.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/wn_icon_button.dart';
 import 'package:whitenoise/widgets/wn_tooltip.dart';
 
 import '../mocks/mock_relay_type.dart';
@@ -93,14 +95,17 @@ void main() {
     mockApi.removedRelays = [];
   });
 
-  Future<void> pumpNetworkScreen(WidgetTester tester) async {
+  Future<void> pumpNetworkScreen(WidgetTester tester, {List<dynamic> overrides = const []}) async {
     await mountTestApp(
       tester,
       overrides: [
         authProvider.overrideWith(() => _MockAuthNotifier()),
         secureStorageProvider.overrideWithValue(MockSecureStorage()),
+        ...overrides,
       ],
     );
+    await tester.pumpAndSettle();
+
     Routes.pushToNetwork(tester.element(find.byType(Scaffold)));
     await tester.pumpAndSettle();
   }
@@ -350,6 +355,56 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Network Relays'), findsNothing);
+      });
+    });
+
+    group('offline state', () {
+      testWidgets('Offline shows offline_notice and disables add relay buttons', (tester) async {
+        await pumpNetworkScreen(
+          tester,
+          overrides: [offlineProvider.overrideWith((ref) => Stream.value(true))],
+        );
+
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+
+        final myRelaysAddBtn = tester.widget<WnIconButton>(
+          find.byKey(const Key('add_icon_my_relays')),
+        );
+        final inboxAddBtn = tester.widget<WnIconButton>(
+          find.byKey(const Key('add_icon_inbox_relays')),
+        );
+        final pkgAddBtn = tester.widget<WnIconButton>(
+          find.byKey(const Key('add_icon_key_package_relays')),
+        );
+
+        expect(myRelaysAddBtn.disabled, isTrue);
+        expect(inboxAddBtn.disabled, isTrue);
+        expect(pkgAddBtn.disabled, isTrue);
+      });
+
+      testWidgets('Online does not show offline_notice and enables add relay buttons', (
+        tester,
+      ) async {
+        await pumpNetworkScreen(
+          tester,
+          overrides: [offlineProvider.overrideWith((ref) => Stream.value(false))],
+        );
+
+        expect(find.byKey(const Key('offline_notice')), findsNothing);
+
+        final myRelaysAddBtn = tester.widget<WnIconButton>(
+          find.byKey(const Key('add_icon_my_relays')),
+        );
+        final inboxAddBtn = tester.widget<WnIconButton>(
+          find.byKey(const Key('add_icon_inbox_relays')),
+        );
+        final pkgAddBtn = tester.widget<WnIconButton>(
+          find.byKey(const Key('add_icon_key_package_relays')),
+        );
+
+        expect(myRelaysAddBtn.disabled, isFalse);
+        expect(inboxAddBtn.disabled, isFalse);
+        expect(pkgAddBtn.disabled, isFalse);
       });
     });
   });

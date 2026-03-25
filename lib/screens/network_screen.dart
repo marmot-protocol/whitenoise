@@ -7,6 +7,7 @@ import 'package:whitenoise/hooks/use_list_item_controller.dart';
 import 'package:whitenoise/hooks/use_network_relays.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_add_relay_bottom_sheet.dart';
@@ -16,6 +17,7 @@ import 'package:whitenoise/widgets/wn_list.dart';
 import 'package:whitenoise/widgets/wn_list_item.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 import 'package:whitenoise/widgets/wn_tooltip.dart';
 
 class NetworkScreen extends HookConsumerWidget {
@@ -26,6 +28,7 @@ class NetworkScreen extends HookConsumerWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final pubkey = ref.watch(accountPubkeyProvider);
+    final isOffline = ref.watch(offlineProvider).value ?? false;
     final (:state, :fetchAll, :addRelay, :removeRelay) = useNetworkRelays(pubkey);
     final listItemController = useListItemController();
 
@@ -83,7 +86,8 @@ class NetworkScreen extends HookConsumerWidget {
           WnIconButton(
             key: addIconKey,
             icon: WnIcons.addCircle,
-            onPressed: onAdd,
+            disabled: isOffline,
+            onPressed: isOffline ? null : onAdd,
           ),
         ],
       );
@@ -140,6 +144,14 @@ class NetworkScreen extends HookConsumerWidget {
         child: WnSlate(
           showTopScrollEffect: true,
           showBottomScrollEffect: true,
+          systemNotice: isOffline
+              ? WnSystemNotice(
+                  key: const Key('offline_notice'),
+                  title: context.l10n.waitingForInternet,
+                  type: WnSystemNoticeType.warning,
+                  variant: WnSystemNoticeVariant.expanded,
+                )
+              : null,
           header: WnSlateNavigationHeader(
             title: context.l10n.networkRelaysTitle,
             onNavigate: () => Routes.goBack(context),
