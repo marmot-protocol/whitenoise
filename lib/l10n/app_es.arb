@@ -400,5 +400,7 @@
   "reportBugSuccess": "Reporte de error enviado. ¡Gracias!",
   "reportBugError": "No se pudo enviar el reporte. Por favor, inténtalo de nuevo.",
   "reportBugWhatWentWrongRequired": "Por favor, describe qué salió mal.",
-  "failedToStartSupportChat": "No se pudo iniciar el chat con soporte"
+  "failedToStartSupportChat": "No se pudo iniciar el chat con soporte",
+  "removedFromGroup": "Te han eliminado de este grupo",
+  "removedFromGroupDescription": "Puedes ver los mensajes guardados, pero no puedes enviar ni recibir nuevos. Puedes archivar o eliminar el chat cuando quieras."
 }

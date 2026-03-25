@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:whitenoise/hooks/use_active_chat.dart';
 import 'package:whitenoise/hooks/use_chat_input.dart';
+import 'package:whitenoise/hooks/use_chat_list.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData, useChatMessages;
 import 'package:whitenoise/hooks/use_chat_profile.dart';
 import 'package:whitenoise/hooks/use_chat_scroll.dart';
@@ -99,11 +100,21 @@ class ChatScreen extends HookConsumerWidget {
 
     final debugViewEnabled = ref.watch(debugViewProvider).value ?? false;
 
+    final chatList = useChatList(pubkey);
+    final isRemovedFromGroup =
+        chatList.chats.where((c) => c.mlsGroupId == groupId).firstOrNull?.removedAt != null;
+    final isRemovedNoticeCollapsed = useState(false);
+
     final noticeMessage = useState<String?>(null);
     final isSearchActive = useState(false);
     final searchQuery = useState('');
     final searchController = useTextEditingController();
     final inputAreaHeight = useState(0.0);
+
+    useEffect(() {
+      if (isRemovedFromGroup) inputAreaHeight.value = 0;
+      return null;
+    }, [isRemovedFromGroup]);
 
     void showNotice(String message) {
       noticeMessage.value = message;
@@ -374,6 +385,25 @@ class ChatScreen extends HookConsumerWidget {
                               onDismiss: dismissNotice,
                             )
                           : null,
+                      footer: isRemovedFromGroup
+                          ? WnSystemNotice(
+                              key: const Key('removed_from_group_notice'),
+                              title: context.l10n.removedFromGroup,
+                              description: Text(
+                                context.l10n.removedFromGroupDescription,
+                                style: typography.medium14.copyWith(
+                                  color: colors.backgroundContentSecondary,
+                                ),
+                              ),
+                              type: WnSystemNoticeType.neutral,
+                              variant: isRemovedNoticeCollapsed.value
+                                  ? WnSystemNoticeVariant.collapsed
+                                  : WnSystemNoticeVariant.expanded,
+                              animateEntrance: false,
+                              onToggle: () =>
+                                  isRemovedNoticeCollapsed.value = !isRemovedNoticeCollapsed.value,
+                            )
+                          : null,
                     ),
                     if (isSearchActive.value) ...[
                       Padding(
@@ -443,26 +473,27 @@ class ChatScreen extends HookConsumerWidget {
                   ],
                 ),
               ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: SafeArea(
-                  top: false,
-                  child: _SizeReporter(
-                    onSizeChanged: (size) => inputAreaHeight.value = size.height,
-                    child: _ChatInput(
-                      input: input,
-                      mediaUpload: mediaUpload,
-                      currentUserPubkey: pubkey,
-                      isGroupChat: chatProfile.data?.isDm != true,
-                      onSend: sendMessage,
-                      onError: showNotice,
-                      getChatMessageQuote: getChatMessageQuote,
+              if (!isRemovedFromGroup)
+                Positioned(
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  child: SafeArea(
+                    top: false,
+                    child: _SizeReporter(
+                      onSizeChanged: (size) => inputAreaHeight.value = size.height,
+                      child: _ChatInput(
+                        input: input,
+                        mediaUpload: mediaUpload,
+                        currentUserPubkey: pubkey,
+                        isGroupChat: chatProfile.data?.isDm != true,
+                        onSend: sendMessage,
+                        onError: showNotice,
+                        getChatMessageQuote: getChatMessageQuote,
+                      ),
                     ),
                   ),
                 ),
-              ),
               WnScrollEdgeEffect.canvasBottom(
                 color: colors.backgroundPrimary,
                 height: safeAreaBottom,

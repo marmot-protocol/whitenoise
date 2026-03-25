@@ -2411,6 +2411,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to start chat with support'**
   String get failedToStartSupportChat;
+
+  /// Notice title shown when the user has been removed from the group
+  ///
+  /// In en, this message translates to:
+  /// **'You were removed from this group'**
+  String get removedFromGroup;
+
+  /// Notice description shown when the user has been removed from the group
+  ///
+  /// In en, this message translates to:
+  /// **'You can still view saved messages, but you can\'t send or receive new ones. You can archive or delete the chat anytime.'**
+  String get removedFromGroupDescription;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

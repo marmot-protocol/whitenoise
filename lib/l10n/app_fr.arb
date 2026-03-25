@@ -400,5 +400,7 @@
   "reportBugSuccess": "Rapport de bug envoyé. Merci !",
   "reportBugError": "Échec de l'envoi du rapport. Veuillez réessayer.",
   "reportBugWhatWentWrongRequired": "Veuillez décrire ce qui s'est passé.",
-  "failedToStartSupportChat": "Échec du démarrage du chat avec le support"
+  "failedToStartSupportChat": "Échec du démarrage du chat avec le support",
+  "removedFromGroup": "Vous avez été retiré de ce groupe",
+  "removedFromGroupDescription": "Vous pouvez toujours consulter les messages enregistrés, mais vous ne pouvez plus en envoyer ni en recevoir. Vous pouvez archiver ou supprimer la discussion à tout moment."
 }

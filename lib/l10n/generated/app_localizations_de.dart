@@ -1346,4 +1346,11 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get failedToStartSupportChat => 'Support-Chat konnte nicht gestartet werden';
+
+  @override
+  String get removedFromGroup => 'Du wurdest aus dieser Gruppe entfernt';
+
+  @override
+  String get removedFromGroupDescription =>
+      'Du kannst gespeicherte Nachrichten noch lesen, aber keine neuen senden oder empfangen. Du kannst den Chat jederzeit archivieren oder löschen.';
 }

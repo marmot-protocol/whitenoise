@@ -400,5 +400,7 @@
   "reportBugSuccess": "Fehlerbericht gesendet. Vielen Dank!",
   "reportBugError": "Bericht konnte nicht gesendet werden. Bitte versuche es erneut.",
   "reportBugWhatWentWrongRequired": "Bitte beschreibe, was schiefgelaufen ist.",
-  "failedToStartSupportChat": "Support-Chat konnte nicht gestartet werden"
+  "failedToStartSupportChat": "Support-Chat konnte nicht gestartet werden",
+  "removedFromGroup": "Du wurdest aus dieser Gruppe entfernt",
+  "removedFromGroupDescription": "Du kannst gespeicherte Nachrichten noch lesen, aber keine neuen senden oder empfangen. Du kannst den Chat jederzeit archivieren oder löschen."
 }

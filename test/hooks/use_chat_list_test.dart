@@ -11,6 +11,7 @@ ChatSummary _chatSummary(
   DateTime createdAt, {
   bool pendingConfirmation = false,
   DateTime? archivedAt,
+  DateTime? removedAt,
 }) => ChatSummary(
   mlsGroupId: 'mls_$id',
   name: 'Chat $id',
@@ -18,6 +19,7 @@ ChatSummary _chatSummary(
   createdAt: createdAt,
   pendingConfirmation: pendingConfirmation,
   archivedAt: archivedAt,
+  removedAt: removedAt,
   unreadCount: BigInt.zero,
 );
 
@@ -298,6 +300,32 @@ void main() {
 
         final ids = getResult().chats.map((c) => c.mlsGroupId).toList();
         expect(ids, ['mls_c2', 'mls_c1']);
+      });
+    });
+
+    group('removedFromGroup trigger', () {
+      testWidgets('keeps removed group in the list with removedAt set', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([
+          _chatSummary('c1', DateTime(2024)),
+          _chatSummary('c2', DateTime(2024, 1, 2)),
+        ]);
+        await tester.pumpAndSettle();
+
+        final removedAt = DateTime(2024, 1, 3);
+        _api.emitUpdate(
+          ChatListUpdateTrigger.removedFromGroup,
+          _chatSummary('c2', DateTime(2024, 1, 2), removedAt: removedAt),
+        );
+        await tester.pumpAndSettle();
+
+        final chats = getResult().chats;
+        expect(chats.map((c) => c.mlsGroupId), containsAll(['mls_c1', 'mls_c2']));
+        expect(
+          chats.firstWhere((c) => c.mlsGroupId == 'mls_c2').removedAt,
+          removedAt,
+        );
       });
     });
   });

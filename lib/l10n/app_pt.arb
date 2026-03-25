@@ -400,5 +400,7 @@
   "reportBugSuccess": "Relatório de bug enviado. Obrigado!",
   "reportBugError": "Falha ao enviar o relatório. Tente novamente.",
   "reportBugWhatWentWrongRequired": "Descreva o que deu errado.",
-  "failedToStartSupportChat": "Falha ao iniciar a conversa com o suporte"
+  "failedToStartSupportChat": "Falha ao iniciar a conversa com o suporte",
+  "removedFromGroup": "Você foi removido deste grupo",
+  "removedFromGroupDescription": "Você ainda pode ver as mensagens salvas, mas não pode enviar ou receber novas. Você pode arquivar ou excluir a conversa a qualquer momento."
 }

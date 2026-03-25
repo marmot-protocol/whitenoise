@@ -109,6 +109,9 @@ enum ChatListUpdateTrigger {
 
   /// The chat's archive status changed.
   chatArchiveChanged,
+
+  /// This account was removed from the group by an admin.
+  removedFromGroup,
 }
 
 class ChatSummary {
@@ -145,6 +148,10 @@ class ChatSummary {
   /// When this chat was archived, if at all.
   final DateTime? archivedAt;
 
+  /// When this account was removed from the group by an admin, if at all.
+  /// `Some` means the group is read-only; the user must archive/delete to hide it.
+  final DateTime? removedAt;
+
   /// Number of unread messages in this chat
   final BigInt unreadCount;
 
@@ -168,6 +175,7 @@ class ChatSummary {
     required this.pendingConfirmation,
     this.welcomerPubkey,
     this.archivedAt,
+    this.removedAt,
     required this.unreadCount,
     this.pinOrder,
     this.dmPeerPubkey,
@@ -185,6 +193,7 @@ class ChatSummary {
       pendingConfirmation.hashCode ^
       welcomerPubkey.hashCode ^
       archivedAt.hashCode ^
+      removedAt.hashCode ^
       unreadCount.hashCode ^
       pinOrder.hashCode ^
       dmPeerPubkey.hashCode;
@@ -204,6 +213,7 @@ class ChatSummary {
           pendingConfirmation == other.pendingConfirmation &&
           welcomerPubkey == other.welcomerPubkey &&
           archivedAt == other.archivedAt &&
+          removedAt == other.removedAt &&
           unreadCount == other.unreadCount &&
           pinOrder == other.pinOrder &&
           dmPeerPubkey == other.dmPeerPubkey;
