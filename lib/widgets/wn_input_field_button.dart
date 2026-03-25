@@ -21,12 +21,14 @@ class WnInputFieldButton extends StatelessWidget {
     required this.onPressed,
     this.buttonSize = WnInputFieldButtonSize.size48,
     this.filled = true,
+    this.iconColor,
   });
 
   final WnIcons icon;
   final VoidCallback onPressed;
   final WnInputFieldButtonSize buttonSize;
   final bool filled;
+  final Color? iconColor;
 
   @override
   Widget build(BuildContext context) {
@@ -45,7 +47,7 @@ class WnInputFieldButton extends StatelessWidget {
           child: WnIcon(
             icon,
             size: buttonSize.iconSize.w,
-            color: colors.backgroundContentPrimary,
+            color: iconColor ?? colors.backgroundContentPrimary,
           ),
         ),
       ),

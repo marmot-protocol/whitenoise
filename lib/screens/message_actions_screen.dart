@@ -95,6 +95,7 @@ class MessageActionsScreen extends HookWidget {
     this.senderName,
     this.senderPictureUrl,
     this.isGroupChat = false,
+    this.isOffline = false,
     this.getChatMessageQuote,
   });
 
@@ -107,6 +108,7 @@ class MessageActionsScreen extends HookWidget {
   final String? senderName;
   final String? senderPictureUrl;
   final bool isGroupChat;
+  final bool isOffline;
   final ChatMessageQuoteData? Function(String? replyId)? getChatMessageQuote;
 
   static Future<void> show(
@@ -120,6 +122,7 @@ class MessageActionsScreen extends HookWidget {
     String? senderName,
     String? senderPictureUrl,
     bool isGroupChat = false,
+    bool isOffline = false,
     ChatMessageQuoteData? Function(String? replyId)? getChatMessageQuote,
   }) {
     final colors = context.colors;
@@ -140,6 +143,7 @@ class MessageActionsScreen extends HookWidget {
             senderName: senderName,
             senderPictureUrl: senderPictureUrl,
             isGroupChat: isGroupChat,
+            isOffline: isOffline,
             getChatMessageQuote: getChatMessageQuote,
           );
         },
@@ -227,9 +231,13 @@ class MessageActionsScreen extends HookWidget {
                     message: message,
                     isOwnMessage: isOwnMessage,
                     currentUserPubkey: pubkey,
-                    onDelete: (isOwnMessage && onDelete != null) ? handleDelete : null,
-                    onReaction: handleReaction,
-                    onEmojiPicker: () => showEmojiPicker.value = !showEmojiPicker.value,
+                    onDelete: (isOwnMessage && onDelete != null && !isOffline)
+                        ? handleDelete
+                        : null,
+                    onReaction: isOffline ? null : handleReaction,
+                    onEmojiPicker: isOffline
+                        ? null
+                        : () => showEmojiPicker.value = !showEmojiPicker.value,
                     selectedEmojis: selectedEmojis,
                     onReply: onReply != null
                         ? () {
@@ -267,9 +275,9 @@ class MessageActionsModal extends StatelessWidget {
     super.key,
     required this.message,
     required this.isOwnMessage,
-    required this.onReaction,
-    required this.onEmojiPicker,
     required this.currentUserPubkey,
+    this.onReaction,
+    this.onEmojiPicker,
     this.onDelete,
     this.selectedEmojis = const {},
     this.onReply,
@@ -282,8 +290,8 @@ class MessageActionsModal extends StatelessWidget {
 
   final ChatMessage message;
   final bool isOwnMessage;
-  final void Function(String emoji) onReaction;
-  final VoidCallback onEmojiPicker;
+  final void Function(String emoji)? onReaction;
+  final VoidCallback? onEmojiPicker;
   final String currentUserPubkey;
   final VoidCallback? onDelete;
   final Set<String> selectedEmojis;
@@ -305,7 +313,10 @@ class MessageActionsModal extends StatelessWidget {
   ];
 
   double _controlsEstimatedHeight() {
-    var height = _modalSectionSpacing.h + 40.h + _modalSectionSpacing.h + 52.h;
+    var height = _modalSectionSpacing.h + 52.h;
+    if (onReaction != null) {
+      height += 40.h + _modalSectionSpacing.h;
+    }
     if (onReply != null) {
       height += _modalButtonSpacing.h + 52.h;
     }
@@ -399,35 +410,37 @@ class MessageActionsModal extends StatelessWidget {
                               },
                             ),
                           ),
-                        SizedBox(height: _modalSectionSpacing.h),
-                        Row(
-                          children: [
-                            ...reactions.map(
-                              (emoji) => Expanded(
-                                child: _ReactionButton(
-                                  key: Key('reaction_$emoji'),
-                                  colors: colors,
-                                  emoji: emoji,
-                                  isSelected: selectedEmojis.contains(emoji),
-                                  onTap: () => onReaction(emoji),
-                                ),
-                              ),
-                            ),
-                            Expanded(
-                              child: GestureDetector(
-                                key: const Key('emoji_picker_button'),
-                                onTap: onEmojiPicker,
-                                child: Center(
-                                  child: WnIcon(
-                                    WnIcons.addEmoji,
-                                    color: colors.backgroundContentPrimary,
-                                    size: 20.sp,
+                        if (onReaction != null) ...[
+                          SizedBox(height: _modalSectionSpacing.h),
+                          Row(
+                            children: [
+                              ...reactions.map(
+                                (emoji) => Expanded(
+                                  child: _ReactionButton(
+                                    key: Key('reaction_$emoji'),
+                                    colors: colors,
+                                    emoji: emoji,
+                                    isSelected: selectedEmojis.contains(emoji),
+                                    onTap: () => onReaction!(emoji),
                                   ),
                                 ),
                               ),
-                            ),
-                          ],
-                        ),
+                              Expanded(
+                                child: GestureDetector(
+                                  key: const Key('emoji_picker_button'),
+                                  onTap: onEmojiPicker,
+                                  child: Center(
+                                    child: WnIcon(
+                                      WnIcons.addEmoji,
+                                      color: colors.backgroundContentPrimary,
+                                      size: 20.sp,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                         SizedBox(height: _modalSectionSpacing.h),
                         if (onReply != null) ...[
                           WnButton(

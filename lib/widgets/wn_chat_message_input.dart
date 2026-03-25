@@ -14,7 +14,7 @@ class WnChatMessageInput extends StatelessWidget {
     required this.inputStyle,
     required this.onAddTap,
     this.onSend,
-    this.sendEnabled = false,
+    this.actionsEnabled = true,
     this.isFocused = false,
   });
 
@@ -24,7 +24,7 @@ class WnChatMessageInput extends StatelessWidget {
   final TextStyle inputStyle;
   final VoidCallback onAddTap;
   final VoidCallback? onSend;
-  final bool sendEnabled;
+  final bool actionsEnabled;
   final bool isFocused;
 
   @override
@@ -34,10 +34,12 @@ class WnChatMessageInput extends StatelessWidget {
     return Container(
       key: const Key('chat_message_input'),
       decoration: BoxDecoration(
-        color: colors.backgroundPrimary,
+        color: actionsEnabled ? colors.backgroundPrimary : colors.backgroundSecondary,
         borderRadius: BorderRadius.circular(8.r),
         border: Border.all(
-          color: isFocused ? colors.borderPrimary : colors.borderSecondary,
+          color: isFocused
+              ? colors.borderPrimary
+              : (!actionsEnabled ? colors.borderTertiary : colors.borderSecondary),
         ),
       ),
       child: Column(
@@ -56,7 +58,7 @@ class WnChatMessageInput extends StatelessWidget {
             inputStyle: inputStyle,
             onAddTap: onAddTap,
             onSend: onSend,
-            sendEnabled: sendEnabled,
+            actionsEnabled: actionsEnabled,
           ),
         ],
       ),
@@ -71,7 +73,7 @@ class _InputRow extends StatelessWidget {
     required this.inputStyle,
     required this.onAddTap,
     this.onSend,
-    this.sendEnabled = false,
+    this.actionsEnabled = true,
   });
 
   final Widget inputField;
@@ -79,17 +81,17 @@ class _InputRow extends StatelessWidget {
   final TextStyle inputStyle;
   final VoidCallback onAddTap;
   final VoidCallback? onSend;
-  final bool sendEnabled;
+  final bool actionsEnabled;
 
   static double get _inputContentPaddingH => 8.w;
 
   bool _isMultiline(BoxConstraints constraints) {
-    final buttonWidth = 32.w + 8.w;
+    final addButtonWidth = actionsEnabled ? WnInputFieldButtonSize.size40.dimension.w + 8.w : 0.0;
     final sendWidth = onSend != null ? 40.h + 8.w : 0.0;
     final horizontalPadding = 16.w;
     final inputPadding = _inputContentPaddingH * 2;
     final availableWidth =
-        constraints.maxWidth - buttonWidth - sendWidth - horizontalPadding - inputPadding;
+        constraints.maxWidth - addButtonWidth - sendWidth - horizontalPadding - inputPadding;
 
     final textPainter = TextPainter(
       text: TextSpan(text: controller.text, style: inputStyle),
@@ -106,21 +108,13 @@ class _InputRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final addButton = WnInputFieldButton(
-      key: const Key('add_button'),
-      icon: WnIcons.addLarge,
-      onPressed: onAddTap,
-      buttonSize: WnInputFieldButtonSize.size40,
-      filled: false,
-    );
-
     final sendButton = onSend != null
         ? WnIconButton(
             key: const Key('send_button'),
             icon: WnIcons.arrowUp,
-            onPressed: sendEnabled ? onSend : null,
             type: WnIconButtonType.primary,
-            disabled: !sendEnabled,
+            onPressed: onSend!,
+            disabled: !actionsEnabled,
           )
         : null;
 
@@ -135,10 +129,17 @@ class _InputRow extends StatelessWidget {
               spacing: 8.w,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Align(
-                  alignment: multiline ? Alignment.topCenter : Alignment.center,
-                  child: addButton,
-                ),
+                if (actionsEnabled)
+                  Align(
+                    alignment: multiline ? Alignment.topCenter : Alignment.center,
+                    child: WnInputFieldButton(
+                      key: const Key('add_button'),
+                      icon: WnIcons.addLarge,
+                      onPressed: onAddTap,
+                      buttonSize: WnInputFieldButtonSize.size40,
+                      filled: false,
+                    ),
+                  ),
                 Expanded(
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: _inputContentPaddingH),

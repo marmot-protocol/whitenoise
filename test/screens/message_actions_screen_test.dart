@@ -1352,6 +1352,60 @@ void main() {
       });
     });
 
+    group('when offline', () {
+      testWidgets('does not call onDelete when own message delete is tapped', (tester) async {
+        var deleteCalled = false;
+        const myPubkey = testPubkeyA;
+
+        await mountShowTest(
+          tester,
+          builder: (context) => ElevatedButton(
+            onPressed: () => MessageActionsScreen.show(
+              context,
+              message: _createTestMessage(),
+              pubkey: myPubkey,
+              isOffline: true,
+              onAddReaction: (_) async {},
+              onRemoveReaction: (_) async {},
+              onDelete: () async {
+                deleteCalled = true;
+              },
+            ),
+            child: const Text('Show Menu'),
+          ),
+        );
+
+        await tester.tap(find.text('Show Menu'));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('delete_button')), findsNothing);
+        expect(deleteCalled, isFalse);
+      });
+
+      testWidgets('hides reactions row', (tester) async {
+        await mountShowTest(
+          tester,
+          builder: (context) => ElevatedButton(
+            onPressed: () => MessageActionsScreen.show(
+              context,
+              message: _createTestMessage(),
+              pubkey: testPubkeyA,
+              isOffline: true,
+              onAddReaction: (_) async {},
+              onRemoveReaction: (_) async {},
+            ),
+            child: const Text('Show Menu'),
+          ),
+        );
+
+        await tester.tap(find.text('Show Menu'));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('reaction_❤')), findsNothing);
+        expect(find.byKey(const Key('emoji_picker_button')), findsNothing);
+      });
+    });
+
     testWidgets('defers onReply to post-frame callback', (tester) async {
       ChatMessage? repliedMessage;
 

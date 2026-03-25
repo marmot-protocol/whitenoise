@@ -67,7 +67,7 @@ Widget wnChatMessageInputShowcase(BuildContext context) {
               child: _InputWithSendEnabled(),
             ),
             const _InputExample(
-              label: 'With send disabled',
+              label: 'Actions disabled (add hidden, send disabled)',
               child: _InputWithSendDisabled(),
             ),
             const _InputExample(
@@ -157,8 +157,8 @@ class _InteractiveMessageInputContainer extends StatelessWidget {
       initialValue: true,
     );
 
-    final sendEnabled = context.knobs.boolean(
-      label: 'Send Enabled',
+    final actionsEnabled = context.knobs.boolean(
+      label: 'Actions Enabled',
       initialValue: true,
     );
 
@@ -197,7 +197,7 @@ class _InteractiveMessageInputContainer extends StatelessWidget {
           ),
         ),
         onSend: showSend ? () {} : null,
-        sendEnabled: sendEnabled,
+        actionsEnabled: actionsEnabled,
       ),
     );
   }
@@ -262,7 +262,7 @@ class _InputWithSendEnabled extends StatelessWidget {
         ),
       ),
       onSend: () {},
-      sendEnabled: true,
+      actionsEnabled: true,
     );
   }
 }
@@ -292,7 +292,7 @@ class _InputWithSendDisabled extends StatelessWidget {
         ),
       ),
       onSend: () {},
-      sendEnabled: false,
+      actionsEnabled: false,
     );
   }
 }
@@ -361,7 +361,7 @@ class _FullInput extends StatelessWidget {
         ),
       ),
       onSend: () {},
-      sendEnabled: true,
+      actionsEnabled: true,
     );
   }
 }
