@@ -7,6 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:whitenoise/providers/app_version_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/appearance_screen.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
@@ -25,6 +26,7 @@ import 'package:whitenoise/screens/start_support_chat_screen.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
+import 'package:whitenoise/widgets/wn_button.dart';
 
 import '../mocks/mock_secure_storage.dart';
 import '../mocks/mock_wn_api.dart';
@@ -102,7 +104,7 @@ void main() {
 
   late _MockAuthNotifier mockAuth;
 
-  Future<void> pumpSettingsScreen(WidgetTester tester) async {
+  Future<void> pumpSettingsScreen(WidgetTester tester, {List<dynamic> overrides = const []}) async {
     mockAuth = _MockAuthNotifier();
 
     await mountTestApp(
@@ -111,8 +113,11 @@ void main() {
         authProvider.overrideWith(() => mockAuth),
         secureStorageProvider.overrideWithValue(MockSecureStorage()),
         appVersionProvider.overrideWith((ref) async => appVersion),
+        ...overrides,
       ],
     );
+    await tester.pumpAndSettle();
+
     Routes.pushToSettings(tester.element(find.byType(Scaffold)));
     await tester.pumpAndSettle();
   }
@@ -184,7 +189,8 @@ void main() {
 
     testWidgets('tapping Report bug navigates to ReportBugScreen', (tester) async {
       await pumpSettingsScreen(tester);
-      await tester.tap(find.text('Report bug'));
+      await tester.scrollUntilVisible(find.byKey(const Key('report_bug_menu_item')), 500);
+      await tester.tap(find.byKey(const Key('report_bug_menu_item')));
       await tester.pumpAndSettle();
       expect(find.byType(ReportBugScreen), findsOneWidget);
     });
@@ -339,6 +345,58 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(NotificationSettingsScreen), findsOneWidget);
+      });
+    });
+    group('offline state', () {
+      testWidgets('Offline shows offline_notice and disables specific actions', (tester) async {
+        await pumpSettingsScreen(
+          tester,
+          overrides: [offlineProvider.overrideWith((ref) => Stream.value(true))],
+        );
+
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+
+        final shareBtn = tester.widget<WnButton>(find.byKey(const Key('share_and_connect_button')));
+        expect(shareBtn.disabled, isFalse);
+
+        await tester.tap(find.byKey(const Key('help_and_support_menu_item')));
+        await tester.pumpAndSettle();
+        expect(find.byType(StartSupportChatScreen), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('slate_back_button')));
+        await tester.pumpAndSettle();
+
+        await tester.scrollUntilVisible(find.byKey(const Key('report_bug_menu_item')), 500);
+        await tester.tap(find.byKey(const Key('report_bug_menu_item')));
+        await tester.pumpAndSettle();
+        expect(find.byType(ReportBugScreen), findsOneWidget);
+      });
+
+      testWidgets('Online does not show offline_notice and enables specific actions', (
+        tester,
+      ) async {
+        mockApi.dmGroupResult = null;
+        await pumpSettingsScreen(
+          tester,
+          overrides: [offlineProvider.overrideWith((ref) => Stream.value(false))],
+        );
+
+        expect(find.byKey(const Key('offline_notice')), findsNothing);
+
+        final shareBtn = tester.widget<WnButton>(find.byKey(const Key('share_and_connect_button')));
+        expect(shareBtn.disabled, isFalse);
+
+        await tester.tap(find.byKey(const Key('share_and_connect_button')));
+        await tester.pumpAndSettle();
+        expect(find.byType(ShareProfileScreen), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('slate_back_button')));
+        await tester.pumpAndSettle();
+
+        await tester.scrollUntilVisible(find.byKey(const Key('report_bug_menu_item')), 500);
+        await tester.tap(find.byKey(const Key('report_bug_menu_item')));
+        await tester.pumpAndSettle();
+        expect(find.byType(ReportBugScreen), findsOneWidget);
       });
     });
   });
