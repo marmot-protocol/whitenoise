@@ -6,6 +6,7 @@ import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/app_version_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/formatting.dart';
@@ -18,6 +19,7 @@ import 'package:whitenoise/widgets/wn_menu_item.dart';
 import 'package:whitenoise/widgets/wn_separator.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 class SettingsScreen extends HookConsumerWidget {
   const SettingsScreen({super.key});
@@ -27,6 +29,7 @@ class SettingsScreen extends HookConsumerWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final pubkey = ref.watch(authProvider).value;
+    final isOffline = ref.watch(offlineProvider).value ?? false;
     final helpState = useSupportChat(accountPubkey: pubkey);
     final metadataSnapshot = useUserMetadata(context, pubkey);
     final appVersion = ref.watch(appVersionProvider);
@@ -44,6 +47,14 @@ class SettingsScreen extends HookConsumerWidget {
         child: WnSlate(
           showTopScrollEffect: true,
           showBottomScrollEffect: true,
+          systemNotice: isOffline
+              ? WnSystemNotice(
+                  key: const Key('offline_notice'),
+                  title: context.l10n.waitingForInternet,
+                  type: WnSystemNoticeType.warning,
+                  variant: WnSystemNoticeVariant.expanded,
+                )
+              : null,
           header: WnSlateNavigationHeader(
             title: context.l10n.settings,
             onNavigate: () => Routes.goBack(context),
@@ -169,7 +180,7 @@ class SettingsScreen extends HookConsumerWidget {
                       icon: WnIcons.flag,
                       label: context.l10n.reportBug,
                       type: WnMenuItemType.secondary,
-                      onTap: () => Routes.pushToReportBug(context),
+                      onTap: isOffline ? null : () => Routes.pushToReportBug(context),
                     ),
                     WnMenuItem(
                       icon: WnIcons.heart,
