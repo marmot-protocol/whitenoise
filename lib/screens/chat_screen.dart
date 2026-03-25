@@ -107,6 +107,11 @@ class ChatScreen extends HookConsumerWidget {
     final searchController = useTextEditingController();
     final inputAreaHeight = useState(0.0);
 
+    useEffect(() {
+      if (isRemovedFromGroup) inputAreaHeight.value = 0;
+      return null;
+    }, [isRemovedFromGroup]);
+
     void showNotice(String message) {
       noticeMessage.value = message;
     }
