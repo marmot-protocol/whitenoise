@@ -1323,4 +1323,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get failedToStartSupportChat => 'Falha ao iniciar a conversa com o suporte';
+
+  @override
+  String get removedFromGroup => 'Você foi removido deste grupo';
+
+  @override
+  String get removedFromGroupDescription =>
+      'Você ainda pode ver as mensagens salvas, mas não pode enviar ou receber novas. Você pode arquivar ou excluir a conversa a qualquer momento.';
 }

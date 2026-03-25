@@ -1330,4 +1330,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get failedToStartSupportChat => 'Échec du démarrage du chat avec le support';
+
+  @override
+  String get removedFromGroup => 'Vous avez été retiré de ce groupe';
+
+  @override
+  String get removedFromGroupDescription =>
+      'Vous pouvez toujours consulter les messages enregistrés, mais vous ne pouvez plus en envoyer ni en recevoir. Vous pouvez archiver ou supprimer la discussion à tout moment.';
 }

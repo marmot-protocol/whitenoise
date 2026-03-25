@@ -1733,5 +1733,13 @@
   "fatalErrorErrorCopied": "Error copied to clipboard",
   "@fatalErrorErrorCopied": {
     "description": "System notice shown after copying error details to clipboard on the fatal error screen"
+  },
+  "removedFromGroup": "You were removed from this group",
+  "@removedFromGroup": {
+    "description": "Notice title shown when the user has been removed from the group"
+  },
+  "removedFromGroupDescription": "You can still view saved messages, but you can't send or receive new ones. You can archive or delete the chat anytime.",
+  "@removedFromGroupDescription": {
+    "description": "Notice description shown when the user has been removed from the group"
   }
 }

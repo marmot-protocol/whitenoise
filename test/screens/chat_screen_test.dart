@@ -12,6 +12,7 @@ import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/chat_raw_debug_screen.dart';
 import 'package:whitenoise/screens/group_info_screen.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
+import 'package:whitenoise/src/rust/api/chat_list.dart';
 import 'package:whitenoise/src/rust/api/drafts.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
@@ -96,6 +97,7 @@ class _MockApi extends MockWnApi {
   List<String> groupMembers = [];
   Completer<MediaFile>? uploadCompleter;
   Map<String, FlutterMetadata>? metadataByPubkey;
+  DateTime? removedAt;
 
   @override
   void reset() {
@@ -118,6 +120,22 @@ class _MockApi extends MockWnApi {
     groupMembers = [];
     uploadCompleter = null;
     metadataByPubkey = null;
+    removedAt = null;
+  }
+
+  @override
+  Stream<ChatListStreamItem> crateApiChatListSubscribeToChatList({
+    required String accountPubkey,
+  }) {
+    final summary = ChatSummary(
+      mlsGroupId: _testGroupId,
+      groupType: GroupType.group,
+      createdAt: DateTime(2024),
+      pendingConfirmation: false,
+      unreadCount: BigInt.zero,
+      removedAt: removedAt,
+    );
+    return Stream.value(ChatListStreamItem.initialSnapshot(items: [summary]));
   }
 
   @override
@@ -1810,6 +1828,85 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(ChatRawDebugScreen), findsNothing);
+      });
+    });
+
+    group('removed from group', () {
+      setUp(() => _api.removedAt = DateTime(2024, 6));
+
+      testWidgets('shows WnSystemNotice with removed title', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.byKey(const Key('removed_from_group_notice')), findsOneWidget);
+        expect(find.text('You were removed from this group'), findsOneWidget);
+      });
+
+      testWidgets('shows description text', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.textContaining('You can still view saved messages'), findsOneWidget);
+      });
+
+      testWidgets('notice is expanded by default', (tester) async {
+        await pumpChatScreen(tester);
+
+        final notice = tester.widget<WnSystemNotice>(
+          find.byKey(const Key('removed_from_group_notice')),
+        );
+        expect(notice.variant, WnSystemNoticeVariant.expanded);
+      });
+
+      testWidgets('notice collapses when chevron is tapped', (tester) async {
+        await pumpChatScreen(tester);
+
+        await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
+        await tester.pumpAndSettle();
+
+        final notice = tester.widget<WnSystemNotice>(
+          find.byKey(const Key('removed_from_group_notice')),
+        );
+        expect(notice.variant, WnSystemNoticeVariant.collapsed);
+      });
+
+      testWidgets('notice expands again after second chevron tap', (tester) async {
+        await pumpChatScreen(tester);
+
+        await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
+        await tester.pumpAndSettle();
+
+        final notice = tester.widget<WnSystemNotice>(
+          find.byKey(const Key('removed_from_group_notice')),
+        );
+        expect(notice.variant, WnSystemNoticeVariant.expanded);
+      });
+
+      testWidgets('hides the message input', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.byType(TextField), findsNothing);
+      });
+
+      testWidgets('still shows messages', (tester) async {
+        _api.initialMessages = [_message('m1', DateTime(2024))];
+        await pumpChatScreen(tester);
+
+        expect(find.byType(WnMessageBubble), findsOneWidget);
+      });
+    });
+
+    group('not removed from group', () {
+      testWidgets('does not show removed notice', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.byKey(const Key('removed_from_group_notice')), findsNothing);
+      });
+
+      testWidgets('shows the message input', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.byType(TextField), findsOneWidget);
       });
     });
   });

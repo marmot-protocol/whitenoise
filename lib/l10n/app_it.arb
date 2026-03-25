@@ -400,5 +400,7 @@
   "reportBugSuccess": "Segnalazione bug inviata. Grazie!",
   "reportBugError": "Invio della segnalazione fallito. Riprova.",
   "reportBugWhatWentWrongRequired": "Descrivi cosa è andato storto.",
-  "failedToStartSupportChat": "Impossibile avviare la chat con il supporto"
+  "failedToStartSupportChat": "Impossibile avviare la chat con il supporto",
+  "removedFromGroup": "Sei stato rimosso da questo gruppo",
+  "removedFromGroupDescription": "Puoi ancora visualizzare i messaggi salvati, ma non puoi inviarne o riceverne di nuovi. Puoi archiviare o eliminare la chat in qualsiasi momento."
 }

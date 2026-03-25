@@ -1345,4 +1345,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get failedToStartSupportChat => 'Не удалось запустить чат с поддержкой';
+
+  @override
+  String get removedFromGroup => 'Вы были удалены из этой группы';
+
+  @override
+  String get removedFromGroupDescription =>
+      'Вы можете просматривать сохранённые сообщения, но не можете отправлять или получать новые. Вы можете архивировать или удалить чат в любое время.';
 }
