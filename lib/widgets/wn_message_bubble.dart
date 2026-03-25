@@ -295,18 +295,20 @@ class _BubbleContent extends StatelessWidget {
             if (hasText || hasTimestamp) SizedBox(height: 8.h),
           ],
           if (hasText && hasTimestamp)
-            _TextWithTimestamp(
-              content: content!,
-              timestamp: timestamp!,
-              textStyle: textStyle,
-              tsStyle: tsStyle,
-              isOutgoing: isOutgoing,
-              showDeliveryStatus: showDeliveryStatus,
-              deliveryStatus: deliveryStatus,
-              onStatusTap: onStatusTap,
+            SelectionArea(
+              child: _TextWithTimestamp(
+                content: content!,
+                timestamp: timestamp!,
+                textStyle: textStyle,
+                tsStyle: tsStyle,
+                isOutgoing: isOutgoing,
+                showDeliveryStatus: showDeliveryStatus,
+                deliveryStatus: deliveryStatus,
+                onStatusTap: onStatusTap,
+              ),
             )
           else if (hasText)
-            Text(content!, style: textStyle)
+            SelectionArea(child: Text(content!, style: textStyle))
           else if (hasTimestamp) ...[
             SizedBox(height: 2.h),
             _buildTimestampRow(),
