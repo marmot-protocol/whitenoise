@@ -74,6 +74,12 @@ class MockWnApi implements RustLibApi {
   String relayControlStateResult = '{}';
   bool shouldFailRelayControlState = false;
   int relayControlStateCallCount = 0;
+  List<String> relayDefaultUrls = [
+    'wss://nos.lol',
+    'wss://relay.primal.net',
+    'wss://relay.damus.io',
+  ];
+  bool shouldFailDefaultRelayUrls = false;
 
   String? lastReadMessageId;
   final List<String> markedAsReadMessages = [];
@@ -271,6 +277,14 @@ class MockWnApi implements RustLibApi {
       throw Exception('relay control dump failed');
     }
     return relayControlStateResult;
+  }
+
+  @override
+  List<String> crateApiRelayDefaultsDefaultRelayUrls() {
+    if (shouldFailDefaultRelayUrls) {
+      throw Exception('default relay urls failed');
+    }
+    return relayDefaultUrls;
   }
 
   @override
@@ -730,6 +744,12 @@ class MockWnApi implements RustLibApi {
     relayControlStateResult = '{}';
     shouldFailRelayControlState = false;
     relayControlStateCallCount = 0;
+    relayDefaultUrls = [
+      'wss://nos.lol',
+      'wss://relay.primal.net',
+      'wss://relay.damus.io',
+    ];
+    shouldFailDefaultRelayUrls = false;
     lastReadMessageId = null;
     markedAsReadMessages.clear();
     getAccountGroupCallCount = 0;

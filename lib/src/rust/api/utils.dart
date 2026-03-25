@@ -9,6 +9,7 @@ import '../api.dart';
 import '../frb_generated.dart';
 import 'error.dart';
 import 'messages.dart';
+import 'relay_defaults.dart';
 
 String npubFromHexPubkey({required String hexPubkey}) =>
     RustLib.instance.api.crateApiUtilsNpubFromHexPubkey(hexPubkey: hexPubkey);
@@ -75,6 +76,3 @@ String eventIdToNeventUri({
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GroupId>>
 abstract class GroupId implements RustOpaqueInterface {}
-
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<RelayUrl>>
-abstract class RelayUrl implements RustOpaqueInterface {}

@@ -22,6 +22,7 @@ import 'api/media_files.dart';
 import 'api/messages.dart';
 import 'api/metadata.dart';
 import 'api/notifications.dart';
+import 'api/relay_defaults.dart';
 import 'api/relays.dart';
 import 'api/signer.dart';
 import 'api/user_search.dart';
@@ -379,6 +380,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   LeafNodeInfo dco_decode_leaf_node_info(dynamic raw);
+
+  @protected
+  List<RelayUrl>
+  dco_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
+    dynamic raw,
+  );
 
   @protected
   List<Tag>
@@ -931,6 +938,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   LeafNodeInfo sse_decode_leaf_node_info(SseDeserializer deserializer);
+
+  @protected
+  List<RelayUrl>
+  sse_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
+    SseDeserializer deserializer,
+  );
 
   @protected
   List<Tag>
@@ -1605,6 +1618,13 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_leaf_node_info(LeafNodeInfo self, SseSerializer serializer);
+
+  @protected
+  void
+  sse_encode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
+    List<RelayUrl> self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
