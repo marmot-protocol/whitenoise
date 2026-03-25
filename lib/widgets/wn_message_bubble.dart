@@ -30,6 +30,7 @@ class _TextWithTimestamp extends StatelessWidget {
     required this.showDeliveryStatus,
     this.deliveryStatus,
     this.onStatusTap,
+    this.onLongPress,
   });
 
   final String content;
@@ -40,6 +41,7 @@ class _TextWithTimestamp extends StatelessWidget {
   final bool showDeliveryStatus;
   final ChatStatusType? deliveryStatus;
   final VoidCallback? onStatusTap;
+  final VoidCallback? onLongPress;
 
   @override
   Widget build(BuildContext context) {
@@ -72,13 +74,17 @@ class _TextWithTimestamp extends StatelessWidget {
 
     return Stack(
       children: [
-        SelectionArea(
-          child: Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(text: content, style: textStyle),
-                WidgetSpan(child: SizedBox(width: reservedWidth)),
-              ],
+        GestureDetector(
+          behavior: HitTestBehavior.translucent,
+          onLongPress: onLongPress,
+          child: SelectionArea(
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(text: content, style: textStyle),
+                  WidgetSpan(child: SizedBox(width: reservedWidth)),
+                ],
+              ),
             ),
           ),
         ),
@@ -217,6 +223,7 @@ class _BubbleContent extends StatelessWidget {
     required this.showDeliveryStatus,
     this.deliveryStatus,
     this.onStatusTap,
+    this.onLongPress,
   });
 
   final Color bubbleColor;
@@ -241,6 +248,7 @@ class _BubbleContent extends StatelessWidget {
   final bool showDeliveryStatus;
   final ChatStatusType? deliveryStatus;
   final VoidCallback? onStatusTap;
+  final VoidCallback? onLongPress;
 
   Widget _buildTimestampRow() {
     Widget row = Row(
@@ -306,9 +314,14 @@ class _BubbleContent extends StatelessWidget {
               showDeliveryStatus: showDeliveryStatus,
               deliveryStatus: deliveryStatus,
               onStatusTap: onStatusTap,
+              onLongPress: onLongPress,
             )
           else if (hasText)
-            SelectionArea(child: Text(content!, style: textStyle))
+            GestureDetector(
+              behavior: HitTestBehavior.translucent,
+              onLongPress: onLongPress,
+              child: SelectionArea(child: Text(content!, style: textStyle)),
+            )
           else if (hasTimestamp) ...[
             SizedBox(height: 2.h),
             _buildTimestampRow(),
@@ -616,6 +629,7 @@ class WnMessageBubble extends StatelessWidget {
       showDeliveryStatus: !isDeleted,
       deliveryStatus: actualDeliveryStatus,
       onStatusTap: isDeleted ? null : onStatusTap,
+      onLongPress: isDeleted ? null : onLongPress,
     );
 
     return LayoutBuilder(
