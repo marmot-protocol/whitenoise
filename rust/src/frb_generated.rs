@@ -4980,6 +4980,7 @@ impl SseDecode for crate::api::chat_list::ChatListUpdateTrigger {
             1 => crate::api::chat_list::ChatListUpdateTrigger::NewLastMessage,
             2 => crate::api::chat_list::ChatListUpdateTrigger::LastMessageDeleted,
             3 => crate::api::chat_list::ChatListUpdateTrigger::ChatArchiveChanged,
+            4 => crate::api::chat_list::ChatListUpdateTrigger::RemovedFromGroup,
             _ => unreachable!("Invalid variant for ChatListUpdateTrigger: {}", inner),
         };
     }
@@ -5056,6 +5057,7 @@ impl SseDecode for crate::api::chat_list::ChatSummary {
         let mut var_pendingConfirmation = <bool>::sse_decode(deserializer);
         let mut var_welcomerPubkey = <Option<String>>::sse_decode(deserializer);
         let mut var_archivedAt = <Option<chrono::DateTime<chrono::Utc>>>::sse_decode(deserializer);
+        let mut var_removedAt = <Option<chrono::DateTime<chrono::Utc>>>::sse_decode(deserializer);
         let mut var_unreadCount = <u64>::sse_decode(deserializer);
         let mut var_pinOrder = <Option<i64>>::sse_decode(deserializer);
         let mut var_dmPeerPubkey = <Option<String>>::sse_decode(deserializer);
@@ -5070,6 +5072,7 @@ impl SseDecode for crate::api::chat_list::ChatSummary {
             pending_confirmation: var_pendingConfirmation,
             welcomer_pubkey: var_welcomerPubkey,
             archived_at: var_archivedAt,
+            removed_at: var_removedAt,
             unread_count: var_unreadCount,
             pin_order: var_pinOrder,
             dm_peer_pubkey: var_dmPeerPubkey,
@@ -6951,6 +6954,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::chat_list::ChatListUpdateTrig
             Self::NewLastMessage => 1.into_dart(),
             Self::LastMessageDeleted => 2.into_dart(),
             Self::ChatArchiveChanged => 3.into_dart(),
+            Self::RemovedFromGroup => 4.into_dart(),
             _ => unreachable!(),
         }
     }
@@ -7037,6 +7041,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::chat_list::ChatSummary {
             self.pending_confirmation.into_into_dart().into_dart(),
             self.welcomer_pubkey.into_into_dart().into_dart(),
             self.archived_at.into_into_dart().into_dart(),
+            self.removed_at.into_into_dart().into_dart(),
             self.unread_count.into_into_dart().into_dart(),
             self.pin_order.into_into_dart().into_dart(),
             self.dm_peer_pubkey.into_into_dart().into_dart(),
@@ -8409,6 +8414,7 @@ impl SseEncode for crate::api::chat_list::ChatListUpdateTrigger {
                 crate::api::chat_list::ChatListUpdateTrigger::NewLastMessage => 1,
                 crate::api::chat_list::ChatListUpdateTrigger::LastMessageDeleted => 2,
                 crate::api::chat_list::ChatListUpdateTrigger::ChatArchiveChanged => 3,
+                crate::api::chat_list::ChatListUpdateTrigger::RemovedFromGroup => 4,
                 _ => {
                     unimplemented!("");
                 }
@@ -8468,6 +8474,7 @@ impl SseEncode for crate::api::chat_list::ChatSummary {
         <bool>::sse_encode(self.pending_confirmation, serializer);
         <Option<String>>::sse_encode(self.welcomer_pubkey, serializer);
         <Option<chrono::DateTime<chrono::Utc>>>::sse_encode(self.archived_at, serializer);
+        <Option<chrono::DateTime<chrono::Utc>>>::sse_encode(self.removed_at, serializer);
         <u64>::sse_encode(self.unread_count, serializer);
         <Option<i64>>::sse_encode(self.pin_order, serializer);
         <Option<String>>::sse_encode(self.dm_peer_pubkey, serializer);

@@ -38,6 +38,9 @@ pub struct ChatSummary {
     pub welcomer_pubkey: Option<String>,
     /// When this chat was archived, if at all.
     pub archived_at: Option<DateTime<Utc>>,
+    /// When this account was removed from the group by an admin, if at all.
+    /// `Some` means the group is read-only; the user must archive/delete to hide it.
+    pub removed_at: Option<DateTime<Utc>>,
     /// Number of unread messages in this chat
     pub unread_count: u64,
     /// Pin order for chat list sorting.
@@ -64,6 +67,7 @@ impl From<WhitenoiseChatListItem> for ChatSummary {
             pending_confirmation: item.pending_confirmation,
             welcomer_pubkey: item.welcomer_pubkey.map(|pk| pk.to_hex()),
             archived_at: item.archived_at,
+            removed_at: item.removed_at,
             unread_count: item.unread_count as u64,
             pin_order: item.pin_order,
             dm_peer_pubkey: item.dm_peer_pubkey.map(|pk| pk.to_hex()),
@@ -83,6 +87,8 @@ pub enum ChatListUpdateTrigger {
     LastMessageDeleted,
     /// The chat's archive status changed.
     ChatArchiveChanged,
+    /// This account was removed from the group by an admin.
+    RemovedFromGroup,
 }
 
 impl From<WhitenoiseChatListUpdateTrigger> for ChatListUpdateTrigger {
@@ -92,6 +98,7 @@ impl From<WhitenoiseChatListUpdateTrigger> for ChatListUpdateTrigger {
             WhitenoiseChatListUpdateTrigger::NewLastMessage => Self::NewLastMessage,
             WhitenoiseChatListUpdateTrigger::LastMessageDeleted => Self::LastMessageDeleted,
             WhitenoiseChatListUpdateTrigger::ChatArchiveChanged => Self::ChatArchiveChanged,
+            WhitenoiseChatListUpdateTrigger::RemovedFromGroup => Self::RemovedFromGroup,
         }
     }
 }
@@ -262,5 +269,12 @@ mod tests {
         let trigger: ChatListUpdateTrigger =
             WhitenoiseChatListUpdateTrigger::ChatArchiveChanged.into();
         assert_eq!(trigger, ChatListUpdateTrigger::ChatArchiveChanged);
+    }
+
+    #[test]
+    fn test_chat_list_update_trigger_conversion_removed_from_group() {
+        let trigger: ChatListUpdateTrigger =
+            WhitenoiseChatListUpdateTrigger::RemovedFromGroup.into();
+        assert_eq!(trigger, ChatListUpdateTrigger::RemovedFromGroup);
     }
 }

@@ -55,6 +55,8 @@ ChatListResult useChatList(String pubkey) {
                     chatMap.value.remove(id);
                     chatMap.value[id] = update.item;
                   }
+                case ChatListUpdateTrigger.removedFromGroup:
+                  chatMap.value[id] = update.item;
               }
               return chatMap.value;
             },
