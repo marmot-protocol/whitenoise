@@ -72,13 +72,16 @@ class _TextWithTimestamp extends StatelessWidget {
 
     return Stack(
       children: [
-        SelectionArea(
-          child: Text.rich(
-            TextSpan(
-              children: [
-                TextSpan(text: content, style: textStyle),
-                WidgetSpan(child: SizedBox(width: reservedWidth)),
-              ],
+        GestureDetector(
+          onLongPress: () {},
+          child: SelectionArea(
+            child: Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(text: content, style: textStyle),
+                  WidgetSpan(child: SizedBox(width: reservedWidth)),
+                ],
+              ),
             ),
           ),
         ),
@@ -308,7 +311,10 @@ class _BubbleContent extends StatelessWidget {
               onStatusTap: onStatusTap,
             )
           else if (hasText)
-            SelectionArea(child: Text(content!, style: textStyle))
+            GestureDetector(
+              onLongPress: () {},
+              child: SelectionArea(child: Text(content!, style: textStyle)),
+            )
           else if (hasTimestamp) ...[
             SizedBox(height: 2.h),
             _buildTimestampRow(),
