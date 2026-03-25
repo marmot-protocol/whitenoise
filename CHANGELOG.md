@@ -23,6 +23,7 @@ and this project adheres to Calendar Versioning (CalVer).
 ### Added
 - Add bug report screen with NIP-44 encrypted anonymous reports [PR #478](https://github.com/marmot-protocol/whitenoise/pull/478)
 - Chat with support [PR #486](https://github.com/marmot-protocol/whitenoise/pull/486)
+- No internet notice [PR #530](https://github.com/marmot-protocol/whitenoise/pull/530)
 
 ### Changed
 - Deleted bubbles style [PR #471](https://github.com/marmot-protocol/whitenoise/pull/471)
