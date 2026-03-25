@@ -2618,7 +2618,7 @@ dependencies = [
 [[package]]
 name = "mdk-core"
 version = "0.7.1"
-source = "git+https://github.com/marmot-protocol/mdk?rev=ca0663ee332958aa92efadf916d19c6e1b1f99c7#ca0663ee332958aa92efadf916d19c6e1b1f99c7"
+source = "git+https://github.com/marmot-protocol/mdk?rev=b6f7dc64b82d10d0d0efad3a213b39816d79d9c6#b6f7dc64b82d10d0d0efad3a213b39816d79d9c6"
 dependencies = [
  "base64",
  "blurhash",
@@ -2643,7 +2643,7 @@ dependencies = [
 [[package]]
 name = "mdk-sqlite-storage"
 version = "0.7.1"
-source = "git+https://github.com/marmot-protocol/mdk?rev=ca0663ee332958aa92efadf916d19c6e1b1f99c7#ca0663ee332958aa92efadf916d19c6e1b1f99c7"
+source = "git+https://github.com/marmot-protocol/mdk?rev=b6f7dc64b82d10d0d0efad3a213b39816d79d9c6#b6f7dc64b82d10d0d0efad3a213b39816d79d9c6"
 dependencies = [
  "getrandom 0.4.2",
  "hex",
@@ -2664,7 +2664,7 @@ dependencies = [
 [[package]]
 name = "mdk-storage-traits"
 version = "0.7.1"
-source = "git+https://github.com/marmot-protocol/mdk?rev=ca0663ee332958aa92efadf916d19c6e1b1f99c7#ca0663ee332958aa92efadf916d19c6e1b1f99c7"
+source = "git+https://github.com/marmot-protocol/mdk?rev=b6f7dc64b82d10d0d0efad3a213b39816d79d9c6#b6f7dc64b82d10d0d0efad3a213b39816d79d9c6"
 dependencies = [
  "nostr",
  "openmls",
@@ -3819,12 +3819,14 @@ dependencies = [
  "sync_wrapper",
  "tokio",
  "tokio-rustls",
+ "tokio-util",
  "tower",
  "tower-http",
  "tower-service",
  "url",
  "wasm-bindgen",
  "wasm-bindgen-futures",
+ "wasm-streams",
  "web-sys",
 ]
 
@@ -4831,6 +4833,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "tokio-util"
+version = "0.7.18"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9ae9cec805b01e8fc3fd2fe289f89149a9b66dd16786abd8b19cfa7b48cb0098"
+dependencies = [
+ "bytes",
+ "futures-core",
+ "futures-sink",
+ "pin-project-lite",
+ "tokio",
+]
+
+[[package]]
 name = "toml"
 version = "0.8.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5272,6 +5287,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "wasm-streams"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9d1ec4f6517c9e11ae630e200b2b65d193279042e28edd4a2cda233e46670bbb"
+dependencies = [
+ "futures-util",
+ "js-sys",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
+
+[[package]]
 name = "wasmparser"
 version = "0.244.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5339,7 +5367,7 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "whitenoise"
 version = "0.2.1"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=f8786caf1666496ef97f621560f22e2eb552f452#f8786caf1666496ef97f621560f22e2eb552f452"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=bcdcf756da0edc19b3864d5c71769ce5dc7ee113#bcdcf756da0edc19b3864d5c71769ce5dc7ee113"
 dependencies = [
  "android-native-keyring-store",
  "anyhow",
@@ -5378,7 +5406,20 @@ dependencies = [
  "tracing",
  "tracing-appender",
  "tracing-subscriber",
+ "unicode-normalization",
+ "webpki-roots 1.0.6",
+ "whitenoise-macros",
  "windows-native-keyring-store",
+]
+
+[[package]]
+name = "whitenoise-macros"
+version = "0.1.0"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=bcdcf756da0edc19b3864d5c71769ce5dc7ee113#bcdcf756da0edc19b3864d5c71769ce5dc7ee113"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
 ]
 
 [[package]]

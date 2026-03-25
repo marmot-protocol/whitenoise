@@ -12,6 +12,7 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated_io.dart';
 import 'api.dart';
 import 'api/account_groups.dart';
 import 'api/accounts.dart';
+import 'api/bug_report.dart';
 import 'api/chat_list.dart';
 import 'api/drafts.dart';
 import 'api/error.dart';
@@ -26,6 +27,7 @@ import 'api/signer.dart';
 import 'api/user_search.dart';
 import 'api/users.dart';
 import 'api/utils.dart';
+import 'api/zapstore.dart';
 import 'frb_generated.dart';
 import 'lib.dart';
 
@@ -232,6 +234,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  RustStreamSink<UserStreamItem> dco_decode_StreamSink_user_stream_item_Sse(
+    dynamic raw,
+  );
+
+  @protected
   String dco_decode_String(dynamic raw);
 
   @protected
@@ -298,6 +305,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   int dco_decode_box_autoadd_u_32(dynamic raw);
+
+  @protected
+  User dco_decode_box_autoadd_user(dynamic raw);
+
+  @protected
+  UserUpdate dco_decode_box_autoadd_user_update(dynamic raw);
 
   @protected
   WhitenoiseConfig dco_decode_box_autoadd_whitenoise_config(dynamic raw);
@@ -580,6 +593,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   UserSearchUpdate dco_decode_user_search_update(dynamic raw);
 
   @protected
+  UserStreamItem dco_decode_user_stream_item(dynamic raw);
+
+  @protected
+  UserUpdate dco_decode_user_update(dynamic raw);
+
+  @protected
+  UserUpdateTrigger dco_decode_user_update_trigger(dynamic raw);
+
+  @protected
   BigInt dco_decode_usize(dynamic raw);
 
   @protected
@@ -752,6 +774,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  RustStreamSink<UserStreamItem> sse_decode_StreamSink_user_stream_item_Sse(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   String sse_decode_String(SseDeserializer deserializer);
 
   @protected
@@ -832,6 +859,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   int sse_decode_box_autoadd_u_32(SseDeserializer deserializer);
+
+  @protected
+  User sse_decode_box_autoadd_user(SseDeserializer deserializer);
+
+  @protected
+  UserUpdate sse_decode_box_autoadd_user_update(SseDeserializer deserializer);
 
   @protected
   WhitenoiseConfig sse_decode_box_autoadd_whitenoise_config(
@@ -1166,6 +1199,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   UserSearchUpdate sse_decode_user_search_update(SseDeserializer deserializer);
 
   @protected
+  UserStreamItem sse_decode_user_stream_item(SseDeserializer deserializer);
+
+  @protected
+  UserUpdate sse_decode_user_update(SseDeserializer deserializer);
+
+  @protected
+  UserUpdateTrigger sse_decode_user_update_trigger(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   BigInt sse_decode_usize(SseDeserializer deserializer);
 
   @protected
@@ -1376,6 +1420,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_StreamSink_user_stream_item_Sse(
+    RustStreamSink<UserStreamItem> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_String(String self, SseSerializer serializer);
 
   @protected
@@ -1476,6 +1526,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_box_autoadd_u_32(int self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_user(User self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_user_update(
+    UserUpdate self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_box_autoadd_whitenoise_config(
@@ -1889,6 +1948,21 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_user_search_update(
     UserSearchUpdate self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_user_stream_item(
+    UserStreamItem self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_user_update(UserUpdate self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_user_update_trigger(
+    UserUpdateTrigger self,
     SseSerializer serializer,
   );
 
