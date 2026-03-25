@@ -467,6 +467,31 @@ class ChatScreen extends HookConsumerWidget {
                 color: colors.backgroundPrimary,
                 height: safeAreaBottom,
               ),
+              if (isLoadingOlderMessages)
+                Positioned(
+                  key: const Key('loading_older_messages_indicator'),
+                  top: slateTopPadding + 8.h,
+                  left: 0,
+                  right: 0,
+                  child: Center(
+                    child: Container(
+                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                      decoration: BoxDecoration(
+                        color: colors.backgroundSecondary,
+                        borderRadius: BorderRadius.circular(999.r),
+                      ),
+                      child: SizedBox(
+                        width: 16.w,
+                        height: 16.w,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          strokeCap: StrokeCap.round,
+                          color: colors.backgroundContentSecondary,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               if (chatScroll.isScrollDownButtonVisible)
                 Positioned(
                   bottom: inputAreaHeight.value + safeAreaBottom + 8.h,

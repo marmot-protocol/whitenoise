@@ -11,6 +11,7 @@ enum MessageStreamEventType {
   lagged,
   streamError,
   disconnected,
+  pageFetch,
 }
 
 class MessageSendLogEntry {
@@ -223,6 +224,32 @@ class MessageDebugLogNotifier extends Notifier<MessageDebugLogState> {
         timestamp: DateTime.now(),
         groupId: groupId,
         eventType: MessageStreamEventType.disconnected,
+      ),
+    );
+  }
+
+  // ── Pagination log ───────────────────────────────────────────────────────
+
+  void logPageFetch({
+    required String groupId,
+    required String outcome,
+    String? cursorId,
+    int? newCount,
+    int? totalCount,
+    Object? error,
+    StackTrace? stackTrace,
+  }) {
+    _addStreamEvent(
+      MessageStreamEventEntry(
+        timestamp: DateTime.now(),
+        groupId: groupId,
+        eventType: MessageStreamEventType.pageFetch,
+        trigger: outcome,
+        messageId: cursorId,
+        messageCount: newCount,
+        laggedCount: totalCount,
+        error: error,
+        stackTrace: stackTrace,
       ),
     );
   }

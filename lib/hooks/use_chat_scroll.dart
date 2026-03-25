@@ -121,7 +121,10 @@ ChatScrollResult useChatScroll({
         isAtBottom.value = atBottom;
       }
 
-      isScrollDownButtonVisible.value = firstUnreadIndex != null && !atBottom;
+      final shouldShowScrollDown = !atBottom;
+      if (isScrollDownButtonVisible.value != shouldShowScrollDown) {
+        isScrollDownButtonVisible.value = shouldShowScrollDown;
+      }
       hasUserScrolled.value = true;
 
       final atTop =
@@ -140,10 +143,11 @@ ChatScrollResult useChatScroll({
 
     scrollController.addListener(onScrollUpdate);
 
-    isScrollDownButtonVisible.value =
-        scrollController.hasClients &&
-        firstUnreadIndex != null &&
-        scrollController.position.pixels > _bottomThreshold;
+    final initialShouldShow =
+        scrollController.hasClients && scrollController.position.pixels > _bottomThreshold;
+    if (isScrollDownButtonVisible.value != initialShouldShow) {
+      isScrollDownButtonVisible.value = initialShouldShow;
+    }
 
     return () {
       scrollController.removeListener(onScrollUpdate);

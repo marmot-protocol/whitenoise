@@ -4,7 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderContainer;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart'
     show ChatMessageQuoteData, ChatMessagesResult, useChatMessages;
-import 'package:whitenoise/providers/message_debug_log_provider.dart' show messageDebugLogProvider;
+import 'package:whitenoise/providers/message_debug_log_provider.dart'
+    show MessageStreamEventEntry, MessageStreamEventType, messageDebugLogProvider;
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
@@ -1071,6 +1072,81 @@ void main() {
           expect(result.getMessage(0).id, 'm3');
           expect(result.getMessage(1).id, 'm2');
           expect(result.getMessage(2).id, 'm1');
+        });
+      });
+
+      group('debugLog pageFetch entries', () {
+        late ProviderContainer container;
+
+        setUp(() {
+          container = ProviderContainer();
+        });
+
+        tearDown(() => container.dispose());
+
+        Future<ChatMessagesResult Function()> pumpWithDebugLog(WidgetTester tester) async {
+          final debugLog = container.read(messageDebugLogProvider.notifier);
+          ChatMessagesResult? result;
+          await mountHook(
+            tester,
+            () {
+              final r = useChatMessages('group1', pubkey: testPubkeyA, debugLog: debugLog);
+              result = r;
+              return r;
+            },
+          );
+          return () => result!;
+        }
+
+        List<MessageStreamEventEntry> pageFetchEntries() => container
+            .read(messageDebugLogProvider)
+            .streamLog
+            .where((e) => e.eventType == MessageStreamEventType.pageFetch)
+            .toList();
+
+        testWidgets('logs fetching then prepended when messages are loaded', (tester) async {
+          final getResult = await pumpWithDebugLog(tester);
+
+          _api.emitInitialSnapshot([_message('m2', DateTime(2024, 1, 2))]);
+          await tester.pumpAndSettle();
+
+          _api.olderMessagesResponse = [_message('m1', DateTime(2024))];
+          await getResult().loadOlderMessages();
+          await tester.pumpAndSettle();
+
+          final entries = pageFetchEntries();
+          expect(entries, hasLength(2));
+          expect(entries.last.trigger, 'fetching');
+          expect(entries.first.trigger, 'prepended');
+          expect(entries.first.messageCount, 1);
+        });
+
+        testWidgets('logs end outcome when no more messages returned', (tester) async {
+          final getResult = await pumpWithDebugLog(tester);
+
+          _api.emitInitialSnapshot([_message('m1', DateTime(2024))]);
+          await tester.pumpAndSettle();
+
+          _api.olderMessagesResponse = [];
+          await getResult().loadOlderMessages();
+          await tester.pumpAndSettle();
+
+          expect(pageFetchEntries().first.trigger, 'end');
+        });
+
+        testWidgets('logs error outcome when fetch fails', (tester) async {
+          final getResult = await pumpWithDebugLog(tester);
+
+          _api.emitInitialSnapshot([_message('m1', DateTime(2024))]);
+          await tester.pumpAndSettle();
+
+          _api.fetchOlderFails = true;
+          await getResult().loadOlderMessages();
+          await tester.pumpAndSettle();
+
+          final entries = pageFetchEntries();
+          expect(entries.first.trigger, 'error');
+          expect(entries.first.error, isNotNull);
         });
       });
     });

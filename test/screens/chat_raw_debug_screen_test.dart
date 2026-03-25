@@ -51,6 +51,7 @@ class _MockApi extends MockWnApi {
   StreamController<MessageStreamItem>? controller;
   List<ChatMessage> initialMessages = [];
   bool shouldFailRatchetTree = false;
+  int fetchOlderCallCount = 0;
 
   @override
   void reset() {
@@ -59,6 +60,19 @@ class _MockApi extends MockWnApi {
     controller = null;
     initialMessages = [];
     shouldFailRatchetTree = false;
+    fetchOlderCallCount = 0;
+  }
+
+  @override
+  Future<List<ChatMessage>> crateApiMessagesFetchAggregatedMessagesForGroup({
+    required String pubkey,
+    required String groupId,
+    DateTime? before,
+    String? beforeMessageId,
+    int? limit,
+  }) async {
+    fetchOlderCallCount++;
+    return [];
   }
 
   @override
@@ -612,6 +626,22 @@ void main() {
       expect(find.textContaining('count=2'), findsOneWidget);
       expect(find.textContaining('raw user reactions'), findsOneWidget);
       expect(find.textContaining('reaction_001'), findsOneWidget);
+    });
+
+    testWidgets('scrolling to end of list triggers loadOlderMessages', (tester) async {
+      final now = DateTime(2024, 1, 15, 12);
+      _api.initialMessages = List.generate(
+        10,
+        (i) => _message('msg$i', now.add(Duration(minutes: i))),
+      );
+
+      await pumpDebugScreen(tester);
+
+      final scrollable = find.byType(Scrollable).first;
+      await tester.drag(scrollable, const Offset(0, -5000));
+      await tester.pumpAndSettle();
+
+      expect(_api.fetchOlderCallCount, greaterThan(0));
     });
   });
 }

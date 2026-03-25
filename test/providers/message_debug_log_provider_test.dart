@@ -161,4 +161,67 @@ void main() {
       expect(streamLog.last.messageId, 'm10');
     });
   });
+
+  group('MessageDebugLogNotifier pagination log', () {
+    test('logPageFetch stores outcome as trigger', () {
+      notifier.logPageFetch(groupId: 'g1', outcome: 'fetching', cursorId: 'cursor_abc');
+      final entry = container.read(messageDebugLogProvider).streamLog.single;
+
+      expect(entry.groupId, 'g1');
+      expect(entry.eventType, MessageStreamEventType.pageFetch);
+      expect(entry.trigger, 'fetching');
+      expect(entry.messageId, 'cursor_abc');
+      expect(entry.messageCount, isNull);
+      expect(entry.laggedCount, isNull);
+    });
+
+    test('logPageFetch stores new and total counts for prepended outcome', () {
+      notifier.logPageFetch(
+        groupId: 'g2',
+        outcome: 'prepended',
+        cursorId: 'cursor_xyz',
+        newCount: 15,
+        totalCount: 65,
+      );
+      final entry = container.read(messageDebugLogProvider).streamLog.single;
+
+      expect(entry.eventType, MessageStreamEventType.pageFetch);
+      expect(entry.trigger, 'prepended');
+      expect(entry.messageCount, 15);
+      expect(entry.laggedCount, 65);
+    });
+
+    test('logPageFetch stores error and stack trace for error outcome', () {
+      final stack = StackTrace.fromString('page stack');
+      notifier.logPageFetch(
+        groupId: 'g3',
+        outcome: 'error',
+        error: 'network timeout',
+        stackTrace: stack,
+      );
+      final entry = container.read(messageDebugLogProvider).streamLog.single;
+
+      expect(entry.eventType, MessageStreamEventType.pageFetch);
+      expect(entry.trigger, 'error');
+      expect(entry.error, 'network timeout');
+      expect(entry.stackTrace, stack);
+    });
+
+    test('pageFetch entries appear in stream log alongside stream events', () {
+      notifier.logStreamSnapshot(groupId: 'g', messageCount: 50);
+      notifier.logPageFetch(groupId: 'g', outcome: 'prepended', newCount: 20, totalCount: 70);
+      notifier.logStreamUpdate(groupId: 'g', trigger: 'newMessage', messageId: 'm_1');
+
+      final types = container
+          .read(messageDebugLogProvider)
+          .streamLog
+          .map((e) => e.eventType)
+          .toList();
+      expect(types, [
+        MessageStreamEventType.update,
+        MessageStreamEventType.pageFetch,
+        MessageStreamEventType.snapshot,
+      ]);
+    });
+  });
 }

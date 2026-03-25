@@ -49,7 +49,7 @@ ChatMessagesResult useChatMessages(
   );
   final isLoadingOlderMessages = useState(false);
   final hasMoreMessages = useState(true);
-  final totalMessageCount = useState(0);
+  final paginationVersion = useState(0);
 
   useEffect(() {
     messageIds.value = [];
@@ -57,7 +57,7 @@ ChatMessagesResult useChatMessages(
     indexById.value = {};
     isLoadingOlderMessages.value = false;
     hasMoreMessages.value = true;
-    totalMessageCount.value = 0;
+    paginationVersion.value = 0;
     return null;
   }, [groupId]);
 
@@ -205,14 +205,6 @@ ChatMessagesResult useChatMessages(
     [snapshot.connectionState, snapshot.hasData, snapshot.hasError, snapshot.data?.messageCount],
   );
 
-  useEffect(() {
-    final streamCount = snapshot.data?.messageCount ?? 0;
-    if (streamCount > 0) {
-      totalMessageCount.value = messageIds.value.length;
-    }
-    return null;
-  }, [snapshot.data?.messageCount]);
-
   ChatMessage getMessage(int reversedIndex) {
     final length = messageIds.value.length;
     final naturalIndex = length - 1 - reversedIndex;
@@ -312,8 +304,18 @@ ChatMessagesResult useChatMessages(
   }, [groupId]);
 
   Future<void> loadOlderMessages() async {
-    if (isLoadingOlderMessages.value || !hasMoreMessages.value) return;
-    if (messageIds.value.isEmpty) return;
+    if (isLoadingOlderMessages.value) {
+      _logger.info('loadOlderMessages groupId=$groupId: skipped (already loading)');
+      return;
+    }
+    if (!hasMoreMessages.value) {
+      _logger.info('loadOlderMessages groupId=$groupId: skipped (no more messages)');
+      return;
+    }
+    if (messageIds.value.isEmpty) {
+      _logger.info('loadOlderMessages groupId=$groupId: skipped (no messages loaded yet)');
+      return;
+    }
 
     final oldestId = messageIds.value.first;
     final oldestMessage = messagesById.value[oldestId];
@@ -322,7 +324,13 @@ ChatMessagesResult useChatMessages(
     final requestGroupId = groupId;
     isLoadingOlderMessages.value = true;
     _logger.info(
-      'loadOlderMessages groupId=$groupId before=${oldestMessage.createdAt} id=$oldestId',
+      'loadOlderMessages groupId=$groupId: fetching page before=${oldestMessage.createdAt} cursorId=$oldestId totalLoaded=${messageIds.value.length}',
+    );
+    debugLog?.logPageFetch(
+      groupId: groupId,
+      outcome: 'fetching',
+      cursorId: oldestId,
+      totalCount: messageIds.value.length,
     );
 
     try {
@@ -333,15 +341,22 @@ ChatMessagesResult useChatMessages(
         beforeMessageId: oldestId,
       );
 
-      if (groupId != requestGroupId) return;
-
-      if (olderMessages.isEmpty) {
-        hasMoreMessages.value = false;
-        _logger.info('loadOlderMessages groupId=$groupId: no more messages');
+      if (groupId != requestGroupId) {
+        _logger.info('loadOlderMessages groupId=$requestGroupId: discarded (groupId changed)');
+        debugLog?.logPageFetch(
+          groupId: requestGroupId,
+          outcome: 'discarded',
+          cursorId: oldestId,
+        );
         return;
       }
 
-      _logger.info('loadOlderMessages groupId=$groupId: got ${olderMessages.length} messages');
+      if (olderMessages.isEmpty) {
+        hasMoreMessages.value = false;
+        _logger.info('loadOlderMessages groupId=$groupId: no more messages (end of history)');
+        debugLog?.logPageFetch(groupId: groupId, outcome: 'end', cursorId: oldestId);
+        return;
+      }
 
       final newIds = <String>[];
       for (final msg in olderMessages) {
@@ -357,15 +372,38 @@ ChatMessagesResult useChatMessages(
         indexById.value = {
           for (var i = 0; i < combined.length; i++) combined[i]: i,
         };
-        totalMessageCount.value = combined.length;
+        paginationVersion.value++;
+        _logger.info(
+          'loadOlderMessages groupId=$groupId: prepended ${newIds.length} messages totalLoaded=${combined.length}',
+        );
+        debugLog?.logPageFetch(
+          groupId: groupId,
+          outcome: 'prepended',
+          cursorId: oldestId,
+          newCount: newIds.length,
+          totalCount: combined.length,
+        );
       } else {
         hasMoreMessages.value = false;
         _logger.info(
-          'loadOlderMessages groupId=$groupId: all ${olderMessages.length} fetched messages already loaded, no more messages',
+          'loadOlderMessages groupId=$groupId: no more messages (${olderMessages.length} fetched were already loaded)',
+        );
+        debugLog?.logPageFetch(
+          groupId: groupId,
+          outcome: 'duplicate',
+          cursorId: oldestId,
+          newCount: 0,
         );
       }
     } catch (e, st) {
-      _logger.severe('loadOlderMessages FAILED groupId=$groupId', e, st);
+      _logger.severe('loadOlderMessages groupId=$groupId: FAILED', e, st);
+      debugLog?.logPageFetch(
+        groupId: groupId,
+        outcome: 'error',
+        cursorId: oldestId,
+        error: e,
+        stackTrace: st,
+      );
     } finally {
       if (groupId == requestGroupId) {
         isLoadingOlderMessages.value = false;
@@ -374,7 +412,7 @@ ChatMessagesResult useChatMessages(
   }
 
   return (
-    messageCount: totalMessageCount.value,
+    messageCount: messageIds.value.length,
     getMessage: getMessage,
     getReversedMessageIndex: getReversedMessageIndex,
     getMessageById: getMessageById,

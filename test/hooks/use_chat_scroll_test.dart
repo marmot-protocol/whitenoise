@@ -386,15 +386,6 @@ void main() {
     });
 
     group('isScrollDownButtonVisible', () {
-      testWidgets('is false when at bottom without unread messages', (tester) async {
-        _api.lastReadMessageId = 'm50';
-        await pumpScroll(tester, latestMessageId: 'm1');
-        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
-        await tester.pumpAndSettle();
-
-        expect(scrollController.position.pixels, 0);
-      });
-
       testWidgets('is false when at bottom', (tester) async {
         ChatScrollResult? lastResult;
         await pumpScroll(
@@ -402,6 +393,41 @@ void main() {
           messageIds: ['m3', 'm2', 'm1'],
           onResult: (r) => lastResult = r,
         );
+        await tester.pumpAndSettle();
+
+        expect(lastResult?.isScrollDownButtonVisible, false);
+      });
+
+      testWidgets('is true when scrolled up, regardless of unread state', (tester) async {
+        _api.lastReadMessageId = 'm50';
+        ChatScrollResult? lastResult;
+        await pumpScroll(
+          tester,
+          messageIds: _generateIds(50),
+          onResult: (r) => lastResult = r,
+        );
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+
+        scrollController.jumpTo(500);
+        await tester.pumpAndSettle();
+
+        expect(lastResult?.isScrollDownButtonVisible, true);
+      });
+
+      testWidgets('is false again after scrolling back to bottom', (tester) async {
+        ChatScrollResult? lastResult;
+        await pumpScroll(
+          tester,
+          messageIds: _generateIds(50),
+          onResult: (r) => lastResult = r,
+        );
+        await tester.pumpAndSettle();
+
+        scrollController.jumpTo(500);
+        await tester.pumpAndSettle();
+
+        scrollController.jumpTo(0);
         await tester.pumpAndSettle();
 
         expect(lastResult?.isScrollDownButtonVisible, false);

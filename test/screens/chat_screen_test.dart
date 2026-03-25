@@ -96,6 +96,7 @@ class _MockApi extends MockWnApi {
   List<String> groupMembers = [];
   Completer<MediaFile>? uploadCompleter;
   Map<String, FlutterMetadata>? metadataByPubkey;
+  Completer<List<ChatMessage>>? fetchOlderCompleter;
 
   @override
   void reset() {
@@ -118,6 +119,19 @@ class _MockApi extends MockWnApi {
     groupMembers = [];
     uploadCompleter = null;
     metadataByPubkey = null;
+    fetchOlderCompleter = null;
+  }
+
+  @override
+  Future<List<ChatMessage>> crateApiMessagesFetchAggregatedMessagesForGroup({
+    required String pubkey,
+    required String groupId,
+    DateTime? before,
+    String? beforeMessageId,
+    int? limit,
+  }) {
+    if (fetchOlderCompleter != null) return fetchOlderCompleter!.future;
+    return Future.value([]);
   }
 
   @override
@@ -382,6 +396,15 @@ void main() {
         await pumpChatScreen(tester);
 
         expect(find.text('No messages yet'), findsOneWidget);
+      });
+    });
+
+    group('loading older messages indicator', () {
+      testWidgets('hidden when not loading older messages', (tester) async {
+        _api.initialMessages = [_message('m1', DateTime(2024))];
+        await pumpChatScreen(tester);
+
+        expect(find.byKey(const Key('loading_older_messages_indicator')), findsNothing);
       });
     });
 
@@ -1484,7 +1507,7 @@ void main() {
         expect(find.byKey(const Key('scroll_down_button')), findsOneWidget);
       });
 
-      testWidgets('hidden when all messages are read', (tester) async {
+      testWidgets('shown when scrolled up even when all messages are read', (tester) async {
         await pumpChatScreen(tester);
         await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
         await tester.pumpAndSettle();
@@ -1493,7 +1516,7 @@ void main() {
         position.jumpTo(position.maxScrollExtent);
         await tester.pumpAndSettle();
 
-        expect(find.byKey(const Key('scroll_down_button')), findsNothing);
+        expect(find.byKey(const Key('scroll_down_button')), findsOneWidget);
       });
 
       testWidgets('tapping scrolls to bottom', (tester) async {
