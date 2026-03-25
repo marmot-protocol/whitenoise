@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart' show RelayType;
 import 'package:whitenoise/src/rust/api/relays.dart';
@@ -107,14 +108,17 @@ void main() {
     mockApi.shouldThrowOnRestore = false;
   });
 
-  Future<void> pumpNetworkScreen(WidgetTester tester) async {
+  Future<void> pumpNetworkScreen(WidgetTester tester, {List<dynamic> overrides = const []}) async {
     await mountTestApp(
       tester,
       overrides: [
         authProvider.overrideWith(() => _MockAuthNotifier()),
         secureStorageProvider.overrideWithValue(MockSecureStorage()),
+        ...overrides,
       ],
     );
+    await tester.pumpAndSettle();
+
     Routes.pushToNetwork(tester.element(find.byType(Scaffold)));
     await tester.pumpAndSettle();
   }
@@ -451,6 +455,52 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Network Relays'), findsNothing);
+      });
+    });
+
+    group('offline state', () {
+      Future<void> pumpOfflineNetworkScreen(WidgetTester tester) async {
+        await pumpNetworkScreen(
+          tester,
+          overrides: [offlineProvider.overrideWith((ref) => Stream.value(true))],
+        );
+      }
+
+      testWidgets('shows offline notice', (tester) async {
+        await pumpOfflineNetworkScreen(tester);
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+      });
+
+      testWidgets('disables my relays add button', (tester) async {
+        await pumpOfflineNetworkScreen(tester);
+        expect(
+          tester.widget<WnButton>(find.byKey(const Key('add_button_my_relays'))).disabled,
+          isTrue,
+        );
+      });
+
+      testWidgets('disables inbox relays add button', (tester) async {
+        await pumpOfflineNetworkScreen(tester);
+        expect(
+          tester.widget<WnButton>(find.byKey(const Key('add_button_inbox_relays'))).disabled,
+          isTrue,
+        );
+      });
+
+      testWidgets('disables key package relays add button', (tester) async {
+        await pumpOfflineNetworkScreen(tester);
+        expect(
+          tester.widget<WnButton>(find.byKey(const Key('add_button_key_package_relays'))).disabled,
+          isTrue,
+        );
+      });
+
+      testWidgets('disables restore default relays button', (tester) async {
+        await pumpOfflineNetworkScreen(tester);
+        expect(
+          tester.widget<WnButton>(find.byKey(const Key('restore_default_relays_button'))).disabled,
+          isTrue,
+        );
       });
     });
   });
