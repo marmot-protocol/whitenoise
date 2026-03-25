@@ -115,7 +115,7 @@ jobs:
         run: |
           PREV_CODE=$(gh release list --repo "${{ github.repository }}" --limit 1 --json tagName --jq '.[0].tagName' 2>/dev/null | grep -oP '\+\K\d+$' || echo "0")
           BUILD_NUMBER=$((PREV_CODE + 1))
-          echo "name=$(date -u +'%Y.%-m.%-d')" >> "$GITHUB_OUTPUT"
+          echo "name=$(date -u +'%y.%m.%d.%H.%M')" >> "$GITHUB_OUTPUT"
           echo "code=${BUILD_NUMBER}" >> "$GITHUB_OUTPUT"
 
       - name: Build production APK
