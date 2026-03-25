@@ -28,6 +28,7 @@ ChatMessage _message(
   bool isDeleted = false,
   bool isReply = false,
   String? replyToId,
+  String? content,
   List<List<String>> tags = const [],
   List<SerializableToken> contentTokens = const [],
   ReactionSummary reactions = const ReactionSummary(byEmoji: [], userReactions: []),
@@ -35,7 +36,7 @@ ChatMessage _message(
 }) => ChatMessage(
   id: id,
   pubkey: pubkey,
-  content: 'Content of $id',
+  content: content ?? 'Content of $id',
   createdAt: createdAt,
   tags: tags,
   isReply: isReply,
@@ -626,6 +627,93 @@ void main() {
       expect(find.textContaining('count=2'), findsOneWidget);
       expect(find.textContaining('raw user reactions'), findsOneWidget);
       expect(find.textContaining('reaction_001'), findsOneWidget);
+    });
+
+    testWidgets('message card renders content tokens with content', (tester) async {
+      final now = DateTime(2024, 1, 15, 12);
+      _api.initialMessages = [
+        _message(
+          'token_msg',
+          now,
+          contentTokens: const [
+            SerializableToken(tokenType: 'text', content: 'hello world'),
+            SerializableToken(tokenType: 'mention'),
+          ],
+        ),
+      ];
+
+      await pumpDebugScreen(tester);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('raw_message_card_token_msg')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(find.textContaining('[text] hello world'), findsOneWidget);
+      expect(find.textContaining('[mention]'), findsOneWidget);
+    });
+
+    testWidgets('message card renders media with all optional fields', (tester) async {
+      final now = DateTime(2024, 1, 15, 12);
+      _api.initialMessages = [
+        _message(
+          'full_media_msg',
+          now,
+          mediaAttachments: [
+            MediaFile(
+              id: 'file_full',
+              mlsGroupId: _testGroupId,
+              accountPubkey: testPubkeyA,
+              filePath: '/tmp/full.jpg',
+              encryptedFileHash: 'enc_hash',
+              originalFileHash: 'orig_hash',
+              mimeType: 'image/jpeg',
+              mediaType: 'image',
+              blossomUrl: 'https://example.com/full.jpg',
+              nostrKey: 'nostr_key',
+              nonce: 'nonce_abc',
+              schemeVersion: '1',
+              fileMetadata: const FileMetadata(
+                originalFilename: 'photo.jpg',
+                dimensions: '1920x1080',
+                blurhash: 'L6PZfSi_.AyE',
+              ),
+              createdAt: now,
+            ),
+          ],
+        ),
+      ];
+
+      await pumpDebugScreen(tester);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('raw_message_card_full_media_msg')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(find.textContaining('original_hash:'), findsWidgets);
+      expect(find.textContaining('nonce:'), findsWidgets);
+      expect(find.textContaining('scheme_version:'), findsWidgets);
+      expect(find.textContaining('filename:'), findsWidgets);
+      expect(find.textContaining('dimensions:'), findsWidgets);
+      expect(find.textContaining('blurhash:'), findsWidgets);
+    });
+
+    testWidgets('message card truncates content longer than 110 characters', (tester) async {
+      final now = DateTime(2024, 1, 15, 12);
+      final longContent = 'A' * 120;
+      _api.initialMessages = [
+        _message('long_msg', now, content: longContent),
+      ];
+
+      await pumpDebugScreen(tester);
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('raw_message_card_long_msg')),
+        200,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(find.textContaining('${'A' * 110}…'), findsWidgets);
     });
 
     testWidgets('scrolling to end of list triggers loadOlderMessages', (tester) async {

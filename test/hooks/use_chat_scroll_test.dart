@@ -415,6 +415,31 @@ void main() {
         expect(lastResult?.isScrollDownButtonVisible, true);
       });
 
+      testWidgets('initialises to true when controller already scrolled up on first render', (
+        tester,
+      ) async {
+        // Set last read to an old message so firstUnreadIndex is non-null
+        _api.lastReadMessageId = 'm1';
+        ChatScrollResult? lastResult;
+
+        // Pump with controller pre-scrolled above the threshold
+        final ids = _generateIds(50);
+        await tester.pumpWidget(
+          _TestWidget(
+            scrollController: scrollController,
+            focusNode: focusNode,
+            messageIds: ids,
+            latestMessageId: ids.first,
+            onResult: (r) => lastResult = r,
+          ),
+        );
+        // Jump before first pump so the effect sees pixels > threshold
+        scrollController.jumpTo(500);
+        await tester.pumpAndSettle();
+
+        expect(lastResult?.isScrollDownButtonVisible, true);
+      });
+
       testWidgets('is false again after scrolling back to bottom', (tester) async {
         ChatScrollResult? lastResult;
         await pumpScroll(

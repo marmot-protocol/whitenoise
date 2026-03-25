@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -78,7 +80,7 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                     if (hasMoreMessages &&
                         notification is ScrollUpdateNotification &&
                         notification.metrics.pixels >= notification.metrics.maxScrollExtent - 200) {
-                      loadOlderMessages();
+                      unawaited(loadOlderMessages());
                     }
                     return false;
                   },

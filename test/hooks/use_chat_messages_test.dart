@@ -134,6 +134,7 @@ class _MockApi extends MockWnApi {
 
   List<ChatMessage> olderMessagesResponse = [];
   bool fetchOlderFails = false;
+  Completer<List<ChatMessage>>? fetchOlderCompleter;
   ({String? pubkey, String? groupId, DateTime? before, String? beforeMessageId, int? limit})?
   lastFetchOlderCall;
 
@@ -153,6 +154,7 @@ class _MockApi extends MockWnApi {
       limit: limit,
     );
     if (fetchOlderFails) throw Exception('fetch failed');
+    if (fetchOlderCompleter != null) return fetchOlderCompleter!.future;
     return olderMessagesResponse;
   }
 
@@ -191,6 +193,7 @@ class _MockApi extends MockWnApi {
     metadataCalls.clear();
     olderMessagesResponse = [];
     fetchOlderFails = false;
+    fetchOlderCompleter = null;
     lastFetchOlderCall = null;
   }
 
@@ -1072,6 +1075,48 @@ void main() {
           expect(result.getMessage(0).id, 'm3');
           expect(result.getMessage(1).id, 'm2');
           expect(result.getMessage(2).id, 'm1');
+        });
+
+        testWidgets('concurrent calls are ignored while already loading', (tester) async {
+          final completer = Completer<List<ChatMessage>>();
+          _api.fetchOlderCompleter = completer;
+          final getResult = await _pump(tester, 'group1');
+
+          _api.emitInitialSnapshot([_message('m1', DateTime(2024))]);
+          await tester.pumpAndSettle();
+
+          // Start loading and don't await — leaves isLoadingOlderMessages = true
+          unawaited(getResult().loadOlderMessages());
+          await tester.pump();
+
+          expect(getResult().isLoadingOlderMessages, isTrue);
+
+          // Second call should be a no-op
+          _api.lastFetchOlderCall = null;
+          await getResult().loadOlderMessages();
+          expect(
+            _api.lastFetchOlderCall,
+            isNull,
+            reason: 'second concurrent call must not trigger a fetch',
+          );
+
+          completer.complete([]);
+          await tester.pumpAndSettle();
+        });
+
+        testWidgets('all-duplicate response sets hasMoreMessages false', (tester) async {
+          final getResult = await _pump(tester, 'group1');
+
+          _api.emitInitialSnapshot([_message('m1', DateTime(2024))]);
+          await tester.pumpAndSettle();
+
+          // Return the same message that's already loaded
+          _api.olderMessagesResponse = [_message('m1', DateTime(2024))];
+          await getResult().loadOlderMessages();
+          await tester.pumpAndSettle();
+
+          expect(getResult().hasMoreMessages, isFalse);
+          expect(getResult().messageCount, 1);
         });
       });
 

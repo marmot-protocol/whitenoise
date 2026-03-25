@@ -131,7 +131,7 @@ ChatScrollResult useChatScroll({
           position.maxScrollExtent > _topThreshold &&
           position.pixels >= position.maxScrollExtent - _topThreshold;
       if (atTop && hasMoreMessages) {
-        loadOlderMessages();
+        unawaited(loadOlderMessages());
       }
 
       debounceTimer.value?.cancel();
@@ -153,6 +153,9 @@ ChatScrollResult useChatScroll({
       scrollController.removeListener(onScrollUpdate);
       debounceTimer.value?.cancel();
     };
+    // hasMoreMessages and loadOlderMessages are intentionally omitted from deps.
+    // loadOlderMessages guards internally against hasMoreMessages and isLoadingOlderMessages,
+    // so a stale closure here cannot cause a runaway fetch loop.
   }, [scrollController, firstUnreadIndex]);
 
   useEffect(() {
