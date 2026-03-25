@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_info_screen.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
@@ -16,6 +17,7 @@ import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
+import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 
@@ -188,10 +190,13 @@ void main() {
   setUpAll(() => RustLib.initMock(api: _api));
   setUp(() => _api.reset());
 
-  Future<void> pumpInviteScreen(WidgetTester tester) async {
+  Future<void> pumpInviteScreen(WidgetTester tester, {List<dynamic> overrides = const []}) async {
     await mountTestApp(
       tester,
-      overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
+      overrides: [
+        authProvider.overrideWith(() => _MockAuthNotifier()),
+        ...overrides,
+      ],
     );
     await tester.pumpAndSettle();
     Routes.pushToInvite(tester.element(find.byType(Scaffold)), _testGroupId);
@@ -654,6 +659,48 @@ void main() {
 
           expect(find.byType(GroupInfoScreen), findsOneWidget);
         });
+      });
+    });
+
+    group('offline state', () {
+      testWidgets('Offline shows offline_notice and disables Accept/Decline', (tester) async {
+        await pumpInviteScreen(
+          tester,
+          overrides: [
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+
+        final acceptBtn = tester.widget<WnButton>(
+          find.widgetWithText(WnButton, 'Accept'),
+        );
+        final declineBtn = tester.widget<WnButton>(
+          find.widgetWithText(WnButton, 'Decline'),
+        );
+        expect(acceptBtn.disabled, isTrue);
+        expect(declineBtn.disabled, isTrue);
+      });
+
+      testWidgets('Online does not show offline_notice and enables Accept/Decline', (tester) async {
+        await pumpInviteScreen(
+          tester,
+          overrides: [
+            offlineProvider.overrideWith((ref) => Stream.value(false)),
+          ],
+        );
+
+        expect(find.byKey(const Key('offline_notice')), findsNothing);
+
+        final acceptBtn = tester.widget<WnButton>(
+          find.widgetWithText(WnButton, 'Accept'),
+        );
+        final declineBtn = tester.widget<WnButton>(
+          find.widgetWithText(WnButton, 'Decline'),
+        );
+        expect(acceptBtn.disabled, isFalse);
+        expect(declineBtn.disabled, isFalse);
       });
     });
   });
