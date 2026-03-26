@@ -1,5 +1,12 @@
 import java.util.Properties
 
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
+    id("dev.flutter.flutter-gradle-plugin")
+}
+
 fun loadKeystoreProperties(fileName: String): Properties? {
     val propertiesFile = rootProject.file(fileName)
     if (!propertiesFile.exists()) {
@@ -37,13 +44,6 @@ val buildsStagingRelease = requestedTaskNames.any {
 }
 val buildsProductionRelease = requestedTaskNames.any {
     it.contains("ProductionRelease", ignoreCase = true)
-}
-
-plugins {
-    id("com.android.application")
-    id("kotlin-android")
-    // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
-    id("dev.flutter.flutter-gradle-plugin")
 }
 
 android {
@@ -151,11 +151,15 @@ android {
 
     buildTypes {
         release {
-            if (buildsStagingRelease) {
-                signingConfig = signingConfigs.getByName("staging")
-            } else if (buildsProductionRelease) {
-                signingConfig = signingConfigs.getByName("production")
-            }
+        }
+    }
+
+    productFlavors {
+        getByName("staging") {
+            signingConfig = signingConfigs.getByName("staging")
+        }
+        getByName("production") {
+            signingConfig = signingConfigs.getByName("production")
         }
     }
 }

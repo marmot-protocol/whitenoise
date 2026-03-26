@@ -45,6 +45,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [check-team]
+    env:
+      ARTIFACT_SUFFIX: unknown
     # Run when: push/dispatch (not a PR, check-team was skipped), or PR where
     # the "apk" label is present and actor is a contributor.
     if: >-
@@ -155,12 +157,11 @@ jobs:
 
         mkdir -p android
         printf '%s' "$ANDROID_STAGING_KEYSTORE_B64" | base64 --decode > android/staging.keystore
-        cat > android/key-staging.properties <<EOF
-storeFile=staging.keystore
-storePassword=$ANDROID_STAGING_STORE_PASSWORD
-keyAlias=$ANDROID_STAGING_KEY_ALIAS
-keyPassword=$ANDROID_STAGING_KEY_PASSWORD
-EOF
+        printf 'storeFile=staging.keystore\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+          "$ANDROID_STAGING_STORE_PASSWORD" \
+          "$ANDROID_STAGING_KEY_ALIAS" \
+          "$ANDROID_STAGING_KEY_PASSWORD" \
+          > android/key-staging.properties
 
     - name: Build Rust libraries for Android
       if: steps.jnilibs-cache.outputs.cache-hit != 'true'
