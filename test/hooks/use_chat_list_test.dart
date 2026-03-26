@@ -339,13 +339,13 @@ void main() {
         final mutedUntil = DateTime(2025);
         _api.emitUpdate(
           ChatListUpdateTrigger.chatMuteChanged,
-          _chatSummary('c1', DateTime(2024), mutedUntil: mutedUntil),
+          _chatSummary('c2', DateTime(2024, 1, 2), mutedUntil: mutedUntil),
         );
         await tester.pumpAndSettle();
 
         final chats = getResult().chats;
         expect(chats.map((c) => c.mlsGroupId).toList(), ['mls_c1', 'mls_c2']);
-        expect(chats.first.mutedUntil, mutedUntil);
+        expect(chats[1].mutedUntil, mutedUntil);
       });
 
       testWidgets('clears mutedUntil when unmuted', (tester) async {
