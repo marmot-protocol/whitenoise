@@ -153,8 +153,7 @@ android {
         release {
             if (buildsStagingRelease) {
                 signingConfig = signingConfigs.getByName("staging")
-            }
-            if (buildsProductionRelease) {
+            } else if (buildsProductionRelease) {
                 signingConfig = signingConfigs.getByName("production")
             }
         }

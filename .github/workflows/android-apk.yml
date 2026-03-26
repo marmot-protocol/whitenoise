@@ -156,11 +156,11 @@ jobs:
         mkdir -p android
         printf '%s' "$ANDROID_STAGING_KEYSTORE_B64" | base64 --decode > android/staging.keystore
         cat > android/key-staging.properties <<EOF
-        storeFile=staging.keystore
-        storePassword=$ANDROID_STAGING_STORE_PASSWORD
-        keyAlias=$ANDROID_STAGING_KEY_ALIAS
-        keyPassword=$ANDROID_STAGING_KEY_PASSWORD
-        EOF
+storeFile=staging.keystore
+storePassword=$ANDROID_STAGING_STORE_PASSWORD
+keyAlias=$ANDROID_STAGING_KEY_ALIAS
+keyPassword=$ANDROID_STAGING_KEY_PASSWORD
+EOF
 
     - name: Build Rust libraries for Android
       if: steps.jnilibs-cache.outputs.cache-hit != 'true'
