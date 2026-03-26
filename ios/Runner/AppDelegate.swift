@@ -17,8 +17,10 @@ import UIKit
     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
   ) {
     super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
+#if DEBUG
     let token = deviceToken.map { String(format: "%02x", $0) }.joined()
     NSLog("APNs registration succeeded with token: %@", token)
+#endif
   }
 
   override func application(
@@ -26,7 +28,9 @@ import UIKit
     didFailToRegisterForRemoteNotificationsWithError error: Error
   ) {
     super.application(application, didFailToRegisterForRemoteNotificationsWithError: error)
+#if DEBUG
     NSLog("APNs registration failed: %@", error.localizedDescription)
+#endif
   }
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
