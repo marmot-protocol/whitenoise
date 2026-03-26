@@ -332,9 +332,10 @@ void main() {
         await tester.tap(find.byKey(const Key('slate_back_button')));
         await tester.pumpAndSettle();
 
+        // Report bug navigation should work even when offline
         await tester.tap(find.text('Report bug'));
         await tester.pumpAndSettle();
-        expect(find.byType(ReportBugScreen), findsNothing);
+        expect(find.byType(ReportBugScreen), findsOneWidget);
       });
 
       testWidgets('Online does not show offline_notice and enables specific actions', (

@@ -7,6 +7,7 @@ import 'package:whitenoise/hooks/use_login_with_nsec.dart' show useLoginWithNsec
 import 'package:whitenoise/hooks/use_onboarding_carousel.dart' show onboardingCarouselSlideCount;
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
+import 'package:whitenoise/providers/offline_provider.dart' show offlineProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/src/rust/api/accounts.dart' show LoginResult, LoginStatus;
 import 'package:whitenoise/theme.dart';
@@ -86,6 +87,7 @@ class LoginScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
+    final isOffline = ref.watch(offlineProvider).value ?? false;
     final (
       :nsecInputController,
       :loginWithNsecState,
@@ -212,18 +214,25 @@ class LoginScreen extends HookConsumerWidget {
                       title: context.l10n.loginTitle,
                       onNavigate: () => Routes.goBack(context),
                     ),
-                    systemNotice: loginWithAndroidSignerState.error != null
+                    systemNotice: isOffline
                         ? WnSystemNotice(
-                            key: ValueKey(loginWithAndroidSignerState.error),
-                            title: _signerErrorL10n(
-                              loginWithAndroidSignerState.error!,
-                              context.l10n,
-                            ),
-                            type: WnSystemNoticeType.error,
-                            variant: WnSystemNoticeVariant.dismissible,
-                            onDismiss: clearLoginWithAndroidSignerError,
+                            key: const Key('offline_notice'),
+                            title: context.l10n.waitingForInternet,
+                            type: WnSystemNoticeType.warning,
+                            variant: WnSystemNoticeVariant.expanded,
                           )
-                        : null,
+                        : (loginWithAndroidSignerState.error != null
+                              ? WnSystemNotice(
+                                  key: ValueKey(loginWithAndroidSignerState.error),
+                                  title: _signerErrorL10n(
+                                    loginWithAndroidSignerState.error!,
+                                    context.l10n,
+                                  ),
+                                  type: WnSystemNoticeType.error,
+                                  variant: WnSystemNoticeVariant.dismissible,
+                                  onDismiss: clearLoginWithAndroidSignerError,
+                                )
+                              : null),
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
                       child: Column(
@@ -253,18 +262,21 @@ class LoginScreen extends HookConsumerWidget {
                                   WnButton(
                                     key: const Key('login_button'),
                                     text: context.l10n.login,
-                                    onPressed: onSubmit,
+                                    onPressed: isOffline ? null : onSubmit,
                                     loading: loginWithNsecState.isLoading,
-                                    disabled: nsecEmpty || loginWithAndroidSignerState.isLoading,
+                                    disabled:
+                                        nsecEmpty ||
+                                        loginWithAndroidSignerState.isLoading ||
+                                        isOffline,
                                   ),
                                   if (isAndroidSignerAvailable)
                                     WnButton(
                                       key: const Key('android_signer_login_button'),
                                       text: context.l10n.loginWithAmber,
                                       type: WnButtonType.outline,
-                                      onPressed: onAndroidSignerSubmit,
+                                      onPressed: isOffline ? null : onAndroidSignerSubmit,
                                       loading: loginWithAndroidSignerState.isLoading,
-                                      disabled: loginWithNsecState.isLoading,
+                                      disabled: loginWithNsecState.isLoading || isOffline,
                                     ),
                                 ],
                               );

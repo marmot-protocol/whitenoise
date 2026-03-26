@@ -180,7 +180,7 @@ class SettingsScreen extends HookConsumerWidget {
                       icon: WnIcons.flag,
                       label: context.l10n.reportBug,
                       type: WnMenuItemType.secondary,
-                      onTap: isOffline ? null : () => Routes.pushToReportBug(context),
+                      onTap: () => Routes.pushToReportBug(context),
                     ),
                     WnMenuItem(
                       icon: WnIcons.heart,
