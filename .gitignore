@@ -47,6 +47,7 @@ app.*.map.json
 /android/app/release
 /android/app/pkg/sumdb/
 /android/key.properties
+/android/key-staging.properties
 *.jks
 *.keystore
 

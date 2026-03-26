@@ -1,9 +1,42 @@
 import java.util.Properties
 
-val keystoreProperties = Properties()
-val keystorePropertiesFile = rootProject.file("key.properties")
-if (keystorePropertiesFile.exists()) {
-    keystorePropertiesFile.inputStream().use { keystoreProperties.load(it) }
+fun loadKeystoreProperties(fileName: String): Properties? {
+    val propertiesFile = rootProject.file(fileName)
+    if (!propertiesFile.exists()) {
+        return null
+    }
+
+    return Properties().apply {
+        propertiesFile.inputStream().use { load(it) }
+    }
+}
+
+fun requireKeystoreProperty(properties: Properties, fileName: String, propertyName: String): String {
+    val value = properties.getProperty(propertyName)
+    require(!value.isNullOrBlank()) {
+        "Missing android/$fileName property: $propertyName"
+    }
+    return value
+}
+
+fun requireKeystoreProperties(properties: Properties?, fileName: String): Properties {
+    requireNotNull(properties) {
+        "Missing android/$fileName for release signing"
+    }
+    return properties
+}
+
+val productionKeystorePropertiesFileName = "key.properties"
+val productionKeystoreProperties = loadKeystoreProperties(productionKeystorePropertiesFileName)
+val stagingKeystorePropertiesFileName = "key-staging.properties"
+val stagingKeystoreProperties = loadKeystoreProperties(stagingKeystorePropertiesFileName)
+
+val requestedTaskNames = gradle.startParameter.taskNames
+val buildsStagingRelease = requestedTaskNames.any {
+    it.contains("StagingRelease", ignoreCase = true)
+}
+val buildsProductionRelease = requestedTaskNames.any {
+    it.contains("ProductionRelease", ignoreCase = true)
 }
 
 plugins {
@@ -38,6 +71,70 @@ android {
         versionName = flutter.versionName
     }
 
+    signingConfigs {
+        create("staging") {
+            if (buildsStagingRelease) {
+                val properties = requireKeystoreProperties(
+                    stagingKeystoreProperties,
+                    stagingKeystorePropertiesFileName,
+                )
+                storeFile = rootProject.file(
+                    requireKeystoreProperty(
+                        properties,
+                        stagingKeystorePropertiesFileName,
+                        "storeFile",
+                    ),
+                )
+                storePassword = requireKeystoreProperty(
+                    properties,
+                    stagingKeystorePropertiesFileName,
+                    "storePassword",
+                )
+                keyAlias = requireKeystoreProperty(
+                    properties,
+                    stagingKeystorePropertiesFileName,
+                    "keyAlias",
+                )
+                keyPassword = requireKeystoreProperty(
+                    properties,
+                    stagingKeystorePropertiesFileName,
+                    "keyPassword",
+                )
+            }
+        }
+
+        create("production") {
+            if (buildsProductionRelease) {
+                val properties = requireKeystoreProperties(
+                    productionKeystoreProperties,
+                    productionKeystorePropertiesFileName,
+                )
+                storeFile = rootProject.file(
+                    requireKeystoreProperty(
+                        properties,
+                        productionKeystorePropertiesFileName,
+                        "storeFile",
+                    ),
+                )
+                storePassword = requireKeystoreProperty(
+                    properties,
+                    productionKeystorePropertiesFileName,
+                    "storePassword",
+                )
+                keyAlias = requireKeystoreProperty(
+                    properties,
+                    productionKeystorePropertiesFileName,
+                    "keyAlias",
+                )
+                keyPassword = requireKeystoreProperty(
+                    properties,
+                    productionKeystorePropertiesFileName,
+                    "keyPassword",
+                )
+            }
+        }
+    }
+
     flavorDimensions += "environment"
 
     productFlavors {
@@ -52,22 +149,14 @@ android {
         }
     }
 
-    signingConfigs {
-        create("release") {
-            val storeFilePath = keystoreProperties.getProperty("storeFile")
-            require(!storeFilePath.isNullOrBlank()) {
-                "Missing android/key.properties with storeFile for release signing"
-            }
-            storeFile = file(storeFilePath)
-            storePassword = keystoreProperties.getProperty("storePassword")
-            keyAlias = keystoreProperties.getProperty("keyAlias")
-            keyPassword = keystoreProperties.getProperty("keyPassword")
-        }
-    }
-
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            if (buildsStagingRelease) {
+                signingConfig = signingConfigs.getByName("staging")
+            }
+            if (buildsProductionRelease) {
+                signingConfig = signingConfigs.getByName("production")
+            }
         }
     }
 }
