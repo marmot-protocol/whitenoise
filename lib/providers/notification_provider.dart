@@ -10,6 +10,7 @@ import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/foreground_service_provider.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/services/android_play_services_service.dart';
 import 'package:whitenoise/services/foreground_service.dart';
 import 'package:whitenoise/services/notification_service.dart';
 import 'package:whitenoise/services/user_service.dart';
@@ -34,6 +35,7 @@ final notificationListenerProvider = Provider.autoDispose<void>((ref) {
   final pubkey = ref.watch(authProvider).value;
   if (pubkey == null) return;
 
+  const androidPlayServicesService = AndroidPlayServicesService();
   final notificationService = ref.read(notificationServiceProvider);
   final foregroundService = ref.read(foregroundServiceProvider);
   StreamSubscription<notifications_api.NotificationUpdate>? subscription;
@@ -44,18 +46,35 @@ final notificationListenerProvider = Provider.autoDispose<void>((ref) {
     _logger.info('Notification listener disposed');
   });
 
-  _initializeAndListen(notificationService, foregroundService, ref, (sub) {
+  _initializeAndListen(androidPlayServicesService, notificationService, foregroundService, ref, (
+    sub,
+  ) {
     subscription = sub;
   });
 });
 
 void _initializeAndListen(
+  AndroidPlayServicesService androidPlayServicesService,
   NotificationService notificationService,
   ForegroundService foregroundService,
   Ref ref,
   void Function(StreamSubscription<notifications_api.NotificationUpdate>) onSubscription,
 ) async {
   try {
+    final playServicesAvailability = await androidPlayServicesService.getAvailability();
+    if (!ref.mounted) return;
+    if (playServicesAvailability.isAvailable) {
+      _logger.info(
+        'Google Play services are available; continuing the foreground notification '
+        'transport until FCM is configured',
+      );
+    } else {
+      _logger.info(
+        'Google Play services are unavailable; continuing the foreground notification '
+        'transport',
+      );
+    }
+
     await notificationService.initialize();
     if (!ref.mounted) return;
     await notificationService.requestPermission();
