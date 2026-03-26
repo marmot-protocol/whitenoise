@@ -5,6 +5,7 @@ use crate::api::utils::group_id_to_string;
 use crate::frb_generated::StreamSink;
 use chrono::{DateTime, Utc};
 use flutter_rust_bridge::frb;
+use mdk_core::prelude::GroupId;
 use nostr_sdk::PublicKey;
 use whitenoise::whitenoise::chat_list::ChatListItem as WhitenoiseChatListItem;
 use whitenoise::{
@@ -50,6 +51,10 @@ pub struct ChatSummary {
     /// For DMs: the public key (hex) of the other participant.
     /// `None` for Group chats.
     pub dm_peer_pubkey: Option<String>,
+    /// When this chat is muted until, if at all.
+    /// `None` = not muted.
+    /// `Some(far-future)` = muted forever (see `MUTE_FOREVER`).
+    pub muted_until: Option<DateTime<Utc>>,
 }
 
 impl From<WhitenoiseChatListItem> for ChatSummary {
@@ -71,6 +76,7 @@ impl From<WhitenoiseChatListItem> for ChatSummary {
             unread_count: item.unread_count as u64,
             pin_order: item.pin_order,
             dm_peer_pubkey: item.dm_peer_pubkey.map(|pk| pk.to_hex()),
+            muted_until: item.muted_until,
         }
     }
 }
@@ -89,6 +95,8 @@ pub enum ChatListUpdateTrigger {
     ChatArchiveChanged,
     /// This account was removed from the group by an admin.
     RemovedFromGroup,
+    /// The chat's mute status changed.
+    ChatMuteChanged,
 }
 
 impl From<WhitenoiseChatListUpdateTrigger> for ChatListUpdateTrigger {
@@ -99,6 +107,7 @@ impl From<WhitenoiseChatListUpdateTrigger> for ChatListUpdateTrigger {
             WhitenoiseChatListUpdateTrigger::LastMessageDeleted => Self::LastMessageDeleted,
             WhitenoiseChatListUpdateTrigger::ChatArchiveChanged => Self::ChatArchiveChanged,
             WhitenoiseChatListUpdateTrigger::RemovedFromGroup => Self::RemovedFromGroup,
+            WhitenoiseChatListUpdateTrigger::ChatMuteChanged => Self::ChatMuteChanged,
         }
     }
 }
@@ -160,6 +169,52 @@ pub async fn set_chat_pin_order(
         .await?;
 
     Ok(())
+}
+
+/// Mutes a chat until the specified time.
+///
+/// Notifications for this chat will be suppressed until `until`.
+/// Use `MUTE_FOREVER` (year 9999) for an indefinite mute.
+/// The `until` timestamp must be in the future.
+#[frb]
+pub async fn mute_chat(
+    account_pubkey: String,
+    mls_group_id: String,
+    until: DateTime<Utc>,
+) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let group_id_bytes = hex::decode(&mls_group_id)?;
+    let group_id = GroupId::from_slice(&group_id_bytes);
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+
+    whitenoise.mute_chat(&account, &group_id, until).await?;
+
+    Ok(())
+}
+
+/// Unmutes a previously muted chat.
+///
+/// Notifications for this chat will resume immediately.
+#[frb]
+pub async fn unmute_chat(account_pubkey: String, mls_group_id: String) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let group_id_bytes = hex::decode(&mls_group_id)?;
+    let group_id = GroupId::from_slice(&group_id_bytes);
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+
+    whitenoise.unmute_chat(&account, &group_id).await?;
+
+    Ok(())
+}
+
+/// Returns the MUTE_FOREVER sentinel timestamp (year 9999).
+///
+/// Pass this to `mute_chat` to mute a chat indefinitely.
+#[frb]
+pub fn mute_forever_timestamp() -> DateTime<Utc> {
+    whitenoise::MUTE_FOREVER
 }
 
 /// Retrieves the chat list for an account.
@@ -325,5 +380,18 @@ mod tests {
         let trigger: ChatListUpdateTrigger =
             WhitenoiseChatListUpdateTrigger::RemovedFromGroup.into();
         assert_eq!(trigger, ChatListUpdateTrigger::RemovedFromGroup);
+    }
+
+    #[test]
+    fn test_chat_list_update_trigger_conversion_chat_mute_changed() {
+        let trigger: ChatListUpdateTrigger =
+            WhitenoiseChatListUpdateTrigger::ChatMuteChanged.into();
+        assert_eq!(trigger, ChatListUpdateTrigger::ChatMuteChanged);
+    }
+
+    #[test]
+    fn test_mute_forever_timestamp_returns_sentinel() {
+        let ts = super::mute_forever_timestamp();
+        assert_eq!(ts, whitenoise::MUTE_FOREVER);
     }
 }

@@ -32,6 +32,38 @@ Future<void> setChatPinOrder({
   pinOrder: pinOrder,
 );
 
+/// Mutes a chat until the specified time.
+///
+/// Notifications for this chat will be suppressed until `until`.
+/// Use `MUTE_FOREVER` (year 9999) for an indefinite mute.
+/// The `until` timestamp must be in the future.
+Future<void> muteChat({
+  required String accountPubkey,
+  required String mlsGroupId,
+  required DateTime until,
+}) => RustLib.instance.api.crateApiChatListMuteChat(
+  accountPubkey: accountPubkey,
+  mlsGroupId: mlsGroupId,
+  until: until,
+);
+
+/// Unmutes a previously muted chat.
+///
+/// Notifications for this chat will resume immediately.
+Future<void> unmuteChat({
+  required String accountPubkey,
+  required String mlsGroupId,
+}) => RustLib.instance.api.crateApiChatListUnmuteChat(
+  accountPubkey: accountPubkey,
+  mlsGroupId: mlsGroupId,
+);
+
+/// Returns the MUTE_FOREVER sentinel timestamp (year 9999).
+///
+/// Pass this to `mute_chat` to mute a chat indefinitely.
+Future<DateTime> muteForeverTimestamp() =>
+    RustLib.instance.api.crateApiChatListMuteForeverTimestamp();
+
 /// Retrieves the chat list for an account.
 ///
 /// Returns a list of chat summaries sorted by:
@@ -118,6 +150,9 @@ enum ChatListUpdateTrigger {
 
   /// This account was removed from the group by an admin.
   removedFromGroup,
+
+  /// The chat's mute status changed.
+  chatMuteChanged,
 }
 
 class ChatSummary {
@@ -170,6 +205,11 @@ class ChatSummary {
   /// `None` for Group chats.
   final String? dmPeerPubkey;
 
+  /// When this chat is muted until, if at all.
+  /// `None` = not muted.
+  /// `Some(far-future)` = muted forever (see `MUTE_FOREVER`).
+  final DateTime? mutedUntil;
+
   const ChatSummary({
     required this.mlsGroupId,
     this.name,
@@ -185,6 +225,7 @@ class ChatSummary {
     required this.unreadCount,
     this.pinOrder,
     this.dmPeerPubkey,
+    this.mutedUntil,
   });
 
   @override
@@ -202,7 +243,8 @@ class ChatSummary {
       removedAt.hashCode ^
       unreadCount.hashCode ^
       pinOrder.hashCode ^
-      dmPeerPubkey.hashCode;
+      dmPeerPubkey.hashCode ^
+      mutedUntil.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -222,5 +264,6 @@ class ChatSummary {
           removedAt == other.removedAt &&
           unreadCount == other.unreadCount &&
           pinOrder == other.pinOrder &&
-          dmPeerPubkey == other.dmPeerPubkey;
+          dmPeerPubkey == other.dmPeerPubkey &&
+          mutedUntil == other.mutedUntil;
 }

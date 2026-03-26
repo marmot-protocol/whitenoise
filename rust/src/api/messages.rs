@@ -459,7 +459,9 @@ pub async fn subscribe_to_group_messages(
 
     info!(group_id = %group_id_str, "subscribe_to_group_messages: subscribing");
 
-    let subscription = whitenoise.subscribe_to_group_messages(&group_id).await?;
+    let subscription = whitenoise
+        .subscribe_to_group_messages(&group_id, None)
+        .await?;
 
     // Emit initial snapshot first
     let initial_messages: Vec<ChatMessage> = subscription
