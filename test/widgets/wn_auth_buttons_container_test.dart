@@ -81,5 +81,78 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Name'), findsOneWidget);
     });
+
+    group('when disabled', () {
+      testWidgets('both buttons have disabled set to true', (tester) async {
+        const widget = WnAuthButtonsContainer(disabled: true);
+        await mountWidget(widget, tester);
+
+        final loginButton = tester.widget<WnButton>(
+          find.widgetWithText(WnButton, 'Login'),
+        );
+        final signupButton = tester.widget<WnButton>(
+          find.widgetWithText(WnButton, 'Sign Up'),
+        );
+
+        expect(loginButton.disabled, isTrue);
+        expect(signupButton.disabled, isTrue);
+      });
+
+      testWidgets('does not call onLogin when disabled and Login tapped', (tester) async {
+        var onLoginCalled = false;
+        final widget = WnAuthButtonsContainer(
+          onLogin: () {
+            onLoginCalled = true;
+          },
+          disabled: true,
+        );
+        await mountWidget(widget, tester);
+        await tester.tap(find.text('Login'));
+        expect(onLoginCalled, isFalse);
+      });
+
+      testWidgets('does not call onSignup when disabled and Sign Up tapped', (tester) async {
+        var onSignupCalled = false;
+        final widget = WnAuthButtonsContainer(
+          onSignup: () {
+            onSignupCalled = true;
+          },
+          disabled: true,
+        );
+        await mountWidget(widget, tester);
+        await tester.tap(find.text('Sign Up'));
+        expect(onSignupCalled, isFalse);
+      });
+
+      testWidgets('Login button onPressed is null when disabled', (tester) async {
+        const widget = WnAuthButtonsContainer(disabled: true);
+        await mountWidget(widget, tester);
+
+        final loginButton = tester.widget<WnButton>(
+          find.widgetWithText(WnButton, 'Login'),
+        );
+        expect(loginButton.onPressed, isNull);
+      });
+
+      testWidgets('Sign Up button onPressed is null when disabled', (tester) async {
+        const widget = WnAuthButtonsContainer(disabled: true);
+        await mountWidget(widget, tester);
+
+        final signupButton = tester.widget<WnButton>(
+          find.widgetWithText(WnButton, 'Sign Up'),
+        );
+        expect(signupButton.onPressed, isNull);
+      });
+
+      testWidgets('default navigation is prevented when disabled', (tester) async {
+        const widget = WnAuthButtonsContainer(disabled: true);
+        await mountWidget(widget, tester);
+
+        await tester.tap(find.text('Login'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Enter your private key'), findsNothing);
+      });
+    });
   });
 }
