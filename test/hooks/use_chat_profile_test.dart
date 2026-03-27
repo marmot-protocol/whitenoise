@@ -47,6 +47,10 @@ class _MockApi extends MockWnApi {
 
   bool shouldError = false;
 
+  void emitMetadataError(Object error, [StackTrace? stackTrace]) {
+    userStreamControllers[_otherPubkey]?.addError(error, stackTrace);
+  }
+
   @override
   Future<Group> crateApiGroupsGetGroup({
     required String accountPubkey,
@@ -146,6 +150,16 @@ void main() {
               isDm: true,
             ),
           );
+        });
+      });
+
+      group('when metadata stream fails', () {
+        testWidgets('returns error', (tester) async {
+          await _mountHook(tester);
+          _api.emitMetadataError(Exception('metadata fail'));
+          await tester.pump();
+
+          expect(getResult().hasError, isTrue);
         });
       });
 

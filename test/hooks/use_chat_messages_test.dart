@@ -584,6 +584,27 @@ void main() {
         expect(_api.userSubscribeCalls, [authorPubkey, authorPubkey]);
         expect(preview?.authorMetadata?.displayName, 'Recovered Author');
       });
+
+      testWidgets('resubscribes after metadata stream closes', (tester) async {
+        const authorPubkey = testPubkeyB;
+        _api.seedUserInitialSnapshot(authorPubkey);
+        final getResult = await _pump(tester, 'group1');
+
+        _api.emitInitialSnapshot([
+          _message('m1', DateTime(2024), pubkey: authorPubkey, content: 'Hello'),
+        ]);
+        await tester.pump();
+
+        getResult().getChatMessageQuote('m1');
+        await tester.pump();
+        await _api.userStreamControllers[authorPubkey]?.close();
+        await tester.pump();
+
+        getResult().getChatMessageQuote('m1');
+        await tester.pump();
+
+        expect(_api.userSubscribeCalls, [authorPubkey, authorPubkey]);
+      });
     });
 
     group('duplicate messages', () {
