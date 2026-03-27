@@ -1,9 +1,18 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
+import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/relay_control_state_screen.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 import '../mocks/mock_clipboard.dart' show clearClipboardMock, mockClipboard;
+import '../mocks/mock_secure_storage.dart';
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
@@ -46,7 +55,7 @@ void main() {
     await mountWidget(const RelayControlStateScreen(), tester);
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('relay_control_state_error')), findsOneWidget);
+    expect(find.byType(WnSystemNotice), findsOneWidget);
     expect(find.textContaining('Failed to load relay control state'), findsOneWidget);
   });
 
@@ -56,7 +65,7 @@ void main() {
     await mountWidget(const RelayControlStateScreen(), tester);
     await tester.pumpAndSettle();
 
-    final copyButton = tester.widget<TextButton>(
+    final copyButton = tester.widget<WnButton>(
       find.byKey(const Key('relay_control_state_copy_button')),
     );
     expect(copyButton.onPressed, isNull);
@@ -82,7 +91,7 @@ void main() {
     expect(getClipboard(), '{"relay":"active"}');
   });
 
-  testWidgets('copy button shows snackbar after copying', (tester) async {
+  testWidgets('copy button shows system notice after copying', (tester) async {
     mockClipboard();
     addTearDown(clearClipboardMock);
     api.relayControlStateResult = '{"relay":"active"}';
@@ -93,6 +102,87 @@ void main() {
     await tester.tap(find.byKey(const Key('relay_control_state_copy_button')));
     await tester.pump();
 
-    expect(find.byType(SnackBar), findsOneWidget);
+    expect(find.byType(WnSystemNotice), findsOneWidget);
   });
+
+  group('when offline', () {
+    testWidgets('offlineProvider returns true when offline', (tester) async {
+      setUpTestView(tester);
+      await mountTestApp(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _MockAuthNotifier()),
+          secureStorageProvider.overrideWithValue(MockSecureStorage()),
+          offlineProvider.overrideWith((ref) => Stream.value(true)),
+        ],
+      );
+      await tester.pump();
+      api.relayControlStateCallCount = 0;
+
+      Routes.pushToRelayControlState(tester.element(find.byType(Scaffold)));
+      await tester.pump();
+      expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+      expect(api.relayControlStateCallCount, 0);
+    });
+
+    testWidgets('displays offline notice text', (tester) async {
+      setUpTestView(tester);
+      await mountTestApp(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _MockAuthNotifier()),
+          secureStorageProvider.overrideWithValue(MockSecureStorage()),
+          offlineProvider.overrideWith((ref) => Stream.value(true)),
+        ],
+      );
+      await tester.pump();
+      api.relayControlStateCallCount = 0;
+
+      Routes.pushToRelayControlState(tester.element(find.byType(Scaffold)));
+      await tester.pump();
+      expect(find.text('Waiting for internet connection'), findsOneWidget);
+      expect(api.relayControlStateCallCount, 0);
+    });
+
+    testWidgets('copy works after going offline with cached dump', (tester) async {
+      final getClipboard = mockClipboard();
+      addTearDown(clearClipboardMock);
+      api.relayControlStateResult = '{"cached":true}';
+
+      final offlineStream = StreamController<bool>();
+      addTearDown(offlineStream.close);
+
+      await mountWidget(
+        const RelayControlStateScreen(),
+        tester,
+        overrides: [
+          offlineProvider.overrideWith((ref) => offlineStream.stream),
+        ],
+      );
+
+      offlineStream.add(false);
+      await tester.pumpAndSettle();
+
+      offlineStream.add(true);
+      await tester.pumpAndSettle();
+
+      final copyButton = tester.widget<WnButton>(
+        find.byKey(const Key('relay_control_state_copy_button')),
+      );
+      expect(copyButton.onPressed, isNotNull);
+
+      await tester.tap(find.byKey(const Key('relay_control_state_copy_button')));
+      await tester.pumpAndSettle();
+
+      expect(getClipboard(), '{"cached":true}');
+    });
+  });
+}
+
+class _MockAuthNotifier extends AuthNotifier {
+  @override
+  Future<String?> build() async {
+    state = const AsyncData(testPubkeyA);
+    return testPubkeyA;
+  }
 }
