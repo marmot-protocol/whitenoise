@@ -6,9 +6,11 @@ import 'package:whitenoise/hooks/use_accounts.dart';
 import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/metadata.dart';
+import 'package:whitenoise/widgets/offline_system_notice.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_profile_switcher_item.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
@@ -22,6 +24,7 @@ class SwitchProfileScreen extends HookConsumerWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final currentPubkey = ref.watch(authProvider).value;
+    final isOffline = ref.watch(offlineProvider).value ?? false;
     final (:accounts, :state, :switchTo) = useAccounts(context, ref, currentPubkey);
 
     if (accounts.connectionState == ConnectionState.waiting) {
@@ -33,6 +36,7 @@ class SwitchProfileScreen extends HookConsumerWidget {
               title: context.l10n.profilesTitle,
               onNavigate: () => Routes.goBack(context),
             ),
+            systemNotice: isOffline ? const OfflineSystemNotice() : null,
             child: Padding(
               padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
               child: Column(
@@ -63,6 +67,7 @@ class SwitchProfileScreen extends HookConsumerWidget {
             title: context.l10n.profilesTitle,
             onNavigate: () => Routes.goBack(context),
           ),
+          systemNotice: isOffline ? const OfflineSystemNotice() : null,
           child: Padding(
             padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
             child: Column(
@@ -111,8 +116,10 @@ class SwitchProfileScreen extends HookConsumerWidget {
                 SizedBox(
                   width: double.infinity,
                   child: WnButton(
+                    key: const Key('connect_another_profile_button'),
                     text: context.l10n.connectAnotherProfile,
-                    onPressed: () => Routes.pushToAddProfile(context),
+                    onPressed: isOffline ? null : () => Routes.pushToAddProfile(context),
+                    disabled: isOffline,
                   ),
                 ),
               ],
