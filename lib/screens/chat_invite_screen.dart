@@ -79,7 +79,7 @@ class ChatInviteScreen extends HookConsumerWidget {
     void handleAvatarTap() {
       final otherPubkey = chatProfile.data?.otherMemberPubkey;
       if (otherPubkey != null) {
-        unawaited(Routes.pushToInviteInfo(context, otherPubkey));
+        unawaited(Routes.pushToInviteInfo(context, mlsGroupId));
       } else {
         Routes.pushToGroupInfo(context, mlsGroupId);
       }

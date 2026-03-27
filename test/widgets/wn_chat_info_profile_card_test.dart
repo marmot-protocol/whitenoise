@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_chat_info_profile_card.dart';
@@ -19,7 +18,9 @@ void main() {
   Future<void> pumpCard(
     WidgetTester tester, {
     String userPubkey = testPubkeyA,
-    FlutterMetadata? metadata,
+    String? displayName,
+    String? pictureUrl,
+    AvatarColor? avatarColor,
     VoidCallback? onCopied,
     VoidCallback? onCopyError,
   }) async {
@@ -27,7 +28,9 @@ void main() {
       SingleChildScrollView(
         child: WnChatInfoProfileCard(
           userPubkey: userPubkey,
-          metadata: metadata,
+          displayName: displayName,
+          pictureUrl: pictureUrl,
+          avatarColor: avatarColor ?? AvatarColor.fromPubkey(userPubkey),
           onPublicKeyCopied: onCopied,
           onPublicKeyCopyError: onCopyError,
         ),
@@ -40,7 +43,7 @@ void main() {
     testWidgets('shows avatar and copy card', (tester) async {
       await pumpCard(
         tester,
-        metadata: const FlutterMetadata(displayName: 'Alice', custom: {}),
+        displayName: 'Alice',
       );
 
       expect(find.byType(WnAvatar), findsOneWidget);
@@ -50,36 +53,53 @@ void main() {
     testWidgets('shows display name', (tester) async {
       await pumpCard(
         tester,
-        metadata: const FlutterMetadata(displayName: 'Alice', custom: {}),
+        displayName: 'Alice',
       );
 
       expect(find.byKey(const Key('chat_info_display_name')), findsOneWidget);
       expect(find.text('Alice'), findsOneWidget);
     });
 
-    testWidgets('falls back to name when display name is missing', (tester) async {
-      await pumpCard(
-        tester,
-        metadata: const FlutterMetadata(name: 'bob', custom: {}),
-      );
+    testWidgets('hides name when display name is null', (tester) async {
+      await pumpCard(tester);
 
-      expect(find.text('bob'), findsOneWidget);
+      expect(find.byKey(const Key('chat_info_display_name')), findsNothing);
     });
 
-    testWidgets('hides name when metadata has no name', (tester) async {
+    testWidgets('hides name when display name is empty string', (tester) async {
       await pumpCard(
         tester,
-        metadata: const FlutterMetadata(custom: {}),
+        displayName: '',
       );
 
       expect(find.byKey(const Key('chat_info_display_name')), findsNothing);
     });
 
-    testWidgets('copy card uses npub values', (tester) async {
+    testWidgets('passes picture URL to avatar', (tester) async {
       await pumpCard(
         tester,
-        metadata: const FlutterMetadata(custom: {}),
+        displayName: 'Alice',
+        pictureUrl: 'https://example.com/p.png',
       );
+
+      final avatar = tester.widget<WnAvatar>(find.byType(WnAvatar));
+      expect(avatar.pictureUrl, 'https://example.com/p.png');
+    });
+
+    testWidgets('passes avatar color to WnAvatar', (tester) async {
+      const color = AvatarColor.blue;
+      await pumpCard(
+        tester,
+        displayName: 'Alice',
+        avatarColor: color,
+      );
+
+      final avatar = tester.widget<WnAvatar>(find.byType(WnAvatar));
+      expect(avatar.color, color);
+    });
+
+    testWidgets('copy card uses npub values', (tester) async {
+      await pumpCard(tester);
 
       final copyCard = tester.widget<WnCopyCard>(find.byType(WnCopyCard));
       expect(copyCard.textToDisplay, testNpubAFormatted);
@@ -92,27 +112,12 @@ void main() {
       expect(copyCard.snapToWords, isTrue);
     });
 
-    testWidgets('does not render nip05 and about text', (tester) async {
-      await pumpCard(
-        tester,
-        metadata: const FlutterMetadata(
-          displayName: 'Alice',
-          nip05: 'alice@example.com',
-          about: 'About text',
-          custom: {},
-        ),
-      );
-
-      expect(find.text('alice@example.com'), findsNothing);
-      expect(find.text('About text'), findsNothing);
-    });
-
     testWidgets('copy action triggers success callback', (tester) async {
       mockClipboard();
       var copied = false;
       await pumpCard(
         tester,
-        metadata: const FlutterMetadata(displayName: 'Alice', custom: {}),
+        displayName: 'Alice',
         onCopied: () => copied = true,
       );
 
@@ -128,7 +133,7 @@ void main() {
       var failed = false;
       await pumpCard(
         tester,
-        metadata: const FlutterMetadata(displayName: 'Alice', custom: {}),
+        displayName: 'Alice',
         onCopyError: () => failed = true,
       );
 

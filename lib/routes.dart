@@ -84,8 +84,8 @@ abstract final class Routes {
   static const _setUpGroup = '/set-up-group';
   static const _addToGroup = '/add-to-group/:userPubkey';
   static const _startChat = '/start-chat/:userPubkey';
-  static const _chatInfo = '/chat-info/:userPubkey';
-  static const _inviteInfo = '/invite-info/:userPubkey';
+  static const _chatInfo = '/chat-info/:mlsGroupId';
+  static const _inviteInfo = '/invite-info/:mlsGroupId';
   static const _groupInfo = '/group-info/:groupId';
   static const _editGroup = '/edit-group/:groupId';
   static const _groupMember = '/group-member/:groupId/:memberPubkey';
@@ -352,7 +352,7 @@ abstract final class Routes {
           path: _chatInfo,
           pageBuilder: (context, state) => _navigationTransition(
             state: state,
-            child: ChatInfoScreen(userPubkey: state.pathParameters['userPubkey']!),
+            child: ChatInfoScreen(mlsGroupId: state.pathParameters['mlsGroupId']!),
             opaque: false,
           ),
         ),
@@ -362,7 +362,7 @@ abstract final class Routes {
           pageBuilder: (context, state) => _navigationTransition(
             state: state,
             child: ChatInfoScreen(
-              userPubkey: state.pathParameters['userPubkey']!,
+              mlsGroupId: state.pathParameters['mlsGroupId']!,
               showSearch: false,
             ),
             opaque: false,
@@ -623,16 +623,16 @@ abstract final class Routes {
     );
   }
 
-  static Future<bool?> pushToChatInfo(BuildContext context, String userPubkey) {
+  static Future<bool?> pushToChatInfo(BuildContext context, String mlsGroupId) {
     return GoRouter.of(
       context,
-    ).pushNamed<bool>('chatInfo', pathParameters: {'userPubkey': userPubkey});
+    ).pushNamed<bool>('chatInfo', pathParameters: {'mlsGroupId': mlsGroupId});
   }
 
-  static Future<void> pushToInviteInfo(BuildContext context, String userPubkey) {
+  static Future<void> pushToInviteInfo(BuildContext context, String mlsGroupId) {
     return GoRouter.of(
       context,
-    ).pushNamed('inviteInfo', pathParameters: {'userPubkey': userPubkey});
+    ).pushNamed('inviteInfo', pathParameters: {'mlsGroupId': mlsGroupId});
   }
 
   static void pushToAddToGroup(BuildContext context, String userPubkey) {

@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart' show useEffect, useFuture, use
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:whitenoise/hooks/use_chat_archive.dart';
 import 'package:whitenoise/hooks/use_group_members.dart';
 import 'package:whitenoise/hooks/use_route_refresh.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
@@ -73,6 +74,26 @@ class GroupInfoScreen extends HookConsumerWidget {
 
     final group = groupSnapshot.data;
     final isAdmin = membersState.admins.contains(accountPubkey);
+    final archiveState = useChatArchive(accountPubkey, groupId);
+
+    Future<void> handleArchiveAction() async {
+      final currentIsArchived = archiveState.isArchived;
+      try {
+        if (currentIsArchived) {
+          await archiveState.unarchive();
+        } else {
+          await archiveState.archive();
+        }
+      } catch (_) {
+        if (context.mounted) {
+          if (currentIsArchived) {
+            showErrorNotice(context.l10n.failedToUnarchiveChat);
+          } else {
+            showErrorNotice(context.l10n.failedToArchiveChat);
+          }
+        }
+      }
+    }
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -121,6 +142,21 @@ class GroupInfoScreen extends HookConsumerWidget {
                       ),
                       Gap(16.h),
                     ],
+                    SizedBox(
+                      width: double.infinity,
+                      child: WnButton(
+                        key: const Key('archive_button'),
+                        text: archiveState.isArchived
+                            ? context.l10n.unarchive
+                            : context.l10n.archive,
+                        size: WnButtonSize.medium,
+                        trailingIcon: archiveState.isArchived ? WnIcons.unarchive : WnIcons.archive,
+                        type: WnButtonType.outline,
+                        loading: archiveState.isActionLoading,
+                        onPressed: !archiveState.isLoading ? handleArchiveAction : null,
+                      ),
+                    ),
+                    Gap(16.h),
                     Text(
                       context.l10n.membersLabel,
                       key: const Key('members_label'),

@@ -355,9 +355,8 @@ class ChatScreen extends HookConsumerWidget {
                             ? closeSearch
                             : () => Routes.goToChatList(context),
                         onAvatarTap: () async {
-                          final otherPubkey = chatProfile.data?.otherMemberPubkey;
-                          if (otherPubkey != null) {
-                            final result = await Routes.pushToChatInfo(context, otherPubkey);
+                          if (chatProfile.data?.isDm == true) {
+                            final result = await Routes.pushToChatInfo(context, groupId);
                             if (result == true) openSearch();
                           } else {
                             Routes.pushToGroupInfo(context, groupId);

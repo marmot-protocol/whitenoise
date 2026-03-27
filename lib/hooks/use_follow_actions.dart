@@ -17,7 +17,7 @@ typedef FollowActionsState = ({
 
 FollowActionsState useFollowActions({
   required String accountPubkey,
-  required String userPubkey,
+  required String? userPubkey,
 }) {
   final isFollowing = useState<bool?>(null);
   final isLoading = useState(true);
@@ -26,6 +26,7 @@ FollowActionsState useFollowActions({
 
   useEffect(() {
     Future<void> fetchIsFollowing() async {
+      if (userPubkey == null) return;
       isLoading.value = true;
       try {
         final result = await accounts_api.isFollowingUser(
@@ -50,6 +51,7 @@ FollowActionsState useFollowActions({
   }
 
   Future<void> follow() async {
+    if (userPubkey == null) return;
     isActionLoading.value = true;
     error.value = null;
     try {
@@ -68,6 +70,7 @@ FollowActionsState useFollowActions({
   }
 
   Future<void> unfollow() async {
+    if (userPubkey == null) return;
     isActionLoading.value = true;
     error.value = null;
     try {
@@ -86,6 +89,7 @@ FollowActionsState useFollowActions({
   }
 
   Future<void> toggleFollow() async {
+    if (userPubkey == null) return;
     if (isFollowing.value == true) {
       await unfollow();
     } else {

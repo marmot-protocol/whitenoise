@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/screens/chat_info_screen.dart';
 import 'package:whitenoise/screens/chat_invite_screen.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/chat_screen.dart';
@@ -506,6 +507,49 @@ void main() {
       Routes.goBack(getContext(tester));
       await tester.pumpAndSettle();
       expect(find.byType(ChatListScreen), findsOneWidget);
+    });
+  });
+
+  group('pushToChatInfo', () {
+    testWidgets('passes mlsGroupId into ChatInfoScreen', (tester) async {
+      await pumpRouter(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
+        ],
+      );
+      Routes.pushToChatInfo(getContext(tester), testGroupId);
+      await tester.pumpAndSettle();
+      final screen = tester.widget<ChatInfoScreen>(find.byType(ChatInfoScreen));
+      expect(screen.mlsGroupId, testGroupId);
+    });
+  });
+
+  group('pushToInviteInfo', () {
+    testWidgets('passes mlsGroupId into ChatInfoScreen', (tester) async {
+      await pumpRouter(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
+        ],
+      );
+      Routes.pushToInviteInfo(getContext(tester), testGroupId);
+      await tester.pumpAndSettle();
+      final screen = tester.widget<ChatInfoScreen>(find.byType(ChatInfoScreen));
+      expect(screen.mlsGroupId, testGroupId);
+    });
+
+    testWidgets('hides search on ChatInfoScreen', (tester) async {
+      await pumpRouter(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
+        ],
+      );
+      Routes.pushToInviteInfo(getContext(tester), testGroupId);
+      await tester.pumpAndSettle();
+      final screen = tester.widget<ChatInfoScreen>(find.byType(ChatInfoScreen));
+      expect(screen.showSearch, false);
     });
   });
 

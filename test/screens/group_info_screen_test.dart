@@ -5,6 +5,7 @@ import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/edit_group_screen.dart';
 import 'package:whitenoise/screens/group_member_screen.dart';
+import 'package:whitenoise/src/rust/api/account_groups.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -25,6 +26,7 @@ class _MockApi extends MockWnApi {
   List<String> adminsList = [];
   Group? groupToReturn;
   String? imagePathToReturn;
+  bool archivedAtResult = false;
   final Map<String, FlutterMetadata> metadataMap = {};
   bool shouldThrowOnGroupMembers = false;
 
@@ -64,6 +66,20 @@ class _MockApi extends MockWnApi {
   }
 
   @override
+  Future<AccountGroup> crateApiAccountGroupsGetAccountGroup({
+    required String accountPubkey,
+    required String mlsGroupId,
+  }) async {
+    return AccountGroup(
+      accountPubkey: accountPubkey,
+      mlsGroupId: mlsGroupId,
+      archivedAt: archivedAtResult ? DateTime.now().millisecondsSinceEpoch : null,
+      createdAt: DateTime.now().millisecondsSinceEpoch,
+      updatedAt: DateTime.now().millisecondsSinceEpoch,
+    );
+  }
+
+  @override
   Future<String?> crateApiGroupsGetGroupImagePath({
     required String accountPubkey,
     required String groupId,
@@ -87,6 +103,7 @@ class _MockApi extends MockWnApi {
     adminsList = [];
     groupToReturn = null;
     imagePathToReturn = null;
+    archivedAtResult = false;
     metadataMap.clear();
     shouldThrowOnGroupMembers = false;
   }
@@ -208,6 +225,92 @@ void main() {
 
       expect(find.byKey(const Key('members_label')), findsOneWidget);
       expect(find.text('Members:'), findsOneWidget);
+    });
+
+    testWidgets('displays archive button above members label', (tester) async {
+      _api.membersList = [_testPubkey, testPubkeyB];
+      _api.adminsList = [_testPubkey];
+      await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+      final archiveButton = find.byKey(const Key('archive_button'));
+      final membersLabel = find.byKey(const Key('members_label'));
+      final archiveTop = tester.getTopLeft(archiveButton).dy;
+      final membersTop = tester.getTopLeft(membersLabel).dy;
+
+      expect(archiveButton, findsOneWidget);
+      expect(archiveTop, lessThan(membersTop));
+    });
+
+    testWidgets('shows archive button when group is not archived', (tester) async {
+      _api.archivedAtResult = false;
+      await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('archive_button')),
+          matching: find.text('Archive'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('shows unarchive button when group is archived', (tester) async {
+      _api.archivedAtResult = true;
+      await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+      expect(
+        find.descendant(
+          of: find.byKey(const Key('archive_button')),
+          matching: find.text('Unarchive'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('calls archive API when archive button is tapped', (tester) async {
+      _api.archivedAtResult = false;
+      await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+      await tester.tap(find.byKey(const Key('archive_button')));
+      await tester.pumpAndSettle();
+
+      expect(_api.archiveChatCallCount, 1);
+    });
+
+    testWidgets('shows error notice when archive fails', (tester) async {
+      _api.archivedAtResult = false;
+      _api.shouldFailArchiveChat = true;
+      await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+      await tester.tap(find.byKey(const Key('archive_button')));
+      await tester.pumpAndSettle();
+
+      expect(_api.archiveChatCallCount, 1);
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(find.text('Failed to archive chat. Please try again.'), findsOneWidget);
+    });
+
+    testWidgets('calls unarchive API when unarchive button is tapped', (tester) async {
+      _api.archivedAtResult = true;
+      await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+      await tester.tap(find.byKey(const Key('archive_button')));
+      await tester.pumpAndSettle();
+
+      expect(_api.unarchiveChatCallCount, 1);
+    });
+
+    testWidgets('shows error notice when unarchive fails', (tester) async {
+      _api.archivedAtResult = true;
+      _api.shouldFailUnarchiveChat = true;
+      await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+      await tester.tap(find.byKey(const Key('archive_button')));
+      await tester.pumpAndSettle();
+
+      expect(_api.unarchiveChatCallCount, 1);
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(find.text('Failed to unarchive chat. Please try again.'), findsOneWidget);
     });
 
     testWidgets('displays member items', (tester) async {
