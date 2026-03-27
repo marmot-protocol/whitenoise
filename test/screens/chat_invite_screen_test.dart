@@ -34,11 +34,12 @@ ChatMessage _message(
   String? replyToId,
   String pubkey = testPubkeyB,
   String content = '',
+  DateTime? createdAt,
 }) => ChatMessage(
   id: id,
   pubkey: pubkey,
   content: content.isEmpty ? 'Message $id' : content,
-  createdAt: DateTime(2024),
+  createdAt: createdAt ?? DateTime(2024),
   tags: const [],
   isReply: isReply,
   replyToId: replyToId,
@@ -67,6 +68,9 @@ class _MockApi extends MockWnApi {
   bool isDm = false;
   List<String> groupMembers = [];
   String? welcomerPubkey;
+  List<List<ChatMessage>> olderMessagePages = [];
+  int _fetchPageIndex = 0;
+  int fetchOlderCallCount = 0;
 
   @override
   void reset() {
@@ -82,6 +86,9 @@ class _MockApi extends MockWnApi {
     isDm = false;
     groupMembers = [];
     welcomerPubkey = null;
+    olderMessagePages = [];
+    _fetchPageIndex = 0;
+    fetchOlderCallCount = 0;
   }
 
   void emitMessage(ChatMessage message) {
@@ -90,6 +97,21 @@ class _MockApi extends MockWnApi {
         update: MessageUpdate(trigger: UpdateTrigger.newMessage, message: message),
       ),
     );
+  }
+
+  @override
+  Future<List<ChatMessage>> crateApiMessagesFetchAggregatedMessagesForGroup({
+    required String pubkey,
+    required String groupId,
+    DateTime? before,
+    String? beforeMessageId,
+    int? limit,
+  }) async {
+    fetchOlderCallCount++;
+    if (_fetchPageIndex < olderMessagePages.length) {
+      return olderMessagePages[_fetchPageIndex++];
+    }
+    return [];
   }
 
   @override
@@ -391,6 +413,56 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.textContaining('Message new_msg'), findsOneWidget);
+      });
+    });
+
+    group('auto-pagination', () {
+      Future<void> pumpUntilPaginationComplete(WidgetTester tester) async {
+        for (var i = 0; i < 20; i++) {
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 10));
+        }
+        await tester.pumpAndSettle();
+      }
+
+      testWidgets('loads all older messages to reach the first message', (tester) async {
+        _api.initialMessages = [
+          _message('m3', createdAt: DateTime(2024, 1, 3)),
+          _message('m4', createdAt: DateTime(2024, 1, 4)),
+        ];
+        _api.olderMessagePages = [
+          [
+            _message('m1', content: 'First ever message', createdAt: DateTime(2024)),
+            _message('m2', createdAt: DateTime(2024, 1, 2)),
+          ],
+        ];
+        await pumpInviteScreen(tester);
+        await pumpUntilPaginationComplete(tester);
+
+        expect(_api.fetchOlderCallCount, greaterThanOrEqualTo(1));
+        expect(find.textContaining('First ever message'), findsOneWidget);
+      });
+
+      testWidgets('paginates through multiple pages', (tester) async {
+        _api.initialMessages = [
+          _message('m5', createdAt: DateTime(2024, 1, 5)),
+        ];
+        _api.olderMessagePages = [
+          [
+            _message('m3', createdAt: DateTime(2024, 1, 3)),
+            _message('m4', createdAt: DateTime(2024, 1, 4)),
+          ],
+          [
+            _message('m1', content: 'Very first', createdAt: DateTime(2024)),
+            _message('m2', createdAt: DateTime(2024, 1, 2)),
+          ],
+        ];
+        await pumpInviteScreen(tester);
+        await pumpUntilPaginationComplete(tester);
+
+        expect(_api.fetchOlderCallCount, greaterThanOrEqualTo(2));
+        expect(find.byType(WnMessageBubble), findsNWidgets(5));
+        expect(find.textContaining('Very first'), findsOneWidget);
       });
     });
 

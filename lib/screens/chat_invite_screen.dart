@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:logging/logging.dart';
 import 'package:whitenoise/hooks/use_active_chat.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart';
 import 'package:whitenoise/hooks/use_chat_profile.dart';
@@ -25,6 +26,8 @@ import 'package:whitenoise/widgets/wn_chat_system_message.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_chat_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
+
+final _logger = Logger('ChatInviteScreen');
 
 class ChatInviteScreen extends HookConsumerWidget {
   final String mlsGroupId;
@@ -254,6 +257,28 @@ class _InviteMessageList extends HookWidget {
   Widget build(BuildContext context) {
     final scrollController = useScrollController();
     final hasMoreBelow = useState(false);
+
+    useEffect(
+      () {
+        if (chatMessages.isLoading ||
+            chatMessages.isLoadingOlderMessages ||
+            !chatMessages.hasMoreMessages ||
+            chatMessages.messageCount == 0) {
+          return null;
+        }
+        _logger.info('auto-paginating to load oldest messages');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          unawaited(chatMessages.loadOlderMessages());
+        });
+        return null;
+      },
+      [
+        chatMessages.isLoading,
+        chatMessages.isLoadingOlderMessages,
+        chatMessages.hasMoreMessages,
+        chatMessages.messageCount,
+      ],
+    );
 
     useEffect(() {
       void updateHasMoreBelow() {
