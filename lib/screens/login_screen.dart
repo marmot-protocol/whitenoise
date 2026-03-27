@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart' show useState;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -7,6 +9,7 @@ import 'package:whitenoise/hooks/use_login_with_nsec.dart' show useLoginWithNsec
 import 'package:whitenoise/hooks/use_onboarding_carousel.dart' show onboardingCarouselSlideCount;
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
+import 'package:whitenoise/providers/offline_provider.dart' show offlineProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/src/rust/api/accounts.dart' show LoginResult, LoginStatus;
 import 'package:whitenoise/theme.dart';
@@ -86,6 +89,7 @@ class LoginScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
+    final isOffline = ref.watch(offlineProvider).value ?? false;
     final (
       :nsecInputController,
       :loginWithNsecState,
@@ -136,6 +140,7 @@ class LoginScreen extends HookConsumerWidget {
     final isKeyboardOpen = keyboardHeight > 0;
     final slateBottomPadding = ((keyboardHeight - bottomSafeArea) + (isKeyboardOpen ? 10.h : 0.0))
         .clamp(0.0, double.infinity);
+    final centerCarouselAboveSlate = isOffline && !isKeyboardOpen;
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -158,18 +163,27 @@ class LoginScreen extends HookConsumerWidget {
                       const carouselMaxHeight = 260.0;
                       final carouselIndicatorSpacing = 16.h;
                       final carouselIndicatorHeight = 8.h;
-                      final keyboardOpenBottomSpacing = 20.h;
-                      final carouselHeight = isKeyboardOpen
-                          ? (constraints.maxHeight -
-                                    carouselIndicatorSpacing -
-                                    carouselIndicatorHeight -
-                                    keyboardOpenBottomSpacing)
-                                .clamp(0.0, carouselMaxHeight.h)
-                          : carouselMaxHeight.h;
+                      final carouselBottomSpacing = centerCarouselAboveSlate
+                          ? 20.h
+                          : isKeyboardOpen
+                          ? 20.h
+                          : isAndroidSignerAvailable
+                          ? 157.h
+                          : 205.h;
+                      final reservedBelowCarousel =
+                          carouselIndicatorSpacing +
+                          carouselIndicatorHeight +
+                          carouselBottomSpacing;
+                      final carouselHeight = math.min(
+                        carouselMaxHeight.h,
+                        math.max(0.0, constraints.maxHeight - reservedBelowCarousel),
+                      );
                       return Stack(
                         children: [
                           Column(
-                            mainAxisAlignment: MainAxisAlignment.end,
+                            mainAxisAlignment: centerCarouselAboveSlate
+                                ? MainAxisAlignment.center
+                                : MainAxisAlignment.end,
                             children: [
                               WnOnboardingCarousel(
                                 key: const Key('login_onboarding_carousel'),
@@ -189,11 +203,7 @@ class LoginScreen extends HookConsumerWidget {
                               AnimatedContainer(
                                 duration: const Duration(milliseconds: 150),
                                 curve: Curves.easeOut,
-                                height: isKeyboardOpen
-                                    ? 20.h
-                                    : isAndroidSignerAvailable
-                                    ? 157.h
-                                    : 205.h,
+                                height: carouselBottomSpacing,
                               ),
                             ],
                           ),
@@ -212,18 +222,25 @@ class LoginScreen extends HookConsumerWidget {
                       title: context.l10n.loginTitle,
                       onNavigate: () => Routes.goBack(context),
                     ),
-                    systemNotice: loginWithAndroidSignerState.error != null
+                    systemNotice: isOffline
                         ? WnSystemNotice(
-                            key: ValueKey(loginWithAndroidSignerState.error),
-                            title: _signerErrorL10n(
-                              loginWithAndroidSignerState.error!,
-                              context.l10n,
-                            ),
-                            type: WnSystemNoticeType.error,
-                            variant: WnSystemNoticeVariant.dismissible,
-                            onDismiss: clearLoginWithAndroidSignerError,
+                            key: const Key('offline_notice'),
+                            title: context.l10n.waitingForInternet,
+                            type: WnSystemNoticeType.warning,
+                            variant: WnSystemNoticeVariant.expanded,
                           )
-                        : null,
+                        : (loginWithAndroidSignerState.error != null
+                              ? WnSystemNotice(
+                                  key: ValueKey(loginWithAndroidSignerState.error),
+                                  title: _signerErrorL10n(
+                                    loginWithAndroidSignerState.error!,
+                                    context.l10n,
+                                  ),
+                                  type: WnSystemNoticeType.error,
+                                  variant: WnSystemNoticeVariant.dismissible,
+                                  onDismiss: clearLoginWithAndroidSignerError,
+                                )
+                              : null),
                     child: Padding(
                       padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
                       child: Column(
@@ -253,18 +270,21 @@ class LoginScreen extends HookConsumerWidget {
                                   WnButton(
                                     key: const Key('login_button'),
                                     text: context.l10n.login,
-                                    onPressed: onSubmit,
+                                    onPressed: isOffline ? null : onSubmit,
                                     loading: loginWithNsecState.isLoading,
-                                    disabled: nsecEmpty || loginWithAndroidSignerState.isLoading,
+                                    disabled:
+                                        nsecEmpty ||
+                                        loginWithAndroidSignerState.isLoading ||
+                                        isOffline,
                                   ),
                                   if (isAndroidSignerAvailable)
                                     WnButton(
                                       key: const Key('android_signer_login_button'),
                                       text: context.l10n.loginWithAmber,
                                       type: WnButtonType.outline,
-                                      onPressed: onAndroidSignerSubmit,
+                                      onPressed: isOffline ? null : onAndroidSignerSubmit,
                                       loading: loginWithAndroidSignerState.isLoading,
-                                      disabled: loginWithNsecState.isLoading,
+                                      disabled: loginWithNsecState.isLoading || isOffline,
                                     ),
                                 ],
                               );
