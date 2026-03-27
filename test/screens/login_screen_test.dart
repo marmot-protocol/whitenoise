@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart' show ScreenUtilInit;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/home_screen.dart';
@@ -714,6 +715,44 @@ void main() {
       testWidgets('does not show WnOverlay when keyboard is closed', (tester) async {
         await pumpLoginScreen(tester);
         expect(find.byType(WnOverlay), findsNothing);
+      });
+    });
+
+    group('when offline', () {
+      Future<void> pumpLoginScreenOffline(WidgetTester tester) async {
+        mockAuth = _MockAuthNotifier();
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => mockAuth),
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+        Routes.pushToLogin(tester.element(find.byType(Scaffold)));
+        await tester.pumpAndSettle();
+      }
+
+      testWidgets('displays offline notice', (tester) async {
+        await pumpLoginScreenOffline(tester);
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+        expect(find.text('Waiting for internet connection'), findsOneWidget);
+      });
+
+      testWidgets('login button is disabled even when nsec is entered', (tester) async {
+        await pumpLoginScreenOffline(tester);
+        await tester.enterText(find.byType(TextField), 'nsec1test');
+        await tester.pump();
+        final loginButton = tester.widget<WnButton>(find.byKey(const Key('login_button')));
+        expect(loginButton.disabled, isTrue);
+      });
+
+      testWidgets('login button onPressed is null when offline', (tester) async {
+        await pumpLoginScreenOffline(tester);
+        await tester.enterText(find.byType(TextField), 'nsec1test');
+        await tester.pump();
+        await tester.tap(find.byKey(const Key('login_button')));
+        await tester.pump();
+        expect(mockAuth.loginCalled, isFalse);
       });
     });
   });

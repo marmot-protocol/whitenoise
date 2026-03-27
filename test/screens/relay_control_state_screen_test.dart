@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/screens/relay_control_state_screen.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
@@ -96,5 +97,17 @@ void main() {
     await tester.pump();
 
     expect(find.byType(WnSystemNotice), findsOneWidget);
+  });
+
+  group('when offline', () {
+    testWidgets('offlineProvider returns true when offline', (tester) async {
+      await mountWidget(
+        const RelayControlStateScreen(),
+        tester,
+        overrides: [offlineProvider.overrideWith((ref) => Stream.value(true))],
+      );
+      await tester.pump();
+      expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+    });
   });
 }

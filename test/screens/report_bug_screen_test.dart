@@ -6,9 +6,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:whitenoise/providers/app_version_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/report_bug_screen.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/wn_button.dart';
+import '../mocks/mock_wn_api.dart';
+import '../test_helpers.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
+import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/screens/report_bug_screen.dart';
+import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/wn_button.dart';
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
@@ -339,6 +348,21 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(mockApi.lastBugReportStepsToReproduce, '1. Open app\n2. Tap chat\n3. Crash');
+    });
+
+    group('when offline', () {
+      testWidgets('offlineProvider returns true when offline', (tester) async {
+        await mountTestApp(
+          tester,
+          overrides: [
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+        Routes.pushToReportBug(tester.element(find.byType(Scaffold)));
+        await tester.pumpAndSettle();
+        await tester.pump();
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+      });
     });
   });
 }
