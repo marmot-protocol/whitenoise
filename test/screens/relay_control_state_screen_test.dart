@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/screens/relay_control_state_screen.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 import '../mocks/mock_clipboard.dart' show clearClipboardMock, mockClipboard;
 import '../mocks/mock_wn_api.dart';
@@ -46,7 +49,7 @@ void main() {
     await mountWidget(const RelayControlStateScreen(), tester);
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('relay_control_state_error')), findsOneWidget);
+    expect(find.byType(WnSystemNotice), findsOneWidget);
     expect(find.textContaining('Failed to load relay control state'), findsOneWidget);
   });
 
@@ -56,7 +59,7 @@ void main() {
     await mountWidget(const RelayControlStateScreen(), tester);
     await tester.pumpAndSettle();
 
-    final copyButton = tester.widget<TextButton>(
+    final copyButton = tester.widget<WnButton>(
       find.byKey(const Key('relay_control_state_copy_button')),
     );
     expect(copyButton.onPressed, isNull);
@@ -82,7 +85,7 @@ void main() {
     expect(getClipboard(), '{"relay":"active"}');
   });
 
-  testWidgets('copy button shows snackbar after copying', (tester) async {
+  testWidgets('copy button shows system notice after copying', (tester) async {
     mockClipboard();
     addTearDown(clearClipboardMock);
     api.relayControlStateResult = '{"relay":"active"}';
@@ -93,6 +96,28 @@ void main() {
     await tester.tap(find.byKey(const Key('relay_control_state_copy_button')));
     await tester.pump();
 
-    expect(find.byType(SnackBar), findsOneWidget);
+    expect(find.byType(WnSystemNotice), findsOneWidget);
+  });
+
+  group('when offline', () {
+    testWidgets('offlineProvider returns true when offline', (tester) async {
+      await mountWidget(
+        const RelayControlStateScreen(),
+        tester,
+        overrides: [offlineProvider.overrideWith((ref) => Stream.value(true))],
+      );
+      await tester.pump();
+      expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+    });
+
+    testWidgets('displays offline notice text', (tester) async {
+      await mountWidget(
+        const RelayControlStateScreen(),
+        tester,
+        overrides: [offlineProvider.overrideWith((ref) => Stream.value(true))],
+      );
+      await tester.pump();
+      expect(find.text('Waiting for internet connection'), findsOneWidget);
+    });
   });
 }
