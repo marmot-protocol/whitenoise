@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/add_profile_screen.dart';
 import 'package:whitenoise/screens/switch_profile_screen.dart';
@@ -171,6 +172,36 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(WnProfileSwitcherItem), findsNWidgets(2));
+    });
+
+    group('when offline', () {
+      testWidgets('offline notice appears when offline', (tester) async {
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            secureStorageProvider.overrideWithValue(MockSecureStorage()),
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+        Routes.pushToSwitchProfile(tester.element(find.byType(Scaffold)));
+        await tester.pump();
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+      });
+
+      testWidgets('displays offline notice text', (tester) async {
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            secureStorageProvider.overrideWithValue(MockSecureStorage()),
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+        Routes.pushToSwitchProfile(tester.element(find.byType(Scaffold)));
+        await tester.pump();
+        expect(find.text('Waiting for internet connection'), findsOneWidget);
+      });
     });
   });
 }
