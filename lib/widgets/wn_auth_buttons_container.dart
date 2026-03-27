@@ -10,10 +10,12 @@ class WnAuthButtonsContainer extends StatelessWidget {
     super.key,
     this.onLogin,
     this.onSignup,
+    this.disabled = false,
   });
 
   final VoidCallback? onLogin;
   final VoidCallback? onSignup;
+  final bool disabled;
 
   @override
   Widget build(BuildContext context) {
@@ -23,12 +25,14 @@ class WnAuthButtonsContainer extends StatelessWidget {
         WnButton(
           text: context.l10n.login,
           type: WnButtonType.outline,
-          onPressed: onLogin ?? () => Routes.pushToLogin(context),
+          onPressed: disabled ? null : (onLogin ?? () => Routes.pushToLogin(context)),
+          disabled: disabled,
         ),
         Gap(12.h),
         WnButton(
           text: context.l10n.signUp,
-          onPressed: onSignup ?? () => Routes.pushToSignup(context),
+          onPressed: disabled ? null : (onSignup ?? () => Routes.pushToSignup(context)),
+          disabled: disabled,
         ),
       ],
     );
