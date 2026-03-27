@@ -5,9 +5,11 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_key_packages.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart' show FlutterEvent;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/offline_system_notice.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_key_package_card.dart';
 import 'package:whitenoise/widgets/wn_scroll_edge_effect.dart';
@@ -23,6 +25,7 @@ class KeyPackageManagementScreen extends HookConsumerWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final pubkey = ref.watch(accountPubkeyProvider);
+    final isOffline = ref.watch(offlineProvider).value ?? false;
     final (:state, :fetch, :publish, :delete, :deleteAll) = useKeyPackages(pubkey);
 
     final noticeMessage = useState<String?>(null);
@@ -68,6 +71,7 @@ class KeyPackageManagementScreen extends HookConsumerWidget {
     Future<void> handleDelete(String id) => handleAction(() => delete(id));
 
     useEffect(() {
+      if (isOffline) return;
       fetch().then((result) {
         if (!context.mounted) return;
         if (!result.success) {
@@ -75,7 +79,7 @@ class KeyPackageManagementScreen extends HookConsumerWidget {
         }
       });
       return null;
-    }, [pubkey]);
+    }, [pubkey, isOffline]);
 
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
@@ -87,14 +91,16 @@ class KeyPackageManagementScreen extends HookConsumerWidget {
               title: context.l10n.keyPackageManagementTitle,
               onNavigate: () => Routes.goBack(context),
             ),
-            systemNotice: noticeMessage.value != null
-                ? WnSystemNotice(
-                    key: ValueKey(noticeMessage.value),
-                    title: noticeMessage.value!,
-                    type: noticeType.value,
-                    onDismiss: dismissNotice,
-                  )
-                : null,
+            systemNotice: isOffline
+                ? const OfflineSystemNotice()
+                : (noticeMessage.value != null
+                      ? WnSystemNotice(
+                          key: ValueKey(noticeMessage.value),
+                          title: noticeMessage.value!,
+                          type: noticeType.value,
+                          onDismiss: dismissNotice,
+                        )
+                      : null),
             child: Padding(
               padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
               child: Column(
@@ -103,6 +109,7 @@ class KeyPackageManagementScreen extends HookConsumerWidget {
                   SizedBox(height: 16.h),
                   _KeyPackageActionButtons(
                     isLoading: state.isLoading,
+                    isOffline: isOffline,
                     activeAction: state.activeAction,
                     onPublish: () => handleAction(publish),
                     onFetch: () => handleAction(fetch),
@@ -120,7 +127,7 @@ class KeyPackageManagementScreen extends HookConsumerWidget {
                     child: _KeyPackageList(
                       packages: state.packages,
                       onDelete: handleDelete,
-                      disabled: state.isLoading,
+                      disabled: state.isLoading || isOffline,
                       deletingId: state.deletingId,
                     ),
                   ),
@@ -137,6 +144,7 @@ class KeyPackageManagementScreen extends HookConsumerWidget {
 class _KeyPackageActionButtons extends StatelessWidget {
   const _KeyPackageActionButtons({
     required this.isLoading,
+    required this.isOffline,
     required this.activeAction,
     required this.onPublish,
     required this.onFetch,
@@ -144,6 +152,7 @@ class _KeyPackageActionButtons extends StatelessWidget {
   });
 
   final bool isLoading;
+  final bool isOffline;
   final KeyPackageAction? activeAction;
   final VoidCallback onPublish;
   final VoidCallback onFetch;
@@ -158,7 +167,7 @@ class _KeyPackageActionButtons extends StatelessWidget {
         WnButton(
           text: context.l10n.refreshKeyPackages,
           onPressed: onFetch,
-          disabled: isLoading,
+          disabled: isLoading || isOffline,
           loading: activeAction == KeyPackageAction.fetch,
           type: WnButtonType.outline,
           size: WnButtonSize.medium,
@@ -166,14 +175,14 @@ class _KeyPackageActionButtons extends StatelessWidget {
         WnButton(
           text: context.l10n.publishNewKeyPackage,
           onPressed: onPublish,
-          disabled: isLoading,
+          disabled: isLoading || isOffline,
           loading: activeAction == KeyPackageAction.publish,
           size: WnButtonSize.medium,
         ),
         WnButton(
           text: context.l10n.deleteAllKeyPackages,
           onPressed: onDeleteAll,
-          disabled: isLoading,
+          disabled: isLoading || isOffline,
           loading: activeAction == KeyPackageAction.deleteAll,
           type: WnButtonType.destructive,
           size: WnButtonSize.medium,

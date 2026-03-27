@@ -5,10 +5,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/constants/nostr_event_kinds.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_scroll_edge_effect.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 
@@ -26,6 +28,9 @@ class _MockApi extends MockWnApi {
   bool shouldThrowOnRefreshAfterDelete = false;
   Completer<List<FlutterEvent>>? fetchCompleter;
   Completer<bool>? deleteKeyPackageCompleter;
+  int keyPackagesFetchCallCount = 0;
+  int keyPackagesPublishCallCount = 0;
+  int keyPackagesDeleteAllCallCount = 0;
 
   @override
   Future<FlutterMetadata> crateApiUsersUserMetadata({
@@ -37,6 +42,7 @@ class _MockApi extends MockWnApi {
   Future<List<FlutterEvent>> crateApiAccountsAccountKeyPackages({
     required String accountPubkey,
   }) async {
+    keyPackagesFetchCallCount++;
     if (fetchCompleter != null) {
       return fetchCompleter!.future;
     }
@@ -50,6 +56,7 @@ class _MockApi extends MockWnApi {
   Future<void> crateApiAccountsPublishAccountKeyPackage({
     required String accountPubkey,
   }) async {
+    keyPackagesPublishCallCount++;
     if (shouldThrowOnPublish) {
       throw Exception('publish error');
     }
@@ -74,6 +81,7 @@ class _MockApi extends MockWnApi {
   Future<BigInt> crateApiAccountsDeleteAccountKeyPackages({
     required String accountPubkey,
   }) async {
+    keyPackagesDeleteAllCallCount++;
     if (shouldThrowOnDeleteAll) {
       throw Exception('delete all error');
     }
@@ -122,6 +130,9 @@ void main() {
     mockApi.shouldThrowOnRefreshAfterDelete = false;
     mockApi.fetchCompleter = null;
     mockApi.deleteKeyPackageCompleter = null;
+    mockApi.keyPackagesFetchCallCount = 0;
+    mockApi.keyPackagesPublishCallCount = 0;
+    mockApi.keyPackagesDeleteAllCallCount = 0;
   });
 
   Future<void> pumpScreen(WidgetTester tester) async {
@@ -475,6 +486,74 @@ void main() {
       expect(
         find.text('Failed to delete key package. Please try again.'),
         findsOneWidget,
+      );
+    });
+
+    group('when offline', () {
+      testWidgets('does not fetch key packages on initial offline mount', (tester) async {
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            secureStorageProvider.overrideWithValue(MockSecureStorage()),
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+        await tester.pumpAndSettle();
+        Routes.pushToKeyPackageManagement(tester.element(find.byType(Scaffold)));
+        await tester.pumpAndSettle();
+
+        expect(mockApi.keyPackagesFetchCallCount, 0);
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+        expect(find.text('No key packages found'), findsOneWidget);
+      });
+
+      testWidgets(
+        'disables screen actions and key package delete after transitioning to offline',
+        (tester) async {
+          mockApi.keyPackages = [
+            FlutterEvent(
+              id: 'pkg1',
+              pubkey: testPubkeyA,
+              createdAt: DateTime.now(),
+              kind: NostrEventKinds.mlsKeyPackage,
+              tags: const [],
+              content: '',
+            ),
+          ];
+          final offlineStream = StreamController<bool>();
+          addTearDown(offlineStream.close);
+
+          await mountTestApp(
+            tester,
+            overrides: [
+              authProvider.overrideWith(() => _MockAuthNotifier()),
+              secureStorageProvider.overrideWithValue(MockSecureStorage()),
+              offlineProvider.overrideWith((ref) => offlineStream.stream),
+            ],
+          );
+          offlineStream.add(false);
+          await tester.pumpAndSettle();
+          Routes.pushToKeyPackageManagement(tester.element(find.byType(Scaffold)));
+          await tester.pumpAndSettle();
+
+          offlineStream.add(true);
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+
+          WnButton findWnButtonByLabel(String label) => tester.widget<WnButton>(
+            find.ancestor(of: find.text(label), matching: find.byType(WnButton)),
+          );
+
+          expect(findWnButtonByLabel('Refresh Key Packages').disabled, isTrue);
+          expect(findWnButtonByLabel('Publish New Key Package').disabled, isTrue);
+          expect(findWnButtonByLabel('Delete All Key Packages').disabled, isTrue);
+          expect(
+            tester.widget<WnButton>(find.byKey(const Key('delete_key_package_pkg1'))).disabled,
+            isTrue,
+          );
+        },
       );
     });
   });
