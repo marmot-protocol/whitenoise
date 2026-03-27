@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/constants/nostr_event_kinds.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
@@ -26,6 +27,7 @@ class _MockApi extends MockWnApi {
   bool shouldThrowOnRefreshAfterDelete = false;
   Completer<List<FlutterEvent>>? fetchCompleter;
   Completer<bool>? deleteKeyPackageCompleter;
+  int keyPackagesFetchCallCount = 0;
 
   @override
   Future<FlutterMetadata> crateApiUsersUserMetadata({
@@ -37,6 +39,7 @@ class _MockApi extends MockWnApi {
   Future<List<FlutterEvent>> crateApiAccountsAccountKeyPackages({
     required String accountPubkey,
   }) async {
+    keyPackagesFetchCallCount++;
     if (fetchCompleter != null) {
       return fetchCompleter!.future;
     }
@@ -122,6 +125,7 @@ void main() {
     mockApi.shouldThrowOnRefreshAfterDelete = false;
     mockApi.fetchCompleter = null;
     mockApi.deleteKeyPackageCompleter = null;
+    mockApi.keyPackagesFetchCallCount = 0;
   });
 
   Future<void> pumpScreen(WidgetTester tester) async {
@@ -476,6 +480,22 @@ void main() {
         find.text('Failed to delete key package. Please try again.'),
         findsOneWidget,
       );
+    });
+
+    group('when offline', () {
+      testWidgets('offline notice appears when offline', (tester) async {
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            secureStorageProvider.overrideWithValue(MockSecureStorage()),
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+        Routes.pushToKeyPackageManagement(tester.element(find.byType(Scaffold)));
+        await tester.pump();
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+      });
     });
   });
 }
