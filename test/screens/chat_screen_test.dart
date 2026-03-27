@@ -1525,7 +1525,7 @@ void main() {
         expect(find.byKey(const Key('scroll_down_button')), findsOneWidget);
       });
 
-      testWidgets('shown when scrolled up even when all messages are read', (tester) async {
+      testWidgets('hidden when scrolled up with all messages already read', (tester) async {
         await pumpChatScreen(tester);
         await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
         await tester.pumpAndSettle();
@@ -1534,7 +1534,7 @@ void main() {
         position.jumpTo(position.maxScrollExtent);
         await tester.pumpAndSettle();
 
-        expect(find.byKey(const Key('scroll_down_button')), findsOneWidget);
+        expect(find.byKey(const Key('scroll_down_button')), findsNothing);
       });
 
       testWidgets('tapping scrolls to bottom', (tester) async {

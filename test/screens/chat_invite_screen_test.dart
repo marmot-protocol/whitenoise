@@ -545,21 +545,13 @@ void main() {
         expect(find.textContaining('Failed to accept'), findsOneWidget);
       });
 
-      testWidgets('marks latest message as read', (tester) async {
+      testWidgets('does not mark messages as read synchronously on accept', (tester) async {
         _api.initialMessages = [_message('m1'), _message('m2')];
         await pumpInviteScreen(tester);
         _api.markedAsReadMessages.clear();
         await tester.tap(find.text('Accept'));
-        await tester.pumpAndSettle();
-
-        expect(_api.markedAsReadMessages, contains('m2'));
-      });
-
-      testWidgets('does not mark as read when no messages', (tester) async {
-        await pumpInviteScreen(tester);
-        _api.markedAsReadMessages.clear();
-        await tester.tap(find.text('Accept'));
-        await tester.pumpAndSettle();
+        // Pump one frame only — before async effects in the navigated screen settle
+        await tester.pump();
 
         expect(_api.markedAsReadMessages, isEmpty);
       });

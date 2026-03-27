@@ -92,14 +92,6 @@ class ChatInviteScreen extends HookConsumerWidget {
           accountPubkey: pubkey,
           mlsGroupId: mlsGroupId,
         );
-        if (chatMessages.latestMessageId != null) {
-          account_groups_api
-              .markMessageRead(
-                accountPubkey: pubkey,
-                messageId: chatMessages.latestMessageId!,
-              )
-              .ignore();
-        }
         if (context.mounted) {
           Routes.goToChat(context, mlsGroupId);
         }

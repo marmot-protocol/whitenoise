@@ -36,7 +36,7 @@ ChatScrollResult useChatScroll({
   );
 
   final isAtBottom = useState(true);
-  final isScrollDownButtonVisible = useState(false);
+  final hasUnseenMessages = useState(false);
   final isInitialPositionReady = useState(false);
   final prevLatestMessageId = useRef<String?>(null);
   final shouldStayAtBottom = useRef(false);
@@ -121,9 +121,8 @@ ChatScrollResult useChatScroll({
         isAtBottom.value = atBottom;
       }
 
-      final shouldShowScrollDown = !atBottom;
-      if (isScrollDownButtonVisible.value != shouldShowScrollDown) {
-        isScrollDownButtonVisible.value = shouldShowScrollDown;
+      if (atBottom && hasUnseenMessages.value) {
+        hasUnseenMessages.value = false;
       }
       hasUserScrolled.value = true;
 
@@ -142,12 +141,6 @@ ChatScrollResult useChatScroll({
     }
 
     scrollController.addListener(onScrollUpdate);
-
-    final initialShouldShow =
-        scrollController.hasClients && scrollController.position.pixels > _bottomThreshold;
-    if (isScrollDownButtonVisible.value != initialShouldShow) {
-      isScrollDownButtonVisible.value = initialShouldShow;
-    }
 
     return () {
       scrollController.removeListener(onScrollUpdate);
@@ -189,6 +182,18 @@ ChatScrollResult useChatScroll({
   final isLatestMessageOwn = latestMessagePubkey == accountPubkey;
 
   useEffect(() {
+    if (!isInitialPositionReady.value) return null;
+    if (latestMessageId == null) return null;
+
+    final atBottom =
+        !scrollController.hasClients || scrollController.position.pixels <= _bottomThreshold;
+    if (atBottom) {
+      markMessageAsRead(latestMessageId);
+    }
+    return null;
+  }, [isInitialPositionReady.value]);
+
+  useEffect(() {
     if (latestMessageId != null && latestMessageId != prevLatestMessageId.value) {
       final isInitialLoad = prevLatestMessageId.value == null;
 
@@ -211,6 +216,8 @@ ChatScrollResult useChatScroll({
         }
       } else if (isAtBottom.value || isLatestMessageOwn) {
         autoScrollToBottom();
+      } else {
+        hasUnseenMessages.value = true;
       }
 
       prevLatestMessageId.value = latestMessageId;
@@ -220,7 +227,7 @@ ChatScrollResult useChatScroll({
 
   return (
     isInitialPositionReady: isInitialPositionReady.value,
-    isScrollDownButtonVisible: isScrollDownButtonVisible.value,
+    isScrollDownButtonVisible: hasUnseenMessages.value,
     scrollToBottom: scrollToBottom,
   );
 }

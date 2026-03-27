@@ -398,7 +398,7 @@ void main() {
         expect(lastResult?.isScrollDownButtonVisible, false);
       });
 
-      testWidgets('is true when scrolled up, regardless of unread state', (tester) async {
+      testWidgets('is false when scrolled up through already-read messages', (tester) async {
         _api.lastReadMessageId = 'm50';
         ChatScrollResult? lastResult;
         await pumpScroll(
@@ -412,13 +412,13 @@ void main() {
         scrollController.jumpTo(500);
         await tester.pumpAndSettle();
 
-        expect(lastResult?.isScrollDownButtonVisible, true);
+        expect(lastResult?.isScrollDownButtonVisible, false);
       });
 
-      testWidgets('initialises to true when controller already scrolled up on first render', (
+      testWidgets('remains false on initial render even when controller is scrolled up', (
         tester,
       ) async {
-        // Set last read to an old message so firstUnreadIndex is non-null
+        // Set last read to an old message so firstUnreadIndex is non-null (will scroll to unread)
         _api.lastReadMessageId = 'm1';
         ChatScrollResult? lastResult;
 
@@ -437,7 +437,8 @@ void main() {
         scrollController.jumpTo(500);
         await tester.pumpAndSettle();
 
-        expect(lastResult?.isScrollDownButtonVisible, true);
+        // Button only appears when a new unseen message arrives, not just on scroll position
+        expect(lastResult?.isScrollDownButtonVisible, false);
       });
 
       testWidgets('is false again after scrolling back to bottom', (tester) async {
