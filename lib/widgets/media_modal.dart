@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:whitenoise/hooks/use_media_download.dart';
+import 'package:whitenoise/hooks/use_save_to_gallery.dart';
+import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
@@ -10,8 +14,10 @@ import 'package:whitenoise/widgets/chat_media_thumbnail.dart';
 import 'package:whitenoise/widgets/media_image.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_icon_button.dart';
 import 'package:whitenoise/widgets/wn_overlay.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 class MediaModal extends HookWidget {
   final List<MediaFile> mediaFiles;
@@ -68,11 +74,26 @@ class MediaModal extends HookWidget {
 
     final showOverlays = !isFullscreen.value && !isZoomed.value;
 
+    final (:noticeMessage, :noticeType, :showSuccessNotice, :showErrorNotice, :dismissNotice) =
+        useSystemNotice();
+
     return Scaffold(
       backgroundColor: Colors.transparent,
       body: Stack(
         children: [
           const WnOverlay(variant: WnOverlayVariant.light),
+          if (noticeMessage != null)
+            SafeArea(
+              child: Align(
+                alignment: Alignment.topCenter,
+                child: WnSystemNotice(
+                  key: ValueKey(noticeMessage),
+                  title: noticeMessage,
+                  type: noticeType,
+                  onDismiss: dismissNotice,
+                ),
+              ),
+            ),
           SafeArea(
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 8.h),
@@ -116,6 +137,8 @@ class MediaModal extends HookWidget {
                         curve: Curves.easeInOut,
                       );
                     },
+                    onSaveSuccess: () => showSuccessNotice(context.l10n.saveToGallerySuccess),
+                    onSaveError: (message) => showErrorNotice(message),
                   ),
                 ),
               ),
@@ -127,7 +150,17 @@ class MediaModal extends HookWidget {
   }
 }
 
-class _MediaContent extends StatelessWidget {
+double? _parseAspectRatio(String? dimensions) {
+  if (dimensions == null) return null;
+  final parts = dimensions.split('x');
+  if (parts.length != 2) return null;
+  final w = double.tryParse(parts[0]);
+  final h = double.tryParse(parts[1]);
+  if (w == null || h == null || w <= 0 || h <= 0) return null;
+  return w / h;
+}
+
+class _MediaContent extends HookWidget {
   final List<MediaFile> mediaFiles;
   final PageController pageController;
   final bool isZoomed;
@@ -137,6 +170,8 @@ class _MediaContent extends StatelessWidget {
   final ValueChanged<bool> onZoomChanged;
   final ValueChanged<int> onPageChanged;
   final ValueChanged<int> onThumbnailTap;
+  final VoidCallback onSaveSuccess;
+  final ValueChanged<String> onSaveError;
 
   const _MediaContent({
     required this.mediaFiles,
@@ -148,10 +183,34 @@ class _MediaContent extends StatelessWidget {
     required this.onZoomChanged,
     required this.onPageChanged,
     required this.onThumbnailTap,
+    required this.onSaveSuccess,
+    required this.onSaveError,
   });
 
   @override
   Widget build(BuildContext context) {
+    final mediaDownload = useMediaDownload(mediaFile: mediaFiles[currentIndex]);
+    final localPath = mediaDownload.status == MediaDownloadStatus.success
+        ? mediaDownload.localPath
+        : null;
+    final saveToGallery = useSaveToGallery(localPath: localPath ?? '', context: context);
+
+    final prevStatus = useRef<SaveToGalleryStatus?>(null);
+    useEffect(() {
+      final status = localPath != null ? saveToGallery.status : null;
+      if (status == prevStatus.value) return null;
+      prevStatus.value = status;
+      if (status == SaveToGalleryStatus.success) {
+        SchedulerBinding.instance.addPostFrameCallback((_) => onSaveSuccess());
+      } else if (status == SaveToGalleryStatus.error) {
+        final message = saveToGallery.errorMessage;
+        if (message != null) {
+          SchedulerBinding.instance.addPostFrameCallback((_) => onSaveError(message));
+        }
+      }
+      return null;
+    }, [localPath, saveToGallery.status]);
+
     return GestureDetector(
       key: const Key('media_content_tap_area'),
       onTap: onTap,
@@ -166,10 +225,56 @@ class _MediaContent extends StatelessWidget {
               physics: isZoomed ? const NeverScrollableScrollPhysics() : const PageScrollPhysics(),
               onPageChanged: onPageChanged,
               itemBuilder: (_, index) {
-                return MediaImage(
-                  key: Key('media_image_$index'),
-                  mediaFile: mediaFiles[index],
-                  onZoomChanged: onZoomChanged,
+                final mediaFile = mediaFiles[index];
+                final aspectRatio = _parseAspectRatio(mediaFile.fileMetadata?.dimensions);
+
+                final downloadButton = GestureDetector(
+                  onTap: () {},
+                  behavior: HitTestBehavior.opaque,
+                  child: WnIconButton(
+                    icon: WnIcons.download,
+                    onPressed: localPath != null ? saveToGallery.save : null,
+                    type: WnIconButtonType.outline,
+                  ),
+                );
+
+                return Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    Positioned.fill(
+                      child: MediaImage(
+                        key: Key('media_image_$index'),
+                        mediaFile: mediaFile,
+                        onZoomChanged: onZoomChanged,
+                      ),
+                    ),
+                    if (index == currentIndex && showOverlays)
+                      if (aspectRatio != null)
+                        Positioned.fill(
+                          child: Center(
+                            child: AspectRatio(
+                              aspectRatio: aspectRatio,
+                              child: Stack(
+                                children: [
+                                  Positioned(
+                                    key: const Key('media_modal_download_button'),
+                                    top: 12.h,
+                                    right: 12.w,
+                                    child: downloadButton,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        )
+                      else
+                        Positioned(
+                          key: const Key('media_modal_download_button'),
+                          top: 12.h,
+                          right: 12.w,
+                          child: downloadButton,
+                        ),
+                  ],
                 );
               },
             ),
