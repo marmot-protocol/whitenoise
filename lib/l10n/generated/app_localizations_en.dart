@@ -202,16 +202,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editProfileTitle => 'Edit profile';
 
   @override
-  String get profileName => 'Profile name';
+  String get profileName => 'Name';
 
   @override
-  String get nostrAddress => 'Nostr address';
+  String get nostrAddress => 'Nostr address (nip-05)';
 
   @override
   String get nostrAddressPlaceholder => 'example@whitenoise.chat';
 
   @override
-  String get aboutYou => 'About you';
+  String get aboutYou => 'About';
 
   @override
   String get profileIsPublic => 'Profile is public';
@@ -301,7 +301,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get copiedToClipboardThankYou => 'Copied to clipboard. Thank you!';
 
   @override
-  String get shareProfileTitle => 'Share profile';
+  String get shareProfileTitle => 'Share & connect';
 
   @override
   String get scanToConnect => 'Scan to connect';

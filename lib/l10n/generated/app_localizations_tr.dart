@@ -301,7 +301,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get copiedToClipboardThankYou => 'Panoya kopyalandı. Teşekkürler!';
 
   @override
-  String get shareProfileTitle => 'Profili paylaş';
+  String get shareProfileTitle => 'Paylaş & bağlan';
 
   @override
   String get scanToConnect => 'Bağlanmak için tarayın';

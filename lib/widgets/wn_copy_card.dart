@@ -37,7 +37,7 @@ class WnCopyCard extends StatelessWidget {
   TextStyle _textStyle(SemanticColors colors) => TextStyle(
     fontWeight: FontWeight.w500,
     fontSize: 14.sp,
-    height: 20 / 14,
+    height: 16 / 14,
     letterSpacing: 0.4.sp,
     color: colors.backgroundContentSecondary,
   );

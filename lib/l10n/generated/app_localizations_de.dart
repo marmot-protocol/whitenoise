@@ -304,7 +304,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get copiedToClipboardThankYou => 'In Zwischenablage kopiert. Danke!';
 
   @override
-  String get shareProfileTitle => 'Profil teilen';
+  String get shareProfileTitle => 'Teilen & verbinden';
 
   @override
   String get scanToConnect => 'Zum Verbinden scannen';

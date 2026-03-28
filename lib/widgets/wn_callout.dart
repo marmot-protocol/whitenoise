@@ -21,6 +21,7 @@ class WnCallout extends StatelessWidget {
     this.onDismiss,
     this.onToggle,
     this.isExpanded = false,
+    this.compact = false,
   });
 
   final String title;
@@ -29,6 +30,7 @@ class WnCallout extends StatelessWidget {
   final VoidCallback? onDismiss;
   final VoidCallback? onToggle;
   final bool isExpanded;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -37,8 +39,8 @@ class WnCallout extends StatelessWidget {
     final colorScheme = _getColorScheme(colors);
 
     return Container(
-      constraints: BoxConstraints(minHeight: 56.h),
-      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 10.h),
+      constraints: BoxConstraints(minHeight: compact ? 44.h : 56.h),
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: compact ? 4.h : 10.h),
       decoration: BoxDecoration(
         color: colorScheme.backgroundColor,
         borderRadius: BorderRadius.circular(8.r),
@@ -88,7 +90,12 @@ class WnCallout extends StatelessWidget {
           ),
           if (description != null) ...[
             Padding(
-              padding: EdgeInsets.only(left: 8.w, right: 8.w, top: 4.h, bottom: 13.h),
+              padding: EdgeInsets.only(
+                left: 8.w,
+                right: 8.w,
+                top: 4.h,
+                bottom: compact ? 4.h : 13.h,
+              ),
               child: Text(
                 description!,
                 style: typography.medium14.copyWith(color: colorScheme.descriptionColor),

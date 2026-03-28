@@ -302,7 +302,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get copiedToClipboardThankYou => 'Скопировано в буфер обмена. Спасибо!';
 
   @override
-  String get shareProfileTitle => 'Поделиться профилем';
+  String get shareProfileTitle => 'Поделиться & подключиться';
 
   @override
   String get scanToConnect => 'Сканируйте для подключения';
