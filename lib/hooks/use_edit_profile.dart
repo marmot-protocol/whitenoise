@@ -83,7 +83,6 @@ class EditProfileState {
   Future<void> Function() loadProfile,
   void Function(String imagePath) onImageSelected,
   Future<bool> Function() updateProfileData,
-  void Function() discardChanges,
 })
 useEditProfile(String pubkey) {
   final state = useState(const EditProfileState());
@@ -216,23 +215,6 @@ useEditProfile(String pubkey) {
     }
   }
 
-  void discardChanges() {
-    if (state.value.currentMetadata == null) return;
-    final displayName = presentName(state.value.currentMetadata) ?? '';
-    final about = state.value.currentMetadata?.about ?? '';
-    final nip05 = state.value.currentMetadata?.nip05 ?? '';
-    displayNameController.text = displayName;
-    aboutController.text = about;
-    nip05Controller.text = nip05;
-    state.value = state.value.copyWith(
-      displayName: displayName,
-      about: about,
-      nip05: nip05,
-      clearError: true,
-      clearSelectedImagePath: true,
-    );
-  }
-
   return (
     state: state.value,
     displayNameController: displayNameController,
@@ -241,6 +223,5 @@ useEditProfile(String pubkey) {
     loadProfile: loadProfile,
     onImageSelected: onImageSelected,
     updateProfileData: updateProfileData,
-    discardChanges: discardChanges,
   );
 }

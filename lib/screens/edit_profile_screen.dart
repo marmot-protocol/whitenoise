@@ -38,7 +38,6 @@ class EditProfileScreen extends HookConsumerWidget {
       :loadProfile,
       :onImageSelected,
       :updateProfileData,
-      discardChanges: _,
     ) = useEditProfile(
       pubkey,
     );
