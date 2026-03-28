@@ -36,11 +36,13 @@ class NetworkRelaysState {
   final Map<RelayCategory, RelayListState> categoryStates;
   final bool isAddingRelay;
   final bool isRemovingRelay;
+  final bool isRestoringDefaults;
 
   const NetworkRelaysState({
     this.categoryStates = const {},
     this.isAddingRelay = false,
     this.isRemovingRelay = false,
+    this.isRestoringDefaults = false,
   });
 
   RelayListState get normalRelays => categoryStates[RelayCategory.normal] ?? const RelayListState();
@@ -52,11 +54,13 @@ class NetworkRelaysState {
     Map<RelayCategory, RelayListState>? categoryStates,
     bool? isAddingRelay,
     bool? isRemovingRelay,
+    bool? isRestoringDefaults,
   }) {
     return NetworkRelaysState(
       categoryStates: categoryStates ?? this.categoryStates,
       isAddingRelay: isAddingRelay ?? this.isAddingRelay,
       isRemovingRelay: isRemovingRelay ?? this.isRemovingRelay,
+      isRestoringDefaults: isRestoringDefaults ?? this.isRestoringDefaults,
     );
   }
 
@@ -76,6 +80,7 @@ class NetworkRelaysState {
   Future<void> Function() fetchAll,
   Future<void> Function(String url, RelayCategory category) addRelay,
   Future<void> Function(String url, RelayCategory category) removeRelay,
+  Future<void> Function() restoreDefaultRelays,
 })
 useNetworkRelays(String pubkey) {
   final state = useState(const NetworkRelaysState());
@@ -166,10 +171,28 @@ useNetworkRelays(String pubkey) {
     }
   }
 
+  Future<void> restoreDefaultRelays() async {
+    if (state.value.isRestoringDefaults) return;
+
+    state.value = state.value.copyWith(isRestoringDefaults: true);
+
+    try {
+      final result = await accounts_api.loginPublishDefaultRelays(pubkey: pubkey);
+      if (result.status == accounts_api.LoginStatus.complete) {
+        await fetchAll();
+      }
+    } catch (e) {
+      _logger.severe('Failed to restore default relays', e);
+    } finally {
+      state.value = state.value.copyWith(isRestoringDefaults: false);
+    }
+  }
+
   return (
     state: state.value,
     fetchAll: fetchAll,
     addRelay: addRelay,
     removeRelay: removeRelay,
+    restoreDefaultRelays: restoreDefaultRelays,
   );
 }

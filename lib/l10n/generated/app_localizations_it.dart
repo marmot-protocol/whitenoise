@@ -607,6 +607,18 @@ class AppLocalizationsIt extends AppLocalizations {
   String get addRelay => 'Aggiungi Relay';
 
   @override
+  String get restoreDefaultRelays => 'Ripristina relay predefiniti';
+
+  @override
+  String get addMyRelay => 'Aggiungi il mio relay';
+
+  @override
+  String get addInboxRelay => 'Aggiungi relay posta in arrivo';
+
+  @override
+  String get addKeyPackageRelay => 'Aggiungi relay pacchetto chiavi';
+
+  @override
   String get enterRelayAddress => 'Inserisci l\'indirizzo del relay';
 
   @override

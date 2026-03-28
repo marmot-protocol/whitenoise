@@ -27,10 +27,16 @@ class AppearanceScreen extends HookConsumerWidget {
       WnDropdownOption(value: ThemeMode.dark, label: context.l10n.themeDark),
     ];
 
+    final systemLocale = View.of(context).platformDispatcher.locale;
+    final systemLanguageName = getLanguageDisplayName(systemLocale.languageCode);
+    final systemLabel = systemLanguageName != systemLocale.languageCode
+        ? '${context.l10n.languageSystem} ($systemLanguageName)'
+        : context.l10n.languageSystem;
+
     final languageOptions = [
       WnDropdownOption<LocaleSetting>(
         value: const SystemLocale(),
-        label: context.l10n.languageSystem,
+        label: systemLabel,
       ),
       ...AppLocalizations.supportedLocales.map(
         (locale) => WnDropdownOption<LocaleSetting>(
@@ -44,6 +50,7 @@ class AppearanceScreen extends HookConsumerWidget {
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
         child: WnSlate(
+          shrinkWrapContent: true,
           header: WnSlateNavigationHeader(
             title: context.l10n.appearanceTitle,
             onNavigate: () => Routes.goBack(context),

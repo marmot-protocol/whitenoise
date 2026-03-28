@@ -32,6 +32,9 @@ void main() {
       mockApi.currentThemeMode = initialThemeMode;
     }
 
+    tester.platformDispatcher.localeTestValue = const Locale('en', 'US');
+    addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+
     await mountTestApp(
       tester,
       overrides: [
@@ -56,7 +59,14 @@ void main() {
 
     testWidgets('displays current theme and language values in dropdowns', (tester) async {
       await pumpAppearanceScreen(tester);
-      expect(find.text('System'), findsNWidgets(2));
+      expect(find.text('System'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(WnDropdownSelector<LocaleSetting>),
+          matching: find.textContaining('System'),
+        ),
+        findsOneWidget,
+      );
     });
 
     testWidgets('tapping back icon returns to previous screen', (tester) async {
@@ -109,7 +119,13 @@ void main() {
       await tester.tap(find.byType(WnDropdownSelector<ThemeMode>));
       await tester.pumpAndSettle();
 
-      expect(find.text('System'), findsNWidgets(3));
+      expect(
+        find.descendant(
+          of: find.byType(WnDropdownSelector<ThemeMode>),
+          matching: find.text('System'),
+        ),
+        findsNWidgets(2),
+      );
       expect(find.text('Light'), findsOneWidget);
       expect(find.text('Dark'), findsOneWidget);
     });
@@ -335,7 +351,7 @@ void main() {
       await tester.tap(find.byType(WnDropdownSelector<LocaleSetting>));
       await tester.pumpAndSettle();
 
-      expect(find.text('System'), findsNWidgets(3));
+      expect(find.textContaining('System ('), findsNWidgets(2));
 
       expect(find.text('Deutsch'), findsOneWidget);
       expect(find.text('English'), findsOneWidget);
@@ -401,7 +417,14 @@ void main() {
       await tester.tap(find.byType(WnDropdownSelector<LocaleSetting>));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('System').last);
+      await tester.tap(
+        find
+            .descendant(
+              of: find.byType(WnDropdownSelector<LocaleSetting>),
+              matching: find.textContaining('System ('),
+            )
+            .last,
+      );
       await tester.pumpAndSettle();
 
       expect(mockApi.currentLanguage, 'system');

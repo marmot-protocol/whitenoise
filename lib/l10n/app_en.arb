@@ -771,11 +771,27 @@
   "@supportChatWelcomeMessage": {
     "description": "Initial welcome message shown in support chat"
   },
-  "addRelay": "Add Relay",
+  "addRelay": "Add relay",
   "@addRelay": {
     "description": "Add relay sheet title and button"
   },
-  "enterRelayAddress": "Enter relay address",
+  "restoreDefaultRelays": "Restore default relays",
+  "@restoreDefaultRelays": {
+    "description": "Button to restore default relay configuration"
+  },
+  "addMyRelay": "Add my relay",
+  "@addMyRelay": {
+    "description": "Button to add a relay to my relays section"
+  },
+  "addInboxRelay": "Add inbox relay",
+  "@addInboxRelay": {
+    "description": "Button to add a relay to inbox relays section"
+  },
+  "addKeyPackageRelay": "Add key package relay",
+  "@addKeyPackageRelay": {
+    "description": "Button to add a relay to key package relays section"
+  },
+  "enterRelayAddress": "Relay address",
   "@enterRelayAddress": {
     "description": "Label for relay address input"
   },

@@ -6,6 +6,7 @@ import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/relays.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_tooltip.dart';
 
 import '../mocks/mock_relay_type.dart';
@@ -19,6 +20,23 @@ class _MockApi extends MockWnApi {
   List<Relay> keyPackageRelays = [];
   List<String> addedRelays = [];
   List<String> removedRelays = [];
+  bool restoreDefaultRelaysCalled = false;
+
+  @override
+  Future<LoginResult> crateApiAccountsLoginPublishDefaultRelays({
+    required String pubkey,
+  }) async {
+    restoreDefaultRelaysCalled = true;
+    return LoginResult(
+      account: Account(
+        pubkey: pubkey,
+        accountType: AccountType.local,
+        createdAt: DateTime.now(),
+        updatedAt: DateTime.now(),
+      ),
+      status: LoginStatus.complete,
+    );
+  }
 
   @override
   Future<RelayType> crateApiRelaysRelayTypeNip65() async => MockRelayType('nip65');
@@ -91,6 +109,7 @@ void main() {
     mockApi.keyPackageRelays = [];
     mockApi.addedRelays = [];
     mockApi.removedRelays = [];
+    mockApi.restoreDefaultRelaysCalled = false;
   });
 
   Future<void> pumpNetworkScreen(WidgetTester tester) async {
@@ -133,11 +152,18 @@ void main() {
       expect(find.byKey(const Key('info_icon_key_package_relays')), findsOneWidget);
     });
 
-    testWidgets('displays add icons for each section', (tester) async {
+    testWidgets('displays add buttons for each section', (tester) async {
       await pumpNetworkScreen(tester);
-      expect(find.byKey(const Key('add_icon_my_relays')), findsOneWidget);
-      expect(find.byKey(const Key('add_icon_inbox_relays')), findsOneWidget);
-      expect(find.byKey(const Key('add_icon_key_package_relays')), findsOneWidget);
+      expect(find.byKey(const Key('add_button_my_relays')), findsOneWidget);
+      expect(find.byKey(const Key('add_button_inbox_relays')), findsOneWidget);
+      expect(find.byKey(const Key('add_button_key_package_relays')), findsOneWidget);
+    });
+
+    testWidgets('displays add button labels', (tester) async {
+      await pumpNetworkScreen(tester);
+      expect(find.text('Add my relay'), findsOneWidget);
+      expect(find.text('Add inbox relay'), findsOneWidget);
+      expect(find.text('Add key package relay'), findsOneWidget);
     });
 
     testWidgets('displays "No relays configured" for empty sections', (tester) async {
@@ -249,34 +275,34 @@ void main() {
     });
 
     group('add relay', () {
-      testWidgets('opens add relay bottom sheet when add icon is tapped', (tester) async {
+      testWidgets('navigates to add relay screen when add button is tapped', (tester) async {
         await pumpNetworkScreen(tester);
-        await tester.tap(find.byKey(const Key('add_icon_my_relays')));
+        await tester.tap(find.byKey(const Key('add_button_my_relays')));
         await tester.pumpAndSettle();
-        expect(find.text('Add Relay'), findsAtLeastNWidgets(1));
-        expect(find.text('Enter relay address'), findsOneWidget);
+        expect(find.text('Add my relay'), findsOneWidget);
+        expect(find.text('Relay address'), findsOneWidget);
       });
 
-      testWidgets('opens add relay bottom sheet for inbox relays', (tester) async {
+      testWidgets('navigates to add relay screen for inbox relays', (tester) async {
         await pumpNetworkScreen(tester);
-        await tester.tap(find.byKey(const Key('add_icon_inbox_relays')));
+        await tester.tap(find.byKey(const Key('add_button_inbox_relays')));
         await tester.pumpAndSettle();
-        expect(find.text('Add Relay'), findsAtLeastNWidgets(1));
-        expect(find.text('Enter relay address'), findsOneWidget);
+        expect(find.text('Add inbox relay'), findsOneWidget);
+        expect(find.text('Relay address'), findsOneWidget);
       });
 
-      testWidgets('opens add relay bottom sheet for key package relays', (tester) async {
+      testWidgets('navigates to add relay screen for key package relays', (tester) async {
         await pumpNetworkScreen(tester);
-        await tester.tap(find.byKey(const Key('add_icon_key_package_relays')));
+        await tester.tap(find.byKey(const Key('add_button_key_package_relays')));
         await tester.pumpAndSettle();
-        expect(find.text('Add Relay'), findsAtLeastNWidgets(1));
-        expect(find.text('Enter relay address'), findsOneWidget);
+        expect(find.text('Add key package relay'), findsOneWidget);
+        expect(find.text('Relay address'), findsOneWidget);
       });
 
-      testWidgets('adds relay when submitted through bottom sheet', (tester) async {
+      testWidgets('adds relay when submitted through add relay screen', (tester) async {
         await pumpNetworkScreen(tester);
 
-        await tester.tap(find.byKey(const Key('add_icon_my_relays')));
+        await tester.tap(find.byKey(const Key('add_button_my_relays')));
         await tester.pumpAndSettle();
 
         await tester.enterText(find.byType(TextField), 'wss://test.relay.com');
@@ -331,6 +357,29 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(mockApi.removedRelays.contains('wss://relay1.com'), isTrue);
+      });
+    });
+
+    group('restore default relays', () {
+      testWidgets('displays restore default relays button', (tester) async {
+        await pumpNetworkScreen(tester);
+        expect(find.byKey(const Key('restore_default_relays_button')), findsOneWidget);
+        expect(find.text('Restore default relays'), findsOneWidget);
+      });
+
+      testWidgets('restore button is primary type', (tester) async {
+        await pumpNetworkScreen(tester);
+        final button = tester.widget<WnButton>(
+          find.byKey(const Key('restore_default_relays_button')),
+        );
+        expect(button.type, WnButtonType.primary);
+      });
+
+      testWidgets('tapping restore button calls restoreDefaultRelays', (tester) async {
+        await pumpNetworkScreen(tester);
+        await tester.tap(find.byKey(const Key('restore_default_relays_button')));
+        await tester.pumpAndSettle();
+        expect(mockApi.restoreDefaultRelaysCalled, isTrue);
       });
     });
 

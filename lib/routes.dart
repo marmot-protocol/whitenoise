@@ -3,12 +3,14 @@ import 'package:flutter/material.dart'
 import 'package:flutter_riverpod/flutter_riverpod.dart' show WidgetRef;
 import 'package:go_router/go_router.dart'
     show CustomTransitionPage, GoRoute, GoRouter, GoRouterState;
+import 'package:whitenoise/hooks/use_network_relays.dart' show RelayCategory;
 import 'package:whitenoise/hooks/use_route_refresh.dart' show routeObserver;
 import 'package:whitenoise/observers/active_chat_route_observer.dart' show ActiveChatRouteObserver;
 import 'package:whitenoise/providers/active_chat_provider.dart' show activeChatProvider;
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
 import 'package:whitenoise/providers/is_adding_account_provider.dart' show isAddingAccountProvider;
 import 'package:whitenoise/screens/add_profile_screen.dart' show AddProfileScreen;
+import 'package:whitenoise/screens/add_relay_screen.dart' show AddRelayScreen;
 import 'package:whitenoise/screens/add_to_group_screen.dart' show AddToGroupScreen;
 import 'package:whitenoise/screens/app_logs_screen.dart' show AppLogsScreen;
 import 'package:whitenoise/screens/appearance_screen.dart' show AppearanceScreen;
@@ -50,6 +52,18 @@ import 'package:whitenoise/screens/user_selection_screen.dart' show UserSelectio
 import 'package:whitenoise/src/rust/api/users.dart' show User;
 import 'package:whitenoise/widgets/wn_slate_content_transition.dart' show WnSlateContentTransition;
 
+final class AddRelayArgs {
+  const AddRelayArgs({required this.category, required this.onRelayAdded});
+  final RelayCategory category;
+  final Future<void> Function(String) onRelayAdded;
+}
+
+final class RelayResolutionArgs {
+  const RelayResolutionArgs({required this.pubkey, required this.isExternalSigner});
+  final String pubkey;
+  final bool isExternalSigner;
+}
+
 abstract final class Routes {
   static final navigatorKey = GlobalKey<NavigatorState>();
 
@@ -76,6 +90,7 @@ abstract final class Routes {
   static const _switchProfile = '/switch-profile';
   static const _addProfile = '/add-profile';
   static const _network = '/network';
+  static const _addRelay = '/add-relay';
   static const _reportBug = '/report-bug';
   static const _relayResolution = '/relay-resolution';
   static const _startSupportChat = '/start-support-chat';
@@ -273,15 +288,35 @@ abstract final class Routes {
           ),
         ),
         GoRoute(
+          name: 'addRelay',
+          path: _addRelay,
+          pageBuilder: (context, state) {
+            final args = state.extra as AddRelayArgs?;
+            if (args == null) {
+              return _navigationTransition(state: state, child: const NetworkScreen());
+            }
+            return _navigationTransition(
+              state: state,
+              child: AddRelayScreen(
+                category: args.category,
+                onRelayAdded: args.onRelayAdded,
+              ),
+            );
+          },
+        ),
+        GoRoute(
           name: 'relayResolution',
           path: _relayResolution,
           pageBuilder: (context, state) {
-            final extra = state.extra! as Map<String, dynamic>;
+            final args = state.extra as RelayResolutionArgs?;
+            if (args == null) {
+              return _navigationTransition(state: state, child: const LoginScreen());
+            }
             return _navigationTransition(
               state: state,
               child: RelayResolutionScreen(
-                pubkey: extra['pubkey'] as String,
-                isExternalSigner: extra['isExternalSigner'] as bool,
+                pubkey: args.pubkey,
+                isExternalSigner: args.isExternalSigner,
               ),
             );
           },
@@ -597,15 +632,23 @@ abstract final class Routes {
   }) {
     GoRouter.of(context).push(
       _relayResolution,
-      extra: {
-        'pubkey': pubkey,
-        'isExternalSigner': isExternalSigner,
-      },
+      extra: RelayResolutionArgs(pubkey: pubkey, isExternalSigner: isExternalSigner),
     );
   }
 
   static void pushToNetwork(BuildContext context) {
     GoRouter.of(context).push(_network);
+  }
+
+  static void pushToAddRelay(
+    BuildContext context, {
+    required RelayCategory category,
+    required Future<void> Function(String) onRelayAdded,
+  }) {
+    GoRouter.of(context).pushNamed(
+      'addRelay',
+      extra: AddRelayArgs(category: category, onRelayAdded: onRelayAdded),
+    );
   }
 
   static Future<bool?> pushToGroupInfo(BuildContext context, String groupId) {

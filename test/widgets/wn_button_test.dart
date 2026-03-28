@@ -728,7 +728,7 @@ void main() {
           expect(resolveBackground(button.style!), equals(colors.fillQuaternary));
         });
 
-        testWidgets('enabled foreground uses fillContentQuaternary', (
+        testWidgets('enabled foreground uses backgroundContentPrimary', (
           WidgetTester tester,
         ) async {
           await mountWidget(
@@ -736,7 +736,7 @@ void main() {
             tester,
           );
           final button = tester.widget<FilledButton>(find.byType(FilledButton));
-          expect(resolveForeground(button.style!), equals(colors.fillContentQuaternary));
+          expect(resolveForeground(button.style!), equals(colors.backgroundContentPrimary));
         });
 
         testWidgets('disabled background uses fillQuaternary with alpha', (
@@ -753,7 +753,7 @@ void main() {
           );
         });
 
-        testWidgets('disabled foreground uses fillContentQuaternary with alpha', (
+        testWidgets('disabled foreground uses backgroundContentPrimary with alpha', (
           WidgetTester tester,
         ) async {
           await mountWidget(
@@ -763,7 +763,7 @@ void main() {
           final button = tester.widget<FilledButton>(find.byType(FilledButton));
           expect(
             resolveForeground(button.style!, disabled: true),
-            equals(colors.fillContentQuaternary.withValues(alpha: 0.25)),
+            equals(colors.backgroundContentPrimary.withValues(alpha: 0.25)),
           );
         });
       });

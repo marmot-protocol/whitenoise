@@ -621,6 +621,18 @@ class AppLocalizationsRu extends AppLocalizations {
   String get addRelay => 'Добавить Реле';
 
   @override
+  String get restoreDefaultRelays => 'Восстановить реле по умолчанию';
+
+  @override
+  String get addMyRelay => 'Добавить моё реле';
+
+  @override
+  String get addInboxRelay => 'Добавить реле входящих';
+
+  @override
+  String get addKeyPackageRelay => 'Добавить реле пакета ключей';
+
+  @override
   String get enterRelayAddress => 'Введите адрес реле';
 
   @override

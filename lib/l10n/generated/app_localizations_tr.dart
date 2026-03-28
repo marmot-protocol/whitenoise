@@ -604,6 +604,18 @@ class AppLocalizationsTr extends AppLocalizations {
   String get addRelay => 'Röle Ekle';
 
   @override
+  String get restoreDefaultRelays => 'Varsayılan röleleri geri yükle';
+
+  @override
+  String get addMyRelay => 'Rölem ekle';
+
+  @override
+  String get addInboxRelay => 'Gelen kutusu rölesi ekle';
+
+  @override
+  String get addKeyPackageRelay => 'Anahtar paketi rölesi ekle';
+
+  @override
   String get enterRelayAddress => 'Röle adresini girin';
 
   @override

@@ -599,10 +599,22 @@ class AppLocalizationsEn extends AppLocalizations {
       'Hi! Tell us what\'s on your mind - questions, bugs, or feedback. We usually reply within a few hours.';
 
   @override
-  String get addRelay => 'Add Relay';
+  String get addRelay => 'Add relay';
 
   @override
-  String get enterRelayAddress => 'Enter relay address';
+  String get restoreDefaultRelays => 'Restore default relays';
+
+  @override
+  String get addMyRelay => 'Add my relay';
+
+  @override
+  String get addInboxRelay => 'Add inbox relay';
+
+  @override
+  String get addKeyPackageRelay => 'Add key package relay';
+
+  @override
+  String get enterRelayAddress => 'Relay address';
 
   @override
   String get relayAddressPlaceholder => 'wss://relay.example.com';
