@@ -159,6 +159,26 @@ void main() {
       expect(find.byKey(const Key('slate_back_button')), findsNothing);
     });
 
+    testWidgets('buttons use medium size', (tester) async {
+      await mountWidget(
+        WnConfirmationSlate(
+          title: 'Test Title',
+          message: 'Test Message',
+          confirmText: 'Confirm',
+          cancelText: 'Cancel',
+          onConfirm: () {},
+          onCancel: () {},
+        ),
+        tester,
+      );
+
+      final cancelButton = tester.widget<WnButton>(find.byKey(const Key('cancel_button')));
+      expect(cancelButton.size, WnButtonSize.medium);
+
+      final confirmButton = tester.widget<WnButton>(find.byKey(const Key('confirm_button')));
+      expect(confirmButton.size, WnButtonSize.medium);
+    });
+
     group('async confirmation', () {
       testWidgets('show with onConfirmAsync shows loading on confirm button', (tester) async {
         final completer = Completer<bool>();

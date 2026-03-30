@@ -176,6 +176,8 @@
   "supportChatWelcomeMessage": "¡Hola! Cuéntanos qué tienes en mente - preguntas, errores o comentarios. Solemos responder en pocas horas.",
   "addRelay": "Añadir Relé",
   "restoreDefaultRelays": "Restaurar relés predeterminados",
+  "restoreDefaultRelaysConfirmationTitle": "¿Restaurar relés predeterminados?",
+  "restoreDefaultRelaysConfirmationMessage": "¿Estás seguro de que quieres restaurar los relés predeterminados de la aplicación? Esto borrará y reemplazará tus relés actuales.",
   "addMyRelay": "Añadir mi relé",
   "addInboxRelay": "Añadir relé de bandeja de entrada",
   "addKeyPackageRelay": "Añadir relé de paquete de claves",

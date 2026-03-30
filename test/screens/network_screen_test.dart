@@ -375,9 +375,50 @@ void main() {
         expect(button.type, WnButtonType.primary);
       });
 
-      testWidgets('tapping restore button calls restoreDefaultRelays', (tester) async {
+      testWidgets('tapping restore button shows confirmation modal', (tester) async {
         await pumpNetworkScreen(tester);
         await tester.tap(find.byKey(const Key('restore_default_relays_button')));
+        await tester.pumpAndSettle();
+        expect(find.text('Restore default relays?'), findsOneWidget);
+        expect(
+          find.text(
+            "Are you sure you want to restore the app's default relays? This will erase and replace your current relays.",
+          ),
+          findsOneWidget,
+        );
+        expect(mockApi.restoreDefaultRelaysCalled, isFalse);
+      });
+
+      testWidgets('confirmation modal has Cancel and Restore relays buttons', (tester) async {
+        await pumpNetworkScreen(tester);
+        await tester.tap(find.byKey(const Key('restore_default_relays_button')));
+        await tester.pumpAndSettle();
+        expect(find.text('Cancel'), findsOneWidget);
+        expect(find.byKey(const Key('confirm_button')), findsOneWidget);
+      });
+
+      testWidgets('confirm button is destructive type', (tester) async {
+        await pumpNetworkScreen(tester);
+        await tester.tap(find.byKey(const Key('restore_default_relays_button')));
+        await tester.pumpAndSettle();
+        final confirmButton = tester.widget<WnButton>(find.byKey(const Key('confirm_button')));
+        expect(confirmButton.type, WnButtonType.destructive);
+      });
+
+      testWidgets('cancelling confirmation does not call restoreDefaultRelays', (tester) async {
+        await pumpNetworkScreen(tester);
+        await tester.tap(find.byKey(const Key('restore_default_relays_button')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Cancel'));
+        await tester.pumpAndSettle();
+        expect(mockApi.restoreDefaultRelaysCalled, isFalse);
+      });
+
+      testWidgets('confirming calls restoreDefaultRelays', (tester) async {
+        await pumpNetworkScreen(tester);
+        await tester.tap(find.byKey(const Key('restore_default_relays_button')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('confirm_button')));
         await tester.pumpAndSettle();
         expect(mockApi.restoreDefaultRelaysCalled, isTrue);
       });

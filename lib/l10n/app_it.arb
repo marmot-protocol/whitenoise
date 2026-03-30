@@ -176,6 +176,8 @@
   "supportChatWelcomeMessage": "Ciao! Raccontaci cosa hai in mente - domande, bug o feedback. Di solito rispondiamo in poche ore.",
   "addRelay": "Aggiungi Relay",
   "restoreDefaultRelays": "Ripristina relay predefiniti",
+  "restoreDefaultRelaysConfirmationTitle": "Ripristinare i relay predefiniti?",
+  "restoreDefaultRelaysConfirmationMessage": "Sei sicuro di voler ripristinare i relay predefiniti dell'app? Questo cancellerà e sostituirà i tuoi relay attuali.",
   "addMyRelay": "Aggiungi il mio relay",
   "addInboxRelay": "Aggiungi relay posta in arrivo",
   "addKeyPackageRelay": "Aggiungi relay pacchetto chiavi",

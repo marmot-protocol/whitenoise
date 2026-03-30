@@ -605,6 +605,13 @@ class AppLocalizationsEn extends AppLocalizations {
   String get restoreDefaultRelays => 'Restore default relays';
 
   @override
+  String get restoreDefaultRelaysConfirmationTitle => 'Restore default relays?';
+
+  @override
+  String get restoreDefaultRelaysConfirmationMessage =>
+      'Are you sure you want to restore the app\'s default relays? This will erase and replace your current relays.';
+
+  @override
   String get addMyRelay => 'Add my relay';
 
   @override

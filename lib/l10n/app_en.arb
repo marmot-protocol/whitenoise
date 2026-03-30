@@ -779,6 +779,14 @@
   "@restoreDefaultRelays": {
     "description": "Button to restore default relay configuration"
   },
+  "restoreDefaultRelaysConfirmationTitle": "Restore default relays?",
+  "@restoreDefaultRelaysConfirmationTitle": {
+    "description": "Title for restore default relays confirmation dialog"
+  },
+  "restoreDefaultRelaysConfirmationMessage": "Are you sure you want to restore the app's default relays? This will erase and replace your current relays.",
+  "@restoreDefaultRelaysConfirmationMessage": {
+    "description": "Message for restore default relays confirmation dialog"
+  },
   "addMyRelay": "Add my relay",
   "@addMyRelay": {
     "description": "Button to add a relay to my relays section"

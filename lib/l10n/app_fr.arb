@@ -176,6 +176,8 @@
   "supportChatWelcomeMessage": "Bonjour ! Dites-nous ce qui vous préoccupe - questions, bugs ou commentaires. Nous répondons généralement en quelques heures.",
   "addRelay": "Ajouter un Relais",
   "restoreDefaultRelays": "Restaurer les relais par défaut",
+  "restoreDefaultRelaysConfirmationTitle": "Restaurer les relais par défaut ?",
+  "restoreDefaultRelaysConfirmationMessage": "Êtes-vous sûr de vouloir restaurer les relais par défaut de l'application ? Cela effacera et remplacera vos relais actuels.",
   "addMyRelay": "Ajouter mon relais",
   "addInboxRelay": "Ajouter un relais de boîte de réception",
   "addKeyPackageRelay": "Ajouter un relais de paquet de clés",

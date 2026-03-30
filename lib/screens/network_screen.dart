@@ -10,6 +10,7 @@ import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/widgets/wn_confirmation_slate.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_list.dart';
 import 'package:whitenoise/widgets/wn_list_item.dart';
@@ -144,7 +145,20 @@ class NetworkScreen extends HookConsumerWidget {
                 trailingIcon: WnIcons.reset,
                 iconSize: 16.31.w,
                 loading: state.isRestoringDefaults,
-                onPressed: state.isRestoringDefaults ? null : restoreDefaultRelays,
+                onPressed: state.isRestoringDefaults
+                    ? null
+                    : () => WnConfirmationSlate.show(
+                        context: context,
+                        title: context.l10n.restoreDefaultRelaysConfirmationTitle,
+                        message: context.l10n.restoreDefaultRelaysConfirmationMessage,
+                        confirmText: context.l10n.restoreDefaultRelays,
+                        cancelText: context.l10n.cancel,
+                        isDestructive: true,
+                        onConfirmAsync: () async {
+                          await restoreDefaultRelays();
+                          return true;
+                        },
+                      ),
               ),
             ),
           ),

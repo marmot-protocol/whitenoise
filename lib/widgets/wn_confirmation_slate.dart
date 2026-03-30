@@ -79,16 +79,15 @@ class WnConfirmationSlate extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Gap(12.h),
             Text(
               message,
               style: context.typographyScaled.medium14.copyWith(
-                color: colors.backgroundContentSecondary,
+                color: colors.backgroundContentPrimary,
               ),
             ),
             Gap(24.h),
             Column(
-              spacing: 8.h,
+              spacing: 4.h,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 WnButton(
@@ -96,6 +95,7 @@ class WnConfirmationSlate extends StatelessWidget {
                   onPressed: onCancel,
                   text: cancelText,
                   type: WnButtonType.outline,
+                  size: WnButtonSize.medium,
                   disabled: loading,
                 ),
                 WnButton(
@@ -103,6 +103,7 @@ class WnConfirmationSlate extends StatelessWidget {
                   onPressed: onConfirm,
                   text: confirmText,
                   type: isDestructive ? WnButtonType.destructive : WnButtonType.primary,
+                  size: WnButtonSize.medium,
                   loading: loading,
                   disabled: loading,
                 ),

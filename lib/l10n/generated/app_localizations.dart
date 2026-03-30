@@ -1164,6 +1164,18 @@ abstract class AppLocalizations {
   /// **'Restore default relays'**
   String get restoreDefaultRelays;
 
+  /// Title for restore default relays confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Restore default relays?'**
+  String get restoreDefaultRelaysConfirmationTitle;
+
+  /// Message for restore default relays confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to restore the app\'s default relays? This will erase and replace your current relays.'**
+  String get restoreDefaultRelaysConfirmationMessage;
+
   /// Button to add a relay to my relays section
   ///
   /// In en, this message translates to:

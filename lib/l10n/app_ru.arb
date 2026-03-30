@@ -176,6 +176,8 @@
   "supportChatWelcomeMessage": "Привет! Расскажите, что у вас на уме - вопросы, баги или отзывы. Обычно мы отвечаем в течение нескольких часов.",
   "addRelay": "Добавить Реле",
   "restoreDefaultRelays": "Восстановить реле по умолчанию",
+  "restoreDefaultRelaysConfirmationTitle": "Восстановить реле по умолчанию?",
+  "restoreDefaultRelaysConfirmationMessage": "Вы уверены, что хотите восстановить реле по умолчанию? Это удалит и заменит ваши текущие реле.",
   "addMyRelay": "Добавить моё реле",
   "addInboxRelay": "Добавить реле входящих",
   "addKeyPackageRelay": "Добавить реле пакета ключей",
