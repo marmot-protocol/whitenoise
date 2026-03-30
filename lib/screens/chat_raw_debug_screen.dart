@@ -79,6 +79,7 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                   onNotification: (notification) {
                     if (hasMoreMessages &&
                         notification is ScrollUpdateNotification &&
+                        notification.metrics.maxScrollExtent > 200 &&
                         notification.metrics.pixels >= notification.metrics.maxScrollExtent - 200) {
                       unawaited(loadOlderMessages());
                     }

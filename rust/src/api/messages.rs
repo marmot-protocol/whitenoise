@@ -532,10 +532,22 @@ pub async fn subscribe_to_group_messages(
     // marker.  The subscription was created first (above) so any concurrent updates
     // that arrived during the fetch will arrive on `subscription.updates`.
     let raw_initial: Vec<WhitenoiseChatMessage> = match parsed_pubkey {
-        Some(ref pk) => whitenoise
+        Some(ref pk) => match whitenoise
             .fetch_messages_unread_with_minimum(pk, &group_id, None)
             .await
-            .unwrap_or(subscription.initial_messages),
+        {
+            Ok(messages) => messages,
+            Err(e) => {
+                warn!(
+                    group_id = %group_id_str,
+                    pubkey = %pk.to_hex(),
+                    error = %e,
+                    "subscribe_to_group_messages: fetch_messages_unread_with_minimum failed, \
+                     falling back to subscription initial_messages"
+                );
+                subscription.initial_messages
+            }
+        },
         None => subscription.initial_messages,
     };
 

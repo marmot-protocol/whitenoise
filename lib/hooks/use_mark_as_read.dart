@@ -81,7 +81,11 @@ MarkAsReadResult useMarkAsRead({
   }
 
   final lastReadId = lastReadMessageId.value;
-  final lastReadFound = lastReadId == null || getReversedIndex(lastReadId) != null;
+  // Require hasLoadedLastRead so consumers don't short-circuit before the
+  // async fetch completes: if the load is still in-flight, treat the marker
+  // as not-yet-found regardless of the current lastReadId value.
+  final lastReadFound =
+      hasLoadedLastRead.value && (lastReadId == null || getReversedIndex(lastReadId) != null);
 
   return (
     firstUnreadIndex: computeFirstUnreadIndex(),

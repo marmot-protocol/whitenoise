@@ -228,8 +228,6 @@ class MessageDebugLogNotifier extends Notifier<MessageDebugLogState> {
     );
   }
 
-  // ── Pagination log ───────────────────────────────────────────────────────
-
   void logPageFetch({
     required String groupId,
     required String outcome,

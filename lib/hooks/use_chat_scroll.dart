@@ -54,6 +54,14 @@ ChatScrollResult useChatScroll({
   messageCountRef.value = messageCount;
   getMessageIdRef.value = getMessageId;
 
+  final isMounted = useRef(true);
+  useEffect(() {
+    isMounted.value = true;
+    return () {
+      isMounted.value = false;
+    };
+  }, []);
+
   void autoScrollToBottom() {
     SchedulerBinding.instance.addPostFrameCallback((_) {
       if (scrollController.hasClients) {
@@ -208,6 +216,7 @@ ChatScrollResult useChatScroll({
         // Keep the list hidden (isInitialPositionReady = false) and fetch the next page.
         // Once messageCount changes, this effect will re-run until we find the last read message.
         WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (!isMounted.value) return;
           unawaited(loadOlderMessages());
         });
         return null;
@@ -216,6 +225,7 @@ ChatScrollResult useChatScroll({
       if (firstUnreadIndex != null && !hasScrolledToUnread.value) {
         hasScrolledToUnread.value = true;
         SchedulerBinding.instance.addPostFrameCallback((_) async {
+          if (!isMounted.value) return;
           if (!scrollController.hasClients) return;
           // Use duration: 1ms to jump instantly rather than animating. We don't want a long
           // animation if the unread message is many pages back.
@@ -224,6 +234,7 @@ ChatScrollResult useChatScroll({
             preferPosition: AutoScrollPosition.middle,
             duration: const Duration(milliseconds: 1),
           );
+          if (!isMounted.value) return;
           isInitialPositionReady.value = true;
         });
       } else {

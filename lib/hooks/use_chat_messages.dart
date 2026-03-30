@@ -49,6 +49,10 @@ ChatMessagesResult useChatMessages(
   );
   final isLoadingOlderMessages = useState(false);
   final hasMoreMessages = useState(true);
+  // Incremented whenever older messages are prepended to messageIds. Because
+  // messageIds is stored in a useRef it does not trigger rebuilds on its own;
+  // this counter forces a rebuild so the list reflects the newly prepended
+  // pages. Do not remove.
   final paginationVersion = useState(0);
 
   useEffect(() {
@@ -57,6 +61,7 @@ ChatMessagesResult useChatMessages(
     indexById.value = {};
     isLoadingOlderMessages.value = false;
     hasMoreMessages.value = true;
+    // Reset rebuild counter when switching groups (see declaration).
     paginationVersion.value = 0;
     return null;
   }, [groupId]);
@@ -372,6 +377,7 @@ ChatMessagesResult useChatMessages(
         indexById.value = {
           for (var i = 0; i < combined.length; i++) combined[i]: i,
         };
+        // Increment to force a widget rebuild after prepending (see declaration).
         paginationVersion.value++;
         _logger.info(
           'loadOlderMessages groupId=$groupId: prepended ${newIds.length} messages totalLoaded=${combined.length}',

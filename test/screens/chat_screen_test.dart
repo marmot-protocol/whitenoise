@@ -425,6 +425,35 @@ void main() {
 
         expect(find.byKey(const Key('loading_older_messages_indicator')), findsNothing);
       });
+
+      testWidgets('visible while older messages are being fetched', (tester) async {
+        // Use enough messages to create a scrollable list with sufficient height so
+        // the top-threshold scroll listener fires when scrolled to the oldest end.
+        _api.initialMessages = List.generate(
+          20,
+          (i) => _message('m$i', DateTime(2024, 1, i + 1)),
+        );
+        _api.lastReadMessageId = 'm19';
+        final completer = Completer<List<ChatMessage>>();
+        _api.fetchOlderCompleter = completer;
+        await pumpChatScreen(tester);
+        await tester.pumpAndSettle();
+
+        // The list is reversed (newest at pixels=0). Scroll to maxScrollExtent
+        // (oldest end) to cross the top-threshold and trigger loadOlderMessages.
+        final position = Scrollable.of(tester.element(find.byType(WnMessageBubble).first)).position;
+        position.jumpTo(position.maxScrollExtent);
+        // Notify listeners manually since jumpTo in tests does not always fire them.
+        await tester.pump();
+        await tester.pump();
+
+        expect(find.byKey(const Key('loading_older_messages_indicator')), findsOneWidget);
+
+        completer.complete([]);
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('loading_older_messages_indicator')), findsNothing);
+      });
     });
 
     group('with messages', () {

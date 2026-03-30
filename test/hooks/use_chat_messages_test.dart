@@ -1160,6 +1160,10 @@ void main() {
           await getResult().loadOlderMessages();
           await tester.pumpAndSettle();
 
+          // pageFetchEntries() returns entries newest-first (matching streamLog
+          // insertion order). entries.last is the oldest log entry ('fetching',
+          // logged when the request started) and entries.first is the newest
+          // ('prepended', logged after the response arrived).
           final entries = pageFetchEntries();
           expect(entries, hasLength(2));
           expect(entries.last.trigger, 'fetching');
