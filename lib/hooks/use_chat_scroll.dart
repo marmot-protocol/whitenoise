@@ -28,7 +28,12 @@ ChatScrollResult useChatScroll({
   required bool hasMoreMessages,
   required Future<void> Function() loadOlderMessages,
 }) {
-  final (:firstUnreadIndex, :hasLoadedLastRead, :markMessageAsRead) = useMarkAsRead(
+  final (
+    :firstUnreadIndex,
+    :hasLoadedLastRead,
+    :lastReadMessageFound,
+    :markMessageAsRead,
+  ) = useMarkAsRead(
     accountPubkey: accountPubkey,
     groupId: groupId,
     messageCount: messageCount,
@@ -193,37 +198,66 @@ ChatScrollResult useChatScroll({
     return null;
   }, [isInitialPositionReady.value]);
 
-  useEffect(() {
-    if (latestMessageId != null && latestMessageId != prevLatestMessageId.value) {
-      final isInitialLoad = prevLatestMessageId.value == null;
+  useEffect(
+    () {
+      if (isInitialPositionReady.value) return null;
+      if (latestMessageId == null) return null;
+      if (messageCount > 0 && !hasLoadedLastRead) return null;
 
-      if (isInitialLoad) {
-        if (messageCount > 0 && !hasLoadedLastRead) return null;
+      if (!lastReadMessageFound && hasMoreMessages) {
+        // Keep the list hidden (isInitialPositionReady = false) and fetch the next page.
+        // Once messageCount changes, this effect will re-run until we find the last read message.
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          unawaited(loadOlderMessages());
+        });
+        return null;
+      }
 
-        if (firstUnreadIndex != null && !hasScrolledToUnread.value) {
-          hasScrolledToUnread.value = true;
-          SchedulerBinding.instance.addPostFrameCallback((_) async {
-            if (!scrollController.hasClients) return;
-            await scrollController.scrollToIndex(
-              firstUnreadIndex,
-              preferPosition: AutoScrollPosition.middle,
-              duration: const Duration(milliseconds: 1),
-            );
-            isInitialPositionReady.value = true;
-          });
-        } else {
+      if (firstUnreadIndex != null && !hasScrolledToUnread.value) {
+        hasScrolledToUnread.value = true;
+        SchedulerBinding.instance.addPostFrameCallback((_) async {
+          if (!scrollController.hasClients) return;
+          // Use duration: 1ms to jump instantly rather than animating. We don't want a long
+          // animation if the unread message is many pages back.
+          await scrollController.scrollToIndex(
+            firstUnreadIndex,
+            preferPosition: AutoScrollPosition.middle,
+            duration: const Duration(milliseconds: 1),
+          );
           isInitialPositionReady.value = true;
-        }
-      } else if (isAtBottom.value || isLatestMessageOwn) {
-        autoScrollToBottom();
+        });
       } else {
-        hasUnseenMessages.value = true;
+        isInitialPositionReady.value = true;
       }
 
       prevLatestMessageId.value = latestMessageId;
+      return null;
+    },
+    [
+      latestMessageId,
+      firstUnreadIndex,
+      hasLoadedLastRead,
+      lastReadMessageFound,
+      hasMoreMessages,
+      isInitialPositionReady.value,
+      messageCount,
+    ],
+  );
+
+  useEffect(() {
+    if (!isInitialPositionReady.value) return null;
+    if (latestMessageId == null) return null;
+    if (latestMessageId == prevLatestMessageId.value) return null;
+
+    if (isAtBottom.value || isLatestMessageOwn) {
+      autoScrollToBottom();
+    } else {
+      hasUnseenMessages.value = true;
     }
+
+    prevLatestMessageId.value = latestMessageId;
     return null;
-  }, [latestMessageId, isLatestMessageOwn, firstUnreadIndex, hasLoadedLastRead]);
+  }, [latestMessageId, isLatestMessageOwn, isInitialPositionReady.value]);
 
   return (
     isInitialPositionReady: isInitialPositionReady.value,

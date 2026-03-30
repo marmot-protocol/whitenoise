@@ -570,6 +570,106 @@ void main() {
       });
     });
 
+    group('pagination to find unread position', () {
+      testWidgets('calls loadOlderMessages when last-read message is not in loaded set', (
+        tester,
+      ) async {
+        _api.lastReadMessageId = 'm99';
+        var loadCallCount = 0;
+        await pumpScroll(
+          tester,
+          messageIds: _generateIds(5),
+          hasMoreMessages: true,
+          loadOlderMessages: () async {
+            loadCallCount++;
+          },
+        );
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+
+        expect(loadCallCount, greaterThanOrEqualTo(1));
+      });
+
+      testWidgets('does not paginate when last-read message is in loaded set', (tester) async {
+        _api.lastReadMessageId = 'm3';
+        var loadCallCount = 0;
+        await pumpScroll(
+          tester,
+          messageIds: _generateIds(5),
+          hasMoreMessages: true,
+          loadOlderMessages: () async {
+            loadCallCount++;
+          },
+        );
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+
+        expect(loadCallCount, 0);
+      });
+
+      testWidgets(
+        'defers scroll until last-read message is found or history exhausted',
+        (
+          tester,
+        ) async {
+          _api.lastReadMessageId = 'm6';
+          ChatScrollResult? lastResult;
+
+          // Initial state: messages m1-m5 are loaded. last-read is m6.
+          // It should NOT scroll yet, and isInitialPositionReady should be false.
+          var messageIds = _generateIds(5); // ['m5', 'm4', 'm3', 'm2', 'm1']
+          var hasMore = true;
+
+          await pumpScroll(
+            tester,
+            messageIds: messageIds,
+            hasMoreMessages: hasMore,
+            onResult: (r) => lastResult = r,
+            loadOlderMessages: () async {},
+          );
+          await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+          await tester.pumpAndSettle();
+
+          expect(lastResult?.isInitialPositionReady, false);
+          expect(scrollController.position.pixels, 0); // Not scrolled
+
+          // Simulate pagination completing: we load m6-m10.
+          // Now last-read is in the loaded set.
+          messageIds = ['m10', 'm9', 'm8', 'm7', 'm6', 'm5', 'm4', 'm3', 'm2', 'm1'];
+          hasMore = false;
+
+          await pumpScroll(
+            tester,
+            messageIds: messageIds,
+            hasMoreMessages: hasMore,
+            onResult: (r) => lastResult = r,
+            loadOlderMessages: () async {},
+          );
+          await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+          await tester.pumpAndSettle();
+
+          expect(lastResult?.isInitialPositionReady, true);
+          expect(scrollController.position.pixels, greaterThan(0)); // Scrolled to unread
+        },
+      );
+
+      testWidgets('does not paginate when no more messages', (tester) async {
+        _api.lastReadMessageId = 'm99';
+        var loadCallCount = 0;
+        await pumpScroll(
+          tester,
+          messageIds: _generateIds(5),
+          loadOlderMessages: () async {
+            loadCallCount++;
+          },
+        );
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.pumpAndSettle();
+
+        expect(loadCallCount, 0);
+      });
+    });
+
     group('scroll-to-top triggers loadOlderMessages', () {
       testWidgets('calls loadOlderMessages when scrolled to top with hasMoreMessages=true', (
         tester,

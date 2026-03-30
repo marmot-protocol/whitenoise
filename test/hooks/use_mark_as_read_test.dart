@@ -107,7 +107,9 @@ void main() {
         expect(lastResult?.firstUnreadIndex, 2);
       });
 
-      testWidgets('is null when last read message is not in the list', (tester) async {
+      testWidgets('treats all messages as unread when last read is not in loaded set', (
+        tester,
+      ) async {
         _api.lastReadMessageId = 'm99';
         MarkAsReadResult? lastResult;
         await _pumpMarkAsRead(
@@ -118,7 +120,7 @@ void main() {
         await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
         await tester.pumpAndSettle();
 
-        expect(lastResult?.firstUnreadIndex, isNull);
+        expect(lastResult?.firstUnreadIndex, 2);
       });
     });
 

@@ -7,6 +7,7 @@ final _logger = Logger('useMarkAsRead');
 typedef MarkAsReadResult = ({
   int? firstUnreadIndex,
   bool hasLoadedLastRead,
+  bool lastReadMessageFound,
   void Function(String messageId) markMessageAsRead,
 });
 
@@ -74,14 +75,18 @@ MarkAsReadResult useMarkAsRead({
     if (lastReadId == null) return messageCount - 1;
 
     final lastReadReversedIndex = getReversedIndex(lastReadId);
-    if (lastReadReversedIndex == null) return null;
+    if (lastReadReversedIndex == null) return messageCount - 1;
 
     return lastReadReversedIndex > 0 ? lastReadReversedIndex - 1 : null;
   }
 
+  final lastReadId = lastReadMessageId.value;
+  final lastReadFound = lastReadId == null || getReversedIndex(lastReadId) != null;
+
   return (
     firstUnreadIndex: computeFirstUnreadIndex(),
     hasLoadedLastRead: hasLoadedLastRead.value,
+    lastReadMessageFound: lastReadFound,
     markMessageAsRead: markMessageAsRead,
   );
 }
