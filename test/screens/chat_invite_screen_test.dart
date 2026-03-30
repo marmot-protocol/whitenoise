@@ -431,6 +431,13 @@ void main() {
 
         expect(_api.fetchOlderCallCount, 0);
         expect(find.textContaining('First ever message'), findsOneWidget);
+
+        // Scroll the message list; scroll-triggered pagination must not fire.
+        await tester.drag(find.byType(WnMessageBubble).first, const Offset(0, 500));
+        await tester.pumpAndSettle();
+
+        expect(_api.fetchOlderCallCount, 0);
+        expect(find.textContaining('First ever message'), findsOneWidget);
       });
 
       testWidgets('displays all messages from a large initial snapshot without pagination', (
@@ -444,6 +451,14 @@ void main() {
           _message('m5', createdAt: DateTime(2024, 1, 5)),
         ];
         await pumpInviteScreen(tester);
+
+        expect(_api.fetchOlderCallCount, 0);
+        expect(find.byType(WnMessageBubble), findsNWidgets(5));
+        expect(find.textContaining('Very first'), findsOneWidget);
+
+        // Scroll the message list; scroll-triggered pagination must not fire.
+        await tester.drag(find.byType(WnMessageBubble).first, const Offset(0, 500));
+        await tester.pumpAndSettle();
 
         expect(_api.fetchOlderCallCount, 0);
         expect(find.byType(WnMessageBubble), findsNWidgets(5));

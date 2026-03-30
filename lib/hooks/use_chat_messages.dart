@@ -55,16 +55,26 @@ ChatMessagesResult useChatMessages(
   // pages. Do not remove.
   final paginationVersion = useState(0);
 
+  // Set to true in the disposal teardown so any in-flight loadOlderMessages
+  // call knows not to write to hook state after the widget is gone.
+  final isDisposed = useRef(false);
+  useEffect(() {
+    isDisposed.value = false;
+    return () {
+      isDisposed.value = true;
+    };
+  }, []);
+
   useEffect(() {
     messageIds.value = [];
     messagesById.value = {};
     indexById.value = {};
     isLoadingOlderMessages.value = false;
     hasMoreMessages.value = true;
-    // Reset rebuild counter when switching groups (see declaration).
+    // Reset rebuild counter when switching groups or accounts (see declaration).
     paginationVersion.value = 0;
     return null;
-  }, [groupId]);
+  }, [groupId, pubkey]);
 
   final stream = useMemoized(
     () {
@@ -164,7 +174,7 @@ ChatMessagesResult useChatMessages(
             );
           });
     },
-    [groupId],
+    [groupId, pubkey],
   );
 
   final initialData = (
@@ -306,7 +316,7 @@ ChatMessagesResult useChatMessages(
       }
       metadataSubscriptionsByPubkey.value = {};
     };
-  }, [groupId]);
+  }, [groupId, pubkey]);
 
   Future<void> loadOlderMessages() async {
     if (isLoadingOlderMessages.value) {
@@ -346,8 +356,10 @@ ChatMessagesResult useChatMessages(
         beforeMessageId: oldestId,
       );
 
-      if (groupId != requestGroupId) {
-        _logger.info('loadOlderMessages groupId=$requestGroupId: discarded (groupId changed)');
+      if (isDisposed.value || groupId != requestGroupId) {
+        _logger.info(
+          'loadOlderMessages groupId=$requestGroupId: discarded (disposed or groupId changed)',
+        );
         debugLog?.logPageFetch(
           groupId: requestGroupId,
           outcome: 'discarded',
@@ -403,15 +415,17 @@ ChatMessagesResult useChatMessages(
       }
     } catch (e, st) {
       _logger.severe('loadOlderMessages groupId=$groupId: FAILED', e, st);
-      debugLog?.logPageFetch(
-        groupId: groupId,
-        outcome: 'error',
-        cursorId: oldestId,
-        error: e,
-        stackTrace: st,
-      );
+      if (!isDisposed.value) {
+        debugLog?.logPageFetch(
+          groupId: groupId,
+          outcome: 'error',
+          cursorId: oldestId,
+          error: e,
+          stackTrace: st,
+        );
+      }
     } finally {
-      if (groupId == requestGroupId) {
+      if (!isDisposed.value && groupId == requestGroupId) {
         isLoadingOlderMessages.value = false;
       }
     }

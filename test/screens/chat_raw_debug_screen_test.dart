@@ -290,6 +290,47 @@ void main() {
       expect(find.text('+1 more entries'), findsOneWidget);
     });
 
+    testWidgets('stream log renders pageFetch entry with truncated cursor and all fields', (
+      tester,
+    ) async {
+      final now = DateTime(2026, 1, 1, 10);
+      // messageId is > 8 chars to exercise the truncation branch in _formatStreamEvent.
+      const longMessageId = 'abcdef1234567890';
+      _seededDebugState = MessageDebugLogState(
+        sendLog: const [],
+        streamLog: [
+          MessageStreamEventEntry(
+            timestamp: now,
+            groupId: _testGroupId,
+            eventType: MessageStreamEventType.pageFetch,
+            trigger: 'prepended',
+            messageId: longMessageId,
+            messageCount: 3,
+            laggedCount: 10,
+            error: 'fetch error',
+          ),
+        ],
+      );
+
+      await pumpDebugScreen(
+        tester,
+        overrides: [messageDebugLogProvider.overrideWith(_SeededMessageDebugLogNotifier.new)],
+      );
+
+      await tester.scrollUntilVisible(
+        find.text('Stream Log'),
+        220,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      // outcome=, cursor= (truncated to first 8 chars + ellipsis), new=, total=, error=
+      expect(find.textContaining('outcome=prepended'), findsOneWidget);
+      expect(find.textContaining('cursor=${longMessageId.substring(0, 8)}…'), findsOneWidget);
+      expect(find.textContaining('new=3'), findsOneWidget);
+      expect(find.textContaining('total=10'), findsOneWidget);
+      expect(find.textContaining('error=fetch error'), findsOneWidget);
+    });
+
     testWidgets('renders seeded stream log entries and overflow indicator', (tester) async {
       final now = DateTime(2026, 1, 1, 10);
       _seededDebugState = MessageDebugLogState(
@@ -725,6 +766,9 @@ void main() {
       );
 
       await pumpDebugScreen(tester);
+
+      // Precondition: no fetch has occurred yet — proves the drag below is the cause.
+      expect(_api.fetchOlderCallCount, 0);
 
       final scrollable = find.byType(Scrollable).first;
       await tester.drag(scrollable, const Offset(0, -5000));

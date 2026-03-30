@@ -59,6 +59,9 @@ class _MockApi extends MockWnApi {
   StreamController<MessageStreamItem>? controller;
   final userSubscribeCalls = <String>[];
   final failingUserSubscriptions = <String>{};
+  // Records the pubkey passed to each crateApiMessagesSubscribeToGroupMessages
+  // call, keyed by groupId, so tests can verify the subscription contract.
+  final lastSubscribePubkeyByGroup = <String, String?>{};
 
   void emitInitialSnapshot(List<ChatMessage> messages) {
     controller?.add(MessageStreamItem.initialSnapshot(messages: messages));
@@ -117,6 +120,7 @@ class _MockApi extends MockWnApi {
     String? pubkey,
     required String groupId,
   }) {
+    lastSubscribePubkeyByGroup[groupId] = pubkey;
     controller?.close();
     controller = StreamController<MessageStreamItem>.broadcast();
     return controller!.stream;
@@ -189,6 +193,7 @@ class _MockApi extends MockWnApi {
     controller = null;
     userSubscribeCalls.clear();
     failingUserSubscriptions.clear();
+    lastSubscribePubkeyByGroup.clear();
     userMetadataResponse = null;
     metadataMode = _MetadataMode.normal;
     metadataCalls.clear();
@@ -277,6 +282,13 @@ void main() {
       final result = getResult();
       expect(result.messageCount, 2);
       expect(result.getMessage(0).id, 'm2');
+    });
+
+    testWidgets('passes the correct pubkey to the subscription', (tester) async {
+      await _pump(tester, 'group1');
+
+      // The pubkey recorded by the mock must match the one supplied to useChatMessages.
+      expect(_api.lastSubscribePubkeyByGroup['group1'], testPubkeyA);
     });
 
     group('getReversedMessageIndex', () {
