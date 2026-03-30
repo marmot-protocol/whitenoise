@@ -26,7 +26,7 @@ class NetworkScreen extends HookConsumerWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final pubkey = ref.watch(accountPubkeyProvider);
-    final (:state, :fetchAll, :addRelay, :removeRelay, :restoreDefaultRelays) = useNetworkRelays(
+    final (:state, :fetchAll, :addRelay, :removeRelay) = useNetworkRelays(
       pubkey,
     );
     final listItemController = useListItemController();
@@ -144,21 +144,15 @@ class NetworkScreen extends HookConsumerWidget {
                 size: WnButtonSize.medium,
                 trailingIcon: WnIcons.reset,
                 iconSize: 16.31.w,
-                loading: state.isRestoringDefaults,
-                onPressed: state.isRestoringDefaults
-                    ? null
-                    : () => WnConfirmationSlate.show(
-                        context: context,
-                        title: context.l10n.restoreDefaultRelaysConfirmationTitle,
-                        message: context.l10n.restoreDefaultRelaysConfirmationMessage,
-                        confirmText: context.l10n.restoreDefaultRelays,
-                        cancelText: context.l10n.cancel,
-                        isDestructive: true,
-                        onConfirmAsync: () async {
-                          await restoreDefaultRelays();
-                          return true;
-                        },
-                      ),
+                onPressed: () => WnConfirmationSlate.show(
+                  context: context,
+                  title: context.l10n.restoreDefaultRelaysConfirmationTitle,
+                  message: context.l10n.restoreDefaultRelaysConfirmationMessage,
+                  confirmText: context.l10n.restoreDefaultRelays,
+                  cancelText: context.l10n.cancel,
+                  isDestructive: true,
+                  onConfirmAsync: () async => true,
+                ),
               ),
             ),
           ),

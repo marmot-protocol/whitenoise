@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_network_relays.dart';
-import 'package:whitenoise/src/rust/api/accounts.dart';
+import 'package:whitenoise/src/rust/api/accounts.dart' show RelayType;
 import 'package:whitenoise/src/rust/api/relays.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
@@ -13,8 +13,6 @@ class MockApi extends MockWnApi {
   List<Relay> inboxRelays = [];
   List<Relay> keyPackageRelays = [];
   bool shouldThrow = false;
-  bool shouldThrowOnRestore = false;
-  LoginStatus restoreStatus = LoginStatus.complete;
 
   @override
   Future<RelayType> crateApiRelaysRelayTypeNip65() async => MockRelayType('nip65');
@@ -42,22 +40,6 @@ class MockApi extends MockWnApi {
       default:
         return [];
     }
-  }
-
-  @override
-  Future<LoginResult> crateApiAccountsLoginPublishDefaultRelays({
-    required String pubkey,
-  }) async {
-    if (shouldThrowOnRestore) throw Exception('Restore error');
-    return LoginResult(
-      account: Account(
-        pubkey: pubkey,
-        accountType: AccountType.local,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-      status: restoreStatus,
-    );
   }
 
   @override
@@ -121,8 +103,6 @@ void main() {
     mockApi.inboxRelays = [];
     mockApi.keyPackageRelays = [];
     mockApi.shouldThrow = false;
-    mockApi.shouldThrowOnRestore = false;
-    mockApi.restoreStatus = LoginStatus.complete;
   });
 
   group('RelayListState', () {
@@ -360,45 +340,6 @@ void main() {
       await tester.pump();
 
       expect(getHook().state.normalRelays.relays.length, 1);
-    });
-  });
-
-  group('restoreDefaultRelays', () {
-    testWidgets('does not fetch relays when status is needsRelayLists', (tester) async {
-      mockApi.restoreStatus = LoginStatus.needsRelayLists;
-      mockApi.normalRelays = [
-        Relay(url: 'wss://relay1.com', createdAt: DateTime.now(), updatedAt: DateTime.now()),
-      ];
-
-      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
-      await getHook().fetchAll();
-      await tester.pump();
-
-      mockApi.normalRelays = [];
-      await getHook().restoreDefaultRelays();
-      await tester.pump();
-
-      expect(getHook().state.normalRelays.relays.length, 1);
-    });
-
-    testWidgets('handles error gracefully without throwing', (tester) async {
-      mockApi.shouldThrowOnRestore = true;
-
-      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
-      await getHook().restoreDefaultRelays();
-      await tester.pump();
-
-      expect(getHook().state.isRestoringDefaults, isFalse);
-    });
-
-    testWidgets('does not restore when already restoring', (tester) async {
-      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
-
-      getHook().restoreDefaultRelays();
-      await getHook().restoreDefaultRelays();
-      await tester.pump();
-
-      expect(getHook().state.isRestoringDefaults, isFalse);
     });
   });
 }

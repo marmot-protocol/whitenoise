@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
-import 'package:whitenoise/src/rust/api/accounts.dart';
+import 'package:whitenoise/src/rust/api/accounts.dart' show RelayType;
 import 'package:whitenoise/src/rust/api/relays.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
@@ -20,23 +20,6 @@ class _MockApi extends MockWnApi {
   List<Relay> keyPackageRelays = [];
   List<String> addedRelays = [];
   List<String> removedRelays = [];
-  bool restoreDefaultRelaysCalled = false;
-
-  @override
-  Future<LoginResult> crateApiAccountsLoginPublishDefaultRelays({
-    required String pubkey,
-  }) async {
-    restoreDefaultRelaysCalled = true;
-    return LoginResult(
-      account: Account(
-        pubkey: pubkey,
-        accountType: AccountType.local,
-        createdAt: DateTime.now(),
-        updatedAt: DateTime.now(),
-      ),
-      status: LoginStatus.complete,
-    );
-  }
 
   @override
   Future<RelayType> crateApiRelaysRelayTypeNip65() async => MockRelayType('nip65');
@@ -109,7 +92,6 @@ void main() {
     mockApi.keyPackageRelays = [];
     mockApi.addedRelays = [];
     mockApi.removedRelays = [];
-    mockApi.restoreDefaultRelaysCalled = false;
   });
 
   Future<void> pumpNetworkScreen(WidgetTester tester) async {
@@ -386,7 +368,6 @@ void main() {
           ),
           findsOneWidget,
         );
-        expect(mockApi.restoreDefaultRelaysCalled, isFalse);
       });
 
       testWidgets('confirmation modal has Cancel and Restore relays buttons', (tester) async {
@@ -405,22 +386,22 @@ void main() {
         expect(confirmButton.type, WnButtonType.destructive);
       });
 
-      testWidgets('cancelling confirmation does not call restoreDefaultRelays', (tester) async {
+      testWidgets('cancelling confirmation dismisses the modal', (tester) async {
         await pumpNetworkScreen(tester);
         await tester.tap(find.byKey(const Key('restore_default_relays_button')));
         await tester.pumpAndSettle();
         await tester.tap(find.text('Cancel'));
         await tester.pumpAndSettle();
-        expect(mockApi.restoreDefaultRelaysCalled, isFalse);
+        expect(find.text('Restore default relays?'), findsNothing);
       });
 
-      testWidgets('confirming calls restoreDefaultRelays', (tester) async {
+      testWidgets('confirming dismisses the confirmation modal', (tester) async {
         await pumpNetworkScreen(tester);
         await tester.tap(find.byKey(const Key('restore_default_relays_button')));
         await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('confirm_button')));
         await tester.pumpAndSettle();
-        expect(mockApi.restoreDefaultRelaysCalled, isTrue);
+        expect(find.text('Restore default relays?'), findsNothing);
       });
     });
 
