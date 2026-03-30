@@ -5351,15 +5351,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     switch (raw[0]) {
       case 0:
-        return ChatMuteDuration_OneHour();
+        return const ChatMuteDuration_OneHour();
       case 1:
-        return ChatMuteDuration_EightHours();
+        return const ChatMuteDuration_EightHours();
       case 2:
-        return ChatMuteDuration_OneDay();
+        return const ChatMuteDuration_OneDay();
       case 3:
-        return ChatMuteDuration_OneWeek();
+        return const ChatMuteDuration_OneWeek();
       case 4:
-        return ChatMuteDuration_Forever();
+        return const ChatMuteDuration_Forever();
       case 5:
         return ChatMuteDuration_Custom(
           until: dco_decode_Chrono_Utc(raw[1]),
@@ -6902,15 +6902,15 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     final tag_ = sse_decode_i_32(deserializer);
     switch (tag_) {
       case 0:
-        return ChatMuteDuration_OneHour();
+        return const ChatMuteDuration_OneHour();
       case 1:
-        return ChatMuteDuration_EightHours();
+        return const ChatMuteDuration_EightHours();
       case 2:
-        return ChatMuteDuration_OneDay();
+        return const ChatMuteDuration_OneDay();
       case 3:
-        return ChatMuteDuration_OneWeek();
+        return const ChatMuteDuration_OneWeek();
       case 4:
-        return ChatMuteDuration_Forever();
+        return const ChatMuteDuration_Forever();
       case 5:
         final var_until = sse_decode_Chrono_Utc(deserializer);
         return ChatMuteDuration_Custom(until: var_until);
