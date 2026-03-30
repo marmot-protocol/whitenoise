@@ -70,10 +70,6 @@
   "@writeSomethingAboutYourself": {
     "description": "Placeholder for bio input"
   },
-  "profilePrivacyTitle": "You control what you share",
-  "@profilePrivacyTitle": {
-    "description": "Title of the privacy notice on signup screen"
-  },
   "profilePrivacyDescription": "Name, photo, and bio are visible on the global Nostr network. Use what you're comfortable sharing.",
   "@profilePrivacyDescription": {
     "description": "Description of the privacy notice on signup screen"

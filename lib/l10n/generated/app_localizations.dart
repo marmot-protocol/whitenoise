@@ -204,12 +204,6 @@ abstract class AppLocalizations {
   /// **'Introduce yourself'**
   String get writeSomethingAboutYourself;
 
-  /// Title of the privacy notice on signup screen
-  ///
-  /// In en, this message translates to:
-  /// **'You control what you share'**
-  String get profilePrivacyTitle;
-
   /// Description of the privacy notice on signup screen
   ///
   /// In en, this message translates to:

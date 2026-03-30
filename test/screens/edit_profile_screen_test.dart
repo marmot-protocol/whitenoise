@@ -130,7 +130,7 @@ void main() {
 
     testWidgets('displays privacy notice', (tester) async {
       await pumpEditProfileScreen(tester);
-      expect(find.text('You control what you share'), findsOneWidget);
+      expect(find.text('Profile is public'), findsOneWidget);
     });
 
     testWidgets('tapping privacy notice toggle expands description', (tester) async {

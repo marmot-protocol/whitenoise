@@ -65,9 +65,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get writeSomethingAboutYourself => 'Apresente-se';
 
   @override
-  String get profilePrivacyTitle => 'Você controla o que compartilha';
-
-  @override
   String get profilePrivacyDescription =>
       'Nome, foto e bio são visíveis na rede global do Nostr. Use o que você se sentir confortável em compartilhar.';
 

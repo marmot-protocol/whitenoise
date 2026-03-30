@@ -65,9 +65,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get writeSomethingAboutYourself => 'Kendinizi tanıtın';
 
   @override
-  String get profilePrivacyTitle => 'Ne paylaştığınızı siz kontrol edersiniz';
-
-  @override
   String get profilePrivacyDescription =>
       'İsim, fotoğraf ve biyografi küresel Nostr ağında görünür. Paylaşırken kendinizi rahat hissedeceğiniz bilgileri kullanın.';
 

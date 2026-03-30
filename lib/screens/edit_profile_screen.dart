@@ -152,7 +152,7 @@ class EditProfileScreen extends HookConsumerWidget {
                       Gap(36.h),
                       WnCallout(
                         key: const Key('edit_profile_privacy_notice'),
-                        title: context.l10n.profilePrivacyTitle,
+                        title: context.l10n.profileIsPublic,
                         description: privacyNoticeExpanded.value
                             ? context.l10n.profilePrivacyDescription
                             : null,

@@ -16,7 +16,6 @@
   "enterYourName": "Введите ваше имя",
   "introduceYourself": "О себе",
   "writeSomethingAboutYourself": "Расскажите о себе",
-  "profilePrivacyTitle": "Вы контролируете, чем делитесь",
   "profilePrivacyDescription": "Имя, фото и биография видны в глобальной сети Nostr. Используйте то, чем вам комфортно делиться.",
   "cancel": "Отмена",
   "profileReady": "Ваш профиль готов!",
