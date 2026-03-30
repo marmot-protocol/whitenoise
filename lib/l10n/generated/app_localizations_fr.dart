@@ -302,7 +302,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get copiedToClipboardThankYou => 'Copié dans le presse-papiers. Merci !';
 
   @override
-  String get shareProfileTitle => 'Partager & connecter';
+  String get shareProfileTitle => 'Partager et connecter';
 
   @override
   String get scanToConnect => 'Scanner pour se connecter';

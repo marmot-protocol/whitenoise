@@ -94,7 +94,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get settings => 'Einstellungen';
 
   @override
-  String get shareAndConnect => 'Teilen & verbinden';
+  String get shareAndConnect => 'Teilen und verbinden';
 
   @override
   String get switchProfile => 'Profil wechseln';
@@ -115,7 +115,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get appearance => 'Erscheinungsbild';
 
   @override
-  String get privacySecurity => 'Datenschutz & Sicherheit';
+  String get privacySecurity => 'Datenschutz und Sicherheit';
 
   @override
   String get donateToWhiteNoise => 'An White Noise spenden';
@@ -130,7 +130,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get appearanceTitle => 'Erscheinungsbild';
 
   @override
-  String get privacySecurityTitle => 'Datenschutz & Sicherheit';
+  String get privacySecurityTitle => 'Datenschutz und Sicherheit';
 
   @override
   String get deleteAllAppData => 'Alle App-Daten löschen';
@@ -304,7 +304,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get copiedToClipboardThankYou => 'In Zwischenablage kopiert. Danke!';
 
   @override
-  String get shareProfileTitle => 'Teilen & verbinden';
+  String get shareProfileTitle => 'Teilen und verbinden';
 
   @override
   String get scanToConnect => 'Zum Verbinden scannen';
