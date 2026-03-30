@@ -10,8 +10,42 @@ use nostr_sdk::PublicKey;
 use whitenoise::whitenoise::chat_list::ChatListItem as WhitenoiseChatListItem;
 use whitenoise::{
     ChatListUpdate as WhitenoiseChatListUpdate,
-    ChatListUpdateTrigger as WhitenoiseChatListUpdateTrigger, Whitenoise,
+    ChatListUpdateTrigger as WhitenoiseChatListUpdateTrigger, MuteDuration, Whitenoise,
 };
+
+/// How long to mute a chat.
+///
+/// Use a preset variant for common durations or [`ChatMuteDuration::Custom`]
+/// for an arbitrary future timestamp.
+#[frb]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ChatMuteDuration {
+    /// Mute for 1 hour
+    OneHour,
+    /// Mute for 8 hours
+    EightHours,
+    /// Mute for 1 day
+    OneDay,
+    /// Mute for 1 week
+    OneWeek,
+    /// Mute until manually unmuted
+    Forever,
+    /// Mute until a specific timestamp (must be in the future)
+    Custom { until: DateTime<Utc> },
+}
+
+impl From<ChatMuteDuration> for MuteDuration {
+    fn from(d: ChatMuteDuration) -> Self {
+        match d {
+            ChatMuteDuration::OneHour => Self::OneHour,
+            ChatMuteDuration::EightHours => Self::EightHours,
+            ChatMuteDuration::OneDay => Self::OneDay,
+            ChatMuteDuration::OneWeek => Self::OneWeek,
+            ChatMuteDuration::Forever => Self::Forever,
+            ChatMuteDuration::Custom { until } => Self::Custom(until),
+        }
+    }
+}
 
 #[frb(non_opaque)]
 #[derive(Debug, Clone)]
@@ -171,16 +205,15 @@ pub async fn set_chat_pin_order(
     Ok(())
 }
 
-/// Mutes a chat until the specified time.
+/// Mutes a chat for the specified duration.
 ///
-/// Notifications for this chat will be suppressed until `until`.
-/// Use `MUTE_FOREVER` (year 9999) for an indefinite mute.
-/// The `until` timestamp must be in the future.
+/// Notifications for this chat will be suppressed until the duration expires.
+/// Use [`ChatMuteDuration::Forever`] to mute indefinitely.
 #[frb]
 pub async fn mute_chat(
     account_pubkey: String,
     mls_group_id: String,
-    until: DateTime<Utc>,
+    duration: ChatMuteDuration,
 ) -> Result<(), ApiError> {
     let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
@@ -188,7 +221,9 @@ pub async fn mute_chat(
     let group_id = GroupId::from_slice(&group_id_bytes);
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
 
-    whitenoise.mute_chat(&account, &group_id, until).await?;
+    whitenoise
+        .mute_chat(&account, &group_id, duration.into())
+        .await?;
 
     Ok(())
 }
@@ -207,14 +242,6 @@ pub async fn unmute_chat(account_pubkey: String, mls_group_id: String) -> Result
     whitenoise.unmute_chat(&account, &group_id).await?;
 
     Ok(())
-}
-
-/// Returns the MUTE_FOREVER sentinel timestamp (year 9999).
-///
-/// Pass this to `mute_chat` to mute a chat indefinitely.
-#[frb]
-pub fn mute_forever_timestamp() -> DateTime<Utc> {
-    whitenoise::MUTE_FOREVER
 }
 
 /// Retrieves the chat list for an account.
@@ -390,8 +417,32 @@ mod tests {
     }
 
     #[test]
-    fn test_mute_forever_timestamp_returns_sentinel() {
-        let ts = super::mute_forever_timestamp();
-        assert_eq!(ts, whitenoise::MUTE_FOREVER);
+    fn test_chat_mute_duration_to_mute_duration_conversion() {
+        assert_eq!(
+            MuteDuration::from(ChatMuteDuration::OneHour),
+            MuteDuration::OneHour
+        );
+        assert_eq!(
+            MuteDuration::from(ChatMuteDuration::EightHours),
+            MuteDuration::EightHours
+        );
+        assert_eq!(
+            MuteDuration::from(ChatMuteDuration::OneDay),
+            MuteDuration::OneDay
+        );
+        assert_eq!(
+            MuteDuration::from(ChatMuteDuration::OneWeek),
+            MuteDuration::OneWeek
+        );
+        assert_eq!(
+            MuteDuration::from(ChatMuteDuration::Forever),
+            MuteDuration::Forever
+        );
+
+        let custom_time = Utc::now() + chrono::Duration::hours(3);
+        assert_eq!(
+            MuteDuration::from(ChatMuteDuration::Custom { until: custom_time }),
+            MuteDuration::Custom(custom_time)
+        );
     }
 }

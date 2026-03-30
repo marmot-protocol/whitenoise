@@ -13,7 +13,7 @@ import 'messages.dart';
 
 part 'chat_list.freezed.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`
 
 /// Sets the pin order for a chat.
 ///
@@ -32,19 +32,18 @@ Future<void> setChatPinOrder({
   pinOrder: pinOrder,
 );
 
-/// Mutes a chat until the specified time.
+/// Mutes a chat for the specified duration.
 ///
-/// Notifications for this chat will be suppressed until `until`.
-/// Use `MUTE_FOREVER` (year 9999) for an indefinite mute.
-/// The `until` timestamp must be in the future.
+/// Notifications for this chat will be suppressed until the duration expires.
+/// Use [`ChatMuteDuration::Forever`] to mute indefinitely.
 Future<void> muteChat({
   required String accountPubkey,
   required String mlsGroupId,
-  required DateTime until,
+  required ChatMuteDuration duration,
 }) => RustLib.instance.api.crateApiChatListMuteChat(
   accountPubkey: accountPubkey,
   mlsGroupId: mlsGroupId,
-  until: until,
+  duration: duration,
 );
 
 /// Unmutes a previously muted chat.
@@ -57,12 +56,6 @@ Future<void> unmuteChat({
   accountPubkey: accountPubkey,
   mlsGroupId: mlsGroupId,
 );
-
-/// Returns the MUTE_FOREVER sentinel timestamp (year 9999).
-///
-/// Pass this to `mute_chat` to mute a chat indefinitely.
-Future<DateTime> muteForeverTimestamp() =>
-    RustLib.instance.api.crateApiChatListMuteForeverTimestamp();
 
 /// Retrieves the chat list for an account.
 ///
@@ -153,6 +146,31 @@ enum ChatListUpdateTrigger {
 
   /// The chat's mute status changed.
   chatMuteChanged,
+}
+
+@freezed
+sealed class ChatMuteDuration with _$ChatMuteDuration {
+  const ChatMuteDuration._();
+
+  /// Mute for 1 hour
+  const factory ChatMuteDuration.oneHour() = ChatMuteDuration_OneHour;
+
+  /// Mute for 8 hours
+  const factory ChatMuteDuration.eightHours() = ChatMuteDuration_EightHours;
+
+  /// Mute for 1 day
+  const factory ChatMuteDuration.oneDay() = ChatMuteDuration_OneDay;
+
+  /// Mute for 1 week
+  const factory ChatMuteDuration.oneWeek() = ChatMuteDuration_OneWeek;
+
+  /// Mute until manually unmuted
+  const factory ChatMuteDuration.forever() = ChatMuteDuration_Forever;
+
+  /// Mute until a specific timestamp (must be in the future)
+  const factory ChatMuteDuration.custom({
+    required DateTime until,
+  }) = ChatMuteDuration_Custom;
 }
 
 class ChatSummary {
