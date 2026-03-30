@@ -73,17 +73,43 @@ Future<ChatMessage?> fetchMessageById({
   messageId: messageId,
 );
 
+/// Fetch the newest messages for a group, ensuring all unread messages are included
+/// and at least `minimum` messages are returned.
+///
+/// The effective fetch size is `max(unread_count, minimum)`, so the caller always
+/// receives a full page even when there are no unread messages, and always receives
+/// every unread message when there are more unreads than the minimum.
+///
+/// Messages are returned in oldest-first order.
+Future<List<ChatMessage>> fetchMessagesUnreadWithMinimum({
+  required String pubkey,
+  required String groupId,
+  int? minimum,
+}) => RustLib.instance.api.crateApiMessagesFetchMessagesUnreadWithMinimum(
+  pubkey: pubkey,
+  groupId: groupId,
+  minimum: minimum,
+);
+
 /// Subscribe to real-time message updates for a group.
 ///
 /// The stream first emits an `InitialSnapshot` containing all current messages,
 /// then emits `Update` items as messages are added, reacted to, or deleted.
 ///
+/// When `pubkey` is provided the initial snapshot is fetched via
+/// `fetch_messages_unread_with_minimum` so it always includes every unread
+/// message plus at least 50 recent messages.  This eliminates the need for the
+/// UI to paginate backwards just to find the read marker.
+///
 /// The initial snapshot is race-condition free: any updates that arrive between
 /// subscribing and fetching are merged into the snapshot.
-Stream<MessageStreamItem> subscribeToGroupMessages({required String groupId}) =>
-    RustLib.instance.api.crateApiMessagesSubscribeToGroupMessages(
-      groupId: groupId,
-    );
+Stream<MessageStreamItem> subscribeToGroupMessages({
+  String? pubkey,
+  required String groupId,
+}) => RustLib.instance.api.crateApiMessagesSubscribeToGroupMessages(
+  pubkey: pubkey,
+  groupId: groupId,
+);
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Tag>>
 abstract class Tag implements RustOpaqueInterface {}

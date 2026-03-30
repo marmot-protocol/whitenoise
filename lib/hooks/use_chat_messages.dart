@@ -68,7 +68,7 @@ ChatMessagesResult useChatMessages(
       );
       Future.microtask(() => debugLog?.logStreamConnected(groupId: groupId));
 
-      return subscribeToGroupMessages(groupId: groupId)
+      return subscribeToGroupMessages(pubkey: pubkey, groupId: groupId)
           .handleError((Object e, StackTrace st) {
             _logger.severe(
               'stream ERROR groupId=$groupId error=$e',

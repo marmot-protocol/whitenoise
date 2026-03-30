@@ -114,6 +114,7 @@ class _MockApi extends MockWnApi {
 
   @override
   Stream<MessageStreamItem> crateApiMessagesSubscribeToGroupMessages({
+    String? pubkey,
     required String groupId,
   }) {
     controller?.close();

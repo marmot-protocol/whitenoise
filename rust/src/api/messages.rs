@@ -473,15 +473,44 @@ pub async fn fetch_message_by_id(
     Ok(message.map(|m| m.into()))
 }
 
+/// Fetch the newest messages for a group, ensuring all unread messages are included
+/// and at least `minimum` messages are returned.
+///
+/// The effective fetch size is `max(unread_count, minimum)`, so the caller always
+/// receives a full page even when there are no unread messages, and always receives
+/// every unread message when there are more unreads than the minimum.
+///
+/// Messages are returned in oldest-first order.
+#[frb]
+pub async fn fetch_messages_unread_with_minimum(
+    pubkey: String,
+    group_id: String,
+    minimum: Option<u32>,
+) -> Result<Vec<ChatMessage>, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let group_id = group_id_from_string(&group_id)?;
+    let messages = whitenoise
+        .fetch_messages_unread_with_minimum(&pubkey, &group_id, minimum)
+        .await?;
+    Ok(messages.into_iter().map(|m| m.into()).collect())
+}
+
 /// Subscribe to real-time message updates for a group.
 ///
 /// The stream first emits an `InitialSnapshot` containing all current messages,
 /// then emits `Update` items as messages are added, reacted to, or deleted.
 ///
+/// When `pubkey` is provided the initial snapshot is fetched via
+/// `fetch_messages_unread_with_minimum` so it always includes every unread
+/// message plus at least 50 recent messages.  This eliminates the need for the
+/// UI to paginate backwards just to find the read marker.
+///
 /// The initial snapshot is race-condition free: any updates that arrive between
 /// subscribing and fetching are merged into the snapshot.
 #[frb]
 pub async fn subscribe_to_group_messages(
+    pubkey: Option<String>,
     group_id: String,
     sink: StreamSink<MessageStreamItem>,
 ) -> Result<(), ApiError> {
@@ -491,16 +520,27 @@ pub async fn subscribe_to_group_messages(
 
     info!(group_id = %group_id_str, "subscribe_to_group_messages: subscribing");
 
+    let parsed_pubkey = pubkey.as_deref().map(PublicKey::parse).transpose()?;
+
     let subscription = whitenoise
         .subscribe_to_group_messages(&group_id, None)
         .await?;
 
+    // When a pubkey is provided, replace the subscription's initial snapshot with an
+    // unread-aware fetch so the caller always receives every unread message plus at
+    // least 50 recent ones — eliminating backwards pagination just to find the read
+    // marker.  The subscription was created first (above) so any concurrent updates
+    // that arrived during the fetch will arrive on `subscription.updates`.
+    let raw_initial: Vec<WhitenoiseChatMessage> = match parsed_pubkey {
+        Some(ref pk) => whitenoise
+            .fetch_messages_unread_with_minimum(pk, &group_id, None)
+            .await
+            .unwrap_or(subscription.initial_messages),
+        None => subscription.initial_messages,
+    };
+
     // Emit initial snapshot first
-    let initial_messages: Vec<ChatMessage> = subscription
-        .initial_messages
-        .into_iter()
-        .map(|m| m.into())
-        .collect();
+    let initial_messages: Vec<ChatMessage> = raw_initial.into_iter().map(|m| m.into()).collect();
 
     info!(
         group_id = %group_id_str,
