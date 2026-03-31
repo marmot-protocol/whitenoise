@@ -670,6 +670,35 @@ void main() {
       });
     });
 
+    group('read marking', () {
+      testWidgets('marks last visible message as read on scroll', (tester) async {
+        _api.initialMessages = List.generate(
+          20,
+          (i) => _message('m$i', createdAt: DateTime(2024, 1, i + 1)),
+        );
+        await pumpInviteScreen(tester);
+        _api.markedAsReadMessages.clear();
+
+        final listFinder = find.byType(ListView);
+        await tester.drag(listFinder, const Offset(0, -500));
+        await tester.pump(const Duration(milliseconds: 350));
+        await tester.pumpAndSettle();
+
+        expect(_api.markedAsReadMessages, isNotEmpty);
+      });
+
+      testWidgets('does not mark messages as read without scrolling', (tester) async {
+        _api.initialMessages = [_message('m1'), _message('m2')];
+        await pumpInviteScreen(tester);
+        _api.markedAsReadMessages.clear();
+
+        await tester.pump(const Duration(milliseconds: 350));
+        await tester.pumpAndSettle();
+
+        expect(_api.markedAsReadMessages, isEmpty);
+      });
+    });
+
     group('navigation', () {
       testWidgets('back button navigates to chat list', (tester) async {
         await pumpInviteScreen(tester);

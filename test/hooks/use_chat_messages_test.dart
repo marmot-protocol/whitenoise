@@ -1141,7 +1141,7 @@ void main() {
           const initialCount = 400;
           const pageCount = 200;
 
-          List<ChatMessage> _makeMessages(int start, int end) => [
+          List<ChatMessage> makeMessages(int start, int end) => [
             for (var i = start; i <= end; i++)
               _message('m$i', DateTime(2024, 1, i ~/ 28 + 1, i % 28 + 1)),
           ];
@@ -1150,13 +1150,13 @@ void main() {
             final getResult = await _pump(tester, 'group1');
 
             // Most-recent messages from the live stream snapshot.
-            _api.emitInitialSnapshot(_makeMessages(pageCount + 1, pageCount + initialCount));
+            _api.emitInitialSnapshot(makeMessages(pageCount + 1, pageCount + initialCount));
             await tester.pumpAndSettle();
 
             expect(getResult().messageCount, initialCount);
 
             // An older page that, when prepended, exceeds the window.
-            _api.olderMessagesResponse = _makeMessages(1, pageCount);
+            _api.olderMessagesResponse = makeMessages(1, pageCount);
             await getResult().loadOlderMessages();
             await tester.pumpAndSettle();
 
@@ -1166,10 +1166,10 @@ void main() {
           testWidgets('evicted messages are removed from messagesById', (tester) async {
             final getResult = await _pump(tester, 'group1');
 
-            _api.emitInitialSnapshot(_makeMessages(pageCount + 1, pageCount + initialCount));
+            _api.emitInitialSnapshot(makeMessages(pageCount + 1, pageCount + initialCount));
             await tester.pumpAndSettle();
 
-            _api.olderMessagesResponse = _makeMessages(1, pageCount);
+            _api.olderMessagesResponse = makeMessages(1, pageCount);
             await getResult().loadOlderMessages();
             await tester.pumpAndSettle();
 
@@ -1190,11 +1190,11 @@ void main() {
             // trims the oldest messages, those pages are still fetchable.
             final getResult = await _pump(tester, 'group1');
 
-            _api.emitInitialSnapshot(_makeMessages(pageCount + 1, pageCount + initialCount));
+            _api.emitInitialSnapshot(makeMessages(pageCount + 1, pageCount + initialCount));
             await tester.pumpAndSettle();
 
             // A page load that exceeds the window triggers eviction.
-            _api.olderMessagesResponse = _makeMessages(1, pageCount);
+            _api.olderMessagesResponse = makeMessages(1, pageCount);
             await getResult().loadOlderMessages();
             await tester.pumpAndSettle();
 
@@ -1207,10 +1207,10 @@ void main() {
           testWidgets('indexById is consistent with messageIds after eviction', (tester) async {
             final getResult = await _pump(tester, 'group1');
 
-            _api.emitInitialSnapshot(_makeMessages(pageCount + 1, pageCount + initialCount));
+            _api.emitInitialSnapshot(makeMessages(pageCount + 1, pageCount + initialCount));
             await tester.pumpAndSettle();
 
-            _api.olderMessagesResponse = _makeMessages(1, pageCount);
+            _api.olderMessagesResponse = makeMessages(1, pageCount);
             await getResult().loadOlderMessages();
             await tester.pumpAndSettle();
 
@@ -1232,10 +1232,10 @@ void main() {
             final getResult = await _pump(tester, 'group1');
 
             // newest message id is m${pageCount + initialCount}
-            _api.emitInitialSnapshot(_makeMessages(pageCount + 1, pageCount + initialCount));
+            _api.emitInitialSnapshot(makeMessages(pageCount + 1, pageCount + initialCount));
             await tester.pumpAndSettle();
 
-            _api.olderMessagesResponse = _makeMessages(1, pageCount);
+            _api.olderMessagesResponse = makeMessages(1, pageCount);
             await getResult().loadOlderMessages();
             await tester.pumpAndSettle();
 

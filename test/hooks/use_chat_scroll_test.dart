@@ -415,14 +415,10 @@ void main() {
         expect(lastResult?.isScrollDownButtonVisible, false);
       });
 
-      testWidgets('remains false on initial render even when controller is scrolled up', (
-        tester,
-      ) async {
-        // Set last read to an old message so firstUnreadIndex is non-null (will scroll to unread)
+      testWidgets('shows when scrolled up with unread messages below', (tester) async {
         _api.lastReadMessageId = 'm1';
         ChatScrollResult? lastResult;
 
-        // Pump with controller pre-scrolled above the threshold
         final ids = _generateIds(50);
         await tester.pumpWidget(
           _TestWidget(
@@ -433,13 +429,46 @@ void main() {
             onResult: (r) => lastResult = r,
           ),
         );
-        // Jump before first pump so the effect sees pixels > threshold
         scrollController.jumpTo(500);
+        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
         await tester.pumpAndSettle();
 
-        // Button only appears when a new unseen message arrives, not just on scroll position
-        expect(lastResult?.isScrollDownButtonVisible, false);
+        expect(lastResult?.isScrollDownButtonVisible, true);
       });
+
+      testWidgets(
+        'shows when new message arrives after scroll-to-unread positions away from bottom',
+        (tester) async {
+          _api.lastReadMessageId = 'm1';
+          ChatScrollResult? lastResult;
+          final ids = _generateIds(50);
+          await pumpScroll(
+            tester,
+            messageIds: ids,
+            onResult: (r) => lastResult = r,
+          );
+          await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+          await tester.pumpAndSettle();
+
+          expect(lastResult?.isInitialPositionReady, true);
+          expect(scrollController.position.pixels, greaterThan(_withinBottomThreshold));
+
+          // New message arrives while user is scrolled to unread (not at bottom)
+          final newIds = ['m51', ...ids];
+          await tester.pumpWidget(
+            _TestWidget(
+              scrollController: scrollController,
+              focusNode: focusNode,
+              messageIds: newIds,
+              latestMessageId: 'm51',
+              onResult: (r) => lastResult = r,
+            ),
+          );
+          await tester.pumpAndSettle();
+
+          expect(lastResult?.isScrollDownButtonVisible, true);
+        },
+      );
 
       testWidgets('is false again after scrolling back to bottom', (tester) async {
         ChatScrollResult? lastResult;

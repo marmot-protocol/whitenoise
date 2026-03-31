@@ -270,9 +270,13 @@ ChatScrollResult useChatScroll({
     return null;
   }, [latestMessageId, isLatestMessageOwn, isInitialPositionReady.value]);
 
+  final showScrollDown =
+      isInitialPositionReady.value &&
+      (hasUnseenMessages.value || (!isAtBottom.value && firstUnreadIndex != null));
+
   return (
     isInitialPositionReady: isInitialPositionReady.value,
-    isScrollDownButtonVisible: hasUnseenMessages.value,
+    isScrollDownButtonVisible: showScrollDown,
     scrollToBottom: scrollToBottom,
   );
 }

@@ -225,9 +225,8 @@ class ChatScreen extends HookConsumerWidget {
     final slateTopPadding = safeAreaTop + _slateHeight.h + searchBarHeight;
     final listBottomPadding = inputAreaHeight.value + safeAreaBottom + 12.h;
 
-    final allMessages = List.generate(messageCount, getMessage);
     final displayMessages = isSearchActive.value
-        ? filterMessagesBySearch(allMessages, searchQuery.value)
+        ? filterMessagesBySearch(List.generate(messageCount, getMessage), searchQuery.value)
         : null;
     final displayCount = displayMessages?.length ?? messageCount;
     final currentMatchIndex = useState(0);

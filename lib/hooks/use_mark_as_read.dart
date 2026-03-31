@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart' as account_groups_api;
@@ -38,12 +40,19 @@ MarkAsReadResult useMarkAsRead({
     return null;
   }, [accountPubkey, groupId]);
 
+  final refetchTimer = useRef<Timer?>(null);
   useEffect(() {
     if (hasLoadedLastRead.value) {
-      fetchLastReadMessageId();
+      refetchTimer.value?.cancel();
+      refetchTimer.value = Timer(const Duration(seconds: 1), fetchLastReadMessageId);
     }
     return null;
   }, [messageCount]);
+  useEffect(
+    () =>
+        () => refetchTimer.value?.cancel(),
+    const [],
+  );
 
   bool isMessageRead(String messageId) {
     if (messageId == lastReadMessageId.value) return true;

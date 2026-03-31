@@ -205,6 +205,7 @@ class ChatInviteScreen extends HookConsumerWidget {
                   : _InviteMessageList(
                       chatMessages: chatMessages,
                       pubkey: pubkey,
+                      groupId: mlsGroupId,
                       isGroupChat: chatProfile.data?.isDm != true,
                     ),
             ),
@@ -243,17 +244,65 @@ class _InviteMessageList extends HookWidget {
   const _InviteMessageList({
     required this.chatMessages,
     required this.pubkey,
+    required this.groupId,
     required this.isGroupChat,
   });
 
   final ChatMessagesResult chatMessages;
   final String pubkey;
+  final String groupId;
   final bool isGroupChat;
 
   @override
   Widget build(BuildContext context) {
     final scrollController = useScrollController();
     final hasMoreBelow = useState(false);
+    final hasUserScrolled = useRef(false);
+    final debounceTimer = useRef<Timer?>(null);
+    final lastMarkedId = useRef<String?>(null);
+
+    useEffect(() {
+      void markVisibleMessagesAsRead() {
+        if (!scrollController.hasClients) return;
+        if (!hasUserScrolled.value) return;
+        if (chatMessages.messageCount == 0) return;
+
+        final position = scrollController.position;
+        final viewportHeight = position.viewportDimension;
+        final bottomEdge = position.pixels + viewportHeight;
+        final totalExtent = position.maxScrollExtent + viewportHeight;
+
+        final lastVisibleIndex = totalExtent > 0
+            ? ((bottomEdge / totalExtent) * chatMessages.messageCount).ceil().clamp(
+                0,
+                chatMessages.messageCount - 1,
+              )
+            : 0;
+
+        final reversedIndex = chatMessages.messageCount - 1 - lastVisibleIndex;
+        final messageId = chatMessages.getMessage(reversedIndex).id;
+        if (messageId == lastMarkedId.value) return;
+        lastMarkedId.value = messageId;
+        unawaited(
+          account_groups_api.markMessageRead(accountPubkey: pubkey, messageId: messageId),
+        );
+      }
+
+      void onScrollUpdate() {
+        hasUserScrolled.value = true;
+        debounceTimer.value?.cancel();
+        debounceTimer.value = Timer(
+          const Duration(milliseconds: 300),
+          markVisibleMessagesAsRead,
+        );
+      }
+
+      scrollController.addListener(onScrollUpdate);
+      return () {
+        scrollController.removeListener(onScrollUpdate);
+        debounceTimer.value?.cancel();
+      };
+    }, [scrollController, chatMessages.messageCount]);
 
     useEffect(() {
       void updateHasMoreBelow() {
