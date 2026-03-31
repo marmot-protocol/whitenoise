@@ -98,11 +98,11 @@ class ShareProfileScreen extends HookConsumerWidget {
                             backgroundColor: colors.backgroundSecondary,
                             eyeStyle: QrEyeStyle(
                               eyeShape: QrEyeShape.square,
-                              color: colors.qrCode,
+                              color: colors.backgroundContentPrimary,
                             ),
                             dataModuleStyle: QrDataModuleStyle(
                               dataModuleShape: QrDataModuleShape.square,
-                              color: colors.qrCode,
+                              color: colors.backgroundContentPrimary,
                             ),
                           ),
                         ),
