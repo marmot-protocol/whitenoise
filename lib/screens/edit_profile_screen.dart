@@ -9,6 +9,7 @@ import 'package:whitenoise/hooks/use_edit_profile.dart'
 import 'package:whitenoise/hooks/use_image_picker.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
@@ -30,6 +31,7 @@ class EditProfileScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final pubkey = ref.watch(accountPubkeyProvider);
+    final isOffline = ref.watch(offlineProvider).value ?? false;
     final (
       :state,
       :displayNameController,
@@ -84,7 +86,14 @@ class EditProfileScreen extends HookConsumerWidget {
             title: context.l10n.editProfile,
             onNavigate: () => Routes.goBack(context),
           ),
-          systemNotice: noticeMessage.value != null
+          systemNotice: isOffline
+              ? WnSystemNotice(
+                  key: const Key('offline_notice'),
+                  title: context.l10n.waitingForInternet,
+                  type: WnSystemNoticeType.warning,
+                  variant: WnSystemNoticeVariant.expanded,
+                )
+              : noticeMessage.value != null
               ? WnSystemNotice(
                   key: ValueKey(noticeMessage.value),
                   title: noticeMessage.value!,
@@ -101,7 +110,8 @@ class EditProfileScreen extends HookConsumerWidget {
                       text: context.l10n.save,
                       size: WnButtonSize.medium,
                       onPressed:
-                          state.hasUnsavedChanges &&
+                          !isOffline &&
+                              state.hasUnsavedChanges &&
                               state.loadingState != EditProfileLoadingState.saving
                           ? () async {
                               final success = await updateProfileData();

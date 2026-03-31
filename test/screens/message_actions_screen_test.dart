@@ -1353,6 +1353,49 @@ void main() {
     });
 
     group('when offline', () {
+      testWidgets('shows offline_notice', (tester) async {
+        await mountShowTest(
+          tester,
+          builder: (context) => ElevatedButton(
+            onPressed: () => MessageActionsScreen.show(
+              context,
+              message: _createTestMessage(),
+              pubkey: testPubkeyA,
+              isOffline: true,
+              onAddReaction: (_) async {},
+              onRemoveReaction: (_) async {},
+            ),
+            child: const Text('Show Menu'),
+          ),
+        );
+
+        await tester.tap(find.text('Show Menu'));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+      });
+
+      testWidgets('does not show offline_notice when online', (tester) async {
+        await mountShowTest(
+          tester,
+          builder: (context) => ElevatedButton(
+            onPressed: () => MessageActionsScreen.show(
+              context,
+              message: _createTestMessage(),
+              pubkey: testPubkeyA,
+              onAddReaction: (_) async {},
+              onRemoveReaction: (_) async {},
+            ),
+            child: const Text('Show Menu'),
+          ),
+        );
+
+        await tester.tap(find.text('Show Menu'));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('offline_notice')), findsNothing);
+      });
+
       testWidgets('does not call onDelete when own message delete is tapped', (tester) async {
         var deleteCalled = false;
         const myPubkey = testPubkeyA;

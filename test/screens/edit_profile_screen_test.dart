@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
@@ -95,14 +96,20 @@ void main() {
     mockApi.updateCompleter = null;
   });
 
-  Future<void> pumpEditProfileScreen(WidgetTester tester) async {
+  Future<void> pumpEditProfileScreen(
+    WidgetTester tester, {
+    List<dynamic> overrides = const [],
+  }) async {
     await mountTestApp(
       tester,
       overrides: [
         authProvider.overrideWith(() => _MockAuthNotifier()),
         secureStorageProvider.overrideWithValue(MockSecureStorage()),
+        ...overrides,
       ],
     );
+    await tester.pumpAndSettle();
+
     Routes.pushToEditProfile(tester.element(find.byType(Scaffold)));
     await tester.pumpAndSettle();
   }
@@ -369,6 +376,40 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(WnSystemNotice), findsNothing);
+    });
+
+    group('offline state', () {
+      testWidgets('Offline shows offline_notice and disables Save button', (tester) async {
+        await pumpEditProfileScreen(
+          tester,
+          overrides: [offlineProvider.overrideWith((ref) => Stream.value(true))],
+        );
+
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+
+        await tester.enterText(find.byType(TextField).first, 'New Name');
+        await tester.pump();
+
+        final saveButton = tester.widget<WnButton>(find.widgetWithText(WnButton, 'Save'));
+        expect(saveButton.onPressed, isNull);
+      });
+
+      testWidgets('Online does not show offline_notice and Save button responds normally', (
+        tester,
+      ) async {
+        await pumpEditProfileScreen(
+          tester,
+          overrides: [offlineProvider.overrideWith((ref) => Stream.value(false))],
+        );
+
+        expect(find.byKey(const Key('offline_notice')), findsNothing);
+
+        await tester.enterText(find.byType(TextField).first, 'New Name');
+        await tester.pump();
+
+        final saveButton = tester.widget<WnButton>(find.widgetWithText(WnButton, 'Save'));
+        expect(saveButton.onPressed, isNotNull);
+      });
     });
   });
 }

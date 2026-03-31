@@ -15,7 +15,8 @@ import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_emoji_picker.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
-import 'package:whitenoise/widgets/wn_system_notice.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart'
+    show WnSystemNotice, WnSystemNoticeType, WnSystemNoticeVariant;
 
 const _modalViewportVerticalInset = 96.0;
 const _modalPreviewTopPadding = 10.0;
@@ -209,16 +210,25 @@ class MessageActionsScreen extends HookWidget {
       }
     }
 
+    final systemNotice = isOffline
+        ? WnSystemNotice(
+            key: const Key('offline_notice'),
+            title: context.l10n.waitingForInternet,
+            type: WnSystemNoticeType.warning,
+            variant: WnSystemNoticeVariant.expanded,
+          )
+        : (noticeMessage.value != null
+              ? WnSystemNotice(
+                  key: ValueKey(noticeMessage.value),
+                  title: noticeMessage.value!,
+                  type: WnSystemNoticeType.error,
+                  onDismiss: dismissNotice,
+                )
+              : null);
+
     return SafeArea(
       child: Column(
         children: [
-          if (noticeMessage.value != null)
-            WnSystemNotice(
-              key: ValueKey(noticeMessage.value),
-              title: noticeMessage.value!,
-              type: WnSystemNoticeType.error,
-              onDismiss: dismissNotice,
-            ),
           Expanded(
             child: Padding(
               padding: EdgeInsets.symmetric(vertical: 16.h),
@@ -231,6 +241,7 @@ class MessageActionsScreen extends HookWidget {
                     message: message,
                     isOwnMessage: isOwnMessage,
                     currentUserPubkey: pubkey,
+                    systemNotice: systemNotice,
                     onDelete: (isOwnMessage && onDelete != null && !isOffline)
                         ? handleDelete
                         : null,
@@ -276,6 +287,7 @@ class MessageActionsModal extends StatelessWidget {
     required this.message,
     required this.isOwnMessage,
     required this.currentUserPubkey,
+    this.systemNotice,
     this.onReaction,
     this.onEmojiPicker,
     this.onDelete,
@@ -290,6 +302,7 @@ class MessageActionsModal extends StatelessWidget {
 
   final ChatMessage message;
   final bool isOwnMessage;
+  final Widget? systemNotice;
   final void Function(String emoji)? onReaction;
   final VoidCallback? onEmojiPicker;
   final String currentUserPubkey;
@@ -341,6 +354,7 @@ class MessageActionsModal extends StatelessWidget {
         builder: (context, slateConstraints) {
           return WnSlate(
             shrinkWrapContent: true,
+            systemNotice: systemNotice,
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 maxWidth: slateConstraints.maxWidth,

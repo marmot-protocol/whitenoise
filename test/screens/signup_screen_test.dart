@@ -5,12 +5,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart' show ScreenUtilInit;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/home_screen.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_carousel_indicator.dart' show WnCarouselIndicator;
 import 'package:whitenoise/widgets/wn_onboarding_carousel.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
@@ -41,12 +43,14 @@ class _MockApi extends MockWnApi {
 
 class _MockAuthNotifier extends AuthNotifier {
   Exception? errorToThrow;
+  bool signupCalled = false;
 
   @override
   Future<String?> build() async => null;
 
   @override
   Future<String> signup() async {
+    signupCalled = true;
     if (errorToThrow != null) throw errorToThrow!;
     state = const AsyncData(testPubkeyA);
     return testPubkeyA;
@@ -444,6 +448,48 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(WnSystemNotice), findsNothing);
+      });
+    });
+
+    group('when offline', () {
+      testWidgets('displays offline notice', (tester) async {
+        await pumpSignupScreen(
+          tester,
+          overrides: [offlineProvider.overrideWith((ref) => Stream.value(true))],
+        );
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+        expect(find.text('Waiting for internet connection'), findsOneWidget);
+      });
+
+      testWidgets('Create profile button is disabled', (tester) async {
+        await pumpSignupScreen(
+          tester,
+          overrides: [offlineProvider.overrideWith((ref) => Stream.value(true))],
+        );
+        await tester.enterText(find.byType(TextField).first, 'Test User');
+        await tester.pump();
+        final createButton = tester.widget<WnButton>(
+          find.widgetWithText(WnButton, 'Create profile'),
+        );
+        expect(createButton.disabled, isTrue);
+      });
+
+      testWidgets('Create profile button onPressed is null when offline', (tester) async {
+        late _MockAuthNotifier mockAuth;
+        mockAuth = _MockAuthNotifier();
+        await pumpSignupScreen(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => mockAuth),
+            secureStorageProvider.overrideWithValue(MockSecureStorage()),
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+        await tester.enterText(find.byType(TextField).first, 'Test User');
+        await tester.pump();
+        await tester.tap(find.text('Create profile'));
+        await tester.pump();
+        expect(mockAuth.signupCalled, isFalse);
       });
     });
   });
