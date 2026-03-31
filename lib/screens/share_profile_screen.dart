@@ -86,18 +86,25 @@ class ShareProfileScreen extends HookConsumerWidget {
                     ),
                     Gap(36.h),
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(8.r),
-                      child: QrImageView(
-                        data: npub,
-                        size: 256.w,
-                        padding: EdgeInsets.zero,
-                        eyeStyle: QrEyeStyle(
-                          eyeShape: QrEyeShape.square,
-                          color: colors.qrCode,
-                        ),
-                        dataModuleStyle: QrDataModuleStyle(
-                          dataModuleShape: QrDataModuleShape.square,
-                          color: colors.qrCode,
+                      borderRadius: BorderRadius.circular(12.r),
+                      child: SizedBox.square(
+                        dimension: 256.w,
+                        child: FittedBox(
+                          fit: BoxFit.fill,
+                          child: QrImageView(
+                            data: npub,
+                            size: 98,
+                            padding: EdgeInsets.zero,
+                            backgroundColor: colors.backgroundSecondary,
+                            eyeStyle: QrEyeStyle(
+                              eyeShape: QrEyeShape.square,
+                              color: colors.qrCode,
+                            ),
+                            dataModuleStyle: QrDataModuleStyle(
+                              dataModuleShape: QrDataModuleShape.square,
+                              color: colors.qrCode,
+                            ),
+                          ),
                         ),
                       ),
                     ),
