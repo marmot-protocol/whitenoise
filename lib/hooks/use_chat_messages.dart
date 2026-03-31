@@ -65,6 +65,12 @@ ChatMessagesResult useChatMessages(
     };
   }, []);
 
+  // Monotonically increasing counter bumped whenever groupId or pubkey changes.
+  // loadOlderMessages captures the current value at call time and checks it
+  // after the await; a mismatch means the account or group changed while the
+  // fetch was in-flight and the response must be discarded.
+  final requestTokenRef = useRef(0);
+
   useEffect(() {
     messageIds.value = [];
     messagesById.value = {};
@@ -73,6 +79,7 @@ ChatMessagesResult useChatMessages(
     hasMoreMessages.value = true;
     // Reset rebuild counter when switching groups or accounts (see declaration).
     paginationVersion.value = 0;
+    requestTokenRef.value++;
     return null;
   }, [groupId, pubkey]);
 
@@ -337,6 +344,7 @@ ChatMessagesResult useChatMessages(
     if (oldestMessage == null) return;
 
     final requestGroupId = groupId;
+    final requestToken = requestTokenRef.value;
     isLoadingOlderMessages.value = true;
     _logger.info(
       'loadOlderMessages groupId=$groupId: fetching page before=${oldestMessage.createdAt} cursorId=$oldestId totalLoaded=${messageIds.value.length}',
@@ -356,9 +364,11 @@ ChatMessagesResult useChatMessages(
         beforeMessageId: oldestId,
       );
 
-      if (isDisposed.value || groupId != requestGroupId) {
+      // Discard if the widget was disposed OR if groupId/pubkey changed while
+      // the fetch was in-flight (requestToken no longer matches the current one).
+      if (isDisposed.value || requestToken != requestTokenRef.value) {
         _logger.info(
-          'loadOlderMessages groupId=$requestGroupId: discarded (disposed or groupId changed)',
+          'loadOlderMessages groupId=$requestGroupId: discarded (disposed or context changed)',
         );
         debugLog?.logPageFetch(
           groupId: requestGroupId,
@@ -425,7 +435,7 @@ ChatMessagesResult useChatMessages(
         );
       }
     } finally {
-      if (!isDisposed.value && groupId == requestGroupId) {
+      if (!isDisposed.value && requestToken == requestTokenRef.value) {
         isLoadingOlderMessages.value = false;
       }
     }
