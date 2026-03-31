@@ -11,6 +11,13 @@ import 'package:whitenoise/src/rust/api/metadata.dart';
 
 final _logger = Logger('useChatMessages');
 
+/// Maximum number of message IDs kept in memory at once. When prepending older
+/// messages would push the total past this limit, the tail (oldest end) is
+/// evicted and hasMoreMessages is reset to true so the user can reload them by
+/// scrolling up. 500 is large enough that normal usage never notices the cap,
+/// yet small enough to prevent OOM in long-running sessions.
+const _kWindowSize = 500;
+
 typedef ChatMessageQuoteData = ({
   String messageId,
   String authorPubkey,
@@ -387,14 +394,43 @@ ChatMessagesResult useChatMessages(
 
       final newIds = <String>[];
       for (final msg in olderMessages) {
+        // Always refresh the stored payload so that updated deletion/media/
+        // content state from an overlapping page overwrites the stale copy.
+        messagesById.value[msg.id] = msg;
+        // Only track new IDs for prepending; duplicates keep their existing
+        // position in the list.
         if (!indexById.value.containsKey(msg.id)) {
           newIds.add(msg.id);
-          messagesById.value[msg.id] = msg;
         }
       }
 
       if (newIds.isNotEmpty) {
-        final combined = [...newIds, ...messageIds.value];
+        var combined = [...newIds, ...messageIds.value];
+
+        // Sliding-window eviction: keep the list bounded so long sessions do
+        // not cause OOM. When the merged list exceeds _kWindowSize we drop the
+        // oldest entries from the front. combined = [newIds (older) …
+        // messageIds.value (newer)], so trimming the front discards the
+        // furthest-back history while keeping the most-recent messages.
+        // Because the user can always reload those pages by scrolling up, we
+        // reset hasMoreMessages to true so the "load older" path remains
+        // available after eviction.
+        if (combined.length > _kWindowSize) {
+          final excess = combined.length - _kWindowSize;
+          final evicted = combined.sublist(0, excess);
+          combined = combined.sublist(excess);
+          // Remove evicted payloads from the lookup map to free memory.
+          for (final id in evicted) {
+            messagesById.value.remove(id);
+          }
+          // The front was trimmed so there are older messages the user has not
+          // loaded yet; keep the pagination gate open.
+          hasMoreMessages.value = true;
+          _logger.info(
+            'loadOlderMessages groupId=$groupId: evicted ${evicted.length} oldest messages (window=$_kWindowSize)',
+          );
+        }
+
         messageIds.value = combined;
         indexById.value = {
           for (var i = 0; i < combined.length; i++) combined[i]: i,

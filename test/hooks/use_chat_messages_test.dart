@@ -1131,6 +1131,119 @@ void main() {
           expect(getResult().hasMoreMessages, isFalse);
           expect(getResult().messageCount, 1);
         });
+
+        group('sliding-window eviction', () {
+          // _kWindowSize is 500. Build enough messages to exceed the window.
+          // The initial snapshot provides the most-recent 400 messages and the
+          // page load provides 200 older ones, for a combined 600 which exceeds
+          // the 500-message window.
+          const windowSize = 500;
+          const initialCount = 400;
+          const pageCount = 200;
+
+          List<ChatMessage> _makeMessages(int start, int end) => [
+            for (var i = start; i <= end; i++)
+              _message('m$i', DateTime(2024, 1, i ~/ 28 + 1, i % 28 + 1)),
+          ];
+
+          testWidgets('truncates combined list to window size', (tester) async {
+            final getResult = await _pump(tester, 'group1');
+
+            // Most-recent messages from the live stream snapshot.
+            _api.emitInitialSnapshot(_makeMessages(pageCount + 1, pageCount + initialCount));
+            await tester.pumpAndSettle();
+
+            expect(getResult().messageCount, initialCount);
+
+            // An older page that, when prepended, exceeds the window.
+            _api.olderMessagesResponse = _makeMessages(1, pageCount);
+            await getResult().loadOlderMessages();
+            await tester.pumpAndSettle();
+
+            expect(getResult().messageCount, windowSize);
+          });
+
+          testWidgets('evicted messages are removed from messagesById', (tester) async {
+            final getResult = await _pump(tester, 'group1');
+
+            _api.emitInitialSnapshot(_makeMessages(pageCount + 1, pageCount + initialCount));
+            await tester.pumpAndSettle();
+
+            _api.olderMessagesResponse = _makeMessages(1, pageCount);
+            await getResult().loadOlderMessages();
+            await tester.pumpAndSettle();
+
+            // The tail of the page (oldest messages, e.g. m1..m100) must have
+            // been evicted so getMessageById returns null for them.
+            final evictedCount = pageCount + initialCount - windowSize;
+            for (var i = 1; i <= evictedCount; i++) {
+              expect(
+                getResult().getMessageById('m$i'),
+                isNull,
+                reason: 'm$i should have been evicted',
+              );
+            }
+          });
+
+          testWidgets('keeps hasMoreMessages true after eviction', (tester) async {
+            // Eviction must never close the pagination gate. If the window
+            // trims the oldest messages, those pages are still fetchable.
+            final getResult = await _pump(tester, 'group1');
+
+            _api.emitInitialSnapshot(_makeMessages(pageCount + 1, pageCount + initialCount));
+            await tester.pumpAndSettle();
+
+            // A page load that exceeds the window triggers eviction.
+            _api.olderMessagesResponse = _makeMessages(1, pageCount);
+            await getResult().loadOlderMessages();
+            await tester.pumpAndSettle();
+
+            // Eviction happened (total would have been 600 > 500).
+            expect(getResult().messageCount, windowSize);
+            // The gate must remain open so the user can reload evicted pages.
+            expect(getResult().hasMoreMessages, isTrue);
+          });
+
+          testWidgets('indexById is consistent with messageIds after eviction', (tester) async {
+            final getResult = await _pump(tester, 'group1');
+
+            _api.emitInitialSnapshot(_makeMessages(pageCount + 1, pageCount + initialCount));
+            await tester.pumpAndSettle();
+
+            _api.olderMessagesResponse = _makeMessages(1, pageCount);
+            await getResult().loadOlderMessages();
+            await tester.pumpAndSettle();
+
+            final result = getResult();
+            expect(result.messageCount, windowSize);
+            // getReversedMessageIndex must return non-null for every message
+            // that is still in the window.
+            final evictedCount = pageCount + initialCount - windowSize;
+            for (var i = evictedCount + 1; i <= pageCount + initialCount; i++) {
+              expect(
+                result.getReversedMessageIndex('m$i'),
+                isNotNull,
+                reason: 'm$i should still be in the window',
+              );
+            }
+          });
+
+          testWidgets('newest messages are always preserved after eviction', (tester) async {
+            final getResult = await _pump(tester, 'group1');
+
+            // newest message id is m${pageCount + initialCount}
+            _api.emitInitialSnapshot(_makeMessages(pageCount + 1, pageCount + initialCount));
+            await tester.pumpAndSettle();
+
+            _api.olderMessagesResponse = _makeMessages(1, pageCount);
+            await getResult().loadOlderMessages();
+            await tester.pumpAndSettle();
+
+            final result = getResult();
+            // The most-recent message (index 0 in reversed order) must still be present.
+            expect(result.getMessage(0).id, 'm${pageCount + initialCount}');
+          });
+        });
       });
 
       group('debugLog pageFetch entries', () {
