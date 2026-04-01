@@ -93,13 +93,20 @@ Future<List<ChatMessage>> fetchMessagesUnreadWithMinimum({
 
 /// Subscribe to real-time message updates for a group.
 ///
-/// The stream first emits an `InitialSnapshot` containing all current messages,
-/// then emits `Update` items as messages are added, reacted to, or deleted.
+/// The stream first emits an `InitialSnapshot`, then emits `Update` items as
+/// messages are added, reacted to, or deleted.
 ///
-/// When `pubkey` is provided the initial snapshot is fetched via
-/// `fetch_messages_unread_with_minimum` so it always includes every unread
-/// message plus at least 50 recent messages.  This eliminates the need for the
-/// UI to paginate backwards just to find the read marker.
+/// **Initial snapshot contents depend on whether `pubkey` is supplied:**
+///
+/// * **Without `pubkey`:** the snapshot contains all messages currently held by
+///   the subscription — a full current-message window.  Callers can treat it as
+///   a complete history up to the point of subscription.
+///
+/// * **With `pubkey`:** the snapshot is produced by
+///   `fetch_messages_unread_with_minimum` and is an *unread-focused* window: it
+///   always includes every unread message plus at least 50 recent messages.
+///   Callers **must not** assume the snapshot covers full history in this case;
+///   older messages are available via `fetch_aggregated_messages_for_group`.
 ///
 /// The initial snapshot is race-condition free: any updates that arrive between
 /// subscribing and fetching are merged into the snapshot.

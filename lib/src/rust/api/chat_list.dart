@@ -118,6 +118,9 @@ enum ChatListUpdateTrigger {
 
   /// This account was removed from the group by an admin.
   removedFromGroup,
+
+  /// The mute status of the chat changed.
+  chatMuteChanged,
 }
 
 class ChatSummary {

@@ -89,6 +89,8 @@ pub enum ChatListUpdateTrigger {
     ChatArchiveChanged,
     /// This account was removed from the group by an admin.
     RemovedFromGroup,
+    /// The mute status of the chat changed.
+    ChatMuteChanged,
 }
 
 impl From<WhitenoiseChatListUpdateTrigger> for ChatListUpdateTrigger {
@@ -99,6 +101,7 @@ impl From<WhitenoiseChatListUpdateTrigger> for ChatListUpdateTrigger {
             WhitenoiseChatListUpdateTrigger::LastMessageDeleted => Self::LastMessageDeleted,
             WhitenoiseChatListUpdateTrigger::ChatArchiveChanged => Self::ChatArchiveChanged,
             WhitenoiseChatListUpdateTrigger::RemovedFromGroup => Self::RemovedFromGroup,
+            WhitenoiseChatListUpdateTrigger::ChatMuteChanged => Self::ChatMuteChanged,
         }
     }
 }

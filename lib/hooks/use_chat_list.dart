@@ -59,6 +59,8 @@ ChatListResult useChatList(String pubkey, {bool archived = false}) {
                     }
                   case ChatListUpdateTrigger.removedFromGroup:
                     chatMap.value[id] = update.item;
+                  case ChatListUpdateTrigger.chatMuteChanged:
+                    chatMap.value[id] = update.item;
                 }
                 return chatMap.value;
               },
