@@ -5237,7 +5237,7 @@ dependencies = [
  "android-native-keyring-store",
  "anyhow",
  "apple-native-keyring-store",
- "async-trait",30
+ "async-trait",
  "base64ct",
  "blurhash",
  "chacha20poly1305",
