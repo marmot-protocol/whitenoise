@@ -21,6 +21,11 @@ MarkAsReadResult useMarkAsRead({
 }) {
   final lastReadMessageId = useState<String?>(null);
   final hasLoadedLastRead = useState(false);
+  final isDisposed = useRef(false);
+  useEffect(() {
+    isDisposed.value = false;
+    return () => isDisposed.value = true;
+  }, const []);
 
   Future<void> fetchLastReadMessageId() async {
     try {
@@ -28,8 +33,10 @@ MarkAsReadResult useMarkAsRead({
         accountPubkey: accountPubkey,
         mlsGroupId: groupId,
       );
+      if (isDisposed.value) return;
       lastReadMessageId.value = accountGroup.lastReadMessageId;
     } catch (error) {
+      if (isDisposed.value) return;
       _logger.severe('Failed to fetch last read message for group $groupId', error.toString());
     }
     hasLoadedLastRead.value = true;
@@ -49,8 +56,9 @@ MarkAsReadResult useMarkAsRead({
     return null;
   }, [messageCount]);
   useEffect(
-    () =>
-        () => refetchTimer.value?.cancel(),
+    () => () {
+      refetchTimer.value?.cancel();
+    },
     const [],
   );
 
@@ -72,7 +80,7 @@ MarkAsReadResult useMarkAsRead({
     account_groups_api
         .markMessageRead(accountPubkey: accountPubkey, messageId: messageId)
         .then((_) {
-          lastReadMessageId.value = messageId;
+          if (!isDisposed.value) lastReadMessageId.value = messageId;
         })
         .onError((_, _) {});
   }

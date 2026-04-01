@@ -273,7 +273,7 @@ class _InviteMessageList extends HookWidget {
         final totalExtent = position.maxScrollExtent + viewportHeight;
 
         final lastVisibleIndex = totalExtent > 0
-            ? ((bottomEdge / totalExtent) * chatMessages.messageCount).ceil().clamp(
+            ? ((bottomEdge / totalExtent) * chatMessages.messageCount).floor().clamp(
                 0,
                 chatMessages.messageCount - 1,
               )

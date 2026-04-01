@@ -90,6 +90,7 @@ ChatScrollResult useChatScroll({
   }
 
   useEffect(() {
+    if (!isInitialPositionReady.value) return null;
     if (latestMessageId == null) return null;
 
     final isOwnMessage = latestMessagePubkey == accountPubkey;
@@ -100,7 +101,7 @@ ChatScrollResult useChatScroll({
       markMessageAsRead(latestMessageId);
     }
     return null;
-  }, [latestMessageId, latestMessagePubkey]);
+  }, [latestMessageId, latestMessagePubkey, isInitialPositionReady.value]);
 
   useEffect(() {
     void markVisibleMessagesAsRead() {
