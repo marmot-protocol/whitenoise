@@ -25,6 +25,7 @@ and this project adheres to Calendar Versioning (CalVer).
 - Chat with support [PR #486](https://github.com/marmot-protocol/whitenoise/pull/486)
 - Add notifications settings screen for android to allow disabling/enabling local notifications [PR #535](https://github.com/marmot-protocol/whitenoise/pull/535)
 - Archive chats [PR #532](https://github.com/marmot-protocol/whitenoise/pull/532)
+- No internet notice [PR #530](https://github.com/marmot-protocol/whitenoise/pull/530)
 
 ### Changed
 - UI Polish: Share & Edit Profile Screens [PR #544](https://github.com/marmot-protocol/whitenoise/pull/544)
