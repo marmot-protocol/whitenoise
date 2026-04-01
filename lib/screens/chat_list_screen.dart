@@ -15,6 +15,7 @@ import 'package:whitenoise/widgets/chat_list_header.dart';
 import 'package:whitenoise/widgets/chat_list_tile.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_chat_list.dart';
+import 'package:whitenoise/widgets/wn_filter_chip.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_search_and_filters.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
@@ -24,6 +25,9 @@ const _zapstoreUrl = 'https://zapstore.dev/apps/org.parres.whitenoise';
 
 const _slateHeight = 80;
 const _searchAndFiltersHeight = 68;
+const _filterChipsHeight = 48;
+
+enum ChatListFilter { chats, archive }
 
 class ChatListScreen extends HookConsumerWidget {
   const ChatListScreen({super.key});
@@ -159,6 +163,8 @@ class ChatListScreen extends HookConsumerWidget {
     final typography = context.typographyScaled;
     final pubkey = ref.watch(accountPubkeyProvider);
     final chatListResult = useChatList(pubkey);
+    final archivedChatListResult = useChatList(pubkey, archived: true);
+    final selectedFilter = useState(ChatListFilter.chats);
     final safeAreaTop = MediaQuery.of(context).padding.top;
     final notice = useSystemNotice();
     final updateState = useZapstoreUpdate();
@@ -171,33 +177,18 @@ class ChatListScreen extends HookConsumerWidget {
       return null;
     }, [pubkey]);
 
-    final chatList = chatListResult.chats;
-    final filteredChats = filterChatsBySearch(chatList, searchQuery.value);
-    final isLoading = chatListResult.isLoading;
-    final isEmpty = chatList.isEmpty && !isLoading;
-    final showWelcomeNotice = isEmpty && !welcomeNoticeDismissed.value;
+    final isArchiveView = selectedFilter.value == ChatListFilter.archive;
+    final activeChatList = isArchiveView ? archivedChatListResult.chats : chatListResult.chats;
+    final filteredChats = filterChatsBySearch(activeChatList, searchQuery.value);
+    final isLoading = isArchiveView ? archivedChatListResult.isLoading : chatListResult.isLoading;
+    final isEmpty = activeChatList.isEmpty && !isLoading;
+    final showWelcomeNotice = !isArchiveView && isEmpty && !welcomeNoticeDismissed.value;
     final activeUpdateVersion = updateState.isDismissed ? null : updateState.availableVersion;
 
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: Stack(
         children: [
-          if (showWelcomeNotice)
-            Center(
-              key: const Key('welcome_slogan'),
-              child: Padding(
-                padding: EdgeInsets.symmetric(horizontal: 40.w),
-                child: Text(
-                  '${context.l10n.sloganDecentralized}, '
-                  '${context.l10n.sloganUncensorable.toLowerCase()},\n'
-                  '${context.l10n.sloganSecureMessaging.toLowerCase()}.',
-                  style: typography.medium16.copyWith(
-                    color: colors.backgroundContentTertiary,
-                  ),
-                  textAlign: TextAlign.center,
-                ),
-              ),
-            ),
           ValueListenableBuilder<double>(
             valueListenable: chatListTopPadding,
             builder: (context, topPadding, _) => WnChatList(
@@ -209,13 +200,60 @@ class ChatListScreen extends HookConsumerWidget {
                 onSearchChanged: (value) => searchQuery.value = value,
               ),
               headerHeight: _searchAndFiltersHeight.h,
-              showEmptyState: !showWelcomeNotice && !isLoading,
+              pinnedHeader: Padding(
+                padding: EdgeInsets.only(top: 8.h),
+                child: Row(
+                  key: const Key('filter_chips_row'),
+                  children: [
+                    WnFilterChip(
+                      key: const Key('filter_chip_chats'),
+                      label: context.l10n.filterChats,
+                      selected: selectedFilter.value == ChatListFilter.chats,
+                      onSelected: (_) => selectedFilter.value = ChatListFilter.chats,
+                    ),
+                    SizedBox(width: 8.w),
+                    WnFilterChip(
+                      key: const Key('filter_chip_archive'),
+                      label: context.l10n.filterArchive,
+                      selected: selectedFilter.value == ChatListFilter.archive,
+                      onSelected: (_) => selectedFilter.value = ChatListFilter.archive,
+                    ),
+                  ],
+                ),
+              ),
+              pinnedHeaderHeight: _filterChipsHeight.h,
+              emptyStateContent: isEmpty
+                  ? isArchiveView
+                        ? Center(
+                            key: const Key('archived_chats_empty'),
+                            child: Text(
+                              context.l10n.archivedChatsEmpty,
+                              style: typography.medium14.copyWith(
+                                color: colors.backgroundContentQuaternary,
+                              ),
+                            ),
+                          )
+                        : Padding(
+                            padding: EdgeInsets.symmetric(horizontal: 40.w),
+                            child: Text(
+                              key: const Key('welcome_slogan'),
+                              context.l10n.sloganFull,
+                              style: typography.medium16.copyWith(
+                                color: colors.backgroundContentTertiary,
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                          )
+                  : null,
               itemBuilder: (context, index) {
                 final chatSummary = filteredChats[index];
                 return ChatListTile(
                   key: Key(chatSummary.mlsGroupId),
                   chatSummary: chatSummary,
-                  onChatListChanged: chatListResult.refresh,
+                  isArchived: isArchiveView,
+                  onChatListChanged: isArchiveView
+                      ? archivedChatListResult.refresh
+                      : chatListResult.refresh,
                   onError: notice.showErrorNotice,
                 );
               },

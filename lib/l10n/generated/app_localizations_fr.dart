@@ -23,6 +23,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get appTitle => 'White Noise';
 
   @override
+  String get sloganFull => 'Décentralisé, Incensurable,\nMessagerie Sécurisée.';
+
+  @override
   String get sloganDecentralized => 'Décentralisé';
 
   @override
@@ -901,6 +904,18 @@ class AppLocalizationsFr extends AppLocalizations {
   String get archive => 'Archiver';
 
   @override
+  String get unarchive => 'Désarchiver';
+
+  @override
+  String get failedToArchiveChat => 'Échec de l\'archivage de la discussion. Veuillez réessayer.';
+
+  @override
+  String get failedToUnarchiveChat => 'Échec du désarchivage de la discussion. Veuillez réessayer.';
+
+  @override
+  String get archivedChatsEmpty => 'Aucune discussion archivée';
+
+  @override
   String get failedToPinChat => 'Échec de l\'épinglage. Veuillez réessayer.';
 
   @override
@@ -1337,4 +1352,25 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Vous pouvez toujours consulter les messages enregistrés, mais vous ne pouvez plus en envoyer ni en recevoir. Vous pouvez archiver ou supprimer la discussion à tout moment.';
+
+  @override
+  String get notificationSettings => 'Notifications';
+
+  @override
+  String get notificationSettingsTitle => 'Notifications';
+
+  @override
+  String get notifications => 'Notifications';
+
+  @override
+  String get notificationsDescription =>
+      'Recevoir des notifications push pour les nouveaux messages';
+
+  @override
+  String get notificationsSettingsLoadError =>
+      'Impossible de charger les paramètres de notifications. Veuillez réessayer.';
+
+  @override
+  String get notificationsSettingsUpdateError =>
+      'Impossible de mettre à jour les paramètres de notifications. Veuillez réessayer.';
 }

@@ -45,6 +45,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [check-team]
+    env:
+      ARTIFACT_SUFFIX: unknown
     # Run when: push/dispatch (not a PR, check-team was skipped), or PR where
     # the "apk" label is present and actor is a contributor.
     if: >-
@@ -140,6 +142,26 @@ jobs:
 
     - name: Install Flutter dependencies
       run: flutter pub get
+
+    - name: Write staging signing config
+      env:
+        ANDROID_STAGING_KEYSTORE_B64: ${{ secrets.ANDROID_STAGING_KEYSTORE_B64 }}
+        ANDROID_STAGING_STORE_PASSWORD: ${{ secrets.ANDROID_STAGING_STORE_PASSWORD }}
+        ANDROID_STAGING_KEY_ALIAS: ${{ secrets.ANDROID_STAGING_KEY_ALIAS }}
+        ANDROID_STAGING_KEY_PASSWORD: ${{ secrets.ANDROID_STAGING_KEY_PASSWORD }}
+      run: |
+        test -n "$ANDROID_STAGING_KEYSTORE_B64" || { echo "Missing secret: ANDROID_STAGING_KEYSTORE_B64"; exit 1; }
+        test -n "$ANDROID_STAGING_STORE_PASSWORD" || { echo "Missing secret: ANDROID_STAGING_STORE_PASSWORD"; exit 1; }
+        test -n "$ANDROID_STAGING_KEY_ALIAS" || { echo "Missing secret: ANDROID_STAGING_KEY_ALIAS"; exit 1; }
+        test -n "$ANDROID_STAGING_KEY_PASSWORD" || { echo "Missing secret: ANDROID_STAGING_KEY_PASSWORD"; exit 1; }
+
+        mkdir -p android
+        printf '%s' "$ANDROID_STAGING_KEYSTORE_B64" | base64 --decode > android/staging.keystore
+        printf 'storeFile=staging.keystore\nstorePassword=%s\nkeyAlias=%s\nkeyPassword=%s\n' \
+          "$ANDROID_STAGING_STORE_PASSWORD" \
+          "$ANDROID_STAGING_KEY_ALIAS" \
+          "$ANDROID_STAGING_KEY_PASSWORD" \
+          > android/key-staging.properties
 
     - name: Build Rust libraries for Android
       if: steps.jnilibs-cache.outputs.cache-hit != 'true'

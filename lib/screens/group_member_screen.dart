@@ -13,6 +13,7 @@ import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/metadata.dart' show presentName;
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_chat_info_profile_card.dart';
@@ -202,7 +203,9 @@ class GroupMemberScreen extends HookConsumerWidget {
                       Gap(8.h),
                       WnChatInfoProfileCard(
                         userPubkey: memberPubkey,
-                        metadata: metadata,
+                        displayName: presentName(metadata),
+                        pictureUrl: metadata?.picture,
+                        avatarColor: AvatarColor.fromPubkey(memberPubkey),
                         onPublicKeyCopied: () => showSuccessNotice(context.l10n.publicKeyCopied),
                         onPublicKeyCopyError: () =>
                             showErrorNotice(context.l10n.publicKeyCopyError),

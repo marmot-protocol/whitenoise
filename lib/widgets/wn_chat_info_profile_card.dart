@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/formatting.dart';
-import 'package:whitenoise/utils/metadata.dart' show presentName;
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_copy_card.dart';
 
@@ -12,21 +10,24 @@ class WnChatInfoProfileCard extends StatelessWidget {
   const WnChatInfoProfileCard({
     super.key,
     required this.userPubkey,
-    this.metadata,
+    this.displayName,
+    this.pictureUrl,
+    required this.avatarColor,
     this.onPublicKeyCopied,
     this.onPublicKeyCopyError,
   });
 
   final String userPubkey;
-  final FlutterMetadata? metadata;
+  final String? displayName;
+  final String? pictureUrl;
+  final AvatarColor avatarColor;
   final VoidCallback? onPublicKeyCopied;
   final VoidCallback? onPublicKeyCopyError;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final displayName = presentName(metadata);
-    final hasDisplayName = displayName != null && displayName.isNotEmpty;
+    final name = displayName;
     final npub = npubFromHex(userPubkey);
     final formattedNpub = formatPublicKey(npub ?? userPubkey);
 
@@ -34,15 +35,15 @@ class WnChatInfoProfileCard extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         WnAvatar(
-          pictureUrl: metadata?.picture,
-          displayName: displayName,
+          pictureUrl: pictureUrl,
+          displayName: name != null && name.isNotEmpty ? name : null,
           size: WnAvatarSize.large,
-          color: AvatarColor.fromPubkey(userPubkey),
+          color: avatarColor,
         ),
         Gap(16.h),
-        if (hasDisplayName)
+        if (name != null && name.isNotEmpty)
           Text(
-            displayName,
+            name,
             key: const Key('chat_info_display_name'),
             style: context.typographyScaled.semiBold20.copyWith(
               color: colors.backgroundContentPrimary,

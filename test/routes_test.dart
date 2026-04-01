@@ -7,6 +7,7 @@ import 'package:go_router/go_router.dart';
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/screens/chat_info_screen.dart';
 import 'package:whitenoise/screens/chat_invite_screen.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/chat_screen.dart';
@@ -14,11 +15,13 @@ import 'package:whitenoise/screens/developer_settings_screen.dart';
 import 'package:whitenoise/screens/donate_screen.dart';
 import 'package:whitenoise/screens/home_screen.dart';
 import 'package:whitenoise/screens/login_screen.dart';
+import 'package:whitenoise/screens/notification_settings_screen.dart';
 import 'package:whitenoise/screens/settings_screen.dart';
 import 'package:whitenoise/screens/signup_screen.dart';
 import 'package:whitenoise/screens/start_support_chat_screen.dart';
 import 'package:whitenoise/screens/user_search_screen.dart';
 import 'package:whitenoise/screens/user_selection_screen.dart';
+import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/users.dart';
@@ -54,6 +57,25 @@ class _MockRustLibApi extends MockWnApi {
       adminPubkeys: const [],
       epoch: BigInt.zero,
       state: GroupState.active,
+    );
+  }
+
+  @override
+  Future<AccountSettings> crateApiAccountsAccountSettings({
+    required String pubkey,
+  }) async {
+    return const AccountSettings(
+      notificationsEnabled: true,
+    );
+  }
+
+  @override
+  Future<AccountSettings> crateApiAccountsUpdateNotificationsEnabled({
+    required String pubkey,
+    required bool enabled,
+  }) async {
+    return AccountSettings(
+      notificationsEnabled: enabled,
     );
   }
 }
@@ -488,6 +510,49 @@ void main() {
     });
   });
 
+  group('pushToChatInfo', () {
+    testWidgets('passes mlsGroupId into ChatInfoScreen', (tester) async {
+      await pumpRouter(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
+        ],
+      );
+      Routes.pushToChatInfo(getContext(tester), testGroupId);
+      await tester.pumpAndSettle();
+      final screen = tester.widget<ChatInfoScreen>(find.byType(ChatInfoScreen));
+      expect(screen.mlsGroupId, testGroupId);
+    });
+  });
+
+  group('pushToInviteInfo', () {
+    testWidgets('passes mlsGroupId into ChatInfoScreen', (tester) async {
+      await pumpRouter(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
+        ],
+      );
+      Routes.pushToInviteInfo(getContext(tester), testGroupId);
+      await tester.pumpAndSettle();
+      final screen = tester.widget<ChatInfoScreen>(find.byType(ChatInfoScreen));
+      expect(screen.mlsGroupId, testGroupId);
+    });
+
+    testWidgets('hides search on ChatInfoScreen', (tester) async {
+      await pumpRouter(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
+        ],
+      );
+      Routes.pushToInviteInfo(getContext(tester), testGroupId);
+      await tester.pumpAndSettle();
+      final screen = tester.widget<ChatInfoScreen>(find.byType(ChatInfoScreen));
+      expect(screen.showSearch, false);
+    });
+  });
+
   group('pushToInvite', () {
     testWidgets('pushes ChatInviteScreen onto stack', (tester) async {
       await pumpRouter(
@@ -557,6 +622,27 @@ void main() {
       Routes.goBack(getContext(tester));
       await tester.pumpAndSettle();
       expect(find.byType(ChatListScreen), findsOneWidget);
+    });
+  });
+
+  group('pushToNotificationSettings', () {
+    testWidgets('navigates to NotificationSettingsScreen when authenticated', (tester) async {
+      await pumpRouter(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
+        ],
+      );
+      Routes.pushToNotificationSettings(getContext(tester));
+      await tester.pumpAndSettle();
+      expect(find.byType(NotificationSettingsScreen), findsOneWidget);
+    });
+
+    testWidgets('redirects to LoginScreen when not authenticated', (tester) async {
+      await pumpRouter(tester);
+      Routes.pushToNotificationSettings(getContext(tester));
+      await tester.pumpAndSettle();
+      expect(find.byType(LoginScreen), findsOneWidget);
     });
   });
 }

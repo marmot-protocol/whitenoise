@@ -29,6 +29,7 @@ class MainActivity : FlutterActivity() {
         super.configureFlutterEngine(flutterEngine)
         Keyring.initializeNdkContext(applicationContext)
         flutterEngine.plugins.add(AndroidSignerPlugin())
+        flutterEngine.plugins.add(AndroidPlayServicesPlugin())
     }
 
     private fun cleanForegroundTaskPrefs() {

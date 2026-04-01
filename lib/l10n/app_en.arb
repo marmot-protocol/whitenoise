@@ -13,6 +13,10 @@
   "@appTitle": {
     "description": "The application title displayed on home screen"
   },
+  "sloganFull": "Decentralized, uncensorable,\nsecure messaging.",
+  "@sloganFull": {
+    "description": "Full welcome slogan on the empty chat list screen"
+  },
   "sloganDecentralized": "Decentralized",
   "@sloganDecentralized": {
     "description": "First slogan word on home screen"
@@ -1147,6 +1151,22 @@
   "@archive": {
     "description": "Archive chat context menu action"
   },
+  "unarchive": "Unarchive",
+  "@unarchive": {
+    "description": "Unarchive chat context menu action"
+  },
+  "failedToArchiveChat": "Failed to archive chat. Please try again.",
+  "@failedToArchiveChat": {
+    "description": "Error message when archive operation fails"
+  },
+  "failedToUnarchiveChat": "Failed to unarchive chat. Please try again.",
+  "@failedToUnarchiveChat": {
+    "description": "Error message when unarchive operation fails"
+  },
+  "archivedChatsEmpty": "No archived chats",
+  "@archivedChatsEmpty": {
+    "description": "Empty state label shown in the archived chats view"
+  },
   "failedToPinChat": "Failed to update pin. Please try again.",
   "@failedToPinChat": {
     "description": "Error message when pin/unpin operation fails"
@@ -1741,5 +1761,29 @@
   "removedFromGroupDescription": "You can still view saved messages, but you can't send or receive new ones. You can archive or delete the chat anytime.",
   "@removedFromGroupDescription": {
     "description": "Notice description shown when the user has been removed from the group"
+  },
+  "notificationSettings": "Notifications",
+  "@notificationSettings": {
+    "description": "Settings screen menu item label for the notifications screen"
+  },
+  "notificationSettingsTitle": "Notifications",
+  "@notificationSettingsTitle": {
+    "description": "Title of the notifications screen"
+  },
+  "notifications": "Notifications",
+  "@notifications": {
+    "description": "Label for notifications toggle"
+  },
+  "notificationsDescription": "Receive push notifications for new messages",
+  "@notificationsDescription": {
+    "description": "Description shown below notifications toggle"
+  },
+  "notificationsSettingsLoadError": "Could not load notification settings. Please try again.",
+  "@notificationsSettingsLoadError": {
+    "description": "Error shown when notification settings fail to load"
+  },
+  "notificationsSettingsUpdateError": "Could not update notification settings. Please try again.",
+  "@notificationsSettingsUpdateError": {
+    "description": "Error shown when updating notification settings fails"
   }
 }

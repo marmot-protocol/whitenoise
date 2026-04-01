@@ -285,6 +285,58 @@ void main() {
       expect(find.text('Bob'), findsOneWidget);
     });
 
+    testWidgets('profile card shows name when displayName is missing but name is set', (
+      tester,
+    ) async {
+      _api.adminsList = [_testPubkey];
+      _api.metadataMap[_memberPubkey] = const FlutterMetadata(
+        name: 'Charlie',
+        custom: {},
+      );
+      await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+      expect(find.textContaining('Charlie'), findsWidgets);
+      final avatar = tester.widget<WnAvatar>(find.byType(WnAvatar));
+      expect(avatar.displayName, 'Charlie');
+    });
+
+    testWidgets('profile card passes picture URL from metadata to avatar', (tester) async {
+      _api.adminsList = [_testPubkey];
+      _api.metadataMap[_memberPubkey] = const FlutterMetadata(
+        displayName: 'Bob',
+        picture: 'https://example.com/a.png',
+        custom: {},
+      );
+      await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+      final avatar = tester.widget<WnAvatar>(find.byType(WnAvatar));
+      expect(avatar.pictureUrl, 'https://example.com/a.png');
+    });
+
+    testWidgets('profile card hides display name when metadata has no presentable name', (
+      tester,
+    ) async {
+      _api.adminsList = [_testPubkey];
+      _api.metadataMap[_memberPubkey] = const FlutterMetadata(custom: {});
+      await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+      expect(find.byKey(const Key('chat_info_display_name')), findsNothing);
+      final shortHex = _memberPubkey.substring(0, 8);
+      expect(find.textContaining(shortHex), findsWidgets);
+    });
+
+    testWidgets('profile card avatar color matches member pubkey', (tester) async {
+      _api.adminsList = [_testPubkey];
+      _api.metadataMap[_memberPubkey] = const FlutterMetadata(
+        displayName: 'Bob',
+        custom: {},
+      );
+      await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+
+      final avatar = tester.widget<WnAvatar>(find.byType(WnAvatar));
+      expect(avatar.color, AvatarColor.fromPubkey(_memberPubkey));
+    });
+
     testWidgets('shows make admin button when current user is admin and member is not', (
       tester,
     ) async {

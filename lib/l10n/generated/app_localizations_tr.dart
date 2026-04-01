@@ -23,6 +23,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get appTitle => 'White Noise';
 
   @override
+  String get sloganFull => 'Merkezi Olmayan, Sansürlenemez,\nGüvenli Mesajlaşma.';
+
+  @override
   String get sloganDecentralized => 'Merkezi Olmayan';
 
   @override
@@ -891,6 +894,18 @@ class AppLocalizationsTr extends AppLocalizations {
   String get archive => 'Arşivle';
 
   @override
+  String get unarchive => 'Arşivden çıkar';
+
+  @override
+  String get failedToArchiveChat => 'Sohbet arşivlenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get failedToUnarchiveChat => 'Sohbet arşivden çıkarılamadı. Lütfen tekrar deneyin.';
+
+  @override
+  String get archivedChatsEmpty => 'Arşivlenmiş sohbet yok';
+
+  @override
   String get failedToPinChat => 'Sabitleme başarısız. Lütfen tekrar deneyin.';
 
   @override
@@ -1321,4 +1336,24 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Kaydedilmiş mesajları görüntüleyebilirsiniz, ancak yeni mesaj gönderemez veya alamazsınız. Sohbeti istediğiniz zaman arşivleyebilir veya silebilirsiniz.';
+
+  @override
+  String get notificationSettings => 'Bildirimler';
+
+  @override
+  String get notificationSettingsTitle => 'Bildirimler';
+
+  @override
+  String get notifications => 'Bildirimler';
+
+  @override
+  String get notificationsDescription => 'Yeni mesajlar için push bildirimleri al';
+
+  @override
+  String get notificationsSettingsLoadError =>
+      'Bildirim ayarları yüklenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get notificationsSettingsUpdateError =>
+      'Bildirim ayarları güncellenemedi. Lütfen tekrar deneyin.';
 }

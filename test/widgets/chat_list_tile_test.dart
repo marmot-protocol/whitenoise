@@ -102,6 +102,7 @@ void main() {
     _api.shouldThrowOnPin = false;
     _api.setChatPinOrderCallCount = 0;
     _api.lastPinOrder = null;
+    _api.reset();
   });
 
   Future<void> pumpTile(
@@ -109,9 +110,10 @@ void main() {
     ChatSummary chatSummary, {
     bool settle = true,
     void Function(String)? onError,
+    bool isArchived = false,
   }) async {
     await mountWidget(
-      ChatListTile(chatSummary: chatSummary, onError: onError),
+      ChatListTile(chatSummary: chatSummary, onError: onError, isArchived: isArchived),
       tester,
       overrides: [
         accountPubkeyProvider.overrideWith(MockAccountPubkeyNotifier.new),
@@ -863,6 +865,156 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(refreshCalled, isFalse);
+      });
+    });
+
+    group('archive context menu', () {
+      testWidgets('archive action calls onChatListChanged on success', (tester) async {
+        var refreshCalled = false;
+
+        await mountWidget(
+          ChatListTile(
+            chatSummary: _chatSummary(name: 'Test Chat'),
+            onChatListChanged: () => refreshCalled = true,
+          ),
+          tester,
+          overrides: [
+            accountPubkeyProvider.overrideWith(MockAccountPubkeyNotifier.new),
+          ],
+        );
+        await tester.pumpAndSettle();
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('context_menu_action_archive')));
+        await tester.pumpAndSettle();
+
+        expect(refreshCalled, isTrue);
+      });
+
+      testWidgets('unarchive action calls onChatListChanged on success', (tester) async {
+        var refreshCalled = false;
+
+        await mountWidget(
+          ChatListTile(
+            chatSummary: _chatSummary(name: 'Test Chat'),
+            isArchived: true,
+            onChatListChanged: () => refreshCalled = true,
+          ),
+          tester,
+          overrides: [
+            accountPubkeyProvider.overrideWith(MockAccountPubkeyNotifier.new),
+          ],
+        );
+        await tester.pumpAndSettle();
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('context_menu_action_unarchive')));
+        await tester.pumpAndSettle();
+
+        expect(refreshCalled, isTrue);
+      });
+
+      testWidgets('context menu shows archive action for non-archived chat', (tester) async {
+        await pumpTile(tester, _chatSummary(name: 'Test Chat'));
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('context_menu_action_archive')), findsOneWidget);
+        expect(find.text('Archive'), findsOneWidget);
+      });
+
+      testWidgets('context menu shows unarchive action for archived chat', (tester) async {
+        await pumpTile(tester, _chatSummary(name: 'Test Chat'), isArchived: true);
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('context_menu_action_unarchive')), findsOneWidget);
+        expect(find.text('Unarchive'), findsOneWidget);
+      });
+
+      testWidgets('archive action calls archiveChat with correct args', (tester) async {
+        await pumpTile(tester, _chatSummary(name: 'Test Chat'));
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('context_menu_action_archive')));
+        await tester.pumpAndSettle();
+
+        expect(_api.archiveChatCallCount, 1);
+        expect(_api.lastArchivedGroupId, testGroupId);
+      });
+
+      testWidgets('archive action does not call unarchiveChat', (tester) async {
+        await pumpTile(tester, _chatSummary(name: 'Test Chat'));
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('context_menu_action_archive')));
+        await tester.pumpAndSettle();
+
+        expect(_api.unarchiveChatCallCount, 0);
+      });
+
+      testWidgets('unarchive action calls unarchiveChat with correct args', (tester) async {
+        await pumpTile(tester, _chatSummary(name: 'Test Chat'), isArchived: true);
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('context_menu_action_unarchive')));
+        await tester.pumpAndSettle();
+
+        expect(_api.unarchiveChatCallCount, 1);
+        expect(_api.lastUnarchivedGroupId, testGroupId);
+      });
+
+      testWidgets('archive action shows error notice on failure', (tester) async {
+        _api.shouldFailArchiveChat = true;
+        String? errorMessage;
+
+        await pumpTile(
+          tester,
+          _chatSummary(name: 'Test Chat'),
+          onError: (msg) => errorMessage = msg,
+        );
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('context_menu_action_archive')));
+        await tester.pumpAndSettle();
+
+        expect(errorMessage, isNotNull);
+        expect(errorMessage, contains('archive'));
+      });
+
+      testWidgets('unarchive action shows error notice on failure', (tester) async {
+        _api.shouldFailUnarchiveChat = true;
+        String? errorMessage;
+
+        await pumpTile(
+          tester,
+          _chatSummary(name: 'Test Chat'),
+          isArchived: true,
+          onError: (msg) => errorMessage = msg,
+        );
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('context_menu_action_unarchive')));
+        await tester.pumpAndSettle();
+
+        expect(errorMessage, isNotNull);
+        expect(errorMessage, contains('unarchive'));
       });
     });
   });

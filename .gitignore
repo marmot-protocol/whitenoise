@@ -46,6 +46,10 @@ app.*.map.json
 /android/app/profile
 /android/app/release
 /android/app/pkg/sumdb/
+/android/key.properties
+/android/key-staging.properties
+*.jks
+*.keystore
 
 # Compiled Rust native libraries (built via `just build-android`)
 /android/app/src/main/jniLibs/

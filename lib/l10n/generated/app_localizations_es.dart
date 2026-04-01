@@ -23,6 +23,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get appTitle => 'White Noise';
 
   @override
+  String get sloganFull => 'Descentralizado, Incensurable,\nMensajería Segura.';
+
+  @override
   String get sloganDecentralized => 'Descentralizado';
 
   @override
@@ -902,6 +905,18 @@ class AppLocalizationsEs extends AppLocalizations {
   String get archive => 'Archivar';
 
   @override
+  String get unarchive => 'Desarchivar';
+
+  @override
+  String get failedToArchiveChat => 'No se pudo archivar el chat. Inténtalo de nuevo.';
+
+  @override
+  String get failedToUnarchiveChat => 'No se pudo desarchivar el chat. Inténtalo de nuevo.';
+
+  @override
+  String get archivedChatsEmpty => 'No hay chats archivados';
+
+  @override
   String get failedToPinChat => 'Error al fijar. Por favor, inténtalo de nuevo.';
 
   @override
@@ -1337,4 +1352,24 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Puedes ver los mensajes guardados, pero no puedes enviar ni recibir nuevos. Puedes archivar o eliminar el chat cuando quieras.';
+
+  @override
+  String get notificationSettings => 'Notificaciones';
+
+  @override
+  String get notificationSettingsTitle => 'Notificaciones';
+
+  @override
+  String get notifications => 'Notificaciones';
+
+  @override
+  String get notificationsDescription => 'Recibir notificaciones push para nuevos mensajes';
+
+  @override
+  String get notificationsSettingsLoadError =>
+      'No se pudieron cargar las preferencias de notificaciones. Por favor, inténtalo de nuevo.';
+
+  @override
+  String get notificationsSettingsUpdateError =>
+      'No se pudieron actualizar las preferencias de notificaciones. Por favor, inténtalo de nuevo.';
 }

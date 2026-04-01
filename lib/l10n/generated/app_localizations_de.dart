@@ -23,6 +23,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get appTitle => 'White Noise';
 
   @override
+  String get sloganFull => 'Dezentralisiert, Unzensierbar,\nSichere Nachrichten.';
+
+  @override
   String get sloganDecentralized => 'Dezentralisiert';
 
   @override
@@ -915,6 +918,20 @@ class AppLocalizationsDe extends AppLocalizations {
   String get archive => 'Archivieren';
 
   @override
+  String get unarchive => 'Dearchivieren';
+
+  @override
+  String get failedToArchiveChat =>
+      'Chat konnte nicht archiviert werden. Bitte versuche es erneut.';
+
+  @override
+  String get failedToUnarchiveChat =>
+      'Chat konnte nicht dearchiviert werden. Bitte versuche es erneut.';
+
+  @override
+  String get archivedChatsEmpty => 'Keine archivierten Chats';
+
+  @override
   String get failedToPinChat => 'Anheften fehlgeschlagen. Bitte versuche es erneut.';
 
   @override
@@ -1353,4 +1370,24 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get removedFromGroupDescription =>
       'Du kannst gespeicherte Nachrichten noch lesen, aber keine neuen senden oder empfangen. Du kannst den Chat jederzeit archivieren oder löschen.';
+
+  @override
+  String get notificationSettings => 'Benachrichtigungen';
+
+  @override
+  String get notificationSettingsTitle => 'Benachrichtigungen';
+
+  @override
+  String get notifications => 'Benachrichtigungen';
+
+  @override
+  String get notificationsDescription => 'Push-Benachrichtigungen für neue Nachrichten erhalten';
+
+  @override
+  String get notificationsSettingsLoadError =>
+      'Benachrichtigungseinstellungen konnten nicht geladen werden. Bitte versuche es erneut.';
+
+  @override
+  String get notificationsSettingsUpdateError =>
+      'Benachrichtigungseinstellungen konnten nicht aktualisiert werden. Bitte versuche es erneut.';
 }

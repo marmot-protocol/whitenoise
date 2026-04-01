@@ -237,6 +237,55 @@ pub async fn subscribe_to_chat_list(
     Ok(())
 }
 
+#[frb]
+pub async fn subscribe_to_archived_chat_list(
+    account_pubkey: String,
+    sink: StreamSink<ChatListStreamItem>,
+) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+
+    let subscription = whitenoise.subscribe_to_archived_chat_list(&account).await?;
+
+    let initial_items: Vec<ChatSummary> = subscription
+        .initial_items
+        .into_iter()
+        .map(|item| item.into())
+        .collect();
+
+    if sink
+        .add(ChatListStreamItem::InitialSnapshot {
+            items: initial_items,
+        })
+        .is_err()
+    {
+        return Ok(());
+    }
+
+    let mut rx = subscription.updates;
+    loop {
+        match rx.recv().await {
+            Ok(update) => {
+                let item = ChatListStreamItem::Update {
+                    update: update.into(),
+                };
+                if sink.add(item).is_err() {
+                    break;
+                }
+            }
+            Err(tokio::sync::broadcast::error::RecvError::Lagged(_)) => {
+                continue;
+            }
+            Err(tokio::sync::broadcast::error::RecvError::Closed) => {
+                break;
+            }
+        }
+    }
+
+    Ok(())
+}
+
 // ============================================================================
 // Tests
 // ============================================================================

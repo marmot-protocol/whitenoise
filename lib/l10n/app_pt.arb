@@ -2,6 +2,7 @@
   "photoCount": "{count, plural, =1{Foto} other{Fotos}}",
   "@@locale": "pt",
   "appTitle": "White Noise",
+  "sloganFull": "Descentralizado, Incensurável,\nMensagens Seguras.",
   "sloganDecentralized": "Descentralizado",
   "sloganUncensorable": "Incensurável",
   "sloganSecureMessaging": "Mensagens Seguras",
@@ -402,5 +403,15 @@
   "reportBugWhatWentWrongRequired": "Descreva o que deu errado.",
   "failedToStartSupportChat": "Falha ao iniciar a conversa com o suporte",
   "removedFromGroup": "Você foi removido deste grupo",
-  "removedFromGroupDescription": "Você ainda pode ver as mensagens salvas, mas não pode enviar ou receber novas. Você pode arquivar ou excluir a conversa a qualquer momento."
+  "removedFromGroupDescription": "Você ainda pode ver as mensagens salvas, mas não pode enviar ou receber novas. Você pode arquivar ou excluir a conversa a qualquer momento.",
+  "notificationSettings": "Notificações",
+  "notificationSettingsTitle": "Notificações",
+  "notifications": "Notificações",
+  "notificationsDescription": "Receber notificações push para novas mensagens",
+  "notificationsSettingsLoadError": "Não foi possível carregar as configurações de notificações. Tente novamente.",
+  "notificationsSettingsUpdateError": "Não foi possível atualizar as configurações de notificações. Tente novamente.",
+  "unarchive": "Desarquivar",
+  "failedToArchiveChat": "Falha ao arquivar a conversa. Tente novamente.",
+  "failedToUnarchiveChat": "Falha ao desarquivar a conversa. Tente novamente.",
+  "archivedChatsEmpty": "Nenhuma conversa arquivada"
 }

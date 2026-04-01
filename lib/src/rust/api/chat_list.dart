@@ -56,6 +56,12 @@ Stream<ChatListStreamItem> subscribeToChatList({
   accountPubkey: accountPubkey,
 );
 
+Stream<ChatListStreamItem> subscribeToArchivedChatList({
+  required String accountPubkey,
+}) => RustLib.instance.api.crateApiChatListSubscribeToArchivedChatList(
+  accountPubkey: accountPubkey,
+);
+
 @freezed
 sealed class ChatListStreamItem with _$ChatListStreamItem {
   const ChatListStreamItem._();

@@ -223,6 +223,34 @@ void main() {
         },
         variant: TargetPlatformVariant.only(TargetPlatform.android),
       );
+
+      testWidgets(
+        'lexicographic non-numeric segment greater returns update',
+        (tester) async {
+          _api.zapstoreVersion = '2026.b.5';
+          _setInstalledVersion('2026.a.5');
+
+          await _mountHook(tester);
+          await tester.pump();
+
+          expect(getResult().availableVersion, equals('2026.b.5'));
+        },
+        variant: TargetPlatformVariant.only(TargetPlatform.android),
+      );
+
+      testWidgets(
+        'lexicographic non-numeric segment lower returns no update',
+        (tester) async {
+          _api.zapstoreVersion = '2026.a.5';
+          _setInstalledVersion('2026.b.5');
+
+          await _mountHook(tester);
+          await tester.pump();
+
+          expect(getResult().availableVersion, isNull);
+        },
+        variant: TargetPlatformVariant.only(TargetPlatform.android),
+      );
     });
   });
 }

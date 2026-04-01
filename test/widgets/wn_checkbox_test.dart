@@ -52,6 +52,25 @@ void main() {
       expect(changed, isTrue);
     });
 
+    testWidgets('does not call onChanged when disabled', (tester) async {
+      var changed = false;
+
+      await mountWidget(
+        WnCheckbox(
+          label: 'Test Label',
+          value: false,
+          enabled: false,
+          onChanged: (v) => changed = v,
+        ),
+        tester,
+      );
+
+      await tester.tap(find.byType(WnCheckbox));
+      await tester.pump();
+
+      expect(changed, isFalse);
+    });
+
     testWidgets('toggles value on tap', (tester) async {
       var value = false;
 

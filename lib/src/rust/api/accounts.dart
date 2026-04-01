@@ -11,7 +11,7 @@ import 'metadata.dart';
 import 'relays.dart';
 import 'users.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`
 
 Future<List<Account>> getAccounts() => RustLib.instance.api.crateApiAccountsGetAccounts();
 
@@ -147,6 +147,17 @@ Future<bool> isFollowingUser({
   userPubkey: userPubkey,
 );
 
+Future<AccountSettings> accountSettings({required String pubkey}) =>
+    RustLib.instance.api.crateApiAccountsAccountSettings(pubkey: pubkey);
+
+Future<AccountSettings> updateNotificationsEnabled({
+  required String pubkey,
+  required bool enabled,
+}) => RustLib.instance.api.crateApiAccountsUpdateNotificationsEnabled(
+  pubkey: pubkey,
+  enabled: enabled,
+);
+
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<RelayType>>
 abstract class RelayType implements RustOpaqueInterface {}
 
@@ -185,6 +196,24 @@ class Account {
           lastSyncedAt == other.lastSyncedAt &&
           createdAt == other.createdAt &&
           updatedAt == other.updatedAt;
+}
+
+class AccountSettings {
+  final bool notificationsEnabled;
+
+  const AccountSettings({
+    required this.notificationsEnabled,
+  });
+
+  @override
+  int get hashCode => notificationsEnabled.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AccountSettings &&
+          runtimeType == other.runtimeType &&
+          notificationsEnabled == other.notificationsEnabled;
 }
 
 /// The type of account authentication.

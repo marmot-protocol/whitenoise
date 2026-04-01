@@ -2,6 +2,7 @@
   "photoCount": "{count, plural, =1{Foto} other{Foto}}",
   "@@locale": "it",
   "appTitle": "White Noise",
+  "sloganFull": "Decentralizzato, Incensurabile,\nMessaggistica Sicura.",
   "sloganDecentralized": "Decentralizzato",
   "sloganUncensorable": "Incensurabile",
   "sloganSecureMessaging": "Messaggistica Sicura",
@@ -402,5 +403,15 @@
   "reportBugWhatWentWrongRequired": "Descrivi cosa è andato storto.",
   "failedToStartSupportChat": "Impossibile avviare la chat con il supporto",
   "removedFromGroup": "Sei stato rimosso da questo gruppo",
-  "removedFromGroupDescription": "Puoi ancora visualizzare i messaggi salvati, ma non puoi inviarne o riceverne di nuovi. Puoi archiviare o eliminare la chat in qualsiasi momento."
+  "removedFromGroupDescription": "Puoi ancora visualizzare i messaggi salvati, ma non puoi inviarne o riceverne di nuovi. Puoi archiviare o eliminare la chat in qualsiasi momento.",
+  "notificationSettings": "Notifiche",
+  "notificationSettingsTitle": "Notifiche",
+  "notifications": "Notifiche",
+  "notificationsDescription": "Ricevi notifiche push per i nuovi messaggi",
+  "notificationsSettingsLoadError": "Impossibile caricare le impostazioni delle notifiche. Riprova.",
+  "notificationsSettingsUpdateError": "Impossibile aggiornare le impostazioni delle notifiche. Riprova.",
+  "unarchive": "Rimuovi dall'archivio",
+  "failedToArchiveChat": "Impossibile archiviare la chat. Riprova.",
+  "failedToUnarchiveChat": "Impossibile rimuovere la chat dall'archivio. Riprova.",
+  "archivedChatsEmpty": "Nessuna chat archiviata"
 }

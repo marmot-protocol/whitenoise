@@ -31,16 +31,39 @@ void main() {
     });
 
     group('empty state', () {
-      testWidgets('shows empty state when not loading and no items', (tester) async {
+      testWidgets('uses list when empty with no emptyStateContent', (tester) async {
         await mountWidget(
           const WnChatList(itemCount: 0, itemBuilder: _emptyBuilder),
           tester,
         );
         await tester.pump();
 
-        expect(find.byKey(const Key('chat_list_empty')), findsOneWidget);
-        expect(find.text('No chats yet'), findsOneWidget);
-        expect(find.text('Start a conversation'), findsOneWidget);
+        expect(find.byKey(const Key('chat_list')), findsOneWidget);
+        expect(find.byKey(const Key('chat_list_empty')), findsNothing);
+      });
+
+      testWidgets('pull down does not reveal header when empty state is shown', (tester) async {
+        await mountWidget(
+          const WnChatList(
+            itemCount: 0,
+            itemBuilder: _emptyBuilder,
+            header: Text('Header'),
+            headerHeight: 142,
+            emptyStateContent: Text('Empty'),
+          ),
+          tester,
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('chat_list_header')), findsNothing);
+
+        final gesture = await tester.startGesture(const Offset(200, 400));
+        await gesture.moveBy(const Offset(0, 200));
+        await tester.pump();
+
+        expect(find.byKey(const Key('chat_list_header')), findsNothing);
+        await gesture.up();
+        await tester.pumpAndSettle();
       });
 
       testWidgets('shows no results when search is active and no items match', (tester) async {
@@ -268,18 +291,12 @@ void main() {
         await gesture.moveBy(const Offset(0, 30));
         await tester.pump();
 
-        expect(
-          find.byKey(const Key('chat_list_header')),
-          findsOneWidget,
-        );
+        expect(find.byKey(const Key('chat_list_header')), findsOneWidget);
 
         await gesture.up();
         await tester.pumpAndSettle();
 
-        expect(
-          find.byKey(const Key('chat_list_header')),
-          findsNothing,
-        );
+        expect(find.byKey(const Key('chat_list_header')), findsNothing);
       });
 
       testWidgets(
@@ -327,8 +344,7 @@ void main() {
       );
 
       testWidgets(
-        'dispatching ScrollEndNotification with negative pixels '
-        'snaps header reveal back to zero',
+        'header stays hidden when ScrollEndNotification fires without prior open',
         (tester) async {
           await mountWidget(
             WnChatList(
@@ -482,6 +498,118 @@ void main() {
         await tester.pump();
 
         expect(find.byKey(const Key('chat_list_header')), findsNothing);
+      });
+    });
+
+    group('pinnedHeader', () {
+      testWidgets('renders pinned header immediately without pull', (tester) async {
+        await mountWidget(
+          const WnChatList(
+            itemCount: 3,
+            itemBuilder: _textBuilder,
+            pinnedHeader: Text('Pinned'),
+            pinnedHeaderHeight: 40,
+          ),
+          tester,
+        );
+        await tester.pump();
+
+        expect(find.byKey(const Key('chat_list_pinned_header')), findsOneWidget);
+        expect(find.text('Pinned'), findsOneWidget);
+      });
+
+      testWidgets('pinned header stays visible when scrolling down', (tester) async {
+        await mountWidget(
+          WnChatList(
+            itemCount: 50,
+            itemBuilder: (context, index) => SizedBox(height: 76, child: Text('Item $index')),
+            pinnedHeader: const Text('Pinned'),
+            pinnedHeaderHeight: 40,
+          ),
+          tester,
+        );
+        await tester.pumpAndSettle();
+
+        await tester.drag(find.byKey(const Key('chat_list')), const Offset(0, -300));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('chat_list_pinned_header')), findsOneWidget);
+      });
+
+      testWidgets('renders pinned header when empty state is shown', (tester) async {
+        await mountWidget(
+          const WnChatList(
+            itemCount: 0,
+            itemBuilder: _emptyBuilder,
+            pinnedHeader: Text('Pinned'),
+            pinnedHeaderHeight: 40,
+            emptyStateContent: Text('Empty placeholder'),
+          ),
+          tester,
+        );
+        await tester.pump();
+
+        expect(find.byKey(const Key('chat_list_empty')), findsOneWidget);
+        expect(find.byKey(const Key('chat_list_pinned_header')), findsOneWidget);
+        expect(find.text('Pinned'), findsOneWidget);
+      });
+
+      testWidgets('renders custom empty state content', (tester) async {
+        await mountWidget(
+          const WnChatList(
+            itemCount: 0,
+            itemBuilder: _emptyBuilder,
+            emptyStateContent: Text('Slogan'),
+          ),
+          tester,
+        );
+        await tester.pump();
+
+        expect(find.byKey(const Key('chat_list_empty')), findsOneWidget);
+        expect(find.text('Slogan'), findsOneWidget);
+        expect(find.text('No chats yet'), findsNothing);
+      });
+
+      testWidgets('does not render pinned header when pinnedHeaderHeight is 0', (tester) async {
+        await mountWidget(
+          const WnChatList(
+            itemCount: 3,
+            itemBuilder: _textBuilder,
+            pinnedHeader: Text('Pinned'),
+          ),
+          tester,
+        );
+        await tester.pump();
+
+        expect(find.byKey(const Key('chat_list_pinned_header')), findsNothing);
+      });
+
+      testWidgets('does not render pinned header when pinnedHeader is null', (tester) async {
+        await mountWidget(
+          const WnChatList(itemCount: 3, itemBuilder: _textBuilder),
+          tester,
+        );
+        await tester.pump();
+
+        expect(find.byKey(const Key('chat_list_pinned_header')), findsNothing);
+      });
+
+      testWidgets('list top padding includes extra 24 spacing after pinned header', (tester) async {
+        await mountWidget(
+          const WnChatList(
+            itemCount: 1,
+            itemBuilder: _textBuilder,
+            topPadding: 80,
+            pinnedHeader: Text('Pinned'),
+            pinnedHeaderHeight: 40,
+          ),
+          tester,
+        );
+        await tester.pump();
+
+        final listView = tester.widget<ListView>(find.byType(ListView));
+        final resolved = listView.padding!.resolve(TextDirection.ltr);
+        expect(resolved.top, greaterThanOrEqualTo(80 + 40 + 24));
       });
     });
 

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show TargetPlatform, debugDefaultTargetPlatformOverride;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
@@ -14,6 +15,7 @@ import 'package:whitenoise/screens/developer_settings_screen.dart';
 import 'package:whitenoise/screens/donate_screen.dart';
 import 'package:whitenoise/screens/edit_profile_screen.dart';
 import 'package:whitenoise/screens/network_screen.dart';
+import 'package:whitenoise/screens/notification_settings_screen.dart';
 import 'package:whitenoise/screens/privacy_security_screen.dart';
 import 'package:whitenoise/screens/profile_keys_screen.dart';
 import 'package:whitenoise/screens/report_bug_screen.dart';
@@ -189,6 +191,7 @@ void main() {
 
     testWidgets('tapping Donate navigates to Donate screen', (tester) async {
       await pumpSettingsScreen(tester);
+      await tester.scrollUntilVisible(find.text('Donate'), 500);
       await tester.tap(find.text('Donate'));
       await tester.pumpAndSettle();
       expect(find.byType(DonateScreen), findsOneWidget);
@@ -305,6 +308,38 @@ void main() {
       await pumpSettingsScreen(tester);
 
       expect(find.text('v1.2.3+45'), findsOneWidget);
+    });
+
+    group('notification settings menu item (Android-only)', () {
+      testWidgets('shows Notification Settings menu item on Android', (tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.android;
+        await pumpSettingsScreen(tester);
+        debugDefaultTargetPlatformOverride = null;
+
+        expect(find.byKey(const Key('notification_settings_menu_item')), findsOneWidget);
+        expect(find.text('Notifications'), findsOneWidget);
+      });
+
+      testWidgets('does not show Notification Settings menu item on iOS', (tester) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+        await pumpSettingsScreen(tester);
+        debugDefaultTargetPlatformOverride = null;
+
+        expect(find.byKey(const Key('notification_settings_menu_item')), findsNothing);
+      });
+
+      testWidgets('tapping Notification Settings navigates to NotificationSettingsScreen', (
+        tester,
+      ) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.android;
+        await pumpSettingsScreen(tester);
+        debugDefaultTargetPlatformOverride = null;
+
+        await tester.tap(find.byKey(const Key('notification_settings_menu_item')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(NotificationSettingsScreen), findsOneWidget);
+      });
     });
   });
 }

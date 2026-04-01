@@ -120,6 +120,12 @@ abstract class AppLocalizations {
   /// **'White Noise'**
   String get appTitle;
 
+  /// Full welcome slogan on the empty chat list screen
+  ///
+  /// In en, this message translates to:
+  /// **'Decentralized, uncensorable,\nsecure messaging.'**
+  String get sloganFull;
+
   /// First slogan word on home screen
   ///
   /// In en, this message translates to:
@@ -1650,6 +1656,30 @@ abstract class AppLocalizations {
   /// **'Archive'**
   String get archive;
 
+  /// Unarchive chat context menu action
+  ///
+  /// In en, this message translates to:
+  /// **'Unarchive'**
+  String get unarchive;
+
+  /// Error message when archive operation fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to archive chat. Please try again.'**
+  String get failedToArchiveChat;
+
+  /// Error message when unarchive operation fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to unarchive chat. Please try again.'**
+  String get failedToUnarchiveChat;
+
+  /// Empty state label shown in the archived chats view
+  ///
+  /// In en, this message translates to:
+  /// **'No archived chats'**
+  String get archivedChatsEmpty;
+
   /// Error message when pin/unpin operation fails
   ///
   /// In en, this message translates to:
@@ -2423,6 +2453,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You can still view saved messages, but you can\'t send or receive new ones. You can archive or delete the chat anytime.'**
   String get removedFromGroupDescription;
+
+  /// Settings screen menu item label for the notifications screen
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationSettings;
+
+  /// Title of the notifications screen
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notificationSettingsTitle;
+
+  /// Label for notifications toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Notifications'**
+  String get notifications;
+
+  /// Description shown below notifications toggle
+  ///
+  /// In en, this message translates to:
+  /// **'Receive push notifications for new messages'**
+  String get notificationsDescription;
+
+  /// Error shown when notification settings fail to load
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load notification settings. Please try again.'**
+  String get notificationsSettingsLoadError;
+
+  /// Error shown when updating notification settings fails
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update notification settings. Please try again.'**
+  String get notificationsSettingsUpdateError;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

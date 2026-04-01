@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/widgets/wn_chat_info_profile_card.dart';
 import 'package:widgetbook_annotation/widgetbook_annotation.dart' as widgetbook;
 
@@ -28,6 +29,11 @@ Widget wnChatInfoProfileCardShowcase(BuildContext context) {
           child: WnChatInfoProfileCard(
             userPubkey:
                 '30f6804a5d0580c6de2a2f8149f89ca92f60163ca87e1230298eb08f6de4def7',
+            displayName: 'River Otter',
+            pictureUrl: 'https://picsum.photos/seed/wn_avatar/200',
+            avatarColor: AvatarColor.fromPubkey(
+              '30f6804a5d0580c6de2a2f8149f89ca92f60163ca87e1230298eb08f6de4def7',
+            ),
           ),
         ),
       ),

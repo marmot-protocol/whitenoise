@@ -30,6 +30,7 @@ pub struct AccountGroup {
     /// - `None` = not pinned (appears after pinned chats)
     /// - `Some(n)` = pinned, lower values appear first
     pub pin_order: Option<i64>,
+    pub archived_at: Option<i64>,
     pub created_at: i64,
     pub updated_at: i64,
 }
@@ -44,6 +45,7 @@ impl From<WhitenoiseAccountGroup> for AccountGroup {
             welcomer_pubkey: ag.welcomer_pubkey.map(|pk| pk.to_hex()),
             last_read_message_id: ag.last_read_message_id.map(|id| id.to_hex()),
             pin_order: ag.pin_order,
+            archived_at: ag.archived_at.map(|dt| dt.timestamp_millis()),
             created_at: ag.created_at.timestamp_millis(),
             updated_at: ag.updated_at.timestamp_millis(),
         }
@@ -60,6 +62,7 @@ impl From<&WhitenoiseAccountGroup> for AccountGroup {
             welcomer_pubkey: ag.welcomer_pubkey.map(|pk| pk.to_hex()),
             last_read_message_id: ag.last_read_message_id.map(|id| id.to_hex()),
             pin_order: ag.pin_order,
+            archived_at: ag.archived_at.map(|dt| dt.timestamp_millis()),
             created_at: ag.created_at.timestamp_millis(),
             updated_at: ag.updated_at.timestamp_millis(),
         }
@@ -140,6 +143,28 @@ pub async fn get_dm_group_with_peer(
     let peer = PublicKey::parse(&peer_pubkey)?;
     let group_id = whitenoise.get_dm_group_with_peer(&account, &peer).await?;
     Ok(group_id.map(|id| group_id_to_string(&id)))
+}
+
+#[frb]
+pub async fn archive_chat(account_pubkey: String, mls_group_id: String) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let group_id_bytes = ::hex::decode(&mls_group_id)?;
+    let group_id = GroupId::from_slice(&group_id_bytes);
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    whitenoise.archive_chat(&account, &group_id).await?;
+    Ok(())
+}
+
+#[frb]
+pub async fn unarchive_chat(account_pubkey: String, mls_group_id: String) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let group_id_bytes = ::hex::decode(&mls_group_id)?;
+    let group_id = GroupId::from_slice(&group_id_bytes);
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    whitenoise.unarchive_chat(&account, &group_id).await?;
+    Ok(())
 }
 
 /// Marks a message as read for the given account.
