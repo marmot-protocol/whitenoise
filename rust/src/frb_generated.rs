@@ -3037,6 +3037,50 @@ fn wire__crate__api__account_groups__mark_message_read_impl(
         },
     )
 }
+fn wire__crate__api__chat_list__mute_chat_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "mute_chat",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_account_pubkey = <String>::sse_decode(&mut deserializer);
+            let api_mls_group_id = <String>::sse_decode(&mut deserializer);
+            let api_duration =
+                <crate::api::chat_list::ChatMuteDuration>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::error::ApiError>(
+                    (move || async move {
+                        let output_ok = crate::api::chat_list::mute_chat(
+                            api_account_pubkey,
+                            api_mls_group_id,
+                            api_duration,
+                        )
+                        .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__utils__npub_from_hex_pubkey_impl(
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
     rust_vec_len_: i32,
@@ -4234,6 +4278,47 @@ fn wire__crate__api__accounts__unfollow_user_impl(
         },
     )
 }
+fn wire__crate__api__chat_list__unmute_chat_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "unmute_chat",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_account_pubkey = <String>::sse_decode(&mut deserializer);
+            let api_mls_group_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::error::ApiError>(
+                    (move || async move {
+                        let output_ok = crate::api::chat_list::unmute_chat(
+                            api_account_pubkey,
+                            api_mls_group_id,
+                        )
+                        .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__accounts__update_account_metadata_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -5353,6 +5438,37 @@ impl SseDecode for crate::api::messages::ChatMessageSummary {
     }
 }
 
+impl SseDecode for crate::api::chat_list::ChatMuteDuration {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut tag_ = <i32>::sse_decode(deserializer);
+        match tag_ {
+            0 => {
+                return crate::api::chat_list::ChatMuteDuration::OneHour;
+            }
+            1 => {
+                return crate::api::chat_list::ChatMuteDuration::EightHours;
+            }
+            2 => {
+                return crate::api::chat_list::ChatMuteDuration::OneDay;
+            }
+            3 => {
+                return crate::api::chat_list::ChatMuteDuration::OneWeek;
+            }
+            4 => {
+                return crate::api::chat_list::ChatMuteDuration::Forever;
+            }
+            5 => {
+                let mut var_until = <chrono::DateTime<chrono::Utc>>::sse_decode(deserializer);
+                return crate::api::chat_list::ChatMuteDuration::Custom { until: var_until };
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
 impl SseDecode for crate::api::chat_list::ChatSummary {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -5371,6 +5487,7 @@ impl SseDecode for crate::api::chat_list::ChatSummary {
         let mut var_unreadCount = <u64>::sse_decode(deserializer);
         let mut var_pinOrder = <Option<i64>>::sse_decode(deserializer);
         let mut var_dmPeerPubkey = <Option<String>>::sse_decode(deserializer);
+        let mut var_mutedUntil = <Option<chrono::DateTime<chrono::Utc>>>::sse_decode(deserializer);
         return crate::api::chat_list::ChatSummary {
             mls_group_id: var_mlsGroupId,
             name: var_name,
@@ -5386,6 +5503,7 @@ impl SseDecode for crate::api::chat_list::ChatSummary {
             unread_count: var_unreadCount,
             pin_order: var_pinOrder,
             dm_peer_pubkey: var_dmPeerPubkey,
+            muted_until: var_mutedUntil,
         };
     }
 }
@@ -7411,6 +7529,35 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::messages::ChatMessageSummary>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::chat_list::ChatMuteDuration {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            crate::api::chat_list::ChatMuteDuration::OneHour => [0.into_dart()].into_dart(),
+            crate::api::chat_list::ChatMuteDuration::EightHours => [1.into_dart()].into_dart(),
+            crate::api::chat_list::ChatMuteDuration::OneDay => [2.into_dart()].into_dart(),
+            crate::api::chat_list::ChatMuteDuration::OneWeek => [3.into_dart()].into_dart(),
+            crate::api::chat_list::ChatMuteDuration::Forever => [4.into_dart()].into_dart(),
+            crate::api::chat_list::ChatMuteDuration::Custom { until } => {
+                [5.into_dart(), until.into_into_dart().into_dart()].into_dart()
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::chat_list::ChatMuteDuration
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::chat_list::ChatMuteDuration>
+    for crate::api::chat_list::ChatMuteDuration
+{
+    fn into_into_dart(self) -> crate::api::chat_list::ChatMuteDuration {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::chat_list::ChatSummary {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
@@ -7428,6 +7575,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::chat_list::ChatSummary {
             self.unread_count.into_into_dart().into_dart(),
             self.pin_order.into_into_dart().into_dart(),
             self.dm_peer_pubkey.into_into_dart().into_dart(),
+            self.muted_until.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -8850,6 +8998,36 @@ impl SseEncode for crate::api::messages::ChatMessageSummary {
     }
 }
 
+impl SseEncode for crate::api::chat_list::ChatMuteDuration {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        match self {
+            crate::api::chat_list::ChatMuteDuration::OneHour => {
+                <i32>::sse_encode(0, serializer);
+            }
+            crate::api::chat_list::ChatMuteDuration::EightHours => {
+                <i32>::sse_encode(1, serializer);
+            }
+            crate::api::chat_list::ChatMuteDuration::OneDay => {
+                <i32>::sse_encode(2, serializer);
+            }
+            crate::api::chat_list::ChatMuteDuration::OneWeek => {
+                <i32>::sse_encode(3, serializer);
+            }
+            crate::api::chat_list::ChatMuteDuration::Forever => {
+                <i32>::sse_encode(4, serializer);
+            }
+            crate::api::chat_list::ChatMuteDuration::Custom { until } => {
+                <i32>::sse_encode(5, serializer);
+                <chrono::DateTime<chrono::Utc>>::sse_encode(until, serializer);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
 impl SseEncode for crate::api::chat_list::ChatSummary {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -8870,6 +9048,7 @@ impl SseEncode for crate::api::chat_list::ChatSummary {
         <u64>::sse_encode(self.unread_count, serializer);
         <Option<i64>>::sse_encode(self.pin_order, serializer);
         <Option<String>>::sse_encode(self.dm_peer_pubkey, serializer);
+        <Option<chrono::DateTime<chrono::Utc>>>::sse_encode(self.muted_until, serializer);
     }
 }
 

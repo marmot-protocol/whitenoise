@@ -115,22 +115,39 @@ void main() {
 
     testWidgets('displays profile name field', (tester) async {
       await pumpEditProfileScreen(tester);
-      expect(find.text('Profile name'), findsOneWidget);
+      expect(find.text('Name'), findsOneWidget);
     });
 
     testWidgets('displays Nostr address field', (tester) async {
       await pumpEditProfileScreen(tester);
-      expect(find.text('Nostr address'), findsOneWidget);
+      expect(find.text('Nostr address (nip-05)'), findsOneWidget);
     });
 
     testWidgets('displays About you field', (tester) async {
       await pumpEditProfileScreen(tester);
-      expect(find.text('About you'), findsOneWidget);
+      expect(find.text('About'), findsOneWidget);
     });
 
-    testWidgets('displays warning box', (tester) async {
+    testWidgets('displays privacy notice', (tester) async {
       await pumpEditProfileScreen(tester);
       expect(find.text('Profile is public'), findsOneWidget);
+    });
+
+    testWidgets('tapping privacy notice toggle expands description', (tester) async {
+      await pumpEditProfileScreen(tester);
+      await tester.tap(find.byKey(const Key('callout_toggle')));
+      await tester.pump();
+      expect(find.textContaining('Name, photo, and bio are visible'), findsOneWidget);
+    });
+
+    testWidgets('tapping privacy notice toggle again collapses description', (tester) async {
+      await pumpEditProfileScreen(tester);
+      await tester.tap(find.byKey(const Key('callout_toggle')));
+      await tester.pump();
+      expect(find.textContaining('Name, photo, and bio are visible'), findsOneWidget);
+      await tester.tap(find.byKey(const Key('callout_toggle')));
+      await tester.pump();
+      expect(find.textContaining('Name, photo, and bio are visible'), findsNothing);
     });
 
     testWidgets('tapping back icon returns to previous screen', (tester) async {
@@ -164,34 +181,13 @@ void main() {
     testWidgets('Save button is enabled when there are changes', (tester) async {
       await pumpEditProfileScreen(tester);
       await tester.pumpAndSettle();
-      final displayNameField = find.text('Profile name');
+      final displayNameField = find.text('Name');
       expect(displayNameField, findsOneWidget);
       await tester.enterText(find.byType(TextField).first, 'New Name');
       await tester.pump();
       final saveButton = find.widgetWithText(WnButton, 'Save');
       final button = tester.widget<WnButton>(saveButton);
       expect(button.onPressed, isNotNull);
-    });
-
-    testWidgets('Discard button appears when there are changes', (tester) async {
-      await pumpEditProfileScreen(tester);
-      await tester.pumpAndSettle();
-      expect(find.text('Discard'), findsNothing);
-      await tester.enterText(find.byType(TextField).first, 'New Name');
-      await tester.pump();
-      expect(find.text('Discard'), findsOneWidget);
-    });
-
-    testWidgets('Discard button resets form fields', (tester) async {
-      await pumpEditProfileScreen(tester);
-      await tester.pumpAndSettle();
-      final displayNameField = find.byType(TextField).first;
-      await tester.enterText(displayNameField, 'New Name');
-      await tester.pump();
-      await tester.tap(find.text('Discard'));
-      await tester.pumpAndSettle();
-      final fieldText = tester.widget<TextField>(displayNameField).controller?.text ?? '';
-      expect(fieldText, 'Test Display Name');
     });
 
     testWidgets('displays error message when profile loading fails', (tester) async {
@@ -288,7 +284,6 @@ void main() {
       Routes.pushToEditProfile(tester.element(find.byType(Scaffold)));
       await tester.pump();
       expect(find.text('Save'), findsNothing);
-      expect(find.text('Discard'), findsNothing);
       await tester.pumpAndSettle();
       expect(find.text('Save'), findsOneWidget);
     });

@@ -106,7 +106,7 @@ void main() {
     testWidgets('displays privacy notice in collapsed state', (tester) async {
       await pumpSignupScreen(tester);
       expect(find.byKey(const Key('signup_privacy_notice')), findsOneWidget);
-      expect(find.text('You control what you share'), findsOneWidget);
+      expect(find.text('Profile is public'), findsOneWidget);
       expect(
         find.textContaining('Name, photo, and bio are visible'),
         findsNothing,

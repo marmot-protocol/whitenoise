@@ -68,9 +68,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get writeSomethingAboutYourself => 'Kendinizi tanıtın';
 
   @override
-  String get profilePrivacyTitle => 'Ne paylaştığınızı siz kontrol edersiniz';
-
-  @override
   String get profilePrivacyDescription =>
       'İsim, fotoğraf ve biyografi küresel Nostr ağında görünür. Paylaşırken kendinizi rahat hissedeceğiniz bilgileri kullanın.';
 
@@ -304,7 +301,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get copiedToClipboardThankYou => 'Panoya kopyalandı. Teşekkürler!';
 
   @override
-  String get shareProfileTitle => 'Profili paylaş';
+  String get shareProfileTitle => 'Paylaş ve bağlan';
 
   @override
   String get scanToConnect => 'Bağlanmak için tarayın';

@@ -68,9 +68,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get writeSomethingAboutYourself => 'Расскажите о себе';
 
   @override
-  String get profilePrivacyTitle => 'Вы контролируете, чем делитесь';
-
-  @override
   String get profilePrivacyDescription =>
       'Имя, фото и биография видны в глобальной сети Nostr. Используйте то, чем вам комфортно делиться.';
 
@@ -305,7 +302,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get copiedToClipboardThankYou => 'Скопировано в буфер обмена. Спасибо!';
 
   @override
-  String get shareProfileTitle => 'Поделиться профилем';
+  String get shareProfileTitle => 'Поделиться и подключиться';
 
   @override
   String get scanToConnect => 'Сканируйте для подключения';

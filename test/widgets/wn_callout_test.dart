@@ -119,5 +119,60 @@ void main() {
       final icon = tester.widget<WnIcon>(find.byKey(const Key('callout_icon')));
       expect(icon.icon, WnIcons.helpFilled);
     });
+
+    testWidgets('compact mode has smaller minimum height than non-compact', (tester) async {
+      await mountWidget(
+        const WnCallout(title: 'Callout Title', compact: true),
+        tester,
+      );
+      final compactContainer = tester.widget<Container>(
+        find.ancestor(
+          of: find.text('Callout Title'),
+          matching: find.byType(Container),
+        ),
+      );
+      final compactConstraints = compactContainer.constraints!;
+
+      await mountWidget(
+        const WnCallout(title: 'Callout Title'),
+        tester,
+      );
+      final normalContainer = tester.widget<Container>(
+        find.ancestor(
+          of: find.text('Callout Title'),
+          matching: find.byType(Container),
+        ),
+      );
+      final normalConstraints = normalContainer.constraints!;
+
+      expect(compactConstraints.minHeight, lessThan(normalConstraints.minHeight));
+    });
+
+    testWidgets('displays toggle button when onToggle is provided', (tester) async {
+      final toggled = [false];
+      final widget = WnCallout(
+        title: 'Callout Title',
+        onToggle: () => toggled[0] = true,
+      );
+      await mountWidget(widget, tester);
+      expect(find.byKey(const Key('callout_toggle')), findsOneWidget);
+      await tester.tap(find.byKey(const Key('callout_toggle')));
+      expect(toggled[0], isTrue);
+    });
+
+    testWidgets('does not display toggle button when onToggle is null', (tester) async {
+      const widget = WnCallout(title: 'Callout Title');
+      await mountWidget(widget, tester);
+      expect(find.byKey(const Key('callout_toggle')), findsNothing);
+    });
+
+    testWidgets('shows chevron up icon when expanded', (tester) async {
+      const widget = WnCallout(
+        title: 'Callout Title',
+        isExpanded: true,
+      );
+      await mountWidget(widget, tester);
+      expect(find.byKey(const Key('callout_icon')), findsOneWidget);
+    });
   });
 }

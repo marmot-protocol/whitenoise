@@ -105,7 +105,6 @@ late ({
   Future<void> Function() loadProfile,
   void Function(String imagePath) onImageSelected,
   Future<bool> Function() updateProfileData,
-  void Function() discardChanges,
 })
 result;
 
@@ -228,49 +227,6 @@ void main() {
       await tester.pump();
 
       expect(result.state.hasUnsavedChanges, isTrue);
-    });
-  });
-
-  group('discardChanges', () {
-    testWidgets('resets to original values', (tester) async {
-      await _pump(tester, overrides);
-      await tester.pump();
-
-      await result.loadProfile();
-      await tester.pumpAndSettle();
-
-      result.displayNameController.text = 'New Name';
-      result.aboutController.text = 'New About';
-      await tester.pump();
-
-      result.discardChanges();
-      await tester.pump();
-
-      expect(result.state.displayName, 'Test Display Name');
-      expect(result.state.about, 'Test About');
-      expect(result.displayNameController.text, 'Test Display Name');
-      expect(result.aboutController.text, 'Test About');
-      expect(result.state.hasUnsavedChanges, isFalse);
-    });
-
-    testWidgets('clears selectedImagePath', (tester) async {
-      await _pump(tester, overrides);
-      await tester.pump();
-
-      await result.loadProfile();
-      await tester.pumpAndSettle();
-
-      result.onImageSelected('/local/path/image.jpg');
-      await tester.pump();
-
-      expect(result.state.selectedImagePath, '/local/path/image.jpg');
-      expect(result.state.hasUnsavedChanges, isTrue);
-
-      result.discardChanges();
-      await tester.pump();
-
-      expect(result.state.selectedImagePath, isNull);
-      expect(result.state.hasUnsavedChanges, isFalse);
     });
   });
 

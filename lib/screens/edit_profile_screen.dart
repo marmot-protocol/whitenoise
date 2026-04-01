@@ -15,7 +15,7 @@ import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart' show WnAvatar, WnAvatarSize;
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_callout.dart';
-import 'package:whitenoise/widgets/wn_input.dart' show WnInput;
+import 'package:whitenoise/widgets/wn_input.dart' show WnInput, WnInputSize;
 import 'package:whitenoise/widgets/wn_input_text_area.dart' show WnInputTextArea;
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
@@ -38,7 +38,6 @@ class EditProfileScreen extends HookConsumerWidget {
       :loadProfile,
       :onImageSelected,
       :updateProfileData,
-      :discardChanges,
     ) = useEditProfile(
       pubkey,
     );
@@ -47,6 +46,7 @@ class EditProfileScreen extends HookConsumerWidget {
     );
     final noticeMessage = useState<String?>(null);
     final noticeType = useState(WnSystemNoticeType.success);
+    final privacyNoticeExpanded = useState(false);
 
     void showNotice(String message, {WnSystemNoticeType type = WnSystemNoticeType.success}) {
       noticeMessage.value = message;
@@ -94,37 +94,24 @@ class EditProfileScreen extends HookConsumerWidget {
               : null,
           footer: state.loadingState != EditProfileLoadingState.loading && state.error == null
               ? Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
-                  child: Column(
-                    spacing: 8.h,
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      if (state.hasUnsavedChanges)
-                        WnButton(
-                          text: context.l10n.discard,
-                          type: WnButtonType.outline,
-                          size: WnButtonSize.medium,
-                          onPressed: () {
-                            discardChanges();
-                          },
-                          disabled: state.loadingState == EditProfileLoadingState.saving,
-                        ),
-                      WnButton(
-                        text: context.l10n.save,
-                        size: WnButtonSize.medium,
-                        onPressed:
-                            state.hasUnsavedChanges &&
-                                state.loadingState != EditProfileLoadingState.saving
-                            ? () async {
-                                final success = await updateProfileData();
-                                if (context.mounted && success) {
-                                  showNotice(context.l10n.profileUpdatedSuccessfully);
-                                }
+                  padding: EdgeInsets.fromLTRB(16.w, 12.h, 16.w, 16.h),
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: WnButton(
+                      text: context.l10n.save,
+                      size: WnButtonSize.medium,
+                      onPressed:
+                          state.hasUnsavedChanges &&
+                              state.loadingState != EditProfileLoadingState.saving
+                          ? () async {
+                              final success = await updateProfileData();
+                              if (context.mounted && success) {
+                                showNotice(context.l10n.profileUpdatedSuccessfully);
                               }
-                            : null,
-                        loading: state.loadingState == EditProfileLoadingState.saving,
-                      ),
-                    ],
+                            }
+                          : null,
+                      loading: state.loadingState == EditProfileLoadingState.saving,
+                    ),
                   ),
                 )
               : null,
@@ -146,11 +133,11 @@ class EditProfileScreen extends HookConsumerWidget {
                   },
                 )
               : SingleChildScrollView(
-                  padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+                  padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Gap(16.h),
+                      Gap(8.h),
                       Center(
                         child: WnAvatar(
                           pictureUrl: state.pictureUrl,
@@ -163,29 +150,37 @@ class EditProfileScreen extends HookConsumerWidget {
                         ),
                       ),
                       Gap(36.h),
+                      WnCallout(
+                        key: const Key('edit_profile_privacy_notice'),
+                        title: context.l10n.profileIsPublic,
+                        description: privacyNoticeExpanded.value
+                            ? context.l10n.profilePrivacyDescription
+                            : null,
+                        isExpanded: privacyNoticeExpanded.value,
+                        compact: true,
+                        onToggle: () {
+                          privacyNoticeExpanded.value = !privacyNoticeExpanded.value;
+                        },
+                      ),
+                      Gap(12.h),
                       WnInput(
                         label: context.l10n.profileName,
                         placeholder: context.l10n.enterYourName,
                         controller: displayNameController,
                       ),
-                      Gap(36.h),
+                      Gap(12.h),
                       WnInput(
                         label: context.l10n.nostrAddress,
                         placeholder: 'example@whitenoise.chat',
                         controller: nip05Controller,
                       ),
-                      Gap(36.h),
+                      Gap(12.h),
                       WnInputTextArea(
                         label: context.l10n.aboutYou,
                         placeholder: context.l10n.writeSomethingAboutYourself,
                         controller: aboutController,
+                        size: WnInputSize.size44,
                       ),
-                      Gap(36.h),
-                      WnCallout(
-                        title: context.l10n.profileIsPublic,
-                        description: context.l10n.profilePublicDescription,
-                      ),
-                      Gap(16.h),
                     ],
                   ),
                 ),

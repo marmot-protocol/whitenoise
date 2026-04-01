@@ -69,7 +69,7 @@ void main() {
   group('ShareProfileScreen', () {
     testWidgets('displays Share profile title', (tester) async {
       await pumpShareProfileScreen(tester);
-      expect(find.text('Share profile'), findsOneWidget);
+      expect(find.text('Share & connect'), findsOneWidget);
     });
 
     testWidgets('displays user display name', (tester) async {

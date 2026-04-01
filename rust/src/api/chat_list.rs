@@ -5,12 +5,47 @@ use crate::api::utils::group_id_to_string;
 use crate::frb_generated::StreamSink;
 use chrono::{DateTime, Utc};
 use flutter_rust_bridge::frb;
+use mdk_core::prelude::GroupId;
 use nostr_sdk::PublicKey;
 use whitenoise::whitenoise::chat_list::ChatListItem as WhitenoiseChatListItem;
 use whitenoise::{
     ChatListUpdate as WhitenoiseChatListUpdate,
-    ChatListUpdateTrigger as WhitenoiseChatListUpdateTrigger, Whitenoise,
+    ChatListUpdateTrigger as WhitenoiseChatListUpdateTrigger, MuteDuration, Whitenoise,
 };
+
+/// How long to mute a chat.
+///
+/// Use a preset variant for common durations or [`ChatMuteDuration::Custom`]
+/// for an arbitrary future timestamp.
+#[frb]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum ChatMuteDuration {
+    /// Mute for 1 hour
+    OneHour,
+    /// Mute for 8 hours
+    EightHours,
+    /// Mute for 1 day
+    OneDay,
+    /// Mute for 1 week
+    OneWeek,
+    /// Mute until manually unmuted
+    Forever,
+    /// Mute until a specific timestamp (must be in the future)
+    Custom { until: DateTime<Utc> },
+}
+
+impl From<ChatMuteDuration> for MuteDuration {
+    fn from(d: ChatMuteDuration) -> Self {
+        match d {
+            ChatMuteDuration::OneHour => Self::OneHour,
+            ChatMuteDuration::EightHours => Self::EightHours,
+            ChatMuteDuration::OneDay => Self::OneDay,
+            ChatMuteDuration::OneWeek => Self::OneWeek,
+            ChatMuteDuration::Forever => Self::Forever,
+            ChatMuteDuration::Custom { until } => Self::Custom(until),
+        }
+    }
+}
 
 #[frb(non_opaque)]
 #[derive(Debug, Clone)]
@@ -50,6 +85,10 @@ pub struct ChatSummary {
     /// For DMs: the public key (hex) of the other participant.
     /// `None` for Group chats.
     pub dm_peer_pubkey: Option<String>,
+    /// When this chat is muted until, if at all.
+    /// `None` = not muted.
+    /// `Some(far-future)` = muted forever.
+    pub muted_until: Option<DateTime<Utc>>,
 }
 
 impl From<WhitenoiseChatListItem> for ChatSummary {
@@ -71,6 +110,7 @@ impl From<WhitenoiseChatListItem> for ChatSummary {
             unread_count: item.unread_count as u64,
             pin_order: item.pin_order,
             dm_peer_pubkey: item.dm_peer_pubkey.map(|pk| pk.to_hex()),
+            muted_until: item.muted_until,
         }
     }
 }
@@ -89,7 +129,7 @@ pub enum ChatListUpdateTrigger {
     ChatArchiveChanged,
     /// This account was removed from the group by an admin.
     RemovedFromGroup,
-    /// The mute status of the chat changed.
+    /// The chat's mute status changed.
     ChatMuteChanged,
 }
 
@@ -161,6 +201,45 @@ pub async fn set_chat_pin_order(
     whitenoise
         .set_chat_pin_order(&account, &group_id, pin_order)
         .await?;
+
+    Ok(())
+}
+
+/// Mutes a chat for the specified duration.
+///
+/// Notifications for this chat will be suppressed until the duration expires.
+/// Use [`ChatMuteDuration::Forever`] to mute indefinitely.
+#[frb]
+pub async fn mute_chat(
+    account_pubkey: String,
+    mls_group_id: String,
+    duration: ChatMuteDuration,
+) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let group_id_bytes = hex::decode(&mls_group_id)?;
+    let group_id = GroupId::from_slice(&group_id_bytes);
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+
+    whitenoise
+        .mute_chat(&account, &group_id, duration.into())
+        .await?;
+
+    Ok(())
+}
+
+/// Unmutes a previously muted chat.
+///
+/// Notifications for this chat will resume immediately.
+#[frb]
+pub async fn unmute_chat(account_pubkey: String, mls_group_id: String) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let group_id_bytes = hex::decode(&mls_group_id)?;
+    let group_id = GroupId::from_slice(&group_id_bytes);
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+
+    whitenoise.unmute_chat(&account, &group_id).await?;
 
     Ok(())
 }
@@ -328,5 +407,42 @@ mod tests {
         let trigger: ChatListUpdateTrigger =
             WhitenoiseChatListUpdateTrigger::RemovedFromGroup.into();
         assert_eq!(trigger, ChatListUpdateTrigger::RemovedFromGroup);
+    }
+
+    #[test]
+    fn test_chat_list_update_trigger_conversion_chat_mute_changed() {
+        let trigger: ChatListUpdateTrigger =
+            WhitenoiseChatListUpdateTrigger::ChatMuteChanged.into();
+        assert_eq!(trigger, ChatListUpdateTrigger::ChatMuteChanged);
+    }
+
+    #[test]
+    fn test_chat_mute_duration_to_mute_duration_conversion() {
+        assert_eq!(
+            MuteDuration::from(ChatMuteDuration::OneHour),
+            MuteDuration::OneHour
+        );
+        assert_eq!(
+            MuteDuration::from(ChatMuteDuration::EightHours),
+            MuteDuration::EightHours
+        );
+        assert_eq!(
+            MuteDuration::from(ChatMuteDuration::OneDay),
+            MuteDuration::OneDay
+        );
+        assert_eq!(
+            MuteDuration::from(ChatMuteDuration::OneWeek),
+            MuteDuration::OneWeek
+        );
+        assert_eq!(
+            MuteDuration::from(ChatMuteDuration::Forever),
+            MuteDuration::Forever
+        );
+
+        let custom_time = Utc::now() + chrono::Duration::hours(3);
+        assert_eq!(
+            MuteDuration::from(ChatMuteDuration::Custom { until: custom_time }),
+            MuteDuration::Custom(custom_time)
+        );
     }
 }

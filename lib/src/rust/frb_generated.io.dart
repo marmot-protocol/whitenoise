@@ -278,6 +278,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ChatMessageSummary dco_decode_box_autoadd_chat_message_summary(dynamic raw);
 
   @protected
+  ChatMuteDuration dco_decode_box_autoadd_chat_mute_duration(dynamic raw);
+
+  @protected
   DeliveryStatus dco_decode_box_autoadd_delivery_status(dynamic raw);
 
   @protected
@@ -332,6 +335,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ChatMessageSummary dco_decode_chat_message_summary(dynamic raw);
+
+  @protected
+  ChatMuteDuration dco_decode_chat_mute_duration(dynamic raw);
 
   @protected
   ChatSummary dco_decode_chat_summary(dynamic raw);
@@ -825,6 +831,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  ChatMuteDuration sse_decode_box_autoadd_chat_mute_duration(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   DeliveryStatus sse_decode_box_autoadd_delivery_status(
     SseDeserializer deserializer,
   );
@@ -897,6 +908,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ChatMessageSummary sse_decode_chat_message_summary(
     SseDeserializer deserializer,
   );
+
+  @protected
+  ChatMuteDuration sse_decode_chat_mute_duration(SseDeserializer deserializer);
 
   @protected
   ChatSummary sse_decode_chat_summary(SseDeserializer deserializer);
@@ -1489,6 +1503,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_chat_mute_duration(
+    ChatMuteDuration self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_delivery_status(
     DeliveryStatus self,
     SseSerializer serializer,
@@ -1578,6 +1598,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_chat_message_summary(
     ChatMessageSummary self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_chat_mute_duration(
+    ChatMuteDuration self,
     SseSerializer serializer,
   );
 

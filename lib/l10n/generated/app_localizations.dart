@@ -210,12 +210,6 @@ abstract class AppLocalizations {
   /// **'Introduce yourself'**
   String get writeSomethingAboutYourself;
 
-  /// Title of the privacy notice on signup screen
-  ///
-  /// In en, this message translates to:
-  /// **'You control what you share'**
-  String get profilePrivacyTitle;
-
   /// Description of the privacy notice on signup screen
   ///
   /// In en, this message translates to:
@@ -471,13 +465,13 @@ abstract class AppLocalizations {
   /// Profile name input label
   ///
   /// In en, this message translates to:
-  /// **'Profile name'**
+  /// **'Name'**
   String get profileName;
 
   /// Nostr address input label
   ///
   /// In en, this message translates to:
-  /// **'Nostr address'**
+  /// **'Nostr address (nip-05)'**
   String get nostrAddress;
 
   /// Placeholder for Nostr address
@@ -489,7 +483,7 @@ abstract class AppLocalizations {
   /// About input label
   ///
   /// In en, this message translates to:
-  /// **'About you'**
+  /// **'About'**
   String get aboutYou;
 
   /// Warning box title for public profile
@@ -651,7 +645,7 @@ abstract class AppLocalizations {
   /// Share profile screen title
   ///
   /// In en, this message translates to:
-  /// **'Share profile'**
+  /// **'Share & connect'**
   String get shareProfileTitle;
 
   /// Text below QR code

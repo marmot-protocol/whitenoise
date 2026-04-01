@@ -74,10 +74,6 @@
   "@writeSomethingAboutYourself": {
     "description": "Placeholder for bio input"
   },
-  "profilePrivacyTitle": "You control what you share",
-  "@profilePrivacyTitle": {
-    "description": "Title of the privacy notice on signup screen"
-  },
   "profilePrivacyDescription": "Name, photo, and bio are visible on the global Nostr network. Use what you're comfortable sharing.",
   "@profilePrivacyDescription": {
     "description": "Description of the privacy notice on signup screen"
@@ -246,11 +242,11 @@
   "@editProfileTitle": {
     "description": "Edit profile screen title"
   },
-  "profileName": "Profile name",
+  "profileName": "Name",
   "@profileName": {
     "description": "Profile name input label"
   },
-  "nostrAddress": "Nostr address",
+  "nostrAddress": "Nostr address (nip-05)",
   "@nostrAddress": {
     "description": "Nostr address input label"
   },
@@ -258,7 +254,7 @@
   "@nostrAddressPlaceholder": {
     "description": "Placeholder for Nostr address"
   },
-  "aboutYou": "About you",
+  "aboutYou": "About",
   "@aboutYou": {
     "description": "About input label"
   },
@@ -379,7 +375,7 @@
   "@copiedToClipboardThankYou": {
     "description": "System notice message when donation address is copied"
   },
-  "shareProfileTitle": "Share profile",
+  "shareProfileTitle": "Share & connect",
   "@shareProfileTitle": {
     "description": "Share profile screen title"
   },
@@ -1737,22 +1733,6 @@
   "failedToStartSupportChat": "Failed to start chat with support",
   "@failedToStartSupportChat": {
     "description": "Error notice shown when starting a DM with support account fails"
-  },
-  "fatalErrorTitle": "Oh no!",
-  "@fatalErrorTitle": {
-    "description": "Error callout title on fatal error screen"
-  },
-  "fatalErrorDescription": "We hit a bump loading the app. It's not you, it's us and we're sorry.\n\nHelp us fix it. Tap below to send this error to our team.",
-  "@fatalErrorDescription": {
-    "description": "Error callout description on fatal error screen"
-  },
-  "fatalErrorCopyError": "Copy error",
-  "@fatalErrorCopyError": {
-    "description": "Button label on the fatal error screen diagnostics box to copy the error to clipboard"
-  },
-  "fatalErrorErrorCopied": "Error copied to clipboard",
-  "@fatalErrorErrorCopied": {
-    "description": "System notice shown after copying error details to clipboard on the fatal error screen"
   },
   "removedFromGroup": "You were removed from this group",
   "@removedFromGroup": {

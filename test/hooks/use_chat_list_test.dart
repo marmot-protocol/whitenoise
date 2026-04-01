@@ -15,6 +15,7 @@ ChatSummary _chatSummary(
   bool pendingConfirmation = false,
   DateTime? archivedAt,
   DateTime? removedAt,
+  DateTime? mutedUntil,
 }) => ChatSummary(
   mlsGroupId: 'mls_$id',
   name: 'Chat $id',
@@ -23,6 +24,7 @@ ChatSummary _chatSummary(
   pendingConfirmation: pendingConfirmation,
   archivedAt: archivedAt,
   removedAt: removedAt,
+  mutedUntil: mutedUntil,
   unreadCount: BigInt.zero,
 );
 
@@ -321,6 +323,46 @@ void main() {
 
         final ids = getResult().chats.map((c) => c.mlsGroupId).toList();
         expect(ids, ['mls_c2', 'mls_c1']);
+      });
+    });
+
+    group('chatMuteChanged trigger', () {
+      testWidgets('updates chat data without changing order', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([
+          _chatSummary('c1', DateTime(2024)),
+          _chatSummary('c2', DateTime(2024, 1, 2)),
+        ]);
+        await tester.pumpAndSettle();
+
+        final mutedUntil = DateTime(2025);
+        _api.emitUpdate(
+          ChatListUpdateTrigger.chatMuteChanged,
+          _chatSummary('c2', DateTime(2024, 1, 2), mutedUntil: mutedUntil),
+        );
+        await tester.pumpAndSettle();
+
+        final chats = getResult().chats;
+        expect(chats.map((c) => c.mlsGroupId).toList(), ['mls_c1', 'mls_c2']);
+        expect(chats[1].mutedUntil, mutedUntil);
+      });
+
+      testWidgets('clears mutedUntil when unmuted', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([
+          _chatSummary('c1', DateTime(2024), mutedUntil: DateTime(2025)),
+        ]);
+        await tester.pumpAndSettle();
+
+        _api.emitUpdate(
+          ChatListUpdateTrigger.chatMuteChanged,
+          _chatSummary('c1', DateTime(2024)),
+        );
+        await tester.pumpAndSettle();
+
+        expect(getResult().chats.first.mutedUntil, isNull);
       });
     });
 

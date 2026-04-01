@@ -34,18 +34,12 @@ class WnCopyCard extends StatelessWidget {
     }
   }
 
-  TextStyle _textStyle(SemanticColors colors) => TextStyle(
-    fontWeight: FontWeight.w500,
-    fontSize: 14.sp,
-    height: 20 / 14,
-    letterSpacing: 0.4.sp,
-    color: colors.backgroundContentSecondary,
-  );
-
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final style = _textStyle(colors);
+    final style = context.typographyScaled.medium14.copyWith(
+      color: colors.backgroundContentSecondary,
+    );
 
     return Material(
       color: colors.fillSecondary,

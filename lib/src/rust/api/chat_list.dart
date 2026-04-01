@@ -13,7 +13,7 @@ import 'messages.dart';
 
 part 'chat_list.freezed.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`
 
 /// Sets the pin order for a chat.
 ///
@@ -30,6 +30,31 @@ Future<void> setChatPinOrder({
   accountPubkey: accountPubkey,
   mlsGroupId: mlsGroupId,
   pinOrder: pinOrder,
+);
+
+/// Mutes a chat for the specified duration.
+///
+/// Notifications for this chat will be suppressed until the duration expires.
+/// Use [`ChatMuteDuration::Forever`] to mute indefinitely.
+Future<void> muteChat({
+  required String accountPubkey,
+  required String mlsGroupId,
+  required ChatMuteDuration duration,
+}) => RustLib.instance.api.crateApiChatListMuteChat(
+  accountPubkey: accountPubkey,
+  mlsGroupId: mlsGroupId,
+  duration: duration,
+);
+
+/// Unmutes a previously muted chat.
+///
+/// Notifications for this chat will resume immediately.
+Future<void> unmuteChat({
+  required String accountPubkey,
+  required String mlsGroupId,
+}) => RustLib.instance.api.crateApiChatListUnmuteChat(
+  accountPubkey: accountPubkey,
+  mlsGroupId: mlsGroupId,
 );
 
 /// Retrieves the chat list for an account.
@@ -119,8 +144,33 @@ enum ChatListUpdateTrigger {
   /// This account was removed from the group by an admin.
   removedFromGroup,
 
-  /// The mute status of the chat changed.
+  /// The chat's mute status changed.
   chatMuteChanged,
+}
+
+@freezed
+sealed class ChatMuteDuration with _$ChatMuteDuration {
+  const ChatMuteDuration._();
+
+  /// Mute for 1 hour
+  const factory ChatMuteDuration.oneHour() = ChatMuteDuration_OneHour;
+
+  /// Mute for 8 hours
+  const factory ChatMuteDuration.eightHours() = ChatMuteDuration_EightHours;
+
+  /// Mute for 1 day
+  const factory ChatMuteDuration.oneDay() = ChatMuteDuration_OneDay;
+
+  /// Mute for 1 week
+  const factory ChatMuteDuration.oneWeek() = ChatMuteDuration_OneWeek;
+
+  /// Mute until manually unmuted
+  const factory ChatMuteDuration.forever() = ChatMuteDuration_Forever;
+
+  /// Mute until a specific timestamp (must be in the future)
+  const factory ChatMuteDuration.custom({
+    required DateTime until,
+  }) = ChatMuteDuration_Custom;
 }
 
 class ChatSummary {
@@ -173,6 +223,11 @@ class ChatSummary {
   /// `None` for Group chats.
   final String? dmPeerPubkey;
 
+  /// When this chat is muted until, if at all.
+  /// `None` = not muted.
+  /// `Some(far-future)` = muted forever (see `MUTE_FOREVER`).
+  final DateTime? mutedUntil;
+
   const ChatSummary({
     required this.mlsGroupId,
     this.name,
@@ -188,6 +243,7 @@ class ChatSummary {
     required this.unreadCount,
     this.pinOrder,
     this.dmPeerPubkey,
+    this.mutedUntil,
   });
 
   @override
@@ -205,7 +261,8 @@ class ChatSummary {
       removedAt.hashCode ^
       unreadCount.hashCode ^
       pinOrder.hashCode ^
-      dmPeerPubkey.hashCode;
+      dmPeerPubkey.hashCode ^
+      mutedUntil.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -225,5 +282,6 @@ class ChatSummary {
           removedAt == other.removedAt &&
           unreadCount == other.unreadCount &&
           pinOrder == other.pinOrder &&
-          dmPeerPubkey == other.dmPeerPubkey;
+          dmPeerPubkey == other.dmPeerPubkey &&
+          mutedUntil == other.mutedUntil;
 }
