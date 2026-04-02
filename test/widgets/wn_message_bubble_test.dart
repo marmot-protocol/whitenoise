@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/src/rust/api/messages.dart' show HighlightSpan;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
@@ -632,6 +633,107 @@ void main() {
 
         expect(find.byKey(const Key('message_status_row')), findsOneWidget);
         expect(tester.takeException(), isNull);
+      });
+    });
+
+    group('highlight spans', () {
+      testWidgets('splits text into spans when highlight starts at beginning', (tester) async {
+        await mountWidget(
+          const SizedBox(
+            width: 300,
+            child: WnMessageBubble(
+              direction: MessageDirection.incoming,
+              isDeleted: false,
+              content: 'hello world',
+              timestamp: '12:00',
+              highlightSpans: [HighlightSpan(start: 0, end: 5)],
+            ),
+          ),
+          tester,
+        );
+
+        expect(find.text('hello world'), findsNothing);
+        expect(find.textContaining('hello'), findsOneWidget);
+        expect(find.textContaining('world'), findsOneWidget);
+      });
+
+      testWidgets('renders gap text before highlight span', (tester) async {
+        await mountWidget(
+          const SizedBox(
+            width: 300,
+            child: WnMessageBubble(
+              direction: MessageDirection.incoming,
+              isDeleted: false,
+              content: 'hello world',
+              timestamp: '12:00',
+              highlightSpans: [HighlightSpan(start: 6, end: 11)],
+            ),
+          ),
+          tester,
+        );
+
+        expect(find.text('hello world'), findsNothing);
+        expect(find.textContaining('hello'), findsOneWidget);
+        expect(find.textContaining('world'), findsOneWidget);
+      });
+
+      testWidgets('renders highlight in text-only bubble without timestamp', (tester) async {
+        await mountWidget(
+          const SizedBox(
+            width: 300,
+            child: WnMessageBubble(
+              direction: MessageDirection.incoming,
+              isDeleted: false,
+              content: 'search term here',
+              highlightSpans: [HighlightSpan(start: 7, end: 11)],
+            ),
+          ),
+          tester,
+        );
+
+        expect(find.textContaining('search'), findsOneWidget);
+        expect(find.textContaining('term'), findsOneWidget);
+      });
+
+      testWidgets('highlight with maxLines renders in truncated layout', (tester) async {
+        final longText = List.filled(200, 'word').join(' ');
+        await mountWidget(
+          SizedBox(
+            width: 280,
+            height: 120,
+            child: WnMessageBubble(
+              direction: MessageDirection.outgoing,
+              isDeleted: false,
+              content: longText,
+              timestamp: '12:00',
+              highlightSpans: const [HighlightSpan(start: 0, end: 6)],
+              contentMaxLines: 3,
+              forceTightHeight: true,
+            ),
+          ),
+          tester,
+        );
+
+        expect(tester.takeException(), isNull);
+        expect(find.byKey(const Key('message_status_row')), findsOneWidget);
+      });
+
+      testWidgets('outgoing bubble uses white-tinted highlight color', (tester) async {
+        await mountWidget(
+          const SizedBox(
+            width: 300,
+            child: WnMessageBubble(
+              direction: MessageDirection.outgoing,
+              isDeleted: false,
+              content: 'hello world',
+              timestamp: '12:00',
+              highlightSpans: [HighlightSpan(start: 0, end: 5)],
+            ),
+          ),
+          tester,
+        );
+
+        expect(find.textContaining('hello'), findsOneWidget);
       });
     });
 

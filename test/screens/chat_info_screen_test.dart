@@ -33,6 +33,7 @@ class _MockApi extends MockWnApi {
   Completer<void>? unfollowCompleter;
   Exception? followError;
   Exception? unfollowError;
+  Exception? groupError;
   final followCalls = <({String account, String target})>[];
   final unfollowCalls = <({String account, String target})>[];
   final Set<String> followingPubkeys = {};
@@ -42,6 +43,7 @@ class _MockApi extends MockWnApi {
     required String accountPubkey,
     required String groupId,
   }) async {
+    if (groupError != null) throw groupError!;
     return Group(
       mlsGroupId: groupId,
       nostrGroupId: testNostrGroupId,
@@ -125,6 +127,7 @@ class _MockApi extends MockWnApi {
     unfollowCompleter = null;
     followError = null;
     unfollowError = null;
+    groupError = null;
     followCalls.clear();
     unfollowCalls.clear();
     followingPubkeys.clear();
@@ -451,6 +454,13 @@ void main() {
       expect(find.byKey(const Key('search_button')), findsNothing);
       expect(find.byKey(const Key('contact_button')), findsOneWidget);
       expect(find.byKey(const Key('add_to_group_button')), findsOneWidget);
+    });
+
+    testWidgets('shows profile load error when chat profile fails', (tester) async {
+      _api.groupError = Exception('group load failed');
+      await pumpChatInfoScreen(tester);
+
+      expect(find.text('Unable to load profile. Please try again.'), findsOneWidget);
     });
   });
 }
