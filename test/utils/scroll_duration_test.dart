@@ -3,6 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:scroll_to_index/scroll_to_index.dart';
 import 'package:whitenoise/utils/scroll_duration.dart';
 
+import '../test_helpers.dart';
+
 void main() {
   group('scrollDuration', () {
     testWidgets('returns max duration when controller has no clients', (tester) async {
@@ -13,6 +15,7 @@ void main() {
     });
 
     testWidgets('returns min duration for nearby targets', (tester) async {
+      setUpTestView(tester);
       final controller = AutoScrollController();
       addTearDown(controller.dispose);
 
@@ -33,6 +36,7 @@ void main() {
     });
 
     testWidgets('scales duration with distance', (tester) async {
+      setUpTestView(tester);
       final controller = AutoScrollController();
       addTearDown(controller.dispose);
 
@@ -54,6 +58,7 @@ void main() {
     });
 
     testWidgets('never exceeds max duration', (tester) async {
+      setUpTestView(tester);
       final controller = AutoScrollController();
       addTearDown(controller.dispose);
 
