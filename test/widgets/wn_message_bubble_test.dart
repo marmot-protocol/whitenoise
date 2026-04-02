@@ -735,6 +735,28 @@ void main() {
 
         expect(find.textContaining('hello'), findsOneWidget);
       });
+
+      testWidgets('correctly highlights text after emoji using code-point indices', (tester) async {
+        // 👋 is a non-BMP character (2 UTF-16 code units, 1 code point).
+        // Rust sends code-point indices, so "world" starts at code-point 5.
+        await mountWidget(
+          const SizedBox(
+            width: 300,
+            child: WnMessageBubble(
+              direction: MessageDirection.incoming,
+              isDeleted: false,
+              // code points: H(0) i(1) (2) 👋(3) (4) w(5) o(6) r(7) l(8) d(9)
+              content: 'Hi 👋 world',
+              timestamp: '12:00',
+              highlightSpans: [HighlightSpan(start: 5, end: 10)],
+            ),
+          ),
+          tester,
+        );
+
+        expect(find.textContaining('world'), findsOneWidget);
+        expect(find.textContaining('Hi 👋 '), findsOneWidget);
+      });
     });
 
     group('chat status', () {

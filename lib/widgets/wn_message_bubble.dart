@@ -9,6 +9,17 @@ import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_reaction.dart';
 export 'package:whitenoise/src/rust/api/messages.dart' show EmojiReaction;
 
+int _codePointToCodeUnit(String text, int codePointIndex) {
+  var codeUnits = 0;
+  var codePoints = 0;
+  for (final rune in text.runes) {
+    if (codePoints >= codePointIndex) break;
+    codeUnits += rune > 0xFFFF ? 2 : 1;
+    codePoints++;
+  }
+  return codeUnits;
+}
+
 List<TextSpan> _buildHighlightedSpans(
   String text,
   TextStyle baseStyle,
@@ -22,8 +33,8 @@ List<TextSpan> _buildHighlightedSpans(
   final result = <TextSpan>[];
   var cursor = 0;
   for (final span in spans) {
-    final start = span.start.clamp(0, text.length);
-    final end = span.end.clamp(start, text.length);
+    final start = _codePointToCodeUnit(text, span.start).clamp(0, text.length);
+    final end = _codePointToCodeUnit(text, span.end).clamp(start, text.length);
     if (start > cursor) {
       result.add(TextSpan(text: text.substring(cursor, start), style: baseStyle));
     }

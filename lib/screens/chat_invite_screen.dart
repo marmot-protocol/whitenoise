@@ -81,7 +81,7 @@ class ChatInviteScreen extends HookConsumerWidget {
       if (otherPubkey != null) {
         unawaited(Routes.pushToInviteInfo(context, otherPubkey));
       } else {
-        Routes.pushToGroupInfo(context, mlsGroupId);
+        unawaited(Routes.pushToGroupInfo(context, mlsGroupId));
       }
     }
 
