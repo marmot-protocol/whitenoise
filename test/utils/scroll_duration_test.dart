@@ -29,7 +29,7 @@ void main() {
       );
 
       final result = scrollDuration(controller, 0);
-      expect(result.inMilliseconds, lessThanOrEqualTo(maxScrollDuration.inMilliseconds));
+      expect(result.inMilliseconds, 50);
     });
 
     testWidgets('scales duration with distance', (tester) async {

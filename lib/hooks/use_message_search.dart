@@ -45,7 +45,7 @@ MessageSearchResult useMessageSearch({
           if (cancelled) return;
           _logger.info(
             'search completed groupId=${groupId.substring(0, 8)}… '
-            'query="$debouncedQuery" results=${searchResults.length}',
+            'queryLength=${debouncedQuery.length} results=${searchResults.length}',
           );
           results.value = searchResults;
 
@@ -55,11 +55,14 @@ MessageSearchResult useMessageSearch({
             return;
           }
 
+          displayItems.value = _matchOnlyItems(searchResults);
+
           try {
             final windows = await _fetchContextWindows(
               pubkey: pubkey,
               groupId: groupId,
               results: searchResults,
+              isCancelled: () => cancelled,
             );
             if (cancelled) return;
             displayItems.value = buildSearchDisplayList(
@@ -67,9 +70,8 @@ MessageSearchResult useMessageSearch({
               contextWindows: windows,
             );
           } catch (e, st) {
-            _logger.warning('context fetch failed, showing matches only', e, st);
             if (!cancelled) {
-              displayItems.value = _matchOnlyItems(searchResults);
+              _logger.warning('context fetch failed, showing matches only', e, st);
             }
           }
 
@@ -77,7 +79,7 @@ MessageSearchResult useMessageSearch({
         })
         .catchError((Object e, StackTrace st) {
           if (!cancelled) {
-            _logger.severe('search failed query="$debouncedQuery"', e, st);
+            _logger.severe('search failed queryLength=${debouncedQuery.length}', e, st);
             results.value = [];
             displayItems.value = [];
             isSearching.value = false;
@@ -113,10 +115,13 @@ Future<List<List<ChatMessage>>> _fetchContextWindows({
   required String pubkey,
   required String groupId,
   required List<SearchResult> results,
+  required bool Function() isCancelled,
 }) async {
   final windows = <List<ChatMessage>>[];
 
   for (final result in results) {
+    if (isCancelled()) return windows;
+
     final match = result.message;
 
     final beforeMessages = await fetchAggregatedMessagesForGroup(
@@ -126,6 +131,8 @@ Future<List<List<ChatMessage>>> _fetchContextWindows({
       beforeMessageId: match.id,
       limit: searchContextSize,
     );
+
+    if (isCancelled()) return windows;
 
     windows.add([...beforeMessages, match]);
   }

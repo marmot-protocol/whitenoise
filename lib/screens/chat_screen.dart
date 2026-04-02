@@ -300,7 +300,7 @@ class ChatScreen extends HookConsumerWidget {
 
             if (displayItem != null && displayItem.isSeparator) {
               return Padding(
-                key: const Key('search_separator'),
+                key: Key('search_separator_$index'),
                 padding: EdgeInsets.symmetric(vertical: 8.h),
                 child: Center(
                   child: Container(
@@ -528,12 +528,14 @@ class ChatScreen extends HookConsumerWidget {
                                 icon: WnIcons.chevronUp,
                               ),
                               Text(
-                                matchCount == 0
-                                    ? context.l10n.noResults
-                                    : context.l10n.chatSearchMatchCount(
+                                matchCount > 0
+                                    ? context.l10n.chatSearchMatchCount(
                                         currentMatchIndex.value + 1,
                                         matchCount,
-                                      ),
+                                      )
+                                    : search.isSearching
+                                    ? ''
+                                    : context.l10n.noResults,
                                 key: const Key('chat_search_match_count'),
                                 style: typography.medium14.copyWith(
                                   color: colors.backgroundContentSecondary,

@@ -36,6 +36,7 @@ class _MockApi extends MockWnApi {
   bool shouldFailSearch = false;
   bool shouldFailContextFetch = false;
   Completer<List<SearchResult>>? searchCompleter;
+  Completer<List<ChatMessage>>? contextFetchCompleter;
   final searchCalls = <({String pubkey, String groupId, String query})>[];
 
   @override
@@ -60,6 +61,7 @@ class _MockApi extends MockWnApi {
     int? limit,
   }) {
     if (shouldFailContextFetch) return Future.error(Exception('context fetch failed'));
+    if (contextFetchCompleter != null) return contextFetchCompleter!.future;
     return Future.value([]);
   }
 
@@ -70,6 +72,7 @@ class _MockApi extends MockWnApi {
     shouldFailSearch = false;
     shouldFailContextFetch = false;
     searchCompleter = null;
+    contextFetchCompleter = null;
     searchCalls.clear();
   }
 }
@@ -243,6 +246,29 @@ void main() {
         expect(getState().results[0].highlightSpans.length, 1);
         expect(getState().results[0].highlightSpans[0].start, 0);
         expect(getState().results[0].highlightSpans[0].end, 5);
+      });
+
+      testWidgets('stale context fetch does not overwrite new query results', (tester) async {
+        api.searchResults = [_searchResultFactory('msg1', 'hello world')];
+        api.contextFetchCompleter = Completer();
+
+        await pump(tester, query: 'hello');
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+
+        expect(getState().results.length, 1);
+        expect(getState().displayItems.where((i) => i.isMatch).length, 1);
+
+        api.searchResults = [_searchResultFactory('msg2', 'new result')];
+        api.contextFetchCompleter = null;
+
+        await pump(tester, query: 'new');
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+        await tester.pump();
+
+        expect(getState().results.length, 1);
+        expect(getState().results[0].message.id, 'msg2');
       });
     });
   });
