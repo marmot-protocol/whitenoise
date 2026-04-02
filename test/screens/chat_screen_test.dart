@@ -1768,7 +1768,10 @@ void main() {
         _api.initialMessages = [_message('m1', DateTime(2024))];
         await openSearch(tester);
         await tester.enterText(find.byKey(const Key('chat_search_field')), 'zzznomatch');
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+        await tester.pump();
         expect(find.byKey(const Key('chat_search_match_count')), findsOneWidget);
         expect(find.text('No results'), findsOneWidget);
       });
@@ -1777,7 +1780,10 @@ void main() {
         _api.initialMessages = [_message('m1', DateTime(2024))];
         await openSearch(tester);
         await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message m1');
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+        await tester.pump();
         expect(find.byKey(const Key('chat_search_match_count')), findsOneWidget);
         expect(find.text('1 of 1 match'), findsOneWidget);
       });
@@ -1789,7 +1795,10 @@ void main() {
         ];
         await openSearch(tester);
         await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+        await tester.pump();
         expect(find.byKey(const Key('chat_search_match_count')), findsOneWidget);
         expect(find.text('1 of 2 matches'), findsOneWidget);
       });
@@ -1801,7 +1810,10 @@ void main() {
         ];
         await openSearch(tester);
         await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+        await tester.pump();
         expect(find.byKey(const Key('chat_search_prev_button')), findsOneWidget);
         expect(find.byKey(const Key('chat_search_next_button')), findsOneWidget);
       });
@@ -1813,7 +1825,10 @@ void main() {
         ];
         await openSearch(tester);
         await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+        await tester.pump();
         expect(find.text('1 of 2 matches'), findsOneWidget);
 
         await tester.tap(find.byKey(const Key('chat_search_next_button')));
@@ -1828,7 +1843,10 @@ void main() {
         ];
         await openSearch(tester);
         await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+        await tester.pump();
         await tester.tap(find.byKey(const Key('chat_search_next_button')));
         await tester.pumpAndSettle();
         expect(find.text('2 of 2 matches'), findsOneWidget);
@@ -1843,7 +1861,10 @@ void main() {
       ) async {
         await openSearch(tester);
         await tester.enterText(find.byKey(const Key('chat_search_field')), 'zzznomatch');
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+        await tester.pump();
         expect(find.text('No messages yet'), findsNothing);
       });
 
@@ -1863,13 +1884,19 @@ void main() {
         ];
         await openSearch(tester);
         await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+        await tester.pump();
         await tester.tap(find.byKey(const Key('chat_search_next_button')));
         await tester.pumpAndSettle();
         expect(find.text('2 of 2 matches'), findsOneWidget);
 
         await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message m1');
-        await tester.pumpAndSettle();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+        await tester.pump();
         expect(find.text('1 of 1 match'), findsOneWidget);
       });
     });
