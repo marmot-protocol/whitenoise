@@ -4,7 +4,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
-import 'package:scroll_to_index/scroll_to_index.dart';
+import 'package:scroll_to_index/scroll_to_index.dart'
+    show AutoScrollController, AutoScrollPosition, AutoScrollTag;
 import 'package:whitenoise/hooks/use_active_chat.dart';
 import 'package:whitenoise/hooks/use_chat_input.dart';
 import 'package:whitenoise/hooks/use_chat_list.dart';
@@ -29,6 +30,8 @@ import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart';
 import 'package:whitenoise/utils/metadata.dart';
+import 'package:whitenoise/utils/scroll_duration.dart';
+import 'package:whitenoise/utils/search_context.dart';
 import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
 import 'package:whitenoise/widgets/chat_message_bubble.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
@@ -46,6 +49,24 @@ final _logger = Logger('ChatScreen');
 
 const _slateHeight = 80.0;
 const _searchBarHeight = 80.0;
+
+void _scrollToMatch(
+  AutoScrollController controller,
+  List<SearchDisplayItem>? items,
+  int matchIndex,
+) {
+  if (items == null) return;
+  for (var i = 0; i < items.length; i++) {
+    if (items[i].isMatch && items[i].matchIndex == matchIndex) {
+      controller.scrollToIndex(
+        i,
+        preferPosition: AutoScrollPosition.middle,
+        duration: scrollDuration(controller, i),
+      );
+      return;
+    }
+  }
+}
 
 class ChatScreen extends HookConsumerWidget {
   final String groupId;
@@ -79,6 +100,8 @@ class ChatScreen extends HookConsumerWidget {
     final chatProfile = useChatProfile(context, pubkey, groupId);
     final scrollToMessageResult = useScrollToMessage(
       getReversedMessageIndex: getReversedMessageIndex,
+      loadOlderMessages: loadOlderMessages,
+      hasMoreMessages: hasMoreMessages,
     );
     final scrollController = scrollToMessageResult.scrollController;
     final mediaUpload = useMediaUpload(pubkey: pubkey, groupId: groupId);
@@ -231,10 +254,12 @@ class ChatScreen extends HookConsumerWidget {
     final slateTopPadding = safeAreaTop + _slateHeight.h + searchBarHeight;
     final listBottomPadding = inputAreaHeight.value + safeAreaBottom + 12.h;
 
-    final displayMessages = isSearchActive.value && searchQuery.value.isNotEmpty
-        ? search.results
+    final searchDisplayItems = isSearchActive.value && searchQuery.value.isNotEmpty
+        ? search.displayItems
         : null;
-    final displayCount = displayMessages?.length ?? messageCount;
+    final isSearchMode = searchDisplayItems != null && searchDisplayItems.isNotEmpty;
+    final matchCount = isSearchMode ? search.results.length : 0;
+    final displayCount = searchDisplayItems?.length ?? messageCount;
     final currentMatchIndex = useState(0);
 
     useEffect(() {
@@ -259,10 +284,10 @@ class ChatScreen extends HookConsumerWidget {
         opacity: chatScroll.isInitialPositionReady ? 1.0 : 0.0,
         child: ListView.builder(
           controller: scrollController,
-          reverse: true,
+          reverse: !isSearchMode,
           padding: EdgeInsets.fromLTRB(10.w, slateTopPadding + 8.h, 10.w, listBottomPadding),
           itemCount: displayCount,
-          findChildIndexCallback: displayMessages == null
+          findChildIndexCallback: !isSearchMode
               ? (key) {
                   if (key is ValueKey<String>) {
                     return getReversedMessageIndex(key.value);
@@ -271,8 +296,26 @@ class ChatScreen extends HookConsumerWidget {
                 }
               : null,
           itemBuilder: (context, index) {
-            final searchResult = displayMessages?[index];
-            final message = searchResult?.message ?? getMessage(index);
+            final displayItem = searchDisplayItems?[index];
+
+            if (displayItem != null && displayItem.isSeparator) {
+              return Padding(
+                key: const Key('search_separator'),
+                padding: EdgeInsets.symmetric(vertical: 8.h),
+                child: Center(
+                  child: Container(
+                    width: 40.w,
+                    height: 2.h,
+                    decoration: BoxDecoration(
+                      color: colors.borderPrimary,
+                      borderRadius: BorderRadius.circular(1.r),
+                    ),
+                  ),
+                ),
+              );
+            }
+
+            final message = displayItem?.message ?? getMessage(index);
             final isOwnMessage = message.pubkey == pubkey;
             final replyPreview = message.isReply ? getChatMessageQuote(message.replyToId) : null;
 
@@ -282,48 +325,88 @@ class ChatScreen extends HookConsumerWidget {
                 : presentName(authorMetadata) ?? context.l10n.unknownUser;
             final senderPictureUrl = authorMetadata?.picture;
 
-            final nextMessage = index > 0 ? getMessage(index - 1) : null;
             final isGroupChat = chatProfile.data?.isDm != true;
-            final showAvatar = shouldShowAvatar(
-              current: message,
-              next: nextMessage,
+            final bool showAvatar;
+            final bool showTail;
+            if (isSearchMode) {
+              final nextItem = index + 1 < displayCount ? searchDisplayItems[index + 1] : null;
+              final nextMessage = nextItem != null && !nextItem.isSeparator
+                  ? nextItem.message
+                  : null;
+              showAvatar = shouldShowAvatar(
+                current: message,
+                next: nextMessage,
+                isOwnMessage: isOwnMessage,
+                isGroupChat: isGroupChat,
+              );
+              showTail = shouldShowTail(current: message, next: nextMessage);
+            } else {
+              final nextMessage = index > 0 ? getMessage(index - 1) : null;
+              showAvatar = shouldShowAvatar(
+                current: message,
+                next: nextMessage,
+                isOwnMessage: isOwnMessage,
+                isGroupChat: isGroupChat,
+              );
+              showTail = shouldShowTail(current: message, next: nextMessage);
+            }
+
+            final isMatchItem = displayItem != null && displayItem.isMatch;
+
+            Widget bubble = ChatMessageBubble(
+              message: message,
+              highlightSpans: displayItem?.highlightSpans,
               isOwnMessage: isOwnMessage,
+              currentUserPubkey: pubkey,
+              replyPreview: replyPreview,
+              senderName: senderName,
+              senderPictureUrl: senderPictureUrl,
+              showAvatar: showAvatar,
+              showTail: showTail,
               isGroupChat: isGroupChat,
+              onLongPress: isSearchMode ? null : () => showMessageMenu(message),
+              onReaction: isSearchMode ? null : (emoji) => toggleReaction(message, emoji),
+              onReplyTap: !isSearchMode && replyPreview != null && !replyPreview.isNotFound
+                  ? () => scrollToMessageResult.scrollToMessage(replyPreview.messageId)
+                  : null,
+              onHorizontalDragEnd: isSearchMode ? null : () => input.setReplyingTo(message),
+              onRetry:
+                  !isSearchMode && isOwnMessage && message.deliveryStatus is DeliveryStatus_Failed
+                  ? () async {
+                      final failedMsg = context.l10n.failedToSendMessage;
+                      try {
+                        await messageService.retryMessage(eventId: message.id);
+                      } catch (_) {
+                        if (context.mounted) showNotice(failedMsg);
+                      }
+                    }
+                  : null,
             );
-            final showTail = shouldShowTail(current: message, next: nextMessage);
+
+            if (isSearchMode) {
+              bubble = GestureDetector(
+                key: isMatchItem ? Key('search_match_${displayItem.matchIndex}') : null,
+                behavior: HitTestBehavior.opaque,
+                onTap: () {
+                  isSearchActive.value = false;
+                  searchQuery.value = '';
+                  searchController.clear();
+                  WidgetsBinding.instance.addPostFrameCallback((_) {
+                    scrollToMessageResult.scrollToMessage(message.id);
+                  });
+                },
+                child: Opacity(
+                  opacity: isMatchItem ? 1.0 : 0.5,
+                  child: IgnorePointer(child: bubble),
+                ),
+              );
+            }
 
             return AutoScrollTag(
               key: ValueKey(message.id),
               controller: scrollController,
               index: index,
-              child: ChatMessageBubble(
-                message: message,
-                highlightSpans: searchResult?.highlightSpans,
-                isOwnMessage: isOwnMessage,
-                currentUserPubkey: pubkey,
-                replyPreview: replyPreview,
-                senderName: senderName,
-                senderPictureUrl: senderPictureUrl,
-                showAvatar: showAvatar,
-                showTail: showTail,
-                isGroupChat: isGroupChat,
-                onLongPress: () => showMessageMenu(message),
-                onReaction: (emoji) => toggleReaction(message, emoji),
-                onReplyTap: replyPreview != null && !replyPreview.isNotFound
-                    ? () => scrollToMessageResult.scrollToMessage(replyPreview.messageId)
-                    : null,
-                onHorizontalDragEnd: () => input.setReplyingTo(message),
-                onRetry: isOwnMessage && message.deliveryStatus is DeliveryStatus_Failed
-                    ? () async {
-                        final failedMsg = context.l10n.failedToSendMessage;
-                        try {
-                          await messageService.retryMessage(eventId: message.id);
-                        } catch (_) {
-                          if (context.mounted) showNotice(failedMsg);
-                        }
-                      }
-                    : null,
-              ),
+              child: bubble,
             );
           },
         ),
@@ -434,26 +517,22 @@ class ChatScreen extends HookConsumerWidget {
                             children: [
                               WnIconButton(
                                 key: const Key('chat_search_prev_button'),
-                                onPressed: displayCount == 0
+                                onPressed: matchCount == 0
                                     ? null
                                     : () {
                                         final next =
-                                            (currentMatchIndex.value - 1 + displayCount) %
-                                            displayCount;
+                                            (currentMatchIndex.value - 1 + matchCount) % matchCount;
                                         currentMatchIndex.value = next;
-                                        scrollController.scrollToIndex(
-                                          displayCount - 1 - next,
-                                          preferPosition: AutoScrollPosition.middle,
-                                        );
+                                        _scrollToMatch(scrollController, searchDisplayItems, next);
                                       },
                                 icon: WnIcons.chevronUp,
                               ),
                               Text(
-                                displayCount == 0
+                                matchCount == 0
                                     ? context.l10n.noResults
                                     : context.l10n.chatSearchMatchCount(
                                         currentMatchIndex.value + 1,
-                                        displayCount,
+                                        matchCount,
                                       ),
                                 key: const Key('chat_search_match_count'),
                                 style: typography.medium14.copyWith(
@@ -462,15 +541,12 @@ class ChatScreen extends HookConsumerWidget {
                               ),
                               WnIconButton(
                                 key: const Key('chat_search_next_button'),
-                                onPressed: displayCount == 0
+                                onPressed: matchCount == 0
                                     ? null
                                     : () {
-                                        final next = (currentMatchIndex.value + 1) % displayCount;
+                                        final next = (currentMatchIndex.value + 1) % matchCount;
                                         currentMatchIndex.value = next;
-                                        scrollController.scrollToIndex(
-                                          displayCount - 1 - next,
-                                          preferPosition: AutoScrollPosition.middle,
-                                        );
+                                        _scrollToMatch(scrollController, searchDisplayItems, next);
                                       },
                                 icon: WnIcons.chevronDown,
                               ),
@@ -481,7 +557,7 @@ class ChatScreen extends HookConsumerWidget {
                   ],
                 ),
               ),
-              if (!isRemovedFromGroup)
+              if (!isRemovedFromGroup && !isSearchActive.value)
                 Positioned(
                   bottom: 0,
                   left: 0,

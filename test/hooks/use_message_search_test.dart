@@ -34,6 +34,7 @@ SearchResult _searchResultFactory(
 class _MockApi extends MockWnApi {
   List<SearchResult> searchResults = [];
   bool shouldFailSearch = false;
+  bool shouldFailContextFetch = false;
   Completer<List<SearchResult>>? searchCompleter;
   final searchCalls = <({String pubkey, String groupId, String query})>[];
 
@@ -51,10 +52,23 @@ class _MockApi extends MockWnApi {
   }
 
   @override
+  Future<List<ChatMessage>> crateApiMessagesFetchAggregatedMessagesForGroup({
+    required String pubkey,
+    required String groupId,
+    DateTime? before,
+    String? beforeMessageId,
+    int? limit,
+  }) {
+    if (shouldFailContextFetch) return Future.error(Exception('context fetch failed'));
+    return Future.value([]);
+  }
+
+  @override
   void reset() {
     super.reset();
     searchResults = [];
     shouldFailSearch = false;
+    shouldFailContextFetch = false;
     searchCompleter = null;
     searchCalls.clear();
   }
@@ -128,11 +142,28 @@ void main() {
         await pump(tester, query: 'hello');
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pump();
+        await tester.pump();
 
         expect(getState().results.length, 2);
         expect(getState().results[0].message.id, 'msg1');
         expect(getState().results[1].message.id, 'msg2');
         expect(getState().isSearching, isFalse);
+      });
+
+      testWidgets('populates displayItems with match items', (tester) async {
+        api.searchResults = [
+          _searchResultFactory('msg1', 'hello world'),
+        ];
+
+        await pump(tester, query: 'hello');
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+        await tester.pump();
+
+        final items = getState().displayItems;
+        expect(items, isNotEmpty);
+        expect(items.where((i) => i.isMatch).length, 1);
+        expect(items.first.message!.id, 'msg1');
       });
 
       testWidgets('isSearching is true while search is in flight', (tester) async {
@@ -150,6 +181,7 @@ void main() {
         await pump(tester, query: 'hello');
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pump();
+        await tester.pump();
         expect(getState().results.length, 1);
 
         // Re-mount with empty query — results should be cleared immediately
@@ -158,6 +190,7 @@ void main() {
         await tester.pump();
 
         expect(getState().results, isEmpty);
+        expect(getState().displayItems, isEmpty);
         expect(getState().isSearching, isFalse);
       });
 
@@ -170,6 +203,27 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(getState().results, isEmpty);
+        expect(getState().isSearching, isFalse);
+      });
+
+      testWidgets('falls back to match-only items when context fetch fails', (tester) async {
+        api.shouldFailContextFetch = true;
+        api.searchResults = [
+          _searchResultFactory('msg1', 'hello world'),
+          _searchResultFactory('msg2', 'say hello'),
+        ];
+
+        await pump(tester, query: 'hello');
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+        await tester.pump();
+
+        final items = getState().displayItems;
+        expect(items, isNotEmpty);
+        final matches = items.where((i) => i.isMatch).toList();
+        expect(matches.length, 2);
+        expect(matches[0].message!.id, 'msg1');
+        expect(matches[1].message!.id, 'msg2');
         expect(getState().isSearching, isFalse);
       });
 

@@ -16,6 +16,8 @@ void main() {
             builder: (context) {
               result = useScrollToMessage(
                 getReversedMessageIndex: (_) => null,
+                loadOlderMessages: () async {},
+                hasMoreMessages: false,
               );
               return const SizedBox();
             },
@@ -34,6 +36,8 @@ void main() {
             builder: (context) {
               final result = useScrollToMessage(
                 getReversedMessageIndex: (_) => null,
+                loadOlderMessages: () async {},
+                hasMoreMessages: false,
               );
               capturedController = result.scrollController;
               return const SizedBox();
@@ -50,7 +54,9 @@ void main() {
       );
     });
 
-    testWidgets('scrollToMessage does nothing for non-existent messageId', (tester) async {
+    testWidgets('scrollToMessage does nothing when message not found and no more pages', (
+      tester,
+    ) async {
       late ScrollToMessageResult result;
       String? lookedUpId;
       await tester.pumpWidget(
@@ -62,6 +68,8 @@ void main() {
                   lookedUpId = id;
                   return null;
                 },
+                loadOlderMessages: () async {},
+                hasMoreMessages: false,
               );
               return const SizedBox();
             },
@@ -69,8 +77,7 @@ void main() {
         ),
       );
 
-      unawaited(result.scrollToMessage('unknown-id'));
-      await tester.pump();
+      await tester.runAsync(() => result.scrollToMessage('unknown-id'));
 
       expect(lookedUpId, 'unknown-id');
     });
@@ -88,6 +95,8 @@ void main() {
                   lookedUpId = id;
                   return id == 'msg-1' ? 0 : null;
                 },
+                loadOlderMessages: () async {},
+                hasMoreMessages: false,
               );
               return const SizedBox();
             },
@@ -99,6 +108,58 @@ void main() {
       await tester.pump();
 
       expect(lookedUpId, 'msg-1');
+    });
+
+    testWidgets('loads older pages until message is found or no more pages', (tester) async {
+      late ScrollToMessageResult result;
+      var loadCalls = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: HookBuilder(
+            builder: (context) {
+              result = useScrollToMessage(
+                getReversedMessageIndex: (_) => null,
+                loadOlderMessages: () async {
+                  loadCalls++;
+                },
+                hasMoreMessages: loadCalls < 3,
+              );
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+
+      await tester.runAsync(() => result.scrollToMessage('deep-msg'));
+
+      expect(loadCalls, greaterThan(0));
+    });
+
+    testWidgets('does not load pages when hasMoreMessages is false', (tester) async {
+      late ScrollToMessageResult result;
+      var loadCalls = 0;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: HookBuilder(
+            builder: (context) {
+              result = useScrollToMessage(
+                getReversedMessageIndex: (_) => null,
+                loadOlderMessages: () async {
+                  loadCalls++;
+                },
+                hasMoreMessages: false,
+              );
+              return const SizedBox();
+            },
+          ),
+        ),
+      );
+
+      await tester.runAsync(() => result.scrollToMessage('deep-msg'));
+
+      expect(loadCalls, 0);
     });
   });
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
+import 'package:whitenoise/utils/search_context.dart';
 
 final _logger = Logger('useMessageSearch');
 
@@ -10,6 +11,7 @@ const _searchDebounceMs = 300;
 
 typedef MessageSearchResult = ({
   List<SearchResult> results,
+  List<SearchDisplayItem> displayItems,
   bool isSearching,
 });
 
@@ -19,12 +21,14 @@ MessageSearchResult useMessageSearch({
   required String query,
 }) {
   final results = useState<List<SearchResult>>([]);
+  final displayItems = useState<List<SearchDisplayItem>>([]);
   final isSearching = useState(false);
   final debouncedQuery = _useDebouncedValue(query, _searchDebounceMs);
 
   useEffect(() {
     if (debouncedQuery.isEmpty) {
       results.value = [];
+      displayItems.value = [];
       isSearching.value = false;
       return null;
     }
@@ -37,20 +41,45 @@ MessageSearchResult useMessageSearch({
           groupId: groupId,
           query: debouncedQuery,
         )
-        .then((messages) {
-          if (!cancelled) {
-            _logger.info(
-              'search completed groupId=${groupId.substring(0, 8)}… '
-              'query="$debouncedQuery" results=${messages.length}',
-            );
-            results.value = messages;
+        .then((searchResults) async {
+          if (cancelled) return;
+          _logger.info(
+            'search completed groupId=${groupId.substring(0, 8)}… '
+            'query="$debouncedQuery" results=${searchResults.length}',
+          );
+          results.value = searchResults;
+
+          if (searchResults.isEmpty) {
+            displayItems.value = [];
             isSearching.value = false;
+            return;
           }
+
+          try {
+            final windows = await _fetchContextWindows(
+              pubkey: pubkey,
+              groupId: groupId,
+              results: searchResults,
+            );
+            if (cancelled) return;
+            displayItems.value = buildSearchDisplayList(
+              results: searchResults,
+              contextWindows: windows,
+            );
+          } catch (e, st) {
+            _logger.warning('context fetch failed, showing matches only', e, st);
+            if (!cancelled) {
+              displayItems.value = _matchOnlyItems(searchResults);
+            }
+          }
+
+          if (!cancelled) isSearching.value = false;
         })
         .catchError((Object e, StackTrace st) {
           if (!cancelled) {
             _logger.severe('search failed query="$debouncedQuery"', e, st);
             results.value = [];
+            displayItems.value = [];
             isSearching.value = false;
           }
         });
@@ -58,7 +87,50 @@ MessageSearchResult useMessageSearch({
     return () => cancelled = true;
   }, [debouncedQuery, pubkey, groupId]);
 
-  return (results: results.value, isSearching: isSearching.value);
+  return (
+    results: results.value,
+    displayItems: displayItems.value,
+    isSearching: isSearching.value,
+  );
+}
+
+List<SearchDisplayItem> _matchOnlyItems(List<SearchResult> results) {
+  final items = <SearchDisplayItem>[];
+  for (var i = 0; i < results.length; i++) {
+    if (i > 0) items.add(SearchDisplayItem.separator());
+    items.add(
+      SearchDisplayItem.match(
+        message: results[i].message,
+        highlightSpans: results[i].highlightSpans,
+        matchIndex: i,
+      ),
+    );
+  }
+  return items;
+}
+
+Future<List<List<ChatMessage>>> _fetchContextWindows({
+  required String pubkey,
+  required String groupId,
+  required List<SearchResult> results,
+}) async {
+  final windows = <List<ChatMessage>>[];
+
+  for (final result in results) {
+    final match = result.message;
+
+    final beforeMessages = await fetchAggregatedMessagesForGroup(
+      pubkey: pubkey,
+      groupId: groupId,
+      before: match.createdAt,
+      beforeMessageId: match.id,
+      limit: searchContextSize,
+    );
+
+    windows.add([...beforeMessages, match]);
+  }
+
+  return windows;
 }
 
 String _useDebouncedValue(String value, int milliseconds) {

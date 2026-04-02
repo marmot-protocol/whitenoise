@@ -22,6 +22,7 @@ import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
+import 'package:whitenoise/widgets/wn_chat_message_input.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
@@ -134,6 +135,14 @@ class _MockApi extends MockWnApi {
     int? limit,
   }) {
     if (fetchOlderCompleter != null) return fetchOlderCompleter!.future;
+    if (before != null && beforeMessageId != null && initialMessages.isNotEmpty) {
+      final sorted = [...initialMessages]..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+      final idx = sorted.indexWhere((m) => m.id == beforeMessageId);
+      if (idx > 0) {
+        final start = (idx - (limit ?? 2)).clamp(0, idx);
+        return Future.value(sorted.sublist(start, idx));
+      }
+    }
     return Future.value([]);
   }
 
@@ -1898,6 +1907,54 @@ void main() {
         await tester.pump();
         await tester.pump();
         expect(find.text('1 of 1 match'), findsOneWidget);
+      });
+
+      testWidgets('hides message input when search is active', (tester) async {
+        await openSearch(tester);
+
+        expect(find.byType(WnChatMessageInput), findsNothing);
+      });
+
+      testWidgets('shows message input after closing search', (tester) async {
+        await openSearch(tester);
+        await tester.tap(find.byKey(const Key('back_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(WnChatMessageInput), findsOneWidget);
+      });
+
+      testWidgets('renders separator between distant match groups', (tester) async {
+        _api.initialMessages = [
+          _message('m1', DateTime(2024)),
+          _message('m2', DateTime(2024, 2)),
+        ];
+        await openSearch(tester);
+        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+        await tester.pump();
+        await tester.pump();
+
+        expect(find.textContaining('Message m1'), findsOneWidget);
+        expect(find.textContaining('Message m2'), findsOneWidget);
+      });
+
+      testWidgets('tapping search result exits search mode', (tester) async {
+        _api.initialMessages = [_message('m1', DateTime(2024))];
+        await openSearch(tester);
+        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message m1');
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+        await tester.pump();
+        await tester.pump();
+
+        await tester.tap(find.byKey(const Key('search_match_0')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('chat_search_bar')), findsNothing);
+        expect(find.byType(WnChatMessageInput), findsOneWidget);
       });
     });
 
