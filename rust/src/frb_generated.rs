@@ -32,7 +32,7 @@ use crate::api::utils::*;
 use crate::api::*;
 use crate::*;
 use flutter_rust_bridge::for_generated::byteorder::{NativeEndian, ReadBytesExt, WriteBytesExt};
-use flutter_rust_bridge::for_generated::{Lifetimeable, Lockable, transform_result_dco};
+use flutter_rust_bridge::for_generated::{transform_result_dco, Lifetimeable, Lockable};
 use flutter_rust_bridge::{Handler, IntoIntoDart};
 
 // Section: boilerplate
@@ -43,7 +43,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 656235973;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1673891259;
 
 // Section: executor
 
@@ -671,6 +671,43 @@ fn wire__crate__api__account_groups__archive_chat_impl(
                             api_mls_group_id,
                         )
                         .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__notifications__clear_push_registration_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "clear_push_registration",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_pubkey = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::error::ApiError>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::notifications::clear_push_registration(api_pubkey).await?;
                         Ok(output_ok)
                     })()
                     .await,
@@ -1796,6 +1833,43 @@ fn wire__crate__api__groups__get_groups_informations_impl(
                             api_group_ids,
                         )
                         .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__notifications__get_push_registration_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "get_push_registration",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_pubkey = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::error::ApiError>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::notifications::get_push_registration(api_pubkey).await?;
                         Ok(output_ok)
                     })()
                     .await,
@@ -4607,6 +4681,54 @@ fn wire__crate__api__groups__upload_group_image_impl(
         },
     )
 }
+fn wire__crate__api__notifications__upsert_push_registration_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "upsert_push_registration",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_pubkey = <String>::sse_decode(&mut deserializer);
+            let api_platform =
+                <crate::api::notifications::PushPlatform>::sse_decode(&mut deserializer);
+            let api_raw_token = <String>::sse_decode(&mut deserializer);
+            let api_server_pubkey = <String>::sse_decode(&mut deserializer);
+            let api_relay_hint = <Option<String>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::error::ApiError>(
+                    (move || async move {
+                        let output_ok = crate::api::notifications::upsert_push_registration(
+                            api_pubkey,
+                            api_platform,
+                            api_raw_token,
+                            api_server_pubkey,
+                            api_relay_hint,
+                        )
+                        .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__users__user_has_key_package_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -6384,6 +6506,19 @@ impl SseDecode for Option<i64> {
     }
 }
 
+impl SseDecode for Option<crate::api::notifications::PushRegistration> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<crate::api::notifications::PushRegistration>::sse_decode(
+                deserializer,
+            ));
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for Option<u32> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -6436,6 +6571,43 @@ impl SseDecode for Option<[u8; 32]> {
         } else {
             return None;
         }
+    }
+}
+
+impl SseDecode for crate::api::notifications::PushPlatform {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::notifications::PushPlatform::Apns,
+            1 => crate::api::notifications::PushPlatform::Fcm,
+            _ => unreachable!("Invalid variant for PushPlatform: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::notifications::PushRegistration {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_accountPubkey = <String>::sse_decode(deserializer);
+        let mut var_platform = <crate::api::notifications::PushPlatform>::sse_decode(deserializer);
+        let mut var_rawToken = <String>::sse_decode(deserializer);
+        let mut var_serverPubkey = <String>::sse_decode(deserializer);
+        let mut var_relayHint = <Option<String>>::sse_decode(deserializer);
+        let mut var_createdAt = <chrono::DateTime<chrono::Utc>>::sse_decode(deserializer);
+        let mut var_updatedAt = <chrono::DateTime<chrono::Utc>>::sse_decode(deserializer);
+        let mut var_lastSharedAt =
+            <Option<chrono::DateTime<chrono::Utc>>>::sse_decode(deserializer);
+        return crate::api::notifications::PushRegistration {
+            account_pubkey: var_accountPubkey,
+            platform: var_platform,
+            raw_token: var_rawToken,
+            server_pubkey: var_serverPubkey,
+            relay_hint: var_relayHint,
+            created_at: var_createdAt,
+            updated_at: var_updatedAt,
+            last_shared_at: var_lastSharedAt,
+        };
     }
 }
 
@@ -6801,286 +6973,304 @@ fn pde_ffi_dispatcher_primary_impl(
         15 => {
             wire__crate__api__account_groups__archive_chat_impl(port, ptr, rust_vec_len, data_len)
         }
-        16 => wire__crate__api__groups__create_group_impl(port, ptr, rust_vec_len, data_len),
-        17 => wire__crate__api__accounts__create_identity_impl(port, ptr, rust_vec_len, data_len),
-        18 => wire__crate__api__create_whitenoise_config_impl(port, ptr, rust_vec_len, data_len),
-        19 => wire__crate__api__relays__debug_relay_control_state_impl(
+        16 => wire__crate__api__notifications__clear_push_registration_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        20 => wire__crate__api__account_groups__decline_account_group_impl(
+        17 => wire__crate__api__groups__create_group_impl(port, ptr, rust_vec_len, data_len),
+        18 => wire__crate__api__accounts__create_identity_impl(port, ptr, rust_vec_len, data_len),
+        19 => wire__crate__api__create_whitenoise_config_impl(port, ptr, rust_vec_len, data_len),
+        20 => wire__crate__api__relays__debug_relay_control_state_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        21 => wire__crate__api__accounts__delete_account_key_package_impl(
+        21 => wire__crate__api__account_groups__decline_account_group_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        22 => wire__crate__api__accounts__delete_account_key_packages_impl(
+        22 => wire__crate__api__accounts__delete_account_key_package_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        23 => wire__crate__api__delete_all_data_impl(port, ptr, rust_vec_len, data_len),
-        24 => wire__crate__api__drafts__delete_draft_impl(port, ptr, rust_vec_len, data_len),
-        25 => wire__crate__api__media_files__download_chat_media_impl(
+        23 => wire__crate__api__accounts__delete_account_key_packages_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        26 => wire__crate__api__relays__ensure_all_subscriptions_impl(
+        24 => wire__crate__api__delete_all_data_impl(port, ptr, rust_vec_len, data_len),
+        25 => wire__crate__api__drafts__delete_draft_impl(port, ptr, rust_vec_len, data_len),
+        26 => wire__crate__api__media_files__download_chat_media_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        28 => {
+        27 => wire__crate__api__relays__ensure_all_subscriptions_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        29 => {
             wire__crate__api__accounts__export_account_nsec_impl(port, ptr, rust_vec_len, data_len)
         }
-        29 => wire__crate__api__messages__fetch_aggregated_messages_for_group_impl(
+        30 => wire__crate__api__messages__fetch_aggregated_messages_for_group_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        30 => wire__crate__api__zapstore__fetch_latest_zapstore_version_impl(
+        31 => wire__crate__api__zapstore__fetch_latest_zapstore_version_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        31 => {
+        32 => {
             wire__crate__api__messages__fetch_message_by_id_impl(port, ptr, rust_vec_len, data_len)
         }
-        32 => wire__crate__api__messages__fetch_messages_unread_with_minimum_impl(
+        33 => wire__crate__api__messages__fetch_messages_unread_with_minimum_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        33 => wire__crate__api__accounts__follow_user_impl(port, ptr, rust_vec_len, data_len),
-        34 => wire__crate__api__accounts__get_account_impl(port, ptr, rust_vec_len, data_len),
-        35 => wire__crate__api__account_groups__get_account_group_impl(
+        34 => wire__crate__api__accounts__follow_user_impl(port, ptr, rust_vec_len, data_len),
+        35 => wire__crate__api__accounts__get_account_impl(port, ptr, rust_vec_len, data_len),
+        36 => wire__crate__api__account_groups__get_account_group_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        36 => wire__crate__api__accounts__get_accounts_impl(port, ptr, rust_vec_len, data_len),
-        37 => wire__crate__api__get_app_settings_impl(port, ptr, rust_vec_len, data_len),
-        38 => wire__crate__api__chat_list__get_chat_list_impl(port, ptr, rust_vec_len, data_len),
-        39 => wire__crate__api__utils__get_default_blossom_server_url_impl(
+        37 => wire__crate__api__accounts__get_accounts_impl(port, ptr, rust_vec_len, data_len),
+        38 => wire__crate__api__get_app_settings_impl(port, ptr, rust_vec_len, data_len),
+        39 => wire__crate__api__chat_list__get_chat_list_impl(port, ptr, rust_vec_len, data_len),
+        40 => wire__crate__api__utils__get_default_blossom_server_url_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        40 => wire__crate__api__account_groups__get_dm_group_with_peer_impl(
+        41 => wire__crate__api__account_groups__get_dm_group_with_peer_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        41 => wire__crate__api__groups__get_group_impl(port, ptr, rust_vec_len, data_len),
-        42 => {
+        42 => wire__crate__api__groups__get_group_impl(port, ptr, rust_vec_len, data_len),
+        43 => {
             wire__crate__api__groups__get_group_image_path_impl(port, ptr, rust_vec_len, data_len)
         }
-        43 => {
+        44 => {
             wire__crate__api__groups__get_group_information_impl(port, ptr, rust_vec_len, data_len)
         }
-        44 => wire__crate__api__groups__get_groups_informations_impl(
+        45 => wire__crate__api__groups__get_groups_informations_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        45 => {
+        46 => wire__crate__api__notifications__get_push_registration_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        47 => {
             wire__crate__api__groups__get_ratchet_tree_info_impl(port, ptr, rust_vec_len, data_len)
         }
-        46 => wire__crate__api__users__get_user_impl(port, ptr, rust_vec_len, data_len),
-        47 => wire__crate__api__groups__group_admins_impl(port, ptr, rust_vec_len, data_len),
-        48 => wire__crate__api__groups__group_group_type_impl(port, ptr, rust_vec_len, data_len),
-        49 => wire__crate__api__utils__group_id_from_string_impl(port, ptr, rust_vec_len, data_len),
-        50 => wire__crate__api__utils__group_id_to_string_impl(port, ptr, rust_vec_len, data_len),
-        51 => wire__crate__api__groups__group_is_direct_message_type_impl(
+        48 => wire__crate__api__users__get_user_impl(port, ptr, rust_vec_len, data_len),
+        49 => wire__crate__api__groups__group_admins_impl(port, ptr, rust_vec_len, data_len),
+        50 => wire__crate__api__groups__group_group_type_impl(port, ptr, rust_vec_len, data_len),
+        51 => wire__crate__api__utils__group_id_from_string_impl(port, ptr, rust_vec_len, data_len),
+        52 => wire__crate__api__utils__group_id_to_string_impl(port, ptr, rust_vec_len, data_len),
+        53 => wire__crate__api__groups__group_is_direct_message_type_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        52 => wire__crate__api__groups__group_is_group_type_impl(port, ptr, rust_vec_len, data_len),
-        53 => wire__crate__api__groups__group_members_impl(port, ptr, rust_vec_len, data_len),
-        54 => wire__crate__api__groups__group_update_group_data_impl(
+        54 => wire__crate__api__groups__group_is_group_type_impl(port, ptr, rust_vec_len, data_len),
+        55 => wire__crate__api__groups__group_members_impl(port, ptr, rust_vec_len, data_len),
+        56 => wire__crate__api__groups__group_update_group_data_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        56 => wire__crate__api__initialize_whitenoise_impl(port, ptr, rust_vec_len, data_len),
-        57 => wire__crate__api__accounts__is_following_user_impl(port, ptr, rust_vec_len, data_len),
-        68 => wire__crate__api__drafts__load_draft_impl(port, ptr, rust_vec_len, data_len),
-        69 => wire__crate__api__accounts__login_cancel_impl(port, ptr, rust_vec_len, data_len),
-        70 => wire__crate__api__signer__login_external_signer_publish_default_relays_impl(
+        58 => wire__crate__api__initialize_whitenoise_impl(port, ptr, rust_vec_len, data_len),
+        59 => wire__crate__api__accounts__is_following_user_impl(port, ptr, rust_vec_len, data_len),
+        70 => wire__crate__api__drafts__load_draft_impl(port, ptr, rust_vec_len, data_len),
+        71 => wire__crate__api__accounts__login_cancel_impl(port, ptr, rust_vec_len, data_len),
+        72 => wire__crate__api__signer__login_external_signer_publish_default_relays_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        71 => wire__crate__api__signer__login_external_signer_start_impl(
+        73 => wire__crate__api__signer__login_external_signer_start_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        72 => wire__crate__api__signer__login_external_signer_with_custom_relay_impl(
+        74 => wire__crate__api__signer__login_external_signer_with_custom_relay_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        73 => wire__crate__api__accounts__login_publish_default_relays_impl(
+        75 => wire__crate__api__accounts__login_publish_default_relays_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        74 => wire__crate__api__accounts__login_start_impl(port, ptr, rust_vec_len, data_len),
-        75 => wire__crate__api__accounts__login_with_custom_relay_impl(
+        76 => wire__crate__api__accounts__login_start_impl(port, ptr, rust_vec_len, data_len),
+        77 => wire__crate__api__accounts__login_with_custom_relay_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        76 => wire__crate__api__accounts__logout_impl(port, ptr, rust_vec_len, data_len),
-        77 => wire__crate__api__account_groups__mark_message_read_impl(
+        78 => wire__crate__api__accounts__logout_impl(port, ptr, rust_vec_len, data_len),
+        79 => wire__crate__api__account_groups__mark_message_read_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        78 => wire__crate__api__chat_list__mute_chat_impl(port, ptr, rust_vec_len, data_len),
-        80 => wire__crate__api__accounts__publish_account_key_package_impl(
+        80 => wire__crate__api__chat_list__mute_chat_impl(port, ptr, rust_vec_len, data_len),
+        82 => wire__crate__api__accounts__publish_account_key_package_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        81 => wire__crate__api__signer__register_external_signer_impl(
+        83 => wire__crate__api__signer__register_external_signer_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        82 => wire__crate__api__relays__relay_type_inbox_impl(port, ptr, rust_vec_len, data_len),
-        83 => {
+        84 => wire__crate__api__relays__relay_type_inbox_impl(port, ptr, rust_vec_len, data_len),
+        85 => {
             wire__crate__api__relays__relay_type_key_package_impl(port, ptr, rust_vec_len, data_len)
         }
-        84 => wire__crate__api__relays__relay_type_nip65_impl(port, ptr, rust_vec_len, data_len),
-        85 => {
+        86 => wire__crate__api__relays__relay_type_nip65_impl(port, ptr, rust_vec_len, data_len),
+        87 => {
             wire__crate__api__utils__relay_url_from_string_impl(port, ptr, rust_vec_len, data_len)
         }
-        86 => {
+        88 => {
             wire__crate__api__accounts__remove_account_relay_impl(port, ptr, rust_vec_len, data_len)
         }
-        87 => wire__crate__api__groups__remove_members_from_group_impl(
+        89 => wire__crate__api__groups__remove_members_from_group_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        88 => wire__crate__api__messages__retry_message_publish_impl(
+        90 => wire__crate__api__messages__retry_message_publish_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        89 => wire__crate__api__drafts__save_draft_impl(port, ptr, rust_vec_len, data_len),
-        90 => wire__crate__api__user_search__search_users_impl(port, ptr, rust_vec_len, data_len),
-        91 => wire__crate__api__bug_report__send_bug_report_impl(port, ptr, rust_vec_len, data_len),
-        92 => wire__crate__api__messages__send_message_to_group_impl(
+        91 => wire__crate__api__drafts__save_draft_impl(port, ptr, rust_vec_len, data_len),
+        92 => wire__crate__api__user_search__search_users_impl(port, ptr, rust_vec_len, data_len),
+        93 => wire__crate__api__bug_report__send_bug_report_impl(port, ptr, rust_vec_len, data_len),
+        94 => wire__crate__api__messages__send_message_to_group_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        93 => {
+        95 => {
             wire__crate__api__chat_list__set_chat_pin_order_impl(port, ptr, rust_vec_len, data_len)
         }
-        94 => {
+        96 => {
             wire__crate__api__utils__string_from_relay_url_impl(port, ptr, rust_vec_len, data_len)
         }
-        95 => wire__crate__api__chat_list__subscribe_to_archived_chat_list_impl(
+        97 => wire__crate__api__chat_list__subscribe_to_archived_chat_list_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        96 => wire__crate__api__chat_list__subscribe_to_chat_list_impl(
+        98 => wire__crate__api__chat_list__subscribe_to_chat_list_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        97 => wire__crate__api__messages__subscribe_to_group_messages_impl(
+        99 => wire__crate__api__messages__subscribe_to_group_messages_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        98 => wire__crate__api__notifications__subscribe_to_notifications_impl(
+        100 => wire__crate__api__notifications__subscribe_to_notifications_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        99 => {
+        101 => {
             wire__crate__api__logs__subscribe_to_rust_logs_impl(port, ptr, rust_vec_len, data_len)
         }
-        100 => wire__crate__api__users__subscribe_to_user_impl(port, ptr, rust_vec_len, data_len),
-        101 => wire__crate__api__utils__tag_from_vec_impl(port, ptr, rust_vec_len, data_len),
-        106 => {
+        102 => wire__crate__api__users__subscribe_to_user_impl(port, ptr, rust_vec_len, data_len),
+        103 => wire__crate__api__utils__tag_from_vec_impl(port, ptr, rust_vec_len, data_len),
+        108 => {
             wire__crate__api__account_groups__unarchive_chat_impl(port, ptr, rust_vec_len, data_len)
         }
-        107 => wire__crate__api__accounts__unfollow_user_impl(port, ptr, rust_vec_len, data_len),
-        108 => wire__crate__api__chat_list__unmute_chat_impl(port, ptr, rust_vec_len, data_len),
-        109 => wire__crate__api__accounts__update_account_metadata_impl(
+        109 => wire__crate__api__accounts__unfollow_user_impl(port, ptr, rust_vec_len, data_len),
+        110 => wire__crate__api__chat_list__unmute_chat_impl(port, ptr, rust_vec_len, data_len),
+        111 => wire__crate__api__accounts__update_account_metadata_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        110 => wire__crate__api__update_language_impl(port, ptr, rust_vec_len, data_len),
-        111 => wire__crate__api__accounts__update_notifications_enabled_impl(
+        112 => wire__crate__api__update_language_impl(port, ptr, rust_vec_len, data_len),
+        113 => wire__crate__api__accounts__update_notifications_enabled_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        112 => wire__crate__api__update_theme_mode_impl(port, ptr, rust_vec_len, data_len),
-        113 => wire__crate__api__accounts__upload_account_profile_picture_impl(
+        114 => wire__crate__api__update_theme_mode_impl(port, ptr, rust_vec_len, data_len),
+        115 => wire__crate__api__accounts__upload_account_profile_picture_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        114 => {
+        116 => {
             wire__crate__api__media_files__upload_chat_media_impl(port, ptr, rust_vec_len, data_len)
         }
-        115 => wire__crate__api__groups__upload_group_image_impl(port, ptr, rust_vec_len, data_len),
-        116 => {
+        117 => wire__crate__api__groups__upload_group_image_impl(port, ptr, rust_vec_len, data_len),
+        118 => wire__crate__api__notifications__upsert_push_registration_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        119 => {
             wire__crate__api__users__user_has_key_package_impl(port, ptr, rust_vec_len, data_len)
         }
-        117 => wire__crate__api__users__user_metadata_impl(port, ptr, rust_vec_len, data_len),
-        118 => wire__crate__api__users__user_relays_impl(port, ptr, rust_vec_len, data_len),
-        119 => wire__crate__api__groups__visible_groups_with_info_impl(
+        120 => wire__crate__api__users__user_metadata_impl(port, ptr, rust_vec_len, data_len),
+        121 => wire__crate__api__users__user_relays_impl(port, ptr, rust_vec_len, data_len),
+        122 => wire__crate__api__groups__visible_groups_with_info_impl(
             port,
             ptr,
             rust_vec_len,
@@ -7098,23 +7288,23 @@ fn pde_ffi_dispatcher_sync_impl(
 ) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        27 => wire__crate__api__utils__event_id_to_nevent_uri_impl(ptr, rust_vec_len, data_len),
-        55 => wire__crate__api__utils__hex_pubkey_from_npub_impl(ptr, rust_vec_len, data_len),
-        58 => wire__crate__api__utils__language_english_impl(ptr, rust_vec_len, data_len),
-        59 => wire__crate__api__utils__language_french_impl(ptr, rust_vec_len, data_len),
-        60 => wire__crate__api__utils__language_german_impl(ptr, rust_vec_len, data_len),
-        61 => wire__crate__api__utils__language_italian_impl(ptr, rust_vec_len, data_len),
-        62 => wire__crate__api__utils__language_portuguese_impl(ptr, rust_vec_len, data_len),
-        63 => wire__crate__api__utils__language_russian_impl(ptr, rust_vec_len, data_len),
-        64 => wire__crate__api__utils__language_spanish_impl(ptr, rust_vec_len, data_len),
-        65 => wire__crate__api__utils__language_system_impl(ptr, rust_vec_len, data_len),
-        66 => wire__crate__api__utils__language_to_string_impl(ptr, rust_vec_len, data_len),
-        67 => wire__crate__api__utils__language_turkish_impl(ptr, rust_vec_len, data_len),
-        79 => wire__crate__api__utils__npub_from_hex_pubkey_impl(ptr, rust_vec_len, data_len),
-        102 => wire__crate__api__utils__theme_mode_dark_impl(ptr, rust_vec_len, data_len),
-        103 => wire__crate__api__utils__theme_mode_light_impl(ptr, rust_vec_len, data_len),
-        104 => wire__crate__api__utils__theme_mode_system_impl(ptr, rust_vec_len, data_len),
-        105 => wire__crate__api__utils__theme_mode_to_string_impl(ptr, rust_vec_len, data_len),
+        28 => wire__crate__api__utils__event_id_to_nevent_uri_impl(ptr, rust_vec_len, data_len),
+        57 => wire__crate__api__utils__hex_pubkey_from_npub_impl(ptr, rust_vec_len, data_len),
+        60 => wire__crate__api__utils__language_english_impl(ptr, rust_vec_len, data_len),
+        61 => wire__crate__api__utils__language_french_impl(ptr, rust_vec_len, data_len),
+        62 => wire__crate__api__utils__language_german_impl(ptr, rust_vec_len, data_len),
+        63 => wire__crate__api__utils__language_italian_impl(ptr, rust_vec_len, data_len),
+        64 => wire__crate__api__utils__language_portuguese_impl(ptr, rust_vec_len, data_len),
+        65 => wire__crate__api__utils__language_russian_impl(ptr, rust_vec_len, data_len),
+        66 => wire__crate__api__utils__language_spanish_impl(ptr, rust_vec_len, data_len),
+        67 => wire__crate__api__utils__language_system_impl(ptr, rust_vec_len, data_len),
+        68 => wire__crate__api__utils__language_to_string_impl(ptr, rust_vec_len, data_len),
+        69 => wire__crate__api__utils__language_turkish_impl(ptr, rust_vec_len, data_len),
+        81 => wire__crate__api__utils__npub_from_hex_pubkey_impl(ptr, rust_vec_len, data_len),
+        104 => wire__crate__api__utils__theme_mode_dark_impl(ptr, rust_vec_len, data_len),
+        105 => wire__crate__api__utils__theme_mode_light_impl(ptr, rust_vec_len, data_len),
+        106 => wire__crate__api__utils__theme_mode_system_impl(ptr, rust_vec_len, data_len),
+        107 => wire__crate__api__utils__theme_mode_to_string_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -8182,6 +8372,54 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::notifications::NotificationUs
     for crate::api::notifications::NotificationUser
 {
     fn into_into_dart(self) -> crate::api::notifications::NotificationUser {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::notifications::PushPlatform {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Apns => 0.into_dart(),
+            Self::Fcm => 1.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::notifications::PushPlatform
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::notifications::PushPlatform>
+    for crate::api::notifications::PushPlatform
+{
+    fn into_into_dart(self) -> crate::api::notifications::PushPlatform {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::notifications::PushRegistration {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.account_pubkey.into_into_dart().into_dart(),
+            self.platform.into_into_dart().into_dart(),
+            self.raw_token.into_into_dart().into_dart(),
+            self.server_pubkey.into_into_dart().into_dart(),
+            self.relay_hint.into_into_dart().into_dart(),
+            self.created_at.into_into_dart().into_dart(),
+            self.updated_at.into_into_dart().into_dart(),
+            self.last_shared_at.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::notifications::PushRegistration
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::notifications::PushRegistration>
+    for crate::api::notifications::PushRegistration
+{
+    fn into_into_dart(self) -> crate::api::notifications::PushRegistration {
         self
     }
 }
@@ -9738,6 +9976,16 @@ impl SseEncode for Option<i64> {
     }
 }
 
+impl SseEncode for Option<crate::api::notifications::PushRegistration> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::notifications::PushRegistration>::sse_encode(value, serializer);
+        }
+    }
+}
+
 impl SseEncode for Option<u32> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -9785,6 +10033,36 @@ impl SseEncode for Option<[u8; 32]> {
         if let Some(value) = self {
             <[u8; 32]>::sse_encode(value, serializer);
         }
+    }
+}
+
+impl SseEncode for crate::api::notifications::PushPlatform {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::notifications::PushPlatform::Apns => 0,
+                crate::api::notifications::PushPlatform::Fcm => 1,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::notifications::PushRegistration {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.account_pubkey, serializer);
+        <crate::api::notifications::PushPlatform>::sse_encode(self.platform, serializer);
+        <String>::sse_encode(self.raw_token, serializer);
+        <String>::sse_encode(self.server_pubkey, serializer);
+        <Option<String>>::sse_encode(self.relay_hint, serializer);
+        <chrono::DateTime<chrono::Utc>>::sse_encode(self.created_at, serializer);
+        <chrono::DateTime<chrono::Utc>>::sse_encode(self.updated_at, serializer);
+        <Option<chrono::DateTime<chrono::Utc>>>::sse_encode(self.last_shared_at, serializer);
     }
 }
 
@@ -10079,7 +10357,7 @@ mod io {
     use flutter_rust_bridge::for_generated::byteorder::{
         NativeEndian, ReadBytesExt, WriteBytesExt,
     };
-    use flutter_rust_bridge::for_generated::{Lifetimeable, Lockable, transform_result_dco};
+    use flutter_rust_bridge::for_generated::{transform_result_dco, Lifetimeable, Lockable};
     use flutter_rust_bridge::{Handler, IntoIntoDart};
 
     // Section: boilerplate

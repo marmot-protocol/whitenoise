@@ -3,11 +3,15 @@ use crate::api::utils::group_id_to_string;
 use crate::frb_generated::StreamSink;
 use chrono::{DateTime, Utc};
 use flutter_rust_bridge::frb;
+use nostr_sdk::{PublicKey, RelayUrl};
 use whitenoise::Whitenoise;
 use whitenoise::whitenoise::notification_streaming::{
     NotificationTrigger as WhitenoiseNotificationTrigger,
     NotificationUpdate as WhitenoiseNotificationUpdate,
     NotificationUser as WhitenoiseNotificationUser,
+};
+use whitenoise::whitenoise::push_notifications::{
+    PushPlatform as WhitenoisePushPlatform, PushRegistration as WhitenoisePushRegistration,
 };
 
 #[frb]
@@ -97,6 +101,106 @@ pub async fn subscribe_to_notifications(
         }
     }
 
+    Ok(())
+}
+
+#[frb]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum PushPlatform {
+    Apns,
+    Fcm,
+}
+
+impl From<PushPlatform> for WhitenoisePushPlatform {
+    fn from(p: PushPlatform) -> Self {
+        match p {
+            PushPlatform::Apns => Self::Apns,
+            PushPlatform::Fcm => Self::Fcm,
+        }
+    }
+}
+
+impl From<WhitenoisePushPlatform> for PushPlatform {
+    fn from(p: WhitenoisePushPlatform) -> Self {
+        match p {
+            WhitenoisePushPlatform::Apns => Self::Apns,
+            WhitenoisePushPlatform::Fcm => Self::Fcm,
+        }
+    }
+}
+
+#[frb(non_opaque)]
+#[derive(Debug, Clone)]
+pub struct PushRegistration {
+    pub account_pubkey: String,
+    pub platform: PushPlatform,
+    pub raw_token: String,
+    pub server_pubkey: String,
+    pub relay_hint: Option<String>,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+    pub last_shared_at: Option<DateTime<Utc>>,
+}
+
+impl From<WhitenoisePushRegistration> for PushRegistration {
+    fn from(r: WhitenoisePushRegistration) -> Self {
+        Self {
+            account_pubkey: r.account_pubkey.to_hex(),
+            platform: r.platform.into(),
+            raw_token: r.raw_token,
+            server_pubkey: r.server_pubkey.to_hex(),
+            relay_hint: r.relay_hint.map(|u| u.to_string()),
+            created_at: r.created_at,
+            updated_at: r.updated_at,
+            last_shared_at: r.last_shared_at,
+        }
+    }
+}
+
+#[frb]
+pub async fn get_push_registration(pubkey: String) -> Result<Option<PushRegistration>, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let registration = whitenoise.push_registration(&account).await?;
+    Ok(registration.map(PushRegistration::from))
+}
+
+#[frb]
+pub async fn upsert_push_registration(
+    pubkey: String,
+    platform: PushPlatform,
+    raw_token: String,
+    server_pubkey: String,
+    relay_hint: Option<String>,
+) -> Result<PushRegistration, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let server_pk = PublicKey::parse(&server_pubkey)?;
+    let relay = relay_hint
+        .as_deref()
+        .map(RelayUrl::parse)
+        .transpose()
+        .map_err(ApiError::from)?;
+    let registration = whitenoise
+        .upsert_push_registration(
+            &account,
+            platform.into(),
+            &raw_token,
+            &server_pk,
+            relay.as_ref(),
+        )
+        .await?;
+    Ok(registration.into())
+}
+
+#[frb]
+pub async fn clear_push_registration(pubkey: String) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    whitenoise.clear_push_registration(&account).await?;
     Ok(())
 }
 

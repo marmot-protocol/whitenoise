@@ -13,6 +13,7 @@ flutter_rust_bridge = { version = "=2.11.1", features = ["chrono"] }
 hex = "0.4"
 mdk-core = { version = "0.7.1", git = "https://github.com/marmot-protocol/mdk", rev = "ec9d719e8fc8e1027ff86bd6a11e8f8021bdbf00", features = [
     "mip04",
+    "mip05",
 ] }
 nostr-sdk = { version = "0.44", features = [
     "nip04",
