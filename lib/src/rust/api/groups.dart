@@ -196,10 +196,8 @@ class Group {
     required this.state,
   });
 
-  Future<GroupType> groupType({required String accountPubkey}) => RustLib
-      .instance
-      .api
-      .crateApiGroupsGroupGroupType(that: this, accountPubkey: accountPubkey);
+  Future<GroupType> groupType({required String accountPubkey}) =>
+      RustLib.instance.api.crateApiGroupsGroupGroupType(that: this, accountPubkey: accountPubkey);
 
   Future<bool> isDirectMessageType({required String accountPubkey}) =>
       RustLib.instance.api.crateApiGroupsGroupIsDirectMessageType(
@@ -207,10 +205,8 @@ class Group {
         accountPubkey: accountPubkey,
       );
 
-  Future<bool> isGroupType({required String accountPubkey}) => RustLib
-      .instance
-      .api
-      .crateApiGroupsGroupIsGroupType(that: this, accountPubkey: accountPubkey);
+  Future<bool> isGroupType({required String accountPubkey}) =>
+      RustLib.instance.api.crateApiGroupsGroupIsGroupType(that: this, accountPubkey: accountPubkey);
 
   Future<void> updateGroupData({
     required String accountPubkey,
@@ -268,10 +264,7 @@ class GroupInformation {
 
   @override
   int get hashCode =>
-      mlsGroupId.hashCode ^
-      groupType.hashCode ^
-      createdAt.hashCode ^
-      updatedAt.hashCode;
+      mlsGroupId.hashCode ^ groupType.hashCode ^ createdAt.hashCode ^ updatedAt.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -344,10 +337,7 @@ class LeafNodeInfo {
 
   @override
   int get hashCode =>
-      index.hashCode ^
-      encryptionKey.hashCode ^
-      signatureKey.hashCode ^
-      credentialIdentity.hashCode;
+      index.hashCode ^ encryptionKey.hashCode ^ signatureKey.hashCode ^ credentialIdentity.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -378,8 +368,7 @@ class RatchetTreeInfo {
   });
 
   @override
-  int get hashCode =>
-      treeHash.hashCode ^ serializedTree.hashCode ^ leafNodes.hashCode;
+  int get hashCode => treeHash.hashCode ^ serializedTree.hashCode ^ leafNodes.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -403,8 +392,7 @@ class UploadGroupImageResult {
   });
 
   @override
-  int get hashCode =>
-      encryptedHash.hashCode ^ imageKey.hashCode ^ imageNonce.hashCode;
+  int get hashCode => encryptedHash.hashCode ^ imageKey.hashCode ^ imageNonce.hashCode;
 
   @override
   bool operator ==(Object other) =>
