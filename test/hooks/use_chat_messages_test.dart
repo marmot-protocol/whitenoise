@@ -1194,10 +1194,11 @@ void main() {
             await getResult().loadOlderMessages();
             await tester.pumpAndSettle();
 
-            // The tail of the page (oldest messages, e.g. m1..m100) must have
-            // been evicted so getMessageById returns null for them.
+            // Eviction trims from the newest end (tail), so the newest
+            // messages from the initial snapshot are evicted.
             final evictedCount = pageCount + initialCount - windowSize;
-            for (var i = 1; i <= evictedCount; i++) {
+            final firstEvictedId = pageCount + initialCount - evictedCount + 1;
+            for (var i = firstEvictedId; i <= pageCount + initialCount; i++) {
               expect(
                 getResult().getMessageById('m$i'),
                 isNull,
@@ -1238,9 +1239,9 @@ void main() {
             final result = getResult();
             expect(result.messageCount, windowSize);
             // getReversedMessageIndex must return non-null for every message
-            // that is still in the window.
-            final evictedCount = pageCount + initialCount - windowSize;
-            for (var i = evictedCount + 1; i <= pageCount + initialCount; i++) {
+            // that is still in the window. Eviction trims the newest end, so
+            // the surviving messages are m1 through m${windowSize}.
+            for (var i = 1; i <= windowSize; i++) {
               expect(
                 result.getReversedMessageIndex('m$i'),
                 isNotNull,
@@ -1249,10 +1250,9 @@ void main() {
             }
           });
 
-          testWidgets('newest messages are always preserved after eviction', (tester) async {
+          testWidgets('oldest messages are always preserved after eviction', (tester) async {
             final getResult = await _pump(tester, 'group1');
 
-            // newest message id is m${pageCount + initialCount}
             _api.emitInitialSnapshot(makeMessages(pageCount + 1, pageCount + initialCount));
             await tester.pumpAndSettle();
 
@@ -1261,8 +1261,68 @@ void main() {
             await tester.pumpAndSettle();
 
             final result = getResult();
-            // The most-recent message (index 0 in reversed order) must still be present.
-            expect(result.getMessage(0).id, 'm${pageCount + initialCount}');
+            // The oldest message (highest reversed index) must be the first
+            // message from the prepended page, proving older messages are kept.
+            expect(result.getMessage(result.messageCount - 1).id, 'm1');
+          });
+
+          testWidgets('evicts from newest end so newly loaded older messages are kept', (
+            tester,
+          ) async {
+            final getResult = await _pump(tester, 'group1');
+
+            _api.emitInitialSnapshot(makeMessages(pageCount + 1, pageCount + initialCount));
+            await tester.pumpAndSettle();
+
+            _api.olderMessagesResponse = makeMessages(1, pageCount);
+            await getResult().loadOlderMessages();
+            await tester.pumpAndSettle();
+
+            final result = getResult();
+            final evictedCount = pageCount + initialCount - windowSize;
+            // The oldest message in the window must be from the prepended page,
+            // NOT from the initial snapshot. This proves that eviction removed
+            // the newest (tail) messages rather than the just-loaded oldest.
+            expect(result.getMessage(result.messageCount - 1).id, 'm1');
+            // The newest message after eviction should be the last initial
+            // message minus what was evicted from the tail.
+            expect(
+              result.getMessage(0).id,
+              'm${pageCount + initialCount - evictedCount}',
+            );
+          });
+
+          testWidgets('repeated pagination at window capacity makes progress', (tester) async {
+            // Simulates 594 messages with window=500, page=50.
+            // After the window fills, each subsequent page must still advance
+            // the cursor (make progress) rather than re-fetching the same page
+            // in an infinite loop.
+            final getResult = await _pump(tester, 'group1');
+
+            // Start with a full window of the newest messages.
+            _api.emitInitialSnapshot(makeMessages(95, 594));
+            await tester.pumpAndSettle();
+            expect(getResult().messageCount, windowSize);
+
+            // Page load: the next 50 older messages (45-94).
+            _api.olderMessagesResponse = makeMessages(45, 94);
+            await getResult().loadOlderMessages();
+            await tester.pumpAndSettle();
+
+            // After eviction the oldest message in the window must be from the
+            // just-loaded page — proving progress was made.
+            final afterFirstLoad = getResult();
+            expect(afterFirstLoad.messageCount, windowSize);
+            expect(afterFirstLoad.getMessage(afterFirstLoad.messageCount - 1).id, 'm45');
+
+            // Second page: messages 1-44.
+            _api.olderMessagesResponse = makeMessages(1, 44);
+            await getResult().loadOlderMessages();
+            await tester.pumpAndSettle();
+
+            // The cursor must have advanced so message m1 is now reachable.
+            final afterSecondLoad = getResult();
+            expect(afterSecondLoad.getMessage(afterSecondLoad.messageCount - 1).id, 'm1');
           });
         });
       });

@@ -409,25 +409,21 @@ ChatMessagesResult useChatMessages(
 
         // Sliding-window eviction: keep the list bounded so long sessions do
         // not cause OOM. When the merged list exceeds _kWindowSize we drop the
-        // oldest entries from the front. combined = [newIds (older) …
-        // messageIds.value (newer)], so trimming the front discards the
-        // furthest-back history while keeping the most-recent messages.
-        // Because the user can always reload those pages by scrolling up, we
-        // reset hasMoreMessages to true so the "load older" path remains
-        // available after eviction.
+        // newest entries from the tail. combined = [newIds (older) …
+        // messageIds.value (newer)], so trimming the tail discards the
+        // most-recent history while keeping the just-loaded older messages.
+        // This ensures the pagination cursor always advances: the newly
+        // prepended messages remain in the window, so the next page load
+        // starts from an older cursor rather than re-fetching the same page.
         if (combined.length > _kWindowSize) {
-          final excess = combined.length - _kWindowSize;
-          final evicted = combined.sublist(0, excess);
-          combined = combined.sublist(excess);
+          final evicted = combined.sublist(_kWindowSize);
+          combined = combined.sublist(0, _kWindowSize);
           // Remove evicted payloads from the lookup map to free memory.
           for (final id in evicted) {
             messagesById.value.remove(id);
           }
-          // The front was trimmed so there are older messages the user has not
-          // loaded yet; keep the pagination gate open.
-          hasMoreMessages.value = true;
           _logger.info(
-            'loadOlderMessages groupId=$groupId: evicted ${evicted.length} oldest messages (window=$_kWindowSize)',
+            'loadOlderMessages groupId=$groupId: evicted ${evicted.length} newest messages (window=$_kWindowSize)',
           );
         }
 
