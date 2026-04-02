@@ -225,7 +225,7 @@ class ChatSummary {
 
   /// When this chat is muted until, if at all.
   /// `None` = not muted.
-  /// `Some(far-future)` = muted forever (see `MUTE_FOREVER`).
+  /// `Some(far-future)` = muted forever.
   final DateTime? mutedUntil;
 
   const ChatSummary({
