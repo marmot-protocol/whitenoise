@@ -392,7 +392,7 @@ void main() {
       });
     });
     group('leftGroup trigger', () {
-      testWidgets('removes the chat from the list', (tester) async {
+      testWidgets('keeps left group in the list with removedAt set', (tester) async {
         final getResult = await _pump(tester, testPubkeyA);
 
         _api.emitInitialSnapshot([
@@ -403,31 +403,19 @@ void main() {
 
         expect(getResult().chats.map((c) => c.mlsGroupId), ['mls_c1', 'mls_c2']);
 
+        final removedAt = DateTime(2024, 1, 3);
         _api.emitUpdate(
           ChatListUpdateTrigger.leftGroup,
-          _chatSummary('c2', DateTime(2024, 1, 2)),
+          _chatSummary('c2', DateTime(2024, 1, 2), removedAt: removedAt),
         );
         await tester.pumpAndSettle();
 
         final chats = getResult().chats;
-        expect(chats.map((c) => c.mlsGroupId), ['mls_c1']);
-      });
-
-      testWidgets('removing nonexistent chat is a no-op', (tester) async {
-        final getResult = await _pump(tester, testPubkeyA);
-
-        _api.emitInitialSnapshot([
-          _chatSummary('c1', DateTime(2024)),
-        ]);
-        await tester.pumpAndSettle();
-
-        _api.emitUpdate(
-          ChatListUpdateTrigger.leftGroup,
-          _chatSummary('nonexistent', DateTime(2024)),
+        expect(chats.map((c) => c.mlsGroupId), containsAll(['mls_c1', 'mls_c2']));
+        expect(
+          chats.firstWhere((c) => c.mlsGroupId == 'mls_c2').removedAt,
+          removedAt,
         );
-        await tester.pumpAndSettle();
-
-        expect(getResult().chats.map((c) => c.mlsGroupId), ['mls_c1']);
       });
     });
 
