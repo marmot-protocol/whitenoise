@@ -16,6 +16,7 @@ MediaFile _mediaFile({
   String filePath = '',
   String? originalFileHash = 'hash123',
   String? blurhash,
+  String? thumbhash,
 }) => MediaFile(
   id: id,
   mlsGroupId: testGroupId,
@@ -28,7 +29,9 @@ MediaFile _mediaFile({
   blossomUrl: 'https://example.com/media',
   nostrKey: 'nostr123',
   createdAt: DateTime(2024),
-  fileMetadata: blurhash != null ? FileMetadata(blurhash: blurhash) : null,
+  fileMetadata: blurhash != null || thumbhash != null
+      ? FileMetadata(blurhash: blurhash, thumbhash: thumbhash)
+      : null,
 );
 
 class _MockApi extends MockWnApi {
@@ -208,6 +211,36 @@ void main() {
         find.byKey(const Key('thumbnail_container')),
       );
       expect(container.constraints?.maxWidth, 56.0);
+    });
+
+    testWidgets('shows thumbhash placeholder while loading', (tester) async {
+      _api.downloadCompleter = Completer<MediaFile>();
+      await mountWidget(
+        ChatMediaThumbnail(
+          mediaFile: _mediaFile(thumbhash: 'YJqGPQw7sFlslqhFafSE+Q6oJ1h2iHB2Rw=='),
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('thumbnail_loading')), findsOneWidget);
+      expect(find.byKey(const Key('thumbhash_placeholder')), findsOneWidget);
+      expect(find.byKey(const Key('thumbnail_image')), findsNothing);
+    });
+
+    testWidgets('prefers thumbhash over blurhash when both provided', (tester) async {
+      _api.downloadCompleter = Completer<MediaFile>();
+      await mountWidget(
+        ChatMediaThumbnail(
+          mediaFile: _mediaFile(
+            thumbhash: 'YJqGPQw7sFlslqhFafSE+Q6oJ1h2iHB2Rw==',
+            blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+          ),
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('thumbhash_placeholder')), findsOneWidget);
+      expect(find.byKey(const Key('blurhash_placeholder')), findsNothing);
     });
 
     testWidgets('Image.file errorBuilder shows fallback blurhash', (tester) async {

@@ -60,5 +60,33 @@ void main() {
       expect(find.byKey(const Key('neutral_placeholder')), findsOneWidget);
       expect(find.byKey(const Key('retry_button')), findsOneWidget);
     });
+
+    testWidgets('shows thumbhash placeholder when thumbHash is provided', (tester) async {
+      await mountWidget(
+        WnMediaErrorPlaceholder(
+          onRetry: () {},
+          thumbHash: 'YJqGPQw7sFlslqhFafSE+Q6oJ1h2iHB2Rw==',
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('thumbhash_placeholder')), findsOneWidget);
+      expect(find.byKey(const Key('retry_button')), findsOneWidget);
+    });
+
+    testWidgets('prefers thumbhash over blurhash when both provided', (tester) async {
+      await mountWidget(
+        WnMediaErrorPlaceholder(
+          onRetry: () {},
+          thumbHash: 'YJqGPQw7sFlslqhFafSE+Q6oJ1h2iHB2Rw==',
+          blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('thumbhash_placeholder')), findsOneWidget);
+      expect(find.byKey(const Key('blurhash_placeholder')), findsNothing);
+      expect(find.byKey(const Key('retry_button')), findsOneWidget);
+    });
   });
 }
