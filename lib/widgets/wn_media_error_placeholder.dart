@@ -33,7 +33,12 @@ class WnMediaErrorPlaceholder extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            WnMediaPlaceholder(thumbHash: thumbHash, blurhash: blurhash, width: width, height: height),
+            WnMediaPlaceholder(
+              thumbHash: thumbHash,
+              blurhash: blurhash,
+              width: width,
+              height: height,
+            ),
             Container(
               key: const Key('error_overlay'),
               color: colors.overlayTertiary,
