@@ -146,6 +146,9 @@ enum ChatListUpdateTrigger {
 
   /// The chat's mute status changed.
   chatMuteChanged,
+
+  /// The user left the group.
+  leftGroup,
 }
 
 @freezed

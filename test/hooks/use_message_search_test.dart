@@ -26,9 +26,11 @@ SearchResult _searchResultFactory(
   String id,
   String content, {
   List<HighlightSpan> spans = const [],
+  int position = 0,
 }) => SearchResult(
   message: _messageFactory(id, content),
   highlightSpans: spans,
+  position: BigInt.from(position),
 );
 
 class _MockApi extends MockWnApi {

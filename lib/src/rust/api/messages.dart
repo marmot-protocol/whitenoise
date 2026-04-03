@@ -429,13 +429,18 @@ class SearchResult {
   /// One span per matched query token, in the order they appear in the content.
   final List<HighlightSpan> highlightSpans;
 
+  /// 0-based position of the message within the group (0 = newest),
+  /// matching the `created_at DESC, message_id DESC` ordering used by pagination.
+  final BigInt position;
+
   const SearchResult({
     required this.message,
     required this.highlightSpans,
+    required this.position,
   });
 
   @override
-  int get hashCode => message.hashCode ^ highlightSpans.hashCode;
+  int get hashCode => message.hashCode ^ highlightSpans.hashCode ^ position.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -443,7 +448,8 @@ class SearchResult {
       other is SearchResult &&
           runtimeType == other.runtimeType &&
           message == other.message &&
-          highlightSpans == other.highlightSpans;
+          highlightSpans == other.highlightSpans &&
+          position == other.position;
 }
 
 /// Flutter-compatible serializable token

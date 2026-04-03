@@ -314,17 +314,22 @@ class _MockApi extends MockWnApi {
     int? limit,
   }) async {
     if (searchOverride != null) return searchOverride!(query);
-    return initialMessages
+    final matches = initialMessages
         .where((m) => m.content.toLowerCase().contains(query.toLowerCase()))
+        .toList();
+    return matches
+        .asMap()
+        .entries
         .map(
-          (m) => SearchResult(
-            message: m,
+          (entry) => SearchResult(
+            message: entry.value,
             highlightSpans: [
               HighlightSpan(
-                start: m.content.toLowerCase().indexOf(query.toLowerCase()),
-                end: m.content.toLowerCase().indexOf(query.toLowerCase()) + query.length,
+                start: entry.value.content.toLowerCase().indexOf(query.toLowerCase()),
+                end: entry.value.content.toLowerCase().indexOf(query.toLowerCase()) + query.length,
               ),
             ],
+            position: BigInt.from(entry.key),
           ),
         )
         .toList();
@@ -1943,10 +1948,12 @@ void main() {
           SearchResult(
             message: _api.initialMessages[0],
             highlightSpans: [const HighlightSpan(start: 0, end: 5)],
+            position: BigInt.zero,
           ),
           SearchResult(
             message: _api.initialMessages[6],
             highlightSpans: [const HighlightSpan(start: 0, end: 5)],
+            position: BigInt.from(6),
           ),
         ];
         await openSearch(tester);

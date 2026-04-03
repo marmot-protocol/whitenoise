@@ -5,44 +5,61 @@ import 'package:whitenoise/utils/scroll_duration.dart';
 
 final _logger = Logger('useScrollToMessage');
 
-const _maxLoadAttempts = 20;
+const _defaultPageSize = 50;
 
 typedef ScrollToMessageResult = ({
   AutoScrollController scrollController,
-  Future<void> Function(String messageId) scrollToMessage,
+  Future<void> Function(String messageId, {int? position}) scrollToMessage,
 });
 
 ScrollToMessageResult useScrollToMessage({
   required int? Function(String messageId) getReversedMessageIndex,
   required Future<void> Function() loadOlderMessages,
   required bool hasMoreMessages,
+  required int messageCount,
 }) {
   final controller = useMemoized(() => AutoScrollController(), []);
   final hasMoreRef = useRef(hasMoreMessages);
   final getIndexRef = useRef(getReversedMessageIndex);
   final loadRef = useRef(loadOlderMessages);
+  final messageCountRef = useRef(messageCount);
 
   hasMoreRef.value = hasMoreMessages;
   getIndexRef.value = getReversedMessageIndex;
   loadRef.value = loadOlderMessages;
+  messageCountRef.value = messageCount;
 
   useEffect(() => controller.dispose, [controller]);
 
-  Future<void> scrollToMessage(String messageId) async {
+  Future<void> scrollToMessage(String messageId, {int? position}) async {
     var reversedIndex = getIndexRef.value(messageId);
 
-    var attempts = 0;
-    while (reversedIndex == null && hasMoreRef.value && attempts < _maxLoadAttempts) {
-      _logger.info(
-        'scrollToMessage: message $messageId not in window, loading page ${attempts + 1}',
-      );
-      await loadRef.value();
-      reversedIndex = getIndexRef.value(messageId);
-      attempts++;
+    if (reversedIndex == null && hasMoreRef.value) {
+      final pagesToLoad = position != null ? _pagesToLoad(position, messageCountRef.value) : null;
+
+      if (pagesToLoad != null) {
+        _logger.info(
+          'scrollToMessage: message $messageId at position $position, '
+          'loading $pagesToLoad pages (${messageCountRef.value} messages loaded)',
+        );
+      }
+
+      var attempts = 0;
+      final limit = pagesToLoad ?? double.infinity;
+      while (reversedIndex == null && hasMoreRef.value && attempts < limit) {
+        if (pagesToLoad == null) {
+          _logger.info(
+            'scrollToMessage: message $messageId not in window, loading page ${attempts + 1}',
+          );
+        }
+        await loadRef.value();
+        reversedIndex = getIndexRef.value(messageId);
+        attempts++;
+      }
     }
 
     if (reversedIndex == null) {
-      _logger.warning('scrollToMessage: message $messageId not found after $attempts attempts');
+      _logger.warning('scrollToMessage: message $messageId not found');
       return;
     }
 
@@ -57,4 +74,10 @@ ScrollToMessageResult useScrollToMessage({
     scrollController: controller,
     scrollToMessage: scrollToMessage,
   );
+}
+
+int _pagesToLoad(int position, int currentMessageCount) {
+  if (position < currentMessageCount) return 0;
+  final remaining = position - currentMessageCount + 1;
+  return (remaining / _defaultPageSize).ceil();
 }

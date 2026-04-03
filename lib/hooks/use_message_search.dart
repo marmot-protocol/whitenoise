@@ -105,6 +105,7 @@ List<SearchDisplayItem> _matchOnlyItems(List<SearchResult> results) {
         message: results[i].message,
         highlightSpans: results[i].highlightSpans,
         matchIndex: i,
+        position: results[i].position.toInt(),
       ),
     );
   }

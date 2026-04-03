@@ -9,23 +9,27 @@ class SearchDisplayItem {
   final ChatMessage? message;
   final List<HighlightSpan>? highlightSpans;
   final int? matchIndex;
+  final int? position;
 
   const SearchDisplayItem._({
     required this.type,
     this.message,
     this.highlightSpans,
     this.matchIndex,
+    this.position,
   });
 
   factory SearchDisplayItem.match({
     required ChatMessage message,
     required List<HighlightSpan> highlightSpans,
     required int matchIndex,
+    required int position,
   }) => SearchDisplayItem._(
     type: SearchDisplayItemType.match,
     message: message,
     highlightSpans: highlightSpans,
     matchIndex: matchIndex,
+    position: position,
   );
 
   factory SearchDisplayItem.context({required ChatMessage message}) =>
@@ -83,6 +87,7 @@ List<SearchDisplayItem> buildSearchDisplayList({
             message: info.result.message,
             highlightSpans: info.result.highlightSpans,
             matchIndex: info.matchIndex,
+            position: info.result.position.toInt(),
           ),
         );
       } else {
@@ -99,6 +104,7 @@ List<SearchDisplayItem> buildSearchDisplayList({
           message: results[i].message,
           highlightSpans: results[i].highlightSpans,
           matchIndex: i,
+          position: results[i].position.toInt(),
         ),
       );
     }

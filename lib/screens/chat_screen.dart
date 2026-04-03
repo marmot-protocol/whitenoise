@@ -49,6 +49,7 @@ final _logger = Logger('ChatScreen');
 
 const _slateHeight = 80.0;
 const _searchBarHeight = 80.0;
+const _searchNavigationHeight = 60.0;
 
 void _scrollToMatch(
   AutoScrollController controller,
@@ -102,6 +103,7 @@ class ChatScreen extends HookConsumerWidget {
       getReversedMessageIndex: getReversedMessageIndex,
       loadOlderMessages: loadOlderMessages,
       hasMoreMessages: hasMoreMessages,
+      messageCount: messageCount,
     );
     final scrollController = scrollToMessageResult.scrollController;
     final mediaUpload = useMediaUpload(pubkey: pubkey, groupId: groupId);
@@ -251,7 +253,8 @@ class ChatScreen extends HookConsumerWidget {
     final safeAreaTop = MediaQuery.of(context).padding.top;
     final safeAreaBottom = MediaQuery.of(context).padding.bottom;
     final searchBarHeight = isSearchActive.value ? _searchBarHeight.h : 0.0;
-    final slateTopPadding = safeAreaTop + _slateHeight.h + searchBarHeight;
+    final searchNavHeight = searchQuery.value.isNotEmpty ? _searchNavigationHeight.h : 0.0;
+    final slateTopPadding = safeAreaTop + _slateHeight.h + searchBarHeight + searchNavHeight;
     final listBottomPadding = inputAreaHeight.value + safeAreaBottom + 12.h;
 
     final searchDisplayItems = isSearchActive.value && searchQuery.value.isNotEmpty
@@ -388,11 +391,15 @@ class ChatScreen extends HookConsumerWidget {
                 key: isMatchItem ? Key('search_match_${displayItem.matchIndex}') : null,
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
+                  final messagePosition = displayItem?.position;
                   isSearchActive.value = false;
                   searchQuery.value = '';
                   searchController.clear();
                   WidgetsBinding.instance.addPostFrameCallback((_) {
-                    scrollToMessageResult.scrollToMessage(message.id);
+                    scrollToMessageResult.scrollToMessage(
+                      message.id,
+                      position: messagePosition,
+                    );
                   });
                 },
                 child: Opacity(

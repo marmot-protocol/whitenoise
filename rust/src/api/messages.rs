@@ -171,6 +171,9 @@ pub struct SearchResult {
     pub message: ChatMessage,
     /// One span per matched query token, in the order they appear in the content.
     pub highlight_spans: Vec<HighlightSpan>,
+    /// 0-based position of the message within the group (0 = newest),
+    /// matching the `created_at DESC, message_id DESC` ordering used by pagination.
+    pub position: u64,
 }
 
 impl From<WhitenoiseSearchResult> for SearchResult {
@@ -185,6 +188,7 @@ impl From<WhitenoiseSearchResult> for SearchResult {
                     end: e as i32,
                 })
                 .collect(),
+            position: result.position,
         }
     }
 }
