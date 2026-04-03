@@ -131,6 +131,8 @@ pub enum ChatListUpdateTrigger {
     RemovedFromGroup,
     /// The chat's mute status changed.
     ChatMuteChanged,
+    /// This account left the group.
+    LeftGroup,
 }
 
 impl From<WhitenoiseChatListUpdateTrigger> for ChatListUpdateTrigger {
@@ -142,6 +144,7 @@ impl From<WhitenoiseChatListUpdateTrigger> for ChatListUpdateTrigger {
             WhitenoiseChatListUpdateTrigger::ChatArchiveChanged => Self::ChatArchiveChanged,
             WhitenoiseChatListUpdateTrigger::RemovedFromGroup => Self::RemovedFromGroup,
             WhitenoiseChatListUpdateTrigger::ChatMuteChanged => Self::ChatMuteChanged,
+            WhitenoiseChatListUpdateTrigger::LeftGroup => Self::LeftGroup,
         }
     }
 }

@@ -5701,10 +5701,12 @@ impl SseDecode for crate::api::media_files::FileMetadata {
         let mut var_originalFilename = <Option<String>>::sse_decode(deserializer);
         let mut var_dimensions = <Option<String>>::sse_decode(deserializer);
         let mut var_blurhash = <Option<String>>::sse_decode(deserializer);
+        let mut var_thumbhash = <Option<String>>::sse_decode(deserializer);
         return crate::api::media_files::FileMetadata {
             original_filename: var_originalFilename,
             dimensions: var_dimensions,
             blurhash: var_blurhash,
+            thumbhash: var_thumbhash,
         };
     }
 }
@@ -7862,6 +7864,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::media_files::FileMetadata {
             self.original_filename.into_into_dart().into_dart(),
             self.dimensions.into_into_dart().into_dart(),
             self.blurhash.into_into_dart().into_dart(),
+            self.thumbhash.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -9345,6 +9348,7 @@ impl SseEncode for crate::api::media_files::FileMetadata {
         <Option<String>>::sse_encode(self.original_filename, serializer);
         <Option<String>>::sse_encode(self.dimensions, serializer);
         <Option<String>>::sse_encode(self.blurhash, serializer);
+        <Option<String>>::sse_encode(self.thumbhash, serializer);
     }
 }
 

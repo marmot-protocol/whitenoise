@@ -5,7 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/hooks/use_media_download.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
-import 'package:whitenoise/widgets/wn_blurhash_placeholder.dart';
+import 'package:whitenoise/widgets/wn_media_placeholder.dart';
 import 'package:whitenoise/widgets/wn_media_thumbnail.dart';
 
 class ChatMediaThumbnail extends HookWidget {
@@ -38,6 +38,7 @@ class ChatMediaThumbnail extends HookWidget {
       return null;
     }, [status]);
 
+    final thumbHash = mediaFile.fileMetadata?.thumbhash;
     final blurhash = mediaFile.fileMetadata?.blurhash;
     final thumbnailSize = size == WnMediaThumbnailSize.large ? 56.w : 44.w;
 
@@ -49,6 +50,7 @@ class ChatMediaThumbnail extends HookWidget {
         status: status,
         localPath: localPath,
         fadeController: fadeController,
+        thumbHash: thumbHash,
         blurhash: blurhash,
         thumbnailSize: thumbnailSize,
       );
@@ -77,6 +79,7 @@ class _MediaContent extends StatelessWidget {
     required this.status,
     required this.localPath,
     required this.fadeController,
+    required this.thumbHash,
     required this.blurhash,
     required this.thumbnailSize,
   });
@@ -84,6 +87,7 @@ class _MediaContent extends StatelessWidget {
   final MediaDownloadStatus status;
   final String? localPath;
   final AnimationController fadeController;
+  final String? thumbHash;
   final String? blurhash;
   final double thumbnailSize;
 
@@ -92,8 +96,9 @@ class _MediaContent extends StatelessWidget {
     return Stack(
       fit: StackFit.passthrough,
       children: [
-        WnBlurhashPlaceholder(
+        WnMediaPlaceholder(
           key: const Key('thumbnail_loading'),
+          thumbHash: thumbHash,
           blurhash: blurhash,
           width: thumbnailSize,
           height: thumbnailSize,
@@ -106,8 +111,9 @@ class _MediaContent extends StatelessWidget {
               File(localPath!),
               key: const Key('thumbnail_image'),
               fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => WnBlurhashPlaceholder(
+              errorBuilder: (_, _, _) => WnMediaPlaceholder(
                 key: const Key('thumbnail_error_fallback'),
+                thumbHash: thumbHash,
                 blurhash: blurhash,
                 width: thumbnailSize,
                 height: thumbnailSize,

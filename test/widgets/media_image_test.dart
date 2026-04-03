@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/media_image.dart';
-import 'package:whitenoise/widgets/wn_blurhash_placeholder.dart';
+import 'package:whitenoise/widgets/wn_media_placeholder.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
@@ -495,7 +495,7 @@ void main() {
       final fallback = image.errorBuilder!(context, Object(), StackTrace.empty);
       final aspectRatioWidget = fallback as AspectRatio;
       expect(aspectRatioWidget.aspectRatio, 2);
-      expect(aspectRatioWidget.child, isA<WnBlurhashPlaceholder>());
+      expect(aspectRatioWidget.child, isA<WnMediaPlaceholder>());
     });
 
     testWidgets('blurhash reappears when fade is interrupted by status change', (

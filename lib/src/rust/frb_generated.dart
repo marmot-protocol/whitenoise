@@ -5686,11 +5686,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   FileMetadata dco_decode_file_metadata(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 3) throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
+    if (arr.length != 4) throw Exception('unexpected arr length: expect 4 but see ${arr.length}');
     return FileMetadata(
       originalFilename: dco_decode_opt_String(arr[0]),
       dimensions: dco_decode_opt_String(arr[1]),
       blurhash: dco_decode_opt_String(arr[2]),
+      thumbhash: dco_decode_opt_String(arr[3]),
     );
   }
 
@@ -7318,10 +7319,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     final var_originalFilename = sse_decode_opt_String(deserializer);
     final var_dimensions = sse_decode_opt_String(deserializer);
     final var_blurhash = sse_decode_opt_String(deserializer);
+    final var_thumbhash = sse_decode_opt_String(deserializer);
     return FileMetadata(
       originalFilename: var_originalFilename,
       dimensions: var_dimensions,
       blurhash: var_blurhash,
+      thumbhash: var_thumbhash,
     );
   }
 
@@ -9314,6 +9317,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_String(self.originalFilename, serializer);
     sse_encode_opt_String(self.dimensions, serializer);
     sse_encode_opt_String(self.blurhash, serializer);
+    sse_encode_opt_String(self.thumbhash, serializer);
   }
 
   @protected
