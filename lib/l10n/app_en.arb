@@ -399,6 +399,26 @@
   "@signOutWarningBackupKey": {
     "description": "Sign out warning second paragraph (back up key, shown only for local storage)"
   },
+  "signOutCalloutTitle": "Back up your private key",
+  "@signOutCalloutTitle": {
+    "description": "Sign out callout title (shown only for local storage)"
+  },
+  "signOutCalloutDescription": "Make sure you've backed up your private key in Settings → Profile Keys. Without it, you won't be able to sign in again.",
+  "@signOutCalloutDescription": {
+    "description": "Sign out callout description (shown only for local storage)"
+  },
+  "signOutCalloutDescriptionBefore": "Make sure you've backed up your private key in ",
+  "@signOutCalloutDescriptionBefore": {
+    "description": "Sign out callout description text before the link"
+  },
+  "signOutCalloutDescriptionLink": "Settings → Profile Keys",
+  "@signOutCalloutDescriptionLink": {
+    "description": "Sign out callout description link text"
+  },
+  "signOutCalloutDescriptionAfter": ". Without it, you won't be able to sign in again.",
+  "@signOutCalloutDescriptionAfter": {
+    "description": "Sign out callout description text after the link"
+  },
   "backUpPrivateKey": "Back up your private key",
   "@backUpPrivateKey": {
     "description": "Back up private key section title"

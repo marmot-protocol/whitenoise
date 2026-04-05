@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/utils/formatting.dart';
 import 'package:whitenoise/widgets/wn_copyable_field.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import '../mocks/mock_clipboard.dart';
@@ -18,7 +19,20 @@ void main() {
       expect(find.text('My Label'), findsOneWidget);
     });
 
-    testWidgets('displays value in text field when not obscurable', (tester) async {
+    testWidgets('displays displayValue when provided', (tester) async {
+      await mountWidget(
+        WnCopyableField(
+          label: 'Label',
+          value: 'abcd1234efgh5678',
+          displayValue: formatPublicKey('abcd1234efgh5678'),
+        ),
+        tester,
+      );
+      expect(find.text(formatPublicKey('abcd1234efgh5678')), findsOneWidget);
+      expect(find.text('abcd1234efgh5678'), findsNothing);
+    });
+
+    testWidgets('displays value when displayValue is not provided', (tester) async {
       await mountWidget(
         const WnCopyableField(
           label: 'Label',
@@ -29,7 +43,24 @@ void main() {
       expect(find.text('my-value'), findsOneWidget);
     });
 
-    testWidgets('displays obscured value when obscurable and obscured', (tester) async {
+    testWidgets('copies original value to clipboard even when displayValue is set', (
+      tester,
+    ) async {
+      late String? Function() getClipboard;
+      getClipboard = mockClipboard();
+      await mountWidget(
+        WnCopyableField(
+          label: 'Label',
+          value: 'abcd1234efgh5678',
+          displayValue: formatPublicKey('abcd1234efgh5678'),
+        ),
+        tester,
+      );
+      await tester.tap(find.byKey(const Key('copy_button')));
+      expect(getClipboard(), 'abcd1234efgh5678');
+    });
+
+    testWidgets('displays 16 large circles when obscurable and obscured', (tester) async {
       await mountWidget(
         const WnCopyableField(
           label: 'Label',
@@ -39,20 +70,21 @@ void main() {
         tester,
       );
       expect(find.text('my-value'), findsNothing);
-      expect(find.textContaining('●'), findsOneWidget);
+      expect(find.text('⬤' * 16), findsOneWidget);
     });
 
     testWidgets('displays actual value when obscurable but not obscured', (tester) async {
       await mountWidget(
         const WnCopyableField(
           label: 'Label',
-          value: 'my-value',
+          value: 'abcd1234efgh5678',
           obscurable: true,
           obscured: false,
         ),
         tester,
       );
-      expect(find.text('my-value'), findsOneWidget);
+      expect(find.text('abcd1234efgh5678'), findsOneWidget);
+      expect(find.text(formatPublicKey('abcd1234efgh5678')), findsNothing);
     });
 
     testWidgets('displays copy button', (tester) async {

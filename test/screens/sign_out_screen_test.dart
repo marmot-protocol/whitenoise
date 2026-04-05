@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise/hooks/use_clipboard_guard.dart' show cancelClipboardGuardTimer;
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/home_screen.dart';
+import 'package:whitenoise/screens/profile_keys_screen.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_copyable_field.dart' show WnCopyableField;
-import 'package:whitenoise/widgets/wn_icon.dart';
 
-import '../mocks/mock_clipboard.dart' show clearClipboardMock, mockClipboard;
 import '../mocks/mock_secure_storage.dart';
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
@@ -87,10 +85,6 @@ void main() {
     mockApi.setAccountType(AccountType.local);
   });
 
-  tearDown(() {
-    cancelClipboardGuardTimer();
-  });
-
   late _MockAuthNotifier mockAuth;
 
   Future<void> pumpSignOutScreen(
@@ -116,129 +110,66 @@ void main() {
       expect(find.text('Sign out'), findsWidgets);
     });
 
-    testWidgets('displays warning box with confirmation message', (tester) async {
+    testWidgets('displays confirmation heading', (tester) async {
       await pumpSignOutScreen(tester);
       expect(find.text('Are you sure you want to sign out?'), findsOneWidget);
-      expect(
-        find.textContaining('When you sign out of White Noise'),
-        findsOneWidget,
-      );
-      expect(
-        find.textContaining('If you haven\'t backed up your private key'),
-        findsOneWidget,
-      );
     });
 
-    group('when nsec storage is external', () {
-      testWidgets('shows only sign-out warning without backup paragraph or section', (
-        tester,
-      ) async {
-        mockApi.setAccountType(AccountType.external_);
-        await pumpSignOutScreen(tester);
-        await tester.pumpAndSettle();
-        expect(
-          find.textContaining('When you sign out of White Noise'),
-          findsOneWidget,
-        );
-        expect(
-          find.textContaining('If you haven\'t backed up your private key'),
-          findsNothing,
-        );
-        expect(find.text('Back up your private key'), findsNothing);
-        expect(find.byType(WnCopyableField), findsNothing);
-      });
-    });
-
-    testWidgets('displays back up section', (tester) async {
+    testWidgets('displays warning callout title', (tester) async {
       await pumpSignOutScreen(tester);
       expect(find.text('Back up your private key'), findsOneWidget);
-      expect(find.text('Private Key'), findsOneWidget);
     });
 
-    testWidgets('loads and displays private key field', (tester) async {
+    testWidgets('warning callout description is hidden by default', (tester) async {
       await pumpSignOutScreen(tester);
-      await tester.pumpAndSettle();
-      final privateKeyField = find.byType(WnCopyableField);
-      expect(privateKeyField, findsOneWidget);
+      expect(
+        find.textContaining('Make sure you\'ve backed up your private key'),
+        findsNothing,
+      );
     });
 
-    testWidgets('tapping copy button copies private key to clipboard', (tester) async {
-      final getClipboard = mockClipboard();
+    testWidgets('tapping warning callout toggle shows description', (tester) async {
       await pumpSignOutScreen(tester);
-      await tester.pumpAndSettle();
-      final copyButton = find.byKey(const Key('copy_button'));
-      expect(copyButton, findsOneWidget);
-      await tester.tap(copyButton);
+      await tester.tap(find.byKey(const Key('callout_toggle')));
       await tester.pump();
-      expect(getClipboard(), startsWith('nsec1'));
-      cancelClipboardGuardTimer();
+      expect(find.text('Settings → Profile Keys'), findsOneWidget);
     });
 
-    testWidgets('shows success message when copying private key', (tester) async {
+    testWidgets('tapping Settings → Profile Keys link navigates to ProfileKeysScreen', (
+      tester,
+    ) async {
       await pumpSignOutScreen(tester);
-      await tester.pumpAndSettle();
-      final copyButton = find.byKey(const Key('copy_button'));
-      await tester.tap(copyButton);
+      await tester.tap(find.byKey(const Key('callout_toggle')));
       await tester.pump();
-      expect(find.text('Private key copied to clipboard'), findsOneWidget);
-      cancelClipboardGuardTimer();
+      await tester.tap(find.byKey(const Key('sign_out_callout_profile_keys_link')));
+      await tester.pumpAndSettle();
+      expect(find.byType(ProfileKeysScreen), findsOneWidget);
     });
 
-    testWidgets('clears clipboard 60 seconds after copying private key', (tester) async {
-      final getClipboard = mockClipboard();
+    testWidgets('tapping warning callout toggle twice hides description again', (tester) async {
       await pumpSignOutScreen(tester);
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.byKey(const Key('copy_button')));
+      await tester.tap(find.byKey(const Key('callout_toggle')));
       await tester.pump();
-      expect(getClipboard(), startsWith('nsec1'));
-
-      await tester.pump(const Duration(seconds: 59));
-      expect(getClipboard(), startsWith('nsec1'));
-
-      await tester.pump(const Duration(seconds: 1));
-      expect(getClipboard(), '');
-      clearClipboardMock();
+      await tester.tap(find.byKey(const Key('callout_toggle')));
+      await tester.pump();
+      expect(find.text('Settings → Profile Keys'), findsNothing);
     });
 
-    testWidgets('dismisses notice after auto-hide duration', (tester) async {
+    testWidgets('does not display private key field', (tester) async {
       await pumpSignOutScreen(tester);
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('copy_button')));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-      expect(find.text('Private key copied to clipboard'), findsOneWidget);
-
-      await tester.pump(const Duration(seconds: 3));
-      await tester.pumpAndSettle();
-
-      expect(find.text('Private key copied to clipboard'), findsNothing);
-      cancelClipboardGuardTimer();
+      expect(find.byType(WnCopyableField), findsNothing);
     });
 
-    testWidgets('tapping visibility toggle shows/hides private key', (tester) async {
+    testWidgets('displays Cancel button', (tester) async {
       await pumpSignOutScreen(tester);
+      expect(find.text('Cancel'), findsOneWidget);
+    });
+
+    testWidgets('tapping Cancel button returns to previous screen', (tester) async {
+      await pumpSignOutScreen(tester);
+      await tester.tap(find.text('Cancel'));
       await tester.pumpAndSettle();
-      final visibilityToggle = find.byKey(const Key('visibility_toggle'));
-      expect(visibilityToggle, findsOneWidget);
-
-      var icons = find.byType(WnIcon).evaluate();
-      var hasViewIcon = icons.any((e) => (e.widget as WnIcon).icon == WnIcons.view);
-      expect(hasViewIcon, isTrue);
-
-      await tester.tap(visibilityToggle);
-      await tester.pump();
-
-      icons = find.byType(WnIcon).evaluate();
-      final hasViewOffIcon = icons.any((e) => (e.widget as WnIcon).icon == WnIcons.viewOff);
-      expect(hasViewOffIcon, isTrue);
-
-      await tester.tap(visibilityToggle);
-      await tester.pump();
-
-      icons = find.byType(WnIcon).evaluate();
-      hasViewIcon = icons.any((e) => (e.widget as WnIcon).icon == WnIcons.view);
-      expect(hasViewIcon, isTrue);
+      expect(find.byType(ChatListScreen), findsOneWidget);
     });
 
     testWidgets('tapping back icon returns to previous screen', (tester) async {
@@ -252,12 +183,7 @@ void main() {
       await pumpSignOutScreen(tester);
       await tester.pumpAndSettle();
 
-      await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -300));
-      await tester.pumpAndSettle();
-
-      final signOutButtons = find.text('Sign out');
-
-      await tester.tap(signOutButtons.last);
+      await tester.tap(find.text('Sign out').last);
       await tester.pumpAndSettle();
 
       expect(mockAuth.logoutCalled, isTrue);
@@ -270,11 +196,7 @@ void main() {
 
       await pumpSignOutScreen(tester, authNotifier: authNotifier);
 
-      await tester.drag(find.byType(SingleChildScrollView), const Offset(0, -300));
-      await tester.pumpAndSettle();
-
-      final signOutButtons = find.text('Sign out');
-      await tester.tap(signOutButtons.last);
+      await tester.tap(find.text('Sign out').last);
       await tester.pumpAndSettle();
 
       expect(mockAuth.logoutCalled, isTrue);
@@ -290,7 +212,6 @@ void main() {
       await tester.pump();
 
       expect(find.text('Are you sure you want to sign out?'), findsNothing);
-      expect(find.byType(WnCopyableField), findsNothing);
     });
 
     testWidgets('shows error notice when nsec fails to load', (tester) async {

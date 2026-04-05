@@ -678,6 +678,36 @@ abstract class AppLocalizations {
   /// **'If you haven\'t backed up your private key, you won\'t be able to use this profile on any other Nostr service.'**
   String get signOutWarningBackupKey;
 
+  /// Sign out callout title (shown only for local storage)
+  ///
+  /// In en, this message translates to:
+  /// **'Back up your private key'**
+  String get signOutCalloutTitle;
+
+  /// Sign out callout description (shown only for local storage)
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure you\'ve backed up your private key in Settings → Profile Keys. Without it, you won\'t be able to sign in again.'**
+  String get signOutCalloutDescription;
+
+  /// Sign out callout description text before the link
+  ///
+  /// In en, this message translates to:
+  /// **'Make sure you\'ve backed up your private key in '**
+  String get signOutCalloutDescriptionBefore;
+
+  /// Sign out callout description link text
+  ///
+  /// In en, this message translates to:
+  /// **'Settings → Profile Keys'**
+  String get signOutCalloutDescriptionLink;
+
+  /// Sign out callout description text after the link
+  ///
+  /// In en, this message translates to:
+  /// **'. Without it, you won\'t be able to sign in again.'**
+  String get signOutCalloutDescriptionAfter;
+
   /// Back up private key section title
   ///
   /// In en, this message translates to:

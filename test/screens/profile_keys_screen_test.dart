@@ -119,9 +119,45 @@ void main() {
       );
     });
 
-    testWidgets('displays warning box', (tester) async {
+    testWidgets('displays warning callout title', (tester) async {
       await pumpProfileKeysScreen(tester);
       expect(find.text('Keep your private key safe!'), findsOneWidget);
+    });
+
+    testWidgets('warning callout description is hidden by default', (tester) async {
+      await pumpProfileKeysScreen(tester);
+      expect(
+        find.text(
+          "Don't share your private key publicly, and use it only to log in to other Nostr apps.",
+        ),
+        findsNothing,
+      );
+    });
+
+    testWidgets('tapping warning callout toggle shows description', (tester) async {
+      await pumpProfileKeysScreen(tester);
+      await tester.tap(find.byKey(const Key('callout_toggle')));
+      await tester.pump();
+      expect(
+        find.text(
+          "Don't share your private key publicly, and use it only to log in to other Nostr apps.",
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('tapping warning callout toggle twice hides description again', (tester) async {
+      await pumpProfileKeysScreen(tester);
+      await tester.tap(find.byKey(const Key('callout_toggle')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('callout_toggle')));
+      await tester.pump();
+      expect(
+        find.text(
+          "Don't share your private key publicly, and use it only to log in to other Nostr apps.",
+        ),
+        findsNothing,
+      );
     });
 
     testWidgets('tapping back icon returns to previous screen', (tester) async {

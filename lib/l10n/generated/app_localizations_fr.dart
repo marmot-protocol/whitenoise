@@ -322,6 +322,23 @@ class AppLocalizationsFr extends AppLocalizations {
       'Si vous n\'avez pas sauvegardé votre clé privée, vous ne pourrez pas utiliser ce profil sur un autre service Nostr.';
 
   @override
+  String get signOutCalloutTitle => 'Sauvegardez votre clé privée';
+
+  @override
+  String get signOutCalloutDescription =>
+      'Assurez-vous d\'avoir sauvegardé votre clé privée dans Paramètres → Clés de profil. Sans elle, vous ne pourrez plus vous connecter.';
+
+  @override
+  String get signOutCalloutDescriptionBefore =>
+      'Assurez-vous d\'avoir sauvegardé votre clé privée dans ';
+
+  @override
+  String get signOutCalloutDescriptionLink => 'Paramètres → Clés de profil';
+
+  @override
+  String get signOutCalloutDescriptionAfter => '. Sans elle, vous ne pourrez plus vous connecter.';
+
+  @override
   String get backUpPrivateKey => 'Sauvegardez votre clé privée';
 
   @override

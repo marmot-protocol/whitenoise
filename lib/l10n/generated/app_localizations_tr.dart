@@ -321,6 +321,23 @@ class AppLocalizationsTr extends AppLocalizations {
       'Özel anahtarınızı yedeklemediyseniz, bu profili başka hiçbir Nostr hizmetinde kullanamazsınız.';
 
   @override
+  String get signOutCalloutTitle => 'Özel anahtarınızı yedekleyin';
+
+  @override
+  String get signOutCalloutDescription =>
+      'Özel anahtarınızı Ayarlar → Profil Anahtarları bölümünden yedeklediğinizden emin olun. Onsuz tekrar giriş yapamayacaksınız.';
+
+  @override
+  String get signOutCalloutDescriptionBefore => 'Özel anahtarınızı ';
+
+  @override
+  String get signOutCalloutDescriptionLink => 'Ayarlar → Profil Anahtarları';
+
+  @override
+  String get signOutCalloutDescriptionAfter =>
+      ' bölümünden yedeklediğinizden emin olun. Onsuz tekrar giriş yapamayacaksınız.';
+
+  @override
   String get backUpPrivateKey => 'Özel anahtarınızı yedekleyin';
 
   @override

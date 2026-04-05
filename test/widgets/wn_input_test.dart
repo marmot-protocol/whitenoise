@@ -170,6 +170,23 @@ void main() {
       });
     });
 
+    group('with textColor override', () {
+      testWidgets('uses provided textColor instead of default', (tester) async {
+        await mountWidget(
+          WnInput(
+            placeholder: 'hint',
+            textColor: SemanticColors.light.backgroundContentSecondary,
+          ),
+          tester,
+        );
+        final field = tester.widget<TextField>(find.byKey(const Key('input_field')));
+        expect(
+          field.style!.color,
+          equals(SemanticColors.light.backgroundContentSecondary),
+        );
+      });
+    });
+
     group('with disabled state', () {
       testWidgets('field is disabled when enabled is false', (tester) async {
         await mountWidget(

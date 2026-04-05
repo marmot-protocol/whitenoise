@@ -322,6 +322,23 @@ class AppLocalizationsEs extends AppLocalizations {
       'Si no has respaldado tu llave privada, no podrás usar este perfil en ningún otro servicio Nostr.';
 
   @override
+  String get signOutCalloutTitle => 'Respalda tu llave privada';
+
+  @override
+  String get signOutCalloutDescription =>
+      'Asegúrate de haber respaldado tu llave privada en Ajustes → Llaves de perfil. Sin ella, no podrás iniciar sesión de nuevo.';
+
+  @override
+  String get signOutCalloutDescriptionBefore =>
+      'Asegúrate de haber respaldado tu llave privada en ';
+
+  @override
+  String get signOutCalloutDescriptionLink => 'Ajustes → Llaves de perfil';
+
+  @override
+  String get signOutCalloutDescriptionAfter => '. Sin ella, no podrás iniciar sesión de nuevo.';
+
+  @override
   String get backUpPrivateKey => 'Respalda tu llave privada';
 
   @override

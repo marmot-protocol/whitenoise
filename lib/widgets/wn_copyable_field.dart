@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_input.dart';
 
@@ -11,16 +12,20 @@ class WnCopyableField extends HookWidget {
     super.key,
     required this.label,
     required this.value,
+    this.displayValue,
     this.obscurable = false,
     this.obscured = true,
+    this.defaultTextColor = false,
     this.onToggleVisibility,
     this.onCopied,
   });
 
   final String label;
   final String value;
+  final String? displayValue;
   final bool obscurable;
   final bool obscured;
+  final bool defaultTextColor;
   final VoidCallback? onToggleVisibility;
   final VoidCallback? onCopied;
 
@@ -30,11 +35,13 @@ class WnCopyableField extends HookWidget {
   }
 
   String _getDisplayValue() {
-    if (!obscurable || !obscured) {
+    if (obscurable) {
+      if (obscured) {
+        return '⬤' * 16;
+      }
       return value;
     }
-    final maskedLength = value.length.clamp(8, 24).toInt();
-    return '●' * maskedLength;
+    return displayValue ?? value;
   }
 
   @override
@@ -44,7 +51,10 @@ class WnCopyableField extends HookWidget {
     useEffect(() {
       controller.text = _getDisplayValue();
       return null;
-    }, [value, obscured, obscurable]);
+    }, [value, displayValue, obscured, obscurable]);
+
+    final colors = context.colors;
+    final typography = context.typographyScaled;
 
     return WnInput(
       label: label,
@@ -52,6 +62,15 @@ class WnCopyableField extends HookWidget {
       controller: controller,
       readOnly: true,
       size: WnInputSize.size44,
+      textColor: defaultTextColor ? null : colors.backgroundContentSecondary,
+      textStyle: (obscurable && obscured)
+          ? typography.medium14.copyWith(
+              color: colors.backgroundContentPrimary,
+              fontSize: 9.sp,
+              height: 1,
+              letterSpacing: 2.sp,
+            )
+          : null,
       inlineActionIcon: obscurable ? (obscured ? WnIcons.view : WnIcons.viewOff) : null,
       inlineActionOnPressed: obscurable ? onToggleVisibility : null,
       inlineActionFilled: false,

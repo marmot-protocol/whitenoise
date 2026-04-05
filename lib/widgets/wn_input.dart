@@ -41,6 +41,8 @@ class WnInput extends HookWidget {
     this.trailingAction,
     this.focusNode,
     this.onSubmitted,
+    this.textColor,
+    this.textStyle,
   });
 
   final String placeholder;
@@ -63,6 +65,8 @@ class WnInput extends HookWidget {
   final Widget? trailingAction;
   final FocusNode? focusNode;
   final void Function(String)? onSubmitted;
+  final Color? textColor;
+  final TextStyle? textStyle;
 
   bool get _hasInlineAction => inlineActionIcon != null;
 
@@ -209,13 +213,17 @@ class WnInput extends HookWidget {
                     onChanged: onChanged,
                     onSubmitted: onSubmitted,
                     textInputAction: textInputAction,
-                    style: typography.medium14.copyWith(
-                      color: enabled
-                          ? (_hasError
-                                ? colors.backgroundContentDestructive
-                                : colors.backgroundContentPrimary)
-                          : colors.backgroundContentTertiary,
-                    ),
+                    style:
+                        textStyle ??
+                        typography.medium14.copyWith(
+                          color:
+                              textColor ??
+                              (enabled
+                                  ? (_hasError
+                                        ? colors.backgroundContentDestructive
+                                        : colors.backgroundContentPrimary)
+                                  : colors.backgroundContentTertiary),
+                        ),
                     decoration: InputDecoration(
                       hintText: placeholder,
                       hintStyle: typography.medium14.copyWith(

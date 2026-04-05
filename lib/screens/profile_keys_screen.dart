@@ -29,6 +29,7 @@ class ProfileKeysScreen extends HookConsumerWidget {
     final npub = npubFromHex(pubkey);
     final (:nsecState) = useNsec(pubkey);
     final obscurePrivateKey = useState(true);
+    final warningCalloutExpanded = useState(false);
     final scheduleClipboardClear = useClipboardGuard();
     final (:noticeMessage, :noticeType, :showSuccessNotice, :showErrorNotice, :dismissNotice) =
         useSystemNotice();
@@ -50,6 +51,7 @@ class ProfileKeysScreen extends HookConsumerWidget {
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
         child: WnSlate(
+          shrinkWrapContent: true,
           header: WnSlateNavigationHeader(
             title: context.l10n.profileKeys,
             onNavigate: () => Routes.goBack(context),
@@ -70,63 +72,62 @@ class ProfileKeysScreen extends HookConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Gap(24.h),
-                        WnCopyableField(
-                          label: context.l10n.publicKey,
-                          value: npub ?? '',
-                          onCopied: () => showSuccessNotice('publicKeyCopied'),
-                        ),
-                        Gap(4.h),
-                        Text(
-                          context.l10n.publicKeyDescription,
-                          style: typography.medium14.copyWith(
-                            color: colors.backgroundContentSecondary,
-                          ),
-                        ),
-                        if (nsecState.nsecStorage == NsecStorage.local) ...[
-                          Gap(36.h),
-                          WnCopyableField(
-                            label: context.l10n.privateKey,
-                            value: nsecState.nsec ?? '',
-                            obscurable: true,
-                            obscured: obscurePrivateKey.value,
-                            onToggleVisibility: togglePrivateKeyVisibility,
-                            onCopied: () {
-                              showSuccessNotice('privateKeyCopied');
-                              scheduleClipboardClear();
-                            },
-                          ),
-                          Gap(4.h),
-                          Text(
-                            context.l10n.privateKeyDescription,
-                            style: context.typographyScaled.medium14.copyWith(
-                              color: colors.backgroundContentSecondary,
-                            ),
-                          ),
-                          Gap(12.h),
-                          WnCallout(
-                            title: context.l10n.keepPrivateKeySecure,
-                            description: context.l10n.privateKeyWarning,
-                            type: CalloutType.warning,
-                          ),
-                        ] else if (nsecState.nsecStorage == NsecStorage.externalSigner) ...[
-                          Gap(12.h),
-                          WnCallout(
-                            title: context.l10n.nsecOnExternalSigner,
-                            description: context.l10n.nsecOnExternalSignerDescription,
-                            type: CalloutType.info,
-                          ),
-                        ],
-                        Gap(24.h),
-                      ],
-                    ),
+                WnCopyableField(
+                  label: context.l10n.publicKey,
+                  value: npub ?? '',
+                  displayValue: formatPublicKey(npub ?? ''),
+                  onCopied: () => showSuccessNotice('publicKeyCopied'),
+                ),
+                Gap(4.h),
+                Text(
+                  context.l10n.publicKeyDescription,
+                  style: typography.medium14.copyWith(
+                    color: colors.backgroundContentSecondary,
                   ),
                 ),
+                if (nsecState.nsecStorage == NsecStorage.local) ...[
+                  Gap(12.h),
+                  WnCopyableField(
+                    label: context.l10n.privateKey,
+                    value: nsecState.nsec ?? '',
+                    obscurable: true,
+                    obscured: obscurePrivateKey.value,
+                    defaultTextColor: true,
+                    onToggleVisibility: togglePrivateKeyVisibility,
+                    onCopied: () {
+                      showSuccessNotice('privateKeyCopied');
+                      scheduleClipboardClear();
+                    },
+                  ),
+                  Gap(4.h),
+                  Text(
+                    context.l10n.privateKeyDescription,
+                    style: context.typographyScaled.medium14.copyWith(
+                      color: colors.backgroundContentSecondary,
+                    ),
+                  ),
+                  Gap(12.h),
+                  WnCallout(
+                    title: context.l10n.keepPrivateKeySecure,
+                    description: warningCalloutExpanded.value
+                        ? context.l10n.privateKeyWarning
+                        : null,
+                    type: CalloutType.warning,
+                    compact: true,
+                    isExpanded: warningCalloutExpanded.value,
+                    onToggle: () {
+                      warningCalloutExpanded.value = !warningCalloutExpanded.value;
+                    },
+                  ),
+                ] else if (nsecState.nsecStorage == NsecStorage.externalSigner) ...[
+                  Gap(12.h),
+                  WnCallout(
+                    title: context.l10n.nsecOnExternalSigner,
+                    description: context.l10n.nsecOnExternalSignerDescription,
+                    type: CalloutType.info,
+                  ),
+                ],
+                Gap(24.h),
               ],
             ),
           ),

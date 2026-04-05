@@ -322,6 +322,23 @@ class AppLocalizationsIt extends AppLocalizations {
       'Se non hai fatto il backup della tua chiave privata, non potrai usare questo profilo su nessun altro servizio Nostr.';
 
   @override
+  String get signOutCalloutTitle => 'Fai il backup della tua chiave privata';
+
+  @override
+  String get signOutCalloutDescription =>
+      'Assicurati di aver fatto il backup della tua chiave privata in Impostazioni → Chiavi profilo. Senza di essa, non potrai più accedere.';
+
+  @override
+  String get signOutCalloutDescriptionBefore =>
+      'Assicurati di aver fatto il backup della tua chiave privata in ';
+
+  @override
+  String get signOutCalloutDescriptionLink => 'Impostazioni → Chiavi profilo';
+
+  @override
+  String get signOutCalloutDescriptionAfter => '. Senza di essa, non potrai più accedere.';
+
+  @override
   String get backUpPrivateKey => 'Fai il backup della tua chiave privata';
 
   @override

@@ -17,6 +17,7 @@ class WnCallout extends StatelessWidget {
     super.key,
     required this.title,
     this.description,
+    this.descriptionWidget,
     this.type = CalloutType.neutral,
     this.onDismiss,
     this.onToggle,
@@ -26,6 +27,7 @@ class WnCallout extends StatelessWidget {
 
   final String title;
   final String? description;
+  final Widget? descriptionWidget;
   final CalloutType type;
   final VoidCallback? onDismiss;
   final VoidCallback? onToggle;
@@ -88,18 +90,20 @@ class WnCallout extends StatelessWidget {
                 ),
             ],
           ),
-          if (description != null) ...[
+          if (descriptionWidget != null || description != null) ...[
             Padding(
               padding: EdgeInsets.only(
                 left: 8.w,
                 right: 8.w,
                 top: 4.h,
-                bottom: compact ? 4.h : 13.h,
+                bottom: compact ? 9.h : 13.h,
               ),
-              child: Text(
-                description!,
-                style: typography.medium14.copyWith(color: colorScheme.descriptionColor),
-              ),
+              child:
+                  descriptionWidget ??
+                  Text(
+                    description!,
+                    style: typography.medium14.copyWith(color: colorScheme.descriptionColor),
+                  ),
             ),
           ],
         ],
