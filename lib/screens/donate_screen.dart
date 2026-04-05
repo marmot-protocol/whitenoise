@@ -36,8 +36,9 @@ class DonateScreen extends HookWidget {
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
         child: WnSlate(
+          shrinkWrapContent: true,
           header: WnSlateNavigationHeader(
-            title: context.l10n.donateToWhiteNoise,
+            title: context.l10n.donate,
             onNavigate: () => Routes.goBack(context),
           ),
           systemNotice: noticeMessage.value != null
@@ -50,22 +51,29 @@ class DonateScreen extends HookWidget {
           child: Padding(
             padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
             child: Column(
-              spacing: 24.h,
+              spacing: 12.h,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   context.l10n.donateDescription,
-                  style: bodyStyle,
+                  style: context.typographyScaled.medium14.copyWith(
+                    color: colors.backgroundContentPrimary,
+                  ),
                 ),
-                WnCopyableField(
-                  label: context.l10n.lightningAddress,
-                  value: _lightningAddress,
-                  onCopied: () => showCopiedNotice(context.l10n.copiedToClipboardThankYou),
-                ),
-                WnCopyableField(
-                  label: context.l10n.bitcoinSilentPayment,
-                  value: _bitcoinAddress,
-                  onCopied: () => showCopiedNotice(context.l10n.copiedToClipboardThankYou),
+                Column(
+                  spacing: 12.h,
+                  children: [
+                    WnCopyableField(
+                      label: context.l10n.lightningAddress,
+                      value: _lightningAddress,
+                      onCopied: () => showCopiedNotice(context.l10n.copiedToClipboardThankYou),
+                    ),
+                    WnCopyableField(
+                      label: context.l10n.bitcoinSilentPayment,
+                      value: _bitcoinAddress,
+                      onCopied: () => showCopiedNotice(context.l10n.copiedToClipboardThankYou),
+                    ),
+                  ],
                 ),
                 Text(
                   context.l10n.donateContributionLetter,

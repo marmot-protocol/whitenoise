@@ -1,142 +1,116 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
-import 'package:whitenoise/screens/chat_list_screen.dart';
-import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/screens/donate_screen.dart';
+import 'package:whitenoise/screens/settings_screen.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
-import '../mocks/mock_clipboard.dart';
+import 'package:whitenoise/widgets/wn_copyable_field.dart';
+import 'package:whitenoise/widgets/wn_slate.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
+
+import '../mocks/mock_secure_storage.dart';
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
-class _MockApi extends MockWnApi {
+class _MockAuthNotifier extends AuthNotifier {
   @override
-  Future<FlutterMetadata> crateApiUsersUserMetadata({
-    required bool blockingDataSync,
-    required String pubkey,
-  }) async {
-    return const FlutterMetadata(
-      name: 'Test User',
-      displayName: 'Test Display Name',
-      about: 'Test bio',
-      custom: {},
-    );
+  Future<String?> build() async {
+    state = const AsyncData(testPubkeyA);
+    return testPubkeyA;
   }
 }
 
-class _AuthenticatedAuthNotifier extends AuthNotifier {
-  @override
-  Future<String?> build() async => testPubkeyA;
-}
-
 void main() {
-  setUpAll(() => RustLib.initMock(api: _MockApi()));
+  late MockWnApi mockApi;
+
+  setUpAll(() {
+    mockApi = MockWnApi();
+    RustLib.initMock(api: mockApi);
+  });
+
+  setUp(() {
+    mockApi.reset();
+  });
+
   Future<void> pumpDonateScreen(WidgetTester tester) async {
     await mountTestApp(
       tester,
-      overrides: [authProvider.overrideWith(() => _AuthenticatedAuthNotifier())],
+      overrides: [
+        authProvider.overrideWith(() => _MockAuthNotifier()),
+        secureStorageProvider.overrideWithValue(MockSecureStorage()),
+      ],
     );
-
-    Routes.pushToDonate(tester.element(find.byType(Scaffold)));
+    Routes.pushToSettings(tester.element(find.byType(Scaffold)));
+    await tester.pumpAndSettle();
+    await tester.scrollUntilVisible(find.text('Donate'), 500);
+    await tester.tap(find.text('Donate'));
     await tester.pumpAndSettle();
   }
 
   group('DonateScreen', () {
-    testWidgets('tapping back icon returns to previous screen', (tester) async {
+    testWidgets('displays Donate title', (tester) async {
       await pumpDonateScreen(tester);
-      await tester.tap(find.byKey(const Key('slate_back_button')));
-      await tester.pumpAndSettle();
-
-      expect(find.byType(ChatListScreen), findsOneWidget);
+      expect(find.byType(DonateScreen), findsOneWidget);
+      expect(find.text('Donate'), findsWidgets);
     });
 
-    testWidgets('shows lightning address', (tester) async {
+    testWidgets('uses shrink wrap slate', (tester) async {
       await pumpDonateScreen(tester);
+      final slate = tester.widget<WnSlate>(find.byType(WnSlate));
+      expect(slate.shrinkWrapContent, isTrue);
+    });
 
+    testWidgets('displays donate description text', (tester) async {
+      await pumpDonateScreen(tester);
+      expect(find.textContaining('501(c)3 non-profit'), findsOneWidget);
+    });
+
+    testWidgets('displays lightning address copyable field', (tester) async {
+      await pumpDonateScreen(tester);
+      expect(find.text('Lightning Address'), findsOneWidget);
       expect(find.text('whitenoise@npub.cash'), findsOneWidget);
     });
 
-    testWidgets('shows bitcoin address', (tester) async {
+    testWidgets('displays bitcoin silent payment copyable field', (tester) async {
       await pumpDonateScreen(tester);
-
-      expect(
-        find.textContaining('sp1qqvp56mxcj9pz9xudvlch5g4ah5hrc8rj6neu25p'),
-        findsOneWidget,
-      );
+      expect(find.text('Bitcoin Silent Payment'), findsOneWidget);
     });
 
-    testWidgets('shows updated donation copy', (tester) async {
+    testWidgets('displays two WnCopyableField widgets', (tester) async {
       await pumpDonateScreen(tester);
-
-      expect(find.textContaining('As a 501(c)3 non-profit'), findsOneWidget);
-      expect(
-        find.text(
-          'If you need a contribution acknowledgement letter for a donation, get in touch with us at info@ipf.dev',
-        ),
-        findsOneWidget,
-      );
+      expect(find.byType(WnCopyableField), findsNWidgets(2));
     });
 
-    group('when copying lightning address', () {
-      testWidgets('shows feedback message', (tester) async {
-        await pumpDonateScreen(tester);
-
-        await tester.tap(find.byKey(const Key('copy_button')).first);
-        await tester.pump();
-
-        expect(find.text('Copied to clipboard. Thank you!'), findsOneWidget);
-      });
-
-      testWidgets('saves lightning address to clipboard', (tester) async {
-        final getClipboard = mockClipboard();
-        await pumpDonateScreen(tester);
-
-        await tester.tap(find.byKey(const Key('copy_button')).first);
-        await tester.pump();
-
-        expect(getClipboard(), 'whitenoise@npub.cash');
-      });
+    testWidgets('displays contribution letter text', (tester) async {
+      await pumpDonateScreen(tester);
+      expect(find.textContaining('contribution acknowledgement letter'), findsOneWidget);
     });
 
-    group('when copying bitcoin address', () {
-      testWidgets('shows feedback message', (tester) async {
-        await pumpDonateScreen(tester);
-
-        await tester.tap(find.byKey(const Key('copy_button')).last);
-        await tester.pump();
-
-        expect(find.text('Copied to clipboard. Thank you!'), findsOneWidget);
-      });
-
-      testWidgets('saves bitcoin address to clipboard', (tester) async {
-        final getClipboard = mockClipboard();
-        await pumpDonateScreen(tester);
-
-        await tester.tap(find.byKey(const Key('copy_button')).last);
-        await tester.pump();
-
-        expect(
-          getClipboard(),
-          'sp1qqvp56mxcj9pz9xudvlch5g4ah5hrc8rj6neu25p34rc9gxhp38cwqqlmld28u57w2srgckr34dkyg3q02phu8tm05cyj483q026xedp0s5f5j40p',
-        );
-      });
+    testWidgets('tapping back button returns to SettingsScreen', (tester) async {
+      await pumpDonateScreen(tester);
+      await tester.tap(find.byKey(const Key('slate_back_button')));
+      await tester.pumpAndSettle();
+      expect(find.byType(SettingsScreen), findsOneWidget);
     });
 
-    group('system notice', () {
-      testWidgets('auto-dismisses after timeout', (tester) async {
-        await pumpDonateScreen(tester);
+    testWidgets('copying lightning address shows copied notice', (tester) async {
+      await pumpDonateScreen(tester);
+      await tester.tap(find.byKey(const Key('copy_button')).first);
+      await tester.pump();
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(find.textContaining('Thank you'), findsOneWidget);
+    });
 
-        await tester.tap(find.byKey(const Key('copy_button')).first);
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 300));
-
-        expect(find.text('Copied to clipboard. Thank you!'), findsOneWidget);
-
-        await tester.pump(const Duration(seconds: 4));
-        await tester.pumpAndSettle();
-
-        expect(find.text('Copied to clipboard. Thank you!'), findsNothing);
-      });
+    testWidgets('copied notice auto-dismisses after timeout', (tester) async {
+      await pumpDonateScreen(tester);
+      await tester.tap(find.byKey(const Key('copy_button')).first);
+      await tester.pump();
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      await tester.pump(const Duration(seconds: 4));
+      await tester.pumpAndSettle();
+      expect(find.byType(WnSystemNotice), findsNothing);
     });
   });
 }
