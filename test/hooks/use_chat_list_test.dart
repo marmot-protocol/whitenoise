@@ -405,10 +405,12 @@ void main() {
 
         _api.emitUpdate(
           ChatListUpdateTrigger.userBlockChanged,
-          _chatSummary('c2', DateTime(2024, 1, 2)),
+          _chatSummary('c2', DateTime(2024, 1, 5)),
         );
         await tester.pumpAndSettle();
 
+        final c2 = getResult().chats.firstWhere((c) => c.mlsGroupId == 'mls_c2');
+        expect(c2.createdAt, DateTime(2024, 1, 5));
         expect(getResult().chats.map((c) => c.mlsGroupId), containsAll(['mls_c1', 'mls_c2']));
       });
     });
