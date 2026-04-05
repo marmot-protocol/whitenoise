@@ -391,6 +391,28 @@ void main() {
         );
       });
     });
+    group('userBlockChanged trigger', () {
+      testWidgets('updates chat item on user block changed', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([
+          _chatSummary('c1', DateTime(2024)),
+          _chatSummary('c2', DateTime(2024, 1, 2)),
+        ]);
+        await tester.pumpAndSettle();
+
+        expect(getResult().chats.map((c) => c.mlsGroupId), containsAll(['mls_c1', 'mls_c2']));
+
+        _api.emitUpdate(
+          ChatListUpdateTrigger.userBlockChanged,
+          _chatSummary('c2', DateTime(2024, 1, 2)),
+        );
+        await tester.pumpAndSettle();
+
+        expect(getResult().chats.map((c) => c.mlsGroupId), containsAll(['mls_c1', 'mls_c2']));
+      });
+    });
+
     group('leftGroup trigger', () {
       testWidgets('keeps left group in the list with removedAt set', (tester) async {
         final getResult = await _pump(tester, testPubkeyA);

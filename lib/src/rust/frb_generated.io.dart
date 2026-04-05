@@ -21,6 +21,7 @@ import 'api/logs.dart';
 import 'api/media_files.dart';
 import 'api/messages.dart';
 import 'api/metadata.dart';
+import 'api/mute_list.dart';
 import 'api/notifications.dart';
 import 'api/relay_defaults.dart';
 import 'api/relays.dart';
@@ -457,6 +458,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<MediaFile> dco_decode_list_media_file(dynamic raw);
 
   @protected
+  List<MuteListEntry> dco_decode_list_mute_list_entry(dynamic raw);
+
+  @protected
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
@@ -503,6 +507,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   MessageWithTokens dco_decode_message_with_tokens(dynamic raw);
+
+  @protected
+  MuteListEntry dco_decode_mute_list_entry(dynamic raw);
 
   @protected
   NotificationTrigger dco_decode_notification_trigger(dynamic raw);
@@ -1078,6 +1085,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<MediaFile> sse_decode_list_media_file(SseDeserializer deserializer);
 
   @protected
+  List<MuteListEntry> sse_decode_list_mute_list_entry(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
@@ -1138,6 +1150,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   MessageWithTokens sse_decode_message_with_tokens(
     SseDeserializer deserializer,
   );
+
+  @protected
+  MuteListEntry sse_decode_mute_list_entry(SseDeserializer deserializer);
 
   @protected
   NotificationTrigger sse_decode_notification_trigger(
@@ -1846,6 +1861,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_mute_list_entry(
+    List<MuteListEntry> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_prim_u_8_strict(
     Uint8List self,
     SseSerializer serializer,
@@ -1916,6 +1937,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     MessageWithTokens self,
     SseSerializer serializer,
   );
+
+  @protected
+  void sse_encode_mute_list_entry(MuteListEntry self, SseSerializer serializer);
 
   @protected
   void sse_encode_notification_trigger(

@@ -429,6 +429,13 @@ mod tests {
     }
 
     #[test]
+    fn test_chat_list_update_trigger_conversion_user_block_changed() {
+        let trigger: ChatListUpdateTrigger =
+            WhitenoiseChatListUpdateTrigger::UserBlockChanged.into();
+        assert_eq!(trigger, ChatListUpdateTrigger::UserBlockChanged);
+    }
+
+    #[test]
     fn test_chat_mute_duration_to_mute_duration_conversion() {
         assert_eq!(
             MuteDuration::from(ChatMuteDuration::OneHour),
