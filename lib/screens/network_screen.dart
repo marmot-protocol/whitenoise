@@ -26,7 +26,7 @@ class NetworkScreen extends HookConsumerWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final pubkey = ref.watch(accountPubkeyProvider);
-    final (:state, :fetchAll, :addRelay, :removeRelay) = useNetworkRelays(
+    final (:state, :fetchAll, :addRelay, :removeRelay, :restoreDefaultRelays) = useNetworkRelays(
       pubkey,
     );
     final listItemController = useListItemController();
@@ -151,7 +151,10 @@ class NetworkScreen extends HookConsumerWidget {
                   confirmText: context.l10n.restoreDefaultRelays,
                   cancelText: context.l10n.cancel,
                   isDestructive: true,
-                  onConfirmAsync: () async => true,
+                  onConfirmAsync: () async {
+                    await restoreDefaultRelays();
+                    return true;
+                  },
                 ),
               ),
             ),

@@ -244,6 +244,37 @@ pub async fn account_relays(pubkey: String, relay_type: RelayType) -> Result<Vec
     Ok(relays.into_iter().map(|r| r.into()).collect())
 }
 
+const DEFAULT_RELAY_URLS: [&str; 3] = [
+    "wss://nos.lol",
+    "wss://relay.primal.net",
+    "wss://relay.damus.io",
+];
+
+#[frb]
+pub async fn restore_default_relays(pubkey: String) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+
+    for relay_type in [RelayType::Nip65, RelayType::Inbox, RelayType::KeyPackage] {
+        let current_relays = account.relays(relay_type.clone(), whitenoise).await?;
+        for relay in &current_relays {
+            account
+                .remove_relay(relay, relay_type.clone(), whitenoise)
+                .await?;
+        }
+        for url in DEFAULT_RELAY_URLS {
+            let relay_url = RelayUrl::parse(url)?;
+            let relay = whitenoise.find_or_create_relay_by_url(&relay_url).await?;
+            account
+                .add_relay(&relay, relay_type.clone(), whitenoise)
+                .await?;
+        }
+    }
+
+    Ok(())
+}
+
 #[frb]
 pub async fn add_account_relay(
     pubkey: String,

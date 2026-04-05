@@ -13,6 +13,17 @@ class MockApi extends MockWnApi {
   List<Relay> inboxRelays = [];
   List<Relay> keyPackageRelays = [];
   bool shouldThrow = false;
+  bool shouldThrowOnRestore = false;
+  bool restoreDefaultRelaysCalled = false;
+
+  @override
+  Future<void> crateApiAccountsRestoreDefaultRelays({required String pubkey}) async {
+    if (shouldThrowOnRestore) throw Exception('Restore error');
+    restoreDefaultRelaysCalled = true;
+    normalRelays = [];
+    inboxRelays = [];
+    keyPackageRelays = [];
+  }
 
   @override
   Future<RelayType> crateApiRelaysRelayTypeNip65() async => MockRelayType('nip65');
@@ -103,6 +114,8 @@ void main() {
     mockApi.inboxRelays = [];
     mockApi.keyPackageRelays = [];
     mockApi.shouldThrow = false;
+    mockApi.shouldThrowOnRestore = false;
+    mockApi.restoreDefaultRelaysCalled = false;
   });
 
   group('RelayListState', () {
@@ -340,6 +353,36 @@ void main() {
       await tester.pump();
 
       expect(getHook().state.normalRelays.relays.length, 1);
+    });
+  });
+
+  group('restoreDefaultRelays', () {
+    testWidgets('calls restoreDefaultRelays API and refreshes relays', (tester) async {
+      mockApi.normalRelays = [
+        Relay(url: 'wss://relay1.com', createdAt: DateTime.now(), updatedAt: DateTime.now()),
+      ];
+
+      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
+      await getHook().fetchAll();
+      await tester.pump();
+
+      expect(getHook().state.normalRelays.relays.length, 1);
+
+      await getHook().restoreDefaultRelays();
+      await tester.pump();
+
+      expect(mockApi.restoreDefaultRelaysCalled, isTrue);
+      expect(getHook().state.normalRelays.relays.length, 0);
+    });
+
+    testWidgets('handles error gracefully without throwing', (tester) async {
+      mockApi.shouldThrowOnRestore = true;
+
+      final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
+      await getHook().restoreDefaultRelays();
+      await tester.pump();
+
+      expect(mockApi.restoreDefaultRelaysCalled, isFalse);
     });
   });
 }

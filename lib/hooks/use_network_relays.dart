@@ -76,6 +76,7 @@ class NetworkRelaysState {
   Future<void> Function() fetchAll,
   Future<void> Function(String url, RelayCategory category) addRelay,
   Future<void> Function(String url, RelayCategory category) removeRelay,
+  Future<void> Function() restoreDefaultRelays,
 })
 useNetworkRelays(String pubkey) {
   final state = useState(const NetworkRelaysState());
@@ -166,10 +167,20 @@ useNetworkRelays(String pubkey) {
     }
   }
 
+  Future<void> restoreDefaultRelays() async {
+    try {
+      await accounts_api.restoreDefaultRelays(pubkey: pubkey);
+      await fetchAll();
+    } catch (e) {
+      _logger.severe('Failed to restore default relays', e);
+    }
+  }
+
   return (
     state: state.value,
     fetchAll: fetchAll,
     addRelay: addRelay,
     removeRelay: removeRelay,
+    restoreDefaultRelays: restoreDefaultRelays,
   );
 }

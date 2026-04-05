@@ -73,6 +73,9 @@ Future<List<Relay>> accountRelays({
   relayType: relayType,
 );
 
+Future<void> restoreDefaultRelays({required String pubkey}) =>
+    RustLib.instance.api.crateApiAccountsRestoreDefaultRelays(pubkey: pubkey);
+
 Future<void> addAccountRelay({
   required String pubkey,
   required String url,
