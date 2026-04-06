@@ -277,6 +277,7 @@ class AppLogsScreen extends HookConsumerWidget {
                               child: Row(
                                 children: [
                                   _LevelToggle(
+                                    key: const Key('log_level_toggle_info'),
                                     label: 'INFO',
                                     color: colors.intentionInfoContent,
                                     isSelected: filter.selectedLevels.contains(Level.INFO),
@@ -286,6 +287,7 @@ class AppLogsScreen extends HookConsumerWidget {
                                   ),
                                   Gap(4.w),
                                   _LevelToggle(
+                                    key: const Key('log_level_toggle_warn'),
                                     label: 'WARN',
                                     color: colors.intentionWarningContent,
                                     isSelected: filter.selectedLevels.contains(Level.WARNING),
@@ -295,6 +297,7 @@ class AppLogsScreen extends HookConsumerWidget {
                                   ),
                                   Gap(4.w),
                                   _LevelToggle(
+                                    key: const Key('log_level_toggle_severe'),
                                     label: 'SEVERE',
                                     color: colors.fillDestructive,
                                     isSelected: filter.selectedLevels.contains(Level.SEVERE),
@@ -499,6 +502,7 @@ class _AppLogsResumeLiveButton extends StatelessWidget {
 
 class _LevelToggle extends StatelessWidget {
   const _LevelToggle({
+    super.key,
     required this.label,
     required this.color,
     required this.isSelected,

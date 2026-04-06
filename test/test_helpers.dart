@@ -15,6 +15,10 @@ const double testDesignWidth = 420;
 const double testDesignHeight = 912;
 const testDesignSize = Size(testDesignWidth, testDesignHeight);
 
+final ThemeData testMaterialAppTheme = ThemeData(
+  splashFactory: NoSplash.splashFactory,
+);
+
 const testPubkeyA = 'a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4a1b2c3d4e5f6a1b2c3d4e5f6a1b2c3d4';
 const testNpubA = 'npub1a1b2c31111111111111111111111111111111111111111111111111111';
 const testNpubAFormatted =
@@ -154,6 +158,7 @@ Future<void> mountTestApp(
             return MaterialApp.router(
               routerConfig: Routes.build(ref),
               locale: const Locale('en'),
+              theme: testMaterialAppTheme,
               localizationsDelegates: _localizationsDelegates,
               supportedLocales: AppLocalizations.supportedLocales,
             );
@@ -173,6 +178,7 @@ Future<T Function()> mountHook<T>(
   await tester.pumpWidget(
     MaterialApp(
       locale: const Locale('en'),
+      theme: testMaterialAppTheme,
       localizationsDelegates: _localizationsDelegates,
       supportedLocales: AppLocalizations.supportedLocales,
       home: _HookTestWidget<T>(useHook, (r) => result = r),
@@ -206,6 +212,7 @@ Future<void> mountWidget(
       builder: (_, _) {
         return MaterialApp(
           locale: const Locale('en'),
+          theme: testMaterialAppTheme,
           localizationsDelegates: _localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
           home: Scaffold(body: child),
@@ -223,6 +230,7 @@ Future<void> mountStackedWidget(Widget child, WidgetTester tester) async {
     builder: (_, _) {
       return MaterialApp(
         locale: const Locale('en'),
+        theme: testMaterialAppTheme,
         localizationsDelegates: _localizationsDelegates,
         supportedLocales: AppLocalizations.supportedLocales,
         home: Scaffold(body: Stack(children: [child])),
