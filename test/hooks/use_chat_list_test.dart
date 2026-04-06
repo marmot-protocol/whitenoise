@@ -401,7 +401,7 @@ void main() {
         ]);
         await tester.pumpAndSettle();
 
-        expect(getResult().chats.map((c) => c.mlsGroupId), containsAll(['mls_c1', 'mls_c2']));
+        expect(getResult().chats.map((c) => c.mlsGroupId).toList(), equals(['mls_c1', 'mls_c2']));
 
         _api.emitUpdate(
           ChatListUpdateTrigger.userBlockChanged,
@@ -409,9 +409,11 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        final c2 = getResult().chats.firstWhere((c) => c.mlsGroupId == 'mls_c2');
+        final chats = getResult().chats;
+        final c2 = chats.firstWhere((c) => c.mlsGroupId == 'mls_c2');
         expect(c2.createdAt, DateTime(2024, 1, 5));
-        expect(getResult().chats.map((c) => c.mlsGroupId), containsAll(['mls_c1', 'mls_c2']));
+        expect(chats.map((c) => c.mlsGroupId).toList(), equals(['mls_c1', 'mls_c2']));
+        expect(chats.indexWhere((c) => c.mlsGroupId == 'mls_c2'), 1);
       });
     });
 
