@@ -28,6 +28,7 @@ and this project adheres to Calendar Versioning (CalVer).
 
 ### Changed
 - UI Polish: Profile Keys & Sign out Screens [PR #552](https://github.com/marmot-protocol/whitenoise/pull/552)
+- UI Polish: Donate Screen [PR #553](https://github.com/marmot-protocol/whitenoise/pull/553)
 - UI Polish: Share & Edit Profile Screens [PR #544](https://github.com/marmot-protocol/whitenoise/pull/544)
 - UI Polish: Network & Appearance Screens [PR #545](https://github.com/marmot-protocol/whitenoise/pull/545)
 - Deleted bubbles style [PR #471](https://github.com/marmot-protocol/whitenoise/pull/471)
