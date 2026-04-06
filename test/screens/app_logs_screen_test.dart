@@ -68,16 +68,17 @@ void main() {
         ],
         child: ScreenUtilInit(
           designSize: testDesignSize,
-          builder: (_, _) => const MaterialApp(
-            locale: Locale('en'),
-            localizationsDelegates: [
+          builder: (_, _) => MaterialApp(
+            locale: const Locale('en'),
+            theme: testMaterialAppTheme,
+            localizationsDelegates: const [
               AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
             supportedLocales: AppLocalizations.supportedLocales,
-            home: Scaffold(body: AppLogsScreen()),
+            home: const Scaffold(body: AppLogsScreen()),
           ),
         ),
       ),
@@ -457,6 +458,38 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('info only'), findsOneWidget);
+    });
+
+    testWidgets('tapping WARN hides WARNING entries', (tester) async {
+      _entries = [
+        _entry('warn message', level: Level.WARNING),
+        _entry('severe message', level: Level.SEVERE),
+      ];
+      await pumpScreen(tester);
+
+      expect(find.text('warn message'), findsOneWidget);
+
+      await tester.ensureVisible(find.byKey(const Key('log_level_toggle_warn')));
+      await tester.tap(find.byKey(const Key('log_level_toggle_warn')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('warn message'), findsNothing);
+    });
+
+    testWidgets('tapping SEVERE hides SEVERE entries', (tester) async {
+      _entries = [
+        _entry('severe message', level: Level.SEVERE),
+        _entry('warn message', level: Level.WARNING),
+      ];
+      await pumpScreen(tester);
+
+      expect(find.text('severe message'), findsOneWidget);
+
+      await tester.ensureVisible(find.byKey(const Key('log_level_toggle_severe')));
+      await tester.tap(find.byKey(const Key('log_level_toggle_severe')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('severe message'), findsNothing);
     });
   });
 }

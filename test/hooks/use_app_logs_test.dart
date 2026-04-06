@@ -32,6 +32,8 @@ class _MockApi extends MockWnApi {
   }
 }
 
+Completer<String>? _pathCompleter;
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -42,7 +44,10 @@ void main() {
     RustLib.initMock(api: api);
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
       pathProviderChannel,
-      (call) async => '/tmp/wn_test_docs',
+      (call) async {
+        if (_pathCompleter != null) return _pathCompleter!.future;
+        return '/tmp/wn_test_docs';
+      },
     );
   });
 
@@ -56,6 +61,7 @@ void main() {
   setUp(() {
     api.reset();
     appLogStore.clear();
+    _pathCompleter = null;
   });
 
   group('parseRustLogLevel', () {
@@ -152,6 +158,24 @@ void main() {
       if (api.logsController != null) {
         expect(api.logsController?.hasListener, isFalse);
       }
+    });
+
+    testWidgets('cancels subscription when _startListening completes after unmount', (
+      tester,
+    ) async {
+      _pathCompleter = Completer<String>();
+
+      await mountHook(tester, useAppLogs);
+      await tester.pump();
+
+      await tester.pumpWidget(const SizedBox());
+      await tester.pump();
+
+      _pathCompleter!.complete('/tmp/wn_test_docs');
+      await tester.pump();
+      await tester.pump();
+
+      expect(api.logsController?.hasListener, isFalse);
     });
 
     testWidgets('handles _startListening failure gracefully', (tester) async {
