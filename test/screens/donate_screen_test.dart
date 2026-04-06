@@ -76,6 +76,10 @@ void main() {
     testWidgets('displays bitcoin silent payment copyable field', (tester) async {
       await pumpDonateScreen(tester);
       expect(find.text('Bitcoin Silent Payment'), findsOneWidget);
+      expect(
+        find.textContaining('sp1qqvp56mxcj9pz9xudvlch5g4ah5hrc8rj6neu25p'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('displays two WnCopyableField widgets', (tester) async {
