@@ -68,7 +68,7 @@ class ProfileKeysScreen extends HookConsumerWidget {
                 )
               : null,
           child: Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+            padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 16.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -127,7 +127,6 @@ class ProfileKeysScreen extends HookConsumerWidget {
                     type: CalloutType.info,
                   ),
                 ],
-                Gap(24.h),
               ],
             ),
           ),

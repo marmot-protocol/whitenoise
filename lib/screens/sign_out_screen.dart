@@ -66,6 +66,7 @@ class SignOutScreen extends HookConsumerWidget {
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
         child: WnSlate(
+          shrinkWrapContent: true,
           header: WnSlateNavigationHeader(
             title: context.l10n.signOut,
             onNavigate: () => Routes.goBack(context),
@@ -82,59 +83,49 @@ class SignOutScreen extends HookConsumerWidget {
                 )
               : null,
           child: Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+            padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 16.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          context.l10n.signOutConfirmation,
-                          style: typography.medium14.copyWith(
-                            color: colors.backgroundContentPrimary,
-                          ),
-                        ),
-                        Gap(24.h),
-                        WnCallout(
-                          title: context.l10n.signOutCalloutTitle,
-                          descriptionWidget: warningCalloutExpanded.value
-                              ? _SignOutCalloutDescription(
-                                  onNavigateToProfileKeys: () => Routes.pushToProfileKeys(context),
-                                )
-                              : null,
-                          type: CalloutType.warning,
-                          compact: true,
-                          isExpanded: warningCalloutExpanded.value,
-                          onToggle: () {
-                            warningCalloutExpanded.value = !warningCalloutExpanded.value;
-                          },
-                        ),
-                        Gap(12.h),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          spacing: 8.h,
-                          children: [
-                            WnButton(
-                              text: context.l10n.cancel,
-                              type: WnButtonType.outline,
-                              size: WnButtonSize.medium,
-                              onPressed: () => Routes.goBack(context),
-                            ),
-                            WnButton(
-                              text: context.l10n.signOut,
-                              size: WnButtonSize.medium,
-                              onPressed: signOut,
-                              loading: isLoggingOut.value,
-                            ),
-                          ],
-                        ),
-                        Gap(24.h),
-                      ],
-                    ),
+                Text(
+                  context.l10n.signOutConfirmation,
+                  style: typography.medium14.copyWith(
+                    color: colors.backgroundContentPrimary,
                   ),
+                ),
+                Gap(24.h),
+                WnCallout(
+                  title: context.l10n.signOutCalloutTitle,
+                  descriptionWidget: warningCalloutExpanded.value
+                      ? _SignOutCalloutDescription(
+                          onNavigateToProfileKeys: () => Routes.pushToProfileKeys(context),
+                        )
+                      : null,
+                  type: CalloutType.warning,
+                  compact: true,
+                  isExpanded: warningCalloutExpanded.value,
+                  onToggle: () {
+                    warningCalloutExpanded.value = !warningCalloutExpanded.value;
+                  },
+                ),
+                Gap(12.h),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  spacing: 8.h,
+                  children: [
+                    WnButton(
+                      text: context.l10n.cancel,
+                      type: WnButtonType.outline,
+                      size: WnButtonSize.medium,
+                      onPressed: () => Routes.goBack(context),
+                    ),
+                    WnButton(
+                      text: context.l10n.signOut,
+                      size: WnButtonSize.medium,
+                      onPressed: signOut,
+                      loading: isLoggingOut.value,
+                    ),
+                  ],
                 ),
               ],
             ),
