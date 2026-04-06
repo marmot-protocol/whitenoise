@@ -64,11 +64,13 @@ class DonateScreen extends HookWidget {
                   spacing: 12.h,
                   children: [
                     WnCopyableField(
+                      key: const Key('lightning_copyable_field'),
                       label: context.l10n.lightningAddress,
                       value: _lightningAddress,
                       onCopied: () => showCopiedNotice(context.l10n.copiedToClipboardThankYou),
                     ),
                     WnCopyableField(
+                      key: const Key('bitcoin_copyable_field'),
                       label: context.l10n.bitcoinSilentPayment,
                       value: _bitcoinAddress,
                       onCopied: () => showCopiedNotice(context.l10n.copiedToClipboardThankYou),

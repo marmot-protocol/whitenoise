@@ -97,7 +97,23 @@ void main() {
 
     testWidgets('copying lightning address shows copied notice', (tester) async {
       await pumpDonateScreen(tester);
-      await tester.tap(find.byKey(const Key('copy_button')).first);
+      final lightningCopyButton = find.descendant(
+        of: find.byKey(const Key('lightning_copyable_field')),
+        matching: find.byKey(const Key('copy_button')),
+      );
+      await tester.tap(lightningCopyButton);
+      await tester.pump();
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(find.textContaining('Thank you'), findsOneWidget);
+    });
+
+    testWidgets('copying bitcoin address shows copied notice', (tester) async {
+      await pumpDonateScreen(tester);
+      final bitcoinCopyButton = find.descendant(
+        of: find.byKey(const Key('bitcoin_copyable_field')),
+        matching: find.byKey(const Key('copy_button')),
+      );
+      await tester.tap(bitcoinCopyButton);
       await tester.pump();
       expect(find.byType(WnSystemNotice), findsOneWidget);
       expect(find.textContaining('Thank you'), findsOneWidget);
@@ -105,7 +121,11 @@ void main() {
 
     testWidgets('copied notice auto-dismisses after timeout', (tester) async {
       await pumpDonateScreen(tester);
-      await tester.tap(find.byKey(const Key('copy_button')).first);
+      final lightningCopyButton = find.descendant(
+        of: find.byKey(const Key('lightning_copyable_field')),
+        matching: find.byKey(const Key('copy_button')),
+      );
+      await tester.tap(lightningCopyButton);
       await tester.pump();
       expect(find.byType(WnSystemNotice), findsOneWidget);
       await tester.pump(const Duration(seconds: 4));
