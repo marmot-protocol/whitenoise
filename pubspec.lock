@@ -101,10 +101,10 @@ packages:
     dependency: "direct dev"
     description:
       name: build_runner
-      sha256: "7981eb922842c77033026eb4341d5af651562008cdb116bdfa31fc46516b6462"
+      sha256: "521daf8d189deb79ba474e43a696b41c49fb3987818dbacf3308f1e03673a75e"
       url: "https://pub.dev"
     source: hosted
-    version: "2.12.2"
+    version: "2.13.1"
   built_collection:
     dependency: transitive
     description:
@@ -237,10 +237,10 @@ packages:
     dependency: "direct main"
     description:
       name: cupertino_icons
-      sha256: ba631d1c7f7bef6b729a622b7b752645a2d076dba9976925b8f25725a30e1ee6
+      sha256: "41e005c33bd814be4d3096aff55b1908d419fde52ca656c8c47719ec745873cd"
       url: "https://pub.dev"
     source: hosted
-    version: "1.0.8"
+    version: "1.0.9"
   dart_style:
     dependency: transitive
     description:
@@ -362,10 +362,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_foreground_task
-      sha256: "1903697944a31f596622e51a6af55e3a9dfb27762f9763ab2841184098c6b0ba"
+      sha256: fc5c01a5e1b8f7bb51d0c737714f0c50440dbdf1aeddc5f8cbba313aa6fd4856
       url: "https://pub.dev"
     source: hosted
-    version: "9.2.1"
+    version: "9.2.2"
   flutter_hooks:
     dependency: "direct main"
     description:
@@ -447,10 +447,10 @@ packages:
     dependency: "direct main"
     description:
       name: flutter_rust_bridge
-      sha256: "37ef40bc6f863652e865f0b2563ea07f0d3c58d8efad803cc01933a4b2ee067e"
+      sha256: e87d6b9ee934dcd24a128ccb2bd91905d2d5fe5c06245d6a8f5477d4907a437a
       url: "https://pub.dev"
     source: hosted
-    version: "2.11.1"
+    version: "2.12.0"
   flutter_screenutil:
     dependency: "direct main"
     description:
@@ -569,10 +569,10 @@ packages:
     dependency: "direct main"
     description:
       name: go_router
-      sha256: "7974313e217a7771557add6ff2238acb63f635317c35fa590d348fb238f00896"
+      sha256: "48fb2f42ad057476fa4b733cb95e9f9ea7b0b010bb349ea491dca7dbdb18ffc4"
       url: "https://pub.dev"
     source: hosted
-    version: "17.1.0"
+    version: "17.2.0"
   graphs:
     dependency: transitive
     description:
@@ -841,10 +841,10 @@ packages:
     dependency: "direct main"
     description:
       name: package_info_plus
-      sha256: f69da0d3189a4b4ceaeb1a3defb0f329b3b352517f52bed4290f83d4f06bc08d
+      sha256: "468c26b4254ab01979fa5e4a98cb343ea3631b9acee6f21028997419a80e1a20"
       url: "https://pub.dev"
     source: hosted
-    version: "9.0.0"
+    version: "9.0.1"
   package_info_plus_platform_interface:
     dependency: transitive
     description:
@@ -1080,10 +1080,10 @@ packages:
     dependency: "direct main"
     description:
       name: share_plus
-      sha256: "14c8860d4de93d3a7e53af51bff479598c4e999605290756bbbe45cf65b37840"
+      sha256: "223873d106614442ea6f20db5a038685cc5b32a2fba81cdecaefbbae0523f7fa"
       url: "https://pub.dev"
     source: hosted
-    version: "12.0.1"
+    version: "12.0.2"
   share_plus_platform_interface:
     dependency: transitive
     description:
@@ -1587,4 +1587,4 @@ packages:
     version: "3.1.3"
 sdks:
   dart: ">=3.11.1 <3.16.0"
-  flutter: ">=3.41.4 <4.0.0"
+  flutter: ">=3.41.4"
