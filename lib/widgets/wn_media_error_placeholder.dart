@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/theme.dart';
-import 'package:whitenoise/widgets/wn_blurhash_placeholder.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_media_placeholder.dart';
 
 class WnMediaErrorPlaceholder extends StatelessWidget {
   final VoidCallback onRetry;
+  final String? thumbHash;
   final String? blurhash;
   final double? width;
   final double? height;
@@ -13,6 +14,7 @@ class WnMediaErrorPlaceholder extends StatelessWidget {
   const WnMediaErrorPlaceholder({
     super.key,
     required this.onRetry,
+    this.thumbHash,
     this.blurhash,
     this.width,
     this.height,
@@ -31,7 +33,12 @@ class WnMediaErrorPlaceholder extends StatelessWidget {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            WnBlurhashPlaceholder(blurhash: blurhash, width: width, height: height),
+            WnMediaPlaceholder(
+              thumbHash: thumbHash,
+              blurhash: blurhash,
+              width: width,
+              height: height,
+            ),
             Container(
               key: const Key('error_overlay'),
               color: colors.overlayTertiary,

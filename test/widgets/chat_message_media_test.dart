@@ -16,6 +16,7 @@ MediaFile _mediaFile({
   String filePath = '',
   String? originalFileHash = 'hash123',
   String? blurhash,
+  String? thumbhash,
 }) => MediaFile(
   id: id,
   mlsGroupId: testGroupId,
@@ -28,7 +29,9 @@ MediaFile _mediaFile({
   blossomUrl: 'https://example.com/media',
   nostrKey: 'nostr123',
   createdAt: DateTime(2024),
-  fileMetadata: blurhash != null ? FileMetadata(blurhash: blurhash) : null,
+  fileMetadata: blurhash != null || thumbhash != null
+      ? FileMetadata(blurhash: blurhash, thumbhash: thumbhash)
+      : null,
 );
 
 class _MockApi extends MockWnApi {
@@ -239,6 +242,51 @@ void main() {
       );
 
       expect(find.byKey(const Key('blurhash_placeholder')), findsOneWidget);
+    });
+
+    testWidgets('shows thumbhash placeholder when thumbhash provided', (tester) async {
+      _api.downloadCompleter = Completer<MediaFile>();
+      await mountWidget(
+        ChatMessageMedia(
+          mediaFiles: [_mediaFile(thumbhash: 'YJqGPQw7sFlslqhFafSE+Q6oJ1h2iHB2Rw==')],
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('thumbhash_placeholder')), findsOneWidget);
+      expect(find.byKey(const Key('blurhash_placeholder')), findsNothing);
+    });
+
+    testWidgets('prefers thumbhash over blurhash when both provided', (tester) async {
+      _api.downloadCompleter = Completer<MediaFile>();
+      await mountWidget(
+        ChatMessageMedia(
+          mediaFiles: [
+            _mediaFile(
+              thumbhash: 'YJqGPQw7sFlslqhFafSE+Q6oJ1h2iHB2Rw==',
+              blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+            ),
+          ],
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('thumbhash_placeholder')), findsOneWidget);
+      expect(find.byKey(const Key('blurhash_placeholder')), findsNothing);
+    });
+
+    testWidgets('shows thumbhash in error placeholder when download fails', (tester) async {
+      _api.shouldFail = true;
+      await mountWidget(
+        ChatMessageMedia(
+          mediaFiles: [_mediaFile(thumbhash: 'YJqGPQw7sFlslqhFafSE+Q6oJ1h2iHB2Rw==')],
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('error_placeholder')), findsOneWidget);
+      expect(find.byKey(const Key('thumbhash_placeholder')), findsOneWidget);
     });
 
     testWidgets('placeholder and image have the same size', (tester) async {

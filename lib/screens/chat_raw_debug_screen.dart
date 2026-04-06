@@ -727,6 +727,7 @@ class _RawMessageCard extends StatelessWidget {
         buffer.writeln('  filename:            ${fm.originalFilename}');
       }
       if (fm.dimensions != null) buffer.writeln('  dimensions:          ${fm.dimensions}');
+      if (fm.thumbhash != null) buffer.writeln('  thumbhash:           ${fm.thumbhash}');
       if (fm.blurhash != null) buffer.writeln('  blurhash:            ${fm.blurhash}');
     }
     buffer.writeln('  created_at:          ${m.createdAt.toIso8601String()}');

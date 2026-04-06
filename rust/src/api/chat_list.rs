@@ -131,7 +131,7 @@ pub enum ChatListUpdateTrigger {
     RemovedFromGroup,
     /// The chat's mute status changed.
     ChatMuteChanged,
-    /// The user left the group.
+    /// This account left the group.
     LeftGroup,
 }
 

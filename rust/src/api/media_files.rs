@@ -13,6 +13,7 @@ pub struct FileMetadata {
     pub original_filename: Option<String>,
     pub dimensions: Option<String>,
     pub blurhash: Option<String>,
+    pub thumbhash: Option<String>,
 }
 
 impl From<WhitenoiseFileMetadata> for FileMetadata {
@@ -21,6 +22,7 @@ impl From<WhitenoiseFileMetadata> for FileMetadata {
             original_filename: metadata.original_filename,
             dimensions: metadata.dimensions,
             blurhash: metadata.blurhash,
+            thumbhash: metadata.thumbhash,
         }
     }
 }
@@ -31,6 +33,7 @@ impl From<FileMetadata> for WhitenoiseFileMetadata {
             original_filename: metadata.original_filename,
             dimensions: metadata.dimensions,
             blurhash: metadata.blurhash,
+            thumbhash: metadata.thumbhash,
         }
     }
 }

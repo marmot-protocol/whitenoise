@@ -34,15 +34,18 @@ class FileMetadata {
   final String? originalFilename;
   final String? dimensions;
   final String? blurhash;
+  final String? thumbhash;
 
   const FileMetadata({
     this.originalFilename,
     this.dimensions,
     this.blurhash,
+    this.thumbhash,
   });
 
   @override
-  int get hashCode => originalFilename.hashCode ^ dimensions.hashCode ^ blurhash.hashCode;
+  int get hashCode =>
+      originalFilename.hashCode ^ dimensions.hashCode ^ blurhash.hashCode ^ thumbhash.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -51,7 +54,8 @@ class FileMetadata {
           runtimeType == other.runtimeType &&
           originalFilename == other.originalFilename &&
           dimensions == other.dimensions &&
-          blurhash == other.blurhash;
+          blurhash == other.blurhash &&
+          thumbhash == other.thumbhash;
 }
 
 class MediaFile {

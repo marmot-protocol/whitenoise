@@ -391,6 +391,34 @@ void main() {
         );
       });
     });
+    group('leftGroup trigger', () {
+      testWidgets('keeps left group in the list with removedAt set', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([
+          _chatSummary('c1', DateTime(2024)),
+          _chatSummary('c2', DateTime(2024, 1, 2)),
+        ]);
+        await tester.pumpAndSettle();
+
+        expect(getResult().chats.map((c) => c.mlsGroupId), ['mls_c1', 'mls_c2']);
+
+        final removedAt = DateTime(2024, 1, 3);
+        _api.emitUpdate(
+          ChatListUpdateTrigger.leftGroup,
+          _chatSummary('c2', DateTime(2024, 1, 2), removedAt: removedAt),
+        );
+        await tester.pumpAndSettle();
+
+        final chats = getResult().chats;
+        expect(chats.map((c) => c.mlsGroupId), containsAll(['mls_c1', 'mls_c2']));
+        expect(
+          chats.firstWhere((c) => c.mlsGroupId == 'mls_c2').removedAt,
+          removedAt,
+        );
+      });
+    });
+
     group('with archived true', () {
       testWidgets('adds archived chat on archive change', (tester) async {
         final getResult = await _pumpWithArchived(tester, testPubkeyA, archived: true);

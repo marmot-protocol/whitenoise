@@ -9,7 +9,7 @@ on:
 jobs:
   check:
     name: Check
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     timeout-minutes: 10
 
     steps:
@@ -85,7 +85,7 @@ jobs:
 
   test:
     name: Test (${{ matrix.shard }}/4)
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
       fail-fast: false
@@ -155,7 +155,7 @@ jobs:
     name: Coverage
     if: always()
     needs: test
-    runs-on: blacksmith-4vcpu-ubuntu-2404
+    runs-on: ubuntu-latest
     timeout-minutes: 10
     permissions:
       actions: read

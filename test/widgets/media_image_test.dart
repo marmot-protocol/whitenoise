@@ -7,7 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/media_image.dart';
-import 'package:whitenoise/widgets/wn_blurhash_placeholder.dart';
+import 'package:whitenoise/widgets/wn_media_placeholder.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
@@ -17,6 +17,7 @@ MediaFile _mediaFile({
   String filePath = '',
   String? originalFileHash = 'hash123',
   String? blurhash,
+  String? thumbhash,
   String? dimensions,
 }) => MediaFile(
   id: id,
@@ -30,8 +31,8 @@ MediaFile _mediaFile({
   blossomUrl: 'https://example.com/media',
   nostrKey: 'nostr123',
   createdAt: DateTime(2024),
-  fileMetadata: blurhash != null || dimensions != null
-      ? FileMetadata(blurhash: blurhash, dimensions: dimensions)
+  fileMetadata: blurhash != null || thumbhash != null || dimensions != null
+      ? FileMetadata(blurhash: blurhash, thumbhash: thumbhash, dimensions: dimensions)
       : null,
 );
 
@@ -197,6 +198,75 @@ void main() {
       await tester.tap(find.byType(MediaImage));
       await tester.pump(kDoubleTapTimeout);
       expect(tapped, isTrue);
+    });
+
+    testWidgets('shows thumbhash placeholder while loading', (tester) async {
+      _api.downloadCompleter = Completer<MediaFile>();
+      await mountWidget(
+        MediaImage(
+          mediaFile: _mediaFile(thumbhash: 'YJqGPQw7sFlslqhFafSE+Q6oJ1h2iHB2Rw=='),
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('media_image_loading')), findsOneWidget);
+      expect(find.byKey(const Key('thumbhash_placeholder')), findsOneWidget);
+      expect(find.byKey(const Key('media_image_viewer')), findsNothing);
+    });
+
+    testWidgets('prefers thumbhash over blurhash when both provided', (tester) async {
+      _api.downloadCompleter = Completer<MediaFile>();
+      await mountWidget(
+        MediaImage(
+          mediaFile: _mediaFile(
+            thumbhash: 'YJqGPQw7sFlslqhFafSE+Q6oJ1h2iHB2Rw==',
+            blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+          ),
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('thumbhash_placeholder')), findsOneWidget);
+      expect(find.byKey(const Key('blurhash_placeholder')), findsNothing);
+    });
+
+    testWidgets('shows thumbhash in error state', (tester) async {
+      _api.shouldFail = true;
+      await mountWidget(
+        MediaImage(
+          mediaFile: _mediaFile(thumbhash: 'YJqGPQw7sFlslqhFafSE+Q6oJ1h2iHB2Rw=='),
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('media_image_error')), findsOneWidget);
+      expect(find.byKey(const Key('thumbhash_placeholder')), findsOneWidget);
+    });
+
+    testWidgets('thumbhash placeholder is removed after fade completes', (tester) async {
+      _api.downloadCompleter = Completer<MediaFile>();
+      final tempDir = Directory.systemTemp.createTempSync('media_thumbhash_gone_test');
+      final tempFile = File('${tempDir.path}/test.png');
+      tempFile.writeAsBytesSync(_minimalPng);
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      await mountWidget(
+        MediaImage(
+          mediaFile: _mediaFile(
+            thumbhash: 'YJqGPQw7sFlslqhFafSE+Q6oJ1h2iHB2Rw==',
+          ),
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('media_image_loading')), findsOneWidget);
+
+      _api.downloadCompleter!.complete(_mediaFile(filePath: tempFile.path));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('media_image_loading')), findsNothing);
+      expect(find.byKey(const Key('media_image_viewer')), findsOneWidget);
     });
 
     testWidgets('constrains blurhash to image aspect ratio when dimensions available', (
@@ -495,7 +565,7 @@ void main() {
       final fallback = image.errorBuilder!(context, Object(), StackTrace.empty);
       final aspectRatioWidget = fallback as AspectRatio;
       expect(aspectRatioWidget.aspectRatio, 2);
-      expect(aspectRatioWidget.child, isA<WnBlurhashPlaceholder>());
+      expect(aspectRatioWidget.child, isA<WnMediaPlaceholder>());
     });
 
     testWidgets('blurhash reappears when fade is interrupted by status change', (

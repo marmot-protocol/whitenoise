@@ -285,8 +285,13 @@ class MessageService {
     if (mediaFile.originalFileHash != null) {
       tags.add('x ${mediaFile.originalFileHash}');
     }
-    if (metadata?.blurhash != null) {
-      tags.add('blurhash ${metadata?.blurhash}');
+    final thumbhash = metadata?.thumbhash?.trim();
+    if (thumbhash != null && thumbhash.isNotEmpty) {
+      tags.add('thumbhash $thumbhash');
+    }
+    final blurhash = metadata?.blurhash?.trim();
+    if (blurhash != null && blurhash.isNotEmpty) {
+      tags.add('blurhash $blurhash');
     }
     if (metadata?.dimensions != null) {
       tags.add('dim ${metadata?.dimensions}');

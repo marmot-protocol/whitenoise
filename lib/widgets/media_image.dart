@@ -4,8 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:whitenoise/hooks/use_media_download.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
-import 'package:whitenoise/widgets/wn_blurhash_placeholder.dart';
 import 'package:whitenoise/widgets/wn_media_error_placeholder.dart';
+import 'package:whitenoise/widgets/wn_media_placeholder.dart';
 
 const _doubleTapScale = 2.5;
 const _minScale = 1.0;
@@ -104,6 +104,7 @@ class MediaImage extends HookWidget {
       animateToMatrix(target);
     }
 
+    final thumbHash = mediaFile.fileMetadata?.thumbhash;
     final blurhash = mediaFile.fileMetadata?.blurhash;
     final dimensions = mediaFile.fileMetadata?.dimensions;
     final aspectRatio = _parseAspectRatio(dimensions);
@@ -113,14 +114,14 @@ class MediaImage extends HookWidget {
       initialValue: status == MediaDownloadStatus.success ? 1.0 : 0.0,
     );
 
-    final showBlurhash = useState(status != MediaDownloadStatus.success);
+    final showPlaceholder = useState(status != MediaDownloadStatus.success);
 
     useEffect(() {
       void statusListener(AnimationStatus status) {
         if (status == AnimationStatus.completed) {
-          showBlurhash.value = false;
+          showPlaceholder.value = false;
         } else if (status == AnimationStatus.dismissed) {
-          showBlurhash.value = true;
+          showPlaceholder.value = true;
         }
       }
 
@@ -145,6 +146,7 @@ class MediaImage extends HookWidget {
         child: WnMediaErrorPlaceholder(
           key: const Key('media_image_error'),
           onRetry: retry!,
+          thumbHash: thumbHash,
           blurhash: blurhash,
         ),
       );
@@ -157,20 +159,22 @@ class MediaImage extends HookWidget {
       child: Stack(
         fit: StackFit.passthrough,
         children: [
-          if (showBlurhash.value)
+          if (showPlaceholder.value)
             if (aspectRatio != null)
               Center(
                 child: AspectRatio(
                   aspectRatio: aspectRatio,
-                  child: WnBlurhashPlaceholder(
+                  child: WnMediaPlaceholder(
                     key: const Key('media_image_loading'),
+                    thumbHash: thumbHash,
                     blurhash: blurhash,
                   ),
                 ),
               )
             else
-              WnBlurhashPlaceholder(
+              WnMediaPlaceholder(
                 key: const Key('media_image_loading'),
+                thumbHash: thumbHash,
                 blurhash: blurhash,
                 width: double.infinity,
                 height: double.infinity,
@@ -178,6 +182,7 @@ class MediaImage extends HookWidget {
           if (status == MediaDownloadStatus.success)
             _buildLoadedImage(
               aspectRatio: aspectRatio,
+              thumbHash: thumbHash,
               blurhash: blurhash,
               fadeController: fadeController,
               transformationController: transformationController,
@@ -190,6 +195,7 @@ class MediaImage extends HookWidget {
 
   static Widget _buildLoadedImage({
     required double? aspectRatio,
+    required String? thumbHash,
     required String? blurhash,
     required AnimationController fadeController,
     required TransformationController transformationController,
@@ -213,13 +219,15 @@ class MediaImage extends HookWidget {
             errorBuilder: (_, _, _) => aspectRatio != null
                 ? AspectRatio(
                     aspectRatio: aspectRatio,
-                    child: WnBlurhashPlaceholder(
+                    child: WnMediaPlaceholder(
                       key: const Key('media_image_error_fallback'),
+                      thumbHash: thumbHash,
                       blurhash: blurhash,
                     ),
                   )
-                : WnBlurhashPlaceholder(
+                : WnMediaPlaceholder(
                     key: const Key('media_image_error_fallback'),
+                    thumbHash: thumbHash,
                     blurhash: blurhash,
                   ),
           ),

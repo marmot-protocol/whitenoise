@@ -5,8 +5,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/hooks/use_media_download.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
-import 'package:whitenoise/widgets/wn_blurhash_placeholder.dart';
 import 'package:whitenoise/widgets/wn_media_error_placeholder.dart';
+import 'package:whitenoise/widgets/wn_media_placeholder.dart';
 import 'package:whitenoise/widgets/wn_message_media.dart';
 
 class ChatMessageMedia extends StatelessWidget {
@@ -51,6 +51,7 @@ class _ChatMessageMediaTile extends HookWidget {
         child: WnMediaErrorPlaceholder(
           key: const Key('error_placeholder'),
           onRetry: retry!,
+          thumbHash: mediaFile.fileMetadata?.thumbhash,
           blurhash: mediaFile.fileMetadata?.blurhash,
         ),
       );
@@ -61,8 +62,9 @@ class _ChatMessageMediaTile extends HookWidget {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          WnBlurhashPlaceholder(
+          WnMediaPlaceholder(
             key: const Key('loading_placeholder'),
+            thumbHash: mediaFile.fileMetadata?.thumbhash,
             blurhash: mediaFile.fileMetadata?.blurhash,
           ),
           if (status == MediaDownloadStatus.success)

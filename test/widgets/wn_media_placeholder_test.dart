@@ -1,21 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_blurhash/flutter_blurhash.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise/widgets/wn_blurhash_placeholder.dart';
+import 'package:whitenoise/widgets/wn_media_placeholder.dart';
 
 import '../test_helpers.dart';
 
 void main() {
-  group('WnBlurhashPlaceholder', () {
-    testWidgets('renders neutral placeholder when blurhash is null', (tester) async {
-      await mountWidget(const WnBlurhashPlaceholder(), tester);
+  group('WnMediaPlaceholder', () {
+    testWidgets('renders neutral placeholder when both hashes are null', (tester) async {
+      await mountWidget(const WnMediaPlaceholder(), tester);
 
       expect(find.byKey(const Key('neutral_placeholder')), findsOneWidget);
       expect(find.byKey(const Key('blurhash_placeholder')), findsNothing);
+      expect(find.byKey(const Key('thumbhash_placeholder')), findsNothing);
     });
 
     testWidgets('renders neutral placeholder when blurhash is empty', (tester) async {
-      await mountWidget(const WnBlurhashPlaceholder(blurhash: ''), tester);
+      await mountWidget(const WnMediaPlaceholder(blurhash: ''), tester);
 
       expect(find.byKey(const Key('neutral_placeholder')), findsOneWidget);
       expect(find.byKey(const Key('blurhash_placeholder')), findsNothing);
@@ -23,7 +24,7 @@ void main() {
 
     testWidgets('renders blurhash when provided', (tester) async {
       await mountWidget(
-        const WnBlurhashPlaceholder(blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'),
+        const WnMediaPlaceholder(blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'),
         tester,
       );
 
@@ -32,9 +33,47 @@ void main() {
       expect(find.byType(BlurHash), findsOneWidget);
     });
 
+    testWidgets('renders thumbhash when provided', (tester) async {
+      // A minimal valid thumbhash (base64-encoded)
+      await mountWidget(
+        const WnMediaPlaceholder(thumbHash: 'YJqGPQw7sFlslqhFafSE+Q6oJ1h2iHB2Rw=='),
+        tester,
+      );
+
+      expect(find.byKey(const Key('thumbhash_placeholder')), findsOneWidget);
+      expect(find.byKey(const Key('blurhash_placeholder')), findsNothing);
+      expect(find.byKey(const Key('neutral_placeholder')), findsNothing);
+    });
+
+    testWidgets('prefers thumbhash over blurhash when both provided', (tester) async {
+      await mountWidget(
+        const WnMediaPlaceholder(
+          thumbHash: 'YJqGPQw7sFlslqhFafSE+Q6oJ1h2iHB2Rw==',
+          blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('thumbhash_placeholder')), findsOneWidget);
+      expect(find.byKey(const Key('blurhash_placeholder')), findsNothing);
+    });
+
+    testWidgets('falls back to blurhash when thumbhash is invalid', (tester) async {
+      await mountWidget(
+        const WnMediaPlaceholder(
+          thumbHash: 'not-valid-base64!!!',
+          blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('blurhash_placeholder')), findsOneWidget);
+      expect(find.byKey(const Key('thumbhash_placeholder')), findsNothing);
+    });
+
     testWidgets('uses provided width and height', (tester) async {
       await mountWidget(
-        const WnBlurhashPlaceholder(width: 100, height: 150),
+        const WnMediaPlaceholder(width: 100, height: 150),
         tester,
       );
 
@@ -48,7 +87,7 @@ void main() {
         const SizedBox(
           width: 200,
           height: 200,
-          child: WnBlurhashPlaceholder(),
+          child: WnMediaPlaceholder(),
         ),
         tester,
       );
@@ -64,7 +103,7 @@ void main() {
     });
 
     testWidgets('uses default height when only width is provided', (tester) async {
-      await mountWidget(const WnBlurhashPlaceholder(width: 100), tester);
+      await mountWidget(const WnMediaPlaceholder(width: 100), tester);
 
       final sizedBox = tester.widget<SizedBox>(find.byKey(const Key('neutral_placeholder')));
       expect(sizedBox.width, 100);
@@ -76,7 +115,7 @@ void main() {
         const SizedBox(
           width: 150,
           height: 150,
-          child: WnBlurhashPlaceholder(blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'),
+          child: WnMediaPlaceholder(blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj'),
         ),
         tester,
       );
