@@ -86,7 +86,6 @@ mod tests {
         let now = Utc::now();
 
         let entry = WhitenoiseEntry {
-            id: Some(1),
             account_pubkey: account_keys.public_key(),
             muted_pubkey: muted_keys.public_key(),
             is_private: true,
@@ -110,7 +109,6 @@ mod tests {
         let muted_keys = Keys::generate();
 
         let entry = WhitenoiseEntry {
-            id: None,
             account_pubkey: account_keys.public_key(),
             muted_pubkey: muted_keys.public_key(),
             is_private: false,

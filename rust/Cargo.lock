@@ -1116,9 +1116,9 @@ checksum = "5243a22cce29dff488db8ef03d8e0e54dd06cd3e6d98475160dff390fa414de2"
 
 [[package]]
 name = "fastrand"
-version = "2.4.0"
+version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a043dc74da1e37d6afe657061213aa6f425f855399a11d3463c6ecccc4dfda1f"
+checksum = "9f1f227452a390804cdb637b74a86990f2a7d7ba4b7d5693aac9b4dd6defd8d6"
 
 [[package]]
 name = "fax"
@@ -5240,7 +5240,7 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "whitenoise"
 version = "0.2.1"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=ab694ced95826266dc4cce13980f359613799018#ab694ced95826266dc4cce13980f359613799018"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=972e31294e7911af1889c64841afde3a2ec2e024#972e31294e7911af1889c64841afde3a2ec2e024"
 dependencies = [
  "android-native-keyring-store",
  "anyhow",
@@ -5288,7 +5288,7 @@ dependencies = [
 [[package]]
 name = "whitenoise-macros"
 version = "0.1.0"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=ab694ced95826266dc4cce13980f359613799018#ab694ced95826266dc4cce13980f359613799018"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=972e31294e7911af1889c64841afde3a2ec2e024#972e31294e7911af1889c64841afde3a2ec2e024"
 dependencies = [
  "proc-macro2",
  "quote",

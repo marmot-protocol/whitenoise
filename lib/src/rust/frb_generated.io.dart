@@ -23,7 +23,6 @@ import 'api/messages.dart';
 import 'api/metadata.dart';
 import 'api/mute_list.dart';
 import 'api/notifications.dart';
-import 'api/relay_defaults.dart';
 import 'api/relays.dart';
 import 'api/signer.dart';
 import 'api/user_search.dart';
@@ -41,31 +40,39 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
     required super.portManager,
   });
 
-  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_AppSettingsPtr => wire
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_AppSettingsPtr => wire
       ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerAppSettingsPtr;
 
-  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_DartSignerPtr => wire
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_DartSignerPtr => wire
       ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartSignerPtr;
 
-  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_GroupIdPtr => wire
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_GroupIdPtr => wire
       ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGroupIdPtr;
 
-  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_LanguagePtr => wire
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_LanguagePtr => wire
       ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerLanguagePtr;
 
-  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_PublicKeyPtr => wire
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_PublicKeyPtr => wire
       ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPublicKeyPtr;
 
-  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_RelayTypePtr => wire
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_RelayTypePtr => wire
       ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayTypePtr;
 
-  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_RelayUrlPtr => wire
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_RelayUrlPtr => wire
       ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrlPtr;
 
   CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_TagPtr => wire
       ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTagPtr;
 
-  CrossPlatformFinalizerArg get rust_arc_decrement_strong_count_ThemeModePtr => wire
+  CrossPlatformFinalizerArg
+  get rust_arc_decrement_strong_count_ThemeModePtr => wire
       ._rust_arc_decrement_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerThemeModePtr;
 
   @protected
@@ -114,7 +121,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  Tag dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
+  Tag
+  dco_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
     dynamic raw,
   );
 
@@ -131,7 +139,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  GroupId dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGroupId(
+  GroupId
+  dco_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGroupId(
     dynamic raw,
   );
 
@@ -157,9 +166,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   DateTime dco_decode_Chrono_Utc(dynamic raw);
 
   @protected
-  FutureOr<String> Function(String) dco_decode_DartFn_Inputs_String_Output_String_AnyhowException(
-    dynamic raw,
-  );
+  FutureOr<String> Function(String)
+  dco_decode_DartFn_Inputs_String_Output_String_AnyhowException(dynamic raw);
 
   @protected
   FutureOr<String> Function(String, String)
@@ -174,47 +182,56 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Map<String, String> dco_decode_Map_String_String_None(dynamic raw);
 
   @protected
-  AppSettings dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerAppSettings(
+  AppSettings
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerAppSettings(
     dynamic raw,
   );
 
   @protected
-  DartSigner dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartSigner(
+  DartSigner
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartSigner(
     dynamic raw,
   );
 
   @protected
-  GroupId dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGroupId(
+  GroupId
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGroupId(
     dynamic raw,
   );
 
   @protected
-  Language dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerLanguage(
+  Language
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerLanguage(
     dynamic raw,
   );
 
   @protected
-  PublicKey dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPublicKey(
+  PublicKey
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPublicKey(
     dynamic raw,
   );
 
   @protected
-  RelayType dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayType(
+  RelayType
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayType(
     dynamic raw,
   );
 
   @protected
-  RelayUrl dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
+  RelayUrl
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
     dynamic raw,
   );
 
   @protected
-  Tag dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
+  Tag
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
     dynamic raw,
   );
 
   @protected
-  ThemeMode dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerThemeMode(
+  ThemeMode
+  dco_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerThemeMode(
     dynamic raw,
   );
 
@@ -222,13 +239,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   RustStreamSink<String> dco_decode_StreamSink_String_Sse(dynamic raw);
 
   @protected
-  RustStreamSink<ChatListStreamItem> dco_decode_StreamSink_chat_list_stream_item_Sse(dynamic raw);
+  RustStreamSink<ChatListStreamItem>
+  dco_decode_StreamSink_chat_list_stream_item_Sse(dynamic raw);
 
   @protected
-  RustStreamSink<MessageStreamItem> dco_decode_StreamSink_message_stream_item_Sse(dynamic raw);
+  RustStreamSink<MessageStreamItem>
+  dco_decode_StreamSink_message_stream_item_Sse(dynamic raw);
 
   @protected
-  RustStreamSink<NotificationUpdate> dco_decode_StreamSink_notification_update_Sse(dynamic raw);
+  RustStreamSink<NotificationUpdate>
+  dco_decode_StreamSink_notification_update_Sse(dynamic raw);
 
   @protected
   RustStreamSink<UserSearchUpdate> dco_decode_StreamSink_user_search_update_Sse(
@@ -386,9 +406,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  HighlightSpan dco_decode_highlight_span(dynamic raw);
-
-  @protected
   int dco_decode_i_32(dynamic raw);
 
   @protected
@@ -402,12 +419,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   LeafNodeInfo dco_decode_leaf_node_info(dynamic raw);
-
-  @protected
-  List<RelayUrl>
-  dco_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
-    dynamic raw,
-  );
 
   @protected
   List<Tag>
@@ -440,10 +451,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<GroupInformation> dco_decode_list_group_information(dynamic raw);
 
   @protected
-  List<GroupWithInfoAndMembership> dco_decode_list_group_with_info_and_membership(dynamic raw);
-
-  @protected
-  List<HighlightSpan> dco_decode_list_highlight_span(dynamic raw);
+  List<GroupWithInfoAndMembership>
+  dco_decode_list_group_with_info_and_membership(dynamic raw);
 
   @protected
   List<LeafNodeInfo> dco_decode_list_leaf_node_info(dynamic raw);
@@ -468,9 +477,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<Relay> dco_decode_list_relay(dynamic raw);
-
-  @protected
-  List<SearchResult> dco_decode_list_search_result(dynamic raw);
 
   @protected
   List<SerializableToken> dco_decode_list_serializable_token(dynamic raw);
@@ -592,9 +598,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Relay dco_decode_relay(dynamic raw);
 
   @protected
-  SearchResult dco_decode_search_result(dynamic raw);
-
-  @protected
   SearchUpdateTrigger dco_decode_search_update_trigger(dynamic raw);
 
   @protected
@@ -700,7 +703,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  Tag sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
+  Tag
+  sse_decode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
     SseDeserializer deserializer,
   );
 
@@ -717,7 +721,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  GroupId sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGroupId(
+  GroupId
+  sse_decode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGroupId(
     SseDeserializer deserializer,
   );
 
@@ -751,47 +756,56 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  AppSettings sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerAppSettings(
+  AppSettings
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerAppSettings(
     SseDeserializer deserializer,
   );
 
   @protected
-  DartSigner sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartSigner(
+  DartSigner
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartSigner(
     SseDeserializer deserializer,
   );
 
   @protected
-  GroupId sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGroupId(
+  GroupId
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGroupId(
     SseDeserializer deserializer,
   );
 
   @protected
-  Language sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerLanguage(
+  Language
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerLanguage(
     SseDeserializer deserializer,
   );
 
   @protected
-  PublicKey sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPublicKey(
+  PublicKey
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPublicKey(
     SseDeserializer deserializer,
   );
 
   @protected
-  RelayType sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayType(
+  RelayType
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayType(
     SseDeserializer deserializer,
   );
 
   @protected
-  RelayUrl sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
+  RelayUrl
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
     SseDeserializer deserializer,
   );
 
   @protected
-  Tag sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
+  Tag
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
     SseDeserializer deserializer,
   );
 
   @protected
-  ThemeMode sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerThemeMode(
+  ThemeMode
+  sse_decode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerThemeMode(
     SseDeserializer deserializer,
   );
 
@@ -801,19 +815,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  RustStreamSink<ChatListStreamItem> sse_decode_StreamSink_chat_list_stream_item_Sse(
-    SseDeserializer deserializer,
-  );
+  RustStreamSink<ChatListStreamItem>
+  sse_decode_StreamSink_chat_list_stream_item_Sse(SseDeserializer deserializer);
 
   @protected
-  RustStreamSink<MessageStreamItem> sse_decode_StreamSink_message_stream_item_Sse(
-    SseDeserializer deserializer,
-  );
+  RustStreamSink<MessageStreamItem>
+  sse_decode_StreamSink_message_stream_item_Sse(SseDeserializer deserializer);
 
   @protected
-  RustStreamSink<NotificationUpdate> sse_decode_StreamSink_notification_update_Sse(
-    SseDeserializer deserializer,
-  );
+  RustStreamSink<NotificationUpdate>
+  sse_decode_StreamSink_notification_update_Sse(SseDeserializer deserializer);
 
   @protected
   RustStreamSink<UserSearchUpdate> sse_decode_StreamSink_user_search_update_Sse(
@@ -999,9 +1010,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  HighlightSpan sse_decode_highlight_span(SseDeserializer deserializer);
-
-  @protected
   int sse_decode_i_32(SseDeserializer deserializer);
 
   @protected
@@ -1015,12 +1023,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   LeafNodeInfo sse_decode_leaf_node_info(SseDeserializer deserializer);
-
-  @protected
-  List<RelayUrl>
-  sse_decode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
-    SseDeserializer deserializer,
-  );
 
   @protected
   List<Tag>
@@ -1059,14 +1061,8 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  List<GroupWithInfoAndMembership> sse_decode_list_group_with_info_and_membership(
-    SseDeserializer deserializer,
-  );
-
-  @protected
-  List<HighlightSpan> sse_decode_list_highlight_span(
-    SseDeserializer deserializer,
-  );
+  List<GroupWithInfoAndMembership>
+  sse_decode_list_group_with_info_and_membership(SseDeserializer deserializer);
 
   @protected
   List<LeafNodeInfo> sse_decode_list_leaf_node_info(
@@ -1099,11 +1095,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<Relay> sse_decode_list_relay(SseDeserializer deserializer);
-
-  @protected
-  List<SearchResult> sse_decode_list_search_result(
-    SseDeserializer deserializer,
-  );
 
   @protected
   List<SerializableToken> sse_decode_list_serializable_token(
@@ -1251,9 +1242,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Relay sse_decode_relay(SseDeserializer deserializer);
 
   @protected
-  SearchResult sse_decode_search_result(SseDeserializer deserializer);
-
-  @protected
   SearchUpdateTrigger sse_decode_search_update_trigger(
     SseDeserializer deserializer,
   );
@@ -1340,13 +1328,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGroupId(
+  void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGroupId(
     GroupId self,
     SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerLanguage(
+  void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerLanguage(
     Language self,
     SseSerializer serializer,
   );
@@ -1366,13 +1356,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
+  void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
     RelayUrl self,
     SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
+  void
+  sse_encode_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
     Tag self,
     SseSerializer serializer,
   );
@@ -1392,25 +1384,29 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGroupId(
+  void
+  sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGroupId(
     GroupId self,
     SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerLanguage(
+  void
+  sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerLanguage(
     Language self,
     SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
+  void
+  sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
     RelayUrl self,
     SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerThemeMode(
+  void
+  sse_encode_Auto_Ref_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerThemeMode(
     ThemeMode self,
     SseSerializer serializer,
   );
@@ -1440,55 +1436,64 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerAppSettings(
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerAppSettings(
     AppSettings self,
     SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartSigner(
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerDartSigner(
     DartSigner self,
     SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGroupId(
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerGroupId(
     GroupId self,
     SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerLanguage(
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerLanguage(
     Language self,
     SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPublicKey(
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerPublicKey(
     PublicKey self,
     SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayType(
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayType(
     RelayType self,
     SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
     RelayUrl self,
     SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
     Tag self,
     SseSerializer serializer,
   );
 
   @protected
-  void sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerThemeMode(
+  void
+  sse_encode_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerThemeMode(
     ThemeMode self,
     SseSerializer serializer,
   );
@@ -1752,9 +1757,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_highlight_span(HighlightSpan self, SseSerializer serializer);
-
-  @protected
   void sse_encode_i_32(int self, SseSerializer serializer);
 
   @protected
@@ -1774,13 +1776,7 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void
-  sse_encode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerRelayUrl(
-    List<RelayUrl> self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void sse_encode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
+  sse_encode_list_Auto_Owned_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerTag(
     List<Tag> self,
     SseSerializer serializer,
   );
@@ -1831,12 +1827,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_list_highlight_span(
-    List<HighlightSpan> self,
-    SseSerializer serializer,
-  );
-
-  @protected
   void sse_encode_list_leaf_node_info(
     List<LeafNodeInfo> self,
     SseSerializer serializer,
@@ -1880,12 +1870,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_list_relay(List<Relay> self, SseSerializer serializer);
-
-  @protected
-  void sse_encode_list_search_result(
-    List<SearchResult> self,
-    SseSerializer serializer,
-  );
 
   @protected
   void sse_encode_list_serializable_token(
@@ -2066,9 +2050,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_relay(Relay self, SseSerializer serializer);
 
   @protected
-  void sse_encode_search_result(SearchResult self, SseSerializer serializer);
-
-  @protected
   void sse_encode_search_update_trigger(
     SearchUpdateTrigger self,
     SseSerializer serializer,
@@ -2160,10 +2141,12 @@ class RustLibWire implements BaseWire {
       RustLibWire(lib.ffiDynamicLibrary);
 
   /// Holds the symbol lookup function.
-  final ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName) _lookup;
+  final ffi.Pointer<T> Function<T extends ffi.NativeType>(String symbolName)
+  _lookup;
 
   /// The symbols are looked up in [dynamicLibrary].
-  RustLibWire(ffi.DynamicLibrary dynamicLibrary) : _lookup = dynamicLibrary.lookup;
+  RustLibWire(ffi.DynamicLibrary dynamicLibrary)
+    : _lookup = dynamicLibrary.lookup;
 
   void
   rust_arc_increment_strong_count_RustOpaque_flutter_rust_bridgefor_generatedRustAutoOpaqueInnerAppSettings(

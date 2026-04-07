@@ -529,7 +529,8 @@ class UserReaction {
   });
 
   @override
-  int get hashCode => reactionId.hashCode ^ user.hashCode ^ emoji.hashCode ^ createdAt.hashCode;
+  int get hashCode =>
+      reactionId.hashCode ^ user.hashCode ^ emoji.hashCode ^ createdAt.hashCode;
 
   @override
   bool operator ==(Object other) =>
