@@ -9,7 +9,6 @@ void main() {
     });
 
     test('notificationServerRelayHint is nullable', () {
-      // Placeholder is null; will be a wss:// URL when configured
       expect(notificationServerRelayHint, isNull);
     });
   });

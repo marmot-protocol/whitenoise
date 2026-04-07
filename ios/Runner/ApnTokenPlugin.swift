@@ -2,8 +2,11 @@ import Flutter
 
 class ApnTokenPlugin: NSObject, FlutterPlugin {
   private static var instance: ApnTokenPlugin?
+  private static var pendingToken: String?
   private var channel: FlutterMethodChannel?
   private var cachedToken: String?
+
+  deinit {}
 
   static func register(with registrar: FlutterPluginRegistrar) {
     let channel = FlutterMethodChannel(
@@ -12,6 +15,8 @@ class ApnTokenPlugin: NSObject, FlutterPlugin {
     )
     let plugin = ApnTokenPlugin()
     plugin.channel = channel
+    plugin.cachedToken = pendingToken
+    pendingToken = nil
     registrar.addMethodCallDelegate(plugin, channel: channel)
     instance = plugin
   }
@@ -26,6 +31,10 @@ class ApnTokenPlugin: NSObject, FlutterPlugin {
   }
 
   static func setToken(_ token: String) {
-    instance?.cachedToken = token
+    if let inst = instance {
+      inst.cachedToken = token
+    } else {
+      pendingToken = token
+    }
   }
 }
