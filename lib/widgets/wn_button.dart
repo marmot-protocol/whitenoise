@@ -18,7 +18,6 @@ class WnButton extends StatelessWidget {
     this.disabled = false,
     this.leadingIcon,
     this.trailingIcon,
-    this.iconSize,
   });
 
   final String text;
@@ -29,7 +28,6 @@ class WnButton extends StatelessWidget {
   final bool disabled;
   final WnIcons? leadingIcon;
   final WnIcons? trailingIcon;
-  final double? iconSize;
 
   @override
   Widget build(BuildContext context) {
@@ -110,7 +108,7 @@ class WnButton extends StatelessWidget {
     final verticalPadding = _getVerticalPadding();
     final horizontalPadding = _getHorizontalPadding();
     final borderRadius = _getBorderRadius();
-    final resolvedIconSize = iconSize ?? _getIconSize();
+    final resolvedIconSize = _getIconSize();
     final fontSize = _getFontSize();
     final iconPadding = (size == WnButtonSize.small || size == WnButtonSize.xsmall) ? 4.w : 8.w;
 
