@@ -2527,7 +2527,7 @@ dependencies = [
 [[package]]
 name = "mdk-core"
 version = "0.7.1"
-source = "git+https://github.com/marmot-protocol/mdk?rev=6e34398333a7a2ee8b3018511f4e9ca7db7e85cc#6e34398333a7a2ee8b3018511f4e9ca7db7e85cc"
+source = "git+https://github.com/marmot-protocol/mdk?rev=fbd3a1bee99feae39e475ee00bf4634c4fe3443a#fbd3a1bee99feae39e475ee00bf4634c4fe3443a"
 dependencies = [
  "base64",
  "blurhash",
@@ -2560,7 +2560,7 @@ source = "git+https://github.com/marmot-protocol/mdk?rev=fbd3a1bee99feae39e475ee
 [[package]]
 name = "mdk-sqlite-storage"
 version = "0.7.1"
-source = "git+https://github.com/marmot-protocol/mdk?rev=6e34398333a7a2ee8b3018511f4e9ca7db7e85cc#6e34398333a7a2ee8b3018511f4e9ca7db7e85cc"
+source = "git+https://github.com/marmot-protocol/mdk?rev=fbd3a1bee99feae39e475ee00bf4634c4fe3443a#fbd3a1bee99feae39e475ee00bf4634c4fe3443a"
 dependencies = [
  "getrandom 0.4.2",
  "hex",
@@ -2581,7 +2581,7 @@ dependencies = [
 [[package]]
 name = "mdk-storage-traits"
 version = "0.7.1"
-source = "git+https://github.com/marmot-protocol/mdk?rev=6e34398333a7a2ee8b3018511f4e9ca7db7e85cc#6e34398333a7a2ee8b3018511f4e9ca7db7e85cc"
+source = "git+https://github.com/marmot-protocol/mdk?rev=fbd3a1bee99feae39e475ee00bf4634c4fe3443a#fbd3a1bee99feae39e475ee00bf4634c4fe3443a"
 dependencies = [
  "nostr",
  "openmls",
@@ -5246,7 +5246,7 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "whitenoise"
 version = "0.2.1"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=5a59787c703130ed8154816e35bead9ffd37dd0d#5a59787c703130ed8154816e35bead9ffd37dd0d"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=e4ab90900abd735629f6ecbb54f7de0bdb7ffb2b#e4ab90900abd735629f6ecbb54f7de0bdb7ffb2b"
 dependencies = [
  "android-native-keyring-store",
  "anyhow",
@@ -5294,7 +5294,7 @@ dependencies = [
 [[package]]
 name = "whitenoise-macros"
 version = "0.1.0"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=5a59787c703130ed8154816e35bead9ffd37dd0d#5a59787c703130ed8154816e35bead9ffd37dd0d"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=e4ab90900abd735629f6ecbb54f7de0bdb7ffb2b#e4ab90900abd735629f6ecbb54f7de0bdb7ffb2b"
 dependencies = [
  "proc-macro2",
  "quote",
