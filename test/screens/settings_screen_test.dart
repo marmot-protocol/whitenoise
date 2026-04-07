@@ -310,7 +310,7 @@ void main() {
       expect(find.text('v1.2.3+45'), findsOneWidget);
     });
 
-    group('notification settings menu item (Android-only)', () {
+    group('notification settings menu item (Android and iOS)', () {
       testWidgets('shows Notification Settings menu item on Android', (tester) async {
         debugDefaultTargetPlatformOverride = TargetPlatform.android;
         await pumpSettingsScreen(tester);
@@ -320,8 +320,19 @@ void main() {
         expect(find.text('Notifications'), findsOneWidget);
       });
 
-      testWidgets('does not show Notification Settings menu item on iOS', (tester) async {
+      testWidgets('shows Notification Settings menu item on iOS', (tester) async {
         debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+        await pumpSettingsScreen(tester);
+        debugDefaultTargetPlatformOverride = null;
+
+        expect(find.byKey(const Key('notification_settings_menu_item')), findsOneWidget);
+        expect(find.text('Notifications'), findsOneWidget);
+      });
+
+      testWidgets('does not show Notification Settings menu item on other platforms', (
+        tester,
+      ) async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.linux;
         await pumpSettingsScreen(tester);
         debugDefaultTargetPlatformOverride = null;
 

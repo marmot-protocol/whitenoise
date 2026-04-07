@@ -4,6 +4,7 @@ import 'dart:io' show Platform;
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
+import 'package:whitenoise/constants/notification_server.dart';
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/active_chat_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
@@ -11,6 +12,7 @@ import 'package:whitenoise/providers/foreground_service_provider.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/services/android_play_services_service.dart';
+import 'package:whitenoise/services/apn_token_service.dart';
 import 'package:whitenoise/services/foreground_service.dart';
 import 'package:whitenoise/services/notification_service.dart';
 import 'package:whitenoise/services/user_service.dart';
@@ -30,37 +32,46 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
 });
 
 final notificationListenerProvider = Provider.autoDispose<void>((ref) {
-  if (!Platform.isAndroid) return;
+  if (!Platform.isAndroid && !Platform.isIOS) return;
 
   final pubkey = ref.watch(authProvider).value;
   if (pubkey == null) return;
 
-  const androidPlayServicesService = AndroidPlayServicesService();
   final notificationService = ref.read(notificationServiceProvider);
   final foregroundService = ref.read(foregroundServiceProvider);
   StreamSubscription<notifications_api.NotificationUpdate>? subscription;
 
   ref.onDispose(() {
     subscription?.cancel();
-    foregroundService.stop();
+    if (Platform.isAndroid) foregroundService.stop();
     _logger.info('Notification listener disposed');
   });
 
-  _initializeAndListen(androidPlayServicesService, notificationService, foregroundService, ref, (
-    sub,
-  ) {
-    subscription = sub;
-  });
+  if (Platform.isAndroid) {
+    _initializeAndListenAndroid(
+      notificationService,
+      foregroundService,
+      ref,
+      (sub) => subscription = sub,
+    );
+  } else if (Platform.isIOS) {
+    _initializeAndListenIos(
+      pubkey,
+      notificationService,
+      ref,
+      (sub) => subscription = sub,
+    );
+  }
 });
 
-void _initializeAndListen(
-  AndroidPlayServicesService androidPlayServicesService,
+void _initializeAndListenAndroid(
   NotificationService notificationService,
   ForegroundService foregroundService,
   Ref ref,
   void Function(StreamSubscription<notifications_api.NotificationUpdate>) onSubscription,
 ) async {
   try {
+    const androidPlayServicesService = AndroidPlayServicesService();
     final playServicesAvailability = await androidPlayServicesService.getAvailability();
     if (!ref.mounted) return;
     if (playServicesAvailability.isAvailable) {
@@ -87,34 +98,77 @@ void _initializeAndListen(
     }
     await foregroundService.requestBatteryOptimizationExemption();
 
-    final stream = notifications_api.subscribeToNotifications();
-
-    final subscription = stream.listen(
-      (update) async {
-        try {
-          await handleNotificationUpdate(update, notificationService, ref);
-        } catch (error, stackTrace) {
-          _logger.severe('Error handling notification update', error, stackTrace);
-        }
-      },
-      onError: (error) {
-        _logger.severe('Notification stream error', error);
-      },
-      onDone: () {
-        _logger.info('Notification stream closed');
-      },
-    );
-
-    if (!ref.mounted) {
-      await subscription.cancel();
-      await foregroundService.stop();
-      return;
-    }
-    onSubscription(subscription);
-    _logger.info('Notification listener started');
+    _subscribeToNotificationStream(notificationService, ref, onSubscription);
   } catch (error, stackTrace) {
     _logger.severe('Failed to initialize notification listener', error, stackTrace);
   }
+}
+
+void _initializeAndListenIos(
+  String pubkey,
+  NotificationService notificationService,
+  Ref ref,
+  void Function(StreamSubscription<notifications_api.NotificationUpdate>) onSubscription,
+) async {
+  try {
+    await notificationService.initialize();
+    if (!ref.mounted) return;
+    await notificationService.requestPermission();
+    if (!ref.mounted) return;
+
+    const apnTokenService = ApnTokenService();
+    final token = await apnTokenService.getToken();
+    if (!ref.mounted) return;
+
+    if (token != null) {
+      await notifications_api.upsertPushRegistration(
+        pubkey: pubkey,
+        platform: notifications_api.PushPlatform.apns,
+        rawToken: token,
+        serverPubkey: notificationServerPubkey,
+        relayHint: notificationServerRelayHint, // ignore: avoid_redundant_argument_values
+      );
+      if (!ref.mounted) return;
+      _logger.info('Registered APNs push token with whitenoise');
+    } else {
+      _logger.warning('APNs token not available; push notifications will not be registered');
+    }
+
+    _subscribeToNotificationStream(notificationService, ref, onSubscription);
+  } catch (error, stackTrace) {
+    _logger.severe('Failed to initialize iOS notification listener', error, stackTrace);
+  }
+}
+
+void _subscribeToNotificationStream(
+  NotificationService notificationService,
+  Ref ref,
+  void Function(StreamSubscription<notifications_api.NotificationUpdate>) onSubscription,
+) {
+  final stream = notifications_api.subscribeToNotifications();
+
+  final subscription = stream.listen(
+    (update) async {
+      try {
+        await handleNotificationUpdate(update, notificationService, ref);
+      } catch (error, stackTrace) {
+        _logger.severe('Error handling notification update', error, stackTrace);
+      }
+    },
+    onError: (error) {
+      _logger.severe('Notification stream error', error);
+    },
+    onDone: () {
+      _logger.info('Notification stream closed');
+    },
+  );
+
+  if (!ref.mounted) {
+    subscription.cancel();
+    return;
+  }
+  onSubscription(subscription);
+  _logger.info('Notification listener started');
 }
 // coverage:ignore-end
 

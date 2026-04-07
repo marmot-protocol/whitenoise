@@ -20,7 +20,7 @@ class NotificationService {
     bool? enabled,
   }) : _plugin = plugin ?? FlutterLocalNotificationsPlugin(),
        _onNotificationTap = onNotificationTap,
-       _enabled = enabled ?? Platform.isAndroid;
+       _enabled = enabled ?? (Platform.isAndroid || Platform.isIOS);
 
   final FlutterLocalNotificationsPlugin _plugin;
   final void Function(String groupId, bool isInvite, String receiverPubkey)? _onNotificationTap;
@@ -36,7 +36,11 @@ class NotificationService {
     if (_initialized) return;
 
     const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
-    const initSettings = InitializationSettings(android: androidSettings);
+    const darwinSettings = DarwinInitializationSettings();
+    const initSettings = InitializationSettings(
+      android: androidSettings,
+      iOS: darwinSettings,
+    );
 
     await _plugin.initialize(
       settings: initSettings,
@@ -107,7 +111,12 @@ class NotificationService {
       priority: Priority.high,
     );
 
-    const details = NotificationDetails(android: androidDetails);
+    const darwinDetails = DarwinNotificationDetails();
+
+    const details = NotificationDetails(
+      android: androidDetails,
+      iOS: darwinDetails,
+    );
 
     await _plugin.show(
       id: notificationId,
@@ -135,12 +144,21 @@ class NotificationService {
 
     final androidPlugin = _plugin
         .resolvePlatformSpecificImplementation<AndroidFlutterLocalNotificationsPlugin>();
+    if (androidPlugin != null) {
+      final granted = await androidPlugin.requestNotificationsPermission();
+      _logger.info('Notification permission ${granted == true ? 'granted' : 'denied'}');
+      return granted ?? false;
+    }
 
-    if (androidPlugin == null) return false;
+    final iosPlugin = _plugin
+        .resolvePlatformSpecificImplementation<IOSFlutterLocalNotificationsPlugin>();
+    if (iosPlugin != null) {
+      final granted = await iosPlugin.requestPermissions(alert: true, badge: true, sound: true);
+      _logger.info('Notification permission ${granted == true ? 'granted' : 'denied'}');
+      return granted ?? false;
+    }
 
-    final granted = await androidPlugin.requestNotificationsPermission();
-    _logger.info('Notification permission ${granted == true ? 'granted' : 'denied'}');
-    return granted ?? false;
+    return false;
   }
 
   static int generateNotificationId(String groupId) {

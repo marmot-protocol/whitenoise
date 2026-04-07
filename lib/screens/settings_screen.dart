@@ -142,7 +142,8 @@ class SettingsScreen extends HookConsumerWidget {
                       label: context.l10n.appearance,
                       onTap: () => Routes.pushToAppearance(context),
                     ),
-                    if (defaultTargetPlatform == TargetPlatform.android)
+                    if (defaultTargetPlatform == TargetPlatform.android ||
+                        defaultTargetPlatform == TargetPlatform.iOS)
                       WnMenuItem(
                         key: const Key('notification_settings_menu_item'),
                         icon: WnIcons.notification,

@@ -17,8 +17,9 @@ import UIKit
     didRegisterForRemoteNotificationsWithDeviceToken deviceToken: Data
   ) {
     super.application(application, didRegisterForRemoteNotificationsWithDeviceToken: deviceToken)
-#if DEBUG
     let token = deviceToken.map { String(format: "%02x", $0) }.joined()
+    ApnTokenPlugin.setToken(token)
+#if DEBUG
     NSLog("APNs registration succeeded with token: %@", token)
 #endif
   }
@@ -35,5 +36,6 @@ import UIKit
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    ApnTokenPlugin.register(with: engineBridge.pluginRegistry.registrar(forPlugin: "ApnTokenPlugin"))
   }
 }
