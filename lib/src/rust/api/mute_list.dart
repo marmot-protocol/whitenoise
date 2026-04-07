@@ -54,10 +54,7 @@ class MuteListEntry {
 
   @override
   int get hashCode =>
-      accountPubkey.hashCode ^
-      mutedPubkey.hashCode ^
-      isPrivate.hashCode ^
-      createdAt.hashCode;
+      accountPubkey.hashCode ^ mutedPubkey.hashCode ^ isPrivate.hashCode ^ createdAt.hashCode;
 
   @override
   bool operator ==(Object other) =>
