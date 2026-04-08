@@ -22,9 +22,10 @@ ChatListSearchResult useChatListSearch({
   final matchedGroupIds = useState<Set<String>>({});
   final isSearching = useState(false);
   final debouncedQuery = _useDebouncedValue(query, _searchDebounceMs);
+  final trimmedQuery = debouncedQuery.trim();
 
   useEffect(() {
-    if (debouncedQuery.isEmpty) {
+    if (trimmedQuery.isEmpty) {
       messageSnippets.value = {};
       matchedGroupIds.value = {};
       isSearching.value = false;
@@ -34,12 +35,12 @@ ChatListSearchResult useChatListSearch({
     isSearching.value = true;
     var cancelled = false;
 
-    searchMessages(pubkey: pubkey, query: debouncedQuery)
+    searchMessages(pubkey: pubkey, query: trimmedQuery)
         .then((results) {
           if (cancelled) return;
           _logger.info(
             'cross-group search completed '
-            'queryLength=${debouncedQuery.length} results=${results.length}',
+            'queryLength=${trimmedQuery.length} results=${results.length}',
           );
 
           final snippets = <String, String>{};
@@ -56,7 +57,7 @@ ChatListSearchResult useChatListSearch({
         .catchError((Object e, StackTrace st) {
           if (!cancelled) {
             _logger.severe(
-              'cross-group search failed queryLength=${debouncedQuery.length}',
+              'cross-group search failed queryLength=${trimmedQuery.length}',
               e,
               st,
             );
@@ -67,7 +68,7 @@ ChatListSearchResult useChatListSearch({
         });
 
     return () => cancelled = true;
-  }, [debouncedQuery, pubkey]);
+  }, [trimmedQuery, pubkey]);
 
   return (
     messageSnippets: messageSnippets.value,

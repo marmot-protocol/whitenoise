@@ -101,6 +101,17 @@ void main() {
 
         expect(api.searchCalls, isEmpty);
       });
+
+      testWidgets('treats whitespace-only query as empty', (tester) async {
+        await pump(tester, query: '   ');
+        await tester.pump(const Duration(milliseconds: 150));
+        await tester.pump();
+
+        expect(api.searchCalls, isEmpty);
+        expect(getState().messageSnippets, isEmpty);
+        expect(getState().matchedGroupIds, isEmpty);
+        expect(getState().isSearching, isFalse);
+      });
     });
 
     group('debounce behavior', () {
