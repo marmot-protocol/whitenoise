@@ -111,9 +111,9 @@ void main() {
         expect(api.searchCalls, isEmpty);
       });
 
-      testWidgets('calls search API after 300ms debounce', (tester) async {
+      testWidgets('calls search API after 150ms debounce', (tester) async {
         await pump(tester, query: 'hello');
-        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump(const Duration(milliseconds: 150));
         await tester.pump();
 
         expect(api.searchCalls.length, 1);
@@ -134,7 +134,7 @@ void main() {
         ];
 
         await pump(tester, query: 'hello');
-        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump(const Duration(milliseconds: 150));
         await tester.pump();
 
         expect(getState().matchedGroupIds, {testGroupId, otherTestGroupId});
@@ -150,7 +150,7 @@ void main() {
         ];
 
         await pump(tester, query: 'match');
-        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump(const Duration(milliseconds: 150));
         await tester.pump();
 
         expect(getState().messageSnippets[testGroupId], 'first match');
@@ -161,7 +161,7 @@ void main() {
         api.searchCompleter = Completer();
 
         await pump(tester, query: 'hello');
-        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump(const Duration(milliseconds: 150));
 
         expect(getState().isSearching, isTrue);
       });
@@ -172,12 +172,12 @@ void main() {
         ];
 
         await pump(tester, query: 'hello');
-        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump(const Duration(milliseconds: 150));
         await tester.pump();
         expect(getState().matchedGroupIds, isNotEmpty);
 
         await pump(tester);
-        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump(const Duration(milliseconds: 150));
         await tester.pump();
 
         expect(getState().messageSnippets, isEmpty);
@@ -189,7 +189,7 @@ void main() {
         api.shouldFailSearch = true;
 
         await pump(tester, query: 'hello');
-        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump(const Duration(milliseconds: 150));
         await tester.pumpAndSettle();
 
         expect(getState().messageSnippets, isEmpty);
@@ -201,7 +201,7 @@ void main() {
         api.searchCompleter = Completer();
 
         await pump(tester, query: 'hello');
-        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump(const Duration(milliseconds: 150));
         expect(getState().isSearching, isTrue);
 
         final staleCompleter = api.searchCompleter!;
@@ -212,7 +212,7 @@ void main() {
         ];
 
         await pump(tester, query: 'new');
-        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump(const Duration(milliseconds: 150));
         await tester.pump();
 
         staleCompleter.complete([

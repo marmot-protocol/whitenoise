@@ -6,7 +6,7 @@ import 'package:whitenoise/src/rust/api/messages.dart';
 
 final _logger = Logger('useChatListSearch');
 
-const _searchDebounceMs = 300;
+const _searchDebounceMs = 150;
 
 typedef ChatListSearchResult = ({
   Map<String, String> messageSnippets,
