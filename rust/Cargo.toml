@@ -22,7 +22,7 @@ thiserror = "2.0.12"
 tokio = { version = "1.44", features = ["rt", "rt-multi-thread"] }
 tracing = "0.1"
 url = "2.5.1"
-whitenoise = { version = "0.2.1", git = "https://github.com/marmot-protocol/whitenoise-rs", rev = "51fef295746eab060afd97af4946b8238737e854" }
+whitenoise = { version = "0.2.1", git = "https://github.com/marmot-protocol/whitenoise-rs", rev = "e4e850dd815aa0dd31bbde45d6ee23d86e6b27ca" }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

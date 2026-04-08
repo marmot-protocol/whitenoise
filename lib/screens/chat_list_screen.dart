@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whitenoise/hooks/use_chat_list.dart';
+import 'package:whitenoise/hooks/use_chat_list_search.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_zapstore_update.dart';
 import 'package:whitenoise/l10n/l10n.dart';
@@ -171,6 +172,10 @@ class ChatListScreen extends HookConsumerWidget {
     final searchQuery = useState('');
     final welcomeNoticeDismissed = useState(false);
     final chatListTopPadding = useMemoized(() => ValueNotifier(safeAreaTop + _slateHeight.h));
+    final chatListSearch = useChatListSearch(
+      pubkey: pubkey,
+      query: searchQuery.value,
+    );
 
     useEffect(() {
       welcomeNoticeDismissed.value = false;
@@ -179,7 +184,11 @@ class ChatListScreen extends HookConsumerWidget {
 
     final isArchiveView = selectedFilter.value == ChatListFilter.archive;
     final activeChatList = isArchiveView ? archivedChatListResult.chats : chatListResult.chats;
-    final filteredChats = filterChatsBySearch(activeChatList, searchQuery.value);
+    final filteredChats = filterChatsBySearchWithMessageMatches(
+      activeChatList,
+      searchQuery.value,
+      chatListSearch.matchedGroupIds,
+    );
     final isLoading = isArchiveView ? archivedChatListResult.isLoading : chatListResult.isLoading;
     final isEmpty = activeChatList.isEmpty && !isLoading;
     final showWelcomeNotice = !isArchiveView && isEmpty && !welcomeNoticeDismissed.value;
@@ -198,6 +207,7 @@ class ChatListScreen extends HookConsumerWidget {
               topPadding: topPadding,
               header: WnSearchAndFilters(
                 onSearchChanged: (value) => searchQuery.value = value,
+                isLoading: chatListSearch.isSearching,
               ),
               headerHeight: _searchAndFiltersHeight.h,
               pinnedHeader: Padding(
@@ -251,6 +261,7 @@ class ChatListScreen extends HookConsumerWidget {
                   key: Key(chatSummary.mlsGroupId),
                   chatSummary: chatSummary,
                   isArchived: isArchiveView,
+                  searchSnippet: chatListSearch.messageSnippets[chatSummary.mlsGroupId],
                   onChatListChanged: isArchiveView
                       ? archivedChatListResult.refresh
                       : chatListResult.refresh,

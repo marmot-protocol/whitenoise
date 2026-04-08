@@ -47,6 +47,7 @@ class ChatListTile extends HookConsumerWidget {
   final VoidCallback? onChatListChanged;
   final void Function(String message)? onError;
   final bool isArchived;
+  final String? searchSnippet;
 
   const ChatListTile({
     super.key,
@@ -54,6 +55,7 @@ class ChatListTile extends HookConsumerWidget {
     this.onChatListChanged,
     this.onError,
     this.isArchived = false,
+    this.searchSnippet,
   });
 
   @override
@@ -154,6 +156,19 @@ class ChatListTile extends HookConsumerWidget {
       }
     }
 
+    final String displaySubtitle;
+    final String? displayPrefixSubtitle;
+    final Widget? displaySubtitleIcon;
+    if (searchSnippet != null) {
+      displaySubtitle = searchSnippet!;
+      displayPrefixSubtitle = null;
+      displaySubtitleIcon = null;
+    } else {
+      displaySubtitle = subtitle;
+      displayPrefixSubtitle = prefixSubtitle;
+      displaySubtitleIcon = subtitleIcon;
+    }
+
     final avatarColorKey = isDm
         ? (chatSummary.dmPeerPubkey ?? chatSummary.mlsGroupId)
         : chatSummary.mlsGroupId;
@@ -171,7 +186,7 @@ class ChatListTile extends HookConsumerWidget {
         childRenderBox: renderBox,
         child: WnChatListItem(
           title: title,
-          subtitle: subtitle,
+          subtitle: displaySubtitle,
           timestamp: formattedTime,
           avatarUrl: pictureUrl,
           avatarName: avatarName,
@@ -179,8 +194,8 @@ class ChatListTile extends HookConsumerWidget {
           showPinned: isPinned,
           status: status,
           unreadCount: unreadCount,
-          prefixSubtitle: prefixSubtitle,
-          subtitleIcon: subtitleIcon,
+          prefixSubtitle: displayPrefixSubtitle,
+          subtitleIcon: displaySubtitleIcon,
         ),
         actions: [
           WnChatListContextMenuAction(
@@ -239,7 +254,7 @@ class ChatListTile extends HookConsumerWidget {
           : () => Routes.goToChat(context, chatSummary.mlsGroupId),
       onLongPress: isPending ? null : showContextMenu,
       title: title,
-      subtitle: subtitle,
+      subtitle: displaySubtitle,
       timestamp: formattedTime,
       avatarUrl: pictureUrl,
       avatarName: avatarName,
@@ -247,8 +262,8 @@ class ChatListTile extends HookConsumerWidget {
       showPinned: chatSummary.pinOrder != null,
       status: status,
       unreadCount: unreadCount,
-      prefixSubtitle: prefixSubtitle,
-      subtitleIcon: subtitleIcon,
+      prefixSubtitle: displayPrefixSubtitle,
+      subtitleIcon: displaySubtitleIcon,
     );
   }
 }

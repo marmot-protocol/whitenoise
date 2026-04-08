@@ -8,9 +8,11 @@ class WnSearchAndFilters extends HookWidget {
   const WnSearchAndFilters({
     super.key,
     this.onSearchChanged,
+    this.isLoading = false,
   });
 
   final ValueChanged<String>? onSearchChanged;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -39,6 +41,7 @@ class WnSearchAndFilters extends HookWidget {
           WnSearchField(
             placeholder: l10n.search,
             controller: searchController,
+            isLoading: isLoading,
           ),
         ],
       ),

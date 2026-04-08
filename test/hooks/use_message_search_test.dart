@@ -29,6 +29,7 @@ SearchResult _searchResultFactory(
   int position = 0,
 }) => SearchResult(
   message: _messageFactory(id, content),
+  mlsGroupId: testGroupId,
   highlightSpans: spans,
   position: BigInt.from(position),
 );

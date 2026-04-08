@@ -170,9 +170,11 @@ pub struct HighlightSpan {
 #[derive(Debug, Clone)]
 pub struct SearchResult {
     pub message: ChatMessage,
+    /// The MLS group this message belongs to (hex-encoded).
+    pub mls_group_id: String,
     /// One span per matched query token, in the order they appear in the content.
     pub highlight_spans: Vec<HighlightSpan>,
-    /// 0-based position of the message within the group (0 = newest),
+    /// 0-based position of the message within its group (0 = newest),
     /// matching the `created_at DESC, message_id DESC` ordering used by pagination.
     pub position: u64,
 }
@@ -181,6 +183,7 @@ impl From<WhitenoiseSearchResult> for SearchResult {
     fn from(result: WhitenoiseSearchResult) -> Self {
         Self {
             message: (&result.message).into(),
+            mls_group_id: group_id_to_string(&result.mls_group_id),
             highlight_spans: result
                 .highlight_spans
                 .into_iter()
@@ -478,6 +481,24 @@ pub async fn search_messages_in_group(
     let results = whitenoise
         .search_messages_in_group(&pubkey, &group_id, &query, limit)
         .await?;
+    Ok(results.into_iter().map(|r| r.into()).collect())
+}
+
+/// Search messages across all groups the account belongs to.
+///
+/// Like [`search_messages_in_group`] but without a group filter. Each result
+/// includes `mls_group_id` so callers can group results by conversation.
+/// Position is computed per-group so the frontend can still jump to the
+/// correct page within each conversation.
+#[frb]
+pub async fn search_messages(
+    pubkey: String,
+    query: String,
+    limit: Option<u32>,
+) -> Result<Vec<SearchResult>, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let results = whitenoise.search_messages(&pubkey, &query, limit).await?;
     Ok(results.into_iter().map(|r| r.into()).collect())
 }
 

@@ -20,6 +20,7 @@ ChatMessage _msg(String id, {DateTime? createdAt}) => ChatMessage(
 
 SearchResult _result(String id, {DateTime? createdAt, int position = 0}) => SearchResult(
   message: _msg(id, createdAt: createdAt),
+  mlsGroupId: testGroupId,
   highlightSpans: const [HighlightSpan(start: 0, end: 7)],
   position: BigInt.from(position),
 );

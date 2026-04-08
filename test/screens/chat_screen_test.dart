@@ -323,6 +323,7 @@ class _MockApi extends MockWnApi {
         .map(
           (entry) => SearchResult(
             message: entry.value,
+            mlsGroupId: groupId,
             highlightSpans: [
               HighlightSpan(
                 start: entry.value.content.toLowerCase().indexOf(query.toLowerCase()),
@@ -1947,11 +1948,13 @@ void main() {
         _api.searchOverride = (query) => [
           SearchResult(
             message: _api.initialMessages[0],
+            mlsGroupId: _testGroupId,
             highlightSpans: [const HighlightSpan(start: 0, end: 5)],
             position: BigInt.zero,
           ),
           SearchResult(
             message: _api.initialMessages[6],
+            mlsGroupId: _testGroupId,
             highlightSpans: [const HighlightSpan(start: 0, end: 5)],
             position: BigInt.from(6),
           ),

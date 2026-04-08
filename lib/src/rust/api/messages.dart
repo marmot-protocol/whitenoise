@@ -61,6 +61,22 @@ Future<List<SearchResult>> searchMessagesInGroup({
   limit: limit,
 );
 
+/// Search messages across all groups the account belongs to.
+///
+/// Like [`search_messages_in_group`] but without a group filter. Each result
+/// includes `mls_group_id` so callers can group results by conversation.
+/// Position is computed per-group so the frontend can still jump to the
+/// correct page within each conversation.
+Future<List<SearchResult>> searchMessages({
+  required String pubkey,
+  required String query,
+  int? limit,
+}) => RustLib.instance.api.crateApiMessagesSearchMessages(
+  pubkey: pubkey,
+  query: query,
+  limit: limit,
+);
+
 /// Fetch a paginated page of messages for a group.
 ///
 /// Returns messages in oldest-first order. Pass the `created_at` and `id` of the
@@ -426,21 +442,26 @@ class ReactionSummary {
 class SearchResult {
   final ChatMessage message;
 
+  /// The MLS group this message belongs to (hex-encoded).
+  final String mlsGroupId;
+
   /// One span per matched query token, in the order they appear in the content.
   final List<HighlightSpan> highlightSpans;
 
-  /// 0-based position of the message within the group (0 = newest),
+  /// 0-based position of the message within its group (0 = newest),
   /// matching the `created_at DESC, message_id DESC` ordering used by pagination.
   final BigInt position;
 
   const SearchResult({
     required this.message,
+    required this.mlsGroupId,
     required this.highlightSpans,
     required this.position,
   });
 
   @override
-  int get hashCode => message.hashCode ^ highlightSpans.hashCode ^ position.hashCode;
+  int get hashCode =>
+      message.hashCode ^ mlsGroupId.hashCode ^ highlightSpans.hashCode ^ position.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -448,6 +469,7 @@ class SearchResult {
       other is SearchResult &&
           runtimeType == other.runtimeType &&
           message == other.message &&
+          mlsGroupId == other.mlsGroupId &&
           highlightSpans == other.highlightSpans &&
           position == other.position;
 }
