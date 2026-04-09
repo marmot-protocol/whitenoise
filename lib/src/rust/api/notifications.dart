@@ -3,162 +3,118 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-
 import '../frb_generated.dart';
 import 'error.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`
 
-Stream<NotificationUpdate> subscribeToNotifications() =>
-    RustLib.instance.api.crateApiNotificationsSubscribeToNotifications();
+            // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`
 
-Future<PushRegistration?> getPushRegistration({required String pubkey}) =>
-    RustLib.instance.api.crateApiNotificationsGetPushRegistration(
-      pubkey: pubkey,
-    );
 
-Future<PushRegistration> upsertPushRegistration({
-  required String pubkey,
-  required PushPlatform platform,
-  required String rawToken,
-  required String serverPubkey,
-  String? relayHint,
-}) => RustLib.instance.api.crateApiNotificationsUpsertPushRegistration(
-  pubkey: pubkey,
-  platform: platform,
-  rawToken: rawToken,
-  serverPubkey: serverPubkey,
-  relayHint: relayHint,
-);
+            Stream<NotificationUpdate>  subscribeToNotifications() => RustLib.instance.api.crateApiNotificationsSubscribeToNotifications();
 
-Future<void> clearPushRegistration({required String pubkey}) =>
-    RustLib.instance.api.crateApiNotificationsClearPushRegistration(pubkey: pubkey);
+Future<PushRegistration?>  getPushRegistration({required String pubkey }) => RustLib.instance.api.crateApiNotificationsGetPushRegistration(pubkey: pubkey);
 
-enum NotificationTrigger {
-  newMessage,
-  groupInvite,
-}
+Future<PushRegistration>  upsertPushRegistration({required String pubkey , required PushPlatform platform , required String rawToken , required String serverPubkey , String? relayHint }) => RustLib.instance.api.crateApiNotificationsUpsertPushRegistration(pubkey: pubkey, platform: platform, rawToken: rawToken, serverPubkey: serverPubkey, relayHint: relayHint);
 
-class NotificationUpdate {
-  final NotificationTrigger trigger;
-  final String mlsGroupId;
-  final String? groupName;
-  final bool isDm;
-  final NotificationUser receiver;
-  final NotificationUser sender;
-  final String content;
-  final DateTime timestamp;
+Future<void>  clearPushRegistration({required String pubkey }) => RustLib.instance.api.crateApiNotificationsClearPushRegistration(pubkey: pubkey);
 
-  const NotificationUpdate({
-    required this.trigger,
-    required this.mlsGroupId,
-    this.groupName,
-    required this.isDm,
-    required this.receiver,
-    required this.sender,
-    required this.content,
-    required this.timestamp,
-  });
+            enum NotificationTrigger {
+                    newMessage,
+groupInvite,
+                    ;
+                    
+                }
 
-  @override
-  int get hashCode =>
-      trigger.hashCode ^
-      mlsGroupId.hashCode ^
-      groupName.hashCode ^
-      isDm.hashCode ^
-      receiver.hashCode ^
-      sender.hashCode ^
-      content.hashCode ^
-      timestamp.hashCode;
+class NotificationUpdate  {
+                final NotificationTrigger trigger;
+final String mlsGroupId;
+final String? groupName;
+final bool isDm;
+final NotificationUser receiver;
+final NotificationUser sender;
+final String content;
+final DateTime timestamp;
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is NotificationUpdate &&
-          runtimeType == other.runtimeType &&
-          trigger == other.trigger &&
-          mlsGroupId == other.mlsGroupId &&
-          groupName == other.groupName &&
-          isDm == other.isDm &&
-          receiver == other.receiver &&
-          sender == other.sender &&
-          content == other.content &&
-          timestamp == other.timestamp;
-}
+                const NotificationUpdate({required this.trigger ,required this.mlsGroupId ,this.groupName ,required this.isDm ,required this.receiver ,required this.sender ,required this.content ,required this.timestamp ,});
 
-class NotificationUser {
-  final String pubkey;
-  final String? displayName;
-  final String? pictureUrl;
+                
+                
 
-  const NotificationUser({
-    required this.pubkey,
-    this.displayName,
-    this.pictureUrl,
-  });
+                
+        @override
+        int get hashCode => trigger.hashCode^mlsGroupId.hashCode^groupName.hashCode^isDm.hashCode^receiver.hashCode^sender.hashCode^content.hashCode^timestamp.hashCode;
+        
 
-  @override
-  int get hashCode => pubkey.hashCode ^ displayName.hashCode ^ pictureUrl.hashCode;
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is NotificationUpdate &&
+                runtimeType == other.runtimeType
+                && trigger == other.trigger&& mlsGroupId == other.mlsGroupId&& groupName == other.groupName&& isDm == other.isDm&& receiver == other.receiver&& sender == other.sender&& content == other.content&& timestamp == other.timestamp;
+        
+            }
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is NotificationUser &&
-          runtimeType == other.runtimeType &&
-          pubkey == other.pubkey &&
-          displayName == other.displayName &&
-          pictureUrl == other.pictureUrl;
-}
+class NotificationUser  {
+                final String pubkey;
+final String? displayName;
+final String? pictureUrl;
+
+                const NotificationUser({required this.pubkey ,this.displayName ,this.pictureUrl ,});
+
+                
+                
+
+                
+        @override
+        int get hashCode => pubkey.hashCode^displayName.hashCode^pictureUrl.hashCode;
+        
+
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is NotificationUser &&
+                runtimeType == other.runtimeType
+                && pubkey == other.pubkey&& displayName == other.displayName&& pictureUrl == other.pictureUrl;
+        
+            }
 
 enum PushPlatform {
-  apns,
-  fcm,
-}
+                    apns,
+fcm,
+                    ;
+                    
+                }
 
-class PushRegistration {
-  final String accountPubkey;
-  final PushPlatform platform;
-  final String rawToken;
-  final String serverPubkey;
-  final String? relayHint;
-  final DateTime createdAt;
-  final DateTime updatedAt;
-  final DateTime? lastSharedAt;
+class PushRegistration  {
+                final String accountPubkey;
+final PushPlatform platform;
+final String rawToken;
+final String serverPubkey;
+final String? relayHint;
+final DateTime createdAt;
+final DateTime updatedAt;
+final DateTime? lastSharedAt;
 
-  const PushRegistration({
-    required this.accountPubkey,
-    required this.platform,
-    required this.rawToken,
-    required this.serverPubkey,
-    this.relayHint,
-    required this.createdAt,
-    required this.updatedAt,
-    this.lastSharedAt,
-  });
+                const PushRegistration({required this.accountPubkey ,required this.platform ,required this.rawToken ,required this.serverPubkey ,this.relayHint ,required this.createdAt ,required this.updatedAt ,this.lastSharedAt ,});
 
-  @override
-  int get hashCode =>
-      accountPubkey.hashCode ^
-      platform.hashCode ^
-      rawToken.hashCode ^
-      serverPubkey.hashCode ^
-      relayHint.hashCode ^
-      createdAt.hashCode ^
-      updatedAt.hashCode ^
-      lastSharedAt.hashCode;
+                
+                
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is PushRegistration &&
-          runtimeType == other.runtimeType &&
-          accountPubkey == other.accountPubkey &&
-          platform == other.platform &&
-          rawToken == other.rawToken &&
-          serverPubkey == other.serverPubkey &&
-          relayHint == other.relayHint &&
-          createdAt == other.createdAt &&
-          updatedAt == other.updatedAt &&
-          lastSharedAt == other.lastSharedAt;
-}
+                
+        @override
+        int get hashCode => accountPubkey.hashCode^platform.hashCode^rawToken.hashCode^serverPubkey.hashCode^relayHint.hashCode^createdAt.hashCode^updatedAt.hashCode^lastSharedAt.hashCode;
+        
+
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is PushRegistration &&
+                runtimeType == other.runtimeType
+                && accountPubkey == other.accountPubkey&& platform == other.platform&& rawToken == other.rawToken&& serverPubkey == other.serverPubkey&& relayHint == other.relayHint&& createdAt == other.createdAt&& updatedAt == other.updatedAt&& lastSharedAt == other.lastSharedAt;
+        
+            }
+            

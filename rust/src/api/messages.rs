@@ -132,6 +132,9 @@ pub enum UpdateTrigger {
     MessageDeleted,
     /// The delivery status of an outgoing message changed (Sending -> Sent or Failed)
     DeliveryStatusChanged,
+    /// The message expired due to the group's disappearing-messages setting.
+    /// Only the `id` field in the accompanying message is meaningful.
+    MessageExpired,
 }
 
 /// A real-time update for a group message.
@@ -407,6 +410,7 @@ impl From<WhitenoiseUpdateTrigger> for UpdateTrigger {
             WhitenoiseUpdateTrigger::ReactionRemoved => Self::ReactionRemoved,
             WhitenoiseUpdateTrigger::MessageDeleted => Self::MessageDeleted,
             WhitenoiseUpdateTrigger::DeliveryStatusChanged => Self::DeliveryStatusChanged,
+            WhitenoiseUpdateTrigger::MessageExpired => Self::MessageExpired,
         }
     }
 }
@@ -722,6 +726,12 @@ mod tests {
     fn test_update_trigger_conversion_delivery_status_changed() {
         let trigger: UpdateTrigger = WhitenoiseUpdateTrigger::DeliveryStatusChanged.into();
         assert_eq!(trigger, UpdateTrigger::DeliveryStatusChanged);
+    }
+
+    #[test]
+    fn test_update_trigger_conversion_message_expired() {
+        let trigger: UpdateTrigger = WhitenoiseUpdateTrigger::MessageExpired.into();
+        assert_eq!(trigger, UpdateTrigger::MessageExpired);
     }
 
     #[test]

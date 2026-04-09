@@ -3,13 +3,17 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-
 import '../frb_generated.dart';
 import 'error.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-/// Fetches the latest version string published on Zapstore for White Noise.
+
+            
+
+            /// Fetches the latest version string published on Zapstore for White Noise.
 ///
 /// Returns `None` when no release has been published yet or the relay is unreachable.
-Future<String?> fetchLatestZapstoreVersion() =>
-    RustLib.instance.api.crateApiZapstoreFetchLatestZapstoreVersion();
+Future<String?>  fetchLatestZapstoreVersion() => RustLib.instance.api.crateApiZapstoreFetchLatestZapstoreVersion();
+
+            
+            

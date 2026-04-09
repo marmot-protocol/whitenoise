@@ -3,78 +3,77 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-
 import '../api.dart';
 import '../frb_generated.dart';
 import 'error.dart';
 import 'messages.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-String npubFromHexPubkey({required String hexPubkey}) =>
-    RustLib.instance.api.crateApiUtilsNpubFromHexPubkey(hexPubkey: hexPubkey);
 
-String hexPubkeyFromNpub({required String npub}) =>
-    RustLib.instance.api.crateApiUtilsHexPubkeyFromNpub(npub: npub);
+            
 
-Future<RelayUrl> relayUrlFromString({required String url}) =>
-    RustLib.instance.api.crateApiUtilsRelayUrlFromString(url: url);
+            String  npubFromHexPubkey({required String hexPubkey }) => RustLib.instance.api.crateApiUtilsNpubFromHexPubkey(hexPubkey: hexPubkey);
 
-Future<String> stringFromRelayUrl({required RelayUrl relayUrl}) =>
-    RustLib.instance.api.crateApiUtilsStringFromRelayUrl(relayUrl: relayUrl);
+String  hexPubkeyFromNpub({required String npub }) => RustLib.instance.api.crateApiUtilsHexPubkeyFromNpub(npub: npub);
 
-Future<Tag> tagFromVec({required List<String> vec}) =>
-    RustLib.instance.api.crateApiUtilsTagFromVec(vec: vec);
+Future<RelayUrl>  relayUrlFromString({required String url }) => RustLib.instance.api.crateApiUtilsRelayUrlFromString(url: url);
 
-Future<String> getDefaultBlossomServerUrl() =>
-    RustLib.instance.api.crateApiUtilsGetDefaultBlossomServerUrl();
+Future<String>  stringFromRelayUrl({required RelayUrl relayUrl }) => RustLib.instance.api.crateApiUtilsStringFromRelayUrl(relayUrl: relayUrl);
 
-Future<String> groupIdToString({required GroupId groupId}) =>
-    RustLib.instance.api.crateApiUtilsGroupIdToString(groupId: groupId);
+Future<Tag>  tagFromVec({required List<String> vec }) => RustLib.instance.api.crateApiUtilsTagFromVec(vec: vec);
 
-Future<GroupId> groupIdFromString({required String groupId}) =>
-    RustLib.instance.api.crateApiUtilsGroupIdFromString(groupId: groupId);
+Future<String>  getDefaultBlossomServerUrl() => RustLib.instance.api.crateApiUtilsGetDefaultBlossomServerUrl();
 
-ThemeMode themeModeLight() => RustLib.instance.api.crateApiUtilsThemeModeLight();
+Future<String>  groupIdToString({required GroupId groupId }) => RustLib.instance.api.crateApiUtilsGroupIdToString(groupId: groupId);
 
-ThemeMode themeModeDark() => RustLib.instance.api.crateApiUtilsThemeModeDark();
+Future<GroupId>  groupIdFromString({required String groupId }) => RustLib.instance.api.crateApiUtilsGroupIdFromString(groupId: groupId);
 
-ThemeMode themeModeSystem() => RustLib.instance.api.crateApiUtilsThemeModeSystem();
+ThemeMode  themeModeLight() => RustLib.instance.api.crateApiUtilsThemeModeLight();
 
-String themeModeToString({required ThemeMode themeMode}) =>
-    RustLib.instance.api.crateApiUtilsThemeModeToString(themeMode: themeMode);
+ThemeMode  themeModeDark() => RustLib.instance.api.crateApiUtilsThemeModeDark();
 
-Language languageEnglish() => RustLib.instance.api.crateApiUtilsLanguageEnglish();
+ThemeMode  themeModeSystem() => RustLib.instance.api.crateApiUtilsThemeModeSystem();
 
-Language languageSpanish() => RustLib.instance.api.crateApiUtilsLanguageSpanish();
+String  themeModeToString({required ThemeMode themeMode }) => RustLib.instance.api.crateApiUtilsThemeModeToString(themeMode: themeMode);
 
-Language languageFrench() => RustLib.instance.api.crateApiUtilsLanguageFrench();
+Language  languageEnglish() => RustLib.instance.api.crateApiUtilsLanguageEnglish();
 
-Language languageGerman() => RustLib.instance.api.crateApiUtilsLanguageGerman();
+Language  languageSpanish() => RustLib.instance.api.crateApiUtilsLanguageSpanish();
 
-Language languageItalian() => RustLib.instance.api.crateApiUtilsLanguageItalian();
+Language  languageFrench() => RustLib.instance.api.crateApiUtilsLanguageFrench();
 
-Language languagePortuguese() => RustLib.instance.api.crateApiUtilsLanguagePortuguese();
+Language  languageGerman() => RustLib.instance.api.crateApiUtilsLanguageGerman();
 
-Language languageRussian() => RustLib.instance.api.crateApiUtilsLanguageRussian();
+Language  languageItalian() => RustLib.instance.api.crateApiUtilsLanguageItalian();
 
-Language languageTurkish() => RustLib.instance.api.crateApiUtilsLanguageTurkish();
+Language  languagePortuguese() => RustLib.instance.api.crateApiUtilsLanguagePortuguese();
 
-Language languageSystem() => RustLib.instance.api.crateApiUtilsLanguageSystem();
+Language  languageRussian() => RustLib.instance.api.crateApiUtilsLanguageRussian();
 
-String languageToString({required Language language}) =>
-    RustLib.instance.api.crateApiUtilsLanguageToString(language: language);
+Language  languageTurkish() => RustLib.instance.api.crateApiUtilsLanguageTurkish();
+
+Language  languageSystem() => RustLib.instance.api.crateApiUtilsLanguageSystem();
+
+String  languageToString({required Language language }) => RustLib.instance.api.crateApiUtilsLanguageToString(language: language);
 
 /// Build a `nostr:nevent1...` URI from a hex event ID and author pubkey (NIP-C7).
-String eventIdToNeventUri({
-  required String eventIdHex,
-  required String pubkeyHex,
-}) => RustLib.instance.api.crateApiUtilsEventIdToNeventUri(
-  eventIdHex: eventIdHex,
-  pubkeyHex: pubkeyHex,
-);
+String  eventIdToNeventUri({required String eventIdHex , required String pubkeyHex }) => RustLib.instance.api.crateApiUtilsEventIdToNeventUri(eventIdHex: eventIdHex, pubkeyHex: pubkeyHex);
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GroupId>>
-abstract class GroupId implements RustOpaqueInterface {}
+            
+                // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GroupId>>
+                abstract class GroupId implements RustOpaqueInterface {
+                    
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<RelayUrl>>
-abstract class RelayUrl implements RustOpaqueInterface {}
+                    
+                }
+                
+
+
+                // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<RelayUrl>>
+                abstract class RelayUrl implements RustOpaqueInterface {
+                    
+
+                    
+                }
+                
+            

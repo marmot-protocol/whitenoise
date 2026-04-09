@@ -168,13 +168,24 @@ ChatMessagesResult useChatMessages(
                   ),
                 );
 
-                messagesById.value[message.id] = message;
+                if (update.trigger == UpdateTrigger.messageExpired) {
+                  final removedIndex = indexById.value.remove(message.id);
+                  messagesById.value.remove(message.id);
+                  if (removedIndex != null) {
+                    messageIds.value.removeAt(removedIndex);
+                    for (var i = removedIndex; i < messageIds.value.length; i++) {
+                      indexById.value[messageIds.value[i]] = i;
+                    }
+                  }
+                } else {
+                  messagesById.value[message.id] = message;
 
-                if (update.trigger == UpdateTrigger.newMessage &&
-                    !indexById.value.containsKey(message.id)) {
-                  final newIndex = messageIds.value.length;
-                  messageIds.value.add(message.id);
-                  indexById.value[message.id] = newIndex;
+                  if (update.trigger == UpdateTrigger.newMessage &&
+                      !indexById.value.containsKey(message.id)) {
+                    final newIndex = messageIds.value.length;
+                    messageIds.value.add(message.id);
+                    indexById.value[message.id] = newIndex;
+                  }
                 }
 
                 final lastId = messageIds.value.isNotEmpty ? messageIds.value.last : null;

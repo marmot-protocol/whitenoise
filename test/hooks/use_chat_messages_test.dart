@@ -83,6 +83,14 @@ class _MockApi extends MockWnApi {
     );
   }
 
+  void emitMessageExpired(ChatMessage message) {
+    controller?.add(
+      MessageStreamItem.update(
+        update: MessageUpdate(trigger: UpdateTrigger.messageExpired, message: message),
+      ),
+    );
+  }
+
   void emitReactionAdded(ChatMessage message) {
     controller?.add(
       MessageStreamItem.update(
@@ -1505,6 +1513,98 @@ void main() {
         mediaFile: null,
       );
       expect(chatMessageQuote.mediaFile, isNull);
+    });
+  });
+
+  group('messageExpired trigger', () {
+    testWidgets('removes expired message from list', (tester) async {
+      final getResult = await _pump(tester, 'group1');
+
+      _api.emitInitialSnapshot([
+        _message('m1', DateTime(2024)),
+        _message('m2', DateTime(2024, 1, 2)),
+        _message('m3', DateTime(2024, 1, 3)),
+      ]);
+      await tester.pumpAndSettle();
+      expect(getResult().messageCount, 3);
+
+      _api.emitMessageExpired(_message('m2', DateTime(2024, 1, 2)));
+      await tester.pumpAndSettle();
+
+      expect(getResult().messageCount, 2);
+      expect(getResult().getMessage(0).id, 'm3');
+      expect(getResult().getMessage(1).id, 'm1');
+    });
+
+    testWidgets('expired message is not retrievable by id', (tester) async {
+      final getResult = await _pump(tester, 'group1');
+
+      _api.emitInitialSnapshot([
+        _message('m1', DateTime(2024)),
+        _message('m2', DateTime(2024, 1, 2)),
+      ]);
+      await tester.pumpAndSettle();
+      expect(getResult().getMessageById('m2'), isNotNull);
+
+      _api.emitMessageExpired(_message('m2', DateTime(2024, 1, 2)));
+      await tester.pumpAndSettle();
+
+      expect(getResult().getMessageById('m2'), isNull);
+    });
+
+    testWidgets('indexes are correct after removing middle message', (tester) async {
+      final getResult = await _pump(tester, 'group1');
+
+      _api.emitInitialSnapshot([
+        _message('m1', DateTime(2024)),
+        _message('m2', DateTime(2024, 1, 2)),
+        _message('m3', DateTime(2024, 1, 3)),
+        _message('m4', DateTime(2024, 1, 4)),
+      ]);
+      await tester.pumpAndSettle();
+
+      _api.emitMessageExpired(_message('m2', DateTime(2024, 1, 2)));
+      await tester.pumpAndSettle();
+
+      expect(getResult().messageCount, 3);
+      expect(getResult().getReversedMessageIndex('m1'), 2);
+      expect(getResult().getReversedMessageIndex('m2'), isNull);
+      expect(getResult().getReversedMessageIndex('m3'), 1);
+      expect(getResult().getReversedMessageIndex('m4'), 0);
+    });
+
+    testWidgets('expiring unknown message id is a no-op', (tester) async {
+      final getResult = await _pump(tester, 'group1');
+
+      _api.emitInitialSnapshot([
+        _message('m1', DateTime(2024)),
+      ]);
+      await tester.pumpAndSettle();
+      expect(getResult().messageCount, 1);
+
+      _api.emitMessageExpired(_message('unknown', DateTime(2024)));
+      await tester.pumpAndSettle();
+
+      expect(getResult().messageCount, 1);
+      expect(getResult().getMessage(0).id, 'm1');
+    });
+
+    testWidgets('updates latest message after expiring last message', (tester) async {
+      final getResult = await _pump(tester, 'group1');
+
+      _api.emitInitialSnapshot([
+        _message('m1', DateTime(2024)),
+        _message('m2', DateTime(2024, 1, 2), pubkey: testPubkeyB),
+      ]);
+      await tester.pumpAndSettle();
+      expect(getResult().latestMessageId, 'm2');
+      expect(getResult().latestMessagePubkey, testPubkeyB);
+
+      _api.emitMessageExpired(_message('m2', DateTime(2024, 1, 2)));
+      await tester.pumpAndSettle();
+
+      expect(getResult().latestMessageId, 'm1');
+      expect(getResult().latestMessagePubkey, testPubkeyA);
     });
   });
 }

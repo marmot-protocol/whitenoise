@@ -3,429 +3,278 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-
 import '../frb_generated.dart';
 import '../lib.dart';
 import 'account_groups.dart';
 import 'error.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `group_creation_relays`
+
+            // These functions are ignored because they are not marked as `pub`: `group_creation_relays`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`
 
-Future<List<Group>> activeGroups({required String pubkey}) =>
-    RustLib.instance.api.crateApiGroupsActiveGroups(pubkey: pubkey);
 
-Future<List<String>> groupMembers({
-  required String pubkey,
-  required String groupId,
-}) => RustLib.instance.api.crateApiGroupsGroupMembers(
-  pubkey: pubkey,
-  groupId: groupId,
-);
+            Future<List<Group>>  activeGroups({required String pubkey }) => RustLib.instance.api.crateApiGroupsActiveGroups(pubkey: pubkey);
 
-Future<List<String>> groupAdmins({
-  required String pubkey,
-  required String groupId,
-}) => RustLib.instance.api.crateApiGroupsGroupAdmins(
-  pubkey: pubkey,
-  groupId: groupId,
-);
+Future<List<String>>  groupMembers({required String pubkey , required String groupId }) => RustLib.instance.api.crateApiGroupsGroupMembers(pubkey: pubkey, groupId: groupId);
 
-Future<Group> createGroup({
-  required String creatorPubkey,
-  required List<String> memberPubkeys,
-  required List<String> adminPubkeys,
-  required String groupName,
-  required String groupDescription,
-  required GroupType groupType,
-}) => RustLib.instance.api.crateApiGroupsCreateGroup(
-  creatorPubkey: creatorPubkey,
-  memberPubkeys: memberPubkeys,
-  adminPubkeys: adminPubkeys,
-  groupName: groupName,
-  groupDescription: groupDescription,
-  groupType: groupType,
-);
+Future<List<String>>  groupAdmins({required String pubkey , required String groupId }) => RustLib.instance.api.crateApiGroupsGroupAdmins(pubkey: pubkey, groupId: groupId);
 
-Future<void> addMembersToGroup({
-  required String pubkey,
-  required String groupId,
-  required List<String> memberPubkeys,
-}) => RustLib.instance.api.crateApiGroupsAddMembersToGroup(
-  pubkey: pubkey,
-  groupId: groupId,
-  memberPubkeys: memberPubkeys,
-);
+Future<Group>  createGroup({required String creatorPubkey , required List<String> memberPubkeys , required List<String> adminPubkeys , required String groupName , required String groupDescription , required GroupType groupType }) => RustLib.instance.api.crateApiGroupsCreateGroup(creatorPubkey: creatorPubkey, memberPubkeys: memberPubkeys, adminPubkeys: adminPubkeys, groupName: groupName, groupDescription: groupDescription, groupType: groupType);
 
-Future<void> removeMembersFromGroup({
-  required String pubkey,
-  required String groupId,
-  required List<String> memberPubkeys,
-}) => RustLib.instance.api.crateApiGroupsRemoveMembersFromGroup(
-  pubkey: pubkey,
-  groupId: groupId,
-  memberPubkeys: memberPubkeys,
-);
+Future<void>  addMembersToGroup({required String pubkey , required String groupId , required List<String> memberPubkeys }) => RustLib.instance.api.crateApiGroupsAddMembersToGroup(pubkey: pubkey, groupId: groupId, memberPubkeys: memberPubkeys);
 
-Future<Group> getGroup({
-  required String accountPubkey,
-  required String groupId,
-}) => RustLib.instance.api.crateApiGroupsGetGroup(
-  accountPubkey: accountPubkey,
-  groupId: groupId,
-);
+Future<void>  removeMembersFromGroup({required String pubkey , required String groupId , required List<String> memberPubkeys }) => RustLib.instance.api.crateApiGroupsRemoveMembersFromGroup(pubkey: pubkey, groupId: groupId, memberPubkeys: memberPubkeys);
 
-Future<GroupInformation> getGroupInformation({
-  required String accountPubkey,
-  required String groupId,
-}) => RustLib.instance.api.crateApiGroupsGetGroupInformation(
-  accountPubkey: accountPubkey,
-  groupId: groupId,
-);
+Future<Group>  getGroup({required String accountPubkey , required String groupId }) => RustLib.instance.api.crateApiGroupsGetGroup(accountPubkey: accountPubkey, groupId: groupId);
 
-Future<List<GroupInformation>> getGroupsInformations({
-  required String accountPubkey,
-  required List<String> groupIds,
-}) => RustLib.instance.api.crateApiGroupsGetGroupsInformations(
-  accountPubkey: accountPubkey,
-  groupIds: groupIds,
-);
+Future<GroupInformation>  getGroupInformation({required String accountPubkey , required String groupId }) => RustLib.instance.api.crateApiGroupsGetGroupInformation(accountPubkey: accountPubkey, groupId: groupId);
 
-Future<List<GroupWithInfoAndMembership>> visibleGroupsWithInfo({
-  required String accountPubkey,
-}) => RustLib.instance.api.crateApiGroupsVisibleGroupsWithInfo(
-  accountPubkey: accountPubkey,
-);
+Future<List<GroupInformation>>  getGroupsInformations({required String accountPubkey , required List<String> groupIds }) => RustLib.instance.api.crateApiGroupsGetGroupsInformations(accountPubkey: accountPubkey, groupIds: groupIds);
 
-Future<UploadGroupImageResult> uploadGroupImage({
-  required String accountPubkey,
-  required String groupId,
-  required String filePath,
-  required String serverUrl,
-}) => RustLib.instance.api.crateApiGroupsUploadGroupImage(
-  accountPubkey: accountPubkey,
-  groupId: groupId,
-  filePath: filePath,
-  serverUrl: serverUrl,
-);
+Future<List<GroupWithInfoAndMembership>>  visibleGroupsWithInfo({required String accountPubkey }) => RustLib.instance.api.crateApiGroupsVisibleGroupsWithInfo(accountPubkey: accountPubkey);
 
-Future<String?> getGroupImagePath({
-  required String accountPubkey,
-  required String groupId,
-}) => RustLib.instance.api.crateApiGroupsGetGroupImagePath(
-  accountPubkey: accountPubkey,
-  groupId: groupId,
-);
+Future<UploadGroupImageResult>  uploadGroupImage({required String accountPubkey , required String groupId , required String filePath , required String serverUrl }) => RustLib.instance.api.crateApiGroupsUploadGroupImage(accountPubkey: accountPubkey, groupId: groupId, filePath: filePath, serverUrl: serverUrl);
 
-Future<RatchetTreeInfo> getRatchetTreeInfo({
-  required String accountPubkey,
-  required String groupId,
-}) => RustLib.instance.api.crateApiGroupsGetRatchetTreeInfo(
-  accountPubkey: accountPubkey,
-  groupId: groupId,
-);
+Future<String?>  getGroupImagePath({required String accountPubkey , required String groupId }) => RustLib.instance.api.crateApiGroupsGetGroupImagePath(accountPubkey: accountPubkey, groupId: groupId);
+
+Future<RatchetTreeInfo>  getRatchetTreeInfo({required String accountPubkey , required String groupId }) => RustLib.instance.api.crateApiGroupsGetRatchetTreeInfo(accountPubkey: accountPubkey, groupId: groupId);
 
 /// Sets the disappearing message duration for a group.
 ///
 /// Only group admins can change this setting.
 /// `duration_secs`: `Some(n)` to enable (messages expire after `n` seconds),
 /// `None` to disable (messages persist forever).
-Future<void> setDisappearingMessages({
-  required String accountPubkey,
-  required String groupId,
-  BigInt? durationSecs,
-}) => RustLib.instance.api.crateApiGroupsSetDisappearingMessages(
-  accountPubkey: accountPubkey,
-  groupId: groupId,
-  durationSecs: durationSecs,
-);
+Future<void>  setDisappearingMessages({required String accountPubkey , required String groupId , BigInt? durationSecs }) => RustLib.instance.api.crateApiGroupsSetDisappearingMessages(accountPubkey: accountPubkey, groupId: groupId, durationSecs: durationSecs);
 
 /// Returns the disappearing message duration for a group in seconds.
 ///
 /// Returns `None` when disappearing messages are disabled.
-Future<BigInt?> getDisappearingMessageDuration({
-  required String accountPubkey,
-  required String groupId,
-}) => RustLib.instance.api.crateApiGroupsGetDisappearingMessageDuration(
-  accountPubkey: accountPubkey,
-  groupId: groupId,
-);
+Future<BigInt?>  getDisappearingMessageDuration({required String accountPubkey , required String groupId }) => RustLib.instance.api.crateApiGroupsGetDisappearingMessageDuration(accountPubkey: accountPubkey, groupId: groupId);
 
-class FlutterGroupDataUpdate {
-  final String? name;
-  final String? description;
-  final List<String>? relays;
-  final List<String>? admins;
-  final U8Array32? imageKey;
-  final U8Array32? imageHash;
-  final U8Array12? imageNonce;
+            class FlutterGroupDataUpdate  {
+                final String? name;
+final String? description;
+final List<String>? relays;
+final List<String>? admins;
+final U8Array32? imageKey;
+final U8Array32? imageHash;
+final U8Array12? imageNonce;
 
-  const FlutterGroupDataUpdate({
-    this.name,
-    this.description,
-    this.relays,
-    this.admins,
-    this.imageKey,
-    this.imageHash,
-    this.imageNonce,
-  });
+                const FlutterGroupDataUpdate({this.name ,this.description ,this.relays ,this.admins ,this.imageKey ,this.imageHash ,this.imageNonce ,});
 
-  @override
-  int get hashCode =>
-      name.hashCode ^
-      description.hashCode ^
-      relays.hashCode ^
-      admins.hashCode ^
-      imageKey.hashCode ^
-      imageHash.hashCode ^
-      imageNonce.hashCode;
+                
+                
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is FlutterGroupDataUpdate &&
-          runtimeType == other.runtimeType &&
-          name == other.name &&
-          description == other.description &&
-          relays == other.relays &&
-          admins == other.admins &&
-          imageKey == other.imageKey &&
-          imageHash == other.imageHash &&
-          imageNonce == other.imageNonce;
-}
+                
+        @override
+        int get hashCode => name.hashCode^description.hashCode^relays.hashCode^admins.hashCode^imageKey.hashCode^imageHash.hashCode^imageNonce.hashCode;
+        
 
-class Group {
-  final String mlsGroupId;
-  final String nostrGroupId;
-  final String name;
-  final String description;
-  final U8Array32? imageHash;
-  final U8Array32? imageKey;
-  final List<String> adminPubkeys;
-  final String? lastMessageId;
-  final DateTime? lastMessageAt;
-  final BigInt epoch;
-  final GroupState state;
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is FlutterGroupDataUpdate &&
+                runtimeType == other.runtimeType
+                && name == other.name&& description == other.description&& relays == other.relays&& admins == other.admins&& imageKey == other.imageKey&& imageHash == other.imageHash&& imageNonce == other.imageNonce;
+        
+            }
 
-  const Group({
-    required this.mlsGroupId,
-    required this.nostrGroupId,
-    required this.name,
-    required this.description,
-    this.imageHash,
-    this.imageKey,
-    required this.adminPubkeys,
-    this.lastMessageId,
-    this.lastMessageAt,
-    required this.epoch,
-    required this.state,
-  });
+class Group  {
+                final String mlsGroupId;
+final String nostrGroupId;
+final String name;
+final String description;
+final U8Array32? imageHash;
+final U8Array32? imageKey;
+final List<String> adminPubkeys;
+final String? lastMessageId;
+final DateTime? lastMessageAt;
+final BigInt epoch;
+final GroupState state;
 
-  Future<GroupType> groupType({required String accountPubkey}) =>
-      RustLib.instance.api.crateApiGroupsGroupGroupType(that: this, accountPubkey: accountPubkey);
+                const Group({required this.mlsGroupId ,required this.nostrGroupId ,required this.name ,required this.description ,this.imageHash ,this.imageKey ,required this.adminPubkeys ,this.lastMessageId ,this.lastMessageAt ,required this.epoch ,required this.state ,});
 
-  Future<bool> isDirectMessageType({required String accountPubkey}) =>
-      RustLib.instance.api.crateApiGroupsGroupIsDirectMessageType(
-        that: this,
-        accountPubkey: accountPubkey,
-      );
+                 Future<GroupType>  groupType({required String accountPubkey })=>RustLib.instance.api.crateApiGroupsGroupGroupType(that: this, accountPubkey: accountPubkey);
 
-  Future<bool> isGroupType({required String accountPubkey}) =>
-      RustLib.instance.api.crateApiGroupsGroupIsGroupType(that: this, accountPubkey: accountPubkey);
 
-  Future<void> updateGroupData({
-    required String accountPubkey,
-    required FlutterGroupDataUpdate groupData,
-  }) => RustLib.instance.api.crateApiGroupsGroupUpdateGroupData(
-    that: this,
-    accountPubkey: accountPubkey,
-    groupData: groupData,
-  );
+ Future<bool>  isDirectMessageType({required String accountPubkey })=>RustLib.instance.api.crateApiGroupsGroupIsDirectMessageType(that: this, accountPubkey: accountPubkey);
 
-  @override
-  int get hashCode =>
-      mlsGroupId.hashCode ^
-      nostrGroupId.hashCode ^
-      name.hashCode ^
-      description.hashCode ^
-      imageHash.hashCode ^
-      imageKey.hashCode ^
-      adminPubkeys.hashCode ^
-      lastMessageId.hashCode ^
-      lastMessageAt.hashCode ^
-      epoch.hashCode ^
-      state.hashCode;
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Group &&
-          runtimeType == other.runtimeType &&
-          mlsGroupId == other.mlsGroupId &&
-          nostrGroupId == other.nostrGroupId &&
-          name == other.name &&
-          description == other.description &&
-          imageHash == other.imageHash &&
-          imageKey == other.imageKey &&
-          adminPubkeys == other.adminPubkeys &&
-          lastMessageId == other.lastMessageId &&
-          lastMessageAt == other.lastMessageAt &&
-          epoch == other.epoch &&
-          state == other.state;
-}
+ Future<bool>  isGroupType({required String accountPubkey })=>RustLib.instance.api.crateApiGroupsGroupIsGroupType(that: this, accountPubkey: accountPubkey);
 
-class GroupInformation {
-  final String mlsGroupId;
-  final GroupType groupType;
-  final DateTime createdAt;
-  final DateTime updatedAt;
 
-  const GroupInformation({
-    required this.mlsGroupId,
-    required this.groupType,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+ Future<void>  updateGroupData({required String accountPubkey , required FlutterGroupDataUpdate groupData })=>RustLib.instance.api.crateApiGroupsGroupUpdateGroupData(that: this, accountPubkey: accountPubkey, groupData: groupData);
 
-  @override
-  int get hashCode =>
-      mlsGroupId.hashCode ^ groupType.hashCode ^ createdAt.hashCode ^ updatedAt.hashCode;
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is GroupInformation &&
-          runtimeType == other.runtimeType &&
-          mlsGroupId == other.mlsGroupId &&
-          groupType == other.groupType &&
-          createdAt == other.createdAt &&
-          updatedAt == other.updatedAt;
-}
+                
+
+                
+        @override
+        int get hashCode => mlsGroupId.hashCode^nostrGroupId.hashCode^name.hashCode^description.hashCode^imageHash.hashCode^imageKey.hashCode^adminPubkeys.hashCode^lastMessageId.hashCode^lastMessageAt.hashCode^epoch.hashCode^state.hashCode;
+        
+
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is Group &&
+                runtimeType == other.runtimeType
+                && mlsGroupId == other.mlsGroupId&& nostrGroupId == other.nostrGroupId&& name == other.name&& description == other.description&& imageHash == other.imageHash&& imageKey == other.imageKey&& adminPubkeys == other.adminPubkeys&& lastMessageId == other.lastMessageId&& lastMessageAt == other.lastMessageAt&& epoch == other.epoch&& state == other.state;
+        
+            }
+
+class GroupInformation  {
+                final String mlsGroupId;
+final GroupType groupType;
+final DateTime createdAt;
+final DateTime updatedAt;
+
+                const GroupInformation({required this.mlsGroupId ,required this.groupType ,required this.createdAt ,required this.updatedAt ,});
+
+                
+                
+
+                
+        @override
+        int get hashCode => mlsGroupId.hashCode^groupType.hashCode^createdAt.hashCode^updatedAt.hashCode;
+        
+
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is GroupInformation &&
+                runtimeType == other.runtimeType
+                && mlsGroupId == other.mlsGroupId&& groupType == other.groupType&& createdAt == other.createdAt&& updatedAt == other.updatedAt;
+        
+            }
 
 enum GroupState {
-  active,
-  inactive,
-  pending,
-}
+                    active,
+inactive,
+pending,
+                    ;
+                    
+                }
 
 enum GroupType {
-  directMessage,
-  group,
-}
+                    directMessage,
+group,
+                    ;
+                    
+                }
 
 /// A group paired with its metadata and account membership record.
 /// Callers can filter on `info.group_type` to separate DMs from regular groups.
-class GroupWithInfoAndMembership {
-  final Group group;
-  final GroupInformation info;
-  final AccountGroup membership;
+class GroupWithInfoAndMembership  {
+                final Group group;
+final GroupInformation info;
+final AccountGroup membership;
 
-  const GroupWithInfoAndMembership({
-    required this.group,
-    required this.info,
-    required this.membership,
-  });
+                const GroupWithInfoAndMembership({required this.group ,required this.info ,required this.membership ,});
 
-  @override
-  int get hashCode => group.hashCode ^ info.hashCode ^ membership.hashCode;
+                
+                
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is GroupWithInfoAndMembership &&
-          runtimeType == other.runtimeType &&
-          group == other.group &&
-          info == other.info &&
-          membership == other.membership;
-}
+                
+        @override
+        int get hashCode => group.hashCode^info.hashCode^membership.hashCode;
+        
+
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is GroupWithInfoAndMembership &&
+                runtimeType == other.runtimeType
+                && group == other.group&& info == other.info&& membership == other.membership;
+        
+            }
 
 /// Public information about a leaf node in the ratchet tree
-class LeafNodeInfo {
-  /// The leaf index in the ratchet tree
-  final int index;
+class LeafNodeInfo  {
+                /// The leaf index in the ratchet tree
+final int index;
+/// The member's public HPKE encryption key (hex-encoded)
+final String encryptionKey;
+/// The member's public signature key (hex-encoded)
+final String signatureKey;
+/// The member's credential identity (hex-encoded, typically a Nostr public key)
+final String credentialIdentity;
 
-  /// The member's public HPKE encryption key (hex-encoded)
-  final String encryptionKey;
+                const LeafNodeInfo({required this.index ,required this.encryptionKey ,required this.signatureKey ,required this.credentialIdentity ,});
 
-  /// The member's public signature key (hex-encoded)
-  final String signatureKey;
+                
+                
 
-  /// The member's credential identity (hex-encoded, typically a Nostr public key)
-  final String credentialIdentity;
+                
+        @override
+        int get hashCode => index.hashCode^encryptionKey.hashCode^signatureKey.hashCode^credentialIdentity.hashCode;
+        
 
-  const LeafNodeInfo({
-    required this.index,
-    required this.encryptionKey,
-    required this.signatureKey,
-    required this.credentialIdentity,
-  });
-
-  @override
-  int get hashCode =>
-      index.hashCode ^ encryptionKey.hashCode ^ signatureKey.hashCode ^ credentialIdentity.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is LeafNodeInfo &&
-          runtimeType == other.runtimeType &&
-          index == other.index &&
-          encryptionKey == other.encryptionKey &&
-          signatureKey == other.signatureKey &&
-          credentialIdentity == other.credentialIdentity;
-}
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is LeafNodeInfo &&
+                runtimeType == other.runtimeType
+                && index == other.index&& encryptionKey == other.encryptionKey&& signatureKey == other.signatureKey&& credentialIdentity == other.credentialIdentity;
+        
+            }
 
 /// Public information about the ratchet tree of an MLS group
-class RatchetTreeInfo {
-  /// SHA-256 fingerprint of the TLS-serialized ratchet tree (hex-encoded)
-  final String treeHash;
+class RatchetTreeInfo  {
+                /// SHA-256 fingerprint of the TLS-serialized ratchet tree (hex-encoded)
+final String treeHash;
+/// The full ratchet tree serialized via TLS encoding (hex-encoded)
+final String serializedTree;
+/// Leaf nodes with their indices and public keys
+final List<LeafNodeInfo> leafNodes;
 
-  /// The full ratchet tree serialized via TLS encoding (hex-encoded)
-  final String serializedTree;
+                const RatchetTreeInfo({required this.treeHash ,required this.serializedTree ,required this.leafNodes ,});
 
-  /// Leaf nodes with their indices and public keys
-  final List<LeafNodeInfo> leafNodes;
+                
+                
 
-  const RatchetTreeInfo({
-    required this.treeHash,
-    required this.serializedTree,
-    required this.leafNodes,
-  });
+                
+        @override
+        int get hashCode => treeHash.hashCode^serializedTree.hashCode^leafNodes.hashCode;
+        
 
-  @override
-  int get hashCode => treeHash.hashCode ^ serializedTree.hashCode ^ leafNodes.hashCode;
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is RatchetTreeInfo &&
+                runtimeType == other.runtimeType
+                && treeHash == other.treeHash&& serializedTree == other.serializedTree&& leafNodes == other.leafNodes;
+        
+            }
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is RatchetTreeInfo &&
-          runtimeType == other.runtimeType &&
-          treeHash == other.treeHash &&
-          serializedTree == other.serializedTree &&
-          leafNodes == other.leafNodes;
-}
+class UploadGroupImageResult  {
+                final U8Array32 encryptedHash;
+final U8Array32 imageKey;
+final U8Array12 imageNonce;
 
-class UploadGroupImageResult {
-  final U8Array32 encryptedHash;
-  final U8Array32 imageKey;
-  final U8Array12 imageNonce;
+                const UploadGroupImageResult({required this.encryptedHash ,required this.imageKey ,required this.imageNonce ,});
 
-  const UploadGroupImageResult({
-    required this.encryptedHash,
-    required this.imageKey,
-    required this.imageNonce,
-  });
+                
+                
 
-  @override
-  int get hashCode => encryptedHash.hashCode ^ imageKey.hashCode ^ imageNonce.hashCode;
+                
+        @override
+        int get hashCode => encryptedHash.hashCode^imageKey.hashCode^imageNonce.hashCode;
+        
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is UploadGroupImageResult &&
-          runtimeType == other.runtimeType &&
-          encryptedHash == other.encryptedHash &&
-          imageKey == other.imageKey &&
-          imageNonce == other.imageNonce;
-}
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is UploadGroupImageResult &&
+                runtimeType == other.runtimeType
+                && encryptedHash == other.encryptedHash&& imageKey == other.imageKey&& imageNonce == other.imageNonce;
+        
+            }
+            

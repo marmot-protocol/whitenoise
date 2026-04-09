@@ -3,43 +3,22 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
-
 import '../frb_generated.dart';
 import 'error.dart';
 import 'media_files.dart';
-
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
+import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'messages.freezed.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
+            // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
 
-Future<MessageWithTokens> sendMessageToGroup({
-  required String pubkey,
-  required String groupId,
-  required String message,
-  required int kind,
-  List<Tag>? tags,
-}) => RustLib.instance.api.crateApiMessagesSendMessageToGroup(
-  pubkey: pubkey,
-  groupId: groupId,
-  message: message,
-  kind: kind,
-  tags: tags,
-);
+
+            Future<MessageWithTokens>  sendMessageToGroup({required String pubkey , required String groupId , required String message , required int kind , List<Tag>? tags }) => RustLib.instance.api.crateApiMessagesSendMessageToGroup(pubkey: pubkey, groupId: groupId, message: message, kind: kind, tags: tags);
 
 /// Retry publishing a failed message.
 ///
 /// Creates a new message with the same content and marks the original as `Retried`.
-Future<void> retryMessagePublish({
-  required String pubkey,
-  required String groupId,
-  required String eventId,
-}) => RustLib.instance.api.crateApiMessagesRetryMessagePublish(
-  pubkey: pubkey,
-  groupId: groupId,
-  eventId: eventId,
-);
+Future<void>  retryMessagePublish({required String pubkey , required String groupId , required String eventId }) => RustLib.instance.api.crateApiMessagesRetryMessagePublish(pubkey: pubkey, groupId: groupId, eventId: eventId);
 
 /// Search messages within a group by content.
 ///
@@ -49,49 +28,19 @@ Future<void> retryMessagePublish({
 ///
 /// Returns `SearchResult` items containing both the matched message and
 /// `highlight_spans` — char-index `[start, end]` pairs for frontend highlighting.
-Future<List<SearchResult>> searchMessagesInGroup({
-  required String pubkey,
-  required String groupId,
-  required String query,
-  int? limit,
-}) => RustLib.instance.api.crateApiMessagesSearchMessagesInGroup(
-  pubkey: pubkey,
-  groupId: groupId,
-  query: query,
-  limit: limit,
-);
+Future<List<SearchResult>>  searchMessagesInGroup({required String pubkey , required String groupId , required String query , int? limit }) => RustLib.instance.api.crateApiMessagesSearchMessagesInGroup(pubkey: pubkey, groupId: groupId, query: query, limit: limit);
 
 /// Fetch a paginated page of messages for a group.
 ///
 /// Returns messages in oldest-first order. Pass the `created_at` and `id` of the
 /// oldest message currently loaded to fetch the preceding page (infinite scroll upward).
 /// Omit `before` and `before_message_id` for the initial load.
-Future<List<ChatMessage>> fetchAggregatedMessagesForGroup({
-  required String pubkey,
-  required String groupId,
-  DateTime? before,
-  String? beforeMessageId,
-  int? limit,
-}) => RustLib.instance.api.crateApiMessagesFetchAggregatedMessagesForGroup(
-  pubkey: pubkey,
-  groupId: groupId,
-  before: before,
-  beforeMessageId: beforeMessageId,
-  limit: limit,
-);
+Future<List<ChatMessage>>  fetchAggregatedMessagesForGroup({required String pubkey , required String groupId , DateTime? before , String? beforeMessageId , int? limit }) => RustLib.instance.api.crateApiMessagesFetchAggregatedMessagesForGroup(pubkey: pubkey, groupId: groupId, before: before, beforeMessageId: beforeMessageId, limit: limit);
 
 /// Fetch a single message by its event ID.
 ///
 /// Returns `None` if the message does not exist in the cache.
-Future<ChatMessage?> fetchMessageById({
-  required String pubkey,
-  required String groupId,
-  required String messageId,
-}) => RustLib.instance.api.crateApiMessagesFetchMessageById(
-  pubkey: pubkey,
-  groupId: groupId,
-  messageId: messageId,
-);
+Future<ChatMessage?>  fetchMessageById({required String pubkey , required String groupId , required String messageId }) => RustLib.instance.api.crateApiMessagesFetchMessageById(pubkey: pubkey, groupId: groupId, messageId: messageId);
 
 /// Fetch the newest messages for a group, ensuring all unread messages are included
 /// and at least `minimum` messages are returned.
@@ -101,15 +50,7 @@ Future<ChatMessage?> fetchMessageById({
 /// every unread message when there are more unreads than the minimum.
 ///
 /// Messages are returned in oldest-first order.
-Future<List<ChatMessage>> fetchMessagesUnreadWithMinimum({
-  required String pubkey,
-  required String groupId,
-  int? minimum,
-}) => RustLib.instance.api.crateApiMessagesFetchMessagesUnreadWithMinimum(
-  pubkey: pubkey,
-  groupId: groupId,
-  minimum: minimum,
-);
+Future<List<ChatMessage>>  fetchMessagesUnreadWithMinimum({required String pubkey , required String groupId , int? minimum }) => RustLib.instance.api.crateApiMessagesFetchMessagesUnreadWithMinimum(pubkey: pubkey, groupId: groupId, minimum: minimum);
 
 /// Subscribe to real-time message updates for a group.
 ///
@@ -130,399 +71,349 @@ Future<List<ChatMessage>> fetchMessagesUnreadWithMinimum({
 ///
 /// The initial snapshot is race-condition free: any updates that arrive between
 /// subscribing and fetching are merged into the snapshot.
-Stream<MessageStreamItem> subscribeToGroupMessages({
-  String? pubkey,
-  required String groupId,
-}) => RustLib.instance.api.crateApiMessagesSubscribeToGroupMessages(
-  pubkey: pubkey,
-  groupId: groupId,
-);
+Stream<MessageStreamItem>  subscribeToGroupMessages({String? pubkey , required String groupId }) => RustLib.instance.api.crateApiMessagesSubscribeToGroupMessages(pubkey: pubkey, groupId: groupId);
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Tag>>
-abstract class Tag implements RustOpaqueInterface {}
+            
+                // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Tag>>
+                abstract class Tag implements RustOpaqueInterface {
+                    
+
+                    
+                }
+                
 
 /// Flutter-compatible chat message
-class ChatMessage {
-  final String id;
-  final String pubkey;
-  final String content;
-  final DateTime createdAt;
-  final List<List<String>> tags;
-  final bool isReply;
-  final String? replyToId;
-  final bool isDeleted;
-  final List<SerializableToken> contentTokens;
-  final ReactionSummary reactions;
-  final List<MediaFile> mediaAttachments;
-  final int kind;
+class ChatMessage  {
+                final String id;
+final String pubkey;
+final String content;
+final DateTime createdAt;
+final List<List<String>> tags;
+final bool isReply;
+final String? replyToId;
+final bool isDeleted;
+final List<SerializableToken> contentTokens;
+final ReactionSummary reactions;
+final List<MediaFile> mediaAttachments;
+final int kind;
+/// Delivery status for outgoing messages. `None` for incoming messages.
+final DeliveryStatus? deliveryStatus;
+/// Expiration timestamp. `None` means the message does not expire.
+/// Set when the group has disappearing messages enabled.
+final DateTime? expiresAt;
 
-  /// Delivery status for outgoing messages. `None` for incoming messages.
-  final DeliveryStatus? deliveryStatus;
+                const ChatMessage({required this.id ,required this.pubkey ,required this.content ,required this.createdAt ,required this.tags ,required this.isReply ,this.replyToId ,required this.isDeleted ,required this.contentTokens ,required this.reactions ,required this.mediaAttachments ,required this.kind ,this.deliveryStatus ,this.expiresAt ,});
 
-  /// Expiration timestamp. `None` means the message does not expire.
-  /// Set when the group has disappearing messages enabled.
-  final DateTime? expiresAt;
+                
+                
 
-  const ChatMessage({
-    required this.id,
-    required this.pubkey,
-    required this.content,
-    required this.createdAt,
-    required this.tags,
-    required this.isReply,
-    this.replyToId,
-    required this.isDeleted,
-    required this.contentTokens,
-    required this.reactions,
-    required this.mediaAttachments,
-    required this.kind,
-    this.deliveryStatus,
-    this.expiresAt,
-  });
+                
+        @override
+        int get hashCode => id.hashCode^pubkey.hashCode^content.hashCode^createdAt.hashCode^tags.hashCode^isReply.hashCode^replyToId.hashCode^isDeleted.hashCode^contentTokens.hashCode^reactions.hashCode^mediaAttachments.hashCode^kind.hashCode^deliveryStatus.hashCode^expiresAt.hashCode;
+        
 
-  @override
-  int get hashCode =>
-      id.hashCode ^
-      pubkey.hashCode ^
-      content.hashCode ^
-      createdAt.hashCode ^
-      tags.hashCode ^
-      isReply.hashCode ^
-      replyToId.hashCode ^
-      isDeleted.hashCode ^
-      contentTokens.hashCode ^
-      reactions.hashCode ^
-      mediaAttachments.hashCode ^
-      kind.hashCode ^
-      deliveryStatus.hashCode ^
-      expiresAt.hashCode;
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is ChatMessage &&
+                runtimeType == other.runtimeType
+                && id == other.id&& pubkey == other.pubkey&& content == other.content&& createdAt == other.createdAt&& tags == other.tags&& isReply == other.isReply&& replyToId == other.replyToId&& isDeleted == other.isDeleted&& contentTokens == other.contentTokens&& reactions == other.reactions&& mediaAttachments == other.mediaAttachments&& kind == other.kind&& deliveryStatus == other.deliveryStatus&& expiresAt == other.expiresAt;
+        
+            }
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ChatMessage &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          pubkey == other.pubkey &&
-          content == other.content &&
-          createdAt == other.createdAt &&
-          tags == other.tags &&
-          isReply == other.isReply &&
-          replyToId == other.replyToId &&
-          isDeleted == other.isDeleted &&
-          contentTokens == other.contentTokens &&
-          reactions == other.reactions &&
-          mediaAttachments == other.mediaAttachments &&
-          kind == other.kind &&
-          deliveryStatus == other.deliveryStatus &&
-          expiresAt == other.expiresAt;
-}
+class ChatMessageSummary  {
+                final String mlsGroupId;
+final String author;
+final String? authorDisplayName;
+final String content;
+final DateTime createdAt;
+final BigInt mediaAttachmentCount;
 
-class ChatMessageSummary {
-  final String mlsGroupId;
-  final String author;
-  final String? authorDisplayName;
-  final String content;
-  final DateTime createdAt;
-  final BigInt mediaAttachmentCount;
+                const ChatMessageSummary({required this.mlsGroupId ,required this.author ,this.authorDisplayName ,required this.content ,required this.createdAt ,required this.mediaAttachmentCount ,});
 
-  const ChatMessageSummary({
-    required this.mlsGroupId,
-    required this.author,
-    this.authorDisplayName,
-    required this.content,
-    required this.createdAt,
-    required this.mediaAttachmentCount,
-  });
+                
+                
 
-  @override
-  int get hashCode =>
-      mlsGroupId.hashCode ^
-      author.hashCode ^
-      authorDisplayName.hashCode ^
-      content.hashCode ^
-      createdAt.hashCode ^
-      mediaAttachmentCount.hashCode;
+                
+        @override
+        int get hashCode => mlsGroupId.hashCode^author.hashCode^authorDisplayName.hashCode^content.hashCode^createdAt.hashCode^mediaAttachmentCount.hashCode;
+        
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ChatMessageSummary &&
-          runtimeType == other.runtimeType &&
-          mlsGroupId == other.mlsGroupId &&
-          author == other.author &&
-          authorDisplayName == other.authorDisplayName &&
-          content == other.content &&
-          createdAt == other.createdAt &&
-          mediaAttachmentCount == other.mediaAttachmentCount;
-}
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is ChatMessageSummary &&
+                runtimeType == other.runtimeType
+                && mlsGroupId == other.mlsGroupId&& author == other.author&& authorDisplayName == other.authorDisplayName&& content == other.content&& createdAt == other.createdAt&& mediaAttachmentCount == other.mediaAttachmentCount;
+        
+            }
 
 @freezed
-sealed class DeliveryStatus with _$DeliveryStatus {
-  const DeliveryStatus._();
+                sealed class DeliveryStatus with _$DeliveryStatus  {
+                    const DeliveryStatus._();
 
-  /// Background publish in progress
-  const factory DeliveryStatus.sending() = DeliveryStatus_Sending;
+                     /// Background publish in progress
+const factory DeliveryStatus.sending() = DeliveryStatus_Sending;
+ /// Published successfully to N relays
+const factory DeliveryStatus.sent({   required BigInt relayCount , }) = DeliveryStatus_Sent;
+ /// All publish attempts exhausted
+const factory DeliveryStatus.failed({   required String reason , }) = DeliveryStatus_Failed;
+ /// The user retried this message — excluded from UI snapshots
+const factory DeliveryStatus.retried() = DeliveryStatus_Retried;
 
-  /// Published successfully to N relays
-  const factory DeliveryStatus.sent({
-    required BigInt relayCount,
-  }) = DeliveryStatus_Sent;
+                    
 
-  /// All publish attempts exhausted
-  const factory DeliveryStatus.failed({
-    required String reason,
-  }) = DeliveryStatus_Failed;
-
-  /// The user retried this message — excluded from UI snapshots
-  const factory DeliveryStatus.retried() = DeliveryStatus_Retried;
-}
+                    
+                }
 
 /// Flutter-compatible emoji reaction details
-class EmojiReaction {
-  final String emoji;
-  final BigInt count;
-  final List<String> users;
+class EmojiReaction  {
+                final String emoji;
+final BigInt count;
+final List<String> users;
 
-  const EmojiReaction({
-    required this.emoji,
-    required this.count,
-    required this.users,
-  });
+                const EmojiReaction({required this.emoji ,required this.count ,required this.users ,});
 
-  @override
-  int get hashCode => emoji.hashCode ^ count.hashCode ^ users.hashCode;
+                
+                
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is EmojiReaction &&
-          runtimeType == other.runtimeType &&
-          emoji == other.emoji &&
-          count == other.count &&
-          users == other.users;
-}
+                
+        @override
+        int get hashCode => emoji.hashCode^count.hashCode^users.hashCode;
+        
+
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is EmojiReaction &&
+                runtimeType == other.runtimeType
+                && emoji == other.emoji&& count == other.count&& users == other.users;
+        
+            }
 
 /// Char-index span marking where a query token matched in message content.
 ///
 /// Indices are char-based (not byte-based), half-open: `content[start..end]`.
-class HighlightSpan {
-  final int start;
-  final int end;
+class HighlightSpan  {
+                final int start;
+final int end;
 
-  const HighlightSpan({
-    required this.start,
-    required this.end,
-  });
+                const HighlightSpan({required this.start ,required this.end ,});
 
-  @override
-  int get hashCode => start.hashCode ^ end.hashCode;
+                
+                
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is HighlightSpan &&
-          runtimeType == other.runtimeType &&
-          start == other.start &&
-          end == other.end;
-}
+                
+        @override
+        int get hashCode => start.hashCode^end.hashCode;
+        
+
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is HighlightSpan &&
+                runtimeType == other.runtimeType
+                && start == other.start&& end == other.end;
+        
+            }
 
 @freezed
-sealed class MessageStreamItem with _$MessageStreamItem {
-  const MessageStreamItem._();
+                sealed class MessageStreamItem with _$MessageStreamItem  {
+                    const MessageStreamItem._();
 
-  /// Initial snapshot of all messages in the group at subscription time
-  const factory MessageStreamItem.initialSnapshot({
-    required List<ChatMessage> messages,
-  }) = MessageStreamItem_InitialSnapshot;
+                     /// Initial snapshot of all messages in the group at subscription time
+const factory MessageStreamItem.initialSnapshot({   required List<ChatMessage> messages , }) = MessageStreamItem_InitialSnapshot;
+ /// Real-time update for a single message
+const factory MessageStreamItem.update({   required MessageUpdate update , }) = MessageStreamItem_Update;
 
-  /// Real-time update for a single message
-  const factory MessageStreamItem.update({
-    required MessageUpdate update,
-  }) = MessageStreamItem_Update;
-}
+                    
+
+                    
+                }
 
 /// A real-time update for a group message.
 ///
 /// Contains the trigger indicating what changed and the complete,
 /// current state of the affected message.
-class MessageUpdate {
-  final UpdateTrigger trigger;
-  final ChatMessage message;
+class MessageUpdate  {
+                final UpdateTrigger trigger;
+final ChatMessage message;
 
-  const MessageUpdate({
-    required this.trigger,
-    required this.message,
-  });
+                const MessageUpdate({required this.trigger ,required this.message ,});
 
-  @override
-  int get hashCode => trigger.hashCode ^ message.hashCode;
+                
+                
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is MessageUpdate &&
-          runtimeType == other.runtimeType &&
-          trigger == other.trigger &&
-          message == other.message;
-}
+                
+        @override
+        int get hashCode => trigger.hashCode^message.hashCode;
+        
+
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is MessageUpdate &&
+                runtimeType == other.runtimeType
+                && trigger == other.trigger&& message == other.message;
+        
+            }
 
 /// Flutter-compatible message with tokens
-class MessageWithTokens {
-  final String id;
-  final String pubkey;
-  final int kind;
-  final DateTime createdAt;
-  final String? content;
-  final List<SerializableToken> tokens;
+class MessageWithTokens  {
+                final String id;
+final String pubkey;
+final int kind;
+final DateTime createdAt;
+final String? content;
+final List<SerializableToken> tokens;
 
-  const MessageWithTokens({
-    required this.id,
-    required this.pubkey,
-    required this.kind,
-    required this.createdAt,
-    this.content,
-    required this.tokens,
-  });
+                const MessageWithTokens({required this.id ,required this.pubkey ,required this.kind ,required this.createdAt ,this.content ,required this.tokens ,});
 
-  @override
-  int get hashCode =>
-      id.hashCode ^
-      pubkey.hashCode ^
-      kind.hashCode ^
-      createdAt.hashCode ^
-      content.hashCode ^
-      tokens.hashCode;
+                
+                
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is MessageWithTokens &&
-          runtimeType == other.runtimeType &&
-          id == other.id &&
-          pubkey == other.pubkey &&
-          kind == other.kind &&
-          createdAt == other.createdAt &&
-          content == other.content &&
-          tokens == other.tokens;
-}
+                
+        @override
+        int get hashCode => id.hashCode^pubkey.hashCode^kind.hashCode^createdAt.hashCode^content.hashCode^tokens.hashCode;
+        
+
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is MessageWithTokens &&
+                runtimeType == other.runtimeType
+                && id == other.id&& pubkey == other.pubkey&& kind == other.kind&& createdAt == other.createdAt&& content == other.content&& tokens == other.tokens;
+        
+            }
 
 /// Flutter-compatible reaction summary
-class ReactionSummary {
-  final List<EmojiReaction> byEmoji;
-  final List<UserReaction> userReactions;
+class ReactionSummary  {
+                final List<EmojiReaction> byEmoji;
+final List<UserReaction> userReactions;
 
-  const ReactionSummary({
-    required this.byEmoji,
-    required this.userReactions,
-  });
+                const ReactionSummary({required this.byEmoji ,required this.userReactions ,});
 
-  @override
-  int get hashCode => byEmoji.hashCode ^ userReactions.hashCode;
+                
+                
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ReactionSummary &&
-          runtimeType == other.runtimeType &&
-          byEmoji == other.byEmoji &&
-          userReactions == other.userReactions;
-}
+                
+        @override
+        int get hashCode => byEmoji.hashCode^userReactions.hashCode;
+        
+
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is ReactionSummary &&
+                runtimeType == other.runtimeType
+                && byEmoji == other.byEmoji&& userReactions == other.userReactions;
+        
+            }
 
 /// A search result wrapping a matched message with highlight spans.
-class SearchResult {
-  final ChatMessage message;
+class SearchResult  {
+                final ChatMessage message;
+/// One span per matched query token, in the order they appear in the content.
+final List<HighlightSpan> highlightSpans;
+/// 0-based position of the message within the group (0 = newest),
+/// matching the `created_at DESC, message_id DESC` ordering used by pagination.
+final BigInt position;
 
-  /// One span per matched query token, in the order they appear in the content.
-  final List<HighlightSpan> highlightSpans;
+                const SearchResult({required this.message ,required this.highlightSpans ,required this.position ,});
 
-  /// 0-based position of the message within the group (0 = newest),
-  /// matching the `created_at DESC, message_id DESC` ordering used by pagination.
-  final BigInt position;
+                
+                
 
-  const SearchResult({
-    required this.message,
-    required this.highlightSpans,
-    required this.position,
-  });
+                
+        @override
+        int get hashCode => message.hashCode^highlightSpans.hashCode^position.hashCode;
+        
 
-  @override
-  int get hashCode => message.hashCode ^ highlightSpans.hashCode ^ position.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SearchResult &&
-          runtimeType == other.runtimeType &&
-          message == other.message &&
-          highlightSpans == other.highlightSpans &&
-          position == other.position;
-}
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is SearchResult &&
+                runtimeType == other.runtimeType
+                && message == other.message&& highlightSpans == other.highlightSpans&& position == other.position;
+        
+            }
 
 /// Flutter-compatible serializable token
-class SerializableToken {
-  final String tokenType;
-  final String? content;
+class SerializableToken  {
+                final String tokenType;
+final String? content;
 
-  const SerializableToken({
-    required this.tokenType,
-    this.content,
-  });
+                const SerializableToken({required this.tokenType ,this.content ,});
 
-  @override
-  int get hashCode => tokenType.hashCode ^ content.hashCode;
+                
+                
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SerializableToken &&
-          runtimeType == other.runtimeType &&
-          tokenType == other.tokenType &&
-          content == other.content;
-}
+                
+        @override
+        int get hashCode => tokenType.hashCode^content.hashCode;
+        
+
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is SerializableToken &&
+                runtimeType == other.runtimeType
+                && tokenType == other.tokenType&& content == other.content;
+        
+            }
 
 /// What triggered a message update in the stream.
 enum UpdateTrigger {
-  /// A new message was added to the group
-  newMessage,
-
-  /// A reaction was added to this message
-  reactionAdded,
-
-  /// A reaction was removed from this message
-  reactionRemoved,
-
-  /// The message itself was marked as deleted
-  messageDeleted,
-
-  /// The delivery status of an outgoing message changed (Sending -> Sent or Failed)
-  deliveryStatusChanged,
-}
+                    /// A new message was added to the group
+newMessage,
+/// A reaction was added to this message
+reactionAdded,
+/// A reaction was removed from this message
+reactionRemoved,
+/// The message itself was marked as deleted
+messageDeleted,
+/// The delivery status of an outgoing message changed (Sending -> Sent or Failed)
+deliveryStatusChanged,
+/// The message expired due to the group's disappearing-messages setting.
+/// Only the `id` field in the accompanying message is meaningful.
+messageExpired,
+                    ;
+                    
+                }
 
 /// Flutter-compatible user reaction
-class UserReaction {
-  final String reactionId;
-  final String user;
-  final String emoji;
-  final DateTime createdAt;
+class UserReaction  {
+                final String reactionId;
+final String user;
+final String emoji;
+final DateTime createdAt;
 
-  const UserReaction({
-    required this.reactionId,
-    required this.user,
-    required this.emoji,
-    required this.createdAt,
-  });
+                const UserReaction({required this.reactionId ,required this.user ,required this.emoji ,required this.createdAt ,});
 
-  @override
-  int get hashCode => reactionId.hashCode ^ user.hashCode ^ emoji.hashCode ^ createdAt.hashCode;
+                
+                
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is UserReaction &&
-          runtimeType == other.runtimeType &&
-          reactionId == other.reactionId &&
-          user == other.user &&
-          emoji == other.emoji &&
-          createdAt == other.createdAt;
-}
+                
+        @override
+        int get hashCode => reactionId.hashCode^user.hashCode^emoji.hashCode^createdAt.hashCode;
+        
+
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is UserReaction &&
+                runtimeType == other.runtimeType
+                && reactionId == other.reactionId&& user == other.user&& emoji == other.emoji&& createdAt == other.createdAt;
+        
+            }
+            

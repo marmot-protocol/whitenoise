@@ -3,46 +3,47 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-
 import '../frb_generated.dart';
 import 'accounts.dart';
 import 'error.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`, `from`
 
-Future<RelayType> relayTypeNip65() => RustLib.instance.api.crateApiRelaysRelayTypeNip65();
+            // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`, `from`
 
-Future<RelayType> relayTypeInbox() => RustLib.instance.api.crateApiRelaysRelayTypeInbox();
 
-Future<RelayType> relayTypeKeyPackage() => RustLib.instance.api.crateApiRelaysRelayTypeKeyPackage();
+            Future<RelayType>  relayTypeNip65() => RustLib.instance.api.crateApiRelaysRelayTypeNip65();
 
-Future<String> debugRelayControlState() =>
-    RustLib.instance.api.crateApiRelaysDebugRelayControlState();
+Future<RelayType>  relayTypeInbox() => RustLib.instance.api.crateApiRelaysRelayTypeInbox();
 
-Future<void> ensureAllSubscriptions() =>
-    RustLib.instance.api.crateApiRelaysEnsureAllSubscriptions();
+Future<RelayType>  relayTypeKeyPackage() => RustLib.instance.api.crateApiRelaysRelayTypeKeyPackage();
 
-class Relay {
-  final String url;
-  final DateTime createdAt;
-  final DateTime updatedAt;
+Future<String>  debugRelayControlState() => RustLib.instance.api.crateApiRelaysDebugRelayControlState();
 
-  const Relay({
-    required this.url,
-    required this.createdAt,
-    required this.updatedAt,
-  });
+Future<void>  ensureAllSubscriptions() => RustLib.instance.api.crateApiRelaysEnsureAllSubscriptions();
 
-  @override
-  int get hashCode => url.hashCode ^ createdAt.hashCode ^ updatedAt.hashCode;
+            class Relay  {
+                final String url;
+final DateTime createdAt;
+final DateTime updatedAt;
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is Relay &&
-          runtimeType == other.runtimeType &&
-          url == other.url &&
-          createdAt == other.createdAt &&
-          updatedAt == other.updatedAt;
-}
+                const Relay({required this.url ,required this.createdAt ,required this.updatedAt ,});
+
+                
+                
+
+                
+        @override
+        int get hashCode => url.hashCode^createdAt.hashCode^updatedAt.hashCode;
+        
+
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is Relay &&
+                runtimeType == other.runtimeType
+                && url == other.url&& createdAt == other.createdAt&& updatedAt == other.updatedAt;
+        
+            }
+            

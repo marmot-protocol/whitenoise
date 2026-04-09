@@ -3,14 +3,15 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-
 import 'api/error.dart';
 import 'frb_generated.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`, `from`
 
-/// Creates a `WhitenoiseConfig` object from string directory paths.
+            // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`, `from`
+
+
+            /// Creates a `WhitenoiseConfig` object from string directory paths.
 ///
 /// This function bridges the gap between Flutter's string-based paths and Rust's
 /// `Path` types, creating a proper configuration object for Whitenoise initialization.
@@ -29,67 +30,77 @@ import 'frb_generated.dart';
 ///     "/path/to/logs".to_string()
 /// );
 /// ```
-Future<WhitenoiseConfig> createWhitenoiseConfig({
-  required String dataDir,
-  required String logsDir,
-}) => RustLib.instance.api.crateApiCreateWhitenoiseConfig(
-  dataDir: dataDir,
-  logsDir: logsDir,
-);
+Future<WhitenoiseConfig>  createWhitenoiseConfig({required String dataDir , required String logsDir }) => RustLib.instance.api.crateApiCreateWhitenoiseConfig(dataDir: dataDir, logsDir: logsDir);
 
-Future<void> initializeWhitenoise({required WhitenoiseConfig config}) =>
-    RustLib.instance.api.crateApiInitializeWhitenoise(config: config);
+Future<void>  initializeWhitenoise({required WhitenoiseConfig config }) => RustLib.instance.api.crateApiInitializeWhitenoise(config: config);
 
-Future<void> deleteAllData() => RustLib.instance.api.crateApiDeleteAllData();
+Future<void>  deleteAllData() => RustLib.instance.api.crateApiDeleteAllData();
 
-Future<AppSettings> getAppSettings() => RustLib.instance.api.crateApiGetAppSettings();
+Future<AppSettings>  getAppSettings() => RustLib.instance.api.crateApiGetAppSettings();
 
-Future<void> updateThemeMode({required ThemeMode themeMode}) =>
-    RustLib.instance.api.crateApiUpdateThemeMode(themeMode: themeMode);
+Future<void>  updateThemeMode({required ThemeMode themeMode }) => RustLib.instance.api.crateApiUpdateThemeMode(themeMode: themeMode);
 
-Future<ThemeMode> appSettingsThemeMode({required AppSettings appSettings}) =>
-    RustLib.instance.api.crateApiAppSettingsThemeMode(appSettings: appSettings);
+Future<ThemeMode>  appSettingsThemeMode({required AppSettings appSettings }) => RustLib.instance.api.crateApiAppSettingsThemeMode(appSettings: appSettings);
 
-Future<void> updateLanguage({required Language language}) =>
-    RustLib.instance.api.crateApiUpdateLanguage(language: language);
+Future<void>  updateLanguage({required Language language }) => RustLib.instance.api.crateApiUpdateLanguage(language: language);
 
-Future<Language> appSettingsLanguage({required AppSettings appSettings}) =>
-    RustLib.instance.api.crateApiAppSettingsLanguage(appSettings: appSettings);
+Future<Language>  appSettingsLanguage({required AppSettings appSettings }) => RustLib.instance.api.crateApiAppSettingsLanguage(appSettings: appSettings);
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<AppSettings>>
-abstract class AppSettings implements RustOpaqueInterface {}
+            
+                // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<AppSettings>>
+                abstract class AppSettings implements RustOpaqueInterface {
+                    
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Language>>
-abstract class Language implements RustOpaqueInterface {}
+                    
+                }
+                
 
-// Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ThemeMode>>
-abstract class ThemeMode implements RustOpaqueInterface {}
+
+                // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Language>>
+                abstract class Language implements RustOpaqueInterface {
+                    
+
+                    
+                }
+                
+
+
+                // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<ThemeMode>>
+                abstract class ThemeMode implements RustOpaqueInterface {
+                    
+
+                    
+                }
+                
 
 /// Flutter-compatible configuration structure that holds directory paths as strings.
 ///
 /// This struct is used to pass configuration data from Flutter to Rust, as flutter_rust_bridge
 /// cannot directly handle `Path` types. The paths are converted to proper `Path` objects
 /// internally when creating a `WhitenoiseConfig`.
-class WhitenoiseConfig {
-  /// Path to the directory where application data will be stored
-  final String dataDir;
+class WhitenoiseConfig  {
+                /// Path to the directory where application data will be stored
+final String dataDir;
+/// Path to the directory where log files will be written
+final String logsDir;
 
-  /// Path to the directory where log files will be written
-  final String logsDir;
+                const WhitenoiseConfig({required this.dataDir ,required this.logsDir ,});
 
-  const WhitenoiseConfig({
-    required this.dataDir,
-    required this.logsDir,
-  });
+                
+                
 
-  @override
-  int get hashCode => dataDir.hashCode ^ logsDir.hashCode;
+                
+        @override
+        int get hashCode => dataDir.hashCode^logsDir.hashCode;
+        
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is WhitenoiseConfig &&
-          runtimeType == other.runtimeType &&
-          dataDir == other.dataDir &&
-          logsDir == other.logsDir;
-}
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is WhitenoiseConfig &&
+                runtimeType == other.runtimeType
+                && dataDir == other.dataDir&& logsDir == other.logsDir;
+        
+            }
+            

@@ -3,29 +3,14 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-
 import '../frb_generated.dart';
 import 'error.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-Future<void> sendBugReport({
-  required String whatWentWrong,
-  String? expectedBehavior,
-  String? stepsToReproduce,
-  String? frequency,
-  String? npub,
-  String? logs,
-  required String appVersion,
-  required String platform,
-  required String osVersion,
-}) => RustLib.instance.api.crateApiBugReportSendBugReport(
-  whatWentWrong: whatWentWrong,
-  expectedBehavior: expectedBehavior,
-  stepsToReproduce: stepsToReproduce,
-  frequency: frequency,
-  npub: npub,
-  logs: logs,
-  appVersion: appVersion,
-  platform: platform,
-  osVersion: osVersion,
-);
+
+            
+
+            Future<void>  sendBugReport({required String whatWentWrong , String? expectedBehavior , String? stepsToReproduce , String? frequency , String? npub , String? logs , required String appVersion , required String platform , required String osVersion }) => RustLib.instance.api.crateApiBugReportSendBugReport(whatWentWrong: whatWentWrong, expectedBehavior: expectedBehavior, stepsToReproduce: stepsToReproduce, frequency: frequency, npub: npub, logs: logs, appVersion: appVersion, platform: platform, osVersion: osVersion);
+
+            
+            

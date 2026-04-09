@@ -3,59 +3,36 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
-
 import '../frb_generated.dart';
 import 'error.dart';
 import 'groups.dart';
 import 'messages.dart';
-
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
+import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'chat_list.freezed.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`
+            // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`
 
-/// Sets the pin order for a chat.
+
+            /// Sets the pin order for a chat.
 ///
 /// Pinned chats appear before unpinned chats in the chat list.
 /// Lower pin_order values appear first among pinned chats.
 ///
 /// - `pin_order = None` = unpin the chat
 /// - `pin_order = Some(n)` = pin the chat with order n
-Future<void> setChatPinOrder({
-  required String accountPubkey,
-  required String mlsGroupId,
-  PlatformInt64? pinOrder,
-}) => RustLib.instance.api.crateApiChatListSetChatPinOrder(
-  accountPubkey: accountPubkey,
-  mlsGroupId: mlsGroupId,
-  pinOrder: pinOrder,
-);
+Future<void>  setChatPinOrder({required String accountPubkey , required String mlsGroupId , PlatformInt64? pinOrder }) => RustLib.instance.api.crateApiChatListSetChatPinOrder(accountPubkey: accountPubkey, mlsGroupId: mlsGroupId, pinOrder: pinOrder);
 
 /// Mutes a chat for the specified duration.
 ///
 /// Notifications for this chat will be suppressed until the duration expires.
 /// Use [`ChatMuteDuration::Forever`] to mute indefinitely.
-Future<void> muteChat({
-  required String accountPubkey,
-  required String mlsGroupId,
-  required ChatMuteDuration duration,
-}) => RustLib.instance.api.crateApiChatListMuteChat(
-  accountPubkey: accountPubkey,
-  mlsGroupId: mlsGroupId,
-  duration: duration,
-);
+Future<void>  muteChat({required String accountPubkey , required String mlsGroupId , required ChatMuteDuration duration }) => RustLib.instance.api.crateApiChatListMuteChat(accountPubkey: accountPubkey, mlsGroupId: mlsGroupId, duration: duration);
 
 /// Unmutes a previously muted chat.
 ///
 /// Notifications for this chat will resume immediately.
-Future<void> unmuteChat({
-  required String accountPubkey,
-  required String mlsGroupId,
-}) => RustLib.instance.api.crateApiChatListUnmuteChat(
-  accountPubkey: accountPubkey,
-  mlsGroupId: mlsGroupId,
-);
+Future<void>  unmuteChat({required String accountPubkey , required String mlsGroupId }) => RustLib.instance.api.crateApiChatListUnmuteChat(accountPubkey: accountPubkey, mlsGroupId: mlsGroupId);
 
 /// Retrieves the chat list for an account.
 ///
@@ -63,10 +40,7 @@ Future<void> unmuteChat({
 /// 1. Pinned chats first (sorted by pin_order, lower values first)
 /// 2. Unpinned chats sorted by last activity (most recent first)
 /// 3. Groups without messages are sorted by creation date
-Future<List<ChatSummary>> getChatList({required String accountPubkey}) =>
-    RustLib.instance.api.crateApiChatListGetChatList(
-      accountPubkey: accountPubkey,
-    );
+Future<List<ChatSummary>>  getChatList({required String accountPubkey }) => RustLib.instance.api.crateApiChatListGetChatList(accountPubkey: accountPubkey);
 
 /// Subscribe to real-time chat list updates for an account.
 ///
@@ -75,216 +49,152 @@ Future<List<ChatSummary>> getChatList({required String accountPubkey}) =>
 ///
 /// The initial snapshot is race-condition free: any updates that arrive between
 /// subscribing and fetching are merged into the snapshot.
-Stream<ChatListStreamItem> subscribeToChatList({
-  required String accountPubkey,
-}) => RustLib.instance.api.crateApiChatListSubscribeToChatList(
-  accountPubkey: accountPubkey,
-);
+Stream<ChatListStreamItem>  subscribeToChatList({required String accountPubkey }) => RustLib.instance.api.crateApiChatListSubscribeToChatList(accountPubkey: accountPubkey);
 
-Stream<ChatListStreamItem> subscribeToArchivedChatList({
-  required String accountPubkey,
-}) => RustLib.instance.api.crateApiChatListSubscribeToArchivedChatList(
-  accountPubkey: accountPubkey,
-);
+Stream<ChatListStreamItem>  subscribeToArchivedChatList({required String accountPubkey }) => RustLib.instance.api.crateApiChatListSubscribeToArchivedChatList(accountPubkey: accountPubkey);
 
-@freezed
-sealed class ChatListStreamItem with _$ChatListStreamItem {
-  const ChatListStreamItem._();
+            @freezed
+                sealed class ChatListStreamItem with _$ChatListStreamItem  {
+                    const ChatListStreamItem._();
 
-  /// Initial snapshot of all chats at subscription time
-  const factory ChatListStreamItem.initialSnapshot({
-    required List<ChatSummary> items,
-  }) = ChatListStreamItem_InitialSnapshot;
+                     /// Initial snapshot of all chats at subscription time
+const factory ChatListStreamItem.initialSnapshot({   required List<ChatSummary> items , }) = ChatListStreamItem_InitialSnapshot;
+ /// Real-time update for a single chat
+const factory ChatListStreamItem.update({   required ChatListUpdate update , }) = ChatListStreamItem_Update;
 
-  /// Real-time update for a single chat
-  const factory ChatListStreamItem.update({
-    required ChatListUpdate update,
-  }) = ChatListStreamItem_Update;
-}
+                    
+
+                    
+                }
 
 /// A real-time update for the chat list.
 ///
 /// Contains the trigger indicating what changed and the complete,
 /// current state of the affected chat item.
-class ChatListUpdate {
-  final ChatListUpdateTrigger trigger;
-  final ChatSummary item;
+class ChatListUpdate  {
+                final ChatListUpdateTrigger trigger;
+final ChatSummary item;
 
-  const ChatListUpdate({
-    required this.trigger,
-    required this.item,
-  });
+                const ChatListUpdate({required this.trigger ,required this.item ,});
 
-  @override
-  int get hashCode => trigger.hashCode ^ item.hashCode;
+                
+                
 
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ChatListUpdate &&
-          runtimeType == other.runtimeType &&
-          trigger == other.trigger &&
-          item == other.item;
-}
+                
+        @override
+        int get hashCode => trigger.hashCode^item.hashCode;
+        
+
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is ChatListUpdate &&
+                runtimeType == other.runtimeType
+                && trigger == other.trigger&& item == other.item;
+        
+            }
 
 /// What triggered a chat list update in the stream.
 enum ChatListUpdateTrigger {
-  /// A new group was created or joined
-  newGroup,
-
-  /// A new message updated the chat's last message preview
-  newLastMessage,
-
-  /// The last message in a chat was deleted
-  lastMessageDeleted,
-
-  /// A chat's archive status changed
-  chatArchiveChanged,
-
-  /// This account was removed from the group by an admin.
-  removedFromGroup,
-
-  /// The chat's mute status changed.
-  chatMuteChanged,
-
-  /// This account left the group.
-  leftGroup,
-}
+                    /// A new group was created or joined
+newGroup,
+/// A new message updated the chat's last message preview
+newLastMessage,
+/// The last message in a chat was deleted
+lastMessageDeleted,
+/// A chat's archive status changed
+chatArchiveChanged,
+/// This account was removed from the group by an admin.
+removedFromGroup,
+/// The chat's mute status changed.
+chatMuteChanged,
+/// This account left the group.
+leftGroup,
+                    ;
+                    
+                }
 
 @freezed
-sealed class ChatMuteDuration with _$ChatMuteDuration {
-  const ChatMuteDuration._();
+                sealed class ChatMuteDuration with _$ChatMuteDuration  {
+                    const ChatMuteDuration._();
 
-  /// Mute for 1 hour
-  const factory ChatMuteDuration.oneHour() = ChatMuteDuration_OneHour;
+                     /// Mute for 1 hour
+const factory ChatMuteDuration.oneHour() = ChatMuteDuration_OneHour;
+ /// Mute for 8 hours
+const factory ChatMuteDuration.eightHours() = ChatMuteDuration_EightHours;
+ /// Mute for 1 day
+const factory ChatMuteDuration.oneDay() = ChatMuteDuration_OneDay;
+ /// Mute for 1 week
+const factory ChatMuteDuration.oneWeek() = ChatMuteDuration_OneWeek;
+ /// Mute until manually unmuted
+const factory ChatMuteDuration.forever() = ChatMuteDuration_Forever;
+ /// Mute until a specific timestamp (must be in the future)
+const factory ChatMuteDuration.custom({   required DateTime until , }) = ChatMuteDuration_Custom;
 
-  /// Mute for 8 hours
-  const factory ChatMuteDuration.eightHours() = ChatMuteDuration_EightHours;
+                    
 
-  /// Mute for 1 day
-  const factory ChatMuteDuration.oneDay() = ChatMuteDuration_OneDay;
+                    
+                }
 
-  /// Mute for 1 week
-  const factory ChatMuteDuration.oneWeek() = ChatMuteDuration_OneWeek;
+class ChatSummary  {
+                /// MLS group identifier (hex string)
+final String mlsGroupId;
+/// Display name for this chat:
+/// - Groups: The group name (may be empty)
+/// - DMs: The other user's display name (None if no metadata)
+final String? name;
+/// Type of chat: Group or DirectMessage
+final GroupType groupType;
+/// When this group was created
+final DateTime createdAt;
+/// Path to cached decrypted group image (Groups only)
+final String? groupImagePath;
+/// Profile picture URL of the other user (DMs only)
+final String? groupImageUrl;
+/// Preview of the last message (None if no messages)
+final ChatMessageSummary? lastMessage;
+/// Whether the group is pending user confirmation
+final bool pendingConfirmation;
+/// Public key (hex) of the user who invited this account to the group.
+/// `Some` when invited by another user, `None` when the user created the group.
+final String? welcomerPubkey;
+/// When this chat was archived, if at all.
+final DateTime? archivedAt;
+/// When this account was removed from the group by an admin, if at all.
+/// `Some` means the group is read-only; the user must archive/delete to hide it.
+final DateTime? removedAt;
+/// Number of unread messages in this chat
+final BigInt unreadCount;
+/// Pin order for chat list sorting.
+/// - `None` = not pinned (appears after pinned chats)
+/// - `Some(n)` = pinned, lower values appear first
+final PlatformInt64? pinOrder;
+/// For DMs: the public key (hex) of the other participant.
+/// `None` for Group chats.
+final String? dmPeerPubkey;
+/// When this chat is muted until, if at all.
+/// `None` = not muted.
+/// `Some(far-future)` = muted forever.
+final DateTime? mutedUntil;
 
-  /// Mute until manually unmuted
-  const factory ChatMuteDuration.forever() = ChatMuteDuration_Forever;
+                const ChatSummary({required this.mlsGroupId ,this.name ,required this.groupType ,required this.createdAt ,this.groupImagePath ,this.groupImageUrl ,this.lastMessage ,required this.pendingConfirmation ,this.welcomerPubkey ,this.archivedAt ,this.removedAt ,required this.unreadCount ,this.pinOrder ,this.dmPeerPubkey ,this.mutedUntil ,});
 
-  /// Mute until a specific timestamp (must be in the future)
-  const factory ChatMuteDuration.custom({
-    required DateTime until,
-  }) = ChatMuteDuration_Custom;
-}
+                
+                
 
-class ChatSummary {
-  /// MLS group identifier (hex string)
-  final String mlsGroupId;
+                
+        @override
+        int get hashCode => mlsGroupId.hashCode^name.hashCode^groupType.hashCode^createdAt.hashCode^groupImagePath.hashCode^groupImageUrl.hashCode^lastMessage.hashCode^pendingConfirmation.hashCode^welcomerPubkey.hashCode^archivedAt.hashCode^removedAt.hashCode^unreadCount.hashCode^pinOrder.hashCode^dmPeerPubkey.hashCode^mutedUntil.hashCode;
+        
 
-  /// Display name for this chat:
-  /// - Groups: The group name (may be empty)
-  /// - DMs: The other user's display name (None if no metadata)
-  final String? name;
-
-  /// Type of chat: Group or DirectMessage
-  final GroupType groupType;
-
-  /// When this group was created
-  final DateTime createdAt;
-
-  /// Path to cached decrypted group image (Groups only)
-  final String? groupImagePath;
-
-  /// Profile picture URL of the other user (DMs only)
-  final String? groupImageUrl;
-
-  /// Preview of the last message (None if no messages)
-  final ChatMessageSummary? lastMessage;
-
-  /// Whether the group is pending user confirmation
-  final bool pendingConfirmation;
-
-  /// Public key (hex) of the user who invited this account to the group.
-  /// `Some` when invited by another user, `None` when the user created the group.
-  final String? welcomerPubkey;
-
-  /// When this chat was archived, if at all.
-  final DateTime? archivedAt;
-
-  /// When this account was removed from the group by an admin, if at all.
-  /// `Some` means the group is read-only; the user must archive/delete to hide it.
-  final DateTime? removedAt;
-
-  /// Number of unread messages in this chat
-  final BigInt unreadCount;
-
-  /// Pin order for chat list sorting.
-  /// - `None` = not pinned (appears after pinned chats)
-  /// - `Some(n)` = pinned, lower values appear first
-  final PlatformInt64? pinOrder;
-
-  /// For DMs: the public key (hex) of the other participant.
-  /// `None` for Group chats.
-  final String? dmPeerPubkey;
-
-  /// When this chat is muted until, if at all.
-  /// `None` = not muted.
-  /// `Some(far-future)` = muted forever.
-  final DateTime? mutedUntil;
-
-  const ChatSummary({
-    required this.mlsGroupId,
-    this.name,
-    required this.groupType,
-    required this.createdAt,
-    this.groupImagePath,
-    this.groupImageUrl,
-    this.lastMessage,
-    required this.pendingConfirmation,
-    this.welcomerPubkey,
-    this.archivedAt,
-    this.removedAt,
-    required this.unreadCount,
-    this.pinOrder,
-    this.dmPeerPubkey,
-    this.mutedUntil,
-  });
-
-  @override
-  int get hashCode =>
-      mlsGroupId.hashCode ^
-      name.hashCode ^
-      groupType.hashCode ^
-      createdAt.hashCode ^
-      groupImagePath.hashCode ^
-      groupImageUrl.hashCode ^
-      lastMessage.hashCode ^
-      pendingConfirmation.hashCode ^
-      welcomerPubkey.hashCode ^
-      archivedAt.hashCode ^
-      removedAt.hashCode ^
-      unreadCount.hashCode ^
-      pinOrder.hashCode ^
-      dmPeerPubkey.hashCode ^
-      mutedUntil.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ChatSummary &&
-          runtimeType == other.runtimeType &&
-          mlsGroupId == other.mlsGroupId &&
-          name == other.name &&
-          groupType == other.groupType &&
-          createdAt == other.createdAt &&
-          groupImagePath == other.groupImagePath &&
-          groupImageUrl == other.groupImageUrl &&
-          lastMessage == other.lastMessage &&
-          pendingConfirmation == other.pendingConfirmation &&
-          welcomerPubkey == other.welcomerPubkey &&
-          archivedAt == other.archivedAt &&
-          removedAt == other.removedAt &&
-          unreadCount == other.unreadCount &&
-          pinOrder == other.pinOrder &&
-          dmPeerPubkey == other.dmPeerPubkey &&
-          mutedUntil == other.mutedUntil;
-}
+                
+        @override
+        bool operator ==(Object other) =>
+            identical(this, other) ||
+            other is ChatSummary &&
+                runtimeType == other.runtimeType
+                && mlsGroupId == other.mlsGroupId&& name == other.name&& groupType == other.groupType&& createdAt == other.createdAt&& groupImagePath == other.groupImagePath&& groupImageUrl == other.groupImageUrl&& lastMessage == other.lastMessage&& pendingConfirmation == other.pendingConfirmation&& welcomerPubkey == other.welcomerPubkey&& archivedAt == other.archivedAt&& removedAt == other.removedAt&& unreadCount == other.unreadCount&& pinOrder == other.pinOrder&& dmPeerPubkey == other.dmPeerPubkey&& mutedUntil == other.mutedUntil;
+        
+            }
+            
