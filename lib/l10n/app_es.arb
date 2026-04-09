@@ -96,7 +96,7 @@
   "signOutWarning": "Cuando cierres sesión en White Noise, tus chats se eliminarán de este dispositivo y no podrán restaurarse en otro dispositivo.",
   "signOutWarningBackupKey": "Si no has respaldado tu llave privada, no podrás usar este perfil en ningún otro servicio Nostr.",
   "signOutCalloutTitle": "Respalda tu llave privada",
-  "signOutCalloutDescription": "Asegúrate de haber respaldado tu llave privada en Ajustes → Llaves de perfil. Sin ella, no podrás iniciar sesión de nuevo.",
+  "signOutCalloutDescription": "When you sign out of White Noise, your chats will be deleted from this device and cannot be restored.\n\nCopy and securely store your private key if you want to access your account again. Without it, you will lose access permanently.",
   "signOutCalloutDescriptionBefore": "Asegúrate de haber respaldado tu llave privada en ",
   "signOutCalloutDescriptionLink": "Ajustes → Llaves de perfil",
   "signOutCalloutDescriptionAfter": ". Sin ella, no podrás iniciar sesión de nuevo.",

@@ -326,7 +326,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get signOutCalloutDescription =>
-      'Certifique-se de ter feito backup da sua chave privada em Configurações → Chaves de perfil. Sem ela, você não conseguirá entrar novamente.';
+      'When you sign out of White Noise, your chats will be deleted from this device and cannot be restored.\n\nCopy and securely store your private key if you want to access your account again. Without it, you will lose access permanently.';
 
   @override
   String get signOutCalloutDescriptionBefore =>

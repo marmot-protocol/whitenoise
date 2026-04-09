@@ -16,6 +16,7 @@ class WnCopyableField extends HookWidget {
     this.obscurable = false,
     this.obscured = true,
     this.defaultTextColor = false,
+    this.obscureDotCount = 16,
     this.onToggleVisibility,
     this.onCopied,
   });
@@ -26,6 +27,7 @@ class WnCopyableField extends HookWidget {
   final bool obscurable;
   final bool obscured;
   final bool defaultTextColor;
+  final int obscureDotCount;
   final VoidCallback? onToggleVisibility;
   final VoidCallback? onCopied;
 
@@ -37,7 +39,7 @@ class WnCopyableField extends HookWidget {
   String _getDisplayValue() {
     if (obscurable) {
       if (obscured) {
-        return '⬤' * 16;
+        return '⬤' * obscureDotCount;
       }
       return value;
     }

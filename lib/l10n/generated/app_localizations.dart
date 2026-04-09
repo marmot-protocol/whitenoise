@@ -687,7 +687,7 @@ abstract class AppLocalizations {
   /// Sign out callout description (shown only for local storage)
   ///
   /// In en, this message translates to:
-  /// **'Make sure you\'ve backed up your private key in Settings → Profile Keys. Without it, you won\'t be able to sign in again.'**
+  /// **'When you sign out of White Noise, your chats will be deleted from this device and cannot be restored.\n\nCopy and securely store your private key if you want to access your account again. Without it, you will lose access permanently.'**
   String get signOutCalloutDescription;
 
   /// Sign out callout description text before the link

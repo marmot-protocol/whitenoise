@@ -73,6 +73,20 @@ void main() {
       expect(find.text('⬤' * 16), findsOneWidget);
     });
 
+    testWidgets('displays custom dot count when obscureDotCount is provided', (tester) async {
+      await mountWidget(
+        const WnCopyableField(
+          label: 'Label',
+          value: 'my-value',
+          obscurable: true,
+          obscureDotCount: 14,
+        ),
+        tester,
+      );
+      expect(find.text('⬤' * 14), findsOneWidget);
+      expect(find.text('⬤' * 16), findsNothing);
+    });
+
     testWidgets('displays actual value when obscurable but not obscured', (tester) async {
       await mountWidget(
         const WnCopyableField(

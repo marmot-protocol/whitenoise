@@ -96,7 +96,7 @@
   "signOutWarning": "Quando esci da White Noise, le tue chat verranno eliminate da questo dispositivo e non potranno essere ripristinate su un altro dispositivo.",
   "signOutWarningBackupKey": "Se non hai fatto il backup della tua chiave privata, non potrai usare questo profilo su nessun altro servizio Nostr.",
   "signOutCalloutTitle": "Fai il backup della tua chiave privata",
-  "signOutCalloutDescription": "Assicurati di aver fatto il backup della tua chiave privata in Impostazioni → Chiavi profilo. Senza di essa, non potrai più accedere.",
+  "signOutCalloutDescription": "When you sign out of White Noise, your chats will be deleted from this device and cannot be restored.\n\nCopy and securely store your private key if you want to access your account again. Without it, you will lose access permanently.",
   "signOutCalloutDescriptionBefore": "Assicurati di aver fatto il backup della tua chiave privata in ",
   "signOutCalloutDescriptionLink": "Impostazioni → Chiavi profilo",
   "signOutCalloutDescriptionAfter": ". Senza di essa, non potrai più accedere.",

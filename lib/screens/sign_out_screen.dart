@@ -3,6 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:whitenoise/hooks/use_clipboard_guard.dart';
 import 'package:whitenoise/hooks/use_nsec.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/l10n/l10n.dart';
@@ -11,6 +12,7 @@ import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_callout.dart';
+import 'package:whitenoise/widgets/wn_copyable_field.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart'
@@ -22,15 +24,16 @@ class SignOutScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
-    final typography = context.typographyScaled;
     final pubkey = ref.watch(authProvider).value;
     final (:nsecState) = useNsec(pubkey);
     final warningCalloutExpanded = useState(false);
+    final obscurePrivateKey = useState(true);
     final isLoggingOut = useState(false);
+    final scheduleClipboardClear = useClipboardGuard();
     final (
       :noticeMessage,
       :noticeType,
-      showSuccessNotice: _,
+      :showSuccessNotice,
       :showErrorNotice,
       :dismissNotice,
     ) = useSystemNotice();
@@ -87,18 +90,19 @@ class SignOutScreen extends HookConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  context.l10n.signOutConfirmation,
-                  style: typography.medium14.copyWith(
-                    color: colors.backgroundContentPrimary,
-                  ),
-                ),
-                Gap(24.h),
                 WnCallout(
-                  title: context.l10n.signOutCalloutTitle,
+                  title: context.l10n.signOutConfirmation,
                   descriptionWidget: warningCalloutExpanded.value
                       ? _SignOutCalloutDescription(
-                          onNavigateToProfileKeys: () => Routes.pushToProfileKeys(context),
+                          nsec: nsecState.nsec,
+                          obscured: obscurePrivateKey.value,
+                          onToggleVisibility: () {
+                            obscurePrivateKey.value = !obscurePrivateKey.value;
+                          },
+                          onCopied: () {
+                            showSuccessNotice('privateKeyCopied');
+                            scheduleClipboardClear();
+                          },
                         )
                       : null,
                   type: CalloutType.warning,
@@ -141,15 +145,25 @@ String _noticeMessageL10n(BuildContext context, String key) {
   switch (key) {
     case 'failedToLoadPrivateKey':
       return l10n.failedToLoadPrivateKey;
+    case 'privateKeyCopied':
+      return l10n.privateKeyCopied;
     default:
       return key;
   }
 }
 
 class _SignOutCalloutDescription extends StatelessWidget {
-  const _SignOutCalloutDescription({required this.onNavigateToProfileKeys});
+  const _SignOutCalloutDescription({
+    required this.nsec,
+    required this.obscured,
+    required this.onToggleVisibility,
+    required this.onCopied,
+  });
 
-  final VoidCallback onNavigateToProfileKeys;
+  final String? nsec;
+  final bool obscured;
+  final VoidCallback onToggleVisibility;
+  final VoidCallback onCopied;
 
   @override
   Widget build(BuildContext context) {
@@ -158,30 +172,30 @@ class _SignOutCalloutDescription extends StatelessWidget {
     final l10n = context.l10n;
     final descriptionColor = colors.backgroundContentQuaternary;
 
-    return Text.rich(
-      TextSpan(
-        style: typography.medium14.copyWith(color: descriptionColor),
-        children: [
-          TextSpan(text: l10n.signOutCalloutDescriptionBefore),
-          WidgetSpan(
-            alignment: PlaceholderAlignment.baseline,
-            baseline: TextBaseline.alphabetic,
-            child: GestureDetector(
-              key: const Key('sign_out_callout_profile_keys_link'),
-              onTap: onNavigateToProfileKeys,
-              child: Text(
-                l10n.signOutCalloutDescriptionLink,
-                style: typography.medium14.copyWith(
-                  color: colors.backgroundContentPrimary,
-                  decoration: TextDecoration.underline,
-                  decorationColor: colors.backgroundContentPrimary,
-                ),
-              ),
-            ),
-          ),
-          TextSpan(text: l10n.signOutCalloutDescriptionAfter),
-        ],
-      ),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          l10n.signOutCalloutDescription,
+          style: typography.medium14.copyWith(color: descriptionColor),
+        ),
+        Gap(4.h),
+        WnCopyableField(
+          label: l10n.privateKey,
+          value: nsec ?? '',
+          obscurable: true,
+          obscured: obscured,
+          defaultTextColor: true,
+          obscureDotCount: 14,
+          onToggleVisibility: onToggleVisibility,
+          onCopied: onCopied,
+        ),
+        Gap(4.h),
+        Text(
+          l10n.privateKeyDescription,
+          style: typography.medium14.copyWith(color: descriptionColor),
+        ),
+      ],
     );
   }
 }

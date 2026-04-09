@@ -326,7 +326,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get signOutCalloutDescription =>
-      'Assurez-vous d\'avoir sauvegardé votre clé privée dans Paramètres → Clés de profil. Sans elle, vous ne pourrez plus vous connecter.';
+      'When you sign out of White Noise, your chats will be deleted from this device and cannot be restored.\n\nCopy and securely store your private key if you want to access your account again. Without it, you will lose access permanently.';
 
   @override
   String get signOutCalloutDescriptionBefore =>

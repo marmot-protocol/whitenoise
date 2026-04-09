@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/hooks/use_clipboard_guard.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/home_screen.dart';
-import 'package:whitenoise/screens/profile_keys_screen.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_copyable_field.dart' show WnCopyableField;
@@ -110,20 +110,15 @@ void main() {
       expect(find.text('Sign out'), findsWidgets);
     });
 
-    testWidgets('displays confirmation heading', (tester) async {
-      await pumpSignOutScreen(tester);
-      expect(find.text('Are you sure you want to sign out?'), findsOneWidget);
-    });
-
     testWidgets('displays warning callout title', (tester) async {
       await pumpSignOutScreen(tester);
-      expect(find.text('Back up your private key'), findsOneWidget);
+      expect(find.text('Are you sure you want to sign out?'), findsOneWidget);
     });
 
     testWidgets('warning callout description is hidden by default', (tester) async {
       await pumpSignOutScreen(tester);
       expect(
-        find.textContaining('Make sure you\'ve backed up your private key'),
+        find.textContaining('When you sign out of White Noise'),
         findsNothing,
       );
     });
@@ -132,18 +127,10 @@ void main() {
       await pumpSignOutScreen(tester);
       await tester.tap(find.byKey(const Key('callout_toggle')));
       await tester.pump();
-      expect(find.text('Settings → Profile Keys'), findsOneWidget);
-    });
-
-    testWidgets('tapping Settings → Profile Keys link navigates to ProfileKeysScreen', (
-      tester,
-    ) async {
-      await pumpSignOutScreen(tester);
-      await tester.tap(find.byKey(const Key('callout_toggle')));
-      await tester.pump();
-      await tester.tap(find.byKey(const Key('sign_out_callout_profile_keys_link')));
-      await tester.pumpAndSettle();
-      expect(find.byType(ProfileKeysScreen), findsOneWidget);
+      expect(
+        find.textContaining('When you sign out of White Noise'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('tapping warning callout toggle twice hides description again', (tester) async {
@@ -152,12 +139,41 @@ void main() {
       await tester.pump();
       await tester.tap(find.byKey(const Key('callout_toggle')));
       await tester.pump();
-      expect(find.text('Settings → Profile Keys'), findsNothing);
+      expect(find.textContaining('When you sign out of White Noise'), findsNothing);
     });
 
-    testWidgets('does not display private key field', (tester) async {
+    testWidgets('does not display private key field when callout is collapsed', (tester) async {
       await pumpSignOutScreen(tester);
       expect(find.byType(WnCopyableField), findsNothing);
+    });
+
+    testWidgets('displays private key field when callout is expanded', (tester) async {
+      await pumpSignOutScreen(tester);
+      await tester.tap(find.byKey(const Key('callout_toggle')));
+      await tester.pump();
+      expect(find.byType(WnCopyableField), findsOneWidget);
+    });
+
+    testWidgets('displays private key description after field when callout is expanded', (
+      tester,
+    ) async {
+      await pumpSignOutScreen(tester);
+      await tester.tap(find.byKey(const Key('callout_toggle')));
+      await tester.pump();
+      expect(
+        find.textContaining('Your private key works like a secret password'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('copying private key shows success notice', (tester) async {
+      await pumpSignOutScreen(tester);
+      await tester.tap(find.byKey(const Key('callout_toggle')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('copy_button')));
+      await tester.pump();
+      cancelClipboardGuardTimer();
+      expect(find.textContaining('Private key copied'), findsOneWidget);
     });
 
     testWidgets('displays Cancel button', (tester) async {
@@ -211,7 +227,7 @@ void main() {
       mockAuth.state = const AsyncData(null);
       await tester.pump();
 
-      expect(find.text('Are you sure you want to sign out?'), findsNothing);
+      expect(find.text('Sign out'), findsNothing);
     });
 
     testWidgets('shows error notice when nsec fails to load', (tester) async {
