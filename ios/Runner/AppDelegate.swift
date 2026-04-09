@@ -36,6 +36,8 @@ import UIKit
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
-    ApnTokenPlugin.register(with: engineBridge.pluginRegistry.registrar(forPlugin: "ApnTokenPlugin"))
+    if let registrar = engineBridge.pluginRegistry.registrar(forPlugin: "ApnTokenPlugin") {
+      ApnTokenPlugin.register(with: registrar)
+    }
   }
 }
