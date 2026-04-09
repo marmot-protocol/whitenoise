@@ -388,6 +388,7 @@ class _BubbleContent extends StatelessWidget {
     this.deliveryStatus,
     this.onStatusTap,
     this.contentMaxLines,
+    this.isEphemeral = false,
   });
 
   final Color bubbleColor;
@@ -415,12 +416,19 @@ class _BubbleContent extends StatelessWidget {
   final ChatStatusType? deliveryStatus;
   final VoidCallback? onStatusTap;
   final int? contentMaxLines;
+  final bool isEphemeral;
 
   Widget _buildTimestampRow() {
     Widget row = Row(
       key: const Key('message_status_row'),
       mainAxisAlignment: MainAxisAlignment.end,
       children: [
+        if (isEphemeral)
+          Padding(
+            key: const Key('ephemeral_icon'),
+            padding: EdgeInsets.only(right: 4.w),
+            child: Icon(Icons.timer_outlined, size: 12.sp, color: tsStyle.color),
+          ),
         Text(timestamp!, style: tsStyle),
         if (showDeliveryStatus && isOutgoing) ...[
           SizedBox(width: _chatStatusGap.w),
@@ -718,6 +726,7 @@ class WnMessageBubble extends StatelessWidget {
   final int? contentMaxLines;
   final double bubbleWidthFactor;
   final bool forceTightHeight;
+  final bool isEphemeral;
 
   const WnMessageBubble({
     super.key,
@@ -744,6 +753,7 @@ class WnMessageBubble extends StatelessWidget {
     this.contentMaxLines,
     this.bubbleWidthFactor = 0.8,
     this.forceTightHeight = false,
+    this.isEphemeral = false,
   });
 
   bool get _isOutgoing => direction == MessageDirection.outgoing;
@@ -827,6 +837,7 @@ class WnMessageBubble extends StatelessWidget {
       deliveryStatus: actualDeliveryStatus,
       onStatusTap: isDeleted ? null : onStatusTap,
       contentMaxLines: contentMaxLines,
+      isEphemeral: isEphemeral && !isDeleted,
     );
 
     return LayoutBuilder(

@@ -412,5 +412,17 @@
   "unarchive": "Desarquivar",
   "failedToArchiveChat": "Falha ao arquivar a conversa. Tente novamente.",
   "failedToUnarchiveChat": "Falha ao desarquivar a conversa. Tente novamente.",
-  "archivedChatsEmpty": "Nenhuma conversa arquivada"
+  "archivedChatsEmpty": "Nenhuma conversa arquivada",
+  "disappearingMessages": "Disappearing Messages",
+  "disappearingMessagesDescription": "When enabled, messages in this group will automatically disappear after the selected duration.",
+  "disappearingMessagesOff": "Off",
+  "disappearingMessagesDuration": "{duration}",
+  "disappearingMessagesUpdated": "Disappearing messages setting updated.",
+  "disappearingMessagesError": "Could not update disappearing messages setting. Please try again.",
+  "durationSeconds": "{count, plural, =1{1 second} other{{count} seconds}}",
+  "durationMinutes": "{count, plural, =1{1 minute} other{{count} minutes}}",
+  "durationHours": "{count, plural, =1{1 hour} other{{count} hours}}",
+  "durationDays": "{count, plural, =1{1 day} other{{count} days}}",
+  "durationWeeks": "{count, plural, =1{1 week} other{{count} weeks}}",
+  "messageExpires": "Disappears {duration}"
 }

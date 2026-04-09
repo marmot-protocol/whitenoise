@@ -84,6 +84,7 @@ impl From<FlutterGroupDataUpdate> for NostrGroupDataUpdate {
             image_nonce: group_data.image_nonce.map(Some),
             image_upload_key: None,
             nostr_group_id: None,
+            disappearing_message_duration_secs: None,
             relays: group_data.relays.map(|relays| {
                 relays
                     .into_iter()
@@ -271,6 +272,7 @@ pub async fn create_group(
         image_nonce: None,
         relays: group_creation_relays()?,
         admins: admin_pubkeys,
+        disappearing_message_duration_secs: None,
     };
 
     let member_pubkeys = member_pubkeys
@@ -499,6 +501,45 @@ pub async fn get_ratchet_tree_info(
             })
             .collect(),
     })
+}
+
+/// Sets the disappearing message duration for a group.
+///
+/// Only group admins can change this setting.
+/// `duration_secs`: `Some(n)` to enable (messages expire after `n` seconds),
+/// `None` to disable (messages persist forever).
+#[frb]
+pub async fn set_disappearing_messages(
+    account_pubkey: String,
+    group_id: String,
+    duration_secs: Option<u64>,
+) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let group_id = group_id_from_string(&group_id)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    whitenoise
+        .set_disappearing_messages(&account, &group_id, duration_secs)
+        .await?;
+    Ok(())
+}
+
+/// Returns the disappearing message duration for a group in seconds.
+///
+/// Returns `None` when disappearing messages are disabled.
+#[frb]
+pub async fn get_disappearing_message_duration(
+    account_pubkey: String,
+    group_id: String,
+) -> Result<Option<u64>, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let group_id = group_id_from_string(&group_id)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let duration = whitenoise
+        .get_disappearing_message_duration(&account, &group_id)
+        .await?;
+    Ok(duration)
 }
 
 #[cfg(test)]

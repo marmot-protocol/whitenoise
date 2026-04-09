@@ -313,6 +313,25 @@ class MockWnApi implements RustLibApi {
     return null;
   }
 
+  BigInt? disappearingMessageDuration;
+
+  @override
+  Future<void> crateApiGroupsSetDisappearingMessages({
+    required String accountPubkey,
+    required String groupId,
+    BigInt? durationSecs,
+  }) async {
+    disappearingMessageDuration = durationSecs;
+  }
+
+  @override
+  Future<BigInt?> crateApiGroupsGetDisappearingMessageDuration({
+    required String accountPubkey,
+    required String groupId,
+  }) async {
+    return disappearingMessageDuration;
+  }
+
   @override
   Future<RatchetTreeInfo> crateApiGroupsGetRatchetTreeInfo({
     required String accountPubkey,

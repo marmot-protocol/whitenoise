@@ -2483,6 +2483,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Could not update notification settings. Please try again.'**
   String get notificationsSettingsUpdateError;
+
+  /// Title for disappearing messages setting
+  ///
+  /// In en, this message translates to:
+  /// **'Disappearing Messages'**
+  String get disappearingMessages;
+
+  /// Description for disappearing messages setting
+  ///
+  /// In en, this message translates to:
+  /// **'When enabled, messages in this group will automatically disappear after the selected duration.'**
+  String get disappearingMessagesDescription;
+
+  /// Label when disappearing messages are disabled
+  ///
+  /// In en, this message translates to:
+  /// **'Off'**
+  String get disappearingMessagesOff;
+
+  /// Duration label for disappearing messages
+  ///
+  /// In en, this message translates to:
+  /// **'{duration}'**
+  String disappearingMessagesDuration(String duration);
+
+  /// Success message when disappearing messages setting is changed
+  ///
+  /// In en, this message translates to:
+  /// **'Disappearing messages setting updated.'**
+  String get disappearingMessagesUpdated;
+
+  /// Error message when disappearing messages setting fails to update
+  ///
+  /// In en, this message translates to:
+  /// **'Could not update disappearing messages setting. Please try again.'**
+  String get disappearingMessagesError;
+
+  /// Duration in seconds
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 second} other{{count} seconds}}'**
+  String durationSeconds(int count);
+
+  /// Duration in minutes
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 minute} other{{count} minutes}}'**
+  String durationMinutes(int count);
+
+  /// Duration in hours
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 hour} other{{count} hours}}'**
+  String durationHours(int count);
+
+  /// Duration in days
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 day} other{{count} days}}'**
+  String durationDays(int count);
+
+  /// Duration in weeks
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 week} other{{count} weeks}}'**
+  String durationWeeks(int count);
+
+  /// Label shown on messages that will expire, with relative time
+  ///
+  /// In en, this message translates to:
+  /// **'Disappears {duration}'**
+  String messageExpires(String duration);
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

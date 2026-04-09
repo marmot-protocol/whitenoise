@@ -58,6 +58,7 @@ ChatMessage _message({
   List<MediaFile> mediaAttachments = const [],
   DateTime? createdAt,
   DeliveryStatus? deliveryStatus,
+  DateTime? expiresAt,
 }) => ChatMessage(
   id: 'msg1',
   pubkey: testPubkeyA,
@@ -72,6 +73,7 @@ ChatMessage _message({
   mediaAttachments: mediaAttachments,
   kind: 9,
   deliveryStatus: deliveryStatus,
+  expiresAt: expiresAt,
 );
 
 void main() {
@@ -681,6 +683,107 @@ void main() {
 
         final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
         expect(bubble.onStatusTap, isNull);
+      });
+    });
+
+    group('ephemeral indicator', () {
+      testWidgets('passes isEphemeral true when expiresAt is set', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(expiresAt: DateTime(2025)),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+
+        final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
+        expect(bubble.isEphemeral, isTrue);
+      });
+
+      testWidgets('passes isEphemeral false when expiresAt is null', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(message: _message(), isOwnMessage: false),
+          tester,
+        );
+
+        final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
+        expect(bubble.isEphemeral, isFalse);
+      });
+
+      testWidgets('shows ephemeral icon for media-only message with expiresAt', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(
+              content: '',
+              expiresAt: DateTime(2025),
+              mediaAttachments: [_mediaFile('1')],
+            ),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('ephemeral_icon')), findsOneWidget);
+      });
+
+      testWidgets('does not show ephemeral icon when expiresAt is null', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(content: '', mediaAttachments: [_mediaFile('1')]),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('ephemeral_icon')), findsNothing);
+      });
+
+      testWidgets('does not show ephemeral icon when showTail is false', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(
+              content: '',
+              expiresAt: DateTime(2025),
+              mediaAttachments: [_mediaFile('1')],
+            ),
+            isOwnMessage: false,
+            showTail: false,
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('ephemeral_icon')), findsNothing);
+      });
+
+      testWidgets('shows ephemeral icon for own media-only message with expiresAt', (
+        tester,
+      ) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(
+              content: '',
+              expiresAt: DateTime(2025),
+              mediaAttachments: [_mediaFile('1')],
+            ),
+            isOwnMessage: true,
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('ephemeral_icon')), findsOneWidget);
+      });
+
+      testWidgets('passes isEphemeral true for message with text and expiresAt', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(content: 'Hello', expiresAt: DateTime(2025)),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+
+        final bubble = tester.widget<WnMessageBubble>(find.byType(WnMessageBubble));
+        expect(bubble.isEphemeral, isTrue);
       });
     });
 

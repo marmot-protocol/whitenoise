@@ -159,6 +159,10 @@ class ChatMessage {
   /// Delivery status for outgoing messages. `None` for incoming messages.
   final DeliveryStatus? deliveryStatus;
 
+  /// Expiration timestamp. `None` means the message does not expire.
+  /// Set when the group has disappearing messages enabled.
+  final DateTime? expiresAt;
+
   const ChatMessage({
     required this.id,
     required this.pubkey,
@@ -173,6 +177,7 @@ class ChatMessage {
     required this.mediaAttachments,
     required this.kind,
     this.deliveryStatus,
+    this.expiresAt,
   });
 
   @override
@@ -189,7 +194,8 @@ class ChatMessage {
       reactions.hashCode ^
       mediaAttachments.hashCode ^
       kind.hashCode ^
-      deliveryStatus.hashCode;
+      deliveryStatus.hashCode ^
+      expiresAt.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -208,7 +214,8 @@ class ChatMessage {
           reactions == other.reactions &&
           mediaAttachments == other.mediaAttachments &&
           kind == other.kind &&
-          deliveryStatus == other.deliveryStatus;
+          deliveryStatus == other.deliveryStatus &&
+          expiresAt == other.expiresAt;
 }
 
 class ChatMessageSummary {

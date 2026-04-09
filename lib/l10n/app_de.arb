@@ -412,5 +412,17 @@
   "unarchive": "Dearchivieren",
   "failedToArchiveChat": "Chat konnte nicht archiviert werden. Bitte versuche es erneut.",
   "failedToUnarchiveChat": "Chat konnte nicht dearchiviert werden. Bitte versuche es erneut.",
-  "archivedChatsEmpty": "Keine archivierten Chats"
+  "archivedChatsEmpty": "Keine archivierten Chats",
+  "disappearingMessages": "Disappearing Messages",
+  "disappearingMessagesDescription": "When enabled, messages in this group will automatically disappear after the selected duration.",
+  "disappearingMessagesOff": "Off",
+  "disappearingMessagesDuration": "{duration}",
+  "disappearingMessagesUpdated": "Disappearing messages setting updated.",
+  "disappearingMessagesError": "Could not update disappearing messages setting. Please try again.",
+  "durationSeconds": "{count, plural, =1{1 second} other{{count} seconds}}",
+  "durationMinutes": "{count, plural, =1{1 minute} other{{count} minutes}}",
+  "durationHours": "{count, plural, =1{1 hour} other{{count} hours}}",
+  "durationDays": "{count, plural, =1{1 day} other{{count} days}}",
+  "durationWeeks": "{count, plural, =1{1 week} other{{count} weeks}}",
+  "messageExpires": "Disappears {duration}"
 }

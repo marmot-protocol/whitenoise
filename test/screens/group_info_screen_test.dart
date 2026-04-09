@@ -31,6 +31,9 @@ class _MockApi extends MockWnApi {
   bool archivedAtResult = false;
   final Map<String, FlutterMetadata> metadataMap = {};
   bool shouldThrowOnGroupMembers = false;
+  bool shouldFailSetDisappearing = false;
+  int setDisappearingCallCount = 0;
+  BigInt? lastSetDisappearingDuration;
 
   @override
   Future<List<String>> crateApiGroupsGroupMembers({
@@ -99,6 +102,18 @@ class _MockApi extends MockWnApi {
   }
 
   @override
+  Future<void> crateApiGroupsSetDisappearingMessages({
+    required String accountPubkey,
+    required String groupId,
+    BigInt? durationSecs,
+  }) async {
+    setDisappearingCallCount++;
+    lastSetDisappearingDuration = durationSecs;
+    if (shouldFailSetDisappearing) throw Exception('Failed to set disappearing messages');
+    disappearingMessageDuration = durationSecs;
+  }
+
+  @override
   void reset() {
     super.reset();
     membersList = [];
@@ -108,6 +123,9 @@ class _MockApi extends MockWnApi {
     archivedAtResult = false;
     metadataMap.clear();
     shouldThrowOnGroupMembers = false;
+    shouldFailSetDisappearing = false;
+    setDisappearingCallCount = 0;
+    lastSetDisappearingDuration = null;
   }
 }
 
@@ -421,6 +439,106 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Group Information'), findsNothing);
+      });
+    });
+
+    group('disappearing messages', () {
+      testWidgets('shows dropdown when user is admin', (tester) async {
+        _api.membersList = [_testPubkey, testPubkeyB];
+        _api.adminsList = [_testPubkey];
+        await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+        expect(find.byKey(const Key('disappearing_messages_selector')), findsOneWidget);
+      });
+
+      testWidgets('hides dropdown when user is not admin', (tester) async {
+        _api.membersList = [_testPubkey, testPubkeyB];
+        _api.adminsList = [testPubkeyB];
+        await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+        expect(find.byKey(const Key('disappearing_messages_selector')), findsNothing);
+      });
+
+      testWidgets('displays "Disappearing Messages" label', (tester) async {
+        _api.membersList = [_testPubkey, testPubkeyB];
+        _api.adminsList = [_testPubkey];
+        await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+        expect(find.text('Disappearing Messages'), findsOneWidget);
+      });
+
+      testWidgets('shows dropdown below archive button', (tester) async {
+        _api.membersList = [_testPubkey, testPubkeyB];
+        _api.adminsList = [_testPubkey];
+        await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+        final archiveTop = tester.getTopLeft(find.byKey(const Key('archive_button'))).dy;
+        final dropdownTop = tester
+            .getTopLeft(
+              find.byKey(const Key('disappearing_messages_selector')),
+            )
+            .dy;
+        expect(dropdownTop, greaterThan(archiveTop));
+      });
+
+      testWidgets('calls API when a duration option is selected', (tester) async {
+        _api.membersList = [_testPubkey, testPubkeyB];
+        _api.adminsList = [_testPubkey];
+        await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+        await tester.tap(find.byKey(const Key('disappearing_messages_selector')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('1 hour').last);
+        await tester.pumpAndSettle();
+
+        expect(_api.setDisappearingCallCount, 1);
+        expect(_api.lastSetDisappearingDuration, BigInt.from(3600));
+      });
+
+      testWidgets('shows success notice after successful update', (tester) async {
+        _api.membersList = [_testPubkey, testPubkeyB];
+        _api.adminsList = [_testPubkey];
+        await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+        await tester.tap(find.byKey(const Key('disappearing_messages_selector')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('1 hour').last);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(WnSystemNotice), findsOneWidget);
+        expect(find.text('Disappearing messages setting updated.'), findsOneWidget);
+      });
+
+      testWidgets('shows error notice when update fails', (tester) async {
+        _api.membersList = [_testPubkey, testPubkeyB];
+        _api.adminsList = [_testPubkey];
+        _api.shouldFailSetDisappearing = true;
+        await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+        await tester.tap(find.byKey(const Key('disappearing_messages_selector')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('1 hour').last);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(WnSystemNotice), findsOneWidget);
+        expect(
+          find.text('Could not update disappearing messages setting. Please try again.'),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('displays Off option in dropdown', (tester) async {
+        _api.membersList = [_testPubkey, testPubkeyB];
+        _api.adminsList = [_testPubkey];
+        await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+        await tester.tap(find.byKey(const Key('disappearing_messages_selector')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Off'), findsWidgets);
       });
     });
   });

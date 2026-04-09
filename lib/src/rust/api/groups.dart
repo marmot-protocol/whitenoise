@@ -126,6 +126,32 @@ Future<RatchetTreeInfo> getRatchetTreeInfo({
   groupId: groupId,
 );
 
+/// Sets the disappearing message duration for a group.
+///
+/// Only group admins can change this setting.
+/// `duration_secs`: `Some(n)` to enable (messages expire after `n` seconds),
+/// `None` to disable (messages persist forever).
+Future<void> setDisappearingMessages({
+  required String accountPubkey,
+  required String groupId,
+  BigInt? durationSecs,
+}) => RustLib.instance.api.crateApiGroupsSetDisappearingMessages(
+  accountPubkey: accountPubkey,
+  groupId: groupId,
+  durationSecs: durationSecs,
+);
+
+/// Returns the disappearing message duration for a group in seconds.
+///
+/// Returns `None` when disappearing messages are disabled.
+Future<BigInt?> getDisappearingMessageDuration({
+  required String accountPubkey,
+  required String groupId,
+}) => RustLib.instance.api.crateApiGroupsGetDisappearingMessageDuration(
+  accountPubkey: accountPubkey,
+  groupId: groupId,
+);
+
 class FlutterGroupDataUpdate {
   final String? name;
   final String? description;

@@ -1387,4 +1387,86 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get notificationsSettingsUpdateError =>
       'Benachrichtigungseinstellungen konnten nicht aktualisiert werden. Bitte versuche es erneut.';
+
+  @override
+  String get disappearingMessages => 'Disappearing Messages';
+
+  @override
+  String get disappearingMessagesDescription =>
+      'When enabled, messages in this group will automatically disappear after the selected duration.';
+
+  @override
+  String get disappearingMessagesOff => 'Off';
+
+  @override
+  String disappearingMessagesDuration(String duration) {
+    return '$duration';
+  }
+
+  @override
+  String get disappearingMessagesUpdated => 'Disappearing messages setting updated.';
+
+  @override
+  String get disappearingMessagesError =>
+      'Could not update disappearing messages setting. Please try again.';
+
+  @override
+  String durationSeconds(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count seconds',
+      one: '1 second',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationMinutes(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count minutes',
+      one: '1 minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationHours(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count hours',
+      one: '1 hour',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationDays(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count days',
+      one: '1 day',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String durationWeeks(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count weeks',
+      one: '1 week',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String messageExpires(String duration) {
+    return 'Disappears $duration';
+  }
 }

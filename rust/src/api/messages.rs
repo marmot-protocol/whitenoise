@@ -10,6 +10,7 @@ use nostr_sdk::prelude::*;
 use tracing::{info, warn};
 use whitenoise::whitenoise::message_aggregator::ChatMessageSummary as WhitenoiseChatMessageSummary;
 use whitenoise::whitenoise::message_aggregator::SearchResult as WhitenoiseSearchResult;
+use whitenoise::whitenoise::messages::PaginationOptions;
 pub use whitenoise::{
     ChatMessage as WhitenoiseChatMessage, DeliveryStatus as WhitenoiseDeliveryStatus,
     EmojiReaction as WhitenoiseEmojiReaction, MediaFile as WhitenoiseMediaFile,
@@ -48,6 +49,9 @@ pub struct ChatMessage {
     pub kind: u16,
     /// Delivery status for outgoing messages. `None` for incoming messages.
     pub delivery_status: Option<DeliveryStatus>,
+    /// Expiration timestamp. `None` means the message does not expire.
+    /// Set when the group has disappearing messages enabled.
+    pub expires_at: Option<DateTime<Utc>>,
 }
 
 /// Flutter-compatible reaction summary
@@ -381,6 +385,12 @@ impl From<&WhitenoiseChatMessage> for ChatMessage {
                 .collect(),
             kind: chat_message.kind,
             delivery_status: chat_message.delivery_status.as_ref().map(|s| s.into()),
+            expires_at: chat_message.expires_at.map(|ts| {
+                let secs = i64::try_from(ts.as_secs()).unwrap_or(0);
+                Utc.timestamp_opt(secs, 0)
+                    .single()
+                    .unwrap_or_else(|| Utc.timestamp_opt(0, 0).single().unwrap())
+            }),
         }
     }
 }
@@ -507,14 +517,13 @@ pub async fn fetch_aggregated_messages_for_group(
             Ok(Timestamp::from(ts as u64))
         })
         .transpose()?;
+    let options = PaginationOptions {
+        before: before_ts,
+        before_message_id,
+        ..Default::default()
+    };
     let messages = whitenoise
-        .fetch_aggregated_messages_for_group(
-            &pubkey,
-            &group_id,
-            before_ts,
-            before_message_id.as_deref(),
-            limit,
-        )
+        .fetch_aggregated_messages_for_group(&pubkey, &group_id, &options, limit)
         .await?;
     Ok(messages.into_iter().map(|m| m.into()).collect())
 }

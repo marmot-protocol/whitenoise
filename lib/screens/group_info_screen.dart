@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_chat_archive.dart';
+import 'package:whitenoise/hooks/use_disappearing_messages.dart';
 import 'package:whitenoise/hooks/use_group_members.dart';
 import 'package:whitenoise/hooks/use_route_refresh.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
@@ -15,8 +16,10 @@ import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' as groups_api;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
+import 'package:whitenoise/utils/format_duration.dart';
 import 'package:whitenoise/utils/metadata.dart' show presentName;
 import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/widgets/wn_dropdown_selector.dart';
 import 'package:whitenoise/widgets/wn_group_info_card.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_overlay.dart';
@@ -77,6 +80,10 @@ class GroupInfoScreen extends HookConsumerWidget {
     final group = groupSnapshot.data;
     final isAdmin = membersState.admins.contains(accountPubkey);
     final archiveState = useChatArchive(accountPubkey, groupId);
+    final disappearingState = useDisappearingMessages(
+      accountPubkey: accountPubkey,
+      groupId: groupId,
+    );
 
     Future<void> handleArchiveAction() async {
       final currentIsArchived = archiveState.isArchived;
@@ -172,6 +179,35 @@ class GroupInfoScreen extends HookConsumerWidget {
                         onPressed: !archiveState.isLoading ? handleArchiveAction : null,
                       ),
                     ),
+                    if (isAdmin) ...[
+                      Gap(8.h),
+                      WnDropdownSelector<int?>(
+                        key: const Key('disappearing_messages_selector'),
+                        label: context.l10n.disappearingMessages,
+                        isDisabled: disappearingState.isSaving,
+                        options: disappearingMessageOptions
+                            .map(
+                              (secs) => WnDropdownOption<int?>(
+                                value: secs,
+                                label: secs == null
+                                    ? context.l10n.disappearingMessagesOff
+                                    : formatDurationSeconds(context.l10n, secs),
+                              ),
+                            )
+                            .toList(),
+                        value: disappearingState.currentDurationSecs,
+                        onChanged: (value) async {
+                          final success = await disappearingState.setDuration(value);
+                          if (context.mounted) {
+                            if (success) {
+                              showSuccessNotice(context.l10n.disappearingMessagesUpdated);
+                            } else {
+                              showErrorNotice(context.l10n.disappearingMessagesError);
+                            }
+                          }
+                        },
+                      ),
+                    ],
                     Gap(16.h),
                     Text(
                       context.l10n.membersLabel,

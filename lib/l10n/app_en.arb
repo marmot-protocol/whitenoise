@@ -1765,5 +1765,88 @@
   "notificationsSettingsUpdateError": "Could not update notification settings. Please try again.",
   "@notificationsSettingsUpdateError": {
     "description": "Error shown when updating notification settings fails"
+  },
+  "disappearingMessages": "Disappearing Messages",
+  "@disappearingMessages": {
+    "description": "Title for disappearing messages setting"
+  },
+  "disappearingMessagesDescription": "When enabled, messages in this group will automatically disappear after the selected duration.",
+  "@disappearingMessagesDescription": {
+    "description": "Description for disappearing messages setting"
+  },
+  "disappearingMessagesOff": "Off",
+  "@disappearingMessagesOff": {
+    "description": "Label when disappearing messages are disabled"
+  },
+  "disappearingMessagesDuration": "{duration}",
+  "@disappearingMessagesDuration": {
+    "description": "Duration label for disappearing messages",
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "disappearingMessagesUpdated": "Disappearing messages setting updated.",
+  "@disappearingMessagesUpdated": {
+    "description": "Success message when disappearing messages setting is changed"
+  },
+  "disappearingMessagesError": "Could not update disappearing messages setting. Please try again.",
+  "@disappearingMessagesError": {
+    "description": "Error message when disappearing messages setting fails to update"
+  },
+  "durationSeconds": "{count, plural, =1{1 second} other{{count} seconds}}",
+  "@durationSeconds": {
+    "description": "Duration in seconds",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationMinutes": "{count, plural, =1{1 minute} other{{count} minutes}}",
+  "@durationMinutes": {
+    "description": "Duration in minutes",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationHours": "{count, plural, =1{1 hour} other{{count} hours}}",
+  "@durationHours": {
+    "description": "Duration in hours",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationDays": "{count, plural, =1{1 day} other{{count} days}}",
+  "@durationDays": {
+    "description": "Duration in days",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "durationWeeks": "{count, plural, =1{1 week} other{{count} weeks}}",
+  "@durationWeeks": {
+    "description": "Duration in weeks",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "messageExpires": "Disappears {duration}",
+  "@messageExpires": {
+    "description": "Label shown on messages that will expire, with relative time",
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
   }
 }

@@ -122,6 +122,7 @@ class ChatMessageBubble extends StatelessWidget {
             )
           : null,
       timestamp: showStatus ? _formatTime(message.createdAt) : null,
+      isEphemeral: message.expiresAt != null,
       reactions: message.reactions.byEmoji,
       currentUserPubkey: currentUserPubkey,
       avatar: !isOwnMessage && showAvatar
