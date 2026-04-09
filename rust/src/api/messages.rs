@@ -385,11 +385,9 @@ impl From<&WhitenoiseChatMessage> for ChatMessage {
                 .collect(),
             kind: chat_message.kind,
             delivery_status: chat_message.delivery_status.as_ref().map(|s| s.into()),
-            expires_at: chat_message.expires_at.map(|ts| {
-                let secs = i64::try_from(ts.as_secs()).unwrap_or(0);
-                Utc.timestamp_opt(secs, 0)
-                    .single()
-                    .unwrap_or_else(|| Utc.timestamp_opt(0, 0).single().unwrap())
+            expires_at: chat_message.expires_at.and_then(|ts| {
+                let secs = i64::try_from(ts.as_secs()).ok()?;
+                Utc.timestamp_opt(secs, 0).single()
             }),
         }
     }

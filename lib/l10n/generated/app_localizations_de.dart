@@ -1389,14 +1389,14 @@ class AppLocalizationsDe extends AppLocalizations {
       'Benachrichtigungseinstellungen konnten nicht aktualisiert werden. Bitte versuche es erneut.';
 
   @override
-  String get disappearingMessages => 'Disappearing Messages';
+  String get disappearingMessages => 'Verschwindende Nachrichten';
 
   @override
   String get disappearingMessagesDescription =>
-      'When enabled, messages in this group will automatically disappear after the selected duration.';
+      'Wenn aktiviert, verschwinden Nachrichten in dieser Gruppe automatisch nach der ausgewählten Dauer.';
 
   @override
-  String get disappearingMessagesOff => 'Off';
+  String get disappearingMessagesOff => 'Aus';
 
   @override
   String disappearingMessagesDuration(String duration) {
@@ -1404,19 +1404,20 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String get disappearingMessagesUpdated => 'Disappearing messages setting updated.';
+  String get disappearingMessagesUpdated =>
+      'Einstellung für verschwindende Nachrichten aktualisiert.';
 
   @override
   String get disappearingMessagesError =>
-      'Could not update disappearing messages setting. Please try again.';
+      'Einstellung für verschwindende Nachrichten konnte nicht aktualisiert werden. Bitte versuche es erneut.';
 
   @override
   String durationSeconds(int count) {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count seconds',
-      one: '1 second',
+      other: '$count Sekunden',
+      one: '1 Sekunde',
     );
     return '$_temp0';
   }
@@ -1426,8 +1427,8 @@ class AppLocalizationsDe extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count minutes',
-      one: '1 minute',
+      other: '$count Minuten',
+      one: '1 Minute',
     );
     return '$_temp0';
   }
@@ -1437,8 +1438,8 @@ class AppLocalizationsDe extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count hours',
-      one: '1 hour',
+      other: '$count Stunden',
+      one: '1 Stunde',
     );
     return '$_temp0';
   }
@@ -1448,8 +1449,8 @@ class AppLocalizationsDe extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count days',
-      one: '1 day',
+      other: '$count Tage',
+      one: '1 Tag',
     );
     return '$_temp0';
   }
@@ -1459,14 +1460,14 @@ class AppLocalizationsDe extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count weeks',
-      one: '1 week',
+      other: '$count Wochen',
+      one: '1 Woche',
     );
     return '$_temp0';
   }
 
   @override
   String messageExpires(String duration) {
-    return 'Disappears $duration';
+    return 'Verschwindet $duration';
   }
 }

@@ -29,6 +29,14 @@ useDisappearingMessages({
   final isLoading = useState(false);
   final isSaving = useState(false);
   final error = useState<String?>(null);
+  final isMountedRef = useRef(true);
+
+  useEffect(() {
+    isMountedRef.value = true;
+    return () {
+      isMountedRef.value = false;
+    };
+  }, []);
 
   Future<void> load() async {
     isLoading.value = true;
@@ -38,12 +46,16 @@ useDisappearingMessages({
         accountPubkey: accountPubkey,
         groupId: groupId,
       );
+      if (!isMountedRef.value) return;
       currentDurationSecs.value = duration?.toInt();
     } catch (e) {
       _logger.severe('Failed to load disappearing message duration: $e');
+      if (!isMountedRef.value) return;
       error.value = e.toString();
     } finally {
-      isLoading.value = false;
+      if (isMountedRef.value) {
+        isLoading.value = false;
+      }
     }
   }
 
@@ -56,14 +68,18 @@ useDisappearingMessages({
         groupId: groupId,
         durationSecs: durationSecs != null ? BigInt.from(durationSecs) : null,
       );
+      if (!isMountedRef.value) return false;
       currentDurationSecs.value = durationSecs;
       return true;
     } catch (e) {
       _logger.severe('Failed to set disappearing message duration: $e');
+      if (!isMountedRef.value) return false;
       error.value = e.toString();
       return false;
     } finally {
-      isSaving.value = false;
+      if (isMountedRef.value) {
+        isSaving.value = false;
+      }
     }
   }
 

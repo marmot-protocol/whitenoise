@@ -854,6 +854,7 @@ class MockWnApi implements RustLibApi {
     unarchiveChatCallCount = 0;
     lastArchivedGroupId = null;
     lastUnarchivedGroupId = null;
+    disappearingMessageDuration = null;
   }
 
   String? zapstoreVersion;
