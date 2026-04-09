@@ -5,8 +5,8 @@ use crate::api::utils::group_id_to_string;
 use crate::frb_generated::StreamSink;
 use chrono::{DateTime, Utc};
 use flutter_rust_bridge::frb;
-use mdk_core::prelude::GroupId;
 use nostr_sdk::PublicKey;
+use whitenoise::mdk::GroupId;
 use whitenoise::whitenoise::chat_list::ChatListItem as WhitenoiseChatListItem;
 use whitenoise::{
     ChatListUpdate as WhitenoiseChatListUpdate,
@@ -198,7 +198,7 @@ pub async fn set_chat_pin_order(
     let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = hex::decode(&mls_group_id)?;
-    let group_id = mdk_core::prelude::GroupId::from_slice(&group_id_bytes);
+    let group_id = GroupId::from_slice(&group_id_bytes);
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
 
     whitenoise

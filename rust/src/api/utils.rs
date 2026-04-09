@@ -6,9 +6,9 @@
 use crate::api::error::ApiError;
 use crate::api::{Language, ThemeMode};
 use flutter_rust_bridge::frb;
-use mdk_core::prelude::GroupId;
 use nostr_sdk::prelude::*;
 pub use whitenoise::Whitenoise;
+use whitenoise::mdk::GroupId;
 
 #[frb(sync)]
 pub fn npub_from_hex_pubkey(hex_pubkey: &str) -> Result<String, ApiError> {

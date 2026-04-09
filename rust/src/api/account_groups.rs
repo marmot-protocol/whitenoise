@@ -1,9 +1,9 @@
 use crate::api::{error::ApiError, utils::group_id_to_string};
 use flutter_rust_bridge::frb;
-use mdk_core::prelude::GroupId;
 use nostr_sdk::prelude::*;
 use whitenoise::AccountGroup as WhitenoiseAccountGroup;
 use whitenoise::Whitenoise;
+use whitenoise::mdk::GroupId;
 
 /// Represents the relationship between an account and an MLS group.
 ///

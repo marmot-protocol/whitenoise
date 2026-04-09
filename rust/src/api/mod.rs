@@ -4,8 +4,8 @@ use std::path::Path;
 pub use whitenoise::{AppSettings, Language, RelayType, ThemeMode, Whitenoise};
 
 // Re-export types that flutter_rust_bridge needs
-pub use mdk_core::prelude::GroupId;
 pub use nostr_sdk::{Event, PublicKey, RelayUrl, Tag};
+pub use whitenoise::mdk::GroupId;
 
 /// Flutter-compatible configuration structure that holds directory paths as strings.
 ///
