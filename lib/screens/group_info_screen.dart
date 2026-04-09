@@ -124,7 +124,7 @@ class GroupInfoScreen extends HookConsumerWidget {
                       onDismiss: dismissNotice,
                     )
                   : null,
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
