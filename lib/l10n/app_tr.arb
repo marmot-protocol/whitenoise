@@ -98,7 +98,7 @@
   "signOutCalloutTitle": "Özel anahtarınızı yedekleyin",
   "signOutCalloutDescription": "White Noise'dan çıkış yaptığınızda, sohbetleriniz bu cihazdan silinecek ve geri yüklenemeyecektir.\n\nHesabınıza tekrar erişmek istiyorsanız özel anahtarınızı kopyalayın ve güvenli bir yerde saklayın. Onsuz erişiminizi kalıcı olarak kaybedersiniz.",
   "signOutCalloutDescriptionBefore": "Özel anahtarınızı ",
-  "signOutCalloutDescriptionLink": "Ayarlar → Profil Anahtarları",
+  "signOutCalloutDescriptionLink": "Ayarlar → Profil anahtarları",
   "signOutCalloutDescriptionAfter": " bölümünden yedeklediğinizden emin olun. Onsuz tekrar giriş yapamayacaksınız.",
   "backUpPrivateKey": "Özel anahtarınızı yedekleyin",
   "copyPrivateKeyHint": "Hesabınızı başka bir cihazda geri yüklemek için özel anahtarınızı kopyalayın.",
