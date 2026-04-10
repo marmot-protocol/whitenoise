@@ -544,6 +544,68 @@ void main() {
         expect(item.subtitle, 'Check this out');
         expect(item.subtitleIcon, isNull);
       });
+
+      group('searchSnippet', () {
+        testWidgets('overrides subtitle with the snippet text', (tester) async {
+          await mountWidget(
+            ChatListTile(
+              chatSummary: _chatSummary(
+                name: 'Dev Team',
+                lastMessageContent: 'Hello world',
+                lastMessageAuthor: testPubkeyA,
+              ),
+              searchSnippet: '...matched text...',
+            ),
+            tester,
+            overrides: [
+              accountPubkeyProvider.overrideWith(MockAccountPubkeyNotifier.new),
+            ],
+          );
+          await tester.pumpAndSettle();
+
+          final item = tester.widget<WnChatListItem>(find.byType(WnChatListItem));
+          expect(item.subtitle, '...matched text...');
+        });
+
+        testWidgets('clears prefixSubtitle when snippet is provided', (tester) async {
+          await mountWidget(
+            ChatListTile(
+              chatSummary: _chatSummary(
+                name: 'Dev Team',
+                lastMessageContent: 'Hello world',
+                lastMessageAuthor: testPubkeyA,
+              ),
+              searchSnippet: '...matched text...',
+            ),
+            tester,
+            overrides: [
+              accountPubkeyProvider.overrideWith(MockAccountPubkeyNotifier.new),
+            ],
+          );
+          await tester.pumpAndSettle();
+
+          final item = tester.widget<WnChatListItem>(find.byType(WnChatListItem));
+          expect(item.prefixSubtitle, isNull);
+        });
+
+        testWidgets('clears subtitleIcon when snippet is provided', (tester) async {
+          await mountWidget(
+            ChatListTile(
+              chatSummary: _chatSummary(lastMessageMediaAttachmentCount: 2),
+              searchSnippet: '...matched text...',
+            ),
+            tester,
+            overrides: [
+              accountPubkeyProvider.overrideWith(MockAccountPubkeyNotifier.new),
+            ],
+          );
+          await tester.pumpAndSettle();
+
+          final item = tester.widget<WnChatListItem>(find.byType(WnChatListItem));
+          expect(item.subtitleIcon, isNull);
+          expect(find.byKey(const Key('media_subtitle_icon')), findsNothing);
+        });
+      });
     });
 
     group('avatar', () {

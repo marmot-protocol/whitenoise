@@ -23,6 +23,22 @@ void main() {
       });
     });
 
+    group('isLoading', () {
+      testWidgets('forwards isLoading=true to WnSearchField', (tester) async {
+        await mountWidget(const WnSearchAndFilters(isLoading: true), tester);
+        final field = tester.widget<WnSearchField>(find.byType(WnSearchField));
+        expect(field.isLoading, isTrue);
+        expect(find.byKey(const Key('search_loading_indicator')), findsOneWidget);
+      });
+
+      testWidgets('forwards isLoading=false to WnSearchField by default', (tester) async {
+        await mountWidget(const WnSearchAndFilters(), tester);
+        final field = tester.widget<WnSearchField>(find.byType(WnSearchField));
+        expect(field.isLoading, isFalse);
+        expect(find.byKey(const Key('search_loading_indicator')), findsNothing);
+      });
+    });
+
     group('search callback', () {
       testWidgets('calls onSearchChanged when text is entered', (tester) async {
         String? searchValue;
