@@ -3795,7 +3795,6 @@ dependencies = [
  "chrono",
  "flutter_rust_bridge",
  "hex",
- "mdk-core",
  "nostr-sdk",
  "serde_json",
  "thiserror 2.0.18",

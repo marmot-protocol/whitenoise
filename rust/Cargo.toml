@@ -11,10 +11,6 @@ anyhow = "1.0.99"
 chrono = { version = "0.4.40", features = ["serde"] }
 flutter_rust_bridge = { version = "=2.11.1", features = ["chrono"] }
 hex = "0.4"
-mdk-core = { version = "0.7.1", git = "https://github.com/marmot-protocol/mdk", rev = "00be14876ea534145155f70b904b1fd758426430", features = [
-    "mip04",
-    "mip05",
-] }
 nostr-sdk = { version = "0.44", features = [
     "nip04",
     "nip44",
