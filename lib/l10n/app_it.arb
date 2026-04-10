@@ -178,6 +178,7 @@
   "restoreDefaultRelays": "Ripristina relay predefiniti",
   "restoreDefaultRelaysConfirmationTitle": "Ripristinare i relay predefiniti?",
   "restoreDefaultRelaysConfirmationMessage": "Sei sicuro di voler ripristinare i relay predefiniti dell'app? Questo cancellerà e sostituirà i tuoi relay attuali.",
+  "restoreDefaultRelaysError": "Impossibile ripristinare i relay predefiniti. Riprova.",
   "addMyRelay": "Aggiungi il mio relay",
   "addInboxRelay": "Aggiungi relay posta in arrivo",
   "addKeyPackageRelay": "Aggiungi relay pacchetto chiavi",

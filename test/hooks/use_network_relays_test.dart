@@ -375,11 +375,14 @@ void main() {
       expect(getHook().state.normalRelays.relays.length, 0);
     });
 
-    testWidgets('handles error gracefully without throwing', (tester) async {
+    testWidgets('rethrows error when restore fails', (tester) async {
       mockApi.shouldThrowOnRestore = true;
 
       final getHook = await mountHook(tester, () => useNetworkRelays(testPubkeyA));
-      await getHook().restoreDefaultRelays();
+      expect(
+        () => getHook().restoreDefaultRelays(),
+        throwsException,
+      );
       await tester.pump();
 
       expect(mockApi.restoreDefaultRelaysCalled, isFalse);

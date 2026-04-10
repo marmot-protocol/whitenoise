@@ -178,6 +178,7 @@
   "restoreDefaultRelays": "Varsayılan röleleri geri yükle",
   "restoreDefaultRelaysConfirmationTitle": "Varsayılan röleler geri yüklensin mi?",
   "restoreDefaultRelaysConfirmationMessage": "Uygulamanın varsayılan rölelerini geri yüklemek istediğinizden emin misiniz? Bu işlem mevcut rölelerinizi silecek ve değiştirecektir.",
+  "restoreDefaultRelaysError": "Varsayılan röleler geri yüklenemedi. Lütfen tekrar deneyin.",
   "addMyRelay": "Rölem ekle",
   "addInboxRelay": "Gelen kutusu rölesi ekle",
   "addKeyPackageRelay": "Anahtar paketi rölesi ekle",

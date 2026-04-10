@@ -787,6 +787,10 @@
   "@restoreDefaultRelaysConfirmationMessage": {
     "description": "Message for restore default relays confirmation dialog"
   },
+  "restoreDefaultRelaysError": "Failed to restore default relays. Please try again.",
+  "@restoreDefaultRelaysError": {
+    "description": "Error message when restoring default relays fails"
+  },
   "addMyRelay": "Add my relay",
   "@addMyRelay": {
     "description": "Button to add a relay to my relays section"

@@ -617,6 +617,9 @@ class AppLocalizationsIt extends AppLocalizations {
       'Sei sicuro di voler ripristinare i relay predefiniti dell\'app? Questo cancellerà e sostituirà i tuoi relay attuali.';
 
   @override
+  String get restoreDefaultRelaysError => 'Impossibile ripristinare i relay predefiniti. Riprova.';
+
+  @override
   String get addMyRelay => 'Aggiungi il mio relay';
 
   @override

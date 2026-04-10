@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_list_item_controller.dart';
 import 'package:whitenoise/hooks/use_network_relays.dart';
+import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
@@ -16,6 +17,7 @@ import 'package:whitenoise/widgets/wn_list.dart';
 import 'package:whitenoise/widgets/wn_list_item.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart' show WnSystemNotice;
 import 'package:whitenoise/widgets/wn_tooltip.dart';
 
 class NetworkScreen extends HookConsumerWidget {
@@ -30,6 +32,8 @@ class NetworkScreen extends HookConsumerWidget {
       pubkey,
     );
     final listItemController = useListItemController();
+    final (:noticeMessage, :noticeType, :showErrorNotice, :showSuccessNotice, :dismissNotice) =
+        useSystemNotice();
 
     useEffect(() {
       fetchAll();
@@ -134,6 +138,14 @@ class NetworkScreen extends HookConsumerWidget {
             title: context.l10n.networkRelaysTitle,
             onNavigate: () => Routes.goBack(context),
           ),
+          systemNotice: noticeMessage != null
+              ? WnSystemNotice(
+                  key: ValueKey(noticeMessage),
+                  title: noticeMessage,
+                  type: noticeType,
+                  onDismiss: dismissNotice,
+                )
+              : null,
           footer: Padding(
             padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 16.h),
             child: SizedBox(
@@ -151,8 +163,15 @@ class NetworkScreen extends HookConsumerWidget {
                   cancelText: context.l10n.cancel,
                   isDestructive: true,
                   onConfirmAsync: () async {
-                    await restoreDefaultRelays();
-                    return true;
+                    try {
+                      await restoreDefaultRelays();
+                      return true;
+                    } catch (_) {
+                      if (context.mounted) {
+                        showErrorNotice(context.l10n.restoreDefaultRelaysError);
+                      }
+                      return false;
+                    }
                   },
                 ),
               ),

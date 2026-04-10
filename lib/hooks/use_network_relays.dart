@@ -173,6 +173,7 @@ useNetworkRelays(String pubkey) {
       await fetchAll();
     } catch (e) {
       _logger.severe('Failed to restore default relays', e);
+      rethrow;
     }
   }
 

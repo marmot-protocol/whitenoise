@@ -621,6 +621,10 @@ class AppLocalizationsFr extends AppLocalizations {
       'Êtes-vous sûr de vouloir restaurer les relais par défaut de l\'application ? Cela effacera et remplacera vos relais actuels.';
 
   @override
+  String get restoreDefaultRelaysError =>
+      'Échec de la restauration des relais par défaut. Veuillez réessayer.';
+
+  @override
   String get addMyRelay => 'Ajouter mon relais';
 
   @override

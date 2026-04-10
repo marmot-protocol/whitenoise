@@ -178,6 +178,7 @@
   "restoreDefaultRelays": "Restaurar relays padrão",
   "restoreDefaultRelaysConfirmationTitle": "Restaurar relays padrão?",
   "restoreDefaultRelaysConfirmationMessage": "Tem certeza de que deseja restaurar os relays padrão do aplicativo? Isso apagará e substituirá seus relays atuais.",
+  "restoreDefaultRelaysError": "Falha ao restaurar os relays padrão. Por favor, tente novamente.",
   "addMyRelay": "Adicionar meu relay",
   "addInboxRelay": "Adicionar relay de caixa de entrada",
   "addKeyPackageRelay": "Adicionar relay de pacote de chaves",

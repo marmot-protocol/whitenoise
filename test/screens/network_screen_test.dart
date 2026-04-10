@@ -21,9 +21,11 @@ class _MockApi extends MockWnApi {
   List<String> addedRelays = [];
   List<String> removedRelays = [];
   bool restoreDefaultRelaysCalled = false;
+  bool shouldThrowOnRestore = false;
 
   @override
   Future<void> crateApiAccountsRestoreDefaultRelays({required String pubkey}) async {
+    if (shouldThrowOnRestore) throw Exception('Restore error');
     restoreDefaultRelaysCalled = true;
     normalRelays = [];
     inboxRelays = [];
@@ -102,6 +104,7 @@ void main() {
     mockApi.addedRelays = [];
     mockApi.removedRelays = [];
     mockApi.restoreDefaultRelaysCalled = false;
+    mockApi.shouldThrowOnRestore = false;
   });
 
   Future<void> pumpNetworkScreen(WidgetTester tester) async {
@@ -413,6 +416,22 @@ void main() {
         await tester.pumpAndSettle();
         expect(mockApi.restoreDefaultRelaysCalled, isTrue);
         expect(find.text('Restore default relays?'), findsNothing);
+      });
+
+      testWidgets('shows error notice when restore fails', (tester) async {
+        mockApi.shouldThrowOnRestore = true;
+
+        await pumpNetworkScreen(tester);
+        await tester.tap(find.byKey(const Key('restore_default_relays_button')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('confirm_button')));
+        await tester.pumpAndSettle();
+
+        expect(mockApi.restoreDefaultRelaysCalled, isFalse);
+        expect(
+          find.text('Failed to restore default relays. Please try again.'),
+          findsOneWidget,
+        );
       });
     });
 

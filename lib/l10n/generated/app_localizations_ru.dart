@@ -631,6 +631,10 @@ class AppLocalizationsRu extends AppLocalizations {
       'Вы уверены, что хотите восстановить реле по умолчанию? Это удалит и заменит ваши текущие реле.';
 
   @override
+  String get restoreDefaultRelaysError =>
+      'Не удалось восстановить реле по умолчанию. Пожалуйста, попробуйте снова.';
+
+  @override
   String get addMyRelay => 'Добавить моё реле';
 
   @override

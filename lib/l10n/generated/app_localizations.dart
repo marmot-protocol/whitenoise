@@ -1176,6 +1176,12 @@ abstract class AppLocalizations {
   /// **'Are you sure you want to restore the app\'s default relays? This will erase and replace your current relays.'**
   String get restoreDefaultRelaysConfirmationMessage;
 
+  /// Error message when restoring default relays fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to restore default relays. Please try again.'**
+  String get restoreDefaultRelaysError;
+
   /// Button to add a relay to my relays section
   ///
   /// In en, this message translates to:

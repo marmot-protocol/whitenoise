@@ -620,6 +620,10 @@ class AppLocalizationsEs extends AppLocalizations {
       '¿Estás seguro de que quieres restaurar los relés predeterminados de la aplicación? Esto borrará y reemplazará tus relés actuales.';
 
   @override
+  String get restoreDefaultRelaysError =>
+      'No se pudieron restaurar los relés predeterminados. Por favor, inténtalo de nuevo.';
+
+  @override
   String get addMyRelay => 'Añadir mi relé';
 
   @override

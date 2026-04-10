@@ -178,6 +178,7 @@
   "restoreDefaultRelays": "Standard-Relays wiederherstellen",
   "restoreDefaultRelaysConfirmationTitle": "Standard-Relays wiederherstellen?",
   "restoreDefaultRelaysConfirmationMessage": "Möchtest du wirklich die Standard-Relays der App wiederherstellen? Dadurch werden deine aktuellen Relays gelöscht und ersetzt.",
+  "restoreDefaultRelaysError": "Standard-Relays konnten nicht wiederhergestellt werden. Bitte versuche es erneut.",
   "addMyRelay": "Mein Relay hinzufügen",
   "addInboxRelay": "Posteingangs-Relay hinzufügen",
   "addKeyPackageRelay": "Key-Package-Relay hinzufügen",

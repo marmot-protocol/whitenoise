@@ -178,6 +178,7 @@
   "restoreDefaultRelays": "Восстановить реле по умолчанию",
   "restoreDefaultRelaysConfirmationTitle": "Восстановить реле по умолчанию?",
   "restoreDefaultRelaysConfirmationMessage": "Вы уверены, что хотите восстановить реле по умолчанию? Это удалит и заменит ваши текущие реле.",
+  "restoreDefaultRelaysError": "Не удалось восстановить реле по умолчанию. Пожалуйста, попробуйте снова.",
   "addMyRelay": "Добавить моё реле",
   "addInboxRelay": "Добавить реле входящих",
   "addKeyPackageRelay": "Добавить реле пакета ключей",

@@ -614,6 +614,10 @@ class AppLocalizationsTr extends AppLocalizations {
       'Uygulamanın varsayılan rölelerini geri yüklemek istediğinizden emin misiniz? Bu işlem mevcut rölelerinizi silecek ve değiştirecektir.';
 
   @override
+  String get restoreDefaultRelaysError =>
+      'Varsayılan röleler geri yüklenemedi. Lütfen tekrar deneyin.';
+
+  @override
   String get addMyRelay => 'Rölem ekle';
 
   @override

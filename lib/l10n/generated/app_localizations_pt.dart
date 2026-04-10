@@ -617,6 +617,10 @@ class AppLocalizationsPt extends AppLocalizations {
       'Tem certeza de que deseja restaurar os relays padrão do aplicativo? Isso apagará e substituirá seus relays atuais.';
 
   @override
+  String get restoreDefaultRelaysError =>
+      'Falha ao restaurar os relays padrão. Por favor, tente novamente.';
+
+  @override
   String get addMyRelay => 'Adicionar meu relay';
 
   @override

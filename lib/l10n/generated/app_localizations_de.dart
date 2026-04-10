@@ -627,6 +627,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Möchtest du wirklich die Standard-Relays der App wiederherstellen? Dadurch werden deine aktuellen Relays gelöscht und ersetzt.';
 
   @override
+  String get restoreDefaultRelaysError =>
+      'Standard-Relays konnten nicht wiederhergestellt werden. Bitte versuche es erneut.';
+
+  @override
   String get addMyRelay => 'Mein Relay hinzufügen';
 
   @override

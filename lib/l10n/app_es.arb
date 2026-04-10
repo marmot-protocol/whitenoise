@@ -178,6 +178,7 @@
   "restoreDefaultRelays": "Restaurar relés predeterminados",
   "restoreDefaultRelaysConfirmationTitle": "¿Restaurar relés predeterminados?",
   "restoreDefaultRelaysConfirmationMessage": "¿Estás seguro de que quieres restaurar los relés predeterminados de la aplicación? Esto borrará y reemplazará tus relés actuales.",
+  "restoreDefaultRelaysError": "No se pudieron restaurar los relés predeterminados. Por favor, inténtalo de nuevo.",
   "addMyRelay": "Añadir mi relé",
   "addInboxRelay": "Añadir relé de bandeja de entrada",
   "addKeyPackageRelay": "Añadir relé de paquete de claves",
