@@ -154,6 +154,15 @@ void main() {
       expect(find.byType(WnCopyableField), findsOneWidget);
     });
 
+    testWidgets('tapping visibility toggle reveals private key', (tester) async {
+      await pumpSignOutScreen(tester);
+      await tester.tap(find.byKey(const Key('callout_toggle')));
+      await tester.pump();
+      await tester.tap(find.byKey(const Key('visibility_toggle')));
+      await tester.pump();
+      expect(find.text('⬤' * 14), findsNothing);
+    });
+
     testWidgets('displays private key description after field when callout is expanded', (
       tester,
     ) async {
