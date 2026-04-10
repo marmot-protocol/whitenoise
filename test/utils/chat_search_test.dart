@@ -27,6 +27,21 @@ void main() {
       expect(results, _chats);
     });
 
+    test('returns all chats when query is whitespace only', () {
+      final results = filterChatsBySearchWithMessageMatches(_chats, '   ', {'g1'});
+      expect(results, _chats);
+    });
+
+    test('trims whitespace around query before matching', () {
+      final results = filterChatsBySearchWithMessageMatches(
+        _chats,
+        '  Alice  ',
+        <String>{},
+      );
+      expect(results.length, 1);
+      expect(results.first.mlsGroupId, 'd1');
+    });
+
     test('matches by name only', () {
       final results = filterChatsBySearchWithMessageMatches(
         _chats,

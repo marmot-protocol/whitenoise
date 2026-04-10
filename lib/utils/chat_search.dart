@@ -5,8 +5,9 @@ List<ChatSummary> filterChatsBySearchWithMessageMatches(
   String query,
   Set<String> messageMatchedGroupIds,
 ) {
-  if (query.isEmpty) return chats;
-  final lowerQuery = query.toLowerCase();
+  final trimmedQuery = query.trim();
+  if (trimmedQuery.isEmpty) return chats;
+  final lowerQuery = trimmedQuery.toLowerCase();
   return chats.where((chat) {
     final name = chat.name?.toLowerCase() ?? '';
     return name.contains(lowerQuery) || messageMatchedGroupIds.contains(chat.mlsGroupId);
