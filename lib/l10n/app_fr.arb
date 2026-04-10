@@ -96,7 +96,7 @@
   "signOutWarning": "Lorsque vous vous déconnectez de White Noise, vos discussions seront supprimées de cet appareil et ne pourront pas être restaurées sur un autre appareil.",
   "signOutWarningBackupKey": "Si vous n'avez pas sauvegardé votre clé privée, vous ne pourrez pas utiliser ce profil sur un autre service Nostr.",
   "signOutCalloutTitle": "Sauvegardez votre clé privée",
-  "signOutCalloutDescription": "When you sign out of White Noise, your chats will be deleted from this device and cannot be restored.\n\nCopy and securely store your private key if you want to access your account again. Without it, you will lose access permanently.",
+  "signOutCalloutDescription": "Lorsque vous vous déconnectez de White Noise, vos discussions seront supprimées de cet appareil et ne pourront pas être restaurées.\n\nCopiez et stockez votre clé privée en lieu sûr si vous souhaitez accéder à nouveau à votre compte. Sans elle, vous perdrez l'accès définitivement.",
   "signOutCalloutDescriptionBefore": "Assurez-vous d'avoir sauvegardé votre clé privée dans ",
   "signOutCalloutDescriptionLink": "Paramètres → Clés de profil",
   "signOutCalloutDescriptionAfter": ". Sans elle, vous ne pourrez plus vous connecter.",

@@ -96,7 +96,7 @@
   "signOutWarning": "White Noise'dan çıkış yaptığınızda, sohbetleriniz bu cihazdan silinecek ve başka bir cihazda geri yüklenemeyecektir.",
   "signOutWarningBackupKey": "Özel anahtarınızı yedeklemediyseniz, bu profili başka hiçbir Nostr hizmetinde kullanamazsınız.",
   "signOutCalloutTitle": "Özel anahtarınızı yedekleyin",
-  "signOutCalloutDescription": "When you sign out of White Noise, your chats will be deleted from this device and cannot be restored.\n\nCopy and securely store your private key if you want to access your account again. Without it, you will lose access permanently.",
+  "signOutCalloutDescription": "White Noise'dan çıkış yaptığınızda, sohbetleriniz bu cihazdan silinecek ve geri yüklenemeyecektir.\n\nHesabınıza tekrar erişmek istiyorsanız özel anahtarınızı kopyalayın ve güvenli bir yerde saklayın. Onsuz erişiminizi kalıcı olarak kaybedersiniz.",
   "signOutCalloutDescriptionBefore": "Özel anahtarınızı ",
   "signOutCalloutDescriptionLink": "Ayarlar → Profil Anahtarları",
   "signOutCalloutDescriptionAfter": " bölümünden yedeklediğinizden emin olun. Onsuz tekrar giriş yapamayacaksınız.",

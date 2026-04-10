@@ -326,7 +326,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get signOutCalloutDescription =>
-      'When you sign out of White Noise, your chats will be deleted from this device and cannot be restored.\n\nCopy and securely store your private key if you want to access your account again. Without it, you will lose access permanently.';
+      'Cuando cierres sesión en White Noise, tus chats se eliminarán de este dispositivo y no podrán restaurarse.\n\nCopia y guarda de forma segura tu llave privada si deseas acceder a tu cuenta de nuevo. Sin ella, perderás el acceso de forma permanente.';
 
   @override
   String get signOutCalloutDescriptionBefore =>

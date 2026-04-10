@@ -96,7 +96,7 @@
   "signOutWarning": "Wenn du dich bei White Noise abmeldest, werden deine Chats von diesem Gerät gelöscht und können auf einem anderen Gerät nicht wiederhergestellt werden.",
   "signOutWarningBackupKey": "Wenn du deinen privaten Schlüssel nicht gesichert hast, kannst du dieses Profil bei keinem anderen Nostr-Dienst verwenden.",
   "signOutCalloutTitle": "Privaten Schlüssel sichern",
-  "signOutCalloutDescription": "When you sign out of White Noise, your chats will be deleted from this device and cannot be restored.\n\nCopy and securely store your private key if you want to access your account again. Without it, you will lose access permanently.",
+  "signOutCalloutDescription": "Wenn du dich bei White Noise abmeldest, werden deine Chats von diesem Gerät gelöscht und können nicht wiederhergestellt werden.\n\nKopiere und speichere deinen privaten Schlüssel sicher, wenn du wieder auf dein Konto zugreifen möchtest. Ohne ihn verlierst du dauerhaft den Zugang.",
   "signOutCalloutDescriptionBefore": "Stelle sicher, dass du deinen privaten Schlüssel in ",
   "signOutCalloutDescriptionLink": "Einstellungen → Profilschlüssel",
   "signOutCalloutDescriptionAfter": " gesichert hast. Ohne ihn kannst du dich nicht mehr anmelden.",

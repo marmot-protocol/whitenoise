@@ -53,7 +53,7 @@ class WnCopyableField extends HookWidget {
     useEffect(() {
       controller.text = _getDisplayValue();
       return null;
-    }, [value, displayValue, obscured, obscurable]);
+    }, [value, displayValue, obscured, obscurable, obscureDotCount]);
 
     final colors = context.colors;
     final typography = context.typographyScaled;
