@@ -289,8 +289,14 @@ class AppLocalizationsFr extends AppLocalizations {
       'En tant qu\'organisation à but non lucratif, White Noise existe uniquement pour votre vie privée et votre liberté, pas pour le profit. Votre soutien nous maintient indépendants et sans compromis.';
 
   @override
-  String get donateContributionLetter =>
-      'Si vous avez besoin d\'une attestation de don, contactez-nous à info@ipf.dev';
+  String get donateContributionAcknowledgmentTitle => 'Attestation de contribution';
+
+  @override
+  String get donateContributionLetterBefore =>
+      'Si vous avez besoin d\'une attestation de don, contactez-nous à ';
+
+  @override
+  String get donateContributionLetterAfter => '';
 
   @override
   String get lightningAddress => 'Adresse Lightning';

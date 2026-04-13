@@ -289,8 +289,14 @@ class AppLocalizationsEs extends AppLocalizations {
       'Como organización sin fines de lucro, White Noise existe únicamente para tu privacidad y libertad, no para obtener ganancias. Tu apoyo nos mantiene independientes y sin compromisos.';
 
   @override
-  String get donateContributionLetter =>
-      'Si necesita una carta de reconocimiento de contribución para una donación, póngase en contacto con nosotros en info@ipf.dev';
+  String get donateContributionAcknowledgmentTitle => 'Reconocimiento de contribución';
+
+  @override
+  String get donateContributionLetterBefore =>
+      'Si necesita una carta de reconocimiento de contribución para una donación, póngase en contacto con nosotros en ';
+
+  @override
+  String get donateContributionLetterAfter => '';
 
   @override
   String get lightningAddress => 'Dirección Lightning';
@@ -333,7 +339,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Asegúrate de haber respaldado tu llave privada en ';
 
   @override
-  String get signOutCalloutDescriptionLink => 'Ajustes → Llaves de perfil';
+  String get signOutCalloutDescriptionLink => 'Ajustes → Llaves del perfil';
 
   @override
   String get signOutCalloutDescriptionAfter => '. Sin ella, no podrás iniciar sesión de nuevo.';

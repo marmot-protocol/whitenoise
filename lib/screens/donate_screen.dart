@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/wn_callout.dart';
 import 'package:whitenoise/widgets/wn_copyable_field.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
@@ -20,9 +21,7 @@ class DonateScreen extends HookWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
     final noticeMessage = useState<String?>(null);
-    final bodyStyle = context.typographyScaled.medium14.copyWith(
-      color: colors.backgroundContentTertiary,
-    );
+    final contributionCalloutExpanded = useState(false);
 
     void showCopiedNotice(String message) {
       noticeMessage.value = message;
@@ -77,14 +76,58 @@ class DonateScreen extends HookWidget {
                     ),
                   ],
                 ),
-                Text(
-                  context.l10n.donateContributionLetter,
-                  style: bodyStyle,
+                WnCallout(
+                  key: const Key('contribution_acknowledgment_callout'),
+                  title: context.l10n.donateContributionAcknowledgmentTitle,
+                  descriptionWidget: contributionCalloutExpanded.value
+                      ? _ContributionDescription(
+                          before: context.l10n.donateContributionLetterBefore,
+                          after: context.l10n.donateContributionLetterAfter,
+                        )
+                      : null,
+                  type: CalloutType.info,
+                  compact: true,
+                  isExpanded: contributionCalloutExpanded.value,
+                  onToggle: () {
+                    contributionCalloutExpanded.value = !contributionCalloutExpanded.value;
+                  },
                 ),
               ],
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _ContributionDescription extends StatelessWidget {
+  const _ContributionDescription({required this.before, required this.after});
+
+  final String before;
+  final String after;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+    final descriptionColor = colors.backgroundContentQuaternary;
+
+    return Text.rich(
+      TextSpan(
+        style: typography.medium14.copyWith(color: descriptionColor),
+        children: [
+          TextSpan(text: before),
+          TextSpan(
+            text: 'info@ipf.dev',
+            style: typography.medium14.copyWith(
+              color: colors.backgroundContentPrimary,
+              decoration: TextDecoration.underline,
+              decorationColor: colors.backgroundContentPrimary,
+            ),
+          ),
+          if (after.isNotEmpty) TextSpan(text: after),
+        ],
       ),
     );
   }

@@ -358,9 +358,19 @@
     "description": "Donate screen description"
   },
 
-  "donateContributionLetter": "If you need a contribution acknowledgement letter for a donation, get in touch with us at info@ipf.dev",
-  "@donateContributionLetter": {
-    "description": "Donate screen contribution acknowledgement text"
+  "donateContributionAcknowledgmentTitle": "Contribution acknowledgment",
+  "@donateContributionAcknowledgmentTitle": {
+    "description": "Donate screen contribution acknowledgment callout title"
+  },
+
+  "donateContributionLetterBefore": "If you need a contribution acknowledgement letter for a donation, get in touch with us at ",
+  "@donateContributionLetterBefore": {
+    "description": "Donate screen contribution acknowledgement text before email link"
+  },
+
+  "donateContributionLetterAfter": "",
+  "@donateContributionLetterAfter": {
+    "description": "Donate screen contribution acknowledgement text after email link"
   },
 
   "lightningAddress": "Lightning Address",

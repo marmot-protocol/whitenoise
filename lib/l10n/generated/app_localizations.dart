@@ -618,11 +618,23 @@ abstract class AppLocalizations {
   /// **'As a 501(c)3 non-profit, White Noise exists solely for your privacy and freedom, not for profit. Your support keeps us independent and uncompromised.'**
   String get donateDescription;
 
-  /// Donate screen contribution acknowledgement text
+  /// Donate screen contribution acknowledgment callout title
   ///
   /// In en, this message translates to:
-  /// **'If you need a contribution acknowledgement letter for a donation, get in touch with us at info@ipf.dev'**
-  String get donateContributionLetter;
+  /// **'Contribution acknowledgment'**
+  String get donateContributionAcknowledgmentTitle;
+
+  /// Donate screen contribution acknowledgement text before email link
+  ///
+  /// In en, this message translates to:
+  /// **'If you need a contribution acknowledgement letter for a donation, get in touch with us at '**
+  String get donateContributionLetterBefore;
+
+  /// Donate screen contribution acknowledgement text after email link
+  ///
+  /// In en, this message translates to:
+  /// **''**
+  String get donateContributionLetterAfter;
 
   /// Lightning address label
   ///

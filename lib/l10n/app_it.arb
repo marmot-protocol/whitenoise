@@ -85,7 +85,12 @@
   "noRelaysConfigured": "Nessun relay configurato",
   "donateTitle": "Dona a White Noise",
   "donateDescription": "Come organizzazione senza scopo di lucro, White Noise esiste unicamente per la tua privacy e libertà, non per profitto. Il tuo supporto ci mantiene indipendenti e senza compromessi.",
-  "donateContributionLetter": "Se hai bisogno di una lettera di attestazione per una donazione, contattaci a info@ipf.dev",
+  "donateContributionLetterBefore": "Se hai bisogno di una lettera di attestazione per una donazione, contattaci a ",
+
+  "donateContributionLetterAfter": "",
+
+  "donateContributionAcknowledgmentTitle": "Attestazione di contributo",
+
   "lightningAddress": "Indirizzo Lightning",
   "bitcoinSilentPayment": "Pagamento Silenzioso Bitcoin",
   "copiedToClipboardThankYou": "Copiato negli appunti. Grazie!",

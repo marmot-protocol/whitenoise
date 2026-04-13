@@ -85,7 +85,12 @@
   "noRelaysConfigured": "Реле не настроены",
   "donateTitle": "Пожертвовать White Noise",
   "donateDescription": "Как некоммерческая организация, White Noise существует исключительно для вашей конфиденциальности и свободы, а не для прибыли. Ваша поддержка сохраняет нашу независимость и бескомпромиссность.",
-  "donateContributionLetter": "Если вам нужно письмо-подтверждение о пожертвовании, свяжитесь с нами по адресу info@ipf.dev",
+  "donateContributionLetterBefore": "Если вам нужно письмо-подтверждение о пожертвовании, свяжитесь с нами по адресу ",
+
+  "donateContributionLetterAfter": "",
+
+  "donateContributionAcknowledgmentTitle": "Подтверждение взноса",
+
   "lightningAddress": "Адрес Lightning",
   "bitcoinSilentPayment": "Тихий Платёж Bitcoin",
   "copiedToClipboardThankYou": "Скопировано в буфер обмена. Спасибо!",

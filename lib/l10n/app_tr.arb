@@ -85,7 +85,12 @@
   "noRelaysConfigured": "Yapılandırılmış röle yok",
   "donateTitle": "White Noise'a Bağış Yap",
   "donateDescription": "Kar amacı gütmeyen bir kuruluş olarak White Noise, yalnızca gizliliğiniz ve özgürlüğünüz için var, kar için değil. Desteğiniz bizi bağımsız ve taviz vermeden tutar.",
-  "donateContributionLetter": "Bir bağış için katkı onay mektubuna ihtiyacınız varsa, info@ipf.dev adresinden bizimle iletişime geçin",
+  "donateContributionLetterBefore": "Bir bağış için katkı onay mektubuna ihtiyacınız varsa, ",
+
+  "donateContributionLetterAfter": " adresinden bizimle iletişime geçin",
+
+  "donateContributionAcknowledgmentTitle": "Katkı onayı",
+
   "lightningAddress": "Lightning Adresi",
   "bitcoinSilentPayment": "Bitcoin Sessiz Ödeme",
   "copiedToClipboardThankYou": "Panoya kopyalandı. Teşekkürler!",
