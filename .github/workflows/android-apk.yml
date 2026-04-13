@@ -43,7 +43,7 @@ jobs:
   build-apk:
     name: Build Staging APK
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 90
     needs: [check-team]
     env:
       ARTIFACT_SUFFIX: unknown
