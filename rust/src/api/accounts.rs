@@ -1,4 +1,6 @@
-use crate::api::{error::ApiError, metadata::FlutterMetadata, relays::Relay, users::User};
+use crate::api::{
+    DEFAULT_RELAY_URLS, error::ApiError, metadata::FlutterMetadata, relays::Relay, users::User,
+};
 use chrono::{DateTime, TimeZone, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
@@ -245,12 +247,6 @@ pub async fn account_relays(pubkey: String, relay_type: RelayType) -> Result<Vec
     let relays = account.relays(relay_type, whitenoise).await?;
     Ok(relays.into_iter().map(|r| r.into()).collect())
 }
-
-const DEFAULT_RELAY_URLS: [&str; 3] = [
-    "wss://nos.lol",
-    "wss://relay.primal.net",
-    "wss://relay.damus.io",
-];
 
 #[frb]
 pub async fn restore_default_relays(pubkey: String) -> Result<(), ApiError> {

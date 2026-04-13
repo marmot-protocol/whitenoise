@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::api::error::ApiError;
+use crate::api::{DEFAULT_RELAY_URLS, error::ApiError};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
 use serde_json::{Value, json};
@@ -10,12 +10,6 @@ const BUG_REPORT_EVENT_KIND: u16 = 0xDEAD;
 
 const BUG_REPORT_RECIPIENT_PUBKEY: &str =
     "960d8044d4b0f3981bf512a231b6e7c687e9e1199ec3e4df3179746118ec9f08";
-
-const DEFAULT_RELAYS: &[&str] = &[
-    "wss://relay.damus.io",
-    "wss://relay.nostr.band",
-    "wss://nos.lol",
-];
 
 const MAX_LOG_BYTES: usize = 64 * 1024;
 
@@ -94,11 +88,9 @@ pub async fn send_bug_report(
             message: e.to_string(),
         })?;
 
-    let relays: Vec<&str> = DEFAULT_RELAYS.to_vec();
-
     let client = Client::new(ephemeral_keys);
-    for url in &relays {
-        if let Err(e) = client.add_relay(*url).await {
+    for url in DEFAULT_RELAY_URLS {
+        if let Err(e) = client.add_relay(url).await {
             warn!(%url, error = %e, "Failed to add relay for bug report");
         }
     }
@@ -132,6 +124,7 @@ pub async fn send_bug_report(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::api::DEFAULT_RELAY_URLS;
 
     #[test]
     fn test_recipient_pubkey_parses_and_event_builds() {
@@ -193,5 +186,14 @@ mod tests {
         let truncated = big_log[..boundary].to_string();
         assert!(truncated.len() <= MAX_LOG_BYTES);
         assert!(big_log.is_char_boundary(truncated.len()));
+    }
+
+    #[test]
+    fn test_bug_report_relays_match_defaults() {
+        let expected = DEFAULT_RELAY_URLS
+            .iter()
+            .map(|url| (*url).to_string())
+            .collect::<Vec<_>>();
+        assert_eq!(expected, crate::api::default_relay_urls());
     }
 }

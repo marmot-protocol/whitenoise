@@ -1,4 +1,6 @@
-use crate::api::{error::ApiError, group_id_from_string, group_id_to_string};
+use crate::api::{
+    default_relay_urls_parsed, error::ApiError, group_id_from_string, group_id_to_string,
+};
 use chrono::{DateTime, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
@@ -8,21 +10,6 @@ use whitenoise::{
     GroupInformation as WhitenoiseGroupInformation, GroupType as WhitenoiseGroupType,
     GroupWithInfoAndMembership as WhitenoiseGroupWithInfoAndMembership, Whitenoise,
 };
-
-const GROUP_CREATION_RELAY_URLS: [&str; 3] = [
-    "wss://nos.lol",
-    "wss://relay.primal.net",
-    "wss://relay.damus.io",
-];
-
-fn group_creation_relays() -> Result<Vec<RelayUrl>, ApiError> {
-    GROUP_CREATION_RELAY_URLS
-        .into_iter()
-        .map(RelayUrl::parse)
-        .collect::<Result<Vec<_>, _>>()
-        .map_err(ApiError::from)
-}
-
 #[frb(non_opaque)]
 #[derive(Debug, Clone)]
 pub struct Group {
@@ -268,7 +255,7 @@ pub async fn create_group(
         image_key: None,
         image_hash: None,
         image_nonce: None,
-        relays: group_creation_relays()?,
+        relays: default_relay_urls_parsed()?,
         admins: admin_pubkeys,
     };
 
@@ -498,20 +485,4 @@ pub async fn get_ratchet_tree_info(
             })
             .collect(),
     })
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{GROUP_CREATION_RELAY_URLS, group_creation_relays};
-
-    #[test]
-    fn group_creation_relays_match_fixed_list() {
-        let relays = group_creation_relays()
-            .expect("group creation relay URLs must stay valid")
-            .into_iter()
-            .map(|relay| relay.to_string())
-            .collect::<Vec<_>>();
-
-        assert_eq!(relays, GROUP_CREATION_RELAY_URLS);
-    }
 }
