@@ -133,6 +133,12 @@ pub enum ChatListUpdateTrigger {
     ChatMuteChanged,
     /// This account left the group.
     LeftGroup,
+    /// All messages in the chat were cleared.
+    ChatCleared,
+    /// The chat was deleted.
+    ChatDeleted,
+    /// A user was blocked or unblocked.
+    UserBlockChanged,
 }
 
 impl From<WhitenoiseChatListUpdateTrigger> for ChatListUpdateTrigger {
@@ -145,6 +151,9 @@ impl From<WhitenoiseChatListUpdateTrigger> for ChatListUpdateTrigger {
             WhitenoiseChatListUpdateTrigger::RemovedFromGroup => Self::RemovedFromGroup,
             WhitenoiseChatListUpdateTrigger::ChatMuteChanged => Self::ChatMuteChanged,
             WhitenoiseChatListUpdateTrigger::LeftGroup => Self::LeftGroup,
+            WhitenoiseChatListUpdateTrigger::ChatCleared => Self::ChatCleared,
+            WhitenoiseChatListUpdateTrigger::ChatDeleted => Self::ChatDeleted,
+            WhitenoiseChatListUpdateTrigger::UserBlockChanged => Self::UserBlockChanged,
         }
     }
 }
@@ -447,5 +456,24 @@ mod tests {
             MuteDuration::from(ChatMuteDuration::Custom { until: custom_time }),
             MuteDuration::Custom(custom_time)
         );
+    }
+
+    #[test]
+    fn test_chat_list_update_trigger_conversion_chat_cleared() {
+        let trigger: ChatListUpdateTrigger = WhitenoiseChatListUpdateTrigger::ChatCleared.into();
+        assert_eq!(trigger, ChatListUpdateTrigger::ChatCleared);
+    }
+
+    #[test]
+    fn test_chat_list_update_trigger_conversion_chat_deleted() {
+        let trigger: ChatListUpdateTrigger = WhitenoiseChatListUpdateTrigger::ChatDeleted.into();
+        assert_eq!(trigger, ChatListUpdateTrigger::ChatDeleted);
+    }
+
+    #[test]
+    fn test_chat_list_update_trigger_conversion_user_block_changed() {
+        let trigger: ChatListUpdateTrigger =
+            WhitenoiseChatListUpdateTrigger::UserBlockChanged.into();
+        assert_eq!(trigger, ChatListUpdateTrigger::UserBlockChanged);
     }
 }

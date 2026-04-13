@@ -419,6 +419,71 @@ void main() {
       });
     });
 
+    group('chatCleared trigger', () {
+      testWidgets('updates chat data without changing order', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([
+          _chatSummary('c1', DateTime(2024)),
+          _chatSummary('c2', DateTime(2024, 1, 2)),
+        ]);
+        await tester.pumpAndSettle();
+
+        _api.emitUpdate(
+          ChatListUpdateTrigger.chatCleared,
+          _chatSummary('c2', DateTime(2024, 1, 2), mutedUntil: DateTime(2025)),
+        );
+        await tester.pumpAndSettle();
+
+        final chats = getResult().chats;
+        expect(chats.map((c) => c.mlsGroupId).toList(), ['mls_c1', 'mls_c2']);
+        expect(chats[1].mutedUntil, DateTime(2025));
+      });
+    });
+
+    group('chatDeleted trigger', () {
+      testWidgets('removes deleted chat from the list', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([
+          _chatSummary('c1', DateTime(2024)),
+          _chatSummary('c2', DateTime(2024, 1, 2)),
+        ]);
+        await tester.pumpAndSettle();
+
+        _api.emitUpdate(
+          ChatListUpdateTrigger.chatDeleted,
+          _chatSummary('c2', DateTime(2024, 1, 2)),
+        );
+        await tester.pumpAndSettle();
+
+        final ids = getResult().chats.map((c) => c.mlsGroupId).toList();
+        expect(ids, ['mls_c1']);
+      });
+    });
+
+    group('userBlockChanged trigger', () {
+      testWidgets('updates chat data without changing order', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([
+          _chatSummary('c1', DateTime(2024)),
+          _chatSummary('c2', DateTime(2024, 1, 2)),
+        ]);
+        await tester.pumpAndSettle();
+
+        _api.emitUpdate(
+          ChatListUpdateTrigger.userBlockChanged,
+          _chatSummary('c2', DateTime(2024, 1, 2), mutedUntil: DateTime(2025)),
+        );
+        await tester.pumpAndSettle();
+
+        final chats = getResult().chats;
+        expect(chats.map((c) => c.mlsGroupId).toList(), ['mls_c1', 'mls_c2']);
+        expect(chats[1].mutedUntil, DateTime(2025));
+      });
+    });
+
     group('with archived true', () {
       testWidgets('adds archived chat on archive change', (tester) async {
         final getResult = await _pumpWithArchived(tester, testPubkeyA, archived: true);

@@ -63,6 +63,12 @@ ChatListResult useChatList(String pubkey, {bool archived = false}) {
                     chatMap.value[id] = update.item;
                   case ChatListUpdateTrigger.leftGroup:
                     chatMap.value[id] = update.item;
+                  case ChatListUpdateTrigger.chatCleared:
+                    chatMap.value[id] = update.item;
+                  case ChatListUpdateTrigger.chatDeleted:
+                    chatMap.value.remove(id);
+                  case ChatListUpdateTrigger.userBlockChanged:
+                    chatMap.value[id] = update.item;
                 }
                 return chatMap.value;
               },

@@ -224,7 +224,9 @@ pub async fn upload_account_profile_picture(
 ) -> Result<String, ApiError> {
     let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let image_type = ImageType::try_from(image_type)?;
+    let image_type = ImageType::try_from(image_type).map_err(|error| ApiError::Other {
+        message: error.to_string(),
+    })?;
 
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let server = Url::parse(&server_url)?;

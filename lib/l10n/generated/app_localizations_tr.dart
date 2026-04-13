@@ -331,7 +331,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get signOutCalloutDescriptionBefore => 'Özel anahtarınızı ';
 
   @override
-  String get signOutCalloutDescriptionLink => 'Ayarlar → Profil Anahtarları';
+  String get signOutCalloutDescriptionLink => 'Ayarlar → Profil anahtarları';
 
   @override
   String get signOutCalloutDescriptionAfter =>

@@ -333,7 +333,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Asegúrate de haber respaldado tu llave privada en ';
 
   @override
-  String get signOutCalloutDescriptionLink => 'Ajustes → Llaves de perfil';
+  String get signOutCalloutDescriptionLink => 'Ajustes → Llaves del perfil';
 
   @override
   String get signOutCalloutDescriptionAfter => '. Sin ella, no podrás iniciar sesión de nuevo.';

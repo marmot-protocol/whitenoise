@@ -149,6 +149,15 @@ enum ChatListUpdateTrigger {
 
   /// This account left the group.
   leftGroup,
+
+  /// All messages in the chat were cleared.
+  chatCleared,
+
+  /// The chat was deleted.
+  chatDeleted,
+
+  /// A user was blocked or unblocked.
+  userBlockChanged,
 }
 
 @freezed

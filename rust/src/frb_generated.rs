@@ -5621,6 +5621,9 @@ impl SseDecode for crate::api::chat_list::ChatListUpdateTrigger {
             4 => crate::api::chat_list::ChatListUpdateTrigger::RemovedFromGroup,
             5 => crate::api::chat_list::ChatListUpdateTrigger::ChatMuteChanged,
             6 => crate::api::chat_list::ChatListUpdateTrigger::LeftGroup,
+            7 => crate::api::chat_list::ChatListUpdateTrigger::ChatCleared,
+            8 => crate::api::chat_list::ChatListUpdateTrigger::ChatDeleted,
+            9 => crate::api::chat_list::ChatListUpdateTrigger::UserBlockChanged,
             _ => unreachable!("Invalid variant for ChatListUpdateTrigger: {}", inner),
         };
     }
@@ -7844,6 +7847,9 @@ impl flutter_rust_bridge::IntoDart for crate::api::chat_list::ChatListUpdateTrig
             Self::RemovedFromGroup => 4.into_dart(),
             Self::ChatMuteChanged => 5.into_dart(),
             Self::LeftGroup => 6.into_dart(),
+            Self::ChatCleared => 7.into_dart(),
+            Self::ChatDeleted => 8.into_dart(),
+            Self::UserBlockChanged => 9.into_dart(),
             _ => unreachable!(),
         }
     }
@@ -9437,6 +9443,9 @@ impl SseEncode for crate::api::chat_list::ChatListUpdateTrigger {
                 crate::api::chat_list::ChatListUpdateTrigger::RemovedFromGroup => 4,
                 crate::api::chat_list::ChatListUpdateTrigger::ChatMuteChanged => 5,
                 crate::api::chat_list::ChatListUpdateTrigger::LeftGroup => 6,
+                crate::api::chat_list::ChatListUpdateTrigger::ChatCleared => 7,
+                crate::api::chat_list::ChatListUpdateTrigger::ChatDeleted => 8,
+                crate::api::chat_list::ChatListUpdateTrigger::UserBlockChanged => 9,
                 _ => {
                     unimplemented!("");
                 }

@@ -613,9 +613,12 @@ pub async fn subscribe_to_group_messages(
     info!(group_id = %group_id_str, "subscribe_to_group_messages: subscribing");
 
     let parsed_pubkey = pubkey.as_deref().map(PublicKey::parse).transpose()?;
+    let subscription_pubkey = parsed_pubkey.as_ref().ok_or_else(|| ApiError::Other {
+        message: "pubkey is required to subscribe to group messages".to_string(),
+    })?;
 
     let subscription = whitenoise
-        .subscribe_to_group_messages(&group_id, None)
+        .subscribe_to_group_messages(subscription_pubkey, &group_id, None)
         .await?;
 
     // When a pubkey is provided, replace the subscription's initial snapshot with an
