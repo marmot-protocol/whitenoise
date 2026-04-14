@@ -138,7 +138,7 @@ enum ChatListUpdateTrigger {
   /// The last message in a chat was deleted
   lastMessageDeleted,
 
-  /// The chat's archive status changed.
+  /// A chat's archive status changed
   chatArchiveChanged,
 
   /// This account was removed from the group by an admin.
@@ -149,6 +149,12 @@ enum ChatListUpdateTrigger {
 
   /// This account left the group.
   leftGroup,
+
+  /// All messages in the chat were cleared.
+  chatCleared,
+
+  /// The chat was deleted.
+  chatDeleted,
 
   /// A user was blocked or unblocked.
   userBlockChanged,
