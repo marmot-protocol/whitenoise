@@ -1437,4 +1437,18 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get waitingForInternet => 'Warten auf Internetverbindung';
+
+  @override
+  String get leaveGroup => 'Gruppe verlassen';
+
+  @override
+  String get leaveGroupConfirmation => 'Gruppe verlassen';
+
+  @override
+  String get leaveGroupWarning =>
+      'Bist du sicher, dass du diese Gruppe verlassen möchtest? Der Chat bleibt in deiner Liste, wenn du ihn nicht löschst, aber du kannst keine neuen Nachrichten senden oder empfangen, es sei denn, jemand lädt dich erneut ein.';
+
+  @override
+  String get failedToLeaveGroup =>
+      'Gruppe konnte nicht verlassen werden. Bitte versuche es erneut.';
 }

@@ -86,11 +86,8 @@
   "donateTitle": "Dona a White Noise",
   "donateDescription": "Come organizzazione senza scopo di lucro, White Noise esiste unicamente per la tua privacy e libertà, non per profitto. Il tuo supporto ci mantiene indipendenti e senza compromessi.",
   "donateContributionLetterBefore": "Se hai bisogno di una lettera di attestazione per una donazione, contattaci a ",
-
   "donateContributionLetterAfter": "",
-
   "donateContributionAcknowledgmentTitle": "Attestazione di contributo",
-
   "lightningAddress": "Indirizzo Lightning",
   "bitcoinSilentPayment": "Pagamento Silenzioso Bitcoin",
   "copiedToClipboardThankYou": "Copiato negli appunti. Grazie!",
@@ -370,9 +367,6 @@
   "appLogsShow": "Mostra",
   "appLogsClearFilters": "Cancella filtri",
   "appLogsLive": "Live",
-  "@appLogsLive": {
-    "description": "Label on the button that resumes live log streaming"
-  },
   "appLogsFilteredCount": "{shown} di {total}",
   "appLogsCopyAll": "Copia tutto",
   "invalidRelayUrlScheme": "L'URL deve iniziare con wss:// o ws://",
@@ -381,22 +375,8 @@
   "youDeletedThisMessage": "Hai eliminato questo messaggio.",
   "relayControlStateLoadError": "Impossibile caricare lo stato di controllo del relay. Per favore, riprova.",
   "updateAvailableTitle": "Aggiornamento disponibile",
-  "@updateAvailableTitle": {
-    "description": "Title of the update-available banner shown when a newer version is on Zapstore"
-  },
   "updateAvailableDescription": "La versione {version} è disponibile su Zapstore.",
-  "@updateAvailableDescription": {
-    "description": "Body of the update-available banner",
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
   "updateNow": "Aggiorna ora",
-  "@updateNow": {
-    "description": "Button label that opens the Zapstore listing for the app update"
-  },
   "fatalErrorCopyError": "Copia errore",
   "fatalErrorErrorCopied": "Errore copiato negli appunti",
   "fatalErrorTitle": "Oh no!",
@@ -430,5 +410,9 @@
   "failedToArchiveChat": "Impossibile archiviare la chat. Riprova.",
   "failedToUnarchiveChat": "Impossibile rimuovere la chat dall'archivio. Riprova.",
   "archivedChatsEmpty": "Nessuna chat archiviata",
-  "waitingForInternet": "In attesa della connessione a internet"
+  "waitingForInternet": "In attesa della connessione a internet",
+  "leaveGroup": "Lascia il gruppo",
+  "leaveGroupConfirmation": "Lascia il gruppo",
+  "leaveGroupWarning": "Sei sicuro di voler lasciare questo gruppo? La chat rimarrà nel tuo elenco se non la elimini, ma non potrai inviare o ricevere nuovi messaggi a meno che qualcuno non ti inviti di nuovo.",
+  "failedToLeaveGroup": "Impossibile lasciare il gruppo. Riprova."
 }

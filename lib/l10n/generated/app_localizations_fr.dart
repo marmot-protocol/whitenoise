@@ -1419,4 +1419,17 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get waitingForInternet => 'En attente de connexion internet';
+
+  @override
+  String get leaveGroup => 'Quitter le groupe';
+
+  @override
+  String get leaveGroupConfirmation => 'Quitter le groupe';
+
+  @override
+  String get leaveGroupWarning =>
+      'Êtes-vous sûr de vouloir quitter ce groupe ? La discussion restera dans votre liste si vous ne la supprimez pas, mais vous ne pourrez ni envoyer ni recevoir de nouveaux messages à moins que quelqu\'un ne vous invite à nouveau.';
+
+  @override
+  String get failedToLeaveGroup => 'Impossible de quitter le groupe. Veuillez réessayer.';
 }

@@ -1402,4 +1402,17 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get waitingForInternet => 'İnternet bağlantısı bekleniyor';
+
+  @override
+  String get leaveGroup => 'Gruptan ayrıl';
+
+  @override
+  String get leaveGroupConfirmation => 'Gruptan ayrıl';
+
+  @override
+  String get leaveGroupWarning =>
+      'Bu gruptan ayrılmak istediğinize emin misiniz? Silmezseniz sohbet listenizde kalacak, ancak biri sizi yeniden davet edene kadar yeni mesaj gönderemez veya alamazsınız.';
+
+  @override
+  String get failedToLeaveGroup => 'Gruptan ayrılma başarısız oldu. Lütfen tekrar deneyin.';
 }

@@ -1432,4 +1432,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get waitingForInternet => 'Ожидание подключения к интернету';
+
+  @override
+  String get leaveGroup => 'Покинуть группу';
+
+  @override
+  String get leaveGroupConfirmation => 'Покинуть группу';
+
+  @override
+  String get leaveGroupWarning =>
+      'Вы уверены, что хотите покинуть эту группу? Чат останется в вашем списке, если вы его не удалите, но вы не сможете отправлять или получать новые сообщения, пока кто-нибудь не пригласит вас снова.';
+
+  @override
+  String get failedToLeaveGroup => 'Не удалось покинуть группу. Пожалуйста, попробуйте еще раз.';
 }

@@ -86,11 +86,8 @@
   "donateTitle": "White Noise'a Bağış Yap",
   "donateDescription": "Kar amacı gütmeyen bir kuruluş olarak White Noise, yalnızca gizliliğiniz ve özgürlüğünüz için var, kar için değil. Desteğiniz bizi bağımsız ve taviz vermeden tutar.",
   "donateContributionLetterBefore": "Bir bağış için katkı onay mektubuna ihtiyacınız varsa, ",
-
   "donateContributionLetterAfter": " adresinden bizimle iletişime geçin",
-
   "donateContributionAcknowledgmentTitle": "Katkı onayı",
-
   "lightningAddress": "Lightning Adresi",
   "bitcoinSilentPayment": "Bitcoin Sessiz Ödeme",
   "copiedToClipboardThankYou": "Panoya kopyalandı. Teşekkürler!",
@@ -370,9 +367,6 @@
   "appLogsShow": "Göster",
   "appLogsClearFilters": "Filtreleri temizle",
   "appLogsLive": "Canlı",
-  "@appLogsLive": {
-    "description": "Label on the button that resumes live log streaming"
-  },
   "appLogsFilteredCount": "{shown} / {total}",
   "appLogsCopyAll": "Tümünü kopyala",
   "invalidRelayUrlScheme": "URL wss:// veya ws:// ile başlamalıdır",
@@ -381,22 +375,8 @@
   "youDeletedThisMessage": "Bu mesajı sildin.",
   "relayControlStateLoadError": "Röle kontrol durumu yüklenemedi. Lütfen tekrar deneyin.",
   "updateAvailableTitle": "Güncelleme mevcut",
-  "@updateAvailableTitle": {
-    "description": "Title of the update-available banner shown when a newer version is on Zapstore"
-  },
   "updateAvailableDescription": "{version} sürümü Zapstore'da mevcut.",
-  "@updateAvailableDescription": {
-    "description": "Body of the update-available banner",
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
   "updateNow": "Şimdi güncelle",
-  "@updateNow": {
-    "description": "Button label that opens the Zapstore listing for the app update"
-  },
   "fatalErrorCopyError": "Hatayı kopyala",
   "fatalErrorErrorCopied": "Hata panoya kopyalandı",
   "fatalErrorTitle": "Eyvah!",
@@ -430,5 +410,9 @@
   "failedToArchiveChat": "Sohbet arşivlenemedi. Lütfen tekrar deneyin.",
   "failedToUnarchiveChat": "Sohbet arşivden çıkarılamadı. Lütfen tekrar deneyin.",
   "archivedChatsEmpty": "Arşivlenmiş sohbet yok",
-  "waitingForInternet": "İnternet bağlantısı bekleniyor"
+  "waitingForInternet": "İnternet bağlantısı bekleniyor",
+  "leaveGroup": "Gruptan ayrıl",
+  "leaveGroupConfirmation": "Gruptan ayrıl",
+  "leaveGroupWarning": "Bu gruptan ayrılmak istediğinize emin misiniz? Silmezseniz sohbet listenizde kalacak, ancak biri sizi yeniden davet edene kadar yeni mesaj gönderemez veya alamazsınız.",
+  "failedToLeaveGroup": "Gruptan ayrılma başarısız oldu. Lütfen tekrar deneyin."
 }

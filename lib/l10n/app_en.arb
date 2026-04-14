@@ -1798,4 +1798,13 @@
   "@waitingForInternet": {
     "description": "Notice shown when the device has no internet connection"
   }
+,
+  "leaveGroup": "Leave group",
+  "@leaveGroup": { "description": "Label for the leave group button" },
+  "leaveGroupConfirmation": "Leave group",
+  "@leaveGroupConfirmation": { "description": "Title of the leave group confirmation dialog" },
+  "leaveGroupWarning": "Are you sure you want to leave this group? The chat will stay in your list if you don't delete it, but you won't be able to send or receive new messages unless someone re-invites you.",
+  "@leaveGroupWarning": { "description": "Warning shown in the leave group confirmation dialog" },
+  "failedToLeaveGroup": "Failed to leave group. Please try again.",
+  "@failedToLeaveGroup": { "description": "Error shown when leaving a group fails" }
 }

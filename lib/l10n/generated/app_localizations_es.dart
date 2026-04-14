@@ -1418,4 +1418,17 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get waitingForInternet => 'Esperando conexión a internet';
+
+  @override
+  String get leaveGroup => 'Salir del grupo';
+
+  @override
+  String get leaveGroupConfirmation => 'Salir del grupo';
+
+  @override
+  String get leaveGroupWarning =>
+      '¿Estás seguro de que quieres salir de este grupo? El chat permanecerá en tu lista si no lo eliminas, pero no podrás enviar ni recibir mensajes nuevos a menos que alguien te vuelva a invitar.';
+
+  @override
+  String get failedToLeaveGroup => 'No se pudo salir del grupo. Por favor, inténtalo de nuevo.';
 }

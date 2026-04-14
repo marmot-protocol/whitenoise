@@ -86,11 +86,8 @@
   "donateTitle": "Пожертвовать White Noise",
   "donateDescription": "Как некоммерческая организация, White Noise существует исключительно для вашей конфиденциальности и свободы, а не для прибыли. Ваша поддержка сохраняет нашу независимость и бескомпромиссность.",
   "donateContributionLetterBefore": "Если вам нужно письмо-подтверждение о пожертвовании, свяжитесь с нами по адресу ",
-
   "donateContributionLetterAfter": "",
-
   "donateContributionAcknowledgmentTitle": "Подтверждение взноса",
-
   "lightningAddress": "Адрес Lightning",
   "bitcoinSilentPayment": "Тихий Платёж Bitcoin",
   "copiedToClipboardThankYou": "Скопировано в буфер обмена. Спасибо!",
@@ -370,9 +367,6 @@
   "appLogsShow": "Показать",
   "appLogsClearFilters": "Сбросить фильтры",
   "appLogsLive": "Прямой эфир",
-  "@appLogsLive": {
-    "description": "Label on the button that resumes live log streaming"
-  },
   "appLogsFilteredCount": "{shown} из {total}",
   "appLogsCopyAll": "Копировать все",
   "invalidRelayUrlScheme": "URL должен начинаться с wss:// или ws://",
@@ -381,22 +375,8 @@
   "youDeletedThisMessage": "Вы удалили это сообщение.",
   "relayControlStateLoadError": "Не удалось загрузить состояние управления реле. Пожалуйста, попробуйте снова.",
   "updateAvailableTitle": "Доступно обновление",
-  "@updateAvailableTitle": {
-    "description": "Title of the update-available banner shown when a newer version is on Zapstore"
-  },
   "updateAvailableDescription": "Версия {version} доступна в Zapstore.",
-  "@updateAvailableDescription": {
-    "description": "Body of the update-available banner",
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
   "updateNow": "Обновить сейчас",
-  "@updateNow": {
-    "description": "Button label that opens the Zapstore listing for the app update"
-  },
   "fatalErrorCopyError": "Копировать ошибку",
   "fatalErrorErrorCopied": "Ошибка скопирована в буфер обмена",
   "fatalErrorTitle": "О нет!",
@@ -430,5 +410,9 @@
   "failedToArchiveChat": "Не удалось архивировать чат. Попробуйте снова.",
   "failedToUnarchiveChat": "Не удалось разархивировать чат. Попробуйте снова.",
   "archivedChatsEmpty": "Нет архивированных чатов",
-  "waitingForInternet": "Ожидание подключения к интернету"
+  "waitingForInternet": "Ожидание подключения к интернету",
+  "leaveGroup": "Покинуть группу",
+  "leaveGroupConfirmation": "Покинуть группу",
+  "leaveGroupWarning": "Вы уверены, что хотите покинуть эту группу? Чат останется в вашем списке, если вы его не удалите, но вы не сможете отправлять или получать новые сообщения, пока кто-нибудь не пригласит вас снова.",
+  "failedToLeaveGroup": "Не удалось покинуть группу. Пожалуйста, попробуйте еще раз."
 }

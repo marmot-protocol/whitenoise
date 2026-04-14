@@ -2573,6 +2573,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Waiting for internet connection'**
   String get waitingForInternet;
+
+  /// Label for the leave group button
+  ///
+  /// In en, this message translates to:
+  /// **'Leave group'**
+  String get leaveGroup;
+
+  /// Title of the leave group confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Leave group'**
+  String get leaveGroupConfirmation;
+
+  /// Warning shown in the leave group confirmation dialog
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to leave this group? The chat will stay in your list if you don\'t delete it, but you won\'t be able to send or receive new messages unless someone re-invites you.'**
+  String get leaveGroupWarning;
+
+  /// Error shown when leaving a group fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to leave group. Please try again.'**
+  String get failedToLeaveGroup;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

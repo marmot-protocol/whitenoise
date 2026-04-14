@@ -86,11 +86,8 @@
   "donateTitle": "Doar para o White Noise",
   "donateDescription": "Como uma organização sem fins lucrativos, o White Noise existe apenas para sua privacidade e liberdade, não para lucro. Seu apoio nos mantém independentes e sem compromissos.",
   "donateContributionLetterBefore": "Se você precisar de uma carta de confirmação de contribuição para uma doação, entre em contato conosco em ",
-
   "donateContributionLetterAfter": "",
-
   "donateContributionAcknowledgmentTitle": "Reconhecimento de contribuição",
-
   "lightningAddress": "Endereço Lightning",
   "bitcoinSilentPayment": "Pagamento Silencioso Bitcoin",
   "copiedToClipboardThankYou": "Copiado para a área de transferência. Obrigado!",
@@ -370,9 +367,6 @@
   "appLogsShow": "Mostrar",
   "appLogsClearFilters": "Limpar filtros",
   "appLogsLive": "Ao vivo",
-  "@appLogsLive": {
-    "description": "Label on the button that resumes live log streaming"
-  },
   "appLogsFilteredCount": "{shown} de {total}",
   "appLogsCopyAll": "Copiar tudo",
   "invalidRelayUrlScheme": "O URL deve começar com wss:// ou ws://",
@@ -381,22 +375,8 @@
   "youDeletedThisMessage": "Você excluiu esta mensagem.",
   "relayControlStateLoadError": "Falha ao carregar o estado de controle do relay. Por favor, tente novamente.",
   "updateAvailableTitle": "Atualização disponível",
-  "@updateAvailableTitle": {
-    "description": "Title of the update-available banner shown when a newer version is on Zapstore"
-  },
   "updateAvailableDescription": "A versão {version} está disponível no Zapstore.",
-  "@updateAvailableDescription": {
-    "description": "Body of the update-available banner",
-    "placeholders": {
-      "version": {
-        "type": "String"
-      }
-    }
-  },
   "updateNow": "Atualizar agora",
-  "@updateNow": {
-    "description": "Button label that opens the Zapstore listing for the app update"
-  },
   "fatalErrorCopyError": "Copiar erro",
   "fatalErrorErrorCopied": "Erro copiado para a área de transferência",
   "fatalErrorTitle": "Oh, não!",
@@ -430,5 +410,9 @@
   "failedToArchiveChat": "Falha ao arquivar a conversa. Tente novamente.",
   "failedToUnarchiveChat": "Falha ao desarquivar a conversa. Tente novamente.",
   "archivedChatsEmpty": "Nenhuma conversa arquivada",
-  "waitingForInternet": "Aguardando conexão com a internet"
+  "waitingForInternet": "Aguardando conexão com a internet",
+  "leaveGroup": "Sair do grupo",
+  "leaveGroupConfirmation": "Sair do grupo",
+  "leaveGroupWarning": "Tem certeza de que deseja sair deste grupo? O chat permanecerá na sua lista se você não o excluir, mas você não poderá enviar ou receber novas mensagens a menos que alguém o convide novamente.",
+  "failedToLeaveGroup": "Falha ao sair do grupo. Por favor, tente novamente."
 }
