@@ -363,6 +363,18 @@ pub async fn leave_and_delete_group(
 }
 
 #[frb]
+pub async fn leave_group(pubkey: String, group_id: String) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let group_id = group_id_from_string(&group_id)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    whitenoise
+        .leave_group(&account, &group_id)
+        .await
+        .map_err(ApiError::from)
+}
+
+#[frb]
 pub async fn get_group(account_pubkey: String, group_id: String) -> Result<Group, ApiError> {
     let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
