@@ -67,6 +67,43 @@ Future<void> removeMembersFromGroup({
   memberPubkeys: memberPubkeys,
 );
 
+/// Clears all messages in a group's chat for this account.
+///
+/// The group stays in the chat list and the account remains an MLS member.
+/// Local-only: nothing is published to relays.
+Future<void> clearChat({
+  required String accountPubkey,
+  required String groupId,
+}) => RustLib.instance.api.crateApiGroupsClearChat(
+  accountPubkey: accountPubkey,
+  groupId: groupId,
+);
+
+/// Removes a group from this account's chat list and deletes its local data.
+///
+/// Local-only: nothing is published to relays, so the account stays an MLS
+/// member and other members keep encrypting to it. Use [`leave_and_delete_group`]
+/// to exit the group entirely.
+Future<void> deleteChat({
+  required String accountPubkey,
+  required String groupId,
+}) => RustLib.instance.api.crateApiGroupsDeleteChat(
+  accountPubkey: accountPubkey,
+  groupId: groupId,
+);
+
+/// Leaves the MLS group, then deletes all local chat data for this account.
+///
+/// Publishes a leave proposal to the group's relays so other members stop
+/// encrypting to this account. If the leave fails, local data is untouched.
+Future<void> leaveAndDeleteGroup({
+  required String accountPubkey,
+  required String groupId,
+}) => RustLib.instance.api.crateApiGroupsLeaveAndDeleteGroup(
+  accountPubkey: accountPubkey,
+  groupId: groupId,
+);
+
 Future<Group> getGroup({
   required String accountPubkey,
   required String groupId,

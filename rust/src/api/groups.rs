@@ -315,6 +315,53 @@ pub async fn remove_members_from_group(
         .map_err(ApiError::from)
 }
 
+/// Clears all messages in a group's chat for this account.
+///
+/// The group stays in the chat list and the account remains an MLS member.
+/// Local-only: nothing is published to relays.
+#[frb]
+pub async fn clear_chat(account_pubkey: String, group_id: String) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let group_id = group_id_from_string(&group_id)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    whitenoise.clear_chat(&account, &group_id).await?;
+    Ok(())
+}
+
+/// Removes a group from this account's chat list and deletes its local data.
+///
+/// Local-only: nothing is published to relays, so the account stays an MLS
+/// member and other members keep encrypting to it. Use [`leave_and_delete_group`]
+/// to exit the group entirely.
+#[frb]
+pub async fn delete_chat(account_pubkey: String, group_id: String) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let group_id = group_id_from_string(&group_id)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    whitenoise.delete_chat(&account, &group_id).await?;
+    Ok(())
+}
+
+/// Leaves the MLS group, then deletes all local chat data for this account.
+///
+/// Publishes a leave proposal to the group's relays so other members stop
+/// encrypting to this account. If the leave fails, local data is untouched.
+#[frb]
+pub async fn leave_and_delete_group(
+    account_pubkey: String,
+    group_id: String,
+) -> Result<(), ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let group_id = group_id_from_string(&group_id)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    whitenoise.leave_group(&account, &group_id).await?;
+    whitenoise.delete_chat(&account, &group_id).await?;
+    Ok(())
+}
+
 #[frb]
 pub async fn get_group(account_pubkey: String, group_id: String) -> Result<Group, ApiError> {
     let whitenoise = Whitenoise::get_instance()?;
