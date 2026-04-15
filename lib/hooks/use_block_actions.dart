@@ -26,25 +26,33 @@ BlockActionsState useBlockActions({
   final error = useState<String?>(null);
 
   useEffect(() {
+    if (userPubkey == null) {
+      isLoading.value = false;
+      return null;
+    }
+
+    var cancelled = false;
+    isLoading.value = true;
+
     Future<void> fetchIsBlocked() async {
-      if (userPubkey == null) return;
-      isLoading.value = true;
       try {
         final result = await mute_list_api.isUserBlocked(
           accountPubkey: accountPubkey,
           targetPubkey: userPubkey,
         );
+        if (cancelled) return;
         isBlocked.value = result;
       } catch (e) {
+        if (cancelled) return;
         _logger.severe('Failed to fetch block status: $e');
         isBlocked.value = false;
       } finally {
-        isLoading.value = false;
+        if (!cancelled) isLoading.value = false;
       }
     }
 
     fetchIsBlocked();
-    return null;
+    return () => cancelled = true;
   }, [accountPubkey, userPubkey, refreshKey]);
 
   void clearError() {

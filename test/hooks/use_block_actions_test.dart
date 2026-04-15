@@ -91,11 +91,11 @@ void main() {
   group('useBlockActions', () {
     group('loading state', () {
       group('with null userPubkey', () {
-        testWidgets('isLoading stays true after settle', (tester) async {
+        testWidgets('isLoading is false after settle', (tester) async {
           await pump(tester, accountPubkey: testPubkeyA);
           await tester.pumpAndSettle();
 
-          expect(getState().isLoading, isTrue);
+          expect(getState().isLoading, isFalse);
         });
 
         testWidgets('isBlocked is false', (tester) async {
@@ -359,6 +359,33 @@ void main() {
 
         expect(_api.blockCalls.length, 0);
         expect(_api.unblockCalls.length, 1);
+        expect(getState().isBlocked, isFalse);
+      });
+    });
+
+    group('cleanup', () {
+      testWidgets('does not write stale state after refreshKey changes', (tester) async {
+        final completer = Completer<bool>();
+        _api.isBlockedCompleter = completer;
+
+        await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
+
+        _api.isBlockedCompleter = null;
+        getState = await mountHook(
+          tester,
+          () => useBlockActions(
+            accountPubkey: testPubkeyA,
+            userPubkey: testPubkeyB,
+            refreshKey: 1,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(getState().isBlocked, isFalse);
+
+        completer.complete(true);
+        await tester.pumpAndSettle();
+
         expect(getState().isBlocked, isFalse);
       });
     });
