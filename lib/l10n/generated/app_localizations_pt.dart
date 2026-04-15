@@ -20,6 +20,17 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String mediaCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Mídias',
+      one: 'Mídia',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get appTitle => 'White Noise';
 
   @override

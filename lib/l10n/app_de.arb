@@ -1,5 +1,6 @@
 {
   "photoCount": "{count, plural, =1{Foto} other{Fotos}}",
+  "mediaCount": "{count, plural, =1{Medium} other{Medien}}",
   "@@locale": "de",
   "appTitle": "White Noise",
   "sloganFull": "Dezentralisiert, Unzensierbar,\nSichere Nachrichten.",

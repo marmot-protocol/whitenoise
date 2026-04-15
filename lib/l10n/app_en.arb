@@ -9,6 +9,15 @@
       }
     }
   },
+  "mediaCount": "{count, plural, =1{Media item} other{Media items}}",
+  "@mediaCount": {
+    "description": "Label shown in chat list when the last message contains media attachments",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
   "appTitle": "White Noise",
   "@appTitle": {
     "description": "The application title displayed on home screen"

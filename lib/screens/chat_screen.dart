@@ -729,7 +729,7 @@ class _ChatInput extends StatelessWidget {
         inputStyle: inputStyle,
         onAddTap: () {
           input.focusNode.unfocus();
-          mediaUpload.pickImages();
+          mediaUpload.pickMedia();
         },
         inputField: TextField(
           controller: input.controller,

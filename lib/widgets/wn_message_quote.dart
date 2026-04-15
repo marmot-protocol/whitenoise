@@ -12,6 +12,7 @@ class WnMessageQuote extends StatelessWidget {
     this.onCancel,
     this.onTap,
     this.image,
+    this.mediaThumbnail,
     this.authorColor,
   });
 
@@ -20,6 +21,7 @@ class WnMessageQuote extends StatelessWidget {
   final VoidCallback? onCancel;
   final VoidCallback? onTap;
   final ImageProvider? image;
+  final Widget? mediaThumbnail;
   final Color? authorColor;
 
   @override
@@ -84,16 +86,20 @@ class WnMessageQuote extends StatelessWidget {
                   ),
                 ),
               ),
-              if (image != null) ...[
+              if (image != null || mediaThumbnail != null) ...[
                 Gap(10.w),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(4.r),
-                  child: Image(
+                  child: SizedBox(
                     key: const Key('quote_thumbnail'),
-                    image: image!,
-                    fit: BoxFit.cover,
                     width: 40.w,
-                    height: 40.w,
+                    height: 40.h,
+                    child: image != null
+                        ? Image(
+                            image: image!,
+                            fit: BoxFit.cover,
+                          )
+                        : mediaThumbnail!,
                   ),
                 ),
               ],

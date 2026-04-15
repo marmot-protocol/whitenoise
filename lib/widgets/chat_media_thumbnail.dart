@@ -5,6 +5,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/hooks/use_media_download.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
+import 'package:whitenoise/utils/media_type.dart';
+import 'package:whitenoise/widgets/local_video_player.dart';
 import 'package:whitenoise/widgets/wn_media_placeholder.dart';
 import 'package:whitenoise/widgets/wn_media_thumbnail.dart';
 
@@ -53,6 +55,7 @@ class ChatMediaThumbnail extends HookWidget {
         thumbHash: thumbHash,
         blurhash: blurhash,
         thumbnailSize: thumbnailSize,
+        isVideo: isVideoMediaFile(mediaFile),
       );
     }
 
@@ -82,6 +85,7 @@ class _MediaContent extends StatelessWidget {
     required this.thumbHash,
     required this.blurhash,
     required this.thumbnailSize,
+    required this.isVideo,
   });
 
   final MediaDownloadStatus status;
@@ -90,6 +94,7 @@ class _MediaContent extends StatelessWidget {
   final String? thumbHash;
   final String? blurhash;
   final double thumbnailSize;
+  final bool isVideo;
 
   @override
   Widget build(BuildContext context) {
@@ -104,22 +109,33 @@ class _MediaContent extends StatelessWidget {
           height: thumbnailSize,
         ),
         if (status == MediaDownloadStatus.success)
-          FadeTransition(
-            key: const Key('fade_transition'),
-            opacity: fadeController,
-            child: Image.file(
-              File(localPath!),
-              key: const Key('thumbnail_image'),
+          if (isVideo)
+            LocalVideoPlayer(
+              key: const Key('thumbnail_video'),
+              filePath: localPath!,
+              thumbHash: thumbHash,
+              blurhash: blurhash,
               fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => WnMediaPlaceholder(
-                key: const Key('thumbnail_error_fallback'),
-                thumbHash: thumbHash,
-                blurhash: blurhash,
-                width: thumbnailSize,
-                height: thumbnailSize,
+              showControls: false,
+            )
+          else
+            FadeTransition(
+              key: const Key('fade_transition'),
+              opacity: fadeController,
+              child: Image.file(
+                File(localPath!),
+                key: const Key('thumbnail_image'),
+                fit: BoxFit.cover,
+                errorBuilder: (_, _, _) => WnMediaPlaceholder(
+                  key: const Key('thumbnail_error_fallback'),
+                  thumbHash: thumbHash,
+                  blurhash: blurhash,
+                  width: thumbnailSize,
+                  height: thumbnailSize,
+                ),
               ),
             ),
-          ),
+        if (isVideo) const VideoPlayIndicator(key: Key('thumbnail_video_indicator')),
       ],
     );
   }

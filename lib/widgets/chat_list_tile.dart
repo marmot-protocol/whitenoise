@@ -32,7 +32,7 @@ final _logger = Logger('ChatListTile');
     return null;
   }
   return (
-    subtitle: context.l10n.photoCount(lastMessage.mediaAttachmentCount.toInt()),
+    subtitle: context.l10n.mediaCount(lastMessage.mediaAttachmentCount.toInt()),
     icon: WnIcon(
       WnIcons.image,
       key: const Key('media_subtitle_icon'),

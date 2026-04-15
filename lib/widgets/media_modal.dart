@@ -6,8 +6,10 @@ import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/media_type.dart';
 import 'package:whitenoise/widgets/chat_media_thumbnail.dart';
 import 'package:whitenoise/widgets/media_image.dart';
+import 'package:whitenoise/widgets/media_video.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_overlay.dart';
@@ -166,9 +168,16 @@ class _MediaContent extends StatelessWidget {
               physics: isZoomed ? const NeverScrollableScrollPhysics() : const PageScrollPhysics(),
               onPageChanged: onPageChanged,
               itemBuilder: (_, index) {
+                final mediaFile = mediaFiles[index];
+                if (isVideoMediaFile(mediaFile)) {
+                  return MediaVideo(
+                    key: Key('media_video_$index'),
+                    mediaFile: mediaFile,
+                  );
+                }
                 return MediaImage(
                   key: Key('media_image_$index'),
-                  mediaFile: mediaFiles[index],
+                  mediaFile: mediaFile,
                   onZoomChanged: onZoomChanged,
                 );
               },

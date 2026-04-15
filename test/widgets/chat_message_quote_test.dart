@@ -86,6 +86,8 @@ MediaFile _mediaFile({
   String id = 'media1',
   String filePath = '',
   String? originalFileHash = 'hash123',
+  String mimeType = 'image/jpeg',
+  String mediaType = 'image',
 }) => MediaFile(
   id: id,
   mlsGroupId: testGroupId,
@@ -93,8 +95,8 @@ MediaFile _mediaFile({
   filePath: filePath,
   originalFileHash: originalFileHash,
   encryptedFileHash: 'encrypted123',
-  mimeType: 'image/jpeg',
-  mediaType: 'image',
+  mimeType: mimeType,
+  mediaType: mediaType,
   blossomUrl: 'https://example.com/media',
   nostrKey: 'nostr123',
   createdAt: DateTime(2024),
@@ -340,6 +342,24 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byKey(const Key('quote_thumbnail')), findsOneWidget);
+      });
+
+      testWidgets('shows video thumbnail for video media', (tester) async {
+        await mountWidget(
+          ChatMessageQuote(
+            data: _quoteData(
+              mediaFile: _mediaFile(
+                mimeType: 'video/mp4',
+                mediaType: 'video',
+              ),
+            ),
+          ),
+          tester,
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('quote_thumbnail')), findsOneWidget);
+        expect(find.byKey(const Key('video_play_indicator')), findsOneWidget);
       });
 
       testWidgets('does not show thumbnail when no media file', (tester) async {

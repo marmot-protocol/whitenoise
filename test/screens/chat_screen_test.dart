@@ -42,6 +42,11 @@ class _MockImagePickerPlatform extends ImagePickerPlatform with MockPlatformInte
   }) async {
     return filesToReturn;
   }
+
+  @override
+  Future<List<XFile>> getMedia({required MediaOptions options}) async {
+    return filesToReturn;
+  }
 }
 
 class _MockTag implements Tag {
@@ -2004,7 +2009,7 @@ void main() {
         ImagePickerPlatform.instance = mockImagePicker;
       });
 
-      testWidgets('shows media upload preview when images are picked', (tester) async {
+      testWidgets('shows media upload preview when media is picked', (tester) async {
         mockImagePicker.filesToReturn = [XFile('/tmp/test_image.jpg')];
         _api.initialMessages = [_message('m1', DateTime(2024))];
         await pumpChatScreen(tester);

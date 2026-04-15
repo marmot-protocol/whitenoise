@@ -114,6 +114,12 @@ abstract class AppLocalizations {
   /// **'{count, plural, =1{Photo} other{Photos}}'**
   String photoCount(int count);
 
+  /// Label shown in chat list when the last message contains media attachments
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Media item} other{Media items}}'**
+  String mediaCount(int count);
+
   /// The application title displayed on home screen
   ///
   /// In en, this message translates to:

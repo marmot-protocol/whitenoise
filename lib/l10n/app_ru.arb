@@ -1,5 +1,6 @@
 {
   "photoCount": "{count, plural, =1{Фото} other{Фото}}",
+  "mediaCount": "{count, plural, =1{Медиа} other{Медиа}}",
   "@@locale": "ru",
   "appTitle": "White Noise",
   "sloganFull": "Децентрализованный, Нецензурируемый,\nБезопасный Мессенджер.",

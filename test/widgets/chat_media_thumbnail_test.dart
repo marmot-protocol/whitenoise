@@ -8,6 +8,7 @@ import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/chat_media_thumbnail.dart';
 import 'package:whitenoise/widgets/wn_media_thumbnail.dart';
 
+import '../fakes/fake_video_player_platform.dart';
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
@@ -17,6 +18,8 @@ MediaFile _mediaFile({
   String? originalFileHash = 'hash123',
   String? blurhash,
   String? thumbhash,
+  String mimeType = 'image/jpeg',
+  String mediaType = 'image',
 }) => MediaFile(
   id: id,
   mlsGroupId: testGroupId,
@@ -24,8 +27,8 @@ MediaFile _mediaFile({
   filePath: filePath,
   originalFileHash: originalFileHash,
   encryptedFileHash: 'encrypted123',
-  mimeType: 'image/jpeg',
-  mediaType: 'image',
+  mimeType: mimeType,
+  mediaType: mediaType,
   blossomUrl: 'https://example.com/media',
   nostrKey: 'nostr123',
   createdAt: DateTime(2024),
@@ -102,6 +105,32 @@ void main() {
 
       expect(find.byKey(const Key('fade_transition')), findsOneWidget);
       expect(find.byKey(const Key('thumbnail_image')), findsOneWidget);
+    });
+
+    testWidgets('shows video thumbnail with play indicator when file exists locally', (
+      tester,
+    ) async {
+      setUpFakeVideoPlayerPlatform();
+      final tempDir = Directory.systemTemp.createTempSync('thumbnail_video_test');
+      final tempFile = File('${tempDir.path}/test.mp4');
+      tempFile.writeAsBytesSync([0, 0, 0, 0]);
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      await mountWidget(
+        ChatMediaThumbnail(
+          mediaFile: _mediaFile(
+            filePath: tempFile.path,
+            mimeType: 'video/mp4',
+            mediaType: 'video',
+          ),
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('thumbnail_video')), findsOneWidget);
+      expect(find.byKey(const Key('thumbnail_video_indicator')), findsOneWidget);
+      expect(find.byKey(const Key('thumbnail_image')), findsNothing);
     });
 
     testWidgets('fade transition animates from 0 to 1', (tester) async {

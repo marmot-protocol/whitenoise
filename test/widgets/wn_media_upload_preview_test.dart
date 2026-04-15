@@ -6,16 +6,20 @@ import 'package:whitenoise/hooks/use_media_upload.dart' show MediaUploadItem, Me
 import 'package:whitenoise/widgets/wn_media_upload_preview.dart';
 import 'package:whitenoise/widgets/wn_spinner.dart';
 
+import '../fakes/fake_video_player_platform.dart';
 import '../test_helpers.dart';
 
 void main() {
   late Directory tempDir;
   late File testImageFile;
+  late File testVideoFile;
 
   setUpAll(() {
     tempDir = Directory.systemTemp.createTempSync('media_preview_test');
     testImageFile = File('${tempDir.path}/test.jpg');
     testImageFile.writeAsBytesSync([0xFF, 0xD8, 0xFF, 0xE0]);
+    testVideoFile = File('${tempDir.path}/test.mp4');
+    testVideoFile.writeAsBytesSync([0, 0, 0, 0]);
   });
 
   tearDownAll(() {
@@ -77,6 +81,25 @@ void main() {
       );
 
       expect(find.byKey(Key('thumbnail_${testImageFile.path}')), findsOneWidget);
+    });
+
+    testWidgets('displays video thumbnail for video items', (tester) async {
+      setUpFakeVideoPlayerPlatform();
+
+      await mountWidget(
+        WnMediaUploadPreview(
+          items: [
+            createItem(filePath: testVideoFile.path, status: MediaUploadStatus.uploaded),
+          ],
+          onRemove: (_) {},
+          onAddMore: () {},
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('thumbnail_video_player')), findsOneWidget);
+      expect(find.byKey(const Key('thumbnail_video_indicator')), findsOneWidget);
     });
 
     testWidgets('displays multiple thumbnails', (tester) async {

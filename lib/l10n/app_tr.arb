@@ -1,5 +1,6 @@
 {
   "photoCount": "{count, plural, =1{Fotoğraf} other{Fotoğraflar}}",
+  "mediaCount": "{count, plural, =1{Medya} other{Medya}}",
   "@@locale": "tr",
   "appTitle": "White Noise",
   "sloganFull": "Merkezi Olmayan, Sansürlenemez,\nGüvenli Mesajlaşma.",

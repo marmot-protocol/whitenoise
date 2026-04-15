@@ -5,6 +5,8 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/hooks/use_media_upload.dart' show MediaUploadItem, MediaUploadStatus;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/media_type.dart';
+import 'package:whitenoise/widgets/local_video_player.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_media_preview.dart';
 import 'package:whitenoise/widgets/wn_spinner.dart';
@@ -70,7 +72,7 @@ class _MediaPreviewWithOverlay extends StatelessWidget {
           selectedIndex: selectedIndex,
           onSelectedChanged: onSelectedChanged,
           onDelete: onDelete,
-          children: items.map((item) => _buildImageTile(item, colors)).toList(),
+          children: items.map((item) => _buildMediaTile(item, colors)).toList(),
         ),
         if (currentItem.status == MediaUploadStatus.uploading)
           const Positioned.fill(
@@ -87,7 +89,27 @@ class _MediaPreviewWithOverlay extends StatelessWidget {
     );
   }
 
-  Widget _buildImageTile(MediaUploadItem item, SemanticColors colors) {
+  Widget _buildMediaTile(MediaUploadItem item, SemanticColors colors) {
+    final uploadedFile = item.file;
+    final isVideo = uploadedFile != null
+        ? isVideoMediaFile(uploadedFile)
+        : isVideoFilePath(item.filePath);
+
+    if (isVideo) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          LocalVideoPlayer(
+            key: const Key('video_tile_player'),
+            filePath: item.filePath,
+            fit: BoxFit.cover,
+            showControls: false,
+          ),
+          const VideoPlayIndicator(key: Key('video_tile_indicator')),
+        ],
+      );
+    }
+
     return Image.file(
       File(item.filePath),
       fit: BoxFit.cover,

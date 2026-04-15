@@ -26,7 +26,7 @@ class _MockImagePicker extends ImagePicker {
   int pickCallCount = 0;
 
   @override
-  Future<List<XFile>> pickMultiImage({
+  Future<List<XFile>> pickMultipleMedia({
     double? maxWidth,
     double? maxHeight,
     int? imageQuality,
@@ -100,12 +100,12 @@ void main() {
       expect(getResult().uploadedFiles, isEmpty);
     });
 
-    group('pickImages', () {
-      testWidgets('calls image picker', (tester) async {
+    group('pickMedia', () {
+      testWidgets('calls media picker', (tester) async {
         final getResult = await pump(tester);
         mockPicker.filesToReturn = [];
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pump();
 
         expect(mockPicker.pickCallCount, 1);
@@ -115,7 +115,7 @@ void main() {
         final getResult = await pump(tester);
         mockPicker.filesToReturn = [];
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pump();
 
         expect(getResult().items, isEmpty);
@@ -125,12 +125,24 @@ void main() {
         final getResult = await pump(tester);
         mockPicker.filesToReturn = [XFile('/path/to/image.jpg')];
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pump();
 
         expect(getResult().items.length, 1);
         expect(getResult().items.first.status, MediaUploadStatus.uploading);
         expect(getResult().items.first.filePath, '/path/to/image.jpg');
+      });
+
+      testWidgets('adds item in uploading state when video is selected', (tester) async {
+        final getResult = await pump(tester);
+        mockPicker.filesToReturn = [XFile('/path/to/video.mp4')];
+
+        await getResult().pickMedia();
+        await tester.pump();
+
+        expect(getResult().items.length, 1);
+        expect(getResult().items.first.status, MediaUploadStatus.uploading);
+        expect(getResult().items.first.filePath, '/path/to/video.mp4');
       });
 
       testWidgets('adds multiple items when multiple images selected', (tester) async {
@@ -140,7 +152,7 @@ void main() {
           XFile('/path/to/image2.jpg'),
         ];
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pump();
 
         expect(getResult().items.length, 2);
@@ -154,7 +166,7 @@ void main() {
         ];
         uploadCompleter.complete(_mediaFile());
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         expect(uploadCallCount, 2);
@@ -167,14 +179,14 @@ void main() {
         uploadCompleter.complete(_mediaFile());
 
         mockPicker.filesToReturn = [XFile('/path/to/image.jpg')];
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         expect(getResult().items.length, 1);
         final uploadsAfterFirst = uploadCallCount;
 
         mockPicker.filesToReturn = [XFile('/path/to/image.jpg')];
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         expect(getResult().items.length, 1);
@@ -186,11 +198,11 @@ void main() {
         uploadCompleter.complete(_mediaFile());
 
         mockPicker.filesToReturn = [XFile('/path/to/image1.jpg')];
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         mockPicker.filesToReturn = [XFile('/path/to/image2.jpg')];
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         expect(getResult().items.length, 2);
@@ -203,7 +215,7 @@ void main() {
         mockPicker.filesToReturn = [XFile('/path/to/image.jpg')];
         uploadCompleter.complete(_mediaFile());
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         expect(getResult().items.first.status, MediaUploadStatus.uploaded);
@@ -214,7 +226,7 @@ void main() {
         mockPicker.filesToReturn = [XFile('/path/to/image.jpg')];
         uploadCompleter.complete(_mediaFile());
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         expect(getResult().items.first.file, isNotNull);
@@ -226,7 +238,7 @@ void main() {
         mockPicker.filesToReturn = [XFile('/path/to/image.jpg')];
         uploadCompleter.complete(_mediaFile());
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         expect(getResult().canSend, isTrue);
@@ -237,7 +249,7 @@ void main() {
         mockPicker.filesToReturn = [XFile('/path/to/image.jpg')];
         uploadCompleter.complete(_mediaFile());
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         expect(getResult().uploadedFiles.length, 1);
@@ -250,7 +262,7 @@ void main() {
         final getResult = await pump(tester);
         mockPicker.filesToReturn = [XFile('/path/to/image.jpg')];
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         expect(getResult().items.first.status, MediaUploadStatus.error);
@@ -261,7 +273,7 @@ void main() {
         final getResult = await pump(tester);
         mockPicker.filesToReturn = [XFile('/path/to/image.jpg')];
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         expect(getResult().items.first.retry, isNotNull);
@@ -272,7 +284,7 @@ void main() {
         final getResult = await pump(tester);
         mockPicker.filesToReturn = [XFile('/path/to/image.jpg')];
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         expect(getResult().canSend, isFalse);
@@ -283,7 +295,7 @@ void main() {
         final getResult = await pump(tester);
         mockPicker.filesToReturn = [XFile('/path/to/image.jpg')];
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
         expect(getResult().items.first.status, MediaUploadStatus.error);
 
@@ -300,7 +312,7 @@ void main() {
         final getResult = await pump(tester);
         mockPicker.filesToReturn = [XFile('/path/to/image.jpg')];
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         final initialUploadCount = uploadCallCount;
@@ -324,7 +336,7 @@ void main() {
         ];
         uploadCompleter.complete(_mediaFile());
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
         expect(getResult().items.length, 2);
 
@@ -340,13 +352,13 @@ void main() {
 
         mockPicker.filesToReturn = [XFile('/path/to/good.jpg')];
         uploadCompleter.complete(_mediaFile());
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         shouldFailUpload = true;
         uploadCompleter = Completer<MediaFile>();
         mockPicker.filesToReturn = [XFile('/path/to/bad.jpg')];
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         expect(getResult().canSend, isFalse);
@@ -367,7 +379,7 @@ void main() {
         ];
         uploadCompleter.complete(_mediaFile());
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
         expect(getResult().items.length, 2);
 
@@ -382,7 +394,7 @@ void main() {
         mockPicker.filesToReturn = [XFile('/path/to/image.jpg')];
         uploadCompleter.complete(_mediaFile());
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
         expect(getResult().canSend, isTrue);
 
@@ -397,7 +409,7 @@ void main() {
         mockPicker.filesToReturn = [XFile('/path/to/image.jpg')];
         uploadCompleter.complete(_mediaFile());
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
         expect(getResult().uploadedFiles, isNotEmpty);
 
@@ -413,7 +425,7 @@ void main() {
         final getResult = await pump(tester);
         mockPicker.filesToReturn = [XFile('/path/to/image.jpg')];
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pump();
 
         expect(getResult().items.first.status, MediaUploadStatus.uploading);
@@ -425,13 +437,13 @@ void main() {
 
         mockPicker.filesToReturn = [XFile('/path/to/good.jpg')];
         uploadCompleter.complete(_mediaFile());
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         shouldFailUpload = true;
         uploadCompleter = Completer<MediaFile>();
         mockPicker.filesToReturn = [XFile('/path/to/bad.jpg')];
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         expect(getResult().canSend, isFalse);
@@ -445,7 +457,7 @@ void main() {
         ];
         uploadCompleter.complete(_mediaFile());
 
-        await getResult().pickImages();
+        await getResult().pickMedia();
         await tester.pumpAndSettle();
 
         expect(getResult().canSend, isTrue);
