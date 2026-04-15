@@ -27,6 +27,7 @@ BlockActionsState useBlockActions({
 
   useEffect(() {
     if (userPubkey == null) {
+      isBlocked.value = null;
       isLoading.value = false;
       return null;
     }

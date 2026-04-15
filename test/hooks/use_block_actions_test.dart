@@ -105,6 +105,21 @@ void main() {
           expect(getState().isBlocked, isFalse);
         });
 
+        testWidgets('resets isBlocked to false when userPubkey becomes null', (tester) async {
+          _api.blockedPubkeys.add(testPubkeyB);
+          await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
+          await tester.pumpAndSettle();
+          expect(getState().isBlocked, isTrue);
+
+          getState = await mountHook(
+            tester,
+            () => useBlockActions(accountPubkey: testPubkeyA, userPubkey: null),
+          );
+          await tester.pumpAndSettle();
+
+          expect(getState().isBlocked, isFalse);
+        });
+
         testWidgets('does not call isUserBlocked API', (tester) async {
           await pump(tester, accountPubkey: testPubkeyA);
           await tester.pumpAndSettle();
@@ -236,9 +251,7 @@ void main() {
 
         expect(getState().error, isNull);
 
-        try {
-          await getState().block();
-        } catch (_) {}
+        await expectLater(getState().block, throwsException);
         await tester.pump();
 
         expect(getState().error, 'Failed to block user');
@@ -311,9 +324,7 @@ void main() {
 
         expect(getState().error, isNull);
 
-        try {
-          await getState().unblock();
-        } catch (_) {}
+        await expectLater(getState().unblock, throwsException);
         await tester.pump();
 
         expect(getState().error, 'Failed to unblock user');
@@ -419,9 +430,7 @@ void main() {
         await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
         await tester.pumpAndSettle();
 
-        try {
-          await getState().block();
-        } catch (_) {}
+        await expectLater(getState().block, throwsException);
         await tester.pump();
 
         expect(getState().error, isNotNull);
