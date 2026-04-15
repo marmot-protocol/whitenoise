@@ -26,6 +26,7 @@ and this project adheres to Calendar Versioning (CalVer).
 - Add notifications settings screen for android to allow disabling/enabling local notifications [PR #535](https://github.com/marmot-protocol/whitenoise/pull/535)
 - Archive chats [PR #532](https://github.com/marmot-protocol/whitenoise/pull/532)
 - No internet notice [PR #565](https://github.com/marmot-protocol/whitenoise/pull/565)
+- Add block/unblock hook [PR #573](https://github.com/marmot-protocol/whitenoise/pull/573)
 
 ### Changed
 - UI Polish: Profile Keys & Sign out Screens [PR #552](https://github.com/marmot-protocol/whitenoise/pull/552)
