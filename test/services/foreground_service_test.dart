@@ -4,6 +4,7 @@ import 'package:whitenoise/services/foreground_service.dart';
 
 class _MockForegroundTaskApi extends ForegroundTaskApi {
   final List<String> calls = [];
+  ForegroundTaskOptions? capturedTaskOptions;
   bool isRunning = false;
   bool isIgnoringBattery = false;
   ServiceRequestResult startResult = const ServiceRequestSuccess();
@@ -17,7 +18,10 @@ class _MockForegroundTaskApi extends ForegroundTaskApi {
     required AndroidNotificationOptions androidNotificationOptions,
     required IOSNotificationOptions iosNotificationOptions,
     required ForegroundTaskOptions foregroundTaskOptions,
-  }) => calls.add('init');
+  }) {
+    calls.add('init');
+    capturedTaskOptions = foregroundTaskOptions;
+  }
 
   @override
   Future<bool> get isRunningService async => isRunning;
@@ -95,6 +99,13 @@ void main() {
           await service.initialize();
 
           expect(mockApi.calls, ['initCommunicationPort', 'init']);
+        });
+
+        test('enables autoRunOnBoot and autoRunOnMyPackageReplaced', () async {
+          await service.initialize();
+
+          expect(mockApi.capturedTaskOptions?.autoRunOnBoot, isTrue);
+          expect(mockApi.capturedTaskOptions?.autoRunOnMyPackageReplaced, isTrue);
         });
 
         test('second call is no-op', () async {

@@ -106,6 +106,8 @@ class ForegroundService {
       iosNotificationOptions: const IOSNotificationOptions(),
       foregroundTaskOptions: ForegroundTaskOptions(
         eventAction: ForegroundTaskEventAction.repeat(60000),
+        autoRunOnBoot: true,
+        autoRunOnMyPackageReplaced: true,
       ),
     );
 
