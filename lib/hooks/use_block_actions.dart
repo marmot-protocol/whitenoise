@@ -10,8 +10,6 @@ typedef BlockActionsState = ({
   bool isActionLoading,
   String? error,
   void Function() clearError,
-  Future<void> Function() block,
-  Future<void> Function() unblock,
   Future<void> Function() toggleBlock,
 });
 
@@ -99,7 +97,7 @@ BlockActionsState useBlockActions({
   }
 
   Future<void> toggleBlock() async {
-    if (userPubkey == null) return;
+    if (userPubkey == null || isLoading.value) return;
     if (isBlocked.value == true) {
       await unblock();
     } else {
@@ -113,8 +111,6 @@ BlockActionsState useBlockActions({
     isActionLoading: isActionLoading.value,
     error: error.value,
     clearError: clearError,
-    block: block,
-    unblock: unblock,
     toggleBlock: toggleBlock,
   );
 }

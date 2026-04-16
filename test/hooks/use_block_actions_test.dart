@@ -179,155 +179,13 @@ void main() {
     });
 
     group('API calls', () {
-      testWidgets('calls API with correct parameters', (tester) async {
+      testWidgets('calls isUserBlocked API with correct parameters', (tester) async {
         await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
         await tester.pumpAndSettle();
 
         expect(_api.isBlockedCalls.length, 1);
         expect(_api.isBlockedCalls[0].account, testPubkeyA);
         expect(_api.isBlockedCalls[0].target, testPubkeyB);
-      });
-    });
-
-    group('block action', () {
-      group('with null userPubkey', () {
-        testWidgets('does not call block API', (tester) async {
-          await pump(tester, accountPubkey: testPubkeyA);
-          await tester.pumpAndSettle();
-
-          await getState().block();
-          await tester.pump();
-
-          expect(_api.blockCalls, isEmpty);
-        });
-      });
-
-      testWidgets('calls block API with correct parameters', (tester) async {
-        await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
-        await tester.pumpAndSettle();
-
-        await getState().block();
-        await tester.pump();
-
-        expect(_api.blockCalls.length, 1);
-        expect(_api.blockCalls[0].account, testPubkeyA);
-        expect(_api.blockCalls[0].target, testPubkeyB);
-      });
-
-      testWidgets('isActionLoading is true during block', (tester) async {
-        _api.blockCompleter = Completer();
-        await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
-        await tester.pumpAndSettle();
-
-        final future = getState().block();
-        await tester.pump();
-
-        expect(getState().isActionLoading, isTrue);
-
-        _api.blockCompleter!.complete();
-        await future;
-        await tester.pump();
-
-        expect(getState().isActionLoading, isFalse);
-      });
-
-      testWidgets('updates isBlocked to true after block', (tester) async {
-        await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
-        await tester.pumpAndSettle();
-
-        expect(getState().isBlocked, isFalse);
-
-        await getState().block();
-        await tester.pump();
-
-        expect(getState().isBlocked, isTrue);
-        expect(_api.isBlockedCalls.length, 1);
-      });
-
-      testWidgets('sets error on block failure', (tester) async {
-        _api.blockError = Exception('Network error');
-        await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
-        await tester.pumpAndSettle();
-
-        expect(getState().error, isNull);
-
-        await expectLater(getState().block, throwsException);
-        await tester.pump();
-
-        expect(getState().error, 'Failed to block user');
-      });
-    });
-
-    group('unblock action', () {
-      group('with null userPubkey', () {
-        testWidgets('does not call unblock API', (tester) async {
-          await pump(tester, accountPubkey: testPubkeyA);
-          await tester.pumpAndSettle();
-
-          await getState().unblock();
-          await tester.pump();
-
-          expect(_api.unblockCalls, isEmpty);
-        });
-      });
-
-      testWidgets('calls unblock API with correct parameters', (tester) async {
-        _api.blockedPubkeys.add(testPubkeyB);
-        await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
-        await tester.pumpAndSettle();
-
-        await getState().unblock();
-        await tester.pump();
-
-        expect(_api.unblockCalls.length, 1);
-        expect(_api.unblockCalls[0].account, testPubkeyA);
-        expect(_api.unblockCalls[0].target, testPubkeyB);
-      });
-
-      testWidgets('isActionLoading is true during unblock', (tester) async {
-        _api.blockedPubkeys.add(testPubkeyB);
-        _api.unblockCompleter = Completer();
-        await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
-        await tester.pumpAndSettle();
-
-        final future = getState().unblock();
-        await tester.pump();
-
-        expect(getState().isActionLoading, isTrue);
-
-        _api.unblockCompleter!.complete();
-        await future;
-        await tester.pump();
-
-        expect(getState().isActionLoading, isFalse);
-      });
-
-      testWidgets('updates isBlocked to false after unblock', (tester) async {
-        _api.blockedPubkeys.add(testPubkeyB);
-        await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
-        await tester.pumpAndSettle();
-
-        expect(getState().isBlocked, isTrue);
-
-        await getState().unblock();
-        await tester.pump();
-
-        expect(getState().isBlocked, isFalse);
-        expect(_api.isBlockedCalls.length, 1);
-      });
-
-      testWidgets('sets error on unblock failure', (tester) async {
-        _api.blockedPubkeys.add(testPubkeyB);
-        _api.unblockError = Exception('Network error');
-        await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
-        await tester.pumpAndSettle();
-
-        expect(getState().error, isNull);
-
-        await expectLater(getState().unblock, throwsException);
-        await tester.pump();
-
-        expect(getState().error, 'Failed to unblock user');
       });
     });
 
@@ -344,7 +202,83 @@ void main() {
         });
       });
 
-      testWidgets('calls block when not blocked', (tester) async {
+      group('while loading', () {
+        testWidgets('does not call block or unblock API', (tester) async {
+          _api.isBlockedCompleter = Completer();
+          await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
+
+          expect(getState().isLoading, isTrue);
+
+          await getState().toggleBlock();
+          await tester.pump();
+
+          expect(_api.blockCalls.length + _api.unblockCalls.length, 0);
+        });
+      });
+
+      testWidgets('calls block API with correct parameters when not blocked', (tester) async {
+        await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
+        await tester.pumpAndSettle();
+
+        await getState().toggleBlock();
+        await tester.pump();
+
+        expect(_api.blockCalls.length, 1);
+        expect(_api.blockCalls[0].account, testPubkeyA);
+        expect(_api.blockCalls[0].target, testPubkeyB);
+        expect(_api.unblockCalls.length, 0);
+      });
+
+      testWidgets('calls unblock API with correct parameters when blocked', (tester) async {
+        _api.blockedPubkeys.add(testPubkeyB);
+        await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
+        await tester.pumpAndSettle();
+
+        await getState().toggleBlock();
+        await tester.pump();
+
+        expect(_api.unblockCalls.length, 1);
+        expect(_api.unblockCalls[0].account, testPubkeyA);
+        expect(_api.unblockCalls[0].target, testPubkeyB);
+        expect(_api.blockCalls.length, 0);
+      });
+
+      testWidgets('isActionLoading is true during block', (tester) async {
+        _api.blockCompleter = Completer();
+        await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
+        await tester.pumpAndSettle();
+
+        final future = getState().toggleBlock();
+        await tester.pump();
+
+        expect(getState().isActionLoading, isTrue);
+
+        _api.blockCompleter!.complete();
+        await future;
+        await tester.pump();
+
+        expect(getState().isActionLoading, isFalse);
+      });
+
+      testWidgets('isActionLoading is true during unblock', (tester) async {
+        _api.blockedPubkeys.add(testPubkeyB);
+        _api.unblockCompleter = Completer();
+        await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
+        await tester.pumpAndSettle();
+
+        final future = getState().toggleBlock();
+        await tester.pump();
+
+        expect(getState().isActionLoading, isTrue);
+
+        _api.unblockCompleter!.complete();
+        await future;
+        await tester.pump();
+
+        expect(getState().isActionLoading, isFalse);
+      });
+
+      testWidgets('updates isBlocked to true after blocking', (tester) async {
         await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
         await tester.pumpAndSettle();
 
@@ -353,12 +287,10 @@ void main() {
         await getState().toggleBlock();
         await tester.pump();
 
-        expect(_api.blockCalls.length, 1);
-        expect(_api.unblockCalls.length, 0);
         expect(getState().isBlocked, isTrue);
       });
 
-      testWidgets('calls unblock when blocked', (tester) async {
+      testWidgets('updates isBlocked to false after unblocking', (tester) async {
         _api.blockedPubkeys.add(testPubkeyB);
         await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
         await tester.pumpAndSettle();
@@ -368,9 +300,34 @@ void main() {
         await getState().toggleBlock();
         await tester.pump();
 
-        expect(_api.blockCalls.length, 0);
-        expect(_api.unblockCalls.length, 1);
         expect(getState().isBlocked, isFalse);
+      });
+
+      testWidgets('sets error on block failure', (tester) async {
+        _api.blockError = Exception('Network error');
+        await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
+        await tester.pumpAndSettle();
+
+        expect(getState().error, isNull);
+
+        await expectLater(getState().toggleBlock, throwsException);
+        await tester.pump();
+
+        expect(getState().error, 'Failed to block user');
+      });
+
+      testWidgets('sets error on unblock failure', (tester) async {
+        _api.blockedPubkeys.add(testPubkeyB);
+        _api.unblockError = Exception('Network error');
+        await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
+        await tester.pumpAndSettle();
+
+        expect(getState().error, isNull);
+
+        await expectLater(getState().toggleBlock, throwsException);
+        await tester.pump();
+
+        expect(getState().error, 'Failed to unblock user');
       });
     });
 
@@ -430,7 +387,7 @@ void main() {
         await pump(tester, accountPubkey: testPubkeyA, userPubkey: testPubkeyB);
         await tester.pumpAndSettle();
 
-        await expectLater(getState().block, throwsException);
+        await expectLater(getState().toggleBlock, throwsException);
         await tester.pump();
 
         expect(getState().error, isNotNull);
