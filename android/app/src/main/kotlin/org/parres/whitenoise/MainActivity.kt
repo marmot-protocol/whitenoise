@@ -2,7 +2,6 @@ package org.parres.whitenoise
 
 import android.content.Context
 import android.os.Bundle
-import io.crates.keyring.Keyring
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 
@@ -27,7 +26,9 @@ class MainActivity : FlutterActivity() {
 
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
-        Keyring.initializeNdkContext(applicationContext)
+        // Keyring.initializeNdkContext moved to WhitenoiseApplication.onCreate
+        // so the Android Context is available from every process entry point,
+        // not just Activity launch.
         flutterEngine.plugins.add(AndroidSignerPlugin())
         flutterEngine.plugins.add(AndroidPlayServicesPlugin())
     }

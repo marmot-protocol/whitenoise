@@ -11,16 +11,24 @@ import 'package:whitenoise/src/rust/frb_generated.dart';
 
 final _logger = Logger('ForegroundService');
 
+// SPIKE: opt-in toggle for profile/release builds so the spike can be tested
+// against production relay config (debug builds point at localhost). Default
+// off — keeps logcat clean for normal users.
+// Enable with: --dart-define=WHITENOISE_ENABLE_SPIKE_LOGS=true
+const _kEnableSpikeLogs = bool.fromEnvironment(
+  'WHITENOISE_ENABLE_SPIKE_LOGS',
+);
+
 // coverage:ignore-start
 @pragma('vm:entry-point')
 void _startCallback() {
   // The task handler runs in its own Dart isolate; forward only this file's
   // logger to logcat so SPIKE output is visible without enabling global
   // logging (which could leak third-party or account-level details).
-  // Gated to debug builds so boot/package-replaced events don't emit user
-  // metadata (account counts, paths) to production logcat. Test the spike
-  // with a debug-mode APK (`flutter build apk --debug`).
-  if (kDebugMode) {
+  // Gated to debug builds (or explicit opt-in via WHITENOISE_ENABLE_SPIKE_LOGS)
+  // so boot/package-replaced events don't emit user metadata to production
+  // logcat by default.
+  if (kDebugMode || _kEnableSpikeLogs) {
     Logger.root.onRecord.listen((record) {
       if (record.loggerName != 'ForegroundService') return;
       final buf = StringBuffer('[${record.level.name}] ${record.loggerName}: ${record.message}');
