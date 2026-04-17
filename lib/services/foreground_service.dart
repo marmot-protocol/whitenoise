@@ -1,4 +1,6 @@
+import 'dart:async' show unawaited;
 import 'dart:io' show Directory, Platform;
+import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/widgets.dart' show WidgetsFlutterBinding;
@@ -6,136 +8,68 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDirectory;
 import 'package:whitenoise/services/notification_service.dart';
+import 'package:whitenoise/services/notification_subscription.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
-import 'package:whitenoise/src/rust/api/accounts.dart' as accounts_api;
+import 'package:whitenoise/src/rust/api/utils.dart' as rust_utils;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
 final _logger = Logger('ForegroundService');
 
-// SPIKE: opt-in toggle for profile/release builds so the spike can be tested
-// against production relay config (debug builds point at localhost). Default
-// off — keeps logcat clean for normal users.
-// Enable with: --dart-define=WHITENOISE_ENABLE_SPIKE_LOGS=true
-const _kEnableSpikeLogs = bool.fromEnvironment(
-  'WHITENOISE_ENABLE_SPIKE_LOGS',
-);
+const _kTaskEventKey = 'event';
+const _kEventMainStarted = 'main_started';
+const _kEventMainStopped = 'main_stopped';
 
 // coverage:ignore-start
 @pragma('vm:entry-point')
 void _startCallback() {
-  // The task handler runs in its own Dart isolate; forward only this file's
-  // logger to logcat so SPIKE output is visible without enabling global
-  // logging (which could leak third-party or account-level details).
-  // Gated to debug builds (or explicit opt-in via WHITENOISE_ENABLE_SPIKE_LOGS)
-  // so boot/package-replaced events don't emit user metadata to production
-  // logcat by default.
-  if (kDebugMode || _kEnableSpikeLogs) {
+  // Task handler runs in its own Dart isolate; forward only this file's
+  // logger to logcat so task-side logs are visible during development.
+  // Gated to debug builds so boot/package-replaced events don't emit
+  // process state to production logcat.
+  if (kDebugMode) {
     Logger.root.onRecord.listen((record) {
-      if (record.loggerName != 'ForegroundService') return;
+      if (record.loggerName != 'ForegroundService' &&
+          record.loggerName != 'NotificationSubscription') {
+        return;
+      }
       final buf = StringBuffer('[${record.level.name}] ${record.loggerName}: ${record.message}');
       if (record.error != null) buf.write(' | error: ${record.error}');
       debugPrint(buf.toString());
     });
   }
-  FlutterForegroundTask.setTaskHandler(_KeepAliveTaskHandler());
+  FlutterForegroundTask.setTaskHandler(_NotificationTaskHandler());
 }
 
-class _KeepAliveTaskHandler extends TaskHandler {
+/// Task handler that runs inside the foreground-task background isolate.
+///
+/// On [TaskStarter.system] starts (boot / package-replaced), the main
+/// UI isolate isn't running, so we own the notification subscription.
+///
+/// On [TaskStarter.developer] starts (main isolate called
+/// `foregroundService.start()`), the main isolate is driving its own
+/// subscription — we stay idle until it tells us otherwise.
+///
+/// The main isolate coordinates via [FlutterForegroundTask.sendDataToTask]:
+/// `{'event': 'main_started'}` → we stop our subscription.
+/// `{'event': 'main_stopped'}` → we start our subscription.
+class _NotificationTaskHandler extends TaskHandler {
+  NotificationSubscription? _subscription;
+  Locale _cachedLocale = const Locale('en');
+  bool _bootstrapped = false;
+
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     _logger.info('Foreground task started: ${starter.name}');
-    await _runHeadlessSpike(starter);
-  }
 
-  // SPIKE: Temporary instrumentation to verify the task isolate can reach
-  // Rust, platform channels, and persisted data from the background isolate.
-  // TODO(#488): Remove when the real headless subscription lands.
-  Future<void> _runHeadlessSpike(TaskStarter starter) async {
-    _logger.info('[SPIKE] begin (starter=${starter.name})');
+    _bootstrapped = await _bootstrapIsolate();
+    if (!_bootstrapped) return;
 
-    try {
-      WidgetsFlutterBinding.ensureInitialized();
-      _logger.info('[SPIKE] PASS: WidgetsFlutterBinding.ensureInitialized()');
-    } catch (e, st) {
-      _logger.severe('[SPIKE] FAIL: WidgetsFlutterBinding.ensureInitialized() threw $e', e, st);
-      return;
-    }
+    _cachedLocale = await _loadLocale();
 
-    try {
-      await RustLib.init();
-      _logger.info('[SPIKE] PASS: RustLib.init()');
-    } catch (e, st) {
-      _logger.severe('[SPIKE] FAIL: RustLib.init() threw $e', e, st);
-      return;
-    }
-
-    final String dataDir;
-    final String logsDir;
-    try {
-      final dir = await getApplicationDocumentsDirectory();
-      dataDir = '${dir.path}/whitenoise/data';
-      logsDir = '${dir.path}/whitenoise/logs';
-      await Directory(dataDir).create(recursive: true);
-      await Directory(logsDir).create(recursive: true);
-      _logger.info('[SPIKE] PASS: platform channel + dirs; dataDir=$dataDir');
-    } catch (e, st) {
-      _logger.severe('[SPIKE] FAIL: path_provider / dir create threw $e', e, st);
-      return;
-    }
-
-    try {
-      final config = await rust_api.createWhitenoiseConfig(dataDir: dataDir, logsDir: logsDir);
-      _logger.info('[SPIKE] PASS: createWhitenoiseConfig');
-      await rust_api.initializeWhitenoise(config: config);
-      _logger.info('[SPIKE] PASS: initializeWhitenoise (fresh — likely headless start)');
-    } catch (e, st) {
-      // The whitenoise Rust crate uses a `OnceCell` singleton. If the main
-      // isolate has already initialized it, a second call throws — benign
-      // for the spike. Anything else is a real problem and surfaces as a
-      // WARNING so it's visible, not swallowed.
-      final msg = e.toString().toLowerCase();
-      if (msg.contains('already')) {
-        _logger.info(
-          '[SPIKE] INFO: initializeWhitenoise skipped (main isolate already initialized): $e',
-        );
-      } else {
-        // Abort — continuing to getAccounts() with an uninitialized singleton
-        // would produce a second, misleading failure instead of real signal.
-        _logger.warning('[SPIKE] WARN: initializeWhitenoise failed unexpectedly', e, st);
-        return;
-      }
-    }
-
-    try {
-      final accounts = await accounts_api.getAccounts();
-      _logger.info('[SPIKE] PASS: getAccounts returned ${accounts.length} account(s)');
-    } catch (e, st) {
-      _logger.severe('[SPIKE] FAIL: getAccounts threw $e', e, st);
-      return;
-    }
-
-    _logger.info('[SPIKE] DONE: headless isolate can reach Rust + platform channels');
-
-    // Only fire the test notification on headless starts (starter=system),
-    // so the user isn't pestered every time they open the app.
     if (starter == TaskStarter.system) {
-      await _spikeShowTestNotification();
-    }
-  }
-
-  Future<void> _spikeShowTestNotification() async {
-    try {
-      final service = NotificationService();
-      await service.initialize();
-      await service.show(
-        groupId: 'spike-test',
-        title: 'WN Spike',
-        body: 'Headless notification fired from task isolate',
-        receiverPubkey: 'spike',
-      );
-      _logger.info('[SPIKE] PASS: showed test notification from task isolate');
-    } catch (e, st) {
-      _logger.severe('[SPIKE] FAIL: NotificationService.show threw $e', e, st);
+      await _startSubscription();
+    } else {
+      _logger.info('Task started by main isolate; awaiting coordination message');
     }
   }
 
@@ -143,12 +77,23 @@ class _KeepAliveTaskHandler extends TaskHandler {
   void onRepeatEvent(DateTime timestamp) {}
 
   @override
-  Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
-    _logger.info('Foreground task destroyed (isTimeout: $isTimeout)');
+  void onReceiveData(Object data) {
+    if (data is! Map) return;
+    final event = data[_kTaskEventKey];
+    if (event == _kEventMainStarted) {
+      _logger.info('Received main_started — yielding subscription');
+      unawaited(_stopSubscription());
+    } else if (event == _kEventMainStopped) {
+      _logger.info('Received main_stopped — taking over subscription');
+      unawaited(_startSubscription());
+    }
   }
 
   @override
-  void onReceiveData(Object data) {}
+  Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
+    _logger.info('Foreground task destroyed (isTimeout: $isTimeout)');
+    await _stopSubscription();
+  }
 
   @override
   void onNotificationPressed() {
@@ -160,6 +105,91 @@ class _KeepAliveTaskHandler extends TaskHandler {
 
   @override
   void onNotificationDismissed() {}
+
+  /// Initializes Flutter bindings, Rust FFI, and the whitenoise singleton
+  /// inside this isolate. Idempotent — if the main isolate already
+  /// initialized whitenoise, we accept the "already initialized" error.
+  Future<bool> _bootstrapIsolate() async {
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      await RustLib.init();
+
+      final dir = await getApplicationDocumentsDirectory();
+      final dataDir = '${dir.path}/whitenoise/data';
+      final logsDir = '${dir.path}/whitenoise/logs';
+      await Directory(dataDir).create(recursive: true);
+      await Directory(logsDir).create(recursive: true);
+
+      try {
+        final config = await rust_api.createWhitenoiseConfig(
+          dataDir: dataDir,
+          logsDir: logsDir,
+        );
+        await rust_api.initializeWhitenoise(config: config);
+        _logger.info('Initialized whitenoise singleton in task isolate');
+      } catch (e, st) {
+        final msg = e.toString().toLowerCase();
+        if (msg.contains('already')) {
+          _logger.fine('whitenoise already initialized by another isolate');
+        } else {
+          _logger.severe('Failed to initialize whitenoise in task isolate', e, st);
+          return false;
+        }
+      }
+      return true;
+    } catch (e, st) {
+      _logger.severe('Failed to bootstrap task isolate', e, st);
+      return false;
+    }
+  }
+
+  Future<void> _startSubscription() async {
+    if (!_bootstrapped) {
+      _logger.warning('Cannot start subscription: bootstrap failed earlier');
+      return;
+    }
+    if (_subscription != null) return;
+
+    final notificationService = NotificationService(
+      onNotificationTap: (_, _, _) {
+        // Headless tap: just launch the app. Deep-link routing is
+        // tracked in #488.
+        FlutterForegroundTask.launchApp();
+      },
+    );
+    final sub = NotificationSubscription(
+      notificationService: notificationService,
+      getActiveChatId: () => null,
+      getLocale: () => _cachedLocale,
+    );
+    _subscription = sub;
+    await sub.start();
+    _logger.info('Headless notification subscription started');
+  }
+
+  Future<void> _stopSubscription() async {
+    final sub = _subscription;
+    if (sub == null) return;
+    _subscription = null;
+    await sub.stop();
+    _logger.info('Headless notification subscription stopped');
+  }
+
+  Future<Locale> _loadLocale() async {
+    try {
+      final settings = await rust_api.getAppSettings();
+      final language = await rust_api.appSettingsLanguage(appSettings: settings);
+      final code = rust_utils.languageToString(language: language);
+      const supported = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'tr'];
+      if (code == 'system' || code.isEmpty || !supported.contains(code)) {
+        return const Locale('en');
+      }
+      return Locale(code);
+    } catch (e, st) {
+      _logger.warning('Failed to load locale; falling back to en', e, st);
+      return const Locale('en');
+    }
+  }
 }
 
 class ForegroundTaskApi {
@@ -196,6 +226,8 @@ class ForegroundTaskApi {
 
   Future<bool> requestIgnoreBatteryOptimization() =>
       FlutterForegroundTask.requestIgnoreBatteryOptimization();
+
+  void sendDataToTask(Object data) => FlutterForegroundTask.sendDataToTask(data);
 }
 // coverage:ignore-end
 
@@ -285,5 +317,21 @@ class ForegroundService {
     if (!await _api.isIgnoringBatteryOptimizations) {
       await _api.requestIgnoreBatteryOptimization();
     }
+  }
+
+  /// Notifies the task isolate that the main isolate has taken over the
+  /// notification subscription — the task should yield.
+  Future<void> notifyMainStarted() async {
+    if (!_enabled) return;
+    if (!await _api.isRunningService) return;
+    _api.sendDataToTask(const {_kTaskEventKey: _kEventMainStarted});
+  }
+
+  /// Notifies the task isolate that the main isolate is releasing the
+  /// subscription — the task should take over.
+  Future<void> notifyMainStopped() async {
+    if (!_enabled) return;
+    if (!await _api.isRunningService) return;
+    _api.sendDataToTask(const {_kTaskEventKey: _kEventMainStopped});
   }
 }

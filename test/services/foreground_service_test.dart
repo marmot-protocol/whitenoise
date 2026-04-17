@@ -4,6 +4,7 @@ import 'package:whitenoise/services/foreground_service.dart';
 
 class _MockForegroundTaskApi extends ForegroundTaskApi {
   final List<String> calls = [];
+  final List<Object> sentData = [];
   ForegroundTaskOptions? capturedTaskOptions;
   bool isRunning = false;
   bool isIgnoringBattery = false;
@@ -50,6 +51,12 @@ class _MockForegroundTaskApi extends ForegroundTaskApi {
   Future<bool> requestIgnoreBatteryOptimization() async {
     calls.add('requestIgnoreBatteryOptimization');
     return true;
+  }
+
+  @override
+  void sendDataToTask(Object data) {
+    calls.add('sendDataToTask');
+    sentData.add(data);
   }
 }
 
@@ -189,6 +196,62 @@ void main() {
 
           expect(mockApi.calls, isEmpty);
         });
+      });
+
+      group('notifyMainStarted / notifyMainStopped', () {
+        test('notifyMainStarted sends event when service is running', () async {
+          mockApi.isRunning = true;
+
+          await service.notifyMainStarted();
+
+          expect(mockApi.calls, contains('sendDataToTask'));
+          expect(mockApi.sentData, [
+            {'event': 'main_started'},
+          ]);
+        });
+
+        test('notifyMainStarted is a no-op when service is not running', () async {
+          mockApi.isRunning = false;
+
+          await service.notifyMainStarted();
+
+          expect(mockApi.calls, isNot(contains('sendDataToTask')));
+        });
+
+        test('notifyMainStopped sends event when service is running', () async {
+          mockApi.isRunning = true;
+
+          await service.notifyMainStopped();
+
+          expect(mockApi.calls, contains('sendDataToTask'));
+          expect(mockApi.sentData, [
+            {'event': 'main_stopped'},
+          ]);
+        });
+
+        test('notifyMainStopped is a no-op when service is not running', () async {
+          mockApi.isRunning = false;
+
+          await service.notifyMainStopped();
+
+          expect(mockApi.calls, isNot(contains('sendDataToTask')));
+        });
+      });
+    });
+
+    group('when disabled (coordination)', () {
+      late ForegroundService service;
+
+      setUp(() {
+        service = ForegroundService(enabled: false);
+      });
+
+      test('notifyMainStarted is no-op', () async {
+        await service.notifyMainStarted();
+      });
+
+      test('notifyMainStopped is no-op', () async {
+        await service.notifyMainStopped();
       });
     });
   });
