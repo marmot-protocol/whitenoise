@@ -5,6 +5,7 @@ import 'package:flutter/widgets.dart' show WidgetsFlutterBinding;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDirectory;
+import 'package:whitenoise/services/notification_service.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/api/accounts.dart' as accounts_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -114,6 +115,28 @@ class _KeepAliveTaskHandler extends TaskHandler {
     }
 
     _logger.info('[SPIKE] DONE: headless isolate can reach Rust + platform channels');
+
+    // Only fire the test notification on headless starts (starter=system),
+    // so the user isn't pestered every time they open the app.
+    if (starter == TaskStarter.system) {
+      await _spikeShowTestNotification();
+    }
+  }
+
+  Future<void> _spikeShowTestNotification() async {
+    try {
+      final service = NotificationService();
+      await service.initialize();
+      await service.show(
+        groupId: 'spike-test',
+        title: 'WN Spike',
+        body: 'Headless notification fired from task isolate',
+        receiverPubkey: 'spike',
+      );
+      _logger.info('[SPIKE] PASS: showed test notification from task isolate');
+    } catch (e, st) {
+      _logger.severe('[SPIKE] FAIL: NotificationService.show threw $e', e, st);
+    }
   }
 
   @override
