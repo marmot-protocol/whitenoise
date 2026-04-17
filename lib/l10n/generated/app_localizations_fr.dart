@@ -1015,6 +1015,28 @@ class AppLocalizationsFr extends AppLocalizations {
   String get addToGroup => 'Ajouter à un groupe';
 
   @override
+  String get blockUser => 'Bloquer l\'utilisateur';
+
+  @override
+  String get unblockUser => 'Débloquer l\'utilisateur';
+
+  @override
+  String get unblock => 'Débloquer';
+
+  @override
+  String get failedToBlockUser => 'Impossible de bloquer l\'utilisateur. Veuillez réessayer.';
+
+  @override
+  String get failedToUnblockUser => 'Impossible de débloquer l\'utilisateur. Veuillez réessayer.';
+
+  @override
+  String get userIsBlocked => 'Vous avez bloqué cet utilisateur';
+
+  @override
+  String get userIsBlockedDescription =>
+      'Vous ne recevrez pas de nouveaux messages tant que vous ne le débloquez pas.';
+
+  @override
   String get addToAnotherGroup => 'Ajouter à un autre groupe';
 
   @override

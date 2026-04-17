@@ -101,6 +101,8 @@ class _MockApi extends MockWnApi {
   Map<String, FlutterMetadata>? metadataByPubkey;
   Completer<List<ChatMessage>>? fetchOlderCompleter;
   DateTime? removedAt;
+  bool blockedUser = false;
+  bool shouldFailUnblockUser = false;
   List<SearchResult> Function(String query)? searchOverride;
 
   @override
@@ -126,6 +128,8 @@ class _MockApi extends MockWnApi {
     metadataByPubkey = null;
     fetchOlderCompleter = null;
     removedAt = null;
+    blockedUser = false;
+    shouldFailUnblockUser = false;
     searchOverride = null;
   }
 
@@ -335,6 +339,20 @@ class _MockApi extends MockWnApi {
           ),
         )
         .toList();
+  }
+
+  @override
+  Future<bool> crateApiMuteListIsUserBlocked({
+    required String accountPubkey,
+    required String targetPubkey,
+  }) async => blockedUser;
+
+  @override
+  Future<void> crateApiMuteListUnblockUser({
+    required String accountPubkey,
+    required String targetPubkey,
+  }) async {
+    if (shouldFailUnblockUser) throw Exception('Unblock failed');
   }
 
   @override
@@ -2163,6 +2181,106 @@ void main() {
         await pumpChatScreen(tester);
 
         expect(find.byType(TextField), findsOneWidget);
+      });
+    });
+
+    group('blocked user', () {
+      setUp(() {
+        _api.isDm = true;
+        _api.groupMembers = [_testPubkey, testPubkeyC];
+        _api.blockedUser = true;
+      });
+
+      testWidgets('shows blocked notice when peer is blocked', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.byKey(const Key('user_blocked_notice')), findsOneWidget);
+        expect(find.text('You have blocked this user'), findsOneWidget);
+      });
+
+      testWidgets('blocked notice is expanded by default', (tester) async {
+        await pumpChatScreen(tester);
+
+        final notice = tester.widget<WnSystemNotice>(
+          find.byKey(const Key('user_blocked_notice')),
+        );
+        expect(notice.variant, WnSystemNoticeVariant.expanded);
+      });
+
+      testWidgets('blocked notice uses neutral type', (tester) async {
+        await pumpChatScreen(tester);
+
+        final notice = tester.widget<WnSystemNotice>(
+          find.byKey(const Key('user_blocked_notice')),
+        );
+        expect(notice.type, WnSystemNoticeType.neutral);
+      });
+
+      testWidgets('shows blocked notice description', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(
+          find.textContaining('You won\'t receive new messages'),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('blocked notice collapses when chevron is tapped', (tester) async {
+        await pumpChatScreen(tester);
+
+        await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
+        await tester.pumpAndSettle();
+
+        final notice = tester.widget<WnSystemNotice>(
+          find.byKey(const Key('user_blocked_notice')),
+        );
+        expect(notice.variant, WnSystemNoticeVariant.collapsed);
+      });
+
+      testWidgets('shows error notice when unblock action fails', (tester) async {
+        _api.shouldFailUnblockUser = true;
+        await pumpChatScreen(tester);
+
+        await tester.tap(find.byKey(const Key('blocked_notice_unblock_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Failed to unblock user. Please try again.'), findsOneWidget);
+      });
+
+      testWidgets('shows error notice when archive action fails from blocked notice', (
+        tester,
+      ) async {
+        _api.shouldFailArchiveChat = true;
+        await pumpChatScreen(tester);
+
+        await tester.tap(find.byKey(const Key('blocked_notice_archive_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Failed to archive chat. Please try again.'), findsOneWidget);
+      });
+    });
+
+    group('not blocked user', () {
+      testWidgets('does not show blocked notice', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.byKey(const Key('user_blocked_notice')), findsNothing);
+      });
+    });
+
+    group('removed from group takes priority over blocked', () {
+      setUp(() {
+        _api.removedAt = DateTime(2024, 6);
+        _api.isDm = true;
+        _api.groupMembers = [_testPubkey, testPubkeyC];
+        _api.blockedUser = true;
+      });
+
+      testWidgets('shows removed notice and not blocked notice', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.byKey(const Key('removed_from_group_notice')), findsOneWidget);
+        expect(find.byKey(const Key('user_blocked_notice')), findsNothing);
       });
     });
 

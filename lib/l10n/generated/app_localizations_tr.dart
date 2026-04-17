@@ -1004,6 +1004,27 @@ class AppLocalizationsTr extends AppLocalizations {
   String get addToGroup => 'Gruba ekle';
 
   @override
+  String get blockUser => 'Kullanıcıyı engelle';
+
+  @override
+  String get unblockUser => 'Engeli kaldır';
+
+  @override
+  String get unblock => 'Engeli kaldır';
+
+  @override
+  String get failedToBlockUser => 'Kullanıcı engellenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get failedToUnblockUser => 'Engel kaldırılamadı. Lütfen tekrar deneyin.';
+
+  @override
+  String get userIsBlocked => 'Bu kullanıcıyı engellediniz';
+
+  @override
+  String get userIsBlockedDescription => 'Engeli kaldırana kadar yeni mesaj almayacaksınız.';
+
+  @override
   String get addToAnotherGroup => 'Başka bir gruba ekle';
 
   @override

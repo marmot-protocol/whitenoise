@@ -1860,6 +1860,48 @@ abstract class AppLocalizations {
   /// **'Add to group'**
   String get addToGroup;
 
+  /// Action label to block this user
+  ///
+  /// In en, this message translates to:
+  /// **'Block user'**
+  String get blockUser;
+
+  /// Action label to unblock this user
+  ///
+  /// In en, this message translates to:
+  /// **'Unblock user'**
+  String get unblockUser;
+
+  /// Short action label to unblock, used in notice buttons
+  ///
+  /// In en, this message translates to:
+  /// **'Unblock'**
+  String get unblock;
+
+  /// Error message when block user operation fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to block user. Please try again.'**
+  String get failedToBlockUser;
+
+  /// Error message when unblock user operation fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to unblock user. Please try again.'**
+  String get failedToUnblockUser;
+
+  /// Notice title shown in chat header when the peer is blocked
+  ///
+  /// In en, this message translates to:
+  /// **'You have blocked this user'**
+  String get userIsBlocked;
+
+  /// Notice description shown in chat header when the peer is blocked
+  ///
+  /// In en, this message translates to:
+  /// **'You won\'t receive new messages until you unblock them.'**
+  String get userIsBlockedDescription;
+
   /// Action label to add this user to another group
   ///
   /// In en, this message translates to:

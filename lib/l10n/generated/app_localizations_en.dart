@@ -1001,6 +1001,27 @@ class AppLocalizationsEn extends AppLocalizations {
   String get addToGroup => 'Add to group';
 
   @override
+  String get blockUser => 'Block user';
+
+  @override
+  String get unblockUser => 'Unblock user';
+
+  @override
+  String get unblock => 'Unblock';
+
+  @override
+  String get failedToBlockUser => 'Failed to block user. Please try again.';
+
+  @override
+  String get failedToUnblockUser => 'Failed to unblock user. Please try again.';
+
+  @override
+  String get userIsBlocked => 'You have blocked this user';
+
+  @override
+  String get userIsBlockedDescription => 'You won\'t receive new messages until you unblock them.';
+
+  @override
   String get addToAnotherGroup => 'Add to another group';
 
   @override

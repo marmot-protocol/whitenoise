@@ -1028,6 +1028,30 @@ class AppLocalizationsRu extends AppLocalizations {
   String get addToGroup => 'Добавить в группу';
 
   @override
+  String get blockUser => 'Заблокировать пользователя';
+
+  @override
+  String get unblockUser => 'Разблокировать пользователя';
+
+  @override
+  String get unblock => 'Разблокировать';
+
+  @override
+  String get failedToBlockUser =>
+      'Не удалось заблокировать пользователя. Пожалуйста, попробуйте ещё раз.';
+
+  @override
+  String get failedToUnblockUser =>
+      'Не удалось разблокировать пользователя. Пожалуйста, попробуйте ещё раз.';
+
+  @override
+  String get userIsBlocked => 'Вы заблокировали этого пользователя';
+
+  @override
+  String get userIsBlockedDescription =>
+      'Вы не будете получать новые сообщения, пока не разблокируете пользователя.';
+
+  @override
   String get addToAnotherGroup => 'Добавить в другую группу';
 
   @override

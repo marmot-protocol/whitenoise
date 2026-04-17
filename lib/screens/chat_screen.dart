@@ -7,6 +7,8 @@ import 'package:logging/logging.dart';
 import 'package:scroll_to_index/scroll_to_index.dart'
     show AutoScrollController, AutoScrollPosition, AutoScrollTag;
 import 'package:whitenoise/hooks/use_active_chat.dart';
+import 'package:whitenoise/hooks/use_block_actions.dart';
+import 'package:whitenoise/hooks/use_chat_archive.dart';
 import 'package:whitenoise/hooks/use_chat_input.dart';
 import 'package:whitenoise/hooks/use_chat_list.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData, useChatMessages;
@@ -37,6 +39,7 @@ import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
 import 'package:whitenoise/widgets/chat_message_bubble.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/chat_scroll_down_button.dart';
+import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_chat_message_input.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_icon_button.dart';
@@ -132,6 +135,17 @@ class ChatScreen extends HookConsumerWidget {
         chatList.chats.where((c) => c.mlsGroupId == groupId).firstOrNull?.removedAt != null;
     final isRemovedNoticeCollapsed = useState(false);
 
+    final peerPubkey = chatProfile.data?.otherMemberPubkey;
+    final blockRefreshKey = useState(0);
+    final blockState = useBlockActions(
+      accountPubkey: pubkey,
+      userPubkey: peerPubkey,
+      refreshKey: blockRefreshKey.value,
+    );
+    final isBlocked = peerPubkey != null ? blockState.isBlocked : false;
+    final isBlockedNoticeCollapsed = useState(false);
+    final archiveState = useChatArchive(pubkey, groupId);
+
     final noticeMessage = useState<String?>(null);
     final isSearchActive = useState(false);
     final searchQuery = useState('');
@@ -155,6 +169,22 @@ class ChatScreen extends HookConsumerWidget {
 
     void dismissNotice() {
       noticeMessage.value = null;
+    }
+
+    Future<void> handleUnblock() async {
+      try {
+        await blockState.toggleBlock();
+      } catch (_) {
+        if (context.mounted) showNotice(context.l10n.failedToUnblockUser);
+      }
+    }
+
+    Future<void> handleArchive() async {
+      try {
+        await archiveState.archive();
+      } catch (_) {
+        if (context.mounted) showNotice(context.l10n.failedToArchiveChat);
+      }
     }
 
     void openSearch() {
@@ -463,6 +493,7 @@ class ChatScreen extends HookConsumerWidget {
                         onAvatarTap: () async {
                           if (chatProfile.data?.isDm == true) {
                             final result = await Routes.pushToChatInfo(context, groupId);
+                            blockRefreshKey.value++;
                             if (result == true) openSearch();
                           } else {
                             final result = await Routes.pushToGroupInfo(context, groupId);
@@ -509,6 +540,42 @@ class ChatScreen extends HookConsumerWidget {
                               animateEntrance: false,
                               onToggle: () =>
                                   isRemovedNoticeCollapsed.value = !isRemovedNoticeCollapsed.value,
+                            )
+                          : isBlocked
+                          ? WnSystemNotice(
+                              key: const Key('user_blocked_notice'),
+                              title: context.l10n.userIsBlocked,
+                              description: Text(
+                                context.l10n.userIsBlockedDescription,
+                                style: typography.medium14.copyWith(
+                                  color: colors.backgroundContentSecondary,
+                                ),
+                              ),
+                              type: WnSystemNoticeType.neutral,
+                              variant: isBlockedNoticeCollapsed.value
+                                  ? WnSystemNoticeVariant.collapsed
+                                  : WnSystemNoticeVariant.expanded,
+                              animateEntrance: false,
+                              onToggle: () =>
+                                  isBlockedNoticeCollapsed.value = !isBlockedNoticeCollapsed.value,
+                              secondaryAction: WnButton(
+                                key: const Key('blocked_notice_unblock_button'),
+                                text: context.l10n.unblock,
+                                type: WnButtonType.overlay,
+                                size: WnButtonSize.medium,
+                                loading: blockState.isActionLoading,
+                                trailingIcon: WnIcons.userCheck,
+                                onPressed: handleUnblock,
+                              ),
+                              primaryAction: WnButton(
+                                key: const Key('blocked_notice_archive_button'),
+                                text: context.l10n.archive,
+                                type: WnButtonType.overlay,
+                                size: WnButtonSize.medium,
+                                loading: archiveState.isActionLoading,
+                                trailingIcon: WnIcons.archive,
+                                onPressed: handleArchive,
+                              ),
                             )
                           : null,
                     ),

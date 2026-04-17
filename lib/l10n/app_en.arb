@@ -1275,6 +1275,34 @@
   "@addToGroup": {
     "description": "Action label to add this user to a group"
   },
+  "blockUser": "Block user",
+  "@blockUser": {
+    "description": "Action label to block this user"
+  },
+  "unblockUser": "Unblock user",
+  "@unblockUser": {
+    "description": "Action label to unblock this user"
+  },
+  "unblock": "Unblock",
+  "@unblock": {
+    "description": "Short action label to unblock, used in notice buttons"
+  },
+  "failedToBlockUser": "Failed to block user. Please try again.",
+  "@failedToBlockUser": {
+    "description": "Error message when block user operation fails"
+  },
+  "failedToUnblockUser": "Failed to unblock user. Please try again.",
+  "@failedToUnblockUser": {
+    "description": "Error message when unblock user operation fails"
+  },
+  "userIsBlocked": "You have blocked this user",
+  "@userIsBlocked": {
+    "description": "Notice title shown in chat header when the peer is blocked"
+  },
+  "userIsBlockedDescription": "You won't receive new messages until you unblock them.",
+  "@userIsBlockedDescription": {
+    "description": "Notice description shown in chat header when the peer is blocked"
+  },
   "addToAnotherGroup": "Add to another group",
   "@addToAnotherGroup": {
     "description": "Action label to add this user to another group"

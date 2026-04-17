@@ -31,12 +31,20 @@ class _MockApi extends MockWnApi {
   Completer<FlutterMetadata>? metadataCompleter;
   Completer<void>? followCompleter;
   Completer<void>? unfollowCompleter;
+  Completer<bool>? isBlockedCompleter;
+  Completer<void>? blockCompleter;
+  Completer<void>? unblockCompleter;
   Exception? followError;
   Exception? unfollowError;
+  Exception? blockError;
+  Exception? unblockError;
   Exception? groupError;
   final followCalls = <({String account, String target})>[];
   final unfollowCalls = <({String account, String target})>[];
+  final blockCalls = <({String account, String target})>[];
+  final unblockCalls = <({String account, String target})>[];
   final Set<String> followingPubkeys = {};
+  final Set<String> blockedPubkeys = {};
 
   @override
   Future<Group> crateApiGroupsGetGroup({
@@ -119,18 +127,55 @@ class _MockApi extends MockWnApi {
   }
 
   @override
+  Future<bool> crateApiMuteListIsUserBlocked({
+    required String accountPubkey,
+    required String targetPubkey,
+  }) async {
+    if (isBlockedCompleter != null) return isBlockedCompleter!.future;
+    return blockedPubkeys.contains(targetPubkey);
+  }
+
+  @override
+  Future<void> crateApiMuteListBlockUser({
+    required String accountPubkey,
+    required String targetPubkey,
+  }) async {
+    blockCalls.add((account: accountPubkey, target: targetPubkey));
+    if (blockCompleter != null) await blockCompleter!.future;
+    if (blockError != null) throw blockError!;
+  }
+
+  @override
+  Future<void> crateApiMuteListUnblockUser({
+    required String accountPubkey,
+    required String targetPubkey,
+  }) async {
+    unblockCalls.add((account: accountPubkey, target: targetPubkey));
+    if (unblockCompleter != null) await unblockCompleter!.future;
+    if (unblockError != null) throw unblockError!;
+  }
+
+  @override
   void reset() {
     super.reset();
     metadata = const FlutterMetadata(custom: {});
     metadataCompleter = null;
     followCompleter = null;
     unfollowCompleter = null;
+    isBlockedCompleter = null;
+    blockCompleter = null;
+    unblockCompleter = null;
     followError = null;
     unfollowError = null;
+    blockError = null;
+    unblockError = null;
     groupError = null;
     followCalls.clear();
     unfollowCalls.clear();
+    blockCalls.clear();
+    unblockCalls.clear();
     followingPubkeys.clear();
+    blockedPubkeys.clear();
     archivedAtResult = false;
     dmMembers = [_testPubkey, _otherPubkey];
   }
@@ -309,9 +354,85 @@ void main() {
       expect(find.byKey(const Key('contact_button')), findsNothing);
       expect(find.byKey(const Key('search_button')), findsNothing);
       expect(find.byKey(const Key('add_to_group_button')), findsNothing);
+      expect(find.byKey(const Key('block_button')), findsNothing);
       expect(find.byKey(const Key('archive_button')), findsNothing);
       expect(_api.followCalls, isEmpty);
       expect(_api.unfollowCalls, isEmpty);
+    });
+
+    testWidgets('hides block button while block status is loading', (tester) async {
+      _api.isBlockedCompleter = Completer();
+      await pumpChatInfoScreen(tester, settle: false);
+
+      expect(find.byKey(const Key('block_button')), findsNothing);
+    });
+
+    testWidgets('shows block user button for non-blocked user', (tester) async {
+      await pumpChatInfoScreen(tester);
+      expect(find.text('Block user'), findsOneWidget);
+    });
+
+    testWidgets('shows unblock user button for blocked user', (tester) async {
+      _api.blockedPubkeys.add(_otherPubkey);
+      await pumpChatInfoScreen(tester);
+      expect(find.text('Unblock user'), findsOneWidget);
+    });
+
+    testWidgets('calls block API when block is tapped', (tester) async {
+      await pumpChatInfoScreen(tester);
+
+      await tester.tap(find.byKey(const Key('block_button')));
+      await tester.pumpAndSettle();
+
+      expect(_api.blockCalls.length, 1);
+      expect(_api.blockCalls[0].account, _testPubkey);
+      expect(_api.blockCalls[0].target, _otherPubkey);
+    });
+
+    testWidgets('calls unblock API when unblock is tapped', (tester) async {
+      _api.blockedPubkeys.add(_otherPubkey);
+      await pumpChatInfoScreen(tester);
+
+      await tester.tap(find.byKey(const Key('block_button')));
+      await tester.pumpAndSettle();
+
+      expect(_api.unblockCalls.length, 1);
+      expect(_api.unblockCalls[0].account, _testPubkey);
+      expect(_api.unblockCalls[0].target, _otherPubkey);
+    });
+
+    testWidgets('shows block button loading state during block action', (tester) async {
+      _api.blockCompleter = Completer();
+      await pumpChatInfoScreen(tester);
+
+      await tester.tap(find.byKey(const Key('block_button')));
+      await tester.pump();
+
+      final button = tester.widget<WnButton>(find.byKey(const Key('block_button')));
+      expect(button.loading, isTrue);
+    });
+
+    testWidgets('shows error notice when block action fails', (tester) async {
+      _api.blockError = Exception('Network error');
+      await pumpChatInfoScreen(tester);
+
+      await tester.tap(find.byKey(const Key('block_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(find.text('Failed to block user. Please try again.'), findsOneWidget);
+    });
+
+    testWidgets('shows error notice when unblock action fails', (tester) async {
+      _api.blockedPubkeys.add(_otherPubkey);
+      _api.unblockError = Exception('Network error');
+      await pumpChatInfoScreen(tester);
+
+      await tester.tap(find.byKey(const Key('block_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(find.text('Failed to unblock user. Please try again.'), findsOneWidget);
     });
 
     testWidgets('shows notice when public key is copied', (tester) async {

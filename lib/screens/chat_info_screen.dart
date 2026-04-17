@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:whitenoise/hooks/use_block_actions.dart';
 import 'package:whitenoise/hooks/use_chat_archive.dart';
 import 'package:whitenoise/hooks/use_chat_profile.dart';
 import 'package:whitenoise/hooks/use_follow_actions.dart';
@@ -43,6 +44,10 @@ class ChatInfoScreen extends HookConsumerWidget {
       accountPubkey: accountPubkey,
       userPubkey: peerPubkey,
     );
+    final blockState = useBlockActions(
+      accountPubkey: accountPubkey,
+      userPubkey: peerPubkey,
+    );
     final archiveState = useChatArchive(accountPubkey, mlsGroupId);
     final (:noticeMessage, :noticeType, :showErrorNotice, :showSuccessNotice, :dismissNotice) =
         useSystemNotice();
@@ -57,6 +62,22 @@ class ChatInfoScreen extends HookConsumerWidget {
       } catch (_) {
         if (context.mounted) {
           showErrorNotice(context.l10n.failedToUpdateFollow);
+        }
+      }
+    }
+
+    Future<void> handleBlockAction() async {
+      if (!hasPeerPubkey) return;
+      final currentIsBlocked = blockState.isBlocked;
+      try {
+        await blockState.toggleBlock();
+      } catch (_) {
+        if (context.mounted) {
+          if (currentIsBlocked) {
+            showErrorNotice(context.l10n.failedToUnblockUser);
+          } else {
+            showErrorNotice(context.l10n.failedToBlockUser);
+          }
         }
       }
     }
@@ -127,6 +148,11 @@ class ChatInfoScreen extends HookConsumerWidget {
                             : null,
                         onAddToGroupTap: peerPubkey != null
                             ? () => Routes.pushToAddToGroup(context, peerPubkey)
+                            : null,
+                        isBlocked: blockState.isBlocked,
+                        isBlockLoading: blockState.isActionLoading,
+                        onBlockTap: hasPeerPubkey && !isOwnProfile && !blockState.isLoading
+                            ? handleBlockAction
                             : null,
                         isArchived: archiveState.isArchived,
                         isArchiveLoading: archiveState.isActionLoading,
@@ -231,6 +257,9 @@ class _ChatInfoActions extends StatelessWidget {
     this.onFollowTap,
     this.onSearchTap,
     this.onAddToGroupTap,
+    this.isBlocked = false,
+    this.isBlockLoading = false,
+    this.onBlockTap,
     this.isArchived = false,
     this.isArchiveLoading = false,
     this.onArchiveTap,
@@ -242,6 +271,9 @@ class _ChatInfoActions extends StatelessWidget {
   final VoidCallback? onFollowTap;
   final VoidCallback? onSearchTap;
   final VoidCallback? onAddToGroupTap;
+  final bool isBlocked;
+  final bool isBlockLoading;
+  final VoidCallback? onBlockTap;
   final bool isArchived;
   final bool isArchiveLoading;
   final VoidCallback? onArchiveTap;
@@ -276,7 +308,7 @@ class _ChatInfoActions extends StatelessWidget {
           ),
           Gap(8.h),
         ],
-        if (onAddToGroupTap != null)
+        if (onAddToGroupTap != null) ...[
           WnButton(
             key: const Key('add_to_group_button'),
             text: context.l10n.addToGroup,
@@ -285,8 +317,21 @@ class _ChatInfoActions extends StatelessWidget {
             trailingIcon: WnIcons.newGroupChat,
             onPressed: onAddToGroupTap,
           ),
-        if (onArchiveTap != null) ...[
           Gap(8.h),
+        ],
+        if (onBlockTap != null) ...[
+          WnButton(
+            key: const Key('block_button'),
+            text: isBlocked ? context.l10n.unblockUser : context.l10n.blockUser,
+            type: WnButtonType.outline,
+            size: WnButtonSize.medium,
+            loading: isBlockLoading,
+            trailingIcon: isBlocked ? WnIcons.userCheck : WnIcons.closeOutline,
+            onPressed: onBlockTap,
+          ),
+          Gap(8.h),
+        ],
+        if (onArchiveTap != null) ...[
           WnButton(
             key: const Key('archive_button'),
             text: isArchived ? context.l10n.unarchive : context.l10n.archive,
