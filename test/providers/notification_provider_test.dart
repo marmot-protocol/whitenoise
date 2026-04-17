@@ -5,8 +5,11 @@ import 'package:whitenoise/services/notification_service.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import '../mocks/mock_wn_api.dart';
+import '../test_helpers.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
   late MockWnApi mockApi;
 
   setUpAll(() {
@@ -37,6 +40,56 @@ void main() {
       final service = container.read(notificationServiceProvider);
 
       expect(service, isA<NotificationService>());
+    });
+  });
+
+  group('handleNotificationTap', () {
+    test('switches profile when current pubkey differs from target', () async {
+      String? switched;
+
+      await handleNotificationTap(
+        currentActivePubkey: testPubkeyA,
+        switchToProfile: (pk) async {
+          switched = pk;
+        },
+        groupId: testGroupId,
+        isInvite: false,
+        receiverPubkey: testPubkeyB,
+      );
+
+      expect(switched, testPubkeyB);
+    });
+
+    test('does not switch profile when current pubkey matches target', () async {
+      String? switched;
+
+      await handleNotificationTap(
+        currentActivePubkey: testPubkeyA,
+        switchToProfile: (pk) async {
+          switched = pk;
+        },
+        groupId: testGroupId,
+        isInvite: false,
+        receiverPubkey: testPubkeyA,
+      );
+
+      expect(switched, isNull);
+    });
+
+    test('switches profile when no active pubkey', () async {
+      String? switched;
+
+      await handleNotificationTap(
+        currentActivePubkey: null,
+        switchToProfile: (pk) async {
+          switched = pk;
+        },
+        groupId: testGroupId,
+        isInvite: false,
+        receiverPubkey: testPubkeyA,
+      );
+
+      expect(switched, testPubkeyA);
     });
   });
 }
