@@ -1,13 +1,33 @@
-import 'dart:io' show Platform;
+import 'dart:io' show Directory, Platform;
 
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
+import 'package:flutter/widgets.dart' show WidgetsFlutterBinding;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:logging/logging.dart';
+import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDirectory;
+import 'package:whitenoise/src/rust/api.dart' as rust_api;
+import 'package:whitenoise/src/rust/api/accounts.dart' as accounts_api;
+import 'package:whitenoise/src/rust/frb_generated.dart';
 
 final _logger = Logger('ForegroundService');
 
 // coverage:ignore-start
 @pragma('vm:entry-point')
 void _startCallback() {
+  // The task handler runs in its own Dart isolate; forward only this file's
+  // logger to logcat so SPIKE output is visible without enabling global
+  // logging (which could leak third-party or account-level details).
+  // Gated to debug builds so boot/package-replaced events don't emit user
+  // metadata (account counts, paths) to production logcat. Test the spike
+  // with a debug-mode APK (`flutter build apk --debug`).
+  if (kDebugMode) {
+    Logger.root.onRecord.listen((record) {
+      if (record.loggerName != 'ForegroundService') return;
+      final buf = StringBuffer('[${record.level.name}] ${record.loggerName}: ${record.message}');
+      if (record.error != null) buf.write(' | error: ${record.error}');
+      debugPrint(buf.toString());
+    });
+  }
   FlutterForegroundTask.setTaskHandler(_KeepAliveTaskHandler());
 }
 
@@ -15,6 +35,77 @@ class _KeepAliveTaskHandler extends TaskHandler {
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     _logger.info('Foreground task started: ${starter.name}');
+    await _runHeadlessSpike(starter);
+  }
+
+  // SPIKE: Temporary instrumentation to verify the task isolate can reach
+  // Rust, platform channels, and persisted data from the background isolate.
+  // TODO(#488): Remove when the real headless subscription lands.
+  Future<void> _runHeadlessSpike(TaskStarter starter) async {
+    _logger.info('[SPIKE] begin (starter=${starter.name})');
+
+    try {
+      WidgetsFlutterBinding.ensureInitialized();
+      _logger.info('[SPIKE] PASS: WidgetsFlutterBinding.ensureInitialized()');
+    } catch (e, st) {
+      _logger.severe('[SPIKE] FAIL: WidgetsFlutterBinding.ensureInitialized() threw $e', e, st);
+      return;
+    }
+
+    try {
+      await RustLib.init();
+      _logger.info('[SPIKE] PASS: RustLib.init()');
+    } catch (e, st) {
+      _logger.severe('[SPIKE] FAIL: RustLib.init() threw $e', e, st);
+      return;
+    }
+
+    final String dataDir;
+    final String logsDir;
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      dataDir = '${dir.path}/whitenoise/data';
+      logsDir = '${dir.path}/whitenoise/logs';
+      await Directory(dataDir).create(recursive: true);
+      await Directory(logsDir).create(recursive: true);
+      _logger.info('[SPIKE] PASS: platform channel + dirs; dataDir=$dataDir');
+    } catch (e, st) {
+      _logger.severe('[SPIKE] FAIL: path_provider / dir create threw $e', e, st);
+      return;
+    }
+
+    try {
+      final config = await rust_api.createWhitenoiseConfig(dataDir: dataDir, logsDir: logsDir);
+      _logger.info('[SPIKE] PASS: createWhitenoiseConfig');
+      await rust_api.initializeWhitenoise(config: config);
+      _logger.info('[SPIKE] PASS: initializeWhitenoise (fresh — likely headless start)');
+    } catch (e, st) {
+      // The whitenoise Rust crate uses a `OnceCell` singleton. If the main
+      // isolate has already initialized it, a second call throws — benign
+      // for the spike. Anything else is a real problem and surfaces as a
+      // WARNING so it's visible, not swallowed.
+      final msg = e.toString().toLowerCase();
+      if (msg.contains('already')) {
+        _logger.info(
+          '[SPIKE] INFO: initializeWhitenoise skipped (main isolate already initialized): $e',
+        );
+      } else {
+        // Abort — continuing to getAccounts() with an uninitialized singleton
+        // would produce a second, misleading failure instead of real signal.
+        _logger.warning('[SPIKE] WARN: initializeWhitenoise failed unexpectedly', e, st);
+        return;
+      }
+    }
+
+    try {
+      final accounts = await accounts_api.getAccounts();
+      _logger.info('[SPIKE] PASS: getAccounts returned ${accounts.length} account(s)');
+    } catch (e, st) {
+      _logger.severe('[SPIKE] FAIL: getAccounts threw $e', e, st);
+      return;
+    }
+
+    _logger.info('[SPIKE] DONE: headless isolate can reach Rust + platform channels');
   }
 
   @override
