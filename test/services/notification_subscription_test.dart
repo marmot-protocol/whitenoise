@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' show Locale;
 
 import 'package:flutter_test/flutter_test.dart';
@@ -18,6 +19,9 @@ const _senderPubkey = 'fedcba9876543210fedcba9876543210fedcba9876543210fedcba987
 class _MockNotificationService extends NotificationService {
   _MockNotificationService() : super(enabled: false);
 
+  int initializeCalls = 0;
+  int requestPermissionCalls = 0;
+  bool shouldFailInitialize = false;
   final List<
     ({
       String groupId,
@@ -28,6 +32,18 @@ class _MockNotificationService extends NotificationService {
     })
   >
   showCalls = [];
+
+  @override
+  Future<void> initialize() async {
+    initializeCalls++;
+    if (shouldFailInitialize) throw Exception('initialize failed');
+  }
+
+  @override
+  Future<bool> requestPermission() async {
+    requestPermissionCalls++;
+    return true;
+  }
 
   @override
   Future<void> show({
@@ -50,6 +66,8 @@ class _MockNotificationService extends NotificationService {
 class _MockApi extends MockWnApi {
   Map<String, FlutterMetadata> metadataByPubkey = {};
   bool shouldFailMetadataFetch = false;
+  bool shouldFailGetAccounts = false;
+  StreamController<NotificationUpdate>? streamController;
 
   @override
   Future<FlutterMetadata> crateApiUsersUserMetadata({
@@ -59,17 +77,31 @@ class _MockApi extends MockWnApi {
     if (shouldFailMetadataFetch) throw Exception('Network error');
     return metadataByPubkey[pubkey] ?? const FlutterMetadata(custom: {});
   }
+
+  @override
+  Stream<NotificationUpdate> crateApiNotificationsSubscribeToNotifications() {
+    streamController = StreamController<NotificationUpdate>.broadcast();
+    return streamController!.stream;
+  }
+
+  @override
+  Future<List<Account>> crateApiAccountsGetAccounts() async {
+    if (shouldFailGetAccounts) throw Exception('getAccounts failed');
+    return super.crateApiAccountsGetAccounts();
+  }
 }
 
 NotificationSubscription _newSubscription(
   NotificationService notificationService, {
   String? activeChatId,
   Locale locale = const Locale('en'),
+  bool enabled = true,
 }) {
   return NotificationSubscription(
     notificationService: notificationService,
     getActiveChatId: () => activeChatId,
     getLocale: () => locale,
+    enabled: enabled,
   );
 }
 
@@ -859,16 +891,192 @@ void main() {
   });
 
   group('NotificationSubscription lifecycle', () {
+    late _MockNotificationService mockNotificationService;
+
+    setUp(() {
+      mockApi.reset();
+      mockApi.accounts = [];
+      mockApi.metadataByPubkey = {};
+      mockApi.streamController = null;
+      mockNotificationService = _MockNotificationService();
+    });
+
     test('isRunning is false before start', () {
-      final sub = _newSubscription(_MockNotificationService());
+      final sub = _newSubscription(mockNotificationService);
 
       expect(sub.isRunning, isFalse);
     });
 
     test('stop is a no-op when never started', () async {
-      final sub = _newSubscription(_MockNotificationService());
+      final sub = _newSubscription(mockNotificationService);
 
       await sub.stop();
+
+      expect(sub.isRunning, isFalse);
+    });
+
+    test('start is a no-op when disabled', () async {
+      final sub = _newSubscription(mockNotificationService, enabled: false);
+
+      await sub.start();
+
+      expect(sub.isRunning, isFalse);
+      expect(mockNotificationService.initializeCalls, 0);
+    });
+
+    test('start initializes notification service and subscribes to stream', () async {
+      final sub = _newSubscription(mockNotificationService);
+
+      await sub.start();
+
+      expect(sub.isRunning, isTrue);
+      expect(mockNotificationService.initializeCalls, 1);
+      expect(mockNotificationService.requestPermissionCalls, 1);
+      expect(mockApi.streamController, isNotNull);
+
+      await sub.stop();
+    });
+
+    test('double-start is a no-op', () async {
+      final sub = _newSubscription(mockNotificationService);
+
+      await sub.start();
+      final firstController = mockApi.streamController;
+      await sub.start();
+
+      expect(identical(firstController, mockApi.streamController), isTrue);
+      expect(mockNotificationService.initializeCalls, 1);
+
+      await sub.stop();
+    });
+
+    test('stop cancels an active subscription', () async {
+      final sub = _newSubscription(mockNotificationService);
+      await sub.start();
+      expect(sub.isRunning, isTrue);
+
+      await sub.stop();
+
+      expect(sub.isRunning, isFalse);
+    });
+
+    test('start subscribes and show() receives events emitted on the stream', () async {
+      final sub = _newSubscription(mockNotificationService);
+      await sub.start();
+
+      mockApi.streamController!.add(
+        NotificationUpdate(
+          trigger: NotificationTrigger.newMessage,
+          mlsGroupId: testGroupId,
+          isDm: true,
+          receiver: const NotificationUser(pubkey: testPubkeyA),
+          sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+          content: 'Streamed hello',
+          timestamp: DateTime.now(),
+        ),
+      );
+      // Allow the stream's microtask + async handler to complete.
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(mockNotificationService.showCalls, hasLength(1));
+      expect(mockNotificationService.showCalls.first.body, 'Streamed hello');
+
+      await sub.stop();
+    });
+
+    test('stop prevents further events from being shown', () async {
+      final sub = _newSubscription(mockNotificationService);
+      await sub.start();
+      await sub.stop();
+
+      mockApi.streamController!.add(
+        NotificationUpdate(
+          trigger: NotificationTrigger.newMessage,
+          mlsGroupId: testGroupId,
+          isDm: true,
+          receiver: const NotificationUser(pubkey: testPubkeyA),
+          sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+          content: 'Should not be shown',
+          timestamp: DateTime.now(),
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+
+      expect(mockNotificationService.showCalls, isEmpty);
+    });
+
+    test('swallows errors from a failing _handleUpdate', () async {
+      mockApi.shouldFailGetAccounts = true;
+
+      final sub = _newSubscription(mockNotificationService);
+      await sub.start();
+
+      // An emitted update triggers _handleUpdate, which calls getAccounts and
+      // throws. The listener's try/catch logs the error without propagating.
+      mockApi.streamController!.add(
+        NotificationUpdate(
+          trigger: NotificationTrigger.newMessage,
+          mlsGroupId: testGroupId,
+          isDm: true,
+          receiver: const NotificationUser(pubkey: testPubkeyA),
+          sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+          content: 'Will fail',
+          timestamp: DateTime.now(),
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+
+      expect(sub.isRunning, isTrue);
+      expect(mockNotificationService.showCalls, isEmpty);
+
+      await sub.stop();
+    });
+
+    test('handles stream error without cancelling the subscription', () async {
+      final sub = _newSubscription(mockNotificationService);
+      await sub.start();
+
+      mockApi.streamController!.addError('transient stream failure');
+      await Future<void>.delayed(Duration.zero);
+
+      // Broadcast-stream listeners don't auto-cancel on error.
+      expect(sub.isRunning, isTrue);
+
+      await sub.stop();
+    });
+
+    test('logs on stream done', () async {
+      final sub = _newSubscription(mockNotificationService);
+      await sub.start();
+
+      await mockApi.streamController!.close();
+      await Future<void>.delayed(Duration.zero);
+
+      // The stream is closed; subscription still logically exists until stop().
+      await sub.stop();
+    });
+
+    test('outer catch handles failure during initialize', () async {
+      mockNotificationService.shouldFailInitialize = true;
+
+      final sub = _newSubscription(mockNotificationService);
+      await sub.start();
+
+      expect(sub.isRunning, isFalse);
+    });
+
+    test('default enabled uses Platform.isAndroid', () async {
+      // On non-Android test platforms, constructing without `enabled` defaults
+      // to Platform.isAndroid (false here), so start() should be a no-op.
+      final sub = NotificationSubscription(
+        notificationService: mockNotificationService,
+        getActiveChatId: () => null,
+        getLocale: () => const Locale('en'),
+      );
+
+      await sub.start();
 
       expect(sub.isRunning, isFalse);
     });

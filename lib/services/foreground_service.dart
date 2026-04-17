@@ -4,7 +4,7 @@ import 'dart:io' show Directory, Platform;
 import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
-import 'package:flutter/widgets.dart' show WidgetsFlutterBinding;
+import 'package:flutter/widgets.dart' show AppLifecycleState, WidgetsFlutterBinding;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDirectory;
@@ -401,5 +401,20 @@ class ForegroundService {
     if (!_enabled) return;
     if (!await _api.isRunningService) return;
     _api.sendDataToTask(const {_kTaskEventKey: _kEventMainStopped});
+  }
+
+  /// Translates a Flutter [AppLifecycleState] into the matching coordination
+  /// signal for the task isolate. Resumed → main took over; any other state
+  /// → main is releasing.
+  Future<void> handleAppLifecycleChange(AppLifecycleState state) async {
+    switch (state) {
+      case AppLifecycleState.resumed:
+        await notifyMainStarted();
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.detached:
+        await notifyMainStopped();
+    }
   }
 }

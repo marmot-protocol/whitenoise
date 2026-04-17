@@ -43,6 +43,56 @@ void main() {
     });
   });
 
+  group('routePendingTap', () {
+    const tap = PendingNotificationTap(
+      groupId: 'group-1',
+      isInvite: false,
+      receiverPubkey: 'pubkey-1',
+    );
+
+    test('is a no-op when pending is null', () async {
+      String? switched;
+      await routePendingTap(
+        pending: null,
+        isMounted: true,
+        currentActivePubkey: 'someone',
+        switchToProfile: (pk) async {
+          switched = pk;
+        },
+      );
+
+      expect(switched, isNull);
+    });
+
+    test('is a no-op when not mounted', () async {
+      String? switched;
+      await routePendingTap(
+        pending: tap,
+        isMounted: false,
+        currentActivePubkey: 'someone-else',
+        switchToProfile: (pk) async {
+          switched = pk;
+        },
+      );
+
+      expect(switched, isNull);
+    });
+
+    test('routes the tap when mounted and payload present', () async {
+      String? switched;
+      await routePendingTap(
+        pending: tap,
+        isMounted: true,
+        currentActivePubkey: 'someone-else',
+        switchToProfile: (pk) async {
+          switched = pk;
+        },
+      );
+
+      expect(switched, tap.receiverPubkey);
+    });
+  });
+
   group('handleNotificationTap', () {
     test('switches profile when current pubkey differs from target', () async {
       String? switched;

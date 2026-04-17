@@ -11,6 +11,10 @@ import 'package:whitenoise/services/android_play_services_service.dart';
 import 'package:whitenoise/services/foreground_service.dart';
 import 'package:whitenoise/services/notification_service.dart';
 import 'package:whitenoise/services/notification_subscription.dart';
+// Re-export so main.dart can import PendingNotificationTap + the consumer
+// plus the routing helper from one place.
+export 'package:whitenoise/services/foreground_service.dart'
+    show consumePendingNotificationTap, PendingNotificationTap;
 
 final _logger = Logger('NotificationProvider');
 
@@ -120,6 +124,30 @@ Future<void> handleNotificationTap({
   }
 
   _navigateToNotificationTarget(groupId: groupId, isInvite: isInvite);
+}
+
+/// Routes a previously-stashed notification tap if one exists. Intended to be
+/// called from the main isolate on startup / resume — after the task isolate
+/// fired a headless notification and stashed the tap payload via
+/// [FlutterForegroundTask.saveData].
+///
+/// Guards against acting on an unmounted widget state (pass `mounted` from
+/// the calling ConsumerState). No-op when no payload is pending.
+Future<void> routePendingTap({
+  required PendingNotificationTap? pending,
+  required bool isMounted,
+  required String? currentActivePubkey,
+  required Future<void> Function(String pubkey) switchToProfile,
+}) async {
+  if (pending == null) return;
+  if (!isMounted) return;
+  await handleNotificationTap(
+    currentActivePubkey: currentActivePubkey,
+    switchToProfile: switchToProfile,
+    groupId: pending.groupId,
+    isInvite: pending.isInvite,
+    receiverPubkey: pending.receiverPubkey,
+  );
 }
 
 void _navigateToNotificationTarget({

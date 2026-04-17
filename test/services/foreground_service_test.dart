@@ -1,3 +1,4 @@
+import 'package:flutter/widgets.dart' show AppLifecycleState;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/services/foreground_service.dart';
@@ -252,6 +253,65 @@ void main() {
 
       test('notifyMainStopped is no-op', () async {
         await service.notifyMainStopped();
+      });
+
+      test('handleAppLifecycleChange is no-op for all states', () async {
+        await service.handleAppLifecycleChange(AppLifecycleState.resumed);
+        await service.handleAppLifecycleChange(AppLifecycleState.paused);
+        await service.handleAppLifecycleChange(AppLifecycleState.inactive);
+        await service.handleAppLifecycleChange(AppLifecycleState.hidden);
+        await service.handleAppLifecycleChange(AppLifecycleState.detached);
+      });
+    });
+
+    group('handleAppLifecycleChange', () {
+      late _MockForegroundTaskApi mockApi;
+      late ForegroundService service;
+
+      setUp(() {
+        mockApi = _MockForegroundTaskApi();
+        mockApi.isRunning = true;
+        service = ForegroundService(enabled: true, api: mockApi);
+      });
+
+      test('resumed sends main_started', () async {
+        await service.handleAppLifecycleChange(AppLifecycleState.resumed);
+
+        expect(mockApi.sentData, [
+          {'event': 'main_started'},
+        ]);
+      });
+
+      test('paused sends main_stopped', () async {
+        await service.handleAppLifecycleChange(AppLifecycleState.paused);
+
+        expect(mockApi.sentData, [
+          {'event': 'main_stopped'},
+        ]);
+      });
+
+      test('inactive sends main_stopped', () async {
+        await service.handleAppLifecycleChange(AppLifecycleState.inactive);
+
+        expect(mockApi.sentData, [
+          {'event': 'main_stopped'},
+        ]);
+      });
+
+      test('hidden sends main_stopped', () async {
+        await service.handleAppLifecycleChange(AppLifecycleState.hidden);
+
+        expect(mockApi.sentData, [
+          {'event': 'main_stopped'},
+        ]);
+      });
+
+      test('detached sends main_stopped', () async {
+        await service.handleAppLifecycleChange(AppLifecycleState.detached);
+
+        expect(mockApi.sentData, [
+          {'event': 'main_stopped'},
+        ]);
       });
     });
   });

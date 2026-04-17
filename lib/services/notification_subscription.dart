@@ -26,13 +26,16 @@ class NotificationSubscription {
     required NotificationService notificationService,
     required ActiveChatGetter getActiveChatId,
     required LocaleGetter getLocale,
+    bool? enabled,
   }) : _notificationService = notificationService,
        _getActiveChatId = getActiveChatId,
-       _getLocale = getLocale;
+       _getLocale = getLocale,
+       _enabled = enabled ?? Platform.isAndroid;
 
   final NotificationService _notificationService;
   final ActiveChatGetter _getActiveChatId;
   final LocaleGetter _getLocale;
+  final bool _enabled;
 
   StreamSubscription<notifications_api.NotificationUpdate>? _subscription;
   bool _stopped = false;
@@ -40,7 +43,7 @@ class NotificationSubscription {
   bool get isRunning => _subscription != null;
 
   Future<void> start() async {
-    if (!Platform.isAndroid) return;
+    if (!_enabled) return;
     if (_subscription != null) return;
     _stopped = false;
 
@@ -67,11 +70,17 @@ class NotificationSubscription {
         },
       );
 
+      // coverage:ignore-start
+      // Defensive: there's no await between the earlier _stopped check
+      // (after requestPermission) and here, so in practice _stopped cannot
+      // flip to true in this window. Keep the guard for safety if future
+      // edits introduce an await above.
       if (_stopped) {
         await _subscription?.cancel();
         _subscription = null;
         return;
       }
+      // coverage:ignore-end
       _logger.info('NotificationSubscription started');
     } catch (error, stackTrace) {
       _logger.severe('Failed to start notification subscription', error, stackTrace);

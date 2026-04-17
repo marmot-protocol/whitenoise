@@ -177,6 +177,23 @@ void main() {
       final app = tester.widget<MaterialApp>(find.byType(MaterialApp));
       expect(app.routerConfig, isNotNull);
     });
+
+    testWidgets('forwards lifecycle state changes without error', (tester) async {
+      await pumpWnApp(tester);
+
+      // ForegroundService is disabled on the test host (Platform.isAndroid
+      // is false), so the observer chain ultimately no-ops — we're
+      // verifying that didChangeAppLifecycleState wires through without
+      // throwing and that each branch of the switch is exercised.
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pumpAndSettle();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pumpAndSettle();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.hidden);
+      await tester.pumpAndSettle();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+    });
   });
 
   group('initializeAppContainer', () {

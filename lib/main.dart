@@ -18,11 +18,10 @@ import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
 import 'package:whitenoise/providers/foreground_service_provider.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart'
-    show handleNotificationTap, notificationListenerProvider;
+    show consumePendingNotificationTap, notificationListenerProvider, routePendingTap;
 import 'package:whitenoise/providers/theme_provider.dart' show themeProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/screens/fatal_error_screen.dart';
-import 'package:whitenoise/services/foreground_service.dart' show consumePendingNotificationTap;
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/theme.dart';
@@ -130,14 +129,11 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
 
   Future<void> _consumePendingNotificationTap() async {
     final pending = await consumePendingNotificationTap();
-    if (pending == null) return;
-    if (!mounted) return;
-    await handleNotificationTap(
+    await routePendingTap(
+      pending: pending,
+      isMounted: mounted,
       currentActivePubkey: ref.read(authProvider).value,
-      switchToProfile: (pk) => ref.read(authProvider.notifier).switchProfile(pk),
-      groupId: pending.groupId,
-      isInvite: pending.isInvite,
-      receiverPubkey: pending.receiverPubkey,
+      switchToProfile: ref.read(authProvider.notifier).switchProfile,
     );
   }
 
@@ -149,20 +145,9 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    final foregroundService = ref.read(foregroundServiceProvider);
-    switch (state) {
-      case AppLifecycleState.resumed:
-        // Main isolate is active — tell the task handler to yield.
-        unawaited(foregroundService.notifyMainStarted());
-        // Consume any notification tap that fired while we were away.
-        unawaited(_consumePendingNotificationTap());
-      case AppLifecycleState.paused:
-      case AppLifecycleState.inactive:
-      case AppLifecycleState.hidden:
-      case AppLifecycleState.detached:
-        // Main isolate is backgrounded/detaching — tell the task handler to
-        // take over notification delivery.
-        unawaited(foregroundService.notifyMainStopped());
+    unawaited(ref.read(foregroundServiceProvider).handleAppLifecycleChange(state));
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_consumePendingNotificationTap());
     }
   }
 
