@@ -23,6 +23,7 @@ import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
+import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_chat_message_input.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
@@ -2196,7 +2197,7 @@ void main() {
         await pumpChatScreen(tester);
 
         expect(find.byKey(const Key('user_blocked_notice')), findsOneWidget);
-        expect(find.text('You have blocked this user'), findsOneWidget);
+        expect(find.text('You blocked this user'), findsOneWidget);
       });
 
       testWidgets('blocked notice is expanded by default', (tester) async {
@@ -2246,6 +2247,27 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Failed to unblock user. Please try again.'), findsOneWidget);
+      });
+
+      testWidgets('archive button shows Archive when not archived', (tester) async {
+        await pumpChatScreen(tester);
+
+        final button = tester.widget<WnButton>(
+          find.byKey(const Key('blocked_notice_archive_button')),
+        );
+        expect(button.text, 'Archive');
+      });
+
+      testWidgets('archive button updates to Unarchive after archiving', (tester) async {
+        await pumpChatScreen(tester);
+
+        await tester.tap(find.byKey(const Key('blocked_notice_archive_button')));
+        await tester.pumpAndSettle();
+
+        final button = tester.widget<WnButton>(
+          find.byKey(const Key('blocked_notice_archive_button')),
+        );
+        expect(button.text, 'Unarchive');
       });
 
       testWidgets('shows error notice when archive action fails from blocked notice', (

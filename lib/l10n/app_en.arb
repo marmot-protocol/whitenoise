@@ -1295,7 +1295,7 @@
   "@failedToUnblockUser": {
     "description": "Error message when unblock user operation fails"
   },
-  "userIsBlocked": "You have blocked this user",
+  "userIsBlocked": "You blocked this user",
   "@userIsBlocked": {
     "description": "Notice title shown in chat header when the peer is blocked"
   },

@@ -1016,7 +1016,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failedToUnblockUser => 'Failed to unblock user. Please try again.';
 
   @override
-  String get userIsBlocked => 'You have blocked this user';
+  String get userIsBlocked => 'You blocked this user';
 
   @override
   String get userIsBlockedDescription => 'You won\'t receive new messages until you unblock them.';

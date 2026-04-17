@@ -1893,7 +1893,7 @@ abstract class AppLocalizations {
   /// Notice title shown in chat header when the peer is blocked
   ///
   /// In en, this message translates to:
-  /// **'You have blocked this user'**
+  /// **'You blocked this user'**
   String get userIsBlocked;
 
   /// Notice description shown in chat header when the peer is blocked

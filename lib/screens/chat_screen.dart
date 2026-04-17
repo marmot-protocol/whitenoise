@@ -172,6 +172,7 @@ class ChatScreen extends HookConsumerWidget {
     }
 
     Future<void> handleUnblock() async {
+      if (!blockState.isBlocked) return;
       try {
         await blockState.toggleBlock();
       } catch (_) {
@@ -180,10 +181,21 @@ class ChatScreen extends HookConsumerWidget {
     }
 
     Future<void> handleArchive() async {
+      final currentIsArchived = archiveState.isArchived;
       try {
-        await archiveState.archive();
+        if (currentIsArchived) {
+          await archiveState.unarchive();
+        } else {
+          await archiveState.archive();
+        }
       } catch (_) {
-        if (context.mounted) showNotice(context.l10n.failedToArchiveChat);
+        if (context.mounted) {
+          if (currentIsArchived) {
+            showNotice(context.l10n.failedToUnarchiveChat);
+          } else {
+            showNotice(context.l10n.failedToArchiveChat);
+          }
+        }
       }
     }
 
@@ -569,11 +581,15 @@ class ChatScreen extends HookConsumerWidget {
                               ),
                               primaryAction: WnButton(
                                 key: const Key('blocked_notice_archive_button'),
-                                text: context.l10n.archive,
+                                text: archiveState.isArchived
+                                    ? context.l10n.unarchive
+                                    : context.l10n.archive,
                                 type: WnButtonType.overlay,
                                 size: WnButtonSize.medium,
                                 loading: archiveState.isActionLoading,
-                                trailingIcon: WnIcons.archive,
+                                trailingIcon: archiveState.isArchived
+                                    ? WnIcons.unarchive
+                                    : WnIcons.archive,
                                 onPressed: handleArchive,
                               ),
                             )
