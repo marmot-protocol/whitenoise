@@ -353,6 +353,7 @@ class _MockApi extends MockWnApi {
     required String targetPubkey,
   }) async {
     if (shouldFailUnblockUser) throw Exception('Unblock failed');
+    blockedUser = false;
   }
 
   @override

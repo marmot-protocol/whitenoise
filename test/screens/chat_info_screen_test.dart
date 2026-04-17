@@ -143,6 +143,7 @@ class _MockApi extends MockWnApi {
     blockCalls.add((account: accountPubkey, target: targetPubkey));
     if (blockCompleter != null) await blockCompleter!.future;
     if (blockError != null) throw blockError!;
+    blockedPubkeys.add(targetPubkey);
   }
 
   @override
@@ -153,6 +154,7 @@ class _MockApi extends MockWnApi {
     unblockCalls.add((account: accountPubkey, target: targetPubkey));
     if (unblockCompleter != null) await unblockCompleter!.future;
     if (unblockError != null) throw unblockError!;
+    blockedPubkeys.remove(targetPubkey);
   }
 
   @override
