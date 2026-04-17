@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'dart:io' show Directory, File, FileSystemException;
 
 import 'package:flutter/material.dart';
@@ -14,6 +15,7 @@ import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDi
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/app_log_provider.dart' show appLogStore;
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
+import 'package:whitenoise/providers/foreground_service_provider.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart' show notificationListenerProvider;
 import 'package:whitenoise/providers/theme_provider.dart' show themeProvider;
@@ -111,13 +113,37 @@ class WnApp extends ConsumerStatefulWidget {
   ConsumerState<WnApp> createState() => _WnAppState();
 }
 
-class _WnAppState extends ConsumerState<WnApp> {
+class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
   late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
     _router = Routes.build(ref);
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final foregroundService = ref.read(foregroundServiceProvider);
+    switch (state) {
+      case AppLifecycleState.resumed:
+        // Main isolate is active — tell the task handler to yield.
+        unawaited(foregroundService.notifyMainStarted());
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.hidden:
+      case AppLifecycleState.detached:
+        // Main isolate is backgrounded/detaching — tell the task handler to
+        // take over notification delivery.
+        unawaited(foregroundService.notifyMainStopped());
+    }
   }
 
   @override
