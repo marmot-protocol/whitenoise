@@ -1,4 +1,5 @@
 import 'dart:async' show unawaited;
+import 'dart:convert' show jsonDecode, jsonEncode;
 import 'dart:io' show Directory, Platform;
 import 'dart:ui' show Locale;
 
@@ -18,6 +19,10 @@ final _logger = Logger('ForegroundService');
 const _kTaskEventKey = 'event';
 const _kEventMainStarted = 'main_started';
 const _kEventMainStopped = 'main_stopped';
+
+/// Key used to stash a headless notification-tap payload so the main isolate
+/// can consume and route it once it launches.
+const _kPendingNotificationTapKey = 'pending_notification_tap';
 
 // coverage:ignore-start
 @pragma('vm:entry-point')
@@ -151,11 +156,7 @@ class _NotificationTaskHandler extends TaskHandler {
     if (_subscription != null) return;
 
     final notificationService = NotificationService(
-      onNotificationTap: (_, _, _) {
-        // Headless tap: just launch the app. Deep-link routing is
-        // tracked in #488.
-        FlutterForegroundTask.launchApp();
-      },
+      onNotificationTap: _persistTapAndLaunch,
     );
     final sub = NotificationSubscription(
       notificationService: notificationService,
@@ -175,6 +176,27 @@ class _NotificationTaskHandler extends TaskHandler {
     _logger.info('Headless notification subscription stopped');
   }
 
+  /// Persists the tapped notification's payload so the main isolate can route
+  /// to the right chat/invite on launch, then brings the app to the
+  /// foreground.
+  void _persistTapAndLaunch(String groupId, bool isInvite, String receiverPubkey) {
+    unawaited(() async {
+      try {
+        await FlutterForegroundTask.saveData(
+          key: _kPendingNotificationTapKey,
+          value: jsonEncode({
+            'groupId': groupId,
+            'isInvite': isInvite,
+            'receiverPubkey': receiverPubkey,
+          }),
+        );
+      } catch (e, st) {
+        _logger.warning('Failed to persist pending notification tap', e, st);
+      }
+      FlutterForegroundTask.launchApp();
+    }());
+  }
+
   Future<Locale> _loadLocale() async {
     try {
       final settings = await rust_api.getAppSettings();
@@ -189,6 +211,52 @@ class _NotificationTaskHandler extends TaskHandler {
       _logger.warning('Failed to load locale; falling back to en', e, st);
       return const Locale('en');
     }
+  }
+}
+
+/// Payload captured when the user taps a notification fired by the headless
+/// task isolate. Stashed via [FlutterForegroundTask.saveData] and consumed by
+/// the main isolate on launch.
+class PendingNotificationTap {
+  const PendingNotificationTap({
+    required this.groupId,
+    required this.isInvite,
+    required this.receiverPubkey,
+  });
+
+  final String groupId;
+  final bool isInvite;
+  final String receiverPubkey;
+}
+
+/// Reads and clears any notification-tap payload stashed by the task
+/// isolate. Returns null if there's nothing pending.
+Future<PendingNotificationTap?> consumePendingNotificationTap() async {
+  if (!Platform.isAndroid) return null;
+  try {
+    final raw = await FlutterForegroundTask.getData<String>(key: _kPendingNotificationTapKey);
+    if (raw == null) return null;
+    await FlutterForegroundTask.removeData(key: _kPendingNotificationTapKey);
+    final data = jsonDecode(raw) as Map<String, dynamic>;
+    final groupId = data['groupId'] as String?;
+    final isInvite = data['isInvite'] as bool?;
+    final receiverPubkey = data['receiverPubkey'] as String?;
+    if (groupId == null ||
+        groupId.isEmpty ||
+        isInvite == null ||
+        receiverPubkey == null ||
+        receiverPubkey.isEmpty) {
+      _logger.warning('Malformed pending notification tap payload: $raw');
+      return null;
+    }
+    return PendingNotificationTap(
+      groupId: groupId,
+      isInvite: isInvite,
+      receiverPubkey: receiverPubkey,
+    );
+  } catch (e, st) {
+    _logger.warning('Failed to consume pending notification tap', e, st);
+    return null;
   }
 }
 

@@ -18,7 +18,13 @@ final _logger = Logger('NotificationProvider');
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService(
     onNotificationTap: (groupId, isInvite, receiverPubkey) {
-      _onNotificationTap(ref, groupId, isInvite, receiverPubkey);
+      handleNotificationTap(
+        currentActivePubkey: ref.read(authProvider).value,
+        switchToProfile: (pk) => ref.read(authProvider.notifier).switchProfile(pk),
+        groupId: groupId,
+        isInvite: isInvite,
+        receiverPubkey: receiverPubkey,
+      );
     },
   );
 });
@@ -93,15 +99,23 @@ Future<void> _startForegroundAndSubscribe(
   }
 }
 
-Future<void> _onNotificationTap(
-  Ref ref,
-  String groupId,
-  bool isInvite,
-  String receiverPubkey,
-) async {
-  final activePubkey = ref.read(authProvider).value;
-  if (activePubkey != receiverPubkey) {
-    await ref.read(authProvider.notifier).switchProfile(receiverPubkey);
+/// Routes a notification tap — whether fired synchronously from the
+/// NotificationService's tap callback (in-app) or consumed from persisted
+/// state after a headless tap woke the app. Switches the active account if
+/// needed, then navigates to the chat/invite screen.
+///
+/// Takes plain values and callbacks instead of a `Ref` so it can be called
+/// from both Provider contexts (Ref.read) and ConsumerState contexts
+/// (WidgetRef.read).
+Future<void> handleNotificationTap({
+  required String? currentActivePubkey,
+  required Future<void> Function(String pubkey) switchToProfile,
+  required String groupId,
+  required bool isInvite,
+  required String receiverPubkey,
+}) async {
+  if (currentActivePubkey != receiverPubkey) {
+    await switchToProfile(receiverPubkey);
     _logger.info('Switched to account $receiverPubkey for notification tap');
   }
 
