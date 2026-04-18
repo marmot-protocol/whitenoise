@@ -15,6 +15,7 @@ import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/chat_search.dart';
 import 'package:whitenoise/widgets/chat_list_header.dart';
 import 'package:whitenoise/widgets/chat_list_tile.dart';
+import 'package:whitenoise/widgets/offline_system_notice.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_chat_list.dart';
 import 'package:whitenoise/widgets/wn_filter_chip.dart';
@@ -88,7 +89,7 @@ class ChatListScreen extends HookConsumerWidget {
     );
   }
 
-  WnSystemNotice? _buildSystemNotice(
+  Widget? _buildSystemNotice(
     BuildContext context,
     AppTypography typography,
     SemanticColors colors, {
@@ -99,12 +100,7 @@ class ChatListScreen extends HookConsumerWidget {
     required VoidCallback onWelcomeDismiss,
   }) {
     if (isOffline) {
-      return WnSystemNotice(
-        key: const Key('offline_notice'),
-        title: context.l10n.waitingForInternet,
-        type: WnSystemNoticeType.warning,
-        variant: WnSystemNoticeVariant.expanded,
-      );
+      return const OfflineSystemNotice();
     }
     if (updateVersion != null) {
       return WnSystemNotice(

@@ -39,6 +39,7 @@ import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
 import 'package:whitenoise/widgets/chat_message_bubble.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/chat_scroll_down_button.dart';
+import 'package:whitenoise/widgets/offline_system_notice.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_chat_message_input.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
@@ -521,12 +522,7 @@ class ChatScreen extends HookConsumerWidget {
                             : null,
                       ),
                       systemNotice: isOffline
-                          ? WnSystemNotice(
-                              key: const Key('offline_notice'),
-                              title: context.l10n.waitingForInternet,
-                              type: WnSystemNoticeType.warning,
-                              variant: WnSystemNoticeVariant.expanded,
-                            )
+                          ? const OfflineSystemNotice()
                           : (noticeMessage.value != null
                                 ? WnSystemNotice(
                                     key: ValueKey(noticeMessage.value),
