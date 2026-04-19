@@ -573,7 +573,7 @@ class ChatScreen extends HookConsumerWidget {
                               secondaryAction: WnButton(
                                 key: const Key('blocked_notice_unblock_button'),
                                 text: context.l10n.unblock,
-                                type: WnButtonType.overlay,
+                                type: WnButtonType.outline,
                                 size: WnButtonSize.medium,
                                 loading: blockState.isActionLoading,
                                 trailingIcon: WnIcons.userCheck,
