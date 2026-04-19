@@ -29,6 +29,7 @@ and this project adheres to Calendar Versioning (CalVer).
 - Add block/unblock hook [PR #573](https://github.com/marmot-protocol/whitenoise/pull/573)
 
 ### Changed
+- Update System Notice colors [PR #579](https://github.com/marmot-protocol/whitenoise/pull/499)
 - UI Polish: Profile Keys & Sign out Screens [PR #552](https://github.com/marmot-protocol/whitenoise/pull/552)
 - UI Polish: Donate Screen [PR #553](https://github.com/marmot-protocol/whitenoise/pull/553)
 - UI Polish: Share & Edit Profile Screens [PR #544](https://github.com/marmot-protocol/whitenoise/pull/544)
