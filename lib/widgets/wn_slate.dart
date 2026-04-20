@@ -33,7 +33,7 @@ class WnSlate extends HookWidget {
 
   BoxDecoration _decoration(SemanticColors colors) {
     return BoxDecoration(
-      color: colors.backgroundSecondary,
+      color: colors.backgroundSlate,
       borderRadius: BorderRadius.circular(16.r),
       border: Border.all(color: colors.borderTertiary),
       boxShadow: [
@@ -85,9 +85,9 @@ class WnSlate extends HookWidget {
               children: [
                 child!,
                 if (showTopScrollEffect && canScrollUp.value)
-                  WnScrollEdgeEffect.slateTop(color: colors.backgroundSecondary),
+                  WnScrollEdgeEffect.slateTop(color: colors.backgroundSlate),
                 if (showBottomScrollEffect && canScrollDown.value)
-                  WnScrollEdgeEffect.slateBottom(color: colors.backgroundSecondary),
+                  WnScrollEdgeEffect.slateBottom(color: colors.backgroundSlate),
               ],
             ),
           ),
