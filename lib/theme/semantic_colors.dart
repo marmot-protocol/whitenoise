@@ -33,6 +33,7 @@ class _NeutralColors {
   static const Color neutral500 = Color(0xFF737373);
   static const Color neutral650 = Color(0xFF494949);
   static const Color neutral700 = Color(0xFF404040);
+  static const Color neutral750 = Color(0xFF333333);
   static const Color neutral800 = Color(0xFF262626);
   static const Color neutral850 = Color(0xFF1E1E1F);
   static const Color neutral900 = Color(0xFF171717);
@@ -679,9 +680,9 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     fillPrimary: _BaseColors.white,
     fillPrimaryHover: _NeutralColors.neutral200,
     fillPrimaryActive: _NeutralColors.neutral200,
-    fillSecondary: _NeutralColors.neutral900,
-    fillSecondaryHover: _NeutralColors.neutral850,
-    fillSecondaryActive: _NeutralColors.neutral850,
+    fillSecondary: _NeutralColors.neutral800,
+    fillSecondaryHover: _NeutralColors.neutral750,
+    fillSecondaryActive: _NeutralColors.neutral750,
     fillTertiary: _BaseColors.transparent,
     fillTertiaryHover: _NeutralColors.neutral850,
     fillTertiaryActive: _NeutralColors.neutral850,
