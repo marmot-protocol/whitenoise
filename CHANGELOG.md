@@ -39,6 +39,7 @@ and this project adheres to Calendar Versioning (CalVer).
 - Debug and relay screens improvements [PR #572](https://github.com/marmot-protocol/whitenoise/pull/502)
 - UI Polish: Slate & Settings Screen [PR #504](https://github.com/marmot-protocol/whitenoise/pull/504)
 - Show an error screen when bridge initialization fails instead of hanging on splash [PR #477](https://github.com/marmot-protocol/whitenoise/pull/477)
+- Replaced delete all key packages with delete legacy key packages method. [PR #585](https://github.com/marmot-protocol/whitenoise/pull/585)
 
 ### Deprecated
 
