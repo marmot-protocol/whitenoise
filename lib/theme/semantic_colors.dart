@@ -33,7 +33,7 @@ class _NeutralColors {
   static const Color neutral500 = Color(0xFF737373);
   static const Color neutral650 = Color(0xFF494949);
   static const Color neutral700 = Color(0xFF404040);
-  static const Color neutral750 = Color(0xFFEDEDEE);
+   static const Color neutral750 = Color(0xFF333333);
   static const Color neutral800 = Color(0xFF262626);
   static const Color neutral850 = Color(0xFF1E1E1F);
   static const Color neutral900 = Color(0xFF171717);
