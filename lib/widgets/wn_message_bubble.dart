@@ -760,7 +760,7 @@ class WnMessageBubble extends StatelessWidget {
         ? Colors.transparent
         : _isOutgoing
         ? colors.fillPrimary
-        : colors.backgroundTertiary;
+        : colors.backgroundMessageIncoming;
     final textColor = isDeleted || !_isOutgoing
         ? colors.backgroundContentPrimary
         : colors.fillContentPrimary;
