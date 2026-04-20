@@ -505,6 +505,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
   final Color backgroundPrimary;
   final Color backgroundSecondary;
   final Color backgroundTertiary;
+  final Color backgroundSlate;
+  final Color backgroundMessageIncoming;
   final Color backgroundContentPrimary;
   final Color backgroundContentSecondary;
   final Color backgroundContentTertiary;
@@ -557,6 +559,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     required this.backgroundPrimary,
     required this.backgroundSecondary,
     required this.backgroundTertiary,
+    required this.backgroundSlate,
+    required this.backgroundMessageIncoming,
     required this.backgroundContentPrimary,
     required this.backgroundContentSecondary,
     required this.backgroundContentTertiary,
@@ -610,6 +614,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     backgroundPrimary: _BaseColors.white,
     backgroundSecondary: _NeutralColors.neutral50,
     backgroundTertiary: _NeutralColors.neutral100,
+    backgroundSlate: _NeutralColors.neutral50,
+    backgroundMessageIncoming: _NeutralColors.neutral100,
     backgroundContentPrimary: _NeutralColors.neutral950,
     backgroundContentSecondary: _NeutralColors.neutral500,
     backgroundContentTertiary: _NeutralColors.neutral400,
@@ -663,6 +669,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     backgroundPrimary: _BaseColors.black,
     backgroundSecondary: _NeutralColors.neutral950,
     backgroundTertiary: _NeutralColors.neutral900,
+    backgroundSlate: _NeutralColors.neutral900,
+    backgroundMessageIncoming: _NeutralColors.neutral800,
     backgroundContentPrimary: _BaseColors.white,
     backgroundContentSecondary: _NeutralColors.neutral400,
     backgroundContentTertiary: _NeutralColors.neutral500,
@@ -717,6 +725,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     Color? backgroundPrimary,
     Color? backgroundSecondary,
     Color? backgroundTertiary,
+    Color? backgroundSlate,
+    Color? backgroundMessageIncoming,
     Color? backgroundContentPrimary,
     Color? backgroundContentSecondary,
     Color? backgroundContentTertiary,
@@ -769,6 +779,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
       backgroundPrimary: backgroundPrimary ?? this.backgroundPrimary,
       backgroundSecondary: backgroundSecondary ?? this.backgroundSecondary,
       backgroundTertiary: backgroundTertiary ?? this.backgroundTertiary,
+      backgroundSlate: backgroundSlate ?? this.backgroundSlate,
+      backgroundMessageIncoming: backgroundMessageIncoming ?? this.backgroundMessageIncoming,
       backgroundContentPrimary: backgroundContentPrimary ?? this.backgroundContentPrimary,
       backgroundContentSecondary: backgroundContentSecondary ?? this.backgroundContentSecondary,
       backgroundContentTertiary: backgroundContentTertiary ?? this.backgroundContentTertiary,
@@ -828,6 +840,12 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
       backgroundPrimary: Color.lerp(backgroundPrimary, other.backgroundPrimary, t)!,
       backgroundSecondary: Color.lerp(backgroundSecondary, other.backgroundSecondary, t)!,
       backgroundTertiary: Color.lerp(backgroundTertiary, other.backgroundTertiary, t)!,
+      backgroundSlate: Color.lerp(backgroundSlate, other.backgroundSlate, t)!,
+      backgroundMessageIncoming: Color.lerp(
+        backgroundMessageIncoming,
+        other.backgroundMessageIncoming,
+        t,
+      )!,
       backgroundContentPrimary: Color.lerp(
         backgroundContentPrimary,
         other.backgroundContentPrimary,
