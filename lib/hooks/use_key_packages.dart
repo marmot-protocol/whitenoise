@@ -1,5 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
+import 'package:whitenoise/constants/nostr_event_kinds.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart' as accounts_api;
 
 final _logger = Logger('useKeyPackages');
@@ -47,11 +48,12 @@ class KeyPackagesState {
 
   bool get isLoading => status is KeyPackagesLoading;
   bool get hasError => status is KeyPackagesError;
+  bool get hasLegacyPackages => packages.any((p) => p.kind == NostrEventKinds.mlsKeyPackageLegacy);
   KeyPackageAction? get activeAction =>
       status is KeyPackagesLoading ? (status as KeyPackagesLoading).action : null;
 }
 
-enum KeyPackageAction { fetch, publish, delete, deleteAll }
+enum KeyPackageAction { fetch, publish, delete, deleteAllLegacy }
 
 typedef KeyPackageResult = ({bool success, KeyPackageAction action});
 
@@ -60,7 +62,7 @@ typedef KeyPackageResult = ({bool success, KeyPackageAction action});
   Future<KeyPackageResult> Function() fetch,
   Future<KeyPackageResult> Function() publish,
   Future<KeyPackageResult> Function(String id) delete,
-  Future<KeyPackageResult> Function() deleteAll,
+  Future<KeyPackageResult> Function() deleteAllLegacy,
 })
 useKeyPackages(String pubkey) {
   final state = useState(const KeyPackagesState());
@@ -188,29 +190,41 @@ useKeyPackages(String pubkey) {
     }
   }
 
-  Future<KeyPackageResult> deleteAll() async {
+  Future<KeyPackageResult> deleteAllLegacy() async {
     if (state.value.isLoading) {
-      return (success: false, action: KeyPackageAction.deleteAll);
+      return (success: false, action: KeyPackageAction.deleteAllLegacy);
     }
     final currentRefreshKey = refreshKey.value;
     state.value = state.value.copyWith(
-      status: const KeyPackagesLoading(KeyPackageAction.deleteAll),
+      status: const KeyPackagesLoading(KeyPackageAction.deleteAllLegacy),
     );
     try {
       await accounts_api.deleteAccountKeyPackages(accountPubkey: pubkey);
-      if (!isMountedRef.value || refreshKey.value != currentRefreshKey) {
-        return (success: true, action: KeyPackageAction.deleteAll);
-      }
-      state.value = state.value.copyWith(status: const KeyPackagesIdle(), packages: []);
-      return (success: true, action: KeyPackageAction.deleteAll);
     } catch (e) {
-      _logger.severe('Failed to delete all key packages', e);
+      _logger.severe('Failed to delete legacy key packages', e);
       if (!isMountedRef.value || refreshKey.value != currentRefreshKey) {
-        return (success: false, action: KeyPackageAction.deleteAll);
+        return (success: false, action: KeyPackageAction.deleteAllLegacy);
       }
       state.value = state.value.copyWith(status: const KeyPackagesError());
-      return (success: false, action: KeyPackageAction.deleteAll);
+      return (success: false, action: KeyPackageAction.deleteAllLegacy);
     }
+    try {
+      if (!isMountedRef.value || refreshKey.value != currentRefreshKey) {
+        return (success: true, action: KeyPackageAction.deleteAllLegacy);
+      }
+      final packages = await accounts_api.accountKeyPackages(accountPubkey: pubkey);
+      if (!isMountedRef.value || refreshKey.value != currentRefreshKey) {
+        return (success: true, action: KeyPackageAction.deleteAllLegacy);
+      }
+      state.value = state.value.copyWith(status: const KeyPackagesIdle(), packages: packages);
+    } catch (e) {
+      _logger.severe('Failed to refresh key packages after delete legacy', e);
+      if (isMountedRef.value && refreshKey.value == currentRefreshKey) {
+        state.value = state.value.copyWith(status: const KeyPackagesIdle());
+      }
+      return (success: false, action: KeyPackageAction.fetch);
+    }
+    return (success: true, action: KeyPackageAction.deleteAllLegacy);
   }
 
   return (
@@ -218,6 +232,6 @@ useKeyPackages(String pubkey) {
     fetch: fetch,
     publish: publish,
     delete: delete,
-    deleteAll: deleteAll,
+    deleteAllLegacy: deleteAllLegacy,
   );
 }

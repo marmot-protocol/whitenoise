@@ -573,9 +573,9 @@
   "@refreshKeyPackages": {
     "description": "Button to refresh key packages"
   },
-  "deleteAllKeyPackages": "Delete All Key Packages",
-  "@deleteAllKeyPackages": {
-    "description": "Button to delete all key packages"
+  "deleteLegacyKeyPackages": "Delete Legacy Key Packages",
+  "@deleteLegacyKeyPackages": {
+    "description": "Button to delete legacy key packages"
   },
   "keyPackagesCount": "Key Packages ({count})",
   "@keyPackagesCount": {
@@ -598,9 +598,9 @@
   "@keyPackagesRefreshed": {
     "description": "Success message when key packages are refreshed"
   },
-  "keyPackagesDeleted": "All key packages deleted",
-  "@keyPackagesDeleted": {
-    "description": "Success message when all key packages are deleted"
+  "legacyKeyPackagesDeleted": "Legacy key packages deleted",
+  "@legacyKeyPackagesDeleted": {
+    "description": "Success message when legacy key packages are deleted"
   },
   "keyPackageDeleted": "Key package deleted",
   "@keyPackageDeleted": {
@@ -618,9 +618,13 @@
   "@keyPackageDeleteFailed": {
     "description": "Error message when deleting a key package fails"
   },
-  "keyPackageDeleteAllFailed": "Failed to delete all key packages. Please try again.",
-  "@keyPackageDeleteAllFailed": {
-    "description": "Error message when deleting all key packages fails"
+  "legacyKeyPackageDeleteFailed": "Failed to delete legacy key packages. Please try again.",
+  "@legacyKeyPackageDeleteFailed": {
+    "description": "Error message when deleting legacy key packages fails"
+  },
+  "legacyLabel": "Legacy",
+  "@legacyLabel": {
+    "description": "Label shown on legacy key package cards"
   },
   "packageNumber": "Package {number}",
   "@packageNumber": {

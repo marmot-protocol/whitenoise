@@ -449,7 +449,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get refreshKeyPackages => 'Refresh Key Packages';
 
   @override
-  String get deleteAllKeyPackages => 'Delete All Key Packages';
+  String get deleteLegacyKeyPackages => 'Delete Legacy Key Packages';
 
   @override
   String keyPackagesCount(int count) {
@@ -466,7 +466,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get keyPackagesRefreshed => 'Key packages refreshed';
 
   @override
-  String get keyPackagesDeleted => 'All key packages deleted';
+  String get legacyKeyPackagesDeleted => 'Legacy key packages deleted';
 
   @override
   String get keyPackageDeleted => 'Key package deleted';
@@ -481,7 +481,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get keyPackageDeleteFailed => 'Failed to delete key package. Please try again.';
 
   @override
-  String get keyPackageDeleteAllFailed => 'Failed to delete all key packages. Please try again.';
+  String get legacyKeyPackageDeleteFailed =>
+      'Failed to delete legacy key packages. Please try again.';
+
+  @override
+  String get legacyLabel => 'Legacy';
 
   @override
   String packageNumber(int number) {

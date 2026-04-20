@@ -17,7 +17,7 @@ class MockApi implements RustLibApi {
   Completer<void>? publishCompleter;
   Completer<void>? fetchCompleter;
   Completer<void>? deleteCompleter;
-  Completer<void>? deleteAllCompleter;
+  Completer<void>? deleteAllLegacyCompleter;
 
   @override
   Future<List<FlutterEvent>> crateApiAccountsAccountKeyPackages({
@@ -44,7 +44,7 @@ class MockApi implements RustLibApi {
         pubkey: accountPubkey,
         createdAt: DateTime.now(),
         kind: NostrEventKinds.mlsKeyPackage,
-        tags: [],
+        tags: const [],
         content: '',
       ),
     );
@@ -67,12 +67,12 @@ class MockApi implements RustLibApi {
   Future<BigInt> crateApiAccountsDeleteAccountKeyPackages({
     required String accountPubkey,
   }) async {
-    if (deleteAllCompleter != null) {
-      await deleteAllCompleter!.future;
+    if (deleteAllLegacyCompleter != null) {
+      await deleteAllLegacyCompleter!.future;
     }
     if (shouldThrow) throw Exception('Network error');
-    final count = keyPackages.length;
-    keyPackages.clear();
+    final count = keyPackages.where((p) => p.kind == NostrEventKinds.mlsKeyPackageLegacy).length;
+    keyPackages.removeWhere((p) => p.kind == NostrEventKinds.mlsKeyPackageLegacy);
     return BigInt.from(count);
   }
 
@@ -85,7 +85,7 @@ late ({
   Future<KeyPackageResult> Function() fetch,
   Future<KeyPackageResult> Function() publish,
   Future<KeyPackageResult> Function(String id) delete,
-  Future<KeyPackageResult> Function() deleteAll,
+  Future<KeyPackageResult> Function() deleteAllLegacy,
 })
 hook;
 
@@ -117,7 +117,7 @@ void main() {
     mockApi.publishCompleter = null;
     mockApi.fetchCompleter = null;
     mockApi.deleteCompleter = null;
-    mockApi.deleteAllCompleter = null;
+    mockApi.deleteAllLegacyCompleter = null;
   });
 
   group('fetch', () {
@@ -369,6 +369,62 @@ void main() {
     });
   });
 
+  group('hasLegacyPackages', () {
+    testWidgets('is false when packages list is empty', (tester) async {
+      await _pump(tester);
+      await hook.fetch();
+      await tester.pump();
+
+      expect(hook.state.hasLegacyPackages, isFalse);
+    });
+
+    testWidgets('is false when all packages are current kind', (tester) async {
+      mockApi.keyPackages = [
+        FlutterEvent(
+          id: 'pkg1',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackage,
+          tags: const [],
+          content: '',
+        ),
+      ];
+
+      await _pump(tester);
+      await hook.fetch();
+      await tester.pump();
+
+      expect(hook.state.hasLegacyPackages, isFalse);
+    });
+
+    testWidgets('is true when any package is legacy kind', (tester) async {
+      mockApi.keyPackages = [
+        FlutterEvent(
+          id: 'pkg1',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackage,
+          tags: const [],
+          content: '',
+        ),
+        FlutterEvent(
+          id: 'pkg2',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackageLegacy,
+          tags: const [],
+          content: '',
+        ),
+      ];
+
+      await _pump(tester);
+      await hook.fetch();
+      await tester.pump();
+
+      expect(hook.state.hasLegacyPackages, isTrue);
+    });
+  });
+
   group('copyWith', () {
     test('preserves status when not provided', () {
       const state = KeyPackagesState(status: KeyPackagesLoading(KeyPackageAction.fetch));
@@ -395,23 +451,23 @@ void main() {
     });
   });
 
-  group('deleteAll', () {
-    testWidgets('clears all packages', (tester) async {
+  group('deleteAllLegacy', () {
+    testWidgets('removes only legacy packages and keeps current ones', (tester) async {
       mockApi.keyPackages = [
         FlutterEvent(
-          id: 'pkg1',
+          id: 'pkg_legacy',
           pubkey: testPubkeyA,
           createdAt: DateTime.now(),
-          kind: NostrEventKinds.mlsKeyPackage,
-          tags: [],
+          kind: NostrEventKinds.mlsKeyPackageLegacy,
+          tags: const [],
           content: '',
         ),
         FlutterEvent(
-          id: 'pkg2',
+          id: 'pkg_current',
           pubkey: testPubkeyA,
           createdAt: DateTime.now(),
           kind: NostrEventKinds.mlsKeyPackage,
-          tags: [],
+          tags: const [],
           content: '',
         ),
       ];
@@ -420,23 +476,26 @@ void main() {
       await hook.fetch();
       await tester.pump();
       expect(hook.state.packages.length, 2);
-      await hook.deleteAll();
+
+      await hook.deleteAllLegacy();
       await tester.pump();
 
-      expect(hook.state.packages, isEmpty);
+      expect(hook.state.packages.length, 1);
+      expect(hook.state.packages.first.id, 'pkg_current');
+      expect(hook.state.packages.first.kind, NostrEventKinds.mlsKeyPackage);
     });
 
-    testWidgets('sets activeAction to deleteAll while loading', (tester) async {
-      mockApi.deleteAllCompleter = Completer<void>();
+    testWidgets('sets activeAction to deleteAllLegacy while loading', (tester) async {
+      mockApi.deleteAllLegacyCompleter = Completer<void>();
 
       await _pump(tester);
-      final future = hook.deleteAll();
+      final future = hook.deleteAllLegacy();
       await tester.pump();
 
       expect(hook.state.isLoading, isTrue);
-      expect(hook.state.activeAction, KeyPackageAction.deleteAll);
+      expect(hook.state.activeAction, KeyPackageAction.deleteAllLegacy);
 
-      mockApi.deleteAllCompleter!.complete();
+      mockApi.deleteAllLegacyCompleter!.complete();
       await future;
       await tester.pump();
 
@@ -448,11 +507,37 @@ void main() {
       mockApi.shouldThrow = true;
 
       await _pump(tester);
-      await hook.deleteAll();
+      await hook.deleteAllLegacy();
       await tester.pump();
 
       expect(hook.state.hasError, isTrue);
       expect(hook.state.activeAction, isNull);
+    });
+
+    testWidgets('returns fetch failure when delete succeeds but refresh fails', (tester) async {
+      mockApi.keyPackages = [
+        FlutterEvent(
+          id: 'pkg1',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackageLegacy,
+          tags: const [],
+          content: '',
+        ),
+      ];
+
+      await _pump(tester);
+      await hook.fetch();
+      await tester.pump();
+
+      mockApi.shouldThrowOnRefresh = true;
+      final result = await hook.deleteAllLegacy();
+      await tester.pump();
+
+      expect(result.success, isFalse);
+      expect(result.action, KeyPackageAction.fetch);
+      expect(hook.state.isLoading, isFalse);
+      expect(hook.state.hasError, isFalse);
     });
   });
 }

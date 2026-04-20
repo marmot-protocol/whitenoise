@@ -11,6 +11,7 @@ import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/widgets/wn_pill.dart';
 import 'package:whitenoise/widgets/wn_scroll_edge_effect.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 
@@ -85,7 +86,9 @@ class _MockApi extends MockWnApi {
     if (shouldThrowOnDeleteAll) {
       throw Exception('delete all error');
     }
-    return BigInt.from(keyPackages.length);
+    final count = keyPackages.where((p) => p.kind == NostrEventKinds.mlsKeyPackageLegacy).length;
+    keyPackages.removeWhere((p) => p.kind == NostrEventKinds.mlsKeyPackageLegacy);
+    return BigInt.from(count);
   }
 }
 
@@ -154,7 +157,7 @@ void main() {
       expect(find.text('Key Package Management'), findsOneWidget);
       expect(find.text('Publish New Key Package'), findsOneWidget);
       expect(find.text('Refresh Key Packages'), findsOneWidget);
-      expect(find.text('Delete All Key Packages'), findsOneWidget);
+      expect(find.text('Delete Legacy Key Packages'), findsOneWidget);
     });
 
     testWidgets('displays empty state when no packages', (tester) async {
@@ -261,21 +264,46 @@ void main() {
           id: 'pkg1',
           pubkey: testPubkeyA,
           createdAt: DateTime.now(),
-          kind: NostrEventKinds.mlsKeyPackage,
+          kind: NostrEventKinds.mlsKeyPackageLegacy,
           tags: const [],
           content: '',
         ),
       ];
       await pumpScreen(tester);
 
-      await tester.tap(find.text('Delete All Key Packages'));
+      await tester.tap(find.text('Delete Legacy Key Packages'));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 300));
 
-      expect(find.text('All key packages deleted'), findsOneWidget);
+      expect(find.text('Legacy key packages deleted'), findsOneWidget);
     });
 
     testWidgets('delete all error shows message', (tester) async {
+      mockApi.keyPackages = [
+        FlutterEvent(
+          id: 'pkg1',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackageLegacy,
+          tags: const [],
+          content: '',
+        ),
+      ];
+      mockApi.shouldThrowOnDeleteAll = true;
+      await pumpScreen(tester);
+
+      await tester.tap(find.text('Delete Legacy Key Packages'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(
+        find.text('Failed to delete legacy key packages. Please try again.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('delete legacy button is disabled when no legacy key packages', (tester) async {
       mockApi.keyPackages = [
         FlutterEvent(
           id: 'pkg1',
@@ -286,18 +314,33 @@ void main() {
           content: '',
         ),
       ];
-      mockApi.shouldThrowOnDeleteAll = true;
       await pumpScreen(tester);
 
-      await tester.tap(find.text('Delete All Key Packages'));
-      await tester.pump();
-      await tester.pump(const Duration(milliseconds: 300));
-
-      expect(find.byType(WnSystemNotice), findsOneWidget);
-      expect(
-        find.text('Failed to delete all key packages. Please try again.'),
-        findsOneWidget,
+      WnButton findWnButtonByLabel(String label) => tester.widget<WnButton>(
+        find.ancestor(of: find.text(label), matching: find.byType(WnButton)),
       );
+
+      expect(findWnButtonByLabel('Delete Legacy Key Packages').disabled, isTrue);
+    });
+
+    testWidgets('delete legacy button is enabled when legacy key packages exist', (tester) async {
+      mockApi.keyPackages = [
+        FlutterEvent(
+          id: 'pkg1',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackageLegacy,
+          tags: const [],
+          content: '',
+        ),
+      ];
+      await pumpScreen(tester);
+
+      WnButton findWnButtonByLabel(String label) => tester.widget<WnButton>(
+        find.ancestor(of: find.text(label), matching: find.byType(WnButton)),
+      );
+
+      expect(findWnButtonByLabel('Delete Legacy Key Packages').disabled, isFalse);
     });
 
     testWidgets('delete key package uses expected id', (tester) async {
@@ -342,6 +385,31 @@ void main() {
         find.text('Failed to delete key package. Please try again.'),
         findsOneWidget,
       );
+    });
+
+    testWidgets('shows legacy pill on legacy key packages', (tester) async {
+      mockApi.keyPackages = [
+        FlutterEvent(
+          id: 'pkg_legacy',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackageLegacy,
+          tags: const [],
+          content: '',
+        ),
+        FlutterEvent(
+          id: 'pkg_current',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackage,
+          tags: const [],
+          content: '',
+        ),
+      ];
+      await pumpScreen(tester);
+
+      expect(find.byType(WnPill), findsOneWidget);
+      expect(find.text('Legacy'), findsOneWidget);
     });
 
     testWidgets('shows error message on initial fetch failure', (tester) async {
@@ -548,7 +616,7 @@ void main() {
 
           expect(findWnButtonByLabel('Refresh Key Packages').disabled, isTrue);
           expect(findWnButtonByLabel('Publish New Key Package').disabled, isTrue);
-          expect(findWnButtonByLabel('Delete All Key Packages').disabled, isTrue);
+          expect(findWnButtonByLabel('Delete Legacy Key Packages').disabled, isTrue);
           expect(
             tester.widget<WnButton>(find.byKey(const Key('delete_key_package_pkg1'))).disabled,
             isTrue,

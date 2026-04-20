@@ -269,7 +269,7 @@ class AppLocalizationsEs extends AppLocalizations {
       'Relés usados para recibir invitaciones e iniciar conversaciones seguras con nuevos usuarios.';
 
   @override
-  String get keyPackageRelays => 'Relés de Paquete de Llaves';
+  String get keyPackageRelays => 'Relés de paquete de llaves';
 
   @override
   String get keyPackageRelaysHelp =>
@@ -447,17 +447,17 @@ class AppLocalizationsEs extends AppLocalizations {
   String get relayControlStateCopyButton => 'Copiar volcado';
 
   @override
-  String get publishNewKeyPackage => 'Publicar Nuevo Paquete de Llaves';
+  String get publishNewKeyPackage => 'Publicar nuevo paquete de llaves';
 
   @override
-  String get refreshKeyPackages => 'Actualizar Paquetes de Llaves';
+  String get refreshKeyPackages => 'Actualizar paquetes de llaves';
 
   @override
-  String get deleteAllKeyPackages => 'Eliminar Todos los Paquetes de Llaves';
+  String get deleteLegacyKeyPackages => 'Eliminar paquetes de llaves obsoletos';
 
   @override
   String keyPackagesCount(int count) {
-    return 'Paquetes de Llaves ($count)';
+    return 'Paquetes de llaves ($count)';
   }
 
   @override
@@ -470,7 +470,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get keyPackagesRefreshed => 'Paquetes de llaves actualizados';
 
   @override
-  String get keyPackagesDeleted => 'Todos los paquetes de llaves eliminados';
+  String get legacyKeyPackagesDeleted => 'Paquetes de llaves obsoletos eliminados';
 
   @override
   String get keyPackageDeleted => 'Paquete de llaves eliminado';
@@ -488,8 +488,11 @@ class AppLocalizationsEs extends AppLocalizations {
       'Error al eliminar el paquete de llaves. Inténtalo de nuevo.';
 
   @override
-  String get keyPackageDeleteAllFailed =>
-      'Error al eliminar todos los paquetes de llaves. Inténtalo de nuevo.';
+  String get legacyKeyPackageDeleteFailed =>
+      'Error al eliminar paquetes de llaves obsoletos. Inténtalo de nuevo.';
+
+  @override
+  String get legacyLabel => 'Obsoleto';
 
   @override
   String packageNumber(int number) {

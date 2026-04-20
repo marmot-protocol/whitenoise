@@ -459,7 +459,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get refreshKeyPackages => 'Schlüsselpakete aktualisieren';
 
   @override
-  String get deleteAllKeyPackages => 'Alle Schlüsselpakete löschen';
+  String get deleteLegacyKeyPackages => 'Veraltete Schlüsselpakete löschen';
 
   @override
   String keyPackagesCount(int count) {
@@ -476,7 +476,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get keyPackagesRefreshed => 'Schlüsselpakete aktualisiert';
 
   @override
-  String get keyPackagesDeleted => 'Alle Schlüsselpakete gelöscht';
+  String get legacyKeyPackagesDeleted => 'Veraltete Schlüsselpakete gelöscht';
 
   @override
   String get keyPackageDeleted => 'Schlüsselpaket gelöscht';
@@ -494,8 +494,11 @@ class AppLocalizationsDe extends AppLocalizations {
       'Schlüsselpaket konnte nicht gelöscht werden. Bitte erneut versuchen.';
 
   @override
-  String get keyPackageDeleteAllFailed =>
-      'Schlüsselpakete konnten nicht gelöscht werden. Bitte erneut versuchen.';
+  String get legacyKeyPackageDeleteFailed =>
+      'Veraltete Schlüsselpakete konnten nicht gelöscht werden. Bitte erneut versuchen.';
+
+  @override
+  String get legacyLabel => 'Veraltet';
 
   @override
   String packageNumber(int number) {

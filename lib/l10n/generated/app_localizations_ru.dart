@@ -451,7 +451,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get refreshKeyPackages => 'Обновить Пакеты Ключей';
 
   @override
-  String get deleteAllKeyPackages => 'Удалить Все Пакеты Ключей';
+  String get deleteLegacyKeyPackages => 'Удалить Устаревшие Пакеты Ключей';
 
   @override
   String keyPackagesCount(int count) {
@@ -468,7 +468,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get keyPackagesRefreshed => 'Пакеты ключей обновлены';
 
   @override
-  String get keyPackagesDeleted => 'Все пакеты ключей удалены';
+  String get legacyKeyPackagesDeleted => 'Устаревшие пакеты ключей удалены';
 
   @override
   String get keyPackageDeleted => 'Пакет ключей удалён';
@@ -483,7 +483,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get keyPackageDeleteFailed => 'Не удалось удалить пакет ключей. Попробуйте снова.';
 
   @override
-  String get keyPackageDeleteAllFailed => 'Не удалось удалить все пакеты ключей. Попробуйте снова.';
+  String get legacyKeyPackageDeleteFailed =>
+      'Не удалось удалить устаревшие пакеты ключей. Попробуйте снова.';
+
+  @override
+  String get legacyLabel => 'Устаревший';
 
   @override
   String packageNumber(int number) {

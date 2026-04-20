@@ -452,7 +452,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get refreshKeyPackages => 'Atualizar Pacotes de Chaves';
 
   @override
-  String get deleteAllKeyPackages => 'Excluir Todos os Pacotes de Chaves';
+  String get deleteLegacyKeyPackages => 'Excluir Pacotes de Chaves Obsoletos';
 
   @override
   String keyPackagesCount(int count) {
@@ -469,7 +469,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get keyPackagesRefreshed => 'Pacotes de chaves atualizados';
 
   @override
-  String get keyPackagesDeleted => 'Todos os pacotes de chaves excluídos';
+  String get legacyKeyPackagesDeleted => 'Pacotes de chaves obsoletos excluídos';
 
   @override
   String get keyPackageDeleted => 'Pacote de chaves excluído';
@@ -484,8 +484,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get keyPackageDeleteFailed => 'Falha ao excluir o pacote de chaves. Tente novamente.';
 
   @override
-  String get keyPackageDeleteAllFailed =>
-      'Falha ao excluir todos os pacotes de chaves. Tente novamente.';
+  String get legacyKeyPackageDeleteFailed =>
+      'Falha ao excluir pacotes de chaves obsoletos. Tente novamente.';
+
+  @override
+  String get legacyLabel => 'Obsoleto';
 
   @override
   String packageNumber(int number) {
