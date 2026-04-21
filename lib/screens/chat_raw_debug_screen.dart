@@ -15,9 +15,9 @@ import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/theme.dart';
-import 'package:whitenoise/widgets/debug_info_pill.dart';
 import 'package:whitenoise/widgets/debug_key_value_row.dart';
 import 'package:whitenoise/widgets/debug_section_card.dart';
+import 'package:whitenoise/widgets/wn_pill.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 
@@ -512,8 +512,8 @@ class _RatchetTreeSection extends HookConsumerWidget {
                 spacing: 8.w,
                 runSpacing: 8.h,
                 children: [
-                  DebugInfoPill(label: 'leaves ${info.leafNodes.length}'),
-                  DebugInfoPill(label: 'size $serializedBytes bytes'),
+                  WnPill(label: 'leaves ${info.leafNodes.length}'),
+                  WnPill(label: 'size $serializedBytes bytes'),
                 ],
               ),
               SizedBox(height: 10.h),
@@ -836,12 +836,12 @@ class _RawMessageCard extends StatelessWidget {
               spacing: 6.w,
               runSpacing: 6.h,
               children: [
-                DebugInfoPill(label: 'kind ${message.kind}'),
-                DebugInfoPill(label: message.isReply ? 'reply' : 'root'),
-                DebugInfoPill(label: '$tagsCount tags'),
-                DebugInfoPill(label: '$emojiReactionCount reactions'),
-                DebugInfoPill(label: '$mediaCount media'),
-                DebugInfoPill(label: '$tokenCount tokens'),
+                WnPill(label: 'kind ${message.kind}'),
+                WnPill(label: message.isReply ? 'reply' : 'root'),
+                WnPill(label: '$tagsCount tags'),
+                WnPill(label: '$emojiReactionCount reactions'),
+                WnPill(label: '$mediaCount media'),
+                WnPill(label: '$tokenCount tokens'),
               ],
             ),
             SizedBox(height: 10.h),

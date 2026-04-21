@@ -66,6 +66,8 @@ import 'package:whitenoise_widgetbook/components/wn_checkbox.dart'
     as _whitenoise_widgetbook_components_wn_checkbox;
 import 'package:whitenoise_widgetbook/components/wn_copy_card.dart'
     as _whitenoise_widgetbook_components_wn_copy_card;
+import 'package:whitenoise_widgetbook/components/wn_pill.dart'
+    as _whitenoise_widgetbook_components_wn_pill;
 import 'package:whitenoise_widgetbook/components/wn_profile_switcher_item.dart'
     as _whitenoise_widgetbook_components_wn_profile_switcher_item;
 import 'package:whitenoise_widgetbook/components/wn_slate_headers.dart'
@@ -344,6 +346,15 @@ final directories = <_widgetbook.WidgetbookNode>[
             name: 'Overlay',
             builder:
                 _whitenoise_widgetbook_components_structure.wnOverlayShowcase,
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookComponent(
+        name: 'WnPillStory',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Pill',
+            builder: _whitenoise_widgetbook_components_wn_pill.wnPillShowcase,
           ),
         ],
       ),
