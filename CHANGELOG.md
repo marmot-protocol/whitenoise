@@ -29,7 +29,7 @@ and this project adheres to Calendar Versioning (CalVer).
 - Add block/unblock hook [PR #573](https://github.com/marmot-protocol/whitenoise/pull/573)
 
 ### Changed
-- Update System Notice colors [PR #579](https://github.com/marmot-protocol/whitenoise/pull/499)
+- Update System Notice colors [PR #579](https://github.com/marmot-protocol/whitenoise/pull/579)
 - Update Fill Secondary Dark Mode colors [PR #580](https://github.com/marmot-protocol/whitenoise/pull/580)
 - Improve Slate and Message Bubble contrast [PR #581](https://github.com/marmot-protocol/whitenoise/pull/581)
 - UI Polish: Profile Keys & Sign out Screens [PR #552](https://github.com/marmot-protocol/whitenoise/pull/552)
