@@ -10,7 +10,7 @@ import '../lib.dart';
 import 'account_groups.dart';
 import 'error.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
 
 Future<List<Group>> activeGroups({required String pubkey}) =>
     RustLib.instance.api.crateApiGroupsActiveGroups(pubkey: pubkey);
@@ -114,6 +114,14 @@ Future<Group> getGroup({
   required String accountPubkey,
   required String groupId,
 }) => RustLib.instance.api.crateApiGroupsGetGroup(
+  accountPubkey: accountPubkey,
+  groupId: groupId,
+);
+
+Future<List<RequiredProposal>> groupRequiredProposals({
+  required String accountPubkey,
+  required String groupId,
+}) => RustLib.instance.api.crateApiGroupsGroupRequiredProposals(
   accountPubkey: accountPubkey,
   groupId: groupId,
 );
@@ -420,6 +428,11 @@ class RatchetTreeInfo {
           treeHash == other.treeHash &&
           serializedTree == other.serializedTree &&
           leafNodes == other.leafNodes;
+}
+
+enum RequiredProposal {
+  selfRemove,
+  unknown,
 }
 
 class UploadGroupImageResult {
