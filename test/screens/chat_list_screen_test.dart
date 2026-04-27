@@ -63,6 +63,7 @@ ChatSummary _chatSummary({
   groupType: GroupType.group,
   createdAt: DateTime(2024),
   pendingConfirmation: pendingConfirmation,
+  selfRemoved: false,
   unreadCount: BigInt.zero,
 );
 

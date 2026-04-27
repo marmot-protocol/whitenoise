@@ -421,6 +421,14 @@ class MockWnApi implements RustLibApi {
   String? lastArchivedGroupId;
   String? lastUnarchivedGroupId;
 
+  bool shouldFailLeaveGroup = false;
+  int leaveGroupCallCount = 0;
+  String? lastLeaveGroupId;
+  String? lastLeaveGroupPubkey;
+
+  GroupState mockGroupState = GroupState.active;
+  bool shouldFailGetGroup = false;
+
   @override
   Future<void> crateApiAccountGroupsArchiveChat({
     required String accountPubkey,
@@ -442,6 +450,34 @@ class MockWnApi implements RustLibApi {
   }
 
   @override
+  Future<Group> crateApiGroupsGetGroup({
+    required String accountPubkey,
+    required String groupId,
+  }) async {
+    if (shouldFailGetGroup) throw Exception('getGroup failed');
+    return Group(
+      mlsGroupId: groupId,
+      nostrGroupId: 'nostr_$groupId',
+      name: 'Test Group',
+      description: '',
+      adminPubkeys: [accountPubkey],
+      epoch: BigInt.zero,
+      state: mockGroupState,
+    );
+  }
+
+  @override
+  Future<void> crateApiGroupsLeaveGroup({
+    required String pubkey,
+    required String groupId,
+  }) async {
+    leaveGroupCallCount++;
+    lastLeaveGroupPubkey = pubkey;
+    lastLeaveGroupId = groupId;
+    if (shouldFailLeaveGroup) throw Exception('leave_group failed');
+  }
+
+  @override
   Stream<ChatListStreamItem> crateApiChatListSubscribeToArchivedChatList({
     required String accountPubkey,
   }) {
@@ -453,6 +489,12 @@ class MockWnApi implements RustLibApi {
     required String pubkey,
     required String groupId,
   }) async => [];
+
+  @override
+  Future<List<RequiredProposal>> crateApiGroupsGroupRequiredProposals({
+    required String accountPubkey,
+    required String groupId,
+  }) async => [RequiredProposal.selfRemove];
 
   @override
   Future<void> crateApiAccountsLogout({required String pubkey}) async {}
@@ -853,6 +895,12 @@ class MockWnApi implements RustLibApi {
     unarchiveChatCallCount = 0;
     lastArchivedGroupId = null;
     lastUnarchivedGroupId = null;
+    shouldFailLeaveGroup = false;
+    leaveGroupCallCount = 0;
+    lastLeaveGroupId = null;
+    lastLeaveGroupPubkey = null;
+    mockGroupState = GroupState.active;
+    shouldFailGetGroup = false;
   }
 
   String? zapstoreVersion;

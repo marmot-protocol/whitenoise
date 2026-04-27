@@ -6153,6 +6153,7 @@ impl SseDecode for crate::api::chat_list::ChatSummary {
         let mut var_welcomerPubkey = <Option<String>>::sse_decode(deserializer);
         let mut var_archivedAt = <Option<chrono::DateTime<chrono::Utc>>>::sse_decode(deserializer);
         let mut var_removedAt = <Option<chrono::DateTime<chrono::Utc>>>::sse_decode(deserializer);
+        let mut var_selfRemoved = <bool>::sse_decode(deserializer);
         let mut var_unreadCount = <u64>::sse_decode(deserializer);
         let mut var_pinOrder = <Option<i64>>::sse_decode(deserializer);
         let mut var_dmPeerPubkey = <Option<String>>::sse_decode(deserializer);
@@ -6169,6 +6170,7 @@ impl SseDecode for crate::api::chat_list::ChatSummary {
             welcomer_pubkey: var_welcomerPubkey,
             archived_at: var_archivedAt,
             removed_at: var_removedAt,
+            self_removed: var_selfRemoved,
             unread_count: var_unreadCount,
             pin_order: var_pinOrder,
             dm_peer_pubkey: var_dmPeerPubkey,
@@ -8484,6 +8486,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::chat_list::ChatSummary {
             self.welcomer_pubkey.into_into_dart().into_dart(),
             self.archived_at.into_into_dart().into_dart(),
             self.removed_at.into_into_dart().into_dart(),
+            self.self_removed.into_into_dart().into_dart(),
             self.unread_count.into_into_dart().into_dart(),
             self.pin_order.into_into_dart().into_dart(),
             self.dm_peer_pubkey.into_into_dart().into_dart(),
@@ -10098,6 +10101,7 @@ impl SseEncode for crate::api::chat_list::ChatSummary {
         <Option<String>>::sse_encode(self.welcomer_pubkey, serializer);
         <Option<chrono::DateTime<chrono::Utc>>>::sse_encode(self.archived_at, serializer);
         <Option<chrono::DateTime<chrono::Utc>>>::sse_encode(self.removed_at, serializer);
+        <bool>::sse_encode(self.self_removed, serializer);
         <u64>::sse_encode(self.unread_count, serializer);
         <Option<i64>>::sse_encode(self.pin_order, serializer);
         <Option<String>>::sse_encode(self.dm_peer_pubkey, serializer);
