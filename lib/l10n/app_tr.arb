@@ -408,7 +408,8 @@
   "reportBugWhatWentWrongRequired": "Lütfen neyin yanlış gittiğini açıklayın.",
   "failedToStartSupportChat": "Destek ile sohbet başlatılamadı",
   "removedFromGroup": "Bu gruptan çıkarıldınız",
-  "removedFromGroupDescription": "Kaydedilmiş mesajları görüntüleyebilirsiniz, ancak yeni mesaj gönderemez veya alamazsınız. Sohbeti istediğiniz zaman arşivleyebilir veya silebilirsiniz.",
+  "youLeftThisGroup": "Bu gruptan ayrıldınız",
+  "removedFromGroupDescription": "Kaydedilmiş mesajları görüntüleyebilirsiniz, ancak yeni mesaj gönderemez veya alamazsınız. Sohbeti istediğiniz zaman arşivleyebilirsiniz.",
   "notificationSettings": "Bildirimler",
   "notificationSettingsTitle": "Bildirimler",
   "notifications": "Bildirimler",
@@ -420,8 +421,9 @@
   "failedToUnarchiveChat": "Sohbet arşivden çıkarılamadı. Lütfen tekrar deneyin.",
   "archivedChatsEmpty": "Arşivlenmiş sohbet yok",
   "waitingForInternet": "İnternet bağlantısı bekleniyor",
+  "leave": "Ayrıl",
   "leaveGroup": "Gruptan ayrıl",
-  "leaveGroupConfirmation": "Gruptan ayrıl",
   "leaveGroupWarning": "Bu gruptan ayrılmak istediğinize emin misiniz? Silmezseniz sohbet listenizde kalacak, ancak biri sizi yeniden davet edene kadar yeni mesaj gönderemez veya alamazsınız.",
-  "failedToLeaveGroup": "Gruptan ayrılma başarısız oldu. Lütfen tekrar deneyin."
+  "failedToLeaveGroup": "Gruptan ayrılma başarısız oldu. Lütfen tekrar deneyin.",
+  "youLeftTheGroup": "Gruptan ayrıldınız"
 }

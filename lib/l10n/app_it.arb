@@ -408,7 +408,8 @@
   "reportBugWhatWentWrongRequired": "Descrivi cosa è andato storto.",
   "failedToStartSupportChat": "Impossibile avviare la chat con il supporto",
   "removedFromGroup": "Sei stato rimosso da questo gruppo",
-  "removedFromGroupDescription": "Puoi ancora visualizzare i messaggi salvati, ma non puoi inviarne o riceverne di nuovi. Puoi archiviare o eliminare la chat in qualsiasi momento.",
+  "youLeftThisGroup": "Hai lasciato questo gruppo",
+  "removedFromGroupDescription": "Puoi ancora visualizzare i messaggi salvati, ma non puoi inviarne o riceverne di nuovi. Puoi archiviare la chat in qualsiasi momento.",
   "notificationSettings": "Notifiche",
   "notificationSettingsTitle": "Notifiche",
   "notifications": "Notifiche",
@@ -420,8 +421,9 @@
   "failedToUnarchiveChat": "Impossibile rimuovere la chat dall'archivio. Riprova.",
   "archivedChatsEmpty": "Nessuna chat archiviata",
   "waitingForInternet": "In attesa della connessione a internet",
+  "leave": "Lascia",
   "leaveGroup": "Lascia il gruppo",
-  "leaveGroupConfirmation": "Lascia il gruppo",
   "leaveGroupWarning": "Sei sicuro di voler lasciare questo gruppo? La chat rimarrà nel tuo elenco se non la elimini, ma non potrai inviare o ricevere nuovi messaggi a meno che qualcuno non ti inviti di nuovo.",
-  "failedToLeaveGroup": "Impossibile lasciare il gruppo. Riprova."
+  "failedToLeaveGroup": "Impossibile lasciare il gruppo. Riprova.",
+  "youLeftTheGroup": "Hai lasciato il gruppo"
 }

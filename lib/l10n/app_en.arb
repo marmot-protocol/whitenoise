@@ -1807,7 +1807,11 @@
   "@removedFromGroup": {
     "description": "Notice title shown when the user has been removed from the group"
   },
-  "removedFromGroupDescription": "You can still view saved messages, but you can't send or receive new ones. You can archive or delete the chat anytime.",
+  "youLeftThisGroup": "You left this group",
+  "@youLeftThisGroup": {
+    "description": "Notice title shown in chat screen when the user voluntarily left the group"
+  },
+  "removedFromGroupDescription": "You can still view saved messages, but you can't send or receive new ones. You can archive the chat anytime.",
   "@removedFromGroupDescription": {
     "description": "Notice description shown when the user has been removed from the group"
   },
@@ -1840,12 +1844,14 @@
     "description": "Notice shown when the device has no internet connection"
   }
 ,
+  "leave": "Leave",
+  "@leave": { "description": "Label for the confirm leave button" },
   "leaveGroup": "Leave group",
-  "@leaveGroup": { "description": "Label for the leave group button" },
-  "leaveGroupConfirmation": "Leave group",
-  "@leaveGroupConfirmation": { "description": "Title of the leave group confirmation dialog" },
+  "@leaveGroup": { "description": "Title of the leave group confirmation dialog" },
   "leaveGroupWarning": "Are you sure you want to leave this group? The chat will stay in your list if you don't delete it, but you won't be able to send or receive new messages unless someone re-invites you.",
   "@leaveGroupWarning": { "description": "Warning shown in the leave group confirmation dialog" },
   "failedToLeaveGroup": "Failed to leave group. Please try again.",
-  "@failedToLeaveGroup": { "description": "Error shown when leaving a group fails" }
+  "@failedToLeaveGroup": { "description": "Error shown when leaving a group fails" },
+  "youLeftTheGroup": "You left the group",
+  "@youLeftTheGroup": { "description": "Subtitle shown for groups the user has left" }
 }

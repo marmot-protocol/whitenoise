@@ -408,7 +408,8 @@
   "reportBugWhatWentWrongRequired": "Veuillez décrire ce qui s'est passé.",
   "failedToStartSupportChat": "Échec du démarrage du chat avec le support",
   "removedFromGroup": "Vous avez été retiré de ce groupe",
-  "removedFromGroupDescription": "Vous pouvez toujours consulter les messages enregistrés, mais vous ne pouvez plus en envoyer ni en recevoir. Vous pouvez archiver ou supprimer la discussion à tout moment.",
+  "youLeftThisGroup": "Vous avez quitté ce groupe",
+  "removedFromGroupDescription": "Vous pouvez toujours consulter les messages enregistrés, mais vous ne pouvez plus en envoyer ni en recevoir. Vous pouvez archiver la discussion à tout moment.",
   "notificationSettings": "Notifications",
   "notificationSettingsTitle": "Notifications",
   "notifications": "Notifications",
@@ -420,8 +421,9 @@
   "failedToUnarchiveChat": "Échec du désarchivage de la discussion. Veuillez réessayer.",
   "archivedChatsEmpty": "Aucune discussion archivée",
   "waitingForInternet": "En attente de connexion internet",
+  "leave": "Quitter",
   "leaveGroup": "Quitter le groupe",
-  "leaveGroupConfirmation": "Quitter le groupe",
   "leaveGroupWarning": "Êtes-vous sûr de vouloir quitter ce groupe ? La discussion restera dans votre liste si vous ne la supprimez pas, mais vous ne pourrez ni envoyer ni recevoir de nouveaux messages à moins que quelqu'un ne vous invite à nouveau.",
-  "failedToLeaveGroup": "Impossible de quitter le groupe. Veuillez réessayer."
+  "failedToLeaveGroup": "Impossible de quitter le groupe. Veuillez réessayer.",
+  "youLeftTheGroup": "Vous avez quitté le groupe"
 }

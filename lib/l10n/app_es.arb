@@ -408,7 +408,8 @@
   "reportBugWhatWentWrongRequired": "Por favor, describe qué salió mal.",
   "failedToStartSupportChat": "No se pudo iniciar el chat con soporte",
   "removedFromGroup": "Te han eliminado de este grupo",
-  "removedFromGroupDescription": "Puedes ver los mensajes guardados, pero no puedes enviar ni recibir nuevos. Puedes archivar o eliminar el chat cuando quieras.",
+  "youLeftThisGroup": "Saliste de este grupo",
+  "removedFromGroupDescription": "Puedes ver los mensajes guardados, pero no puedes enviar ni recibir nuevos. Puedes archivar el chat cuando quieras.",
   "notificationSettings": "Notificaciones",
   "notificationSettingsTitle": "Notificaciones",
   "notifications": "Notificaciones",
@@ -420,8 +421,9 @@
   "failedToUnarchiveChat": "No se pudo desarchivar el chat. Inténtalo de nuevo.",
   "archivedChatsEmpty": "No hay chats archivados",
   "waitingForInternet": "Esperando conexión a internet",
+  "leave": "Salir",
   "leaveGroup": "Salir del grupo",
-  "leaveGroupConfirmation": "Salir del grupo",
   "leaveGroupWarning": "¿Estás seguro de que quieres salir de este grupo? El chat permanecerá en tu lista si no lo eliminas, pero no podrás enviar ni recibir mensajes nuevos a menos que alguien te vuelva a invitar.",
-  "failedToLeaveGroup": "No se pudo salir del grupo. Por favor, inténtalo de nuevo."
+  "failedToLeaveGroup": "No se pudo salir del grupo. Por favor, inténtalo de nuevo.",
+  "youLeftTheGroup": "Saliste del grupo"
 }
