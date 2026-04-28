@@ -91,6 +91,15 @@ Future<void> _startForegroundAndSubscribe(
     }
     await foregroundService.requestBatteryOptimizationExemption();
 
+    // Claim ownership of the notification channel before starting the main
+    // subscription. If the service was started headlessly (post-reboot /
+    // package-replaced), the task isolate is already subscribed; this signal
+    // tells it to yield. WidgetsBindingObserver doesn't replay the current
+    // lifecycle state on registration, so we can't rely on the eventual
+    // `resumed` event firing in time to avoid a brief double-subscription
+    // window.
+    await foregroundService.notifyMainStarted();
+
     await subscription.start();
     if (!ref.mounted) {
       await subscription.stop();

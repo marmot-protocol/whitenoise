@@ -163,8 +163,18 @@ class _NotificationTaskHandler extends TaskHandler {
       getActiveChatId: () => null,
       getLocale: () => _cachedLocale,
     );
-    _subscription = sub;
     await sub.start();
+    // NotificationSubscription.start() catches its own failures and logs
+    // them, so a successful return doesn't mean the stream is attached.
+    // Check isRunning and clear our reference on failure so a follow-up
+    // coordination signal can retry instead of perma-no-op'ing.
+    if (!sub.isRunning) {
+      _logger.warning(
+        'Headless notification subscription did not attach; will retry on next coordination signal',
+      );
+      return;
+    }
+    _subscription = sub;
     _logger.info('Headless notification subscription started');
   }
 
