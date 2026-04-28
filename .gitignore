@@ -78,6 +78,15 @@ opencode.json
 .opencode/
 .cursor/
 
+# Fastlane local credentials and generated output
+/fastlane/*.json
+/fastlane/*.p8
+/fastlane/README.md
+/fastlane/report.xml
+/fastlane/Preview.html
+/fastlane/screenshots/
+/fastlane/test_output/
+
 # Flutter DevTools
 devtools_options.yaml
 # Widgetbook
