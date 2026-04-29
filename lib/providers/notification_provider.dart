@@ -1,10 +1,7 @@
-import 'dart:async';
 import 'dart:io' show Platform;
 
-import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
-import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/active_chat_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/foreground_service_provider.dart';
@@ -13,10 +10,11 @@ import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/services/android_play_services_service.dart';
 import 'package:whitenoise/services/foreground_service.dart';
 import 'package:whitenoise/services/notification_service.dart';
-import 'package:whitenoise/services/user_service.dart';
-import 'package:whitenoise/src/rust/api/accounts.dart' as accounts_api;
-import 'package:whitenoise/src/rust/api/notifications.dart' as notifications_api;
-import 'package:whitenoise/utils/metadata.dart';
+import 'package:whitenoise/services/notification_subscription.dart';
+// Re-export so main.dart can import PendingNotificationTap + the consumer
+// plus the routing helper from one place.
+export 'package:whitenoise/services/foreground_service.dart'
+    show consumePendingNotificationTap, PendingNotificationTap;
 
 final _logger = Logger('NotificationProvider');
 
@@ -24,7 +22,13 @@ final _logger = Logger('NotificationProvider');
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService(
     onNotificationTap: (groupId, isInvite, receiverPubkey) {
-      _onNotificationTap(ref, groupId, isInvite, receiverPubkey);
+      handleNotificationTap(
+        currentActivePubkey: ref.read(authProvider).value,
+        switchToProfile: (pk) => ref.read(authProvider.notifier).switchProfile(pk),
+        groupId: groupId,
+        isInvite: isInvite,
+        receiverPubkey: receiverPubkey,
+      );
     },
   );
 });
@@ -38,30 +42,35 @@ final notificationListenerProvider = Provider.autoDispose<void>((ref) {
   const androidPlayServicesService = AndroidPlayServicesService();
   final notificationService = ref.read(notificationServiceProvider);
   final foregroundService = ref.read(foregroundServiceProvider);
-  StreamSubscription<notifications_api.NotificationUpdate>? subscription;
+
+  final subscription = NotificationSubscription(
+    notificationService: notificationService,
+    getActiveChatId: () => ref.read(activeChatProvider),
+    getLocale: () => ref.read(localeProvider.notifier).resolveLocale(),
+  );
 
   ref.onDispose(() {
-    subscription?.cancel();
+    subscription.stop();
     foregroundService.stop();
     _logger.info('Notification listener disposed');
   });
 
-  _initializeAndListen(androidPlayServicesService, notificationService, foregroundService, ref, (
-    sub,
-  ) {
-    subscription = sub;
-  });
+  _startForegroundAndSubscribe(
+    androidPlayServicesService,
+    foregroundService,
+    subscription,
+    ref,
+  );
 });
 
-void _initializeAndListen(
-  AndroidPlayServicesService androidPlayServicesService,
-  NotificationService notificationService,
+Future<void> _startForegroundAndSubscribe(
+  AndroidPlayServicesService playServicesService,
   ForegroundService foregroundService,
+  NotificationSubscription subscription,
   Ref ref,
-  void Function(StreamSubscription<notifications_api.NotificationUpdate>) onSubscription,
 ) async {
   try {
-    final playServicesAvailability = await androidPlayServicesService.getAvailability();
+    final playServicesAvailability = await playServicesService.getAvailability();
     if (!ref.mounted) return;
     if (playServicesAvailability.isAvailable) {
       _logger.info(
@@ -75,11 +84,6 @@ void _initializeAndListen(
       );
     }
 
-    await notificationService.initialize();
-    if (!ref.mounted) return;
-    await notificationService.requestPermission();
-    if (!ref.mounted) return;
-
     await foregroundService.start();
     if (!ref.mounted) {
       await foregroundService.stop();
@@ -87,132 +91,72 @@ void _initializeAndListen(
     }
     await foregroundService.requestBatteryOptimizationExemption();
 
-    final stream = notifications_api.subscribeToNotifications();
+    // Claim ownership of the notification channel before starting the main
+    // subscription. If the service was started headlessly (post-reboot /
+    // package-replaced), the task isolate is already subscribed; this signal
+    // tells it to yield. WidgetsBindingObserver doesn't replay the current
+    // lifecycle state on registration, so we can't rely on the eventual
+    // `resumed` event firing in time to avoid a brief double-subscription
+    // window.
+    await foregroundService.notifyMainStarted();
 
-    final subscription = stream.listen(
-      (update) async {
-        try {
-          await handleNotificationUpdate(update, notificationService, ref);
-        } catch (error, stackTrace) {
-          _logger.severe('Error handling notification update', error, stackTrace);
-        }
-      },
-      onError: (error) {
-        _logger.severe('Notification stream error', error);
-      },
-      onDone: () {
-        _logger.info('Notification stream closed');
-      },
-    );
-
+    await subscription.start();
     if (!ref.mounted) {
-      await subscription.cancel();
+      await subscription.stop();
       await foregroundService.stop();
       return;
     }
-    onSubscription(subscription);
     _logger.info('Notification listener started');
   } catch (error, stackTrace) {
     _logger.severe('Failed to initialize notification listener', error, stackTrace);
   }
 }
-// coverage:ignore-end
 
-@visibleForTesting
-Future<void> handleNotificationUpdate(
-  notifications_api.NotificationUpdate update,
-  NotificationService notificationService,
-  Ref ref,
-) async {
-  final activeChat = ref.read(activeChatProvider);
-  if (activeChat == update.mlsGroupId) {
-    _logger.fine('Skipping notification for active chat ${update.mlsGroupId}');
-    return;
-  }
-
-  final locale = ref.read(localeProvider.notifier).resolveLocale();
-  final l10n = lookupAppLocalizations(locale);
-
-  final accounts = await accounts_api.getAccounts();
-  final String? receiverName = accounts.length > 1
-      ? (update.receiver.displayName ?? l10n.unknownUser)
-      : null;
-
-  final senderName = await _resolveSenderName(update.sender);
-
-  final (title, body, isInvite) = formatNotification(
-    update,
-    l10n,
-    receiverName: receiverName,
-    senderName: senderName,
-  );
-
-  await notificationService.show(
-    groupId: update.mlsGroupId,
-    title: title,
-    body: body,
-    receiverPubkey: update.receiver.pubkey,
-    isInvite: isInvite,
-  );
-}
-
-Future<String?> _resolveSenderName(notifications_api.NotificationUser sender) async {
-  if (sender.displayName != null) return sender.displayName;
-  try {
-    final metadata = await UserService(sender.pubkey).getInitialMetadata();
-    return presentName(metadata);
-  } catch (e) {
-    _logger.warning('Failed to fetch sender metadata', e);
-    return null;
-  }
-}
-
-@visibleForTesting
-(String title, String body, bool isInvite) formatNotification(
-  notifications_api.NotificationUpdate update,
-  AppLocalizations l10n, {
-  String? receiverName,
-  String? senderName,
-}) {
-  senderName ??= update.sender.displayName ?? l10n.unknownUser;
-
-  String applyReceiver(String title) {
-    if (receiverName == null) return title;
-    return '$title ($receiverName)';
-  }
-
-  switch (update.trigger) {
-    case notifications_api.NotificationTrigger.newMessage:
-      if (update.isDm) {
-        return (applyReceiver(senderName), update.content, false);
-      } else {
-        final groupName = update.groupName ?? l10n.unknownGroup;
-        return (applyReceiver(groupName), '$senderName: ${update.content}', false);
-      }
-    case notifications_api.NotificationTrigger.groupInvite:
-      if (update.isDm) {
-        return (applyReceiver(senderName), l10n.hasInvitedYouToSecureChat, true);
-      } else {
-        final groupName = update.groupName ?? l10n.unknownGroup;
-        return (applyReceiver(groupName), l10n.userInvitedYouToSecureChat(senderName), true);
-      }
-  }
-}
-
-// coverage:ignore-start
-Future<void> _onNotificationTap(
-  Ref ref,
-  String groupId,
-  bool isInvite,
-  String receiverPubkey,
-) async {
-  final activePubkey = ref.read(authProvider).value;
-  if (activePubkey != receiverPubkey) {
-    await ref.read(authProvider.notifier).switchProfile(receiverPubkey);
+/// Routes a notification tap — whether fired synchronously from the
+/// NotificationService's tap callback (in-app) or consumed from persisted
+/// state after a headless tap woke the app. Switches the active account if
+/// needed, then navigates to the chat/invite screen.
+///
+/// Takes plain values and callbacks instead of a `Ref` so it can be called
+/// from both Provider contexts (Ref.read) and ConsumerState contexts
+/// (WidgetRef.read).
+Future<void> handleNotificationTap({
+  required String? currentActivePubkey,
+  required Future<void> Function(String pubkey) switchToProfile,
+  required String groupId,
+  required bool isInvite,
+  required String receiverPubkey,
+}) async {
+  if (currentActivePubkey != receiverPubkey) {
+    await switchToProfile(receiverPubkey);
     _logger.info('Switched to account $receiverPubkey for notification tap');
   }
 
   _navigateToNotificationTarget(groupId: groupId, isInvite: isInvite);
+}
+
+/// Routes a previously-stashed notification tap if one exists. Intended to be
+/// called from the main isolate on startup / resume — after the task isolate
+/// fired a headless notification and stashed the tap payload via
+/// [FlutterForegroundTask.saveData].
+///
+/// Guards against acting on an unmounted widget state (pass `mounted` from
+/// the calling ConsumerState). No-op when no payload is pending.
+Future<void> routePendingTap({
+  required PendingNotificationTap? pending,
+  required bool isMounted,
+  required String? currentActivePubkey,
+  required Future<void> Function(String pubkey) switchToProfile,
+}) async {
+  if (pending == null) return;
+  if (!isMounted) return;
+  await handleNotificationTap(
+    currentActivePubkey: currentActivePubkey,
+    switchToProfile: switchToProfile,
+    groupId: pending.groupId,
+    isInvite: pending.isInvite,
+    receiverPubkey: pending.receiverPubkey,
+  );
 }
 
 void _navigateToNotificationTarget({
