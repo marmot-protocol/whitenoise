@@ -40,6 +40,7 @@ and this project adheres to Calendar Versioning (CalVer).
 - Debug and relay screens improvements [PR #572](https://github.com/marmot-protocol/whitenoise/pull/502)
 - UI Polish: Slate & Settings Screen [PR #504](https://github.com/marmot-protocol/whitenoise/pull/504)
 - Show an error screen when bridge initialization fails instead of hanging on splash [PR #477](https://github.com/marmot-protocol/whitenoise/pull/477)
+- UI Polish: Signup Screen, Callout, IconButton [PR #519](https://github.com/marmot-protocol/whitenoise/pull/519)
 - Replaced delete all key packages with delete legacy key packages method. [PR #585](https://github.com/marmot-protocol/whitenoise/pull/585)
 
 ### Deprecated
@@ -47,7 +48,7 @@ and this project adheres to Calendar Versioning (CalVer).
 ### Removed
 
 ### Fixed
-- UI Polish: Signup Screen, Callout, IconButton [PR #519](https://github.com/marmot-protocol/whitenoise/pull/519)
+- Fix notification icon for graphene os [PR #605](https://github.com/marmot-protocol/whitenoise/pull/605)
 
 ### Security
 
