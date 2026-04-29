@@ -1429,8 +1429,11 @@ class AppLocalizationsEs extends AppLocalizations {
   String get removedFromGroup => 'Te han eliminado de este grupo';
 
   @override
+  String get youLeftThisGroup => 'Saliste de este grupo';
+
+  @override
   String get removedFromGroupDescription =>
-      'Puedes ver los mensajes guardados, pero no puedes enviar ni recibir nuevos. Puedes archivar o eliminar el chat cuando quieras.';
+      'Puedes ver los mensajes guardados, pero no puedes enviar ni recibir nuevos. Puedes archivar el chat cuando quieras.';
 
   @override
   String get notificationSettings => 'Notificaciones';
@@ -1456,10 +1459,10 @@ class AppLocalizationsEs extends AppLocalizations {
   String get waitingForInternet => 'Esperando conexión a internet';
 
   @override
-  String get leaveGroup => 'Salir del grupo';
+  String get leave => 'Salir';
 
   @override
-  String get leaveGroupConfirmation => 'Salir del grupo';
+  String get leaveGroup => 'Salir del grupo';
 
   @override
   String get leaveGroupWarning =>
@@ -1467,4 +1470,7 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get failedToLeaveGroup => 'No se pudo salir del grupo. Por favor, inténtalo de nuevo.';
+
+  @override
+  String get youLeftTheGroup => 'Saliste del grupo';
 }

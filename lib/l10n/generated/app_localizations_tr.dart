@@ -1412,8 +1412,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get removedFromGroup => 'Bu gruptan çıkarıldınız';
 
   @override
+  String get youLeftThisGroup => 'Bu gruptan ayrıldınız';
+
+  @override
   String get removedFromGroupDescription =>
-      'Kaydedilmiş mesajları görüntüleyebilirsiniz, ancak yeni mesaj gönderemez veya alamazsınız. Sohbeti istediğiniz zaman arşivleyebilir veya silebilirsiniz.';
+      'Kaydedilmiş mesajları görüntüleyebilirsiniz, ancak yeni mesaj gönderemez veya alamazsınız. Sohbeti istediğiniz zaman arşivleyebilirsiniz.';
 
   @override
   String get notificationSettings => 'Bildirimler';
@@ -1439,10 +1442,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get waitingForInternet => 'İnternet bağlantısı bekleniyor';
 
   @override
-  String get leaveGroup => 'Gruptan ayrıl';
+  String get leave => 'Ayrıl';
 
   @override
-  String get leaveGroupConfirmation => 'Gruptan ayrıl';
+  String get leaveGroup => 'Gruptan ayrıl';
 
   @override
   String get leaveGroupWarning =>
@@ -1450,4 +1453,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get failedToLeaveGroup => 'Gruptan ayrılma başarısız oldu. Lütfen tekrar deneyin.';
+
+  @override
+  String get youLeftTheGroup => 'Gruptan ayrıldınız';
 }

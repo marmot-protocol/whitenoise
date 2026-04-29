@@ -2580,10 +2580,16 @@ abstract class AppLocalizations {
   /// **'You were removed from this group'**
   String get removedFromGroup;
 
+  /// Notice title shown in chat screen when the user voluntarily left the group
+  ///
+  /// In en, this message translates to:
+  /// **'You left this group'**
+  String get youLeftThisGroup;
+
   /// Notice description shown when the user has been removed from the group
   ///
   /// In en, this message translates to:
-  /// **'You can still view saved messages, but you can\'t send or receive new ones. You can archive or delete the chat anytime.'**
+  /// **'You can still view saved messages, but you can\'t send or receive new ones. You can archive the chat anytime.'**
   String get removedFromGroupDescription;
 
   /// Settings screen menu item label for the notifications screen
@@ -2628,17 +2634,17 @@ abstract class AppLocalizations {
   /// **'Waiting for internet connection'**
   String get waitingForInternet;
 
-  /// Label for the leave group button
+  /// Label for the confirm leave button
   ///
   /// In en, this message translates to:
-  /// **'Leave group'**
-  String get leaveGroup;
+  /// **'Leave'**
+  String get leave;
 
   /// Title of the leave group confirmation dialog
   ///
   /// In en, this message translates to:
   /// **'Leave group'**
-  String get leaveGroupConfirmation;
+  String get leaveGroup;
 
   /// Warning shown in the leave group confirmation dialog
   ///
@@ -2651,6 +2657,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to leave group. Please try again.'**
   String get failedToLeaveGroup;
+
+  /// Subtitle shown for groups the user has left
+  ///
+  /// In en, this message translates to:
+  /// **'You left the group'**
+  String get youLeftTheGroup;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

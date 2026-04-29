@@ -1446,8 +1446,11 @@ class AppLocalizationsRu extends AppLocalizations {
   String get removedFromGroup => 'Вы были удалены из этой группы';
 
   @override
+  String get youLeftThisGroup => 'Вы покинули эту группу';
+
+  @override
   String get removedFromGroupDescription =>
-      'Вы можете просматривать сохранённые сообщения, но не можете отправлять или получать новые. Вы можете архивировать или удалить чат в любое время.';
+      'Вы можете просматривать сохранённые сообщения, но не можете отправлять или получать новые. Вы можете архивировать чат в любое время.';
 
   @override
   String get notificationSettings => 'Уведомления';
@@ -1473,10 +1476,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get waitingForInternet => 'Ожидание подключения к интернету';
 
   @override
-  String get leaveGroup => 'Покинуть группу';
+  String get leave => 'Покинуть';
 
   @override
-  String get leaveGroupConfirmation => 'Покинуть группу';
+  String get leaveGroup => 'Покинуть группу';
 
   @override
   String get leaveGroupWarning =>
@@ -1484,4 +1487,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get failedToLeaveGroup => 'Не удалось покинуть группу. Пожалуйста, попробуйте еще раз.';
+
+  @override
+  String get youLeftTheGroup => 'Вы покинули группу';
 }

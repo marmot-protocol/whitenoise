@@ -168,6 +168,7 @@ class _MockApi extends MockWnApi {
       groupType: GroupType.group,
       createdAt: DateTime(2024),
       pendingConfirmation: false,
+      selfRemoved: false,
       unreadCount: BigInt.zero,
       removedAt: removedAt,
     );

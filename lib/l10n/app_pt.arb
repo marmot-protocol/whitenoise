@@ -408,7 +408,8 @@
   "reportBugWhatWentWrongRequired": "Descreva o que deu errado.",
   "failedToStartSupportChat": "Falha ao iniciar a conversa com o suporte",
   "removedFromGroup": "Você foi removido deste grupo",
-  "removedFromGroupDescription": "Você ainda pode ver as mensagens salvas, mas não pode enviar ou receber novas. Você pode arquivar ou excluir a conversa a qualquer momento.",
+  "youLeftThisGroup": "Você saiu deste grupo",
+  "removedFromGroupDescription": "Você ainda pode ver as mensagens salvas, mas não pode enviar ou receber novas. Você pode arquivar a conversa a qualquer momento.",
   "notificationSettings": "Notificações",
   "notificationSettingsTitle": "Notificações",
   "notifications": "Notificações",
@@ -420,8 +421,9 @@
   "failedToUnarchiveChat": "Falha ao desarquivar a conversa. Tente novamente.",
   "archivedChatsEmpty": "Nenhuma conversa arquivada",
   "waitingForInternet": "Aguardando conexão com a internet",
+  "leave": "Sair",
   "leaveGroup": "Sair do grupo",
-  "leaveGroupConfirmation": "Sair do grupo",
   "leaveGroupWarning": "Tem certeza de que deseja sair deste grupo? O chat permanecerá na sua lista se você não o excluir, mas você não poderá enviar ou receber novas mensagens a menos que alguém o convide novamente.",
-  "failedToLeaveGroup": "Falha ao sair do grupo. Por favor, tente novamente."
+  "failedToLeaveGroup": "Falha ao sair do grupo. Por favor, tente novamente.",
+  "youLeftTheGroup": "Você saiu do grupo"
 }

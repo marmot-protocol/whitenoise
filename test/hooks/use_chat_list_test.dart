@@ -22,6 +22,7 @@ ChatSummary _chatSummary(
   groupType: GroupType.group,
   createdAt: createdAt,
   pendingConfirmation: pendingConfirmation,
+  selfRemoved: false,
   archivedAt: archivedAt,
   removedAt: removedAt,
   mutedUntil: mutedUntil,
@@ -201,6 +202,7 @@ void main() {
           groupType: GroupType.group,
           createdAt: DateTime(2024),
           pendingConfirmation: true,
+          selfRemoved: false,
           unreadCount: BigInt.zero,
         );
         _api.emitUpdate(ChatListUpdateTrigger.newLastMessage, updatedChat);
@@ -259,6 +261,7 @@ void main() {
           groupType: GroupType.group,
           createdAt: DateTime(2024),
           pendingConfirmation: false,
+          selfRemoved: false,
           unreadCount: BigInt.zero,
         );
         _api.emitUpdate(ChatListUpdateTrigger.lastMessageDeleted, updatedChat);
@@ -280,6 +283,7 @@ void main() {
           groupType: GroupType.group,
           createdAt: DateTime(2024),
           pendingConfirmation: false,
+          selfRemoved: false,
           unreadCount: BigInt.zero,
         );
         _api.emitUpdate(ChatListUpdateTrigger.lastMessageDeleted, updatedChat);

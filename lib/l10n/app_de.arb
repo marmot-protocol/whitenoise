@@ -408,7 +408,8 @@
   "reportBugWhatWentWrongRequired": "Bitte beschreibe, was schiefgelaufen ist.",
   "failedToStartSupportChat": "Support-Chat konnte nicht gestartet werden",
   "removedFromGroup": "Du wurdest aus dieser Gruppe entfernt",
-  "removedFromGroupDescription": "Du kannst gespeicherte Nachrichten noch lesen, aber keine neuen senden oder empfangen. Du kannst den Chat jederzeit archivieren oder löschen.",
+  "youLeftThisGroup": "Du hast diese Gruppe verlassen",
+  "removedFromGroupDescription": "Du kannst gespeicherte Nachrichten noch lesen, aber keine neuen senden oder empfangen. Du kannst den Chat jederzeit archivieren.",
   "notificationSettings": "Benachrichtigungen",
   "notificationSettingsTitle": "Benachrichtigungen",
   "notifications": "Benachrichtigungen",
@@ -420,8 +421,9 @@
   "failedToUnarchiveChat": "Chat konnte nicht dearchiviert werden. Bitte versuche es erneut.",
   "archivedChatsEmpty": "Keine archivierten Chats",
   "waitingForInternet": "Warten auf Internetverbindung",
+  "leave": "Verlassen",
   "leaveGroup": "Gruppe verlassen",
-  "leaveGroupConfirmation": "Gruppe verlassen",
   "leaveGroupWarning": "Bist du sicher, dass du diese Gruppe verlassen möchtest? Der Chat bleibt in deiner Liste, wenn du ihn nicht löschst, aber du kannst keine neuen Nachrichten senden oder empfangen, es sei denn, jemand lädt dich erneut ein.",
-  "failedToLeaveGroup": "Gruppe konnte nicht verlassen werden. Bitte versuche es erneut."
+  "failedToLeaveGroup": "Gruppe konnte nicht verlassen werden. Bitte versuche es erneut.",
+  "youLeftTheGroup": "Du hast die Gruppe verlassen"
 }

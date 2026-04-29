@@ -6140,7 +6140,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   ChatSummary dco_decode_chat_summary(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 15) throw Exception('unexpected arr length: expect 15 but see ${arr.length}');
+    if (arr.length != 16) throw Exception('unexpected arr length: expect 16 but see ${arr.length}');
     return ChatSummary(
       mlsGroupId: dco_decode_String(arr[0]),
       name: dco_decode_opt_String(arr[1]),
@@ -6153,10 +6153,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       welcomerPubkey: dco_decode_opt_String(arr[8]),
       archivedAt: dco_decode_opt_box_autoadd_Chrono_Utc(arr[9]),
       removedAt: dco_decode_opt_box_autoadd_Chrono_Utc(arr[10]),
-      unreadCount: dco_decode_u_64(arr[11]),
-      pinOrder: dco_decode_opt_box_autoadd_i_64(arr[12]),
-      dmPeerPubkey: dco_decode_opt_String(arr[13]),
-      mutedUntil: dco_decode_opt_box_autoadd_Chrono_Utc(arr[14]),
+      selfRemoved: dco_decode_bool(arr[11]),
+      unreadCount: dco_decode_u_64(arr[12]),
+      pinOrder: dco_decode_opt_box_autoadd_i_64(arr[13]),
+      dmPeerPubkey: dco_decode_opt_String(arr[14]),
+      mutedUntil: dco_decode_opt_box_autoadd_Chrono_Utc(arr[15]),
     );
   }
 
@@ -7846,6 +7847,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     final var_welcomerPubkey = sse_decode_opt_String(deserializer);
     final var_archivedAt = sse_decode_opt_box_autoadd_Chrono_Utc(deserializer);
     final var_removedAt = sse_decode_opt_box_autoadd_Chrono_Utc(deserializer);
+    final var_selfRemoved = sse_decode_bool(deserializer);
     final var_unreadCount = sse_decode_u_64(deserializer);
     final var_pinOrder = sse_decode_opt_box_autoadd_i_64(deserializer);
     final var_dmPeerPubkey = sse_decode_opt_String(deserializer);
@@ -7862,6 +7864,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       welcomerPubkey: var_welcomerPubkey,
       archivedAt: var_archivedAt,
       removedAt: var_removedAt,
+      selfRemoved: var_selfRemoved,
       unreadCount: var_unreadCount,
       pinOrder: var_pinOrder,
       dmPeerPubkey: var_dmPeerPubkey,
@@ -9992,6 +9995,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_opt_String(self.welcomerPubkey, serializer);
     sse_encode_opt_box_autoadd_Chrono_Utc(self.archivedAt, serializer);
     sse_encode_opt_box_autoadd_Chrono_Utc(self.removedAt, serializer);
+    sse_encode_bool(self.selfRemoved, serializer);
     sse_encode_u_64(self.unreadCount, serializer);
     sse_encode_opt_box_autoadd_i_64(self.pinOrder, serializer);
     sse_encode_opt_String(self.dmPeerPubkey, serializer);

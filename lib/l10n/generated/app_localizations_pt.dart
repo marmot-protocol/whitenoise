@@ -1424,8 +1424,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get removedFromGroup => 'Você foi removido deste grupo';
 
   @override
+  String get youLeftThisGroup => 'Você saiu deste grupo';
+
+  @override
   String get removedFromGroupDescription =>
-      'Você ainda pode ver as mensagens salvas, mas não pode enviar ou receber novas. Você pode arquivar ou excluir a conversa a qualquer momento.';
+      'Você ainda pode ver as mensagens salvas, mas não pode enviar ou receber novas. Você pode arquivar a conversa a qualquer momento.';
 
   @override
   String get notificationSettings => 'Notificações';
@@ -1451,10 +1454,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get waitingForInternet => 'Aguardando conexão com a internet';
 
   @override
-  String get leaveGroup => 'Sair do grupo';
+  String get leave => 'Sair';
 
   @override
-  String get leaveGroupConfirmation => 'Sair do grupo';
+  String get leaveGroup => 'Sair do grupo';
 
   @override
   String get leaveGroupWarning =>
@@ -1462,4 +1465,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get failedToLeaveGroup => 'Falha ao sair do grupo. Por favor, tente novamente.';
+
+  @override
+  String get youLeftTheGroup => 'Você saiu do grupo';
 }
