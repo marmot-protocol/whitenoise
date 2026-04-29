@@ -64,14 +64,20 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-if [[ ! -f "$PUBSPEC" ]]; then
-  echo "Pubspec not found: $PUBSPEC" >&2
+if [[ "$PUBSPEC" = /* ]]; then
+  RESOLVED_PUBSPEC="$PUBSPEC"
+else
+  RESOLVED_PUBSPEC="$REPO/$PUBSPEC"
+fi
+
+if [[ ! -f "$RESOLVED_PUBSPEC" ]]; then
+  echo "Pubspec not found: $RESOLVED_PUBSPEC" >&2
   exit 1
 fi
 
-VERSION_LINE="$(grep -E '^[[:space:]]*version:[[:space:]]*[^[:space:]]+' "$PUBSPEC" | head -n 1 || true)"
+VERSION_LINE="$(grep -E '^[[:space:]]*version:[[:space:]]*[^[:space:]]+' "$RESOLVED_PUBSPEC" | head -n 1 || true)"
 if [[ -z "$VERSION_LINE" ]]; then
-  echo "Could not find version in $PUBSPEC" >&2
+  echo "Could not find version in $RESOLVED_PUBSPEC" >&2
   exit 1
 fi
 

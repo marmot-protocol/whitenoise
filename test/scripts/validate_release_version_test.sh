@@ -89,6 +89,10 @@ write_pubspec_line '  version: "2026.4.28+23" # release candidate'
 output="$("$SCRIPT" --pubspec "$RELEASE_REPO/pubspec.yaml" --repo "$RELEASE_REPO")"
 assert_contains "$output" "full_version=2026.4.28+23"
 
+mkdir "$TMPDIR/outside"
+output="$(cd "$TMPDIR/outside" && "$SCRIPT" --pubspec pubspec.yaml --repo "$RELEASE_REPO")"
+assert_contains "$output" "full_version=2026.4.28+23"
+
 rm -f "$TMPDIR/out"
 "$SCRIPT" --pubspec "$RELEASE_REPO/pubspec.yaml" --repo "$RELEASE_REPO" --github-output "$TMPDIR/out" >/dev/null
 assert_contains "$(cat "$TMPDIR/out")" "full_version=2026.4.28+23"

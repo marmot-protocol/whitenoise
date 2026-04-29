@@ -12,40 +12,46 @@ fail() {
 
 assert_contains() {
   local haystack="$1"
-  local needle="$2"
-  if [[ "$haystack" != *"$needle"* ]]; then
-    fail "expected output to contain '$needle'"
+  local pattern="$2"
+  if ! printf '%s\n' "$haystack" | grep -Eq "^${pattern}$"; then
+    fail "expected output to contain line matching regex '$pattern'"
   fi
 }
 
 just_list="$(just --list --unsorted)"
-assert_contains "$just_list" "release-build-staging"
-assert_contains "$just_list" "release-build-production"
-assert_contains "$just_list" "release-build-android-staging"
-assert_contains "$just_list" "release-build-android-production"
-assert_contains "$just_list" "release-build-ios-staging"
-assert_contains "$just_list" "release-build-ios-production"
+assert_contains "$just_list" '[[:space:]]*release-build-staging[[:space:]].*'
+assert_contains "$just_list" '[[:space:]]*release-build-production[[:space:]].*'
+assert_contains "$just_list" '[[:space:]]*release-build-android-staging[[:space:]].*'
+assert_contains "$just_list" '[[:space:]]*release-build-android-production[[:space:]].*'
+assert_contains "$just_list" '[[:space:]]*release-build-ios-staging[[:space:]].*'
+assert_contains "$just_list" '[[:space:]]*release-build-ios-production[[:space:]].*'
 
 fastfile="$(cat fastlane/Fastfile)"
-assert_contains "$fastfile" "lane :build_android_staging"
-assert_contains "$fastfile" "lane :build_android_production"
-assert_contains "$fastfile" "lane :build_ios_staging"
-assert_contains "$fastfile" "lane :build_ios_production"
-assert_contains "$fastfile" "lane :build_staging_release"
-assert_contains "$fastfile" "lane :build_production_release"
-assert_contains "$fastfile" "android_package_name: 'dev.ipf.whitenoise.staging'"
-assert_contains "$fastfile" "android_package_name: 'org.parres.whitenoise'"
-assert_contains "$fastfile" "ios_app_identifier: 'dev.ipf.whitenoise.staging'"
-assert_contains "$fastfile" "ios_app_identifier: 'org.parres.whitenoise'"
+assert_contains "$fastfile" 'lane[[:space:]]+:build_android_staging[[:space:]]+do.*'
+assert_contains "$fastfile" 'lane[[:space:]]+:build_android_production[[:space:]]+do.*'
+assert_contains "$fastfile" 'lane[[:space:]]+:build_ios_staging[[:space:]]+do.*'
+assert_contains "$fastfile" 'lane[[:space:]]+:build_ios_production[[:space:]]+do.*'
+assert_contains "$fastfile" 'lane[[:space:]]+:build_staging_release[[:space:]]+do.*'
+assert_contains "$fastfile" 'lane[[:space:]]+:build_production_release[[:space:]]+do.*'
+assert_contains "$fastfile" "[[:space:]]*android_package_name: 'dev\\.ipf\\.whitenoise\\.staging',"
+assert_contains "$fastfile" "[[:space:]]*android_package_name: 'org\\.parres\\.whitenoise',"
+assert_contains "$fastfile" "[[:space:]]*ios_app_identifier: 'dev\\.ipf\\.whitenoise\\.staging',"
+assert_contains "$fastfile" "[[:space:]]*ios_app_identifier: 'org\\.parres\\.whitenoise',"
 
 android_gradle="$(cat android/app/build.gradle.kts)"
-assert_contains "$android_gradle" 'applicationId = "dev.ipf.whitenoise.staging"'
-assert_contains "$android_gradle" 'applicationId = "org.parres.whitenoise"'
+assert_contains "$android_gradle" '[[:space:]]*applicationId = "dev\.ipf\.whitenoise\.staging"'
+assert_contains "$android_gradle" '[[:space:]]*applicationId = "org\.parres\.whitenoise"'
 
 ruby <<'RUBY'
 require 'yaml'
 
-pattern = YAML.load_file('zapstore.yaml').fetch('match')
+config = YAML.safe_load(
+  File.read('zapstore.yaml'),
+  permitted_classes: [],
+  permitted_symbols: [],
+  aliases: false,
+)
+pattern = config.fetch('match')
 regex = Regexp.new(pattern)
 
 production_apk = 'whitenoise-2026.3.23-arm64-v8a.apk'
