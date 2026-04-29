@@ -186,6 +186,10 @@ validate-locales-keys:
     @echo "🔍 Validating l10n keys..."
     ./scripts/validate-locales-keys.sh
 
+test-release-scripts:
+    @bash test/scripts/validate_release_version_test.sh
+    @bash test/scripts/release_automation_config_test.sh
+
 # ==============================================================================
 # CLEANING
 # ==============================================================================
@@ -277,6 +281,74 @@ build-release-android:
 # iOS-only release artifacts (macOS only)
 build-release-ios:
     ./scripts/build_release.sh --ios
+
+# ==============================================================================
+# RELEASE AUTOMATION
+# ==============================================================================
+
+# Validate release version metadata, optionally against a git tag
+release-doctor tag="":
+    @if [ -n "{{tag}}" ]; then \
+        bundle exec fastlane release_doctor tag:"{{tag}}"; \
+    else \
+        bundle exec fastlane release_doctor; \
+    fi
+
+# Build staging Android release artifacts with Fastlane
+release-build-android-staging tag="":
+    @if [ -n "{{tag}}" ]; then \
+        bundle exec fastlane build_android_staging tag:"{{tag}}"; \
+    else \
+        bundle exec fastlane build_android_staging; \
+    fi
+
+# Build production Android release artifacts with Fastlane
+release-build-android-production tag="":
+    @if [ -n "{{tag}}" ]; then \
+        bundle exec fastlane build_android_production tag:"{{tag}}"; \
+    else \
+        bundle exec fastlane build_android_production; \
+    fi
+
+# Build staging iOS IPA for App Store Connect/TestFlight with Fastlane
+release-build-ios-staging tag="":
+    @if [ -n "{{tag}}" ]; then \
+        bundle exec fastlane build_ios_staging tag:"{{tag}}"; \
+    else \
+        bundle exec fastlane build_ios_staging; \
+    fi
+
+# Build production iOS IPA for App Store Connect/TestFlight with Fastlane
+release-build-ios-production tag="":
+    @if [ -n "{{tag}}" ]; then \
+        bundle exec fastlane build_ios_production tag:"{{tag}}"; \
+    else \
+        bundle exec fastlane build_ios_production; \
+    fi
+
+# Build staging app release artifacts with Fastlane
+release-build-staging tag="":
+    @if [ -n "{{tag}}" ]; then \
+        bundle exec fastlane build_staging_release tag:"{{tag}}"; \
+    else \
+        bundle exec fastlane build_staging_release; \
+    fi
+
+# Build production app release artifacts with Fastlane
+release-build-production tag="":
+    @if [ -n "{{tag}}" ]; then \
+        bundle exec fastlane build_production_release tag:"{{tag}}"; \
+    else \
+        bundle exec fastlane build_production_release; \
+    fi
+
+# Build staging and production release artifacts with Fastlane
+release-build-all tag="":
+    @if [ -n "{{tag}}" ]; then \
+        bundle exec fastlane build_all_release_artifacts tag:"{{tag}}"; \
+    else \
+        bundle exec fastlane build_all_release_artifacts; \
+    fi
 
 # ==============================================================================
 # BUILDING - iOS

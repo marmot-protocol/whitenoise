@@ -1,4 +1,5 @@
 repository: https://github.com/marmot-protocol/whitenoise
+match: "^whitenoise-[0-9].*-arm64-v8a\\.apk$"
 description: |
     **White Noise: The Identity-Free Messenger for Private, Censorship-Resistant Communication**
 
