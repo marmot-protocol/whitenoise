@@ -28,12 +28,23 @@ def flavor_config(flavor)
   config
 end
 
+def release_tag(options = {})
+  tag = options[:tag].to_s.strip
+  return tag unless tag.empty?
+
+  tag = ENV.fetch('RELEASE_TAG', '').to_s.strip
+  return tag unless tag.empty?
+
+  return ENV.fetch('GITHUB_REF_NAME', '').to_s.strip if ENV['GITHUB_REF_TYPE'] == 'tag'
+
+  ''
+end
+
 def release_info(options = {})
-  tag = options[:tag] || ENV['RELEASE_TAG']
-  tag ||= ENV['GITHUB_REF_NAME'] if ENV['GITHUB_REF_TYPE'] == 'tag'
+  tag = release_tag(options)
 
   command = ['./scripts/validate_release_version.sh']
-  command += ['--tag', tag.to_s] if tag && !tag.to_s.empty?
+  command += ['--tag', tag] unless tag.empty?
 
   output, error, status = Open3.capture3(*command, chdir: ROOT)
   UI.user_error!(error.strip.empty? ? output.strip : error.strip) unless status.success?

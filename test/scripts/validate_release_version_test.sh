@@ -30,6 +30,14 @@ version: $version
 EOF
 }
 
+write_pubspec_line() {
+  local version_line="$1"
+  cat >"$RELEASE_REPO/pubspec.yaml" <<EOF
+name: whitenoise
+$version_line
+EOF
+}
+
 mkdir "$RELEASE_REPO"
 git -C "$RELEASE_REPO" init --quiet
 git -C "$RELEASE_REPO" config user.email "release-test@example.com"
@@ -72,5 +80,29 @@ if "$SCRIPT" --pubspec "$RELEASE_REPO/pubspec.yaml" --repo "$RELEASE_REPO" >"$TM
   fail "expected missing build number to fail"
 fi
 assert_contains "$(cat "$TMPDIR/err")" "must include a build number"
+
+write_pubspec_line 'version: "2026.4.28+23" # release candidate'
+output="$("$SCRIPT" --pubspec "$RELEASE_REPO/pubspec.yaml" --repo "$RELEASE_REPO")"
+assert_contains "$output" "full_version=2026.4.28+23"
+
+if "$SCRIPT" --pubspec >"$TMPDIR/out" 2>"$TMPDIR/err"; then
+  fail "expected missing --pubspec value to fail"
+fi
+assert_contains "$(cat "$TMPDIR/err")" "Missing value for --pubspec"
+
+if "$SCRIPT" --pubspec "$RELEASE_REPO/pubspec.yaml" --repo --tag "v2026.4.28+23" >"$TMPDIR/out" 2>"$TMPDIR/err"; then
+  fail "expected missing --repo value to fail"
+fi
+assert_contains "$(cat "$TMPDIR/err")" "Missing value for --repo"
+
+if "$SCRIPT" --pubspec "$RELEASE_REPO/pubspec.yaml" --tag --github-output "$TMPDIR/github-output" >"$TMPDIR/out" 2>"$TMPDIR/err"; then
+  fail "expected missing --tag value to fail"
+fi
+assert_contains "$(cat "$TMPDIR/err")" "Missing value for --tag"
+
+if "$SCRIPT" --pubspec "$RELEASE_REPO/pubspec.yaml" --github-output >"$TMPDIR/out" 2>"$TMPDIR/err"; then
+  fail "expected missing --github-output value to fail"
+fi
+assert_contains "$(cat "$TMPDIR/err")" "Missing value for --github-output"
 
 echo "validate_release_version_test passed"

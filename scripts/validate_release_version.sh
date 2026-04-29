@@ -19,21 +19,36 @@ is provided, that the tag matches the pubspec version and points at HEAD.
 EOF
 }
 
+require_option_value() {
+  local option="$1"
+  local value="${2:-}"
+
+  if [[ -z "$value" || "$value" == --* ]]; then
+    echo "Missing value for $option" >&2
+    usage >&2
+    exit 2
+  fi
+}
+
 while [[ $# -gt 0 ]]; do
   case "$1" in
   --pubspec)
+    require_option_value "$1" "${2:-}"
     PUBSPEC="$2"
     shift 2
     ;;
   --repo)
+    require_option_value "$1" "${2:-}"
     REPO="$2"
     shift 2
     ;;
   --tag)
+    require_option_value "$1" "${2:-}"
     TAG="$2"
     shift 2
     ;;
   --github-output)
+    require_option_value "$1" "${2:-}"
     GITHUB_OUTPUT_FILE="$2"
     shift 2
     ;;
@@ -60,7 +75,12 @@ if [[ -z "$VERSION_LINE" ]]; then
   exit 1
 fi
 
-FULL_VERSION="$(printf '%s\n' "$VERSION_LINE" | sed -E 's/^version:[[:space:]]*//' | tr -d '[:space:]')"
+FULL_VERSION="$(
+  printf '%s\n' "$VERSION_LINE" |
+    sed -E 's/^version:[[:space:]]*//' |
+    sed -E 's/[[:space:]]*#.*$//' |
+    sed -E 's/^[[:space:]]*["'\'']?//; s/["'\'']?[[:space:]]*$//'
+)"
 if [[ "$FULL_VERSION" != *+* ]]; then
   echo "Release version must include a build number, e.g. 2026.4.28+23" >&2
   exit 1
