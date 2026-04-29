@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/widgets.dart' show AppLifecycleState, WidgetsFlutterBinding;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:logging/logging.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDirectory;
 import 'package:whitenoise/services/notification_service.dart';
 import 'package:whitenoise/services/notification_subscription.dart';
@@ -289,11 +290,13 @@ class ForegroundTaskApi {
     required int serviceId,
     required String notificationTitle,
     required String notificationText,
+    NotificationIcon? notificationIcon,
     required Function callback,
   }) => FlutterForegroundTask.startService(
     serviceId: serviceId,
     notificationTitle: notificationTitle,
     notificationText: notificationText,
+    notificationIcon: notificationIcon,
     callback: callback,
   );
 
@@ -310,12 +313,14 @@ class ForegroundTaskApi {
 // coverage:ignore-end
 
 class ForegroundService {
-  ForegroundService({bool? enabled, ForegroundTaskApi? api})
+  ForegroundService({bool? enabled, ForegroundTaskApi? api, String? packageName})
     : _enabled = enabled ?? Platform.isAndroid,
-      _api = api ?? ForegroundTaskApi(); // coverage:ignore-line
+      _api = api ?? ForegroundTaskApi(), // coverage:ignore-line
+      _packageName = packageName;
 
   final bool _enabled;
   final ForegroundTaskApi _api;
+  final String? _packageName;
   bool _initialized = false;
 
   static const _serviceId = 888;
@@ -359,10 +364,15 @@ class ForegroundService {
       return;
     }
 
+    final resolvedPackageName = _packageName ?? (await PackageInfo.fromPlatform()).packageName;
+
     final result = await _api.startService(
       serviceId: _serviceId,
       notificationTitle: 'White Noise',
       notificationText: 'Connected to relays',
+      notificationIcon: NotificationIcon(
+        metaDataName: '$resolvedPackageName.NOTIFICATION_ICON',
+      ),
       callback: _startCallback,
     );
 
