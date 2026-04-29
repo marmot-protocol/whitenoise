@@ -24,9 +24,11 @@ and this project adheres to Calendar Versioning (CalVer).
 - Add bug report screen with NIP-44 encrypted anonymous reports [PR #478](https://github.com/marmot-protocol/whitenoise/pull/478)
 - Chat with support [PR #486](https://github.com/marmot-protocol/whitenoise/pull/486)
 - Add notifications settings screen for android to allow disabling/enabling local notifications [PR #535](https://github.com/marmot-protocol/whitenoise/pull/535)
-- Archive chats [PR #532](https://github.com/marmot-protocol/whitenoise/pull/532)
+- Archive chats [PR #532](https://github.com/marmot-protocol/whitenoise/pull/532), [PR #603](https://github.com/marmot-protocol/whitenoise/pull/603)
+- Search by content in chat list [PR #557](https://github.com/marmot-protocol/whitenoise/pull/557)
 - No internet notice [PR #565](https://github.com/marmot-protocol/whitenoise/pull/565), [PR #576](https://github.com/marmot-protocol/whitenoise/pull/576), [PR #586](https://github.com/marmot-protocol/whitenoise/pull/586)
-- Add block/unblock hook [PR #573](https://github.com/marmot-protocol/whitenoise/pull/573)
+- Block/unblock users [PR #573](https://github.com/marmot-protocol/whitenoise/pull/573), [PR #574](https://github.com/marmot-protocol/whitenoise/pull/574)
+- Video media attachment support[PR #574](https://github.com/marmot-protocol/whitenoise/pull/574)
 
 ### Changed
 - Update System Notice colors [PR #579](https://github.com/marmot-protocol/whitenoise/pull/579)
