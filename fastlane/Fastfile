@@ -8,7 +8,7 @@ ROOT = File.expand_path('..', __dir__)
 FLAVORS = {
   'staging' => {
     artifact_prefix: 'whitenoise-staging',
-    android_package_name: 'dev.ipf.whitenoise.staging',
+    android_package_name: 'org.parres.whitenoise.staging',
     ios_app_identifier: 'dev.ipf.whitenoise.staging',
   },
   'production' => {

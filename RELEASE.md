@@ -9,7 +9,7 @@ The first release automation layer is build-only:
 
 - validates that `pubspec.yaml` has a release version with a build number
 - optionally validates that a git tag matches the pubspec version
-- builds staging Android split APKs and AAB for `dev.ipf.whitenoise.staging`
+- builds staging Android split APKs and AAB for `org.parres.whitenoise.staging`
 - builds production Android split APKs and AAB for `org.parres.whitenoise`
 - builds staging iOS IPA for `dev.ipf.whitenoise.staging`
 - builds production iOS IPA for `org.parres.whitenoise`
@@ -22,11 +22,14 @@ after signing and account setup are stable.
 
 Current app IDs:
 
-- Production: `org.parres.whitenoise`
-- Staging: `dev.ipf.whitenoise.staging`
+- Production Android: `org.parres.whitenoise`
+- Production iOS: `org.parres.whitenoise`
+- Staging Android: `org.parres.whitenoise.staging`
+- Staging iOS: `dev.ipf.whitenoise.staging`
 
 If production moves under the IPF namespace later, the expected target would be
-`dev.ipf.whitenoise` for production and `dev.ipf.whitenoise.staging` for staging.
+`dev.ipf.whitenoise` for production and `dev.ipf.whitenoise.staging` for staging
+on both platforms.
 
 ## Setup
 

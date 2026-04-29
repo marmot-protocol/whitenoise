@@ -140,7 +140,7 @@ android {
     productFlavors {
         create("staging") {
             dimension = "environment"
-            applicationId = "dev.ipf.whitenoise.staging"
+            applicationIdSuffix = ".staging"
             resValue("string", "app_name", "WN Staging")
         }
         create("production") {

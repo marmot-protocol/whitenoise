@@ -33,13 +33,13 @@ assert_contains "$fastfile" 'lane[[:space:]]+:build_ios_staging[[:space:]]+do.*'
 assert_contains "$fastfile" 'lane[[:space:]]+:build_ios_production[[:space:]]+do.*'
 assert_contains "$fastfile" 'lane[[:space:]]+:build_staging_release[[:space:]]+do.*'
 assert_contains "$fastfile" 'lane[[:space:]]+:build_production_release[[:space:]]+do.*'
-assert_contains "$fastfile" "[[:space:]]*android_package_name: 'dev\\.ipf\\.whitenoise\\.staging',"
+assert_contains "$fastfile" "[[:space:]]*android_package_name: 'org\\.parres\\.whitenoise\\.staging',"
 assert_contains "$fastfile" "[[:space:]]*android_package_name: 'org\\.parres\\.whitenoise',"
 assert_contains "$fastfile" "[[:space:]]*ios_app_identifier: 'dev\\.ipf\\.whitenoise\\.staging',"
 assert_contains "$fastfile" "[[:space:]]*ios_app_identifier: 'org\\.parres\\.whitenoise',"
 
 android_gradle="$(cat android/app/build.gradle.kts)"
-assert_contains "$android_gradle" '[[:space:]]*applicationId = "dev\.ipf\.whitenoise\.staging"'
+assert_contains "$android_gradle" '[[:space:]]*applicationIdSuffix = "\.staging"'
 assert_contains "$android_gradle" '[[:space:]]*applicationId = "org\.parres\.whitenoise"'
 
 ruby <<'RUBY'
