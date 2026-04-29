@@ -170,9 +170,7 @@ class WnChatList extends HookWidget {
       return false;
     }
 
-    final effectiveHeaderHeight = isAnimatingClosed.value
-        ? headerHeight
-        : headerHeight * headerRevealAnimation;
+    final effectiveHeaderHeight = headerHeight * headerRevealAnimation;
     final emptyStateTopInset = topPadding + effectiveHeaderHeight + pinnedHeaderHeight;
     final listPadding = EdgeInsets.only(
       top:
@@ -180,18 +178,6 @@ class WnChatList extends HookWidget {
       left: horizontalPadding,
       right: horizontalPadding,
     );
-
-    if (itemCount == 0 && emptyStateContent != null && !isSearchActive) {
-      if (canScrollUp.value) {
-        if (SchedulerBinding.instance.schedulerPhase == SchedulerPhase.persistentCallbacks) {
-          SchedulerBinding.instance.addPostFrameCallback((_) {
-            canScrollUp.value = false;
-          });
-        } else {
-          canScrollUp.value = false;
-        }
-      }
-    }
 
     return NotificationListener<ScrollMetricsNotification>(
       onNotification: (notification) {
@@ -202,6 +188,16 @@ class WnChatList extends HookWidget {
         onNotification: handleScrollNotification,
         child: Stack(
           children: [
+            ListView.builder(
+              key: const Key('chat_list'),
+              controller: scrollController,
+              padding: listPadding,
+              physics: const AlwaysScrollableScrollPhysics(
+                parent: BouncingScrollPhysics(),
+              ),
+              itemCount: itemCount,
+              itemBuilder: itemBuilder,
+            ),
             if (itemCount == 0 && emptyStateContent != null && !isSearchActive)
               Positioned.fill(
                 key: const Key('chat_list_empty'),
@@ -210,8 +206,8 @@ class WnChatList extends HookWidget {
                 child: Center(
                   child: emptyStateContent,
                 ),
-              )
-            else if (isSearchActive && itemCount == 0)
+              ),
+            if (isSearchActive && itemCount == 0)
               Positioned.fill(
                 key: const Key('chat_list_no_results'),
                 child: Center(
@@ -222,17 +218,6 @@ class WnChatList extends HookWidget {
                     ),
                   ),
                 ),
-              )
-            else
-              ListView.builder(
-                key: const Key('chat_list'),
-                controller: scrollController,
-                padding: listPadding,
-                physics: const AlwaysScrollableScrollPhysics(
-                  parent: BouncingScrollPhysics(),
-                ),
-                itemCount: itemCount,
-                itemBuilder: itemBuilder,
               ),
             if (hasHeader && (headerOpen.value || headerRevealAnimation > 0))
               Positioned(
@@ -244,7 +229,10 @@ class WnChatList extends HookWidget {
                   child: Align(
                     alignment: Alignment.topCenter,
                     heightFactor: headerRevealAnimation.clamp(0.0, 1.0),
-                    child: header,
+                    child: FadeTransition(
+                      opacity: headerRevealController,
+                      child: header,
+                    ),
                   ),
                 ),
               ),
