@@ -69,7 +69,7 @@ if [[ ! -f "$PUBSPEC" ]]; then
   exit 1
 fi
 
-VERSION_LINE="$(grep -E '^version:[[:space:]]*[^[:space:]]+' "$PUBSPEC" | head -n 1 || true)"
+VERSION_LINE="$(grep -E '^[[:space:]]*version:[[:space:]]*[^[:space:]]+' "$PUBSPEC" | head -n 1 || true)"
 if [[ -z "$VERSION_LINE" ]]; then
   echo "Could not find version in $PUBSPEC" >&2
   exit 1
@@ -77,7 +77,7 @@ fi
 
 FULL_VERSION="$(
   printf '%s\n' "$VERSION_LINE" |
-    sed -E 's/^version:[[:space:]]*//' |
+    sed -E 's/^[[:space:]]*version:[[:space:]]*//' |
     sed -E 's/[[:space:]]*#.*$//' |
     sed -E 's/^[[:space:]]*["'\'']?//; s/["'\'']?[[:space:]]*$//'
 )"

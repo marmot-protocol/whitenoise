@@ -23,6 +23,8 @@ assert_contains "$just_list" "release-build-staging"
 assert_contains "$just_list" "release-build-production"
 assert_contains "$just_list" "release-build-android-staging"
 assert_contains "$just_list" "release-build-android-production"
+assert_contains "$just_list" "release-build-ios-staging"
+assert_contains "$just_list" "release-build-ios-production"
 
 fastfile="$(cat fastlane/Fastfile)"
 assert_contains "$fastfile" "lane :build_android_staging"

@@ -85,6 +85,16 @@ write_pubspec_line 'version: "2026.4.28+23" # release candidate'
 output="$("$SCRIPT" --pubspec "$RELEASE_REPO/pubspec.yaml" --repo "$RELEASE_REPO")"
 assert_contains "$output" "full_version=2026.4.28+23"
 
+write_pubspec_line '  version: "2026.4.28+23" # release candidate'
+output="$("$SCRIPT" --pubspec "$RELEASE_REPO/pubspec.yaml" --repo "$RELEASE_REPO")"
+assert_contains "$output" "full_version=2026.4.28+23"
+
+rm -f "$TMPDIR/out"
+"$SCRIPT" --pubspec "$RELEASE_REPO/pubspec.yaml" --repo "$RELEASE_REPO" --github-output "$TMPDIR/out" >/dev/null
+assert_contains "$(cat "$TMPDIR/out")" "full_version=2026.4.28+23"
+assert_contains "$(cat "$TMPDIR/out")" "version_name=2026.4.28"
+assert_contains "$(cat "$TMPDIR/out")" "build_number=23"
+
 if "$SCRIPT" --pubspec >"$TMPDIR/out" 2>"$TMPDIR/err"; then
   fail "expected missing --pubspec value to fail"
 fi
