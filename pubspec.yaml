@@ -49,7 +49,7 @@ dependencies:
   gap: ^3.0.1
   emoji_picker_flutter: ^4.4.0
   flutter_svg: ^2.2.4
-  go_router: ^17.2.1
+  go_router: ^17.2.2
   flutter_riverpod: ^3.3.1
   flutter_secure_storage: ^10.0.0
   flutter_hooks: ^0.21.3
