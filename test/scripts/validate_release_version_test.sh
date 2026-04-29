@@ -7,6 +7,7 @@ SCRIPT="$REPO_ROOT/scripts/validate_release_version.sh"
 
 TMPDIR="$(mktemp -d)"
 trap 'rm -rf "$TMPDIR"' EXIT
+RELEASE_REPO="$TMPDIR/repo"
 
 fail() {
   echo "FAIL: $1" >&2
@@ -23,27 +24,51 @@ assert_contains() {
 
 write_pubspec() {
   local version="$1"
-  cat >"$TMPDIR/pubspec.yaml" <<EOF
+  cat >"$RELEASE_REPO/pubspec.yaml" <<EOF
 name: whitenoise
 version: $version
 EOF
 }
 
-write_pubspec "2026.4.28+23"
+mkdir "$RELEASE_REPO"
+git -C "$RELEASE_REPO" init --quiet
+git -C "$RELEASE_REPO" config user.email "release-test@example.com"
+git -C "$RELEASE_REPO" config user.name "Release Test"
 
-output="$("$SCRIPT" --pubspec "$TMPDIR/pubspec.yaml" --tag "v2026.4.28+23")"
+write_pubspec "2026.4.28+23"
+git -C "$RELEASE_REPO" add pubspec.yaml
+git -C "$RELEASE_REPO" commit --quiet -m "prepare release"
+git -C "$RELEASE_REPO" tag v2026.4.28+23
+
+output="$("$SCRIPT" --pubspec "$RELEASE_REPO/pubspec.yaml" --repo "$RELEASE_REPO" --tag "v2026.4.28+23")"
 assert_contains "$output" "full_version=2026.4.28+23"
 assert_contains "$output" "version_name=2026.4.28"
 assert_contains "$output" "build_number=23"
 assert_contains "$output" "tag=v2026.4.28+23"
+assert_contains "$output" "tag_commit=$(git -C "$RELEASE_REPO" rev-parse HEAD)"
 
-if "$SCRIPT" --pubspec "$TMPDIR/pubspec.yaml" --tag "v2026.4.28+24" >"$TMPDIR/out" 2>"$TMPDIR/err"; then
+if "$SCRIPT" --pubspec "$RELEASE_REPO/pubspec.yaml" --repo "$RELEASE_REPO" --tag "v2026.4.28+24" >"$TMPDIR/out" 2>"$TMPDIR/err"; then
   fail "expected mismatched tag to fail"
 fi
 assert_contains "$(cat "$TMPDIR/err")" "does not match pubspec version"
 
+git -C "$RELEASE_REPO" tag -d v2026.4.28+23 >/dev/null
+if "$SCRIPT" --pubspec "$RELEASE_REPO/pubspec.yaml" --repo "$RELEASE_REPO" --tag "v2026.4.28+23" >"$TMPDIR/out" 2>"$TMPDIR/err"; then
+  fail "expected missing tag to fail"
+fi
+assert_contains "$(cat "$TMPDIR/err")" "does not exist"
+
+git -C "$RELEASE_REPO" tag v2026.4.28+23
+echo "change after tag" >"$RELEASE_REPO/after-tag.txt"
+git -C "$RELEASE_REPO" add after-tag.txt
+git -C "$RELEASE_REPO" commit --quiet -m "move head"
+if "$SCRIPT" --pubspec "$RELEASE_REPO/pubspec.yaml" --repo "$RELEASE_REPO" --tag "v2026.4.28+23" >"$TMPDIR/out" 2>"$TMPDIR/err"; then
+  fail "expected tag not at HEAD to fail"
+fi
+assert_contains "$(cat "$TMPDIR/err")" "does not point at HEAD"
+
 write_pubspec "2026.4.28"
-if "$SCRIPT" --pubspec "$TMPDIR/pubspec.yaml" >"$TMPDIR/out" 2>"$TMPDIR/err"; then
+if "$SCRIPT" --pubspec "$RELEASE_REPO/pubspec.yaml" --repo "$RELEASE_REPO" >"$TMPDIR/out" 2>"$TMPDIR/err"; then
   fail "expected missing build number to fail"
 fi
 assert_contains "$(cat "$TMPDIR/err")" "must include a build number"

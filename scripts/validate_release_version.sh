@@ -3,15 +3,19 @@
 set -euo pipefail
 
 PUBSPEC="pubspec.yaml"
-TAG="${GITHUB_REF_NAME:-}"
+TAG=""
+if [[ "${GITHUB_REF_TYPE:-}" == "tag" ]]; then
+  TAG="${GITHUB_REF_NAME:-}"
+fi
 GITHUB_OUTPUT_FILE="${GITHUB_OUTPUT:-}"
+REPO="."
 
 usage() {
   cat <<'EOF'
-Usage: scripts/validate_release_version.sh [--pubspec PATH] [--tag TAG] [--github-output PATH]
+Usage: scripts/validate_release_version.sh [--pubspec PATH] [--repo PATH] [--tag TAG] [--github-output PATH]
 
 Validates that the Flutter pubspec version has a build number and, when a tag
-is provided, that the tag matches the pubspec version.
+is provided, that the tag matches the pubspec version and points at HEAD.
 EOF
 }
 
@@ -19,6 +23,10 @@ while [[ $# -gt 0 ]]; do
   case "$1" in
   --pubspec)
     PUBSPEC="$2"
+    shift 2
+    ;;
+  --repo)
+    REPO="$2"
     shift 2
     ;;
   --tag)
@@ -72,9 +80,26 @@ if ! [[ "$BUILD_NUMBER" =~ ^[0-9]+$ ]]; then
 fi
 
 if [[ -n "$TAG" ]]; then
-  TAG_VERSION="${TAG#v}"
+  TAG_NAME="${TAG#refs/tags/}"
+  TAG_VERSION="${TAG_NAME#v}"
   if [[ "$TAG_VERSION" != "$FULL_VERSION" ]]; then
-    echo "Tag $TAG does not match pubspec version $FULL_VERSION" >&2
+    echo "Tag $TAG_NAME does not match pubspec version $FULL_VERSION" >&2
+    exit 1
+  fi
+
+  if ! git -C "$REPO" rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+    echo "Tag validation requires a git repository: $REPO" >&2
+    exit 1
+  fi
+
+  if ! TAG_COMMIT="$(git -C "$REPO" rev-parse --verify --quiet "$TAG_NAME^{commit}" 2>/dev/null)"; then
+    echo "Tag $TAG_NAME does not exist in $REPO" >&2
+    exit 1
+  fi
+
+  HEAD_COMMIT="$(git -C "$REPO" rev-parse HEAD)"
+  if [[ "$TAG_COMMIT" != "$HEAD_COMMIT" ]]; then
+    echo "Tag $TAG_NAME does not point at HEAD" >&2
     exit 1
   fi
 fi
@@ -92,5 +117,6 @@ emit "full_version" "$FULL_VERSION"
 emit "version_name" "$VERSION_NAME"
 emit "build_number" "$BUILD_NUMBER"
 if [[ -n "$TAG" ]]; then
-  emit "tag" "$TAG"
+  emit "tag" "$TAG_NAME"
+  emit "tag_commit" "$TAG_COMMIT"
 fi
