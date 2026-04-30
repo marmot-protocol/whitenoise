@@ -42,7 +42,7 @@ void main() {
         expect(find.byKey(const Key('chat_list_empty')), findsNothing);
       });
 
-      testWidgets('pull down does not reveal header when empty state is shown', (tester) async {
+      testWidgets('pull down reveals header when empty state is shown', (tester) async {
         await mountWidget(
           const WnChatList(
             itemCount: 0,
@@ -61,7 +61,7 @@ void main() {
         await gesture.moveBy(const Offset(0, 200));
         await tester.pump();
 
-        expect(find.byKey(const Key('chat_list_header')), findsNothing);
+        expect(find.byKey(const Key('chat_list_header')), findsOneWidget);
         await gesture.up();
         await tester.pumpAndSettle();
       });
