@@ -1016,12 +1016,6 @@ class AppLocalizationsPt extends AppLocalizations {
   String get chatInformation => 'Informações do chat';
 
   @override
-  String get addAsContact => 'Adicionar como contato';
-
-  @override
-  String get removeAsContact => 'Remover como contato';
-
-  @override
   String get addToGroup => 'Adicionar ao grupo';
 
   @override

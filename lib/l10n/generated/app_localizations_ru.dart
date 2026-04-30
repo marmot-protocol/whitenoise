@@ -1034,12 +1034,6 @@ class AppLocalizationsRu extends AppLocalizations {
   String get chatInformation => 'Информация о чате';
 
   @override
-  String get addAsContact => 'Добавить в контакты';
-
-  @override
-  String get removeAsContact => 'Удалить из контактов';
-
-  @override
   String get addToGroup => 'Добавить в группу';
 
   @override

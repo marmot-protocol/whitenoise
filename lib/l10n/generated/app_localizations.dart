@@ -1854,18 +1854,6 @@ abstract class AppLocalizations {
   /// **'Chat Information'**
   String get chatInformation;
 
-  /// Action label to add a user as contact
-  ///
-  /// In en, this message translates to:
-  /// **'Add as contact'**
-  String get addAsContact;
-
-  /// Action label to remove a user as contact
-  ///
-  /// In en, this message translates to:
-  /// **'Remove as contact'**
-  String get removeAsContact;
-
   /// Action label to add this user to a group
   ///
   /// In en, this message translates to:

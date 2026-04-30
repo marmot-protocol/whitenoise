@@ -275,15 +275,15 @@ void main() {
       expect(find.text('I love Nostr!'), findsNothing);
     });
 
-    testWidgets('shows add as contact for non-followed user', (tester) async {
+    testWidgets('shows Follow for non-followed user', (tester) async {
       await pumpChatInfoScreen(tester);
-      expect(find.text('Add as contact'), findsOneWidget);
+      expect(find.text('Follow'), findsOneWidget);
     });
 
-    testWidgets('shows remove as contact for followed user', (tester) async {
+    testWidgets('shows Unfollow for followed user', (tester) async {
       _api.followingPubkeys.add(_otherPubkey);
       await pumpChatInfoScreen(tester);
-      expect(find.text('Remove as contact'), findsOneWidget);
+      expect(find.text('Unfollow'), findsOneWidget);
     });
 
     testWidgets('calls follow API when follow is tapped', (tester) async {

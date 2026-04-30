@@ -287,8 +287,6 @@
   "deleteAllDataWarning": "Isso excluirá permanentemente todos os seus chats, mensagens e configurações deste dispositivo. Esta ação não pode ser desfeita.",
   "deleteAllDataError": "Falha ao excluir todos os dados. Por favor, tente novamente.",
   "chatInformation": "Informações do chat",
-  "addAsContact": "Adicionar como contato",
-  "removeAsContact": "Remover como contato",
   "addToGroup": "Adicionar ao grupo",
   "blockUser": "Bloquear usuário",
   "unblockUser": "Desbloquear usuário",

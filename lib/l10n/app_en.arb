@@ -1276,14 +1276,6 @@
   "@chatInformation": {
     "description": "Chat information screen title"
   },
-  "addAsContact": "Add as contact",
-  "@addAsContact": {
-    "description": "Action label to add a user as contact"
-  },
-  "removeAsContact": "Remove as contact",
-  "@removeAsContact": {
-    "description": "Action label to remove a user as contact"
-  },
   "addToGroup": "Add to group",
   "@addToGroup": {
     "description": "Action label to add this user to a group"

@@ -287,8 +287,6 @@
   "deleteAllDataWarning": "Bu işlem, bu cihazdaki tüm sohbetlerinizi, mesajlarınızı ve ayarlarınızı kalıcı olarak silecektir. Bu işlem geri alınamaz.",
   "deleteAllDataError": "Tüm veriler silinemedi. Lütfen tekrar deneyin.",
   "chatInformation": "Sohbet Bilgileri",
-  "addAsContact": "Kişi olarak ekle",
-  "removeAsContact": "Kişilerden çıkar",
   "addToGroup": "Gruba ekle",
   "blockUser": "Kullanıcıyı engelle",
   "unblockUser": "Engeli kaldır",

@@ -110,7 +110,7 @@ class StartChatScreen extends HookConsumerWidget {
             width: double.infinity,
             child: WnButton(
               key: const Key('follow_button'),
-              text: isFollowing ? context.l10n.removeAsContact : context.l10n.addAsContact,
+              text: isFollowing ? context.l10n.unfollow : context.l10n.follow,
               type: WnButtonType.outline,
               size: WnButtonSize.medium,
               trailingIcon: isFollowing ? WnIcons.userUnfollow : WnIcons.userFollow,

@@ -287,8 +287,6 @@
   "deleteAllDataWarning": "Cela supprimera définitivement tous vos chats, messages et paramètres de cet appareil. Cette action ne peut pas être annulée.",
   "deleteAllDataError": "Échec de la suppression de toutes les données. Veuillez réessayer.",
   "chatInformation": "Informations du chat",
-  "addAsContact": "Ajouter comme contact",
-  "removeAsContact": "Retirer des contacts",
   "addToGroup": "Ajouter à un groupe",
   "blockUser": "Bloquer l'utilisateur",
   "unblockUser": "Débloquer l'utilisateur",

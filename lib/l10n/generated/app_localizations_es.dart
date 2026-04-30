@@ -1021,12 +1021,6 @@ class AppLocalizationsEs extends AppLocalizations {
   String get chatInformation => 'Información del chat';
 
   @override
-  String get addAsContact => 'Añadir como contacto';
-
-  @override
-  String get removeAsContact => 'Eliminar como contacto';
-
-  @override
   String get addToGroup => 'Añadir al grupo';
 
   @override
