@@ -29,6 +29,7 @@ and this project adheres to Calendar Versioning (CalVer).
 - No internet notice [PR #565](https://github.com/marmot-protocol/whitenoise/pull/565), [PR #576](https://github.com/marmot-protocol/whitenoise/pull/576), [PR #586](https://github.com/marmot-protocol/whitenoise/pull/586)
 - Block/unblock users [PR #573](https://github.com/marmot-protocol/whitenoise/pull/573), [PR #574](https://github.com/marmot-protocol/whitenoise/pull/574)
 - Video media attachment support[PR #574](https://github.com/marmot-protocol/whitenoise/pull/574)
+- Leave group from chat list (but disabled with a feature flag) [PR #604](https://github.com/marmot-protocol/whitenoise/pull/604), [PR #600](https://github.com/marmot-protocol/whitenoise/pull/600), [PR #571](https://github.com/marmot-protocol/whitenoise/pull/571)
 
 ### Changed
 - Update System Notice colors [PR #579](https://github.com/marmot-protocol/whitenoise/pull/579)
@@ -44,6 +45,7 @@ and this project adheres to Calendar Versioning (CalVer).
 - Show an error screen when bridge initialization fails instead of hanging on splash [PR #477](https://github.com/marmot-protocol/whitenoise/pull/477)
 - UI Polish: Signup Screen, Callout, IconButton [PR #519](https://github.com/marmot-protocol/whitenoise/pull/519)
 - Replaced delete all key packages with delete legacy key packages method. [PR #585](https://github.com/marmot-protocol/whitenoise/pull/585)
+- Renamed "contact" wording to "follows" [PR #595](https://github.com/marmot-protocol/whitenoise/pull/595)
 
 ### Deprecated
 
