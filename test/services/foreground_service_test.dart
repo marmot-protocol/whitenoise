@@ -15,6 +15,8 @@ class _MockForegroundTaskApi extends ForegroundTaskApi {
   @override
   void initCommunicationPort() => calls.add('initCommunicationPort');
 
+  NotificationIcon? lastNotificationIcon;
+
   @override
   void init({
     required AndroidNotificationOptions androidNotificationOptions,
@@ -33,9 +35,11 @@ class _MockForegroundTaskApi extends ForegroundTaskApi {
     required int serviceId,
     required String notificationTitle,
     required String notificationText,
+    NotificationIcon? notificationIcon,
     required Function callback,
   }) async {
     calls.add('startService');
+    lastNotificationIcon = notificationIcon;
     return startResult;
   }
 
@@ -99,7 +103,11 @@ void main() {
 
       setUp(() {
         mockApi = _MockForegroundTaskApi();
-        service = ForegroundService(enabled: true, api: mockApi);
+        service = ForegroundService(
+          enabled: true,
+          api: mockApi,
+          packageName: 'org.parres.whitenoise',
+        );
       });
 
       group('initialize', () {
@@ -150,6 +158,14 @@ void main() {
           await service.start();
 
           expect(mockApi.calls, isNot(contains('startService')));
+        });
+
+        test('passes notification icon from metadata', () async {
+          await service.start();
+          expect(
+            mockApi.lastNotificationIcon?.metaDataName,
+            'org.parres.whitenoise.NOTIFICATION_ICON',
+          );
         });
 
         test('handles start failure', () async {
@@ -271,7 +287,11 @@ void main() {
       setUp(() {
         mockApi = _MockForegroundTaskApi();
         mockApi.isRunning = true;
-        service = ForegroundService(enabled: true, api: mockApi);
+        service = ForegroundService(
+          enabled: true,
+          api: mockApi,
+          packageName: 'org.parres.whitenoise',
+        );
       });
 
       test('resumed sends main_started', () async {

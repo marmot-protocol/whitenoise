@@ -35,7 +35,7 @@ class NotificationService {
     if (!_enabled) return;
     if (_initialized) return;
 
-    const androidSettings = AndroidInitializationSettings('@mipmap/ic_launcher');
+    const androidSettings = AndroidInitializationSettings('@mipmap/ic_notification');
     const initSettings = InitializationSettings(android: androidSettings);
 
     await _plugin.initialize(

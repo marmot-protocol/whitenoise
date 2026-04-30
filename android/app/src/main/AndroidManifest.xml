@@ -38,6 +38,9 @@
         <meta-data
             android:name="flutterEmbedding"
             android:value="2" />
+        <meta-data
+            android:name="${applicationId}.NOTIFICATION_ICON"
+            android:resource="@mipmap/ic_notification" />
         <!-- Foreground service for background notifications -->
         <service
             android:name="com.pravera.flutter_foreground_task.service.ForegroundService"
