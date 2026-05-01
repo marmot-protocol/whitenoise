@@ -1,1 +1,3 @@
 "NSCameraUsageDescription" = "Camera access is required to scan QR codes";
+"NSPhotoLibraryAddUsageDescription" = "Photo library access is required to save media";
+"NSPhotoLibraryUsageDescription" = "Photo library access is required to save media";

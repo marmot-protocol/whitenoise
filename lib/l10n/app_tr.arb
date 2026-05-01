@@ -423,5 +423,9 @@
   "leaveGroup": "Gruptan ayrıl",
   "leaveGroupWarning": "Bu gruptan ayrılmak istediğinize emin misiniz? Silmezseniz sohbet listenizde kalacak, ancak biri sizi yeniden davet edene kadar yeni mesaj gönderemez veya alamazsınız.",
   "failedToLeaveGroup": "Gruptan ayrılma başarısız oldu. Lütfen tekrar deneyin.",
-  "youLeftTheGroup": "Gruptan ayrıldınız"
+  "youLeftTheGroup": "Gruptan ayrıldınız",
+  "saveToGalleryPermissionDenied": "Görüntüyü kaydetme izni reddedildi",
+  "saveToGalleryNotEnoughSpace": "Yeterli depolama alanı yok",
+  "saveToGalleryNotSupportedFormat": "Görüntü formatı desteklenmiyor",
+  "saveToGalleryError": "Görüntü galeriye kaydedilemedi"
 }

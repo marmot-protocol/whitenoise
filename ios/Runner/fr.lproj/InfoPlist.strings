@@ -1,1 +1,3 @@
 "NSCameraUsageDescription" = "L'accès à la caméra est requis pour scanner les codes QR";
+"NSPhotoLibraryAddUsageDescription" = "L'accès à la photothèque est requis pour enregistrer des médias";
+"NSPhotoLibraryUsageDescription" = "L'accès à la photothèque est requis pour enregistrer des médias";
