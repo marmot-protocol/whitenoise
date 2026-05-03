@@ -230,8 +230,8 @@ class GroupMemberScreen extends HookConsumerWidget {
                           child: WnButton(
                             key: const Key('follow_button'),
                             text: followState.isFollowing
-                                ? context.l10n.removeAsContact
-                                : context.l10n.addAsContact,
+                                ? context.l10n.unfollow
+                                : context.l10n.follow,
                             type: WnButtonType.outline,
                             size: WnButtonSize.medium,
                             trailingIcon: followState.isFollowing

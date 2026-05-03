@@ -294,15 +294,15 @@ void main() {
     });
 
     group('follow button', () {
-      testWidgets('shows Add as contact for non-followed user', (tester) async {
+      testWidgets('shows Follow for non-followed user', (tester) async {
         await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
-        expect(find.text('Add as contact'), findsOneWidget);
+        expect(find.text('Follow'), findsOneWidget);
       });
 
-      testWidgets('shows Remove as contact for followed user', (tester) async {
+      testWidgets('shows Unfollow for followed user', (tester) async {
         _api.followingPubkeys.add(_otherPubkey);
         await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
-        expect(find.text('Remove as contact'), findsOneWidget);
+        expect(find.text('Unfollow'), findsOneWidget);
       });
 
       testWidgets('calls follow API when tapped', (tester) async {

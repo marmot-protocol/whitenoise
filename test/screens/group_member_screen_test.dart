@@ -630,23 +630,23 @@ void main() {
     });
 
     group('follow button', () {
-      testWidgets('displays Add as contact button for non-followed member', (tester) async {
+      testWidgets('displays Follow button for non-followed member', (tester) async {
         _api.adminsList = [_testPubkey];
         await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
 
         expect(find.byKey(const Key('follow_button')), findsOneWidget);
-        expect(find.text('Add as contact'), findsOneWidget);
+        expect(find.text('Follow'), findsOneWidget);
       });
 
-      testWidgets('displays Remove as contact button for followed member', (tester) async {
+      testWidgets('displays Unfollow button for followed member', (tester) async {
         _api.adminsList = [_testPubkey];
         _api.followingPubkeys.add(_memberPubkey);
         await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
 
-        expect(find.text('Remove as contact'), findsOneWidget);
+        expect(find.text('Unfollow'), findsOneWidget);
       });
 
-      testWidgets('calls follow API when Add as contact is tapped', (tester) async {
+      testWidgets('calls follow API when Follow is tapped', (tester) async {
         _api.adminsList = [_testPubkey];
         await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
 
@@ -658,7 +658,7 @@ void main() {
         expect(_api.followCalls[0].target, _memberPubkey);
       });
 
-      testWidgets('calls unfollow API when Remove as contact is tapped', (tester) async {
+      testWidgets('calls unfollow API when Unfollow is tapped', (tester) async {
         _api.adminsList = [_testPubkey];
         _api.followingPubkeys.add(_memberPubkey);
         await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
