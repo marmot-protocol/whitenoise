@@ -20,13 +20,11 @@ class AddProfileScreen extends ConsumerWidget {
     final isOffline = ref.watch(offlineProvider).value ?? false;
 
     void navigateToLogin() {
-      if (isOffline) return;
       ref.read(isAddingAccountProvider.notifier).set(true);
       Routes.pushToLogin(context);
     }
 
     void navigateToSignup() {
-      if (isOffline) return;
       ref.read(isAddingAccountProvider.notifier).set(true);
       Routes.pushToSignup(context);
     }
