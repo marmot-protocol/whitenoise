@@ -105,6 +105,7 @@ class ChatScreen extends HookConsumerWidget {
       debugLog: debugLog,
     );
     final chatProfile = useChatProfile(context, pubkey, groupId);
+    final isGroupChat = chatProfile.data?.isDm == false;
     final scrollToMessageResult = useScrollToMessage(
       getReversedMessageIndex: getReversedMessageIndex,
       loadOlderMessages: loadOlderMessages,
@@ -262,7 +263,6 @@ class ChatScreen extends HookConsumerWidget {
 
     Future<void> showMessageMenu(ChatMessage message) async {
       FocusScope.of(context).unfocus();
-      final isGroupChat = chatProfile.data?.isDm != true;
       final authorMetadata = getAuthorMetadata(message.pubkey);
       final senderName = message.pubkey == pubkey
           ? context.l10n.you
@@ -374,7 +374,6 @@ class ChatScreen extends HookConsumerWidget {
                 : presentName(authorMetadata) ?? context.l10n.unknownUser;
             final senderPictureUrl = authorMetadata?.picture;
 
-            final isGroupChat = chatProfile.data?.isDm == false;
             final bool showAvatar;
             final bool showTail;
             if (isSearchMode) {
@@ -668,7 +667,7 @@ class ChatScreen extends HookConsumerWidget {
                         input: input,
                         mediaUpload: mediaUpload,
                         currentUserPubkey: pubkey,
-                        isGroupChat: chatProfile.data?.isDm != true,
+                        isGroupChat: isGroupChat,
                         onSend: sendMessage,
                         onError: showNotice,
                         getChatMessageQuote: getChatMessageQuote,
