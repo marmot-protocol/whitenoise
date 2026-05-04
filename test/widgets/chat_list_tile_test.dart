@@ -5,17 +5,20 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart' show
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
+import 'package:whitenoise/constants/feature_flags.dart' show FeatureFlag;
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
+import 'package:whitenoise/providers/feature_flags_provider.dart';
 import 'package:whitenoise/src/rust/api/chat_list.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/chat_list_menu.dart';
 import 'package:whitenoise/widgets/chat_list_tile.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
-import 'package:whitenoise/widgets/wn_chat_list_context_menu.dart';
 import 'package:whitenoise/widgets/wn_chat_list_item.dart';
+import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
@@ -24,6 +27,7 @@ ChatSummary _chatSummary({
   String? name,
   GroupType groupType = GroupType.group,
   bool pendingConfirmation = false,
+  bool selfRemoved = false,
   String? lastMessageContent,
   String? lastMessageAuthor,
   String? lastMessageAuthorDisplayName,
@@ -39,7 +43,7 @@ ChatSummary _chatSummary({
   groupType: groupType,
   createdAt: DateTime(2024),
   pendingConfirmation: pendingConfirmation,
-  selfRemoved: false,
+  selfRemoved: selfRemoved,
   unreadCount: BigInt.zero,
   groupImagePath: groupImagePath,
   groupImageUrl: groupImageUrl,
@@ -112,12 +116,14 @@ void main() {
     bool settle = true,
     void Function(String)? onError,
     bool isArchived = false,
+    List extraOverrides = const [],
   }) async {
     await mountWidget(
       ChatListTile(chatSummary: chatSummary, onError: onError, isArchived: isArchived),
       tester,
       overrides: [
         accountPubkeyProvider.overrideWith(MockAccountPubkeyNotifier.new),
+        ...extraOverrides,
       ],
     );
     if (settle) {
@@ -546,6 +552,49 @@ void main() {
         expect(item.subtitleIcon, isNull);
       });
 
+      group('selfRemoved', () {
+        testWidgets('shows "You left the group" when selfRemoved is true', (tester) async {
+          await pumpTile(tester, _chatSummary(selfRemoved: true));
+          final item = tester.widget<WnChatListItem>(find.byType(WnChatListItem));
+          expect(item.subtitle, 'You left the group');
+        });
+
+        testWidgets('suppresses author prefix when selfRemoved is true', (tester) async {
+          await pumpTile(
+            tester,
+            _chatSummary(
+              selfRemoved: true,
+              lastMessageContent: 'Last message before leaving',
+              lastMessageAuthor: testPubkeyA,
+            ),
+          );
+          final item = tester.widget<WnChatListItem>(find.byType(WnChatListItem));
+          expect(item.prefixSubtitle, isNull);
+        });
+
+        testWidgets('overrides last message content when selfRemoved is true', (tester) async {
+          await pumpTile(
+            tester,
+            _chatSummary(
+              selfRemoved: true,
+              lastMessageContent: 'Last message before leaving',
+            ),
+          );
+          final item = tester.widget<WnChatListItem>(find.byType(WnChatListItem));
+          expect(item.subtitle, 'You left the group');
+          expect(item.subtitle, isNot(contains('Last message before leaving')));
+        });
+
+        testWidgets('shows last message normally when selfRemoved is false', (tester) async {
+          await pumpTile(
+            tester,
+            _chatSummary(lastMessageContent: 'Regular message'),
+          );
+          final item = tester.widget<WnChatListItem>(find.byType(WnChatListItem));
+          expect(item.subtitle, 'Regular message');
+        });
+      });
+
       group('searchSnippet', () {
         testWidgets('overrides subtitle with the snippet text', (tester) async {
           await mountWidget(
@@ -789,7 +838,7 @@ void main() {
         await tester.longPress(find.byType(WnChatListItem));
         await tester.pumpAndSettle();
 
-        expect(find.byType(WnChatListContextMenu), findsOneWidget);
+        expect(find.byType(ChatListMenu), findsOneWidget);
       });
 
       testWidgets('pending chat has no onLongPress handler', (tester) async {
@@ -806,9 +855,13 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byKey(const Key('context_menu_card')), findsOneWidget);
-        final contextMenuFinder = find.byType(WnChatListContextMenu);
-        final contextMenu = tester.widget<WnChatListContextMenu>(contextMenuFinder);
-        expect(contextMenu.child, isA<WnChatListItem>());
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('context_menu_card')),
+            matching: find.text('Preview Chat'),
+          ),
+          findsOneWidget,
+        );
       });
 
       testWidgets('context menu is dismissed when tapping outside', (tester) async {
@@ -817,12 +870,12 @@ void main() {
         await tester.longPress(find.byType(WnChatListItem));
         await tester.pumpAndSettle();
 
-        expect(find.byType(WnChatListContextMenu), findsOneWidget);
+        expect(find.byType(ChatListMenu), findsOneWidget);
 
         await tester.tapAt(Offset.zero);
         await tester.pumpAndSettle();
 
-        expect(find.byType(WnChatListContextMenu), findsNothing);
+        expect(find.byType(ChatListMenu), findsNothing);
       });
 
       testWidgets('shows Pin label and icon for unpinned chat', (tester) async {
@@ -877,11 +930,13 @@ void main() {
         await tester.longPress(find.byType(WnChatListItem));
         await tester.pumpAndSettle();
 
-        final contextMenu = tester.widget<WnChatListContextMenu>(
-          find.byType(WnChatListContextMenu),
+        expect(
+          find.descendant(
+            of: find.byKey(const Key('context_menu_card')),
+            matching: find.byKey(const Key('avatar_pin_badge')),
+          ),
+          findsOneWidget,
         );
-        final previewItem = contextMenu.child as WnChatListItem;
-        expect(previewItem.showPinned, isTrue);
       });
 
       testWidgets('calls onError when setChatPinOrder fails', (tester) async {
@@ -1078,6 +1133,249 @@ void main() {
 
         expect(errorMessage, isNotNull);
         expect(errorMessage, contains('unarchive'));
+      });
+    });
+
+    group('leave group context menu', () {
+      testWidgets('does not show Leave group while kLeaveGroupEnabled is false', (
+        tester,
+      ) async {
+        await pumpTile(
+          tester,
+          _chatSummary(name: 'My Group'),
+          extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(false)],
+        );
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('context_menu_action_leave_group')), findsNothing);
+      });
+
+      testWidgets('does not show Leave group for DMs', (tester) async {
+        await pumpTile(
+          tester,
+          _chatSummary(name: 'Alice', groupType: GroupType.directMessage),
+          extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+        );
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('context_menu_action_leave_group')), findsNothing);
+      });
+
+      testWidgets(
+        'tapping Leave group transitions overlay to confirmation',
+        (tester) async {
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          expect(
+            find.byKey(const Key('context_menu_action_confirm_leave_group')),
+            findsOneWidget,
+          );
+          expect(find.byKey(const Key('context_menu_action_cancel_leave')), findsOneWidget);
+        },
+      );
+
+      testWidgets(
+        'confirmation shows leave warning text',
+        (tester) async {
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          expect(
+            find.text(
+              'Are you sure you want to leave this group? The chat will stay in your list '
+              "if you don't delete it, but you won't be able to send or receive new messages "
+              'unless someone re-invites you.',
+            ),
+            findsOneWidget,
+          );
+        },
+      );
+
+      testWidgets(
+        'confirmation title is "Leave group"',
+        (tester) async {
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('context_menu_navigation_header')), findsOneWidget);
+          expect(
+            find.descendant(
+              of: find.byType(WnSlateNavigationHeader),
+              matching: find.text('Leave group'),
+            ),
+            findsOneWidget,
+          );
+        },
+      );
+
+      testWidgets(
+        'Cancel on confirmation dismisses overlay',
+        (tester) async {
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_cancel_leave')));
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('context_menu_card')), findsNothing);
+        },
+      );
+
+      testWidgets(
+        'back arrow on confirmation returns to initial menu',
+        (tester) async {
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('slate_back_button')), findsOneWidget);
+          await tester.tap(find.byKey(const Key('slate_back_button')));
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('context_menu_action_leave_group')), findsOneWidget);
+          expect(find.byKey(const Key('context_menu_navigation_header')), findsNothing);
+        },
+      );
+
+      testWidgets(
+        'confirming Leave calls leaveGroup with correct args',
+        (tester) async {
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_confirm_leave_group')));
+          await tester.pumpAndSettle();
+
+          expect(_api.leaveGroupCallCount, 1);
+          expect(_api.lastLeaveGroupId, testGroupId);
+          expect(_api.lastLeaveGroupPubkey, testPubkeyA);
+        },
+      );
+
+      testWidgets(
+        'confirming Leave calls onChatListChanged',
+        (tester) async {
+          var refreshCalled = false;
+
+          await mountWidget(
+            ChatListTile(
+              chatSummary: _chatSummary(name: 'My Group'),
+              onChatListChanged: () => refreshCalled = true,
+            ),
+            tester,
+            overrides: [
+              accountPubkeyProvider.overrideWith(MockAccountPubkeyNotifier.new),
+              featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true),
+            ],
+          );
+          await tester.pumpAndSettle();
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_confirm_leave_group')));
+          await tester.pumpAndSettle();
+
+          expect(refreshCalled, isTrue);
+        },
+      );
+
+      testWidgets('does not show Leave group when selfRemoved is true', (tester) async {
+        await pumpTile(
+          tester,
+          _chatSummary(name: 'My Group', selfRemoved: true),
+          extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+        );
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('context_menu_action_leave_group')), findsNothing);
+      });
+
+      testWidgets('leaveGroup failure calls onError', (tester) async {
+        _api.shouldFailLeaveGroup = true;
+        String? errorMessage;
+
+        await pumpTile(
+          tester,
+          _chatSummary(name: 'My Group'),
+          onError: (msg) => errorMessage = msg,
+          extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+        );
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('context_menu_action_confirm_leave_group')));
+        await tester.pumpAndSettle();
+
+        expect(errorMessage, isNotNull);
+        expect(errorMessage, contains('leave'));
       });
     });
   });

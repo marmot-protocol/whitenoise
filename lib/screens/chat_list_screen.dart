@@ -99,9 +99,20 @@ class ChatListScreen extends HookConsumerWidget {
     required String? updateVersion,
     required VoidCallback onUpdateDismiss,
     required VoidCallback onWelcomeDismiss,
+    required String? noticeMessage,
+    required WnSystemNoticeType noticeType,
+    required VoidCallback onNoticeDismiss,
   }) {
     if (isOffline) {
       return const OfflineSystemNotice();
+    }
+    if (noticeMessage != null) {
+      return WnSystemNotice(
+        key: ValueKey(noticeMessage),
+        title: noticeMessage,
+        type: noticeType,
+        onDismiss: onNoticeDismiss,
+      );
     }
     if (updateVersion != null) {
       return WnSystemNotice(
@@ -296,21 +307,14 @@ class ChatListScreen extends HookConsumerWidget {
                       welcomeNoticeDismissed.value = true;
                     }
                   },
+                  noticeMessage: notice.noticeMessage,
+                  noticeType: notice.noticeType,
+                  onNoticeDismiss: notice.dismissNotice,
                 ),
                 header: const ChatListHeader(),
               ),
             ),
           ),
-          if (notice.noticeMessage != null)
-            SafeArea(
-              bottom: false,
-              child: WnSystemNotice(
-                key: ValueKey(notice.noticeMessage),
-                title: notice.noticeMessage!,
-                type: notice.noticeType,
-                onDismiss: notice.dismissNotice,
-              ),
-            ),
         ],
       ),
     );

@@ -1,22 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise/widgets/wn_chat_list_context_menu.dart';
+import 'package:whitenoise/widgets/chat_list_menu.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 
 import '../test_helpers.dart' show mountWidget;
 
 void main() {
-  group('WnChatListContextMenu', () {
-    WnChatListContextMenuController? activeController;
+  group('ChatListMenu', () {
+    ChatListMenuController? activeController;
 
     tearDown(() {
-      activeController?.dispose();
+      activeController?.dismiss();
       activeController = null;
     });
 
     Future<void> openContextMenu(
       WidgetTester tester, {
-      required List<WnChatListContextMenuAction> actions,
+      required List<ChatListAction> actions,
       String childText = 'Chat Item',
     }) async {
       final triggerKey = GlobalKey();
@@ -30,7 +30,7 @@ void main() {
                 behavior: HitTestBehavior.opaque,
                 onTap: () {
                   final renderBox = triggerKey.currentContext!.findRenderObject() as RenderBox;
-                  activeController = WnChatListContextMenu.show(
+                  activeController = ChatListMenu.show(
                     context,
                     childRenderBox: renderBox,
                     child: Text(childText),
@@ -58,11 +58,11 @@ void main() {
         await openContextMenu(
           tester,
           actions: [
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'pin',
               label: 'Pin',
               icon: WnIcons.pin,
-              onTap: () {},
+              onTap: () async {},
             ),
           ],
         );
@@ -77,11 +77,11 @@ void main() {
         await openContextMenu(
           tester,
           actions: [
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'pin',
               label: 'Pin',
               icon: WnIcons.pin,
-              onTap: () {},
+              onTap: () async {},
             ),
           ],
           childText: 'My Chat Preview',
@@ -94,23 +94,23 @@ void main() {
         await openContextMenu(
           tester,
           actions: [
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'pin',
               label: 'Pin',
               icon: WnIcons.pin,
-              onTap: () {},
+              onTap: () async {},
             ),
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'archive',
               label: 'Archive',
               icon: WnIcons.archive,
-              onTap: () {},
+              onTap: () async {},
             ),
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'delete',
               label: 'Delete',
               icon: WnIcons.trashCan,
-              onTap: () {},
+              onTap: () async {},
               isDestructive: true,
             ),
           ],
@@ -125,17 +125,17 @@ void main() {
         await openContextMenu(
           tester,
           actions: [
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'pin',
               label: 'Pin',
               icon: WnIcons.pin,
-              onTap: () {},
+              onTap: () async {},
             ),
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'archive',
               label: 'Archive',
               icon: WnIcons.archive,
-              onTap: () {},
+              onTap: () async {},
             ),
           ],
         );
@@ -154,11 +154,11 @@ void main() {
         await openContextMenu(
           tester,
           actions: [
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'delete',
               label: 'Delete',
               icon: WnIcons.trashCan,
-              onTap: () {},
+              onTap: () async {},
               isDestructive: true,
             ),
           ],
@@ -175,11 +175,11 @@ void main() {
         await openContextMenu(
           tester,
           actions: [
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'pin',
               label: 'Pin',
               icon: WnIcons.pin,
-              onTap: () {},
+              onTap: () async {},
             ),
           ],
         );
@@ -191,11 +191,11 @@ void main() {
         await openContextMenu(
           tester,
           actions: [
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'mute',
               label: 'Mute',
               icon: WnIcons.notificationOff,
-              onTap: () {},
+              onTap: () async {},
             ),
           ],
         );
@@ -214,11 +214,11 @@ void main() {
         await openContextMenu(
           tester,
           actions: [
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'pin',
               label: 'Pin',
               icon: WnIcons.pin,
-              onTap: () => pinCalled = true,
+              onTap: () async => pinCalled = true,
             ),
           ],
         );
@@ -235,11 +235,11 @@ void main() {
         await openContextMenu(
           tester,
           actions: [
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'pin',
               label: 'Pin',
               icon: WnIcons.pin,
-              onTap: () {},
+              onTap: () async {},
             ),
           ],
         );
@@ -264,11 +264,11 @@ void main() {
         await openContextMenu(
           tester,
           actions: [
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'pin',
               label: 'Pin',
               icon: WnIcons.pin,
-              onTap: () {},
+              onTap: () async {},
             ),
           ],
         );
@@ -291,11 +291,11 @@ void main() {
         await openContextMenu(
           tester,
           actions: [
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'pin',
               label: 'Pin',
               icon: WnIcons.pin,
-              onTap: () {},
+              onTap: () async {},
             ),
           ],
           childText: 'Card Content',
@@ -324,23 +324,23 @@ void main() {
         await openContextMenu(
           tester,
           actions: [
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'pin',
               label: 'Pin',
               icon: WnIcons.pin,
-              onTap: () => pinCalled = true,
+              onTap: () async => pinCalled = true,
             ),
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'archive',
               label: 'Archive',
               icon: WnIcons.archive,
-              onTap: () => archiveCalled = true,
+              onTap: () async => archiveCalled = true,
             ),
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'delete',
               label: 'Delete',
               icon: WnIcons.trashCan,
-              onTap: () => deleteCalled = true,
+              onTap: () async => deleteCalled = true,
               isDestructive: true,
             ),
           ],
@@ -362,17 +362,17 @@ void main() {
         await openContextMenu(
           tester,
           actions: [
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'pin',
               label: 'Pin',
               icon: WnIcons.pin,
-              onTap: () {},
+              onTap: () async {},
             ),
           ],
         );
 
         expect(
-          find.byType(WnChatListContextMenu),
+          find.byType(ChatListMenu),
           findsOneWidget,
         );
         expect(
@@ -389,11 +389,11 @@ void main() {
         await openContextMenu(
           tester,
           actions: [
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'pin',
               label: 'Pin',
               icon: WnIcons.pin,
-              onTap: () {},
+              onTap: () async {},
             ),
           ],
         );
@@ -415,7 +415,7 @@ void main() {
 
     group('controller', () {
       test('isShowing returns false when no overlay is set', () {
-        final controller = WnChatListContextMenuController();
+        final controller = ChatListMenuController();
         expect(controller.isShowing, isFalse);
       });
 
@@ -423,11 +423,11 @@ void main() {
         await openContextMenu(
           tester,
           actions: [
-            WnChatListContextMenuAction(
+            ChatListAction(
               id: 'pin',
               label: 'Pin',
               icon: WnIcons.pin,
-              onTap: () {},
+              onTap: () async {},
             ),
           ],
         );
@@ -436,14 +436,8 @@ void main() {
       });
 
       test('dismiss on fresh controller is a no-op', () {
-        final controller = WnChatListContextMenuController();
+        final controller = ChatListMenuController();
         controller.dismiss();
-        expect(controller.isShowing, isFalse);
-      });
-
-      test('dispose on fresh controller is a no-op', () {
-        final controller = WnChatListContextMenuController();
-        controller.dispose();
         expect(controller.isShowing, isFalse);
       });
 
@@ -453,11 +447,11 @@ void main() {
           await openContextMenu(
             tester,
             actions: [
-              WnChatListContextMenuAction(
+              ChatListAction(
                 id: 'pin',
                 label: 'Pin',
                 icon: WnIcons.pin,
-                onTap: () {},
+                onTap: () async {},
               ),
             ],
           );
@@ -472,24 +466,35 @@ void main() {
       );
     });
 
-    group('WnChatListContextMenuAction', () {
+    group('ChatListAction', () {
       test('defaults isDestructive to false', () {
-        final action = WnChatListContextMenuAction(
+        final action = ChatListAction(
           id: 'pin',
           label: 'Pin',
           icon: WnIcons.pin,
-          onTap: () {},
+          onTap: () async {},
         );
 
         expect(action.isDestructive, isFalse);
       });
 
+      test('defaults autoDismiss to true', () {
+        final action = ChatListAction(
+          id: 'pin',
+          label: 'Pin',
+          icon: WnIcons.pin,
+          onTap: () async {},
+        );
+
+        expect(action.autoDismiss, isTrue);
+      });
+
       test('stores id, label and icon', () {
-        final action = WnChatListContextMenuAction(
+        final action = ChatListAction(
           id: 'archive',
           label: 'Archive',
           icon: WnIcons.archive,
-          onTap: () {},
+          onTap: () async {},
         );
 
         expect(action.id, 'archive');
@@ -498,15 +503,284 @@ void main() {
       });
 
       test('stores isDestructive when set to true', () {
-        final action = WnChatListContextMenuAction(
+        final action = ChatListAction(
           id: 'delete',
           label: 'Delete',
           icon: WnIcons.trashCan,
-          onTap: () {},
+          onTap: () async {},
           isDestructive: true,
         );
 
         expect(action.isDestructive, isTrue);
+      });
+
+      test('stores autoDismiss when set to false', () {
+        final action = ChatListAction(
+          id: 'leave_group',
+          label: 'Leave group',
+          icon: WnIcons.leave,
+          onTap: () async {},
+          autoDismiss: false,
+        );
+
+        expect(action.autoDismiss, isFalse);
+      });
+    });
+
+    group('PopScope / Android back', () {
+      testWidgets('Android back dismisses overlay when no onBack registered', (tester) async {
+        await openContextMenu(
+          tester,
+          actions: [
+            ChatListAction(
+              id: 'pin',
+              label: 'Pin',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+        );
+
+        expect(find.byKey(const Key('context_menu_card')), findsOneWidget);
+
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('context_menu_card')), findsNothing);
+      });
+
+      testWidgets('Android back calls onBack when registered', (tester) async {
+        var onBackCalled = false;
+
+        await openContextMenu(
+          tester,
+          actions: [
+            ChatListAction(
+              id: 'pin',
+              label: 'Pin',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+        );
+
+        activeController!.updateState(
+          [
+            ChatListAction(
+              id: 'confirm',
+              label: 'Confirm',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+          title: 'Step 2',
+          onBack: () => onBackCalled = true,
+        );
+        await tester.pumpAndSettle();
+
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+
+        expect(onBackCalled, isTrue);
+        expect(find.byKey(const Key('context_menu_card')), findsOneWidget);
+      });
+    });
+
+    group('title header', () {
+      testWidgets('no title renders no navigation header', (tester) async {
+        await openContextMenu(
+          tester,
+          actions: [
+            ChatListAction(
+              id: 'pin',
+              label: 'Pin',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+        );
+
+        expect(
+          find.byKey(const Key('context_menu_navigation_header')),
+          findsNothing,
+        );
+      });
+
+      testWidgets('title renders header text after updateState', (tester) async {
+        await openContextMenu(
+          tester,
+          actions: [
+            ChatListAction(
+              id: 'pin',
+              label: 'Pin',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+        );
+
+        activeController!.updateState(
+          [
+            ChatListAction(
+              id: 'confirm',
+              label: 'Confirm',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+          title: 'Leave group',
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('context_menu_navigation_header')), findsOneWidget);
+        expect(find.text('Leave group'), findsOneWidget);
+      });
+
+      testWidgets('title back arrow calls onBack', (tester) async {
+        var onBackCalled = false;
+
+        await openContextMenu(
+          tester,
+          actions: [
+            ChatListAction(
+              id: 'pin',
+              label: 'Pin',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+        );
+
+        activeController!.updateState(
+          [
+            ChatListAction(
+              id: 'confirm',
+              label: 'Confirm',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+          title: 'Step 2',
+          onBack: () => onBackCalled = true,
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.byKey(const Key('slate_back_button')));
+        await tester.pumpAndSettle();
+
+        expect(onBackCalled, isTrue);
+      });
+
+      testWidgets('no back arrow when title set but no onBack', (tester) async {
+        await openContextMenu(
+          tester,
+          actions: [
+            ChatListAction(
+              id: 'pin',
+              label: 'Pin',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+        );
+
+        activeController!.updateState(
+          [
+            ChatListAction(
+              id: 'confirm',
+              label: 'Confirm',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+          title: 'Step 2',
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('slate_back_button')), findsNothing);
+      });
+    });
+
+    group('updateState', () {
+      testWidgets('updateState replaces action buttons', (tester) async {
+        await openContextMenu(
+          tester,
+          actions: [
+            ChatListAction(
+              id: 'pin',
+              label: 'Pin',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+        );
+
+        expect(find.byKey(const Key('context_menu_action_pin')), findsOneWidget);
+
+        activeController!.updateState([
+          ChatListAction(
+            id: 'confirm',
+            label: 'Confirm action',
+            icon: WnIcons.pin,
+            onTap: () async {},
+          ),
+        ]);
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('context_menu_action_pin')), findsNothing);
+        expect(find.byKey(const Key('context_menu_action_confirm')), findsOneWidget);
+      });
+
+      testWidgets('action with autoDismiss false does not dismiss on tap', (tester) async {
+        var tapCalled = false;
+
+        await openContextMenu(
+          tester,
+          actions: [
+            ChatListAction(
+              id: 'no_dismiss',
+              label: 'No dismiss',
+              icon: WnIcons.pin,
+              autoDismiss: false,
+              onTap: () async => tapCalled = true,
+            ),
+          ],
+        );
+
+        await tester.tap(find.byKey(const Key('context_menu_action_no_dismiss')));
+        await tester.pumpAndSettle();
+
+        expect(tapCalled, isTrue);
+        expect(find.byKey(const Key('context_menu_card')), findsOneWidget);
+      });
+
+      testWidgets('middleContent is shown after updateState', (tester) async {
+        await openContextMenu(
+          tester,
+          actions: [
+            ChatListAction(
+              id: 'pin',
+              label: 'Pin',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+        );
+
+        activeController!.updateState(
+          [
+            ChatListAction(
+              id: 'confirm',
+              label: 'Confirm',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+          middleContent: const Text('Warning message'),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Warning message'), findsOneWidget);
       });
     });
   });
