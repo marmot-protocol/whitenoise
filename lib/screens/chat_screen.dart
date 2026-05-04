@@ -374,7 +374,7 @@ class ChatScreen extends HookConsumerWidget {
                 : presentName(authorMetadata) ?? context.l10n.unknownUser;
             final senderPictureUrl = authorMetadata?.picture;
 
-            final isGroupChat = chatProfile.data?.isDm != true;
+            final isGroupChat = chatProfile.data?.isDm == false;
             final bool showAvatar;
             final bool showTail;
             if (isSearchMode) {

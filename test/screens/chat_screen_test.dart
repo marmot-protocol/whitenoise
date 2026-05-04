@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/debug_view_provider.dart';
 import 'package:whitenoise/providers/offline_provider.dart';
@@ -11,6 +12,7 @@ import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_info_screen.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/chat_raw_debug_screen.dart';
+import 'package:whitenoise/screens/chat_screen.dart';
 import 'package:whitenoise/screens/group_info_screen.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
 import 'package:whitenoise/src/rust/api/chat_list.dart';
@@ -102,6 +104,7 @@ class _MockApi extends MockWnApi {
   Exception? retryError;
   int _sendCallCount = 0;
   bool isDm = false;
+  Completer<bool>? isDmCompleter;
   List<String> groupMembers = [];
   Completer<MediaFile>? uploadCompleter;
   Map<String, FlutterMetadata>? metadataByPubkey;
@@ -129,6 +132,7 @@ class _MockApi extends MockWnApi {
     retryError = null;
     _sendCallCount = 0;
     isDm = false;
+    isDmCompleter = null;
     groupMembers = [];
     uploadCompleter = null;
     metadataByPubkey = null;
@@ -299,6 +303,7 @@ class _MockApi extends MockWnApi {
     required Group that,
     required String accountPubkey,
   }) {
+    if (isDmCompleter != null) return isDmCompleter!.future;
     return Future.value(isDm);
   }
 
@@ -390,6 +395,11 @@ class _MockApi extends MockWnApi {
 class _MockAuthNotifier extends AuthNotifier {
   @override
   Future<String?> build() async => _testPubkey;
+}
+
+class _MockAccountPubkeyNotifier extends AccountPubkeyNotifier {
+  @override
+  String build() => _testPubkey;
 }
 
 class _MockDebugViewNotifier extends DebugViewNotifier {
@@ -628,6 +638,35 @@ void main() {
         await pumpChatScreen(tester);
 
         expect(avatarsInBubbles(), findsOneWidget);
+      });
+
+      testWidgets('DM never shows bubble avatar while chat profile is loading', (tester) async {
+        _api.initialMessages = [
+          _message('m1', DateTime(2024)),
+        ];
+        _api.isDm = true;
+        _api.isDmCompleter = Completer<bool>();
+        _api.groupMembers = [_testPubkey, testPubkeyC];
+
+        await mountWidget(
+          const ChatScreen(groupId: _testGroupId),
+          tester,
+          overrides: [
+            accountPubkeyProvider.overrideWith(_MockAccountPubkeyNotifier.new),
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            offlineProvider.overrideWith((ref) => Stream.value(false)),
+          ],
+        );
+        await tester.pump();
+        await tester.pump();
+
+        expect(find.byType(WnMessageBubble), findsOneWidget);
+        expect(avatarsInBubbles(), findsNothing);
+
+        _api.isDmCompleter!.complete(true);
+        await tester.pumpAndSettle();
+
+        expect(avatarsInBubbles(), findsNothing);
       });
 
       testWidgets('same sender <5 min apart: only older message has tail', (tester) async {
