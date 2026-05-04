@@ -6,6 +6,7 @@ use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
 use whitenoise::mdk::{Group as WhitenoiseGroup, GroupState as WhitenoiseGroupState};
 use whitenoise::mdk::{NostrGroupConfigData, NostrGroupDataUpdate};
+use whitenoise::whitenoise::groups::RequiredProposal as WhitenoiseRequiredProposal;
 use whitenoise::{
     GroupInformation as WhitenoiseGroupInformation, GroupType as WhitenoiseGroupType,
     GroupWithInfoAndMembership as WhitenoiseGroupWithInfoAndMembership, Whitenoise,
@@ -171,6 +172,22 @@ impl From<WhitenoiseGroupType> for GroupType {
         match whitenoise_type {
             WhitenoiseGroupType::DirectMessage => GroupType::DirectMessage,
             WhitenoiseGroupType::Group => GroupType::Group,
+        }
+    }
+}
+
+#[frb]
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum RequiredProposal {
+    SelfRemove,
+    Unknown,
+}
+
+impl From<WhitenoiseRequiredProposal> for RequiredProposal {
+    fn from(required_proposal: WhitenoiseRequiredProposal) -> Self {
+        match required_proposal {
+            WhitenoiseRequiredProposal::SelfRemove => RequiredProposal::SelfRemove,
+            WhitenoiseRequiredProposal::Unknown => RequiredProposal::Unknown,
         }
     }
 }
@@ -385,6 +402,24 @@ pub async fn get_group(account_pubkey: String, group_id: String) -> Result<Group
 }
 
 #[frb]
+pub async fn group_required_proposals(
+    account_pubkey: String,
+    group_id: String,
+) -> Result<Vec<RequiredProposal>, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let group_id = group_id_from_string(&group_id)?;
+    let required_proposals = whitenoise
+        .group_required_proposals(&account, &group_id)
+        .await?;
+    Ok(required_proposals
+        .into_iter()
+        .map(RequiredProposal::from)
+        .collect())
+}
+
+#[frb]
 pub async fn get_group_information(
     account_pubkey: String,
     group_id: String,
@@ -479,6 +514,23 @@ pub async fn upload_group_image(
         image_key,
         image_nonce,
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn required_proposal_from_whitenoise_required_proposal() {
+        assert_eq!(
+            RequiredProposal::from(WhitenoiseRequiredProposal::SelfRemove),
+            RequiredProposal::SelfRemove,
+        );
+        assert_eq!(
+            RequiredProposal::from(WhitenoiseRequiredProposal::Unknown),
+            RequiredProposal::Unknown,
+        );
+    }
 }
 
 #[frb]

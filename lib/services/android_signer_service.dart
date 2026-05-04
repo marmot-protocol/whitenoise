@@ -13,6 +13,7 @@ final _logger = Logger('AndroidSignerService');
 // NIP-55 (https://github.com/nostr-protocol/nips/blob/master/55.md)
 final _defaultSignerPermissions = [
   const SignerPermission(type: 'sign_event', kind: NostrEventKinds.mlsKeyPackage),
+  const SignerPermission(type: 'sign_event', kind: NostrEventKinds.mlsKeyPackageLegacy),
   const SignerPermission(type: 'sign_event', kind: NostrEventKinds.mlsWelcome),
   const SignerPermission(type: 'sign_event', kind: NostrEventKinds.mlsGroupMessage),
   const SignerPermission(type: 'sign_event', kind: NostrEventKinds.giftWrap),

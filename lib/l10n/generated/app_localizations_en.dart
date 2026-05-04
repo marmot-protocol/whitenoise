@@ -20,6 +20,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String mediaCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Media items',
+      one: 'Media item',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get appTitle => 'White Noise';
 
   @override
@@ -449,7 +460,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get refreshKeyPackages => 'Refresh Key Packages';
 
   @override
-  String get deleteAllKeyPackages => 'Delete All Key Packages';
+  String get deleteLegacyKeyPackages => 'Delete Legacy Key Packages';
 
   @override
   String keyPackagesCount(int count) {
@@ -466,7 +477,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get keyPackagesRefreshed => 'Key packages refreshed';
 
   @override
-  String get keyPackagesDeleted => 'All key packages deleted';
+  String get legacyKeyPackagesDeleted => 'Legacy key packages deleted';
 
   @override
   String get keyPackageDeleted => 'Key package deleted';
@@ -481,7 +492,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get keyPackageDeleteFailed => 'Failed to delete key package. Please try again.';
 
   @override
-  String get keyPackageDeleteAllFailed => 'Failed to delete all key packages. Please try again.';
+  String get legacyKeyPackageDeleteFailed =>
+      'Failed to delete legacy key packages. Please try again.';
+
+  @override
+  String get legacyLabel => 'Legacy';
 
   @override
   String packageNumber(int number) {
@@ -1389,8 +1404,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get removedFromGroup => 'You were removed from this group';
 
   @override
+  String get youLeftThisGroup => 'You left this group';
+
+  @override
   String get removedFromGroupDescription =>
-      'You can still view saved messages, but you can\'t send or receive new ones. You can archive or delete the chat anytime.';
+      'You can still view saved messages, but you can\'t send or receive new ones. You can archive the chat anytime.';
 
   @override
   String get notificationSettings => 'Notifications';
@@ -1416,10 +1434,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get waitingForInternet => 'Waiting for internet connection';
 
   @override
-  String get leaveGroup => 'Leave group';
+  String get leave => 'Leave';
 
   @override
-  String get leaveGroupConfirmation => 'Leave group';
+  String get leaveGroup => 'Leave group';
 
   @override
   String get leaveGroupWarning =>
@@ -1427,4 +1445,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get failedToLeaveGroup => 'Failed to leave group. Please try again.';
+
+  @override
+  String get youLeftTheGroup => 'You left the group';
 }

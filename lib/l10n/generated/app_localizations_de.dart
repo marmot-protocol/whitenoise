@@ -20,6 +20,17 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String mediaCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Medien',
+      one: 'Medium',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get appTitle => 'White Noise';
 
   @override
@@ -459,7 +470,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get refreshKeyPackages => 'Schlüsselpakete aktualisieren';
 
   @override
-  String get deleteAllKeyPackages => 'Alle Schlüsselpakete löschen';
+  String get deleteLegacyKeyPackages => 'Veraltete Schlüsselpakete löschen';
 
   @override
   String keyPackagesCount(int count) {
@@ -476,7 +487,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get keyPackagesRefreshed => 'Schlüsselpakete aktualisiert';
 
   @override
-  String get keyPackagesDeleted => 'Alle Schlüsselpakete gelöscht';
+  String get legacyKeyPackagesDeleted => 'Veraltete Schlüsselpakete gelöscht';
 
   @override
   String get keyPackageDeleted => 'Schlüsselpaket gelöscht';
@@ -494,8 +505,11 @@ class AppLocalizationsDe extends AppLocalizations {
       'Schlüsselpaket konnte nicht gelöscht werden. Bitte erneut versuchen.';
 
   @override
-  String get keyPackageDeleteAllFailed =>
-      'Schlüsselpakete konnten nicht gelöscht werden. Bitte erneut versuchen.';
+  String get legacyKeyPackageDeleteFailed =>
+      'Veraltete Schlüsselpakete konnten nicht gelöscht werden. Bitte erneut versuchen.';
+
+  @override
+  String get legacyLabel => 'Veraltet';
 
   @override
   String packageNumber(int number) {
@@ -1429,8 +1443,11 @@ class AppLocalizationsDe extends AppLocalizations {
   String get removedFromGroup => 'Du wurdest aus dieser Gruppe entfernt';
 
   @override
+  String get youLeftThisGroup => 'Du hast diese Gruppe verlassen';
+
+  @override
   String get removedFromGroupDescription =>
-      'Du kannst gespeicherte Nachrichten noch lesen, aber keine neuen senden oder empfangen. Du kannst den Chat jederzeit archivieren oder löschen.';
+      'Du kannst gespeicherte Nachrichten noch lesen, aber keine neuen senden oder empfangen. Du kannst den Chat jederzeit archivieren.';
 
   @override
   String get notificationSettings => 'Benachrichtigungen';
@@ -1456,10 +1473,10 @@ class AppLocalizationsDe extends AppLocalizations {
   String get waitingForInternet => 'Warten auf Internetverbindung';
 
   @override
-  String get leaveGroup => 'Gruppe verlassen';
+  String get leave => 'Verlassen';
 
   @override
-  String get leaveGroupConfirmation => 'Gruppe verlassen';
+  String get leaveGroup => 'Gruppe verlassen';
 
   @override
   String get leaveGroupWarning =>
@@ -1468,4 +1485,7 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get failedToLeaveGroup =>
       'Gruppe konnte nicht verlassen werden. Bitte versuche es erneut.';
+
+  @override
+  String get youLeftTheGroup => 'Du hast die Gruppe verlassen';
 }

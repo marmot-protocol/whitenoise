@@ -2,6 +2,7 @@ import 'package:flutter/material.dart' show Key, SizedBox;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_key_package_card.dart';
+import 'package:whitenoise/widgets/wn_pill.dart';
 import '../test_helpers.dart' show mountWidget;
 
 void main() {
@@ -203,6 +204,36 @@ void main() {
         expect(find.text('Key Package #42'), findsOneWidget);
         expect(find.textContaining('xyz789'), findsOneWidget);
         expect(find.textContaining('2025-12-25T12:00:00.000Z'), findsOneWidget);
+      });
+    });
+
+    group('legacy pill', () {
+      testWidgets('shows legacy pill when legacyLabel is provided', (WidgetTester tester) async {
+        final widget = WnKeyPackageCard(
+          title: 'Key Package #1',
+          packageId: 'abc123',
+          createdAt: '2026-01-28T21:00:42.000Z',
+          onDelete: () {},
+          deleteLabel: 'Delete',
+          legacyLabel: 'Legacy',
+        );
+        await mountWidget(widget, tester);
+        expect(find.byType(WnPill), findsOneWidget);
+        expect(find.text('Legacy'), findsOneWidget);
+      });
+
+      testWidgets('does not show legacy pill when legacyLabel is null', (
+        WidgetTester tester,
+      ) async {
+        final widget = WnKeyPackageCard(
+          title: 'Key Package #1',
+          packageId: 'abc123',
+          createdAt: '2026-01-28T21:00:42.000Z',
+          onDelete: () {},
+          deleteLabel: 'Delete',
+        );
+        await mountWidget(widget, tester);
+        expect(find.byKey(const Key('legacy_pill')), findsNothing);
       });
     });
 

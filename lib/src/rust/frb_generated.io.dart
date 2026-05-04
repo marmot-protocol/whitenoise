@@ -470,6 +470,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<Relay> dco_decode_list_relay(dynamic raw);
 
   @protected
+  List<RequiredProposal> dco_decode_list_required_proposal(dynamic raw);
+
+  @protected
   List<SearchResult> dco_decode_list_search_result(dynamic raw);
 
   @protected
@@ -590,6 +593,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Relay dco_decode_relay(dynamic raw);
+
+  @protected
+  RequiredProposal dco_decode_required_proposal(dynamic raw);
 
   @protected
   SearchResult dco_decode_search_result(dynamic raw);
@@ -1101,6 +1107,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<Relay> sse_decode_list_relay(SseDeserializer deserializer);
 
   @protected
+  List<RequiredProposal> sse_decode_list_required_proposal(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   List<SearchResult> sse_decode_list_search_result(
     SseDeserializer deserializer,
   );
@@ -1249,6 +1260,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   Relay sse_decode_relay(SseDeserializer deserializer);
+
+  @protected
+  RequiredProposal sse_decode_required_proposal(SseDeserializer deserializer);
 
   @protected
   SearchResult sse_decode_search_result(SseDeserializer deserializer);
@@ -1882,6 +1896,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_list_relay(List<Relay> self, SseSerializer serializer);
 
   @protected
+  void sse_encode_list_required_proposal(
+    List<RequiredProposal> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_search_result(
     List<SearchResult> self,
     SseSerializer serializer,
@@ -2064,6 +2084,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_relay(Relay self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_required_proposal(
+    RequiredProposal self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_search_result(SearchResult self, SseSerializer serializer);

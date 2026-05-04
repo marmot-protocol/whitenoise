@@ -4,6 +4,8 @@
 
 A secure, private, and decentralized chat app using the [marmot protocol 🦫](https://github.com/marmot-protocol/marmot) to build secure messaging with MLS and Nostr
 
+> This is the Flutter app repository. If you're looking for the core messaging logic of whitenoise or the CLI, those live in [whitenoise-rs](https://github.com/marmot-protocol/whitenoise-rs).
+
 ## 📱 Supported Platforms
 
 ![Supported Platforms](https://blossom.primal.net/f03868727daf86f5d7d28d0e1286595381195f2d5e11b67c0d07e0b6fd8643fe.png)
@@ -102,6 +104,12 @@ genhtml coverage/lcov.info -o coverage/html
 - We pass data to hooks, not widget refs.
 - We let screens watch providers and pass data to hooks.
 - We avoid comments unless strictly necessary and write self-explanatory code.
+
+## Contributing
+
+Contributions are welcome. Please read [CONTRIBUTING.md](CONTRIBUTING.md) before opening a PR.
+
+TLDR: fork the repo, open or comment on an issue before building significant features, keep PRs under ~500 lines, open as a draft if it's not ready for review, always run `just precommit`, and include screenshots for UI changes.
 
 ## 📚 Resources
 

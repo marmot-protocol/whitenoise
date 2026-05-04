@@ -1,0 +1,202 @@
+require 'fileutils'
+require 'open3'
+require 'shellwords'
+
+opt_out_usage
+
+ROOT = File.expand_path('..', __dir__)
+FLAVORS = {
+  'staging' => {
+    artifact_prefix: 'whitenoise-staging',
+    android_package_name: 'org.parres.whitenoise.staging',
+    ios_app_identifier: 'dev.ipf.whitenoise.staging',
+  },
+  'production' => {
+    artifact_prefix: 'whitenoise',
+    android_package_name: 'org.parres.whitenoise',
+    ios_app_identifier: 'org.parres.whitenoise',
+  },
+}.freeze
+
+def run_from_root(parts)
+  sh("cd #{Shellwords.escape(ROOT)} && #{parts.shelljoin}")
+end
+
+def flavor_config(flavor)
+  config = FLAVORS[flavor.to_s]
+  UI.user_error!("Unknown release flavor: #{flavor}") unless config
+  config
+end
+
+def release_tag(options = {})
+  tag = options[:tag].to_s.strip
+  return tag unless tag.empty?
+
+  tag = ENV.fetch('RELEASE_TAG', '').to_s.strip
+  return tag unless tag.empty?
+
+  return ENV.fetch('GITHUB_REF_NAME', '').to_s.strip if ENV['GITHUB_REF_TYPE'] == 'tag'
+
+  ''
+end
+
+def release_info(options = {})
+  tag = release_tag(options)
+
+  command = ['./scripts/validate_release_version.sh']
+  command += ['--tag', tag] unless tag.empty?
+
+  output, error, status = Open3.capture3(*command, chdir: ROOT)
+  UI.user_error!(error.strip.empty? ? output.strip : error.strip) unless status.success?
+
+  info = {}
+  output.lines.each do |line|
+    key, value = line.strip.split('=', 2)
+    info[key] = value if key && value
+  end
+
+  UI.user_error!('Release version could not be resolved') unless info['full_version']
+  UI.user_error!('Release build number could not be resolved') unless info['build_number']
+
+  info
+end
+
+def flutter_build_args(info)
+  ['--build-name', info['version_name'], '--build-number', info['build_number']]
+end
+
+def release_output_dir(info, flavor, *parts)
+  File.join(ROOT, 'build', 'releases', "v#{info['full_version']}", flavor.to_s, *parts)
+end
+
+def stage_artifact(source, destination_dir, destination_name)
+  UI.user_error!("Missing artifact: #{source}") unless File.file?(source)
+
+  FileUtils.mkdir_p(destination_dir)
+  destination = File.join(destination_dir, destination_name)
+  FileUtils.cp(source, destination)
+  UI.message("Staged #{destination}")
+  destination
+end
+
+def latest_ipa
+  Dir[File.join(ROOT, 'build', 'ios', 'ipa', '*.ipa')].max_by { |path| File.mtime(path) }
+end
+
+def android_aab(flavor)
+  candidates = Dir[File.join(ROOT, 'build', 'app', 'outputs', 'bundle', '**', "*#{flavor}*.aab")]
+  candidates.max_by { |path| File.mtime(path) }
+end
+
+def require_macos!
+  UI.user_error!('iOS release builds require macOS') unless RUBY_PLATFORM.include?('darwin')
+end
+
+def build_android_flavor(flavor, options, build_native: true)
+  info = release_info(options)
+  config = flavor_config(flavor)
+  args = flutter_build_args(info)
+
+  run_from_root(['./scripts/build_android.sh']) if build_native
+  run_from_root(['flutter', 'build', 'apk', '--flavor', flavor, '--split-per-abi'] + args)
+  run_from_root(['flutter', 'build', 'appbundle', '--flavor', flavor] + args)
+
+  apk_dir = File.join(ROOT, 'build', 'app', 'outputs', 'flutter-apk')
+  output_dir = release_output_dir(info, flavor, 'android')
+
+  %w[arm64-v8a armeabi-v7a x86_64].each do |abi|
+    source = File.join(apk_dir, "app-#{abi}-#{flavor}-release.apk")
+    unless File.file?(source)
+      next UI.important("Skipping missing optional APK: #{source}") if abi == 'armeabi-v7a'
+
+      UI.user_error!("Required APK was not found: #{source}")
+    end
+
+    stage_artifact(source, output_dir, "#{config[:artifact_prefix]}-#{info['version_name']}-#{abi}.apk")
+  end
+
+  source = android_aab(flavor)
+  UI.user_error!("#{flavor.capitalize} AAB was not found") unless source
+
+  stage_artifact(source, output_dir, "#{config[:artifact_prefix]}-#{info['version_name']}.aab")
+end
+
+def build_ios_flavor(flavor, options, build_native: true)
+  require_macos!
+  info = release_info(options)
+  config = flavor_config(flavor)
+
+  run_from_root(['./scripts/build_ios.sh']) if build_native
+  run_from_root(
+    ['flutter', 'build', 'ipa', '--flavor', flavor, '--export-method', 'app-store'] +
+      flutter_build_args(info),
+  )
+
+  source = latest_ipa
+  UI.user_error!("#{flavor.capitalize} IPA was not found") unless source
+
+  stage_artifact(
+    source,
+    release_output_dir(info, flavor, 'ios'),
+    "#{config[:artifact_prefix]}-#{info['full_version']}.ipa",
+  )
+end
+
+def build_channel_release(flavor, options)
+  build_android_flavor(flavor, options)
+
+  if RUBY_PLATFORM.include?('darwin')
+    build_ios_flavor(flavor, options)
+  else
+    UI.important("Skipping #{flavor} iOS artifacts because this machine is not macOS")
+  end
+end
+
+desc 'Validate release version metadata'
+lane :release_doctor do |options|
+  info = release_info(options)
+  UI.success("Release #{info['full_version']} is ready to build")
+end
+
+desc 'Build staging Android APKs and AAB'
+lane :build_android_staging do |options|
+  build_android_flavor('staging', options)
+end
+
+desc 'Build production Android APKs and AAB'
+lane :build_android_production do |options|
+  build_android_flavor('production', options)
+end
+
+desc 'Build staging iOS IPA for App Store Connect/TestFlight'
+lane :build_ios_staging do |options|
+  build_ios_flavor('staging', options)
+end
+
+desc 'Build production iOS IPA for App Store Connect/TestFlight'
+lane :build_ios_production do |options|
+  build_ios_flavor('production', options)
+end
+
+desc 'Build staging app release artifacts'
+lane :build_staging_release do |options|
+  build_channel_release('staging', options)
+end
+
+desc 'Build production app release artifacts'
+lane :build_production_release do |options|
+  build_channel_release('production', options)
+end
+
+desc 'Build staging and production release artifacts'
+lane :build_all_release_artifacts do |options|
+  build_android_flavor('staging', options)
+  build_android_flavor('production', options, build_native: false)
+
+  if RUBY_PLATFORM.include?('darwin')
+    build_ios_flavor('staging', options)
+    build_ios_flavor('production', options, build_native: false)
+  else
+    UI.important('Skipping iOS artifacts because this machine is not macOS')
+  end
+end

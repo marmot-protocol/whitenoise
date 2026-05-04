@@ -1,3 +1,4 @@
+import 'dart:async' show unawaited;
 import 'dart:io' show Directory, File, FileSystemException;
 
 import 'package:flutter/material.dart';
@@ -14,8 +15,10 @@ import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDi
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/app_log_provider.dart' show appLogStore;
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
+import 'package:whitenoise/providers/foreground_service_provider.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
-import 'package:whitenoise/providers/notification_provider.dart' show notificationListenerProvider;
+import 'package:whitenoise/providers/notification_provider.dart'
+    show consumePendingNotificationTap, notificationListenerProvider, routePendingTap;
 import 'package:whitenoise/providers/theme_provider.dart' show themeProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/screens/fatal_error_screen.dart';
@@ -111,13 +114,41 @@ class WnApp extends ConsumerStatefulWidget {
   ConsumerState<WnApp> createState() => _WnAppState();
 }
 
-class _WnAppState extends ConsumerState<WnApp> {
+class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
   late final GoRouter _router;
 
   @override
   void initState() {
     super.initState();
     _router = Routes.build(ref);
+    WidgetsBinding.instance.addObserver(this);
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      unawaited(_consumePendingNotificationTap());
+    });
+  }
+
+  Future<void> _consumePendingNotificationTap() async {
+    final pending = await consumePendingNotificationTap();
+    await routePendingTap(
+      pending: pending,
+      isMounted: mounted,
+      currentActivePubkey: ref.read(authProvider).value,
+      switchToProfile: ref.read(authProvider.notifier).switchProfile,
+    );
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    unawaited(ref.read(foregroundServiceProvider).handleAppLifecycleChange(state));
+    if (state == AppLifecycleState.resumed) {
+      unawaited(_consumePendingNotificationTap());
+    }
   }
 
   @override

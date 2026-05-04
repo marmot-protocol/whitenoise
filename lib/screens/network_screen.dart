@@ -8,8 +8,10 @@ import 'package:whitenoise/hooks/use_network_relays.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/offline_system_notice.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_confirmation_slate.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
@@ -17,7 +19,7 @@ import 'package:whitenoise/widgets/wn_list.dart';
 import 'package:whitenoise/widgets/wn_list_item.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
-import 'package:whitenoise/widgets/wn_system_notice.dart' show WnSystemNotice;
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 import 'package:whitenoise/widgets/wn_tooltip.dart';
 
 class NetworkScreen extends HookConsumerWidget {
@@ -31,6 +33,7 @@ class NetworkScreen extends HookConsumerWidget {
     final (:state, :fetchAll, :addRelay, :removeRelay, :restoreDefaultRelays) = useNetworkRelays(
       pubkey,
     );
+    final isOffline = ref.watch(offlineProvider).value ?? false;
     final listItemController = useListItemController();
     final (:noticeMessage, :noticeType, :showErrorNotice, :showSuccessNotice, :dismissNotice) =
         useSystemNotice();
@@ -128,24 +131,28 @@ class NetworkScreen extends HookConsumerWidget {
       );
     }
 
+    final systemNotice = isOffline
+        ? const OfflineSystemNotice()
+        : noticeMessage != null
+        ? WnSystemNotice(
+            key: ValueKey(noticeMessage),
+            title: noticeMessage,
+            type: noticeType,
+            onDismiss: dismissNotice,
+          )
+        : null;
+
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
         child: WnSlate(
           showTopScrollEffect: true,
           showBottomScrollEffect: true,
+          systemNotice: systemNotice,
           header: WnSlateNavigationHeader(
             title: context.l10n.networkRelaysTitle,
             onNavigate: () => Routes.goBack(context),
           ),
-          systemNotice: noticeMessage != null
-              ? WnSystemNotice(
-                  key: ValueKey(noticeMessage),
-                  title: noticeMessage,
-                  type: noticeType,
-                  onDismiss: dismissNotice,
-                )
-              : null,
           footer: Padding(
             padding: EdgeInsets.fromLTRB(16.w, 24.h, 16.w, 16.h),
             child: SizedBox(
@@ -155,25 +162,28 @@ class NetworkScreen extends HookConsumerWidget {
                 text: context.l10n.restoreDefaultRelays,
                 size: WnButtonSize.medium,
                 trailingIcon: WnIcons.reset,
-                onPressed: () => WnConfirmationSlate.show(
-                  context: context,
-                  title: context.l10n.restoreDefaultRelaysConfirmationTitle,
-                  message: context.l10n.restoreDefaultRelaysConfirmationMessage,
-                  confirmText: context.l10n.restoreDefaultRelays,
-                  cancelText: context.l10n.cancel,
-                  isDestructive: true,
-                  onConfirmAsync: () async {
-                    try {
-                      await restoreDefaultRelays();
-                      return true;
-                    } catch (_) {
-                      if (context.mounted) {
-                        showErrorNotice(context.l10n.restoreDefaultRelaysError);
-                      }
-                      return false;
-                    }
-                  },
-                ),
+                disabled: isOffline,
+                onPressed: isOffline
+                    ? null
+                    : () => WnConfirmationSlate.show(
+                        context: context,
+                        title: context.l10n.restoreDefaultRelaysConfirmationTitle,
+                        message: context.l10n.restoreDefaultRelaysConfirmationMessage,
+                        confirmText: context.l10n.restoreDefaultRelays,
+                        cancelText: context.l10n.cancel,
+                        isDestructive: true,
+                        onConfirmAsync: () async {
+                          try {
+                            await restoreDefaultRelays();
+                            return true;
+                          } catch (_) {
+                            if (context.mounted) {
+                              showErrorNotice(context.l10n.restoreDefaultRelaysError);
+                            }
+                            return false;
+                          }
+                        },
+                      ),
               ),
             ),
           ),
@@ -216,7 +226,10 @@ class NetworkScreen extends HookConsumerWidget {
                                 type: WnButtonType.overlay,
                                 size: WnButtonSize.medium,
                                 trailingIcon: WnIcons.addLarge,
-                                onPressed: () => showAddRelaySheet(RelayCategory.normal),
+                                disabled: isOffline,
+                                onPressed: isOffline
+                                    ? null
+                                    : () => showAddRelaySheet(RelayCategory.normal),
                               ),
                             ),
                           ],
@@ -243,7 +256,10 @@ class NetworkScreen extends HookConsumerWidget {
                                 type: WnButtonType.overlay,
                                 size: WnButtonSize.medium,
                                 trailingIcon: WnIcons.addLarge,
-                                onPressed: () => showAddRelaySheet(RelayCategory.inbox),
+                                disabled: isOffline,
+                                onPressed: isOffline
+                                    ? null
+                                    : () => showAddRelaySheet(RelayCategory.inbox),
                               ),
                             ),
                           ],
@@ -273,7 +289,10 @@ class NetworkScreen extends HookConsumerWidget {
                                 type: WnButtonType.overlay,
                                 size: WnButtonSize.medium,
                                 trailingIcon: WnIcons.addLarge,
-                                onPressed: () => showAddRelaySheet(RelayCategory.keyPackage),
+                                disabled: isOffline,
+                                onPressed: isOffline
+                                    ? null
+                                    : () => showAddRelaySheet(RelayCategory.keyPackage),
                               ),
                             ),
                           ],

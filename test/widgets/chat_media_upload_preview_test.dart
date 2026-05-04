@@ -7,12 +7,14 @@ import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
 import 'package:whitenoise/widgets/wn_media_preview.dart';
 import 'package:whitenoise/widgets/wn_spinner.dart';
 
+import '../fakes/fake_video_player_platform.dart';
 import '../test_helpers.dart';
 
 void main() {
   late Directory tempDir;
   late File testImageFile;
   late File testImageFile2;
+  late File testVideoFile;
 
   setUpAll(() {
     tempDir = Directory.systemTemp.createTempSync('chat_media_preview_test');
@@ -20,6 +22,8 @@ void main() {
     testImageFile.writeAsBytesSync([0xFF, 0xD8, 0xFF, 0xE0]);
     testImageFile2 = File('${tempDir.path}/test2.jpg');
     testImageFile2.writeAsBytesSync([0xFF, 0xD8, 0xFF, 0xE0]);
+    testVideoFile = File('${tempDir.path}/test.mp4');
+    testVideoFile.writeAsBytesSync([0, 0, 0, 0]);
   });
 
   tearDownAll(() {
@@ -60,6 +64,22 @@ void main() {
       );
 
       expect(find.byKey(const Key('chat_media_upload_preview')), findsOneWidget);
+    });
+
+    testWidgets('renders video tile for video files', (tester) async {
+      setUpFakeVideoPlayerPlatform();
+
+      await mountWidget(
+        ChatMediaUploadPreview(
+          items: [createItem(filePath: testVideoFile.path)],
+          onRemove: (_) {},
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('video_tile_player')), findsOneWidget);
+      expect(find.byKey(const Key('video_tile_indicator')), findsOneWidget);
     });
 
     testWidgets('shows uploading overlay when current item is uploading', (tester) async {

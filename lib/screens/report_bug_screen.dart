@@ -9,11 +9,13 @@ import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/app_version_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/bug_report.dart';
 import 'package:whitenoise/src/rust/api/utils.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/keyboard_dismiss_on_tap.dart';
+import 'package:whitenoise/widgets/offline_system_notice.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_checkbox.dart';
 import 'package:whitenoise/widgets/wn_dropdown_selector.dart';
@@ -32,6 +34,7 @@ class ReportBugScreen extends HookConsumerWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final l10n = context.l10n;
+    final isOffline = ref.watch(offlineProvider).value ?? false;
 
     final description = useTextEditingController();
     final stepsToReproduce = useTextEditingController();
@@ -54,6 +57,7 @@ class ReportBugScreen extends HookConsumerWidget {
     ];
 
     Future<void> handleSend() async {
+      if (isOffline) return;
       if (description.text.trim().isEmpty) {
         descriptionError.value = l10n.reportBugWhatWentWrongRequired;
         return;
@@ -103,14 +107,16 @@ class ReportBugScreen extends HookConsumerWidget {
             title: l10n.reportBug,
             onNavigate: () => Routes.goBack(context),
           ),
-          systemNotice: notice.noticeMessage != null
-              ? WnSystemNotice(
-                  key: ValueKey(notice.noticeMessage),
-                  title: notice.noticeMessage!,
-                  type: notice.noticeType,
-                  onDismiss: notice.dismissNotice,
-                )
-              : null,
+          systemNotice: isOffline
+              ? const OfflineSystemNotice()
+              : (notice.noticeMessage != null
+                    ? WnSystemNotice(
+                        key: ValueKey(notice.noticeMessage),
+                        title: notice.noticeMessage!,
+                        type: notice.noticeType,
+                        onDismiss: notice.dismissNotice,
+                      )
+                    : null),
           child: KeyboardDismissOnTap(
             child: SingleChildScrollView(
               padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
@@ -161,7 +167,8 @@ class ReportBugScreen extends HookConsumerWidget {
                     child: WnButton(
                       text: l10n.reportBugSend,
                       loading: isSending.value,
-                      onPressed: isSending.value ? null : handleSend,
+                      disabled: isOffline || isSending.value,
+                      onPressed: isOffline || isSending.value ? null : handleSend,
                     ),
                   ),
                 ],

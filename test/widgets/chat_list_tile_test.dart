@@ -39,6 +39,7 @@ ChatSummary _chatSummary({
   groupType: groupType,
   createdAt: DateTime(2024),
   pendingConfirmation: pendingConfirmation,
+  selfRemoved: false,
   unreadCount: BigInt.zero,
   groupImagePath: groupImagePath,
   groupImageUrl: groupImageUrl,
@@ -193,7 +194,7 @@ void main() {
             expect(item.subtitle, 'Hello from pending chat');
           });
 
-          testWidgets('shows photo subtitle and icon for media-only message', (tester) async {
+          testWidgets('shows media subtitle and icon for media-only message', (tester) async {
             await pumpTile(
               tester,
               _chatSummary(
@@ -204,12 +205,12 @@ void main() {
             );
             final finder = find.byType(WnChatListItem);
             final item = tester.widget<WnChatListItem>(finder);
-            expect(item.subtitle, 'Photo');
+            expect(item.subtitle, 'Media item');
             expect(item.subtitleIcon, isNotNull);
             expect(find.byKey(const Key('media_subtitle_icon')), findsOneWidget);
           });
 
-          testWidgets('shows photos subtitle for multiple media-only message', (tester) async {
+          testWidgets('shows media subtitle for multiple media-only message', (tester) async {
             await pumpTile(
               tester,
               _chatSummary(
@@ -220,7 +221,7 @@ void main() {
             );
             final finder = find.byType(WnChatListItem);
             final item = tester.widget<WnChatListItem>(finder);
-            expect(item.subtitle, 'Photos');
+            expect(item.subtitle, 'Media items');
             expect(item.subtitleIcon, isNotNull);
           });
 
@@ -328,7 +329,7 @@ void main() {
             expect(item.subtitle, 'Group message in pending chat');
           });
 
-          testWidgets('shows photo subtitle and icon for media-only message', (tester) async {
+          testWidgets('shows media subtitle and icon for media-only message', (tester) async {
             await pumpTile(
               tester,
               _chatSummary(
@@ -338,12 +339,12 @@ void main() {
             );
             final finder = find.byType(WnChatListItem);
             final item = tester.widget<WnChatListItem>(finder);
-            expect(item.subtitle, 'Photo');
+            expect(item.subtitle, 'Media item');
             expect(item.subtitleIcon, isNotNull);
             expect(find.byKey(const Key('media_subtitle_icon')), findsOneWidget);
           });
 
-          testWidgets('shows photos subtitle for multiple media-only message', (tester) async {
+          testWidgets('shows media subtitle for multiple media-only message', (tester) async {
             await pumpTile(
               tester,
               _chatSummary(
@@ -353,7 +354,7 @@ void main() {
             );
             final finder = find.byType(WnChatListItem);
             final item = tester.widget<WnChatListItem>(finder);
-            expect(item.subtitle, 'Photos');
+            expect(item.subtitle, 'Media items');
             expect(item.subtitleIcon, isNotNull);
           });
 
@@ -501,7 +502,7 @@ void main() {
         expect(item.subtitle, '');
       });
 
-      testWidgets('shows "Photo" and image icon when single media-only message', (
+      testWidgets('shows "Media item" and media icon when single media-only message', (
         tester,
       ) async {
         await pumpTile(
@@ -510,12 +511,12 @@ void main() {
         );
         final finder = find.byType(WnChatListItem);
         final item = tester.widget<WnChatListItem>(finder);
-        expect(item.subtitle, 'Photo');
+        expect(item.subtitle, 'Media item');
         expect(item.subtitleIcon, isNotNull);
         expect(find.byKey(const Key('media_subtitle_icon')), findsOneWidget);
       });
 
-      testWidgets('shows "Photos" and image icon when multiple media-only message', (
+      testWidgets('shows "Media items" and media icon when multiple media-only message', (
         tester,
       ) async {
         await pumpTile(
@@ -524,7 +525,7 @@ void main() {
         );
         final finder = find.byType(WnChatListItem);
         final item = tester.widget<WnChatListItem>(finder);
-        expect(item.subtitle, 'Photos');
+        expect(item.subtitle, 'Media items');
         expect(item.subtitleIcon, isNotNull);
         expect(find.byKey(const Key('media_subtitle_icon')), findsOneWidget);
       });

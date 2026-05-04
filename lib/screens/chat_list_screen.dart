@@ -13,13 +13,14 @@ import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/chat_search.dart';
+import 'package:whitenoise/widgets/chat_list_filters.dart';
 import 'package:whitenoise/widgets/chat_list_header.dart';
+import 'package:whitenoise/widgets/chat_list_search_and_filters.dart';
 import 'package:whitenoise/widgets/chat_list_tile.dart';
+import 'package:whitenoise/widgets/offline_system_notice.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_chat_list.dart';
-import 'package:whitenoise/widgets/wn_filter_chip.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
-import 'package:whitenoise/widgets/wn_search_and_filters.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 
@@ -27,6 +28,7 @@ const _zapstoreUrl = 'https://zapstore.dev/apps/org.parres.whitenoise';
 
 const _slateHeight = 80;
 const _searchAndFiltersHeight = 68;
+const _searchAndFiltersWithChipsHeight = 108;
 const _filterChipsHeight = 48;
 
 enum ChatListFilter { chats, archive }
@@ -88,7 +90,7 @@ class ChatListScreen extends HookConsumerWidget {
     );
   }
 
-  WnSystemNotice? _buildSystemNotice(
+  Widget? _buildSystemNotice(
     BuildContext context,
     AppTypography typography,
     SemanticColors colors, {
@@ -99,12 +101,7 @@ class ChatListScreen extends HookConsumerWidget {
     required VoidCallback onWelcomeDismiss,
   }) {
     if (isOffline) {
-      return WnSystemNotice(
-        key: const Key('offline_notice'),
-        title: context.l10n.waitingForInternet,
-        type: WnSystemNoticeType.warning,
-        variant: WnSystemNoticeVariant.expanded,
-      );
+      return const OfflineSystemNotice();
     }
     if (updateVersion != null) {
       return WnSystemNotice(
@@ -216,33 +213,29 @@ class ChatListScreen extends HookConsumerWidget {
               isLoading: isLoading,
               isSearchActive: searchQuery.value.isNotEmpty,
               topPadding: topPadding,
-              header: WnSearchAndFilters(
+              header: ChatListSearchAndFilters(
                 onSearchChanged: (value) => searchQuery.value = value,
                 isLoading: chatListSearch.isSearching,
+                showFilterChips: !isArchiveView,
+                isChatsSelected: !isArchiveView,
+                onChatsSelected: (_) => selectedFilter.value = ChatListFilter.chats,
+                onArchiveSelected: (_) => selectedFilter.value = ChatListFilter.archive,
               ),
-              headerHeight: _searchAndFiltersHeight.h,
-              pinnedHeader: Padding(
-                padding: EdgeInsets.only(top: 8.h),
-                child: Row(
-                  key: const Key('filter_chips_row'),
-                  children: [
-                    WnFilterChip(
-                      key: const Key('filter_chip_chats'),
-                      label: context.l10n.filterChats,
-                      selected: selectedFilter.value == ChatListFilter.chats,
-                      onSelected: (_) => selectedFilter.value = ChatListFilter.chats,
-                    ),
-                    SizedBox(width: 8.w),
-                    WnFilterChip(
-                      key: const Key('filter_chip_archive'),
-                      label: context.l10n.filterArchive,
-                      selected: selectedFilter.value == ChatListFilter.archive,
-                      onSelected: (_) => selectedFilter.value = ChatListFilter.archive,
-                    ),
-                  ],
-                ),
-              ),
-              pinnedHeaderHeight: _filterChipsHeight.h,
+              headerHeight: isArchiveView
+                  ? _searchAndFiltersHeight.h
+                  : _searchAndFiltersWithChipsHeight.h,
+              pinnedHeader: isArchiveView
+                  ? Padding(
+                      padding: EdgeInsets.only(top: 8.h),
+                      child: ChatListFilters(
+                        isChatsSelected: selectedFilter.value == ChatListFilter.chats,
+                        isArchiveSelected: selectedFilter.value == ChatListFilter.archive,
+                        onChatsSelected: (_) => selectedFilter.value = ChatListFilter.chats,
+                        onArchiveSelected: (_) {},
+                      ),
+                    )
+                  : null,
+              pinnedHeaderHeight: isArchiveView ? _filterChipsHeight.h : 0,
               emptyStateContent: isEmpty
                   ? isArchiveView
                         ? Center(

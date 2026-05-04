@@ -4,21 +4,28 @@ import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/media_image.dart';
 import 'package:whitenoise/widgets/media_modal.dart';
+import 'package:whitenoise/widgets/media_video.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_overlay.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
-MediaFile _mediaFile(String id, {String filePath = '', String? blurhash}) => MediaFile(
+MediaFile _mediaFile(
+  String id, {
+  String filePath = '',
+  String? blurhash,
+  String mimeType = 'image/jpeg',
+  String mediaType = 'image',
+}) => MediaFile(
   id: id,
   mlsGroupId: testGroupId,
   accountPubkey: testPubkeyA,
   filePath: filePath,
   originalFileHash: 'hash$id',
   encryptedFileHash: 'encrypted$id',
-  mimeType: 'image/jpeg',
-  mediaType: 'image',
+  mimeType: mimeType,
+  mediaType: mediaType,
   blossomUrl: 'https://example.com/$id',
   nostrKey: 'nostr$id',
   createdAt: DateTime(2024),
@@ -69,6 +76,33 @@ void main() {
       expect(find.byKey(const Key('media_page_view')), findsOneWidget);
       expect(find.byKey(const Key('media_modal_slate')), findsOneWidget);
       expect(find.byKey(const Key('media_thumbnail_strip')), findsNothing);
+    });
+
+    testWidgets('renders video media with video viewer', (tester) async {
+      await mountWidget(
+        Builder(
+          builder: (context) => ElevatedButton(
+            onPressed: () => MediaModal.show(
+              context: context,
+              mediaFiles: [
+                _mediaFile(
+                  '1',
+                  mimeType: 'video/mp4',
+                  mediaType: 'video',
+                ),
+              ],
+            ),
+            child: const Text('Open'),
+          ),
+        ),
+        tester,
+      );
+
+      await tester.tap(find.text('Open'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(MediaVideo), findsOneWidget);
+      expect(find.byKey(const Key('media_image_0')), findsNothing);
     });
 
     testWidgets('renders thumbnail strip for multiple media', (tester) async {

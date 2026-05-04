@@ -20,6 +20,17 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String mediaCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Mídias',
+      one: 'Mídia',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get appTitle => 'White Noise';
 
   @override
@@ -452,7 +463,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get refreshKeyPackages => 'Atualizar Pacotes de Chaves';
 
   @override
-  String get deleteAllKeyPackages => 'Excluir Todos os Pacotes de Chaves';
+  String get deleteLegacyKeyPackages => 'Excluir Pacotes de Chaves Obsoletos';
 
   @override
   String keyPackagesCount(int count) {
@@ -469,7 +480,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get keyPackagesRefreshed => 'Pacotes de chaves atualizados';
 
   @override
-  String get keyPackagesDeleted => 'Todos os pacotes de chaves excluídos';
+  String get legacyKeyPackagesDeleted => 'Pacotes de chaves obsoletos excluídos';
 
   @override
   String get keyPackageDeleted => 'Pacote de chaves excluído';
@@ -484,8 +495,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get keyPackageDeleteFailed => 'Falha ao excluir o pacote de chaves. Tente novamente.';
 
   @override
-  String get keyPackageDeleteAllFailed =>
-      'Falha ao excluir todos os pacotes de chaves. Tente novamente.';
+  String get legacyKeyPackageDeleteFailed =>
+      'Falha ao excluir pacotes de chaves obsoletos. Tente novamente.';
+
+  @override
+  String get legacyLabel => 'Obsoleto';
 
   @override
   String packageNumber(int number) {
@@ -1404,8 +1418,11 @@ class AppLocalizationsPt extends AppLocalizations {
   String get removedFromGroup => 'Você foi removido deste grupo';
 
   @override
+  String get youLeftThisGroup => 'Você saiu deste grupo';
+
+  @override
   String get removedFromGroupDescription =>
-      'Você ainda pode ver as mensagens salvas, mas não pode enviar ou receber novas. Você pode arquivar ou excluir a conversa a qualquer momento.';
+      'Você ainda pode ver as mensagens salvas, mas não pode enviar ou receber novas. Você pode arquivar a conversa a qualquer momento.';
 
   @override
   String get notificationSettings => 'Notificações';
@@ -1431,10 +1448,10 @@ class AppLocalizationsPt extends AppLocalizations {
   String get waitingForInternet => 'Aguardando conexão com a internet';
 
   @override
-  String get leaveGroup => 'Sair do grupo';
+  String get leave => 'Sair';
 
   @override
-  String get leaveGroupConfirmation => 'Sair do grupo';
+  String get leaveGroup => 'Sair do grupo';
 
   @override
   String get leaveGroupWarning =>
@@ -1442,4 +1459,7 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get failedToLeaveGroup => 'Falha ao sair do grupo. Por favor, tente novamente.';
+
+  @override
+  String get youLeftTheGroup => 'Você saiu do grupo';
 }

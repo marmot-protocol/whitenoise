@@ -3,11 +3,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/is_adding_account_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/add_profile_screen.dart';
 import 'package:whitenoise/screens/login_screen.dart';
 import 'package:whitenoise/screens/signup_screen.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 
 import '../mocks/mock_secure_storage.dart';
@@ -120,6 +122,53 @@ void main() {
       await tester.tap(find.byKey(const Key('slate_back_button')));
       await tester.pumpAndSettle();
       expect(find.byType(AddProfileScreen), findsNothing);
+    });
+
+    group('when offline', () {
+      Future<void> pumpAddProfileScreenOffline(WidgetTester tester) async {
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            secureStorageProvider.overrideWithValue(MockSecureStorage()),
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+        Routes.pushToAddProfile(tester.element(find.byType(Scaffold)));
+        await tester.pumpAndSettle();
+      }
+
+      testWidgets('displays offline notice', (tester) async {
+        await pumpAddProfileScreenOffline(tester);
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+        expect(find.text('Waiting for internet connection'), findsOneWidget);
+      });
+
+      testWidgets('Login button is disabled', (tester) async {
+        await pumpAddProfileScreenOffline(tester);
+        final loginButton = tester.widget<WnButton>(find.widgetWithText(WnButton, 'Login'));
+        expect(loginButton.disabled, isTrue);
+      });
+
+      testWidgets('Sign Up button is disabled', (tester) async {
+        await pumpAddProfileScreenOffline(tester);
+        final signupButton = tester.widget<WnButton>(find.widgetWithText(WnButton, 'Sign Up'));
+        expect(signupButton.disabled, isTrue);
+      });
+
+      testWidgets('tapping Login does not navigate', (tester) async {
+        await pumpAddProfileScreenOffline(tester);
+        await tester.tap(find.text('Login'));
+        await tester.pumpAndSettle();
+        expect(find.byType(LoginScreen), findsNothing);
+      });
+
+      testWidgets('tapping Sign Up does not navigate', (tester) async {
+        await pumpAddProfileScreenOffline(tester);
+        await tester.tap(find.text('Sign Up'));
+        await tester.pumpAndSettle();
+        expect(find.byType(SignupScreen), findsNothing);
+      });
     });
   });
 }

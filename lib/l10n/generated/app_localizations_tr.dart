@@ -20,6 +20,17 @@ class AppLocalizationsTr extends AppLocalizations {
   }
 
   @override
+  String mediaCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Medya',
+      one: 'Medya',
+    );
+    return '$_temp0';
+  }
+
+  @override
   String get appTitle => 'White Noise';
 
   @override
@@ -450,7 +461,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get refreshKeyPackages => 'Anahtar Paketlerini Yenile';
 
   @override
-  String get deleteAllKeyPackages => 'Tüm Anahtar Paketlerini Sil';
+  String get deleteLegacyKeyPackages => 'Eski Anahtar Paketlerini Sil';
 
   @override
   String keyPackagesCount(int count) {
@@ -467,7 +478,7 @@ class AppLocalizationsTr extends AppLocalizations {
   String get keyPackagesRefreshed => 'Anahtar paketleri yenilendi';
 
   @override
-  String get keyPackagesDeleted => 'Tüm anahtar paketleri silindi';
+  String get legacyKeyPackagesDeleted => 'Eski anahtar paketleri silindi';
 
   @override
   String get keyPackageDeleted => 'Anahtar paketi silindi';
@@ -482,8 +493,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get keyPackageDeleteFailed => 'Anahtar paketi silinemedi. Lütfen tekrar deneyin.';
 
   @override
-  String get keyPackageDeleteAllFailed =>
-      'Tüm anahtar paketleri silinemedi. Lütfen tekrar deneyin.';
+  String get legacyKeyPackageDeleteFailed =>
+      'Eski anahtar paketleri silinemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get legacyLabel => 'Eski';
 
   @override
   String packageNumber(int number) {
@@ -1392,8 +1406,11 @@ class AppLocalizationsTr extends AppLocalizations {
   String get removedFromGroup => 'Bu gruptan çıkarıldınız';
 
   @override
+  String get youLeftThisGroup => 'Bu gruptan ayrıldınız';
+
+  @override
   String get removedFromGroupDescription =>
-      'Kaydedilmiş mesajları görüntüleyebilirsiniz, ancak yeni mesaj gönderemez veya alamazsınız. Sohbeti istediğiniz zaman arşivleyebilir veya silebilirsiniz.';
+      'Kaydedilmiş mesajları görüntüleyebilirsiniz, ancak yeni mesaj gönderemez veya alamazsınız. Sohbeti istediğiniz zaman arşivleyebilirsiniz.';
 
   @override
   String get notificationSettings => 'Bildirimler';
@@ -1419,10 +1436,10 @@ class AppLocalizationsTr extends AppLocalizations {
   String get waitingForInternet => 'İnternet bağlantısı bekleniyor';
 
   @override
-  String get leaveGroup => 'Gruptan ayrıl';
+  String get leave => 'Ayrıl';
 
   @override
-  String get leaveGroupConfirmation => 'Gruptan ayrıl';
+  String get leaveGroup => 'Gruptan ayrıl';
 
   @override
   String get leaveGroupWarning =>
@@ -1430,4 +1447,7 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get failedToLeaveGroup => 'Gruptan ayrılma başarısız oldu. Lütfen tekrar deneyin.';
+
+  @override
+  String get youLeftTheGroup => 'Gruptan ayrıldınız';
 }

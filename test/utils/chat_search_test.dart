@@ -9,6 +9,7 @@ ChatSummary _chatSummary({required String id, String? name, GroupType? groupType
   groupType: groupType ?? GroupType.group,
   createdAt: DateTime(2024),
   pendingConfirmation: false,
+  selfRemoved: false,
   unreadCount: BigInt.zero,
 );
 

@@ -8,6 +8,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart' show ScreenUtilInit;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/home_screen.dart';
@@ -132,7 +133,10 @@ void main() {
       setUpTestView(tester);
       await tester.pumpWidget(
         ProviderScope(
-          overrides: [authProvider.overrideWith(() => mockAuth)],
+          overrides: [
+            authProvider.overrideWith(() => mockAuth),
+            offlineProvider.overrideWith((ref) => Stream.value(false)),
+          ],
           child: ScreenUtilInit(
             designSize: testDesignSize,
             builder: (_, _) => const MaterialApp(
@@ -147,9 +151,13 @@ void main() {
     } else {
       await mountTestApp(
         tester,
-        overrides: [authProvider.overrideWith(() => mockAuth)],
+        overrides: [
+          authProvider.overrideWith(() => mockAuth),
+          offlineProvider.overrideWith((ref) => Stream.value(false)),
+        ],
       );
-      Routes.pushToLogin(tester.element(find.byType(Scaffold)));
+      await tester.pumpAndSettle();
+      Routes.pushToLogin(tester.element(find.byType(HomeScreen)));
     }
     await tester.pumpAndSettle();
   }
@@ -560,7 +568,8 @@ void main() {
             tester,
             overrides: [authProvider.overrideWith(() => mockAuth)],
           );
-          Routes.pushToLogin(tester.element(find.byType(Scaffold)));
+          await tester.pumpAndSettle();
+          Routes.pushToLogin(tester.element(find.byType(HomeScreen)));
           await tester.pumpAndSettle();
 
           await tester.tap(find.byKey(const Key('android_signer_login_button')));
@@ -715,6 +724,89 @@ void main() {
         await pumpLoginScreen(tester);
         expect(find.byType(WnOverlay), findsNothing);
       });
+    });
+
+    group('when offline', () {
+      Future<void> pumpLoginScreenOffline(WidgetTester tester) async {
+        mockAuth = _MockAuthNotifier();
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => mockAuth),
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+        await tester.pumpAndSettle();
+        Routes.pushToLogin(tester.element(find.byType(HomeScreen)));
+        await tester.pumpAndSettle();
+      }
+
+      testWidgets('displays offline notice', (tester) async {
+        await pumpLoginScreenOffline(tester);
+        expect(find.text('Waiting for internet connection'), findsOneWidget);
+      });
+
+      testWidgets('login button is disabled even when nsec is entered', (tester) async {
+        await pumpLoginScreenOffline(tester);
+        await tester.enterText(find.byType(TextField), 'nsec1test');
+        await tester.pump();
+        final loginButton = tester.widget<WnButton>(find.byKey(const Key('login_button')));
+        expect(loginButton.disabled, isTrue);
+      });
+
+      testWidgets('login button onPressed is null when offline', (tester) async {
+        await pumpLoginScreenOffline(tester);
+        await tester.enterText(find.byType(TextField), 'nsec1test');
+        await tester.pump();
+        await tester.tap(find.byKey(const Key('login_button')));
+        await tester.pump();
+        expect(mockAuth.loginCalled, isFalse);
+      });
+
+      testWidgets(
+        'carousel stays visible with positive height after keyboard closes',
+        (tester) async {
+          mockAuth = _MockAuthNotifier();
+          setUpTestView(tester);
+
+          Future<void> pumpWithKeyboardBottom(double bottom) async {
+            await tester.pumpWidget(
+              ProviderScope(
+                overrides: [
+                  authProvider.overrideWith(() => mockAuth),
+                  offlineProvider.overrideWith((ref) => Stream.value(true)),
+                ],
+                child: ScreenUtilInit(
+                  designSize: testDesignSize,
+                  builder: (_, _) => MediaQuery(
+                    data: MediaQueryData(viewInsets: EdgeInsets.only(bottom: bottom)),
+                    child: const MaterialApp(
+                      locale: Locale('en'),
+                      localizationsDelegates: _localizationsDelegates,
+                      supportedLocales: AppLocalizations.supportedLocales,
+                      home: LoginScreen(),
+                    ),
+                  ),
+                ),
+              ),
+            );
+            await tester.pumpAndSettle();
+          }
+
+          await pumpWithKeyboardBottom(300);
+          expect(find.byKey(const Key('login_onboarding_carousel')), findsOneWidget);
+
+          await pumpWithKeyboardBottom(0);
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('login_onboarding_carousel')), findsOneWidget);
+          expect(
+            tester.getSize(find.byKey(const Key('login_onboarding_carousel'))).height,
+            greaterThan(80),
+          );
+          expect(tester.takeException(), isNull);
+        },
+      );
     });
   });
 }

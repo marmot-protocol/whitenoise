@@ -20,6 +20,7 @@ import 'package:whitenoise/utils/bubble_grouping.dart';
 import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/widgets/chat_message_bubble.dart';
 import 'package:whitenoise/widgets/chat_scroll_down_button.dart';
+import 'package:whitenoise/widgets/offline_system_notice.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_chat_system_message.dart';
@@ -133,12 +134,7 @@ class ChatInviteScreen extends HookConsumerWidget {
             WnSlate(
               tag: 'wn-slate-invite-header',
               systemNotice: isOffline
-                  ? WnSystemNotice(
-                      key: const Key('offline_notice'),
-                      title: context.l10n.waitingForInternet,
-                      type: WnSystemNoticeType.warning,
-                      variant: WnSystemNoticeVariant.expanded,
-                    )
+                  ? const OfflineSystemNotice()
                   : (noticeMessage.value != null
                         ? WnSystemNotice(
                             key: ValueKey(noticeMessage.value),

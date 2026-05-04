@@ -1,13 +1,17 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/add_profile_screen.dart';
 import 'package:whitenoise/screens/switch_profile_screen.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_profile_switcher_item.dart';
 
 import '../mocks/mock_secure_storage.dart';
@@ -171,6 +175,98 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(WnProfileSwitcherItem), findsNWidgets(2));
+    });
+
+    group('when offline', () {
+      testWidgets('offline notice appears during loading when offline', (tester) async {
+        mockApi.getAccountsCompleter = Completer();
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            secureStorageProvider.overrideWithValue(MockSecureStorage()),
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+        Routes.pushToSwitchProfile(tester.element(find.byType(Scaffold)));
+        await tester.pump();
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+      });
+
+      testWidgets('offline notice appears when offline', (tester) async {
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            secureStorageProvider.overrideWithValue(MockSecureStorage()),
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+        Routes.pushToSwitchProfile(tester.element(find.byType(Scaffold)));
+        await tester.pump();
+        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+      });
+
+      testWidgets('displays offline notice text', (tester) async {
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            secureStorageProvider.overrideWithValue(MockSecureStorage()),
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+        Routes.pushToSwitchProfile(tester.element(find.byType(Scaffold)));
+        await tester.pump();
+        expect(find.text('Waiting for internet connection'), findsOneWidget);
+      });
+
+      testWidgets('Connect Another Profile button is disabled when offline', (tester) async {
+        mockApi.getAccountsCompleter = Completer();
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            secureStorageProvider.overrideWithValue(MockSecureStorage()),
+            offlineProvider.overrideWith((ref) => Stream.value(true)),
+          ],
+        );
+        await tester.pump();
+        Routes.pushToSwitchProfile(tester.element(find.byType(Scaffold)));
+        await tester.pump(const Duration(milliseconds: 300));
+        mockApi.getAccountsCompleter!.complete(mockApi.accounts);
+        await tester.pumpAndSettle();
+
+        final button = tester.widget<WnButton>(
+          find.byKey(const Key('connect_another_profile_button')),
+        );
+        expect(button.onPressed, isNull);
+      });
+
+      testWidgets(
+        'tapping Connect Another Profile when offline does not navigate to AddProfileScreen',
+        (tester) async {
+          mockApi.getAccountsCompleter = Completer();
+          await mountTestApp(
+            tester,
+            overrides: [
+              authProvider.overrideWith(() => _MockAuthNotifier()),
+              secureStorageProvider.overrideWithValue(MockSecureStorage()),
+              offlineProvider.overrideWith((ref) => Stream.value(true)),
+            ],
+          );
+          await tester.pump();
+          Routes.pushToSwitchProfile(tester.element(find.byType(Scaffold)));
+          await tester.pump(const Duration(milliseconds: 300));
+          mockApi.getAccountsCompleter!.complete(mockApi.accounts);
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('connect_another_profile_button')));
+          await tester.pump();
+
+          expect(find.byType(AddProfileScreen), findsNothing);
+        },
+      );
     });
   });
 }

@@ -203,6 +203,7 @@ Future<void> mountWidget(
   Widget child,
   WidgetTester tester, {
   List overrides = const [],
+  List<NavigatorObserver> navigatorObservers = const [],
 }) async {
   setUpTestView(tester);
   final widget = ProviderScope(
@@ -215,6 +216,7 @@ Future<void> mountWidget(
           theme: testMaterialAppTheme,
           localizationsDelegates: _localizationsDelegates,
           supportedLocales: AppLocalizations.supportedLocales,
+          navigatorObservers: navigatorObservers,
           home: Scaffold(body: child),
         );
       },

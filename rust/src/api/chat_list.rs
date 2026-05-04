@@ -76,6 +76,8 @@ pub struct ChatSummary {
     /// When this account was removed from the group by an admin, if at all.
     /// `Some` means the group is read-only; the user must archive/delete to hide it.
     pub removed_at: Option<DateTime<Utc>>,
+    /// Whether the user voluntarily left the group. Only meaningful when `removed_at` is `Some`.
+    pub self_removed: bool,
     /// Number of unread messages in this chat
     pub unread_count: u64,
     /// Pin order for chat list sorting.
@@ -107,6 +109,7 @@ impl From<WhitenoiseChatListItem> for ChatSummary {
             welcomer_pubkey: item.welcomer_pubkey.map(|pk| pk.to_hex()),
             archived_at: item.archived_at,
             removed_at: item.removed_at,
+            self_removed: item.self_removed,
             unread_count: item.unread_count as u64,
             pin_order: item.pin_order,
             dm_peer_pubkey: item.dm_peer_pubkey.map(|pk| pk.to_hex()),

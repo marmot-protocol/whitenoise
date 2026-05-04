@@ -3,6 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_pill.dart';
 
 class WnKeyPackageCard extends StatelessWidget {
   const WnKeyPackageCard({
@@ -12,6 +13,7 @@ class WnKeyPackageCard extends StatelessWidget {
     required this.createdAt,
     required this.onDelete,
     required this.deleteLabel,
+    this.legacyLabel,
     this.disabled = false,
     this.loading = false,
     this.deleteButtonKey,
@@ -22,6 +24,7 @@ class WnKeyPackageCard extends StatelessWidget {
   final String createdAt;
   final VoidCallback onDelete;
   final String deleteLabel;
+  final String? legacyLabel;
   final bool disabled;
   final bool loading;
   final Key? deleteButtonKey;
@@ -77,6 +80,7 @@ class WnKeyPackageCard extends StatelessWidget {
               ),
             ),
           ),
+          if (legacyLabel != null) WnPill(label: legacyLabel!),
         ],
       ),
     );

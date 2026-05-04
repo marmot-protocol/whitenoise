@@ -8,11 +8,11 @@
 
 ## Description
 
-<!--- Describe your changes in detail -->
+<!--
+Describe what changed and why. Link the related issue: `Closes #NNN`
+-->
 
 ## Type of Change
-
-<!--- Put an `x` in all the boxes that apply: -->
 
 - [ ] ✨ New feature (non-breaking change which adds functionality)
 - [ ] 🛠️ Bug fix (non-breaking change which fixes an issue)
@@ -23,9 +23,21 @@
 - [ ] 🗑️ Chore
 - [ ] 🧪 Tests
 
+## How I Tested This
+
+<!-- Describe what you ran or manually verified and include device/OS/simulator details. -->
+
+## Screenshots
+
+<!-- Required for UI changes. Drag images here. Delete this section if UI is not affected -->
+
+| Before | After |
+|---|---|
+| | |
+
 ## Checklist
 
-<!-- Please make sure you've done the following before submitting your PR: -->
-
-- [ ] Run `just precommit` to ensure that formatting and linting are correct
-- [ ] Updated the `CHANGELOG.md` file with your changes (if they affect the user experience)
+- [ ] `just precommit` passes
+- [ ] Related issue linked (`Closes #NNN`)
+- [ ] `CHANGELOG.md` updated (if user-visible change)
+- [ ] Screenshots added (for UI changes)

@@ -32,6 +32,8 @@ class _MockNotificationsPlugin implements FlutterLocalNotificationsPlugin {
     return null;
   }
 
+  InitializationSettings? lastInitSettings;
+
   @override
   Future<bool?> initialize({
     required InitializationSettings settings,
@@ -39,6 +41,7 @@ class _MockNotificationsPlugin implements FlutterLocalNotificationsPlugin {
     onDidReceiveBackgroundNotificationResponse,
   }) async {
     calls.add('initialize');
+    lastInitSettings = settings;
     tapCallback = onDidReceiveNotificationResponse;
     return true;
   }
@@ -111,6 +114,11 @@ void main() {
       test('calls plugin initialize', () async {
         await service.initialize();
         expect(mockPlugin.calls, contains('initialize'));
+      });
+
+      test('uses ic_notification icon', () async {
+        await service.initialize();
+        expect(mockPlugin.lastInitSettings?.android?.defaultIcon, '@mipmap/ic_notification');
       });
 
       test('second call is idempotent', () async {

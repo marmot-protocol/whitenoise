@@ -115,6 +115,19 @@ void main() {
         expect(find.byKey(const Key('quote_thumbnail')), findsOneWidget);
       });
 
+      testWidgets('shows thumbnail when mediaThumbnail is provided', (tester) async {
+        await mountWidget(
+          const WnMessageQuote(
+            author: 'Alice',
+            text: 'Hello',
+            mediaThumbnail: ColoredBox(color: Colors.black),
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('quote_thumbnail')), findsOneWidget);
+      });
+
       testWidgets('hides thumbnail when image is null', (tester) async {
         await mountWidget(
           const WnMessageQuote(author: 'Alice', text: 'Hello'),

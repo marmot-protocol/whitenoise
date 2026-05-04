@@ -7,10 +7,12 @@ import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/app_version_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/formatting.dart';
 import 'package:whitenoise/utils/metadata.dart';
+import 'package:whitenoise/widgets/offline_system_notice.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
@@ -28,6 +30,7 @@ class SettingsScreen extends HookConsumerWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final pubkey = ref.watch(authProvider).value;
+    final isOffline = ref.watch(offlineProvider).value ?? false;
     final helpState = useSupportChat(accountPubkey: pubkey);
     final metadataSnapshot = useUserMetadata(context, pubkey);
     final appVersion = ref.watch(appVersionProvider);
@@ -45,6 +48,7 @@ class SettingsScreen extends HookConsumerWidget {
         child: WnSlate(
           showTopScrollEffect: true,
           showBottomScrollEffect: true,
+          systemNotice: isOffline ? const OfflineSystemNotice() : null,
           header: WnSlateNavigationHeader(
             title: context.l10n.settings,
             onNavigate: () => Routes.goBack(context),
@@ -174,6 +178,7 @@ class SettingsScreen extends HookConsumerWidget {
                 WnMenu(
                   children: [
                     WnMenuItem(
+                      key: const Key('report_bug_menu_item'),
                       icon: WnIcons.flag,
                       label: context.l10n.reportBug,
                       type: WnMenuItemType.secondary,

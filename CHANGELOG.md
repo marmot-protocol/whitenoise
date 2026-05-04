@@ -24,11 +24,16 @@ and this project adheres to Calendar Versioning (CalVer).
 - Add bug report screen with NIP-44 encrypted anonymous reports [PR #478](https://github.com/marmot-protocol/whitenoise/pull/478)
 - Chat with support [PR #486](https://github.com/marmot-protocol/whitenoise/pull/486)
 - Add notifications settings screen for android to allow disabling/enabling local notifications [PR #535](https://github.com/marmot-protocol/whitenoise/pull/535)
-- Archive chats [PR #532](https://github.com/marmot-protocol/whitenoise/pull/532)
-- No internet notice [PR #565](https://github.com/marmot-protocol/whitenoise/pull/565)
-- Add block/unblock hook [PR #573](https://github.com/marmot-protocol/whitenoise/pull/573)
+- Archive chats [PR #532](https://github.com/marmot-protocol/whitenoise/pull/532), [PR #603](https://github.com/marmot-protocol/whitenoise/pull/603)
+- Search by content in chat list [PR #557](https://github.com/marmot-protocol/whitenoise/pull/557)
+- No internet notice [PR #565](https://github.com/marmot-protocol/whitenoise/pull/565), [PR #576](https://github.com/marmot-protocol/whitenoise/pull/576), [PR #586](https://github.com/marmot-protocol/whitenoise/pull/586)
+- Block/unblock users [PR #573](https://github.com/marmot-protocol/whitenoise/pull/573), [PR #574](https://github.com/marmot-protocol/whitenoise/pull/574)
+- Video media attachment support[PR #574](https://github.com/marmot-protocol/whitenoise/pull/574)
 
 ### Changed
+- Update System Notice colors [PR #579](https://github.com/marmot-protocol/whitenoise/pull/579)
+- Update Fill Secondary Dark Mode colors [PR #580](https://github.com/marmot-protocol/whitenoise/pull/580)
+- Improve Slate and Message Bubble contrast [PR #581](https://github.com/marmot-protocol/whitenoise/pull/581)
 - UI Polish: Profile Keys & Sign out Screens [PR #552](https://github.com/marmot-protocol/whitenoise/pull/552)
 - UI Polish: Donate Screen [PR #553](https://github.com/marmot-protocol/whitenoise/pull/553)
 - UI Polish: Share & Edit Profile Screens [PR #544](https://github.com/marmot-protocol/whitenoise/pull/544)
@@ -37,13 +42,15 @@ and this project adheres to Calendar Versioning (CalVer).
 - Debug and relay screens improvements [PR #572](https://github.com/marmot-protocol/whitenoise/pull/502)
 - UI Polish: Slate & Settings Screen [PR #504](https://github.com/marmot-protocol/whitenoise/pull/504)
 - Show an error screen when bridge initialization fails instead of hanging on splash [PR #477](https://github.com/marmot-protocol/whitenoise/pull/477)
+- UI Polish: Signup Screen, Callout, IconButton [PR #519](https://github.com/marmot-protocol/whitenoise/pull/519)
+- Replaced delete all key packages with delete legacy key packages method. [PR #585](https://github.com/marmot-protocol/whitenoise/pull/585)
 
 ### Deprecated
 
 ### Removed
 
 ### Fixed
-- UI Polish: Signup Screen, Callout, IconButton [PR #519](https://github.com/marmot-protocol/whitenoise/pull/519)
+- Fix notification icon for graphene os [PR #605](https://github.com/marmot-protocol/whitenoise/pull/605)
 
 ### Security
 

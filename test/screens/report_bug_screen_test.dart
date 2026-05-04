@@ -6,9 +6,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:whitenoise/providers/app_version_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/report_bug_screen.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/offline_system_notice.dart';
+
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
@@ -339,6 +342,40 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(mockApi.lastBugReportStepsToReproduce, '1. Open app\n2. Tap chat\n3. Crash');
+    });
+
+    group('when offline', () {
+      testWidgets(
+        'shows offline notice and does not send bug report when send is tapped',
+        (tester) async {
+          await mountWidget(
+            const ReportBugScreen(),
+            tester,
+            overrides: [
+              authProvider.overrideWith(() => _MockAuthNotifier()),
+              appVersionProvider.overrideWith((ref) async => '1.0.0'),
+              offlineProvider.overrideWith((ref) => Stream.value(true)),
+            ],
+          );
+          await tester.pumpAndSettle();
+          expect(find.byType(OfflineSystemNotice), findsOneWidget);
+
+          await tester.enterText(
+            find.byKey(const Key('report_bug_description')),
+            'Something when offline',
+          );
+          await tester.pumpAndSettle();
+          await tester.scrollUntilVisible(
+            find.text('Send report'),
+            500,
+            scrollable: find.byType(Scrollable).first,
+          );
+          await tester.tap(find.text('Send report'));
+          await tester.pumpAndSettle();
+
+          expect(mockApi.sendBugReportCalled, isFalse);
+        },
+      );
     });
   });
 }

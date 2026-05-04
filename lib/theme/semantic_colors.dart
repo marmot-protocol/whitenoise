@@ -33,6 +33,7 @@ class _NeutralColors {
   static const Color neutral500 = Color(0xFF737373);
   static const Color neutral650 = Color(0xFF494949);
   static const Color neutral700 = Color(0xFF404040);
+  static const Color neutral750 = Color(0xFF333333);
   static const Color neutral800 = Color(0xFF262626);
   static const Color neutral850 = Color(0xFF1E1E1F);
   static const Color neutral900 = Color(0xFF171717);
@@ -504,6 +505,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
   final Color backgroundPrimary;
   final Color backgroundSecondary;
   final Color backgroundTertiary;
+  final Color backgroundSlate;
+  final Color backgroundMessageIncoming;
   final Color backgroundContentPrimary;
   final Color backgroundContentSecondary;
   final Color backgroundContentTertiary;
@@ -556,6 +559,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     required this.backgroundPrimary,
     required this.backgroundSecondary,
     required this.backgroundTertiary,
+    required this.backgroundSlate,
+    required this.backgroundMessageIncoming,
     required this.backgroundContentPrimary,
     required this.backgroundContentSecondary,
     required this.backgroundContentTertiary,
@@ -609,6 +614,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     backgroundPrimary: _BaseColors.white,
     backgroundSecondary: _NeutralColors.neutral50,
     backgroundTertiary: _NeutralColors.neutral100,
+    backgroundSlate: _NeutralColors.neutral50,
+    backgroundMessageIncoming: _NeutralColors.neutral100,
     backgroundContentPrimary: _NeutralColors.neutral950,
     backgroundContentSecondary: _NeutralColors.neutral500,
     backgroundContentTertiary: _NeutralColors.neutral400,
@@ -662,6 +669,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     backgroundPrimary: _BaseColors.black,
     backgroundSecondary: _NeutralColors.neutral950,
     backgroundTertiary: _NeutralColors.neutral900,
+    backgroundSlate: _NeutralColors.neutral900,
+    backgroundMessageIncoming: _NeutralColors.neutral800,
     backgroundContentPrimary: _BaseColors.white,
     backgroundContentSecondary: _NeutralColors.neutral400,
     backgroundContentTertiary: _NeutralColors.neutral500,
@@ -671,9 +680,9 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     fillPrimary: _BaseColors.white,
     fillPrimaryHover: _NeutralColors.neutral200,
     fillPrimaryActive: _NeutralColors.neutral200,
-    fillSecondary: _NeutralColors.neutral900,
-    fillSecondaryHover: _NeutralColors.neutral850,
-    fillSecondaryActive: _NeutralColors.neutral850,
+    fillSecondary: _NeutralColors.neutral800,
+    fillSecondaryHover: _NeutralColors.neutral750,
+    fillSecondaryActive: _NeutralColors.neutral750,
     fillTertiary: _BaseColors.transparent,
     fillTertiaryHover: _NeutralColors.neutral850,
     fillTertiaryActive: _NeutralColors.neutral850,
@@ -716,6 +725,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
     Color? backgroundPrimary,
     Color? backgroundSecondary,
     Color? backgroundTertiary,
+    Color? backgroundSlate,
+    Color? backgroundMessageIncoming,
     Color? backgroundContentPrimary,
     Color? backgroundContentSecondary,
     Color? backgroundContentTertiary,
@@ -768,6 +779,8 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
       backgroundPrimary: backgroundPrimary ?? this.backgroundPrimary,
       backgroundSecondary: backgroundSecondary ?? this.backgroundSecondary,
       backgroundTertiary: backgroundTertiary ?? this.backgroundTertiary,
+      backgroundSlate: backgroundSlate ?? this.backgroundSlate,
+      backgroundMessageIncoming: backgroundMessageIncoming ?? this.backgroundMessageIncoming,
       backgroundContentPrimary: backgroundContentPrimary ?? this.backgroundContentPrimary,
       backgroundContentSecondary: backgroundContentSecondary ?? this.backgroundContentSecondary,
       backgroundContentTertiary: backgroundContentTertiary ?? this.backgroundContentTertiary,
@@ -827,6 +840,12 @@ class SemanticColors extends ThemeExtension<SemanticColors> {
       backgroundPrimary: Color.lerp(backgroundPrimary, other.backgroundPrimary, t)!,
       backgroundSecondary: Color.lerp(backgroundSecondary, other.backgroundSecondary, t)!,
       backgroundTertiary: Color.lerp(backgroundTertiary, other.backgroundTertiary, t)!,
+      backgroundSlate: Color.lerp(backgroundSlate, other.backgroundSlate, t)!,
+      backgroundMessageIncoming: Color.lerp(
+        backgroundMessageIncoming,
+        other.backgroundMessageIncoming,
+        t,
+      )!,
       backgroundContentPrimary: Color.lerp(
         backgroundContentPrimary,
         other.backgroundContentPrimary,

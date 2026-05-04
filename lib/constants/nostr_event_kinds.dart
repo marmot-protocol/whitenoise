@@ -11,7 +11,10 @@ class NostrEventKinds {
   static const int chatMessage = 9;
 
   // MIP-00: https://github.com/marmot-protocol/marmot/blob/master/00.md
-  static const int mlsKeyPackage = 443;
+  static const int mlsKeyPackage = 30443;
+
+  // MIP-00: https://github.com/marmot-protocol/marmot/blob/master/00.md
+  static const int mlsKeyPackageLegacy = 443;
 
   // MIP-02: https://github.com/marmot-protocol/marmot/blob/master/02.md
   static const int mlsWelcome = 444;

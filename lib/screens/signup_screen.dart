@@ -18,8 +18,10 @@ import 'package:whitenoise/hooks/use_onboarding_carousel.dart' show onboardingCa
 import 'package:whitenoise/hooks/use_signup.dart' show useSignup;
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
+import 'package:whitenoise/providers/offline_provider.dart' show offlineProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/offline_system_notice.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart' show WnAvatar, WnAvatarSize;
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_callout.dart';
@@ -40,6 +42,7 @@ class SignupScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
+    final isOffline = ref.watch(offlineProvider).value ?? false;
     final generatedDisplayName = useMemoized(() {
       final generator = UniqueNamesGenerator(
         config: Config(
@@ -216,7 +219,9 @@ class SignupScreen extends HookConsumerWidget {
                                 title: context.l10n.setupProfile,
                                 onNavigate: () => Routes.goBack(context),
                               ),
-                              systemNotice: noticeMessage.value != null
+                              systemNotice: isOffline
+                                  ? const OfflineSystemNotice()
+                                  : (noticeMessage.value != null)
                                   ? WnSystemNotice(
                                       key: ValueKey(noticeMessage.value),
                                       title: noticeMessage.value!,
@@ -239,9 +244,9 @@ class SignupScreen extends HookConsumerWidget {
                                         final hasName = value.text.trim().isNotEmpty;
                                         return WnButton(
                                           text: context.l10n.createProfile,
-                                          onPressed: hasName ? onSubmit : null,
+                                          onPressed: hasName && !isOffline ? onSubmit : null,
                                           loading: state.isLoading,
-                                          disabled: !hasName || state.isLoading,
+                                          disabled: !hasName || state.isLoading || isOffline,
                                         );
                                       },
                                     ),

@@ -15,8 +15,12 @@ void main() {
       expect(NostrEventKinds.chatMessage, 9);
     });
 
-    test('mlsKeyPackage is 443 (MIP-00)', () {
-      expect(NostrEventKinds.mlsKeyPackage, 443);
+    test('mlsKeyPackage is 30443 (MIP-00)', () {
+      expect(NostrEventKinds.mlsKeyPackage, 30443);
+    });
+
+    test('mlsKeyPackageLegacy is 443 (MIP-00 legacy)', () {
+      expect(NostrEventKinds.mlsKeyPackageLegacy, 443);
     });
 
     test('mlsWelcome is 444 (MIP-02)', () {

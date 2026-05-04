@@ -21,7 +21,7 @@ typedef MediaUploadState = ({
   List<MediaUploadItem> items,
   bool canSend,
   List<MediaFile> uploadedFiles,
-  Future<void> Function() pickImages,
+  Future<void> Function() pickMedia,
   void Function(String filePath) removeItem,
   VoidCallback clearAll,
 });
@@ -106,27 +106,27 @@ MediaUploadState useMediaUpload({
     }
   }
 
-  Future<void> pickImages() async {
-    _logger.info('pickImages groupId=$groupId');
-    final pickedFiles = await picker.pickMultiImage(
+  Future<void> pickMedia() async {
+    _logger.info('pickMedia groupId=$groupId');
+    final pickedFiles = await picker.pickMultipleMedia(
       maxWidth: 1920,
       maxHeight: 1920,
       imageQuality: 85,
     );
     if (pickedFiles.isEmpty) {
-      _logger.info('pickImages no files selected');
+      _logger.info('pickMedia no files selected');
       return;
     }
 
     final existingPaths = items.value.map((item) => item.filePath).toSet();
     final uniqueFiles = pickedFiles.where((xFile) => !existingPaths.contains(xFile.path)).toList();
     if (uniqueFiles.isEmpty) {
-      _logger.info('pickImages all ${pickedFiles.length} files already queued, skipping');
+      _logger.info('pickMedia all ${pickedFiles.length} files already queued, skipping');
       return;
     }
 
     _logger.info(
-      'pickImages picked=${pickedFiles.length} unique=${uniqueFiles.length} groupId=$groupId',
+      'pickMedia picked=${pickedFiles.length} unique=${uniqueFiles.length} groupId=$groupId',
     );
 
     final newItems = uniqueFiles.map((xFile) {
@@ -167,7 +167,7 @@ MediaUploadState useMediaUpload({
     items: items.value,
     canSend: canSend,
     uploadedFiles: uploadedFiles,
-    pickImages: pickImages,
+    pickMedia: pickMedia,
     removeItem: removeItem,
     clearAll: clearAll,
   );

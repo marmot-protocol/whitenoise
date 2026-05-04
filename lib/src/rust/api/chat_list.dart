@@ -223,6 +223,9 @@ class ChatSummary {
   /// `Some` means the group is read-only; the user must archive/delete to hide it.
   final DateTime? removedAt;
 
+  /// Whether the user voluntarily left the group. Only meaningful when `removed_at` is `Some`.
+  final bool selfRemoved;
+
   /// Number of unread messages in this chat
   final BigInt unreadCount;
 
@@ -252,6 +255,7 @@ class ChatSummary {
     this.welcomerPubkey,
     this.archivedAt,
     this.removedAt,
+    required this.selfRemoved,
     required this.unreadCount,
     this.pinOrder,
     this.dmPeerPubkey,
@@ -271,6 +275,7 @@ class ChatSummary {
       welcomerPubkey.hashCode ^
       archivedAt.hashCode ^
       removedAt.hashCode ^
+      selfRemoved.hashCode ^
       unreadCount.hashCode ^
       pinOrder.hashCode ^
       dmPeerPubkey.hashCode ^
@@ -292,6 +297,7 @@ class ChatSummary {
           welcomerPubkey == other.welcomerPubkey &&
           archivedAt == other.archivedAt &&
           removedAt == other.removedAt &&
+          selfRemoved == other.selfRemoved &&
           unreadCount == other.unreadCount &&
           pinOrder == other.pinOrder &&
           dmPeerPubkey == other.dmPeerPubkey &&

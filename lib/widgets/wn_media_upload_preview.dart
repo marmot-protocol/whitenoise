@@ -4,6 +4,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/hooks/use_media_upload.dart' show MediaUploadItem, MediaUploadStatus;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/media_type.dart';
+import 'package:whitenoise/widgets/local_video_player.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_spinner.dart';
 
@@ -76,24 +78,7 @@ class _ThumbnailItem extends StatelessWidget {
         children: [
           ClipRRect(
             borderRadius: BorderRadius.circular(8.r),
-            child: Image.file(
-              File(item.filePath),
-              key: const Key('thumbnail_image'),
-              width: size,
-              height: size,
-              fit: BoxFit.cover,
-              errorBuilder: (_, _, _) => Container(
-                key: const Key('thumbnail_error_placeholder'),
-                color: colors.fillSecondary,
-                child: Center(
-                  child: WnIcon(
-                    WnIcons.image,
-                    color: colors.backgroundContentTertiary,
-                    size: 20.sp,
-                  ),
-                ),
-              ),
-            ),
+            child: _ThumbnailMedia(item: item, size: size, colors: colors),
           ),
           if (item.status == MediaUploadStatus.uploading)
             Positioned.fill(
@@ -150,6 +135,63 @@ class _ThumbnailItem extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _ThumbnailMedia extends StatelessWidget {
+  const _ThumbnailMedia({
+    required this.item,
+    required this.size,
+    required this.colors,
+  });
+
+  final MediaUploadItem item;
+  final double size;
+  final SemanticColors colors;
+
+  @override
+  Widget build(BuildContext context) {
+    final uploadedFile = item.file;
+    final isVideo = uploadedFile != null
+        ? isVideoMediaFile(uploadedFile)
+        : isVideoFilePath(item.filePath);
+
+    if (isVideo) {
+      return Stack(
+        fit: StackFit.expand,
+        children: [
+          LocalVideoPlayer(
+            key: const Key('thumbnail_video_player'),
+            filePath: item.filePath,
+            fit: BoxFit.cover,
+            showControls: false,
+          ),
+          VideoPlayIndicator(
+            key: const Key('thumbnail_video_indicator'),
+            size: 24.w,
+          ),
+        ],
+      );
+    }
+
+    return Image.file(
+      File(item.filePath),
+      key: const Key('thumbnail_image'),
+      width: size,
+      height: size,
+      fit: BoxFit.cover,
+      errorBuilder: (_, _, _) => Container(
+        key: const Key('thumbnail_error_placeholder'),
+        color: colors.fillSecondary,
+        child: Center(
+          child: WnIcon(
+            WnIcons.image,
+            color: colors.backgroundContentTertiary,
+            size: 20.sp,
+          ),
+        ),
       ),
     );
   }

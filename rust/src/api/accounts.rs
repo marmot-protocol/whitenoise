@@ -359,7 +359,7 @@ pub async fn delete_account_key_packages(account_pubkey: String) -> Result<usize
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let deleted_count = whitenoise
-        .delete_all_key_packages_for_account(&account, true)
+        .delete_legacy_key_packages_for_account(&account)
         .await?;
     Ok(deleted_count)
 }
