@@ -178,22 +178,24 @@ void main() {
     });
 
     group('when offline', () {
-      testWidgets('offline notice appears during loading when offline', (tester) async {
-        mockApi.getAccountsCompleter = Completer();
-        await mountTestApp(
-          tester,
-          overrides: [
-            authProvider.overrideWith(() => _MockAuthNotifier()),
-            secureStorageProvider.overrideWithValue(MockSecureStorage()),
-            offlineProvider.overrideWith((ref) => Stream.value(true)),
-          ],
-        );
-        Routes.pushToSwitchProfile(tester.element(find.byType(Scaffold)));
-        await tester.pump();
-        expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+      group('when loading', () {
+        testWidgets('offline notice appears', (tester) async {
+          mockApi.getAccountsCompleter = Completer();
+          await mountTestApp(
+            tester,
+            overrides: [
+              authProvider.overrideWith(() => _MockAuthNotifier()),
+              secureStorageProvider.overrideWithValue(MockSecureStorage()),
+              offlineProvider.overrideWith((ref) => Stream.value(true)),
+            ],
+          );
+          Routes.pushToSwitchProfile(tester.element(find.byType(Scaffold)));
+          await tester.pump();
+          expect(find.byKey(const Key('offline_notice')), findsOneWidget);
+        });
       });
 
-      testWidgets('offline notice appears when offline', (tester) async {
+      testWidgets('offline notice appears', (tester) async {
         await mountTestApp(
           tester,
           overrides: [
