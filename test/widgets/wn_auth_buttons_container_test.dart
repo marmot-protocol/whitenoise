@@ -99,18 +99,23 @@ void main() {
     });
 
     group('when disabled', () {
-      testWidgets('both buttons have disabled set to true', (tester) async {
+      testWidgets('login button has disabled set to true', (tester) async {
         const widget = WnAuthButtonsContainer(disabled: true);
         await mountWidget(widget, tester);
 
         final loginButton = tester.widget<WnButton>(
           find.widgetWithText(WnButton, 'Login'),
         );
+        expect(loginButton.disabled, isTrue);
+      });
+
+      testWidgets('sign up button has disabled set to true', (tester) async {
+        const widget = WnAuthButtonsContainer(disabled: true);
+        await mountWidget(widget, tester);
+
         final signupButton = tester.widget<WnButton>(
           find.widgetWithText(WnButton, 'Sign Up'),
         );
-
-        expect(loginButton.disabled, isTrue);
         expect(signupButton.disabled, isTrue);
       });
 
