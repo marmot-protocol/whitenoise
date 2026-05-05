@@ -7,6 +7,7 @@ import 'package:logging/logging.dart';
 import 'package:whitenoise/hooks/use_edit_profile.dart'
     show EditProfileLoadingState, useEditProfile;
 import 'package:whitenoise/hooks/use_image_picker.dart';
+import 'package:whitenoise/hooks/use_system_notice.dart' show useSystemNotice;
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/offline_provider.dart';
@@ -47,18 +48,14 @@ class EditProfileScreen extends HookConsumerWidget {
     final (:pickImage, error: imagePickerError, clearError: clearImagePickerError) = useImagePicker(
       onImageSelected: onImageSelected,
     );
-    final noticeMessage = useState<String?>(null);
-    final noticeType = useState(WnSystemNoticeType.success);
+    final (
+      :noticeMessage,
+      :noticeType,
+      :showErrorNotice,
+      :showSuccessNotice,
+      :dismissNotice,
+    ) = useSystemNotice();
     final privacyNoticeExpanded = useState(false);
-
-    void showNotice(String message, {WnSystemNoticeType type = WnSystemNoticeType.success}) {
-      noticeMessage.value = message;
-      noticeType.value = type;
-    }
-
-    void dismissNotice() {
-      noticeMessage.value = null;
-    }
 
     useEffect(() {
       loadProfile();
@@ -69,7 +66,7 @@ class EditProfileScreen extends HookConsumerWidget {
       if (imagePickerError != null) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (context.mounted) {
-            showNotice(context.l10n.imagePickerError, type: WnSystemNoticeType.error);
+            showErrorNotice(context.l10n.imagePickerError);
           }
         });
         clearImagePickerError();
@@ -89,11 +86,11 @@ class EditProfileScreen extends HookConsumerWidget {
           ),
           systemNotice: isOffline
               ? const OfflineSystemNotice()
-              : noticeMessage.value != null
+              : noticeMessage != null
               ? WnSystemNotice(
-                  key: ValueKey(noticeMessage.value),
-                  title: noticeMessage.value!,
-                  type: noticeType.value,
+                  key: ValueKey(noticeMessage),
+                  title: noticeMessage,
+                  type: noticeType,
                   onDismiss: dismissNotice,
                 )
               : null,
@@ -112,7 +109,7 @@ class EditProfileScreen extends HookConsumerWidget {
                           ? () async {
                               final success = await updateProfileData();
                               if (context.mounted && success) {
-                                showNotice(context.l10n.profileUpdatedSuccessfully);
+                                showSuccessNotice(context.l10n.profileUpdatedSuccessfully);
                               }
                             }
                           : null,
