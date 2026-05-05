@@ -20,6 +20,7 @@ class LocalVideoPlayer extends HookWidget {
     this.fit = BoxFit.contain,
     this.showControls = true,
     this.autoplay = false,
+    this.overlay,
   });
 
   final String filePath;
@@ -28,6 +29,7 @@ class LocalVideoPlayer extends HookWidget {
   final BoxFit fit;
   final bool showControls;
   final bool autoplay;
+  final Widget? overlay;
 
   @override
   Widget build(BuildContext context) {
@@ -101,45 +103,79 @@ class LocalVideoPlayer extends HookWidget {
       }
     }
 
-    return GestureDetector(
-      key: const Key('local_video_tap_area'),
-      behavior: HitTestBehavior.opaque,
-      onTap: showControls ? () => unawaited(togglePlayback()) : null,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (!isInitialized.value || hasError.value)
-            WnMediaPlaceholder(
-              key: hasError.value
-                  ? const Key('video_error_placeholder')
-                  : const Key('video_loading_placeholder'),
-              thumbHash: thumbHash,
-              blurhash: blurhash,
-              width: double.infinity,
-              height: double.infinity,
-            ),
-          if (activeController != null && isInitialized.value && !hasError.value)
-            FittedBox(
-              fit: fit,
-              child: SizedBox(
-                width: activeController.value.size.width,
-                height: activeController.value.size.height,
-                child: VideoPlayer(
-                  activeController,
-                  key: const Key('video_player'),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        Positioned? overlayPositioned;
+        if (overlay != null && activeController?.value.isPlaying != true) {
+          if (isInitialized.value &&
+              activeController != null &&
+              activeController.value.size.width > 0 &&
+              activeController.value.size.height > 0 &&
+              constraints.maxWidth.isFinite &&
+              constraints.maxHeight.isFinite) {
+            final availableSize = Size(constraints.maxWidth, constraints.maxHeight);
+            final fittedSizes = applyBoxFit(fit, activeController.value.size, availableSize);
+            final destSize = fittedSizes.destination;
+            final xOffset = ((availableSize.width - destSize.width) / 2).clamp(
+              0.0,
+              double.infinity,
+            );
+            final yOffset = ((availableSize.height - destSize.height) / 2).clamp(
+              0.0,
+              double.infinity,
+            );
+            overlayPositioned = Positioned(
+              top: yOffset + 12.h,
+              right: xOffset + 12.w,
+              child: overlay!,
+            );
+          } else {
+            overlayPositioned = Positioned(top: 12.h, right: 12.w, child: overlay!);
+          }
+        }
+
+        return GestureDetector(
+          key: const Key('local_video_tap_area'),
+          behavior: HitTestBehavior.opaque,
+          onTap: showControls ? () => unawaited(togglePlayback()) : null,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              if (!isInitialized.value || hasError.value)
+                WnMediaPlaceholder(
+                  key: hasError.value
+                      ? const Key('video_error_placeholder')
+                      : const Key('video_loading_placeholder'),
+                  thumbHash: thumbHash,
+                  blurhash: blurhash,
+                  width: double.infinity,
+                  height: double.infinity,
                 ),
-              ),
-            ),
-          if (showControls || hasError.value)
-            VideoPlayIndicator(
-              key: const Key('video_play_indicator'),
-              visible:
-                  !isInitialized.value ||
-                  hasError.value ||
-                  activeController?.value.isPlaying != true,
-            ),
-        ],
-      ),
+              if (activeController != null && isInitialized.value && !hasError.value)
+                FittedBox(
+                  fit: fit,
+                  child: SizedBox(
+                    width: activeController.value.size.width,
+                    height: activeController.value.size.height,
+                    child: VideoPlayer(
+                      activeController,
+                      key: const Key('video_player'),
+                    ),
+                  ),
+                ),
+              if (showControls || hasError.value)
+                VideoPlayIndicator(
+                  key: const Key('video_play_indicator'),
+                  visible:
+                      !isInitialized.value ||
+                      hasError.value ||
+                      activeController?.value.isPlaying != true,
+                ),
+              if (overlayPositioned != null) overlayPositioned,
+            ],
+          ),
+        );
+      },
     );
   }
 }

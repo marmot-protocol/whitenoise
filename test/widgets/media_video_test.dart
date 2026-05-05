@@ -101,5 +101,56 @@ void main() {
       expect(find.byKey(const Key('media_video_player')), findsOneWidget);
       expect(find.byKey(const Key('video_player')), findsOneWidget);
     });
+
+    testWidgets('renders overlay on loading placeholder', (tester) async {
+      _api.downloadCompleter = Completer<MediaFile>();
+
+      await mountWidget(
+        MediaVideo(
+          mediaFile: _mediaFile(),
+          overlay: const SizedBox.square(key: Key('test_overlay'), dimension: 40),
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('media_video_loading')), findsOneWidget);
+      expect(find.byKey(const Key('test_overlay')), findsOneWidget);
+    });
+
+    testWidgets('renders overlay on error placeholder', (tester) async {
+      _api.shouldFail = true;
+
+      await mountWidget(
+        MediaVideo(
+          mediaFile: _mediaFile(),
+          overlay: const SizedBox.square(key: Key('test_overlay'), dimension: 40),
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('media_video_error')), findsOneWidget);
+      expect(find.byKey(const Key('test_overlay')), findsOneWidget);
+    });
+
+    testWidgets('passes overlay to local video player when downloaded', (tester) async {
+      setUpFakeVideoPlayerPlatform();
+      final tempDir = Directory.systemTemp.createTempSync('media_video_overlay_test');
+      final tempFile = File('${tempDir.path}/test.mp4');
+      tempFile.writeAsBytesSync([0, 0, 0, 0]);
+      addTearDown(() => tempDir.deleteSync(recursive: true));
+
+      await mountWidget(
+        MediaVideo(
+          mediaFile: _mediaFile(filePath: tempFile.path),
+          overlay: const SizedBox.square(key: Key('test_overlay'), dimension: 40),
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('video_player')), findsOneWidget);
+      expect(find.byKey(const Key('test_overlay')), findsOneWidget);
+    });
   });
 }
