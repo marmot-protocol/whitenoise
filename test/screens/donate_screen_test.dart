@@ -72,7 +72,7 @@ void main() {
     testWidgets('displays lightning address copyable field', (tester) async {
       await pumpDonateScreen(tester);
       expect(find.text('Lightning Address'), findsOneWidget);
-      expect(find.text('whitenoise@npub.cash'), findsOneWidget);
+      expect(find.text('whitenoise@donate.ipf.dev'), findsOneWidget);
     });
 
     testWidgets('displays bitcoin silent payment copyable field', (tester) async {
@@ -122,7 +122,7 @@ void main() {
       );
       await tester.tap(lightningCopyButton);
       await tester.pump();
-      expect(getClipboard(), 'whitenoise@npub.cash');
+      expect(getClipboard(), 'whitenoise@donate.ipf.dev');
       expect(find.byType(WnSystemNotice), findsOneWidget);
       expect(find.textContaining('Thank you'), findsOneWidget);
     });

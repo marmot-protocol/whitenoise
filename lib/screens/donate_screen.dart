@@ -13,7 +13,7 @@ import 'package:whitenoise/widgets/wn_system_notice.dart';
 class DonateScreen extends HookWidget {
   const DonateScreen({super.key});
 
-  static const _lightningAddress = 'whitenoise@npub.cash';
+  static const _lightningAddress = 'whitenoise@donate.ipf.dev';
   static const _bitcoinAddress =
       'sp1qqvp56mxcj9pz9xudvlch5g4ah5hrc8rj6neu25p34rc9gxhp38cwqqlmld28u57w2srgckr34dkyg3q02phu8tm05cyj483q026xedp0s5f5j40p';
 
