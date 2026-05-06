@@ -309,7 +309,7 @@ class MessageActionsModal extends StatelessWidget {
     '👎',
     '🤣',
     '🔥',
-    '🦥',
+    '🦫',
   ];
 
   double _controlsEstimatedHeight() {
