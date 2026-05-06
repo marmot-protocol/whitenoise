@@ -91,6 +91,7 @@ ChatMessage _message(
 
 class _MockApi extends MockWnApi {
   StreamController<MessageStreamItem>? controller;
+  final List<StreamController<ChatListStreamItem>> chatListControllers = [];
   List<ChatMessage> initialMessages = [];
   String groupName = 'Test Group';
   final List<String> sentMessages = [];
@@ -119,6 +120,10 @@ class _MockApi extends MockWnApi {
     super.reset();
     controller?.close();
     controller = null;
+    for (final chatListController in [...chatListControllers]) {
+      chatListController.close();
+    }
+    chatListControllers.clear();
     initialMessages = [];
     groupName = 'Test Group';
     sentMessages.clear();
@@ -167,7 +172,22 @@ class _MockApi extends MockWnApi {
   Stream<ChatListStreamItem> crateApiChatListSubscribeToChatList({
     required String accountPubkey,
   }) {
-    final summary = ChatSummary(
+    final controller = StreamController<ChatListStreamItem>();
+    chatListControllers.add(controller);
+    Future.microtask(() {
+      if (!controller.isClosed) {
+        controller.add(ChatListStreamItem.initialSnapshot(items: [_chatSummary()]));
+      }
+    });
+    controller.onCancel = () {
+      chatListControllers.remove(controller);
+      if (!controller.isClosed) controller.close();
+    };
+    return controller.stream;
+  }
+
+  ChatSummary _chatSummary() {
+    return ChatSummary(
       mlsGroupId: _testGroupId,
       groupType: GroupType.group,
       createdAt: DateTime(2024),
@@ -176,7 +196,18 @@ class _MockApi extends MockWnApi {
       unreadCount: BigInt.zero,
       removedAt: removedAt,
     );
-    return Stream.value(ChatListStreamItem.initialSnapshot(items: [summary]));
+  }
+
+  void emitChatListUpdate(ChatListUpdateTrigger trigger) {
+    final item = ChatListStreamItem.update(
+      update: ChatListUpdate(
+        item: _chatSummary(),
+        trigger: trigger,
+      ),
+    );
+    for (final controller in [...chatListControllers]) {
+      if (!controller.isClosed) controller.add(item);
+    }
   }
 
   @override
@@ -828,6 +859,45 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.textContaining('Message new_msg'), findsOneWidget);
+      });
+
+      testWidgets('does not show initial messages from blocked authors', (tester) async {
+        _api.blockedPubkeys.add(testPubkeyB);
+        _api.initialMessages = [
+          _message('blocked', DateTime(2024)),
+          _message('visible', DateTime(2024, 1, 2), pubkey: testPubkeyC),
+        ];
+
+        await pumpChatScreen(tester);
+
+        expect(find.textContaining('Message blocked'), findsNothing);
+        expect(find.textContaining('Message visible'), findsOneWidget);
+      });
+
+      testWidgets('does not show new messages from blocked authors', (tester) async {
+        _api.blockedPubkeys.add(testPubkeyB);
+        _api.initialMessages = [_message('visible', DateTime(2024), pubkey: testPubkeyC)];
+
+        await pumpChatScreen(tester);
+        _api.emitMessage(_message('blocked', DateTime.now()));
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Message blocked'), findsNothing);
+        expect(find.textContaining('Message visible'), findsOneWidget);
+      });
+
+      testWidgets('does not show new messages after block state changes', (tester) async {
+        _api.initialMessages = [_message('visible', DateTime(2024), pubkey: testPubkeyC)];
+
+        await pumpChatScreen(tester);
+        _api.blockedPubkeys.add(testPubkeyB);
+        _api.emitChatListUpdate(ChatListUpdateTrigger.userBlockChanged);
+        await tester.pumpAndSettle();
+        _api.emitMessage(_message('blocked', DateTime.now()));
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Message blocked'), findsNothing);
+        expect(find.textContaining('Message visible'), findsOneWidget);
       });
     });
 

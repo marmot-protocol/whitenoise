@@ -296,6 +296,17 @@ void main() {
       expect(find.text('Decline'), findsOneWidget);
     });
 
+    testWidgets('returns to chat list when inviter is blocked', (tester) async {
+      _api.welcomerPubkey = testPubkeyB;
+      _api.blockedPubkeys.add(testPubkeyB);
+
+      await pumpInviteScreen(tester);
+
+      expect(find.byType(ChatListScreen), findsOneWidget);
+      expect(find.text('Accept'), findsNothing);
+      expect(find.text('Decline'), findsNothing);
+    });
+
     group('avatar color', () {
       group('when group', () {
         testWidgets('uses group ID', (tester) async {
@@ -369,6 +380,19 @@ void main() {
         await pumpInviteScreen(tester);
 
         expect(find.byType(WnMessageBubble), findsNWidgets(2));
+      });
+
+      testWidgets('does not display messages from blocked authors', (tester) async {
+        _api.blockedPubkeys.add(testPubkeyB);
+        _api.initialMessages = [
+          _message('blocked'),
+          _message('visible', pubkey: testPubkeyC),
+        ];
+
+        await pumpInviteScreen(tester);
+
+        expect(find.textContaining('Message blocked'), findsNothing);
+        expect(find.textContaining('Message visible'), findsOneWidget);
       });
 
       testWidgets('does not display deleted message text', (tester) async {

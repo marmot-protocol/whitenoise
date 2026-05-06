@@ -8,6 +8,7 @@ import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/services/notification_service.dart';
 import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart' as accounts_api;
+import 'package:whitenoise/src/rust/api/mute_list.dart' as mute_list_api;
 import 'package:whitenoise/src/rust/api/notifications.dart' as notifications_api;
 import 'package:whitenoise/utils/metadata.dart';
 
@@ -101,6 +102,13 @@ class NotificationSubscription {
     final activeChat = _getActiveChatId();
     if (activeChat == update.mlsGroupId) {
       _logger.fine('Skipping notification for active chat ${update.mlsGroupId}');
+      return;
+    }
+    if (await mute_list_api.isUserBlocked(
+      accountPubkey: update.receiver.pubkey,
+      targetPubkey: update.sender.pubkey,
+    )) {
+      _logger.fine('Skipping notification from blocked sender ${update.sender.pubkey}');
       return;
     }
 

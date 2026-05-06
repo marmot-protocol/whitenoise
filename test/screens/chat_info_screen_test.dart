@@ -44,7 +44,6 @@ class _MockApi extends MockWnApi {
   final blockCalls = <({String account, String target})>[];
   final unblockCalls = <({String account, String target})>[];
   final Set<String> followingPubkeys = {};
-  final Set<String> blockedPubkeys = {};
 
   @override
   Future<Group> crateApiGroupsGetGroup({

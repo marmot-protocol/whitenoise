@@ -19,11 +19,19 @@ MessageSearchResult useMessageSearch({
   required String pubkey,
   required String groupId,
   required String query,
+  Set<String> hiddenPubkeys = const {},
 }) {
   final results = useState<List<SearchResult>>([]);
   final displayItems = useState<List<SearchDisplayItem>>([]);
   final isSearching = useState(false);
   final debouncedQuery = _useDebouncedValue(query, _searchDebounceMs);
+  final hiddenPubkeysKey = useMemoized(
+    () {
+      final sorted = hiddenPubkeys.toList()..sort();
+      return sorted.join('|');
+    },
+    [hiddenPubkeys],
+  );
 
   useEffect(() {
     if (debouncedQuery.isEmpty) {
@@ -43,30 +51,34 @@ MessageSearchResult useMessageSearch({
         )
         .then((searchResults) async {
           if (cancelled) return;
+          final visibleSearchResults = searchResults
+              .where((result) => !hiddenPubkeys.contains(result.message.pubkey))
+              .toList();
           _logger.info(
             'search completed groupId=${groupId.substring(0, 8)}… '
-            'queryLength=${debouncedQuery.length} results=${searchResults.length}',
+            'queryLength=${debouncedQuery.length} results=${visibleSearchResults.length}',
           );
-          results.value = searchResults;
+          results.value = visibleSearchResults;
 
-          if (searchResults.isEmpty) {
+          if (visibleSearchResults.isEmpty) {
             displayItems.value = [];
             isSearching.value = false;
             return;
           }
 
-          displayItems.value = _matchOnlyItems(searchResults);
+          displayItems.value = _matchOnlyItems(visibleSearchResults);
 
           try {
             final windows = await _fetchContextWindows(
               pubkey: pubkey,
               groupId: groupId,
-              results: searchResults,
+              results: visibleSearchResults,
+              hiddenPubkeys: hiddenPubkeys,
               isCancelled: () => cancelled,
             );
             if (cancelled) return;
             displayItems.value = buildSearchDisplayList(
-              results: searchResults,
+              results: visibleSearchResults,
               contextWindows: windows,
             );
           } catch (e, st) {
@@ -87,7 +99,7 @@ MessageSearchResult useMessageSearch({
         });
 
     return () => cancelled = true;
-  }, [debouncedQuery, pubkey, groupId]);
+  }, [debouncedQuery, pubkey, groupId, hiddenPubkeysKey]);
 
   return (
     results: results.value,
@@ -116,6 +128,7 @@ Future<List<List<ChatMessage>>> _fetchContextWindows({
   required String pubkey,
   required String groupId,
   required List<SearchResult> results,
+  required Set<String> hiddenPubkeys,
   required bool Function() isCancelled,
 }) async {
   final windows = <List<ChatMessage>>[];
@@ -135,7 +148,10 @@ Future<List<List<ChatMessage>>> _fetchContextWindows({
 
     if (isCancelled()) return windows;
 
-    windows.add([...beforeMessages, match]);
+    windows.add([
+      ...beforeMessages.where((message) => !hiddenPubkeys.contains(message.pubkey)),
+      match,
+    ]);
   }
 
   return windows;

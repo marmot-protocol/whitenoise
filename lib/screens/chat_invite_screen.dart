@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_active_chat.dart';
+import 'package:whitenoise/hooks/use_blocked_pubkeys.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart';
 import 'package:whitenoise/hooks/use_chat_profile.dart';
 import 'package:whitenoise/l10n/l10n.dart';
@@ -44,6 +45,7 @@ class ChatInviteScreen extends HookConsumerWidget {
     final isDeclining = useState(false);
     final isProcessing = isAccepting.value || isDeclining.value;
     final noticeMessage = useState<String?>(null);
+    final blockedPubkeysState = useBlockedPubkeys(pubkey);
 
     void showNotice(String message) {
       noticeMessage.value = message;
@@ -54,7 +56,11 @@ class ChatInviteScreen extends HookConsumerWidget {
     }
 
     final chatProfile = useChatProfile(context, pubkey, mlsGroupId);
-    final chatMessages = useChatMessages(mlsGroupId, pubkey: pubkey);
+    final chatMessages = useChatMessages(
+      mlsGroupId,
+      pubkey: pubkey,
+      hiddenPubkeys: blockedPubkeysState.blockedPubkeys,
+    );
 
     final accountGroup = useMemoized(
       () => account_groups_api.getAccountGroup(
@@ -64,13 +70,23 @@ class ChatInviteScreen extends HookConsumerWidget {
       [pubkey, mlsGroupId],
     );
     final accountGroupSnapshot = useFuture(accountGroup);
+    final welcomerPubkey = accountGroupSnapshot.data?.welcomerPubkey;
+    final isBlockedInvite =
+        welcomerPubkey != null && blockedPubkeysState.blockedPubkeys.contains(welcomerPubkey);
     final inviterName = useStream(
       useMemoized(() {
-        final welcomerPubkey = accountGroupSnapshot.data?.welcomerPubkey;
         if (welcomerPubkey == null) return null;
         return UserService(welcomerPubkey).watchMetadata().map(presentName);
-      }, [accountGroupSnapshot.data?.welcomerPubkey]),
+      }, [welcomerPubkey]),
     );
+
+    useEffect(() {
+      if (!isBlockedInvite) return null;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (context.mounted) Routes.goToChatList(context);
+      });
+      return null;
+    }, [isBlockedInvite]);
 
     useActiveChat(
       groupId: mlsGroupId,
@@ -124,6 +140,10 @@ class ChatInviteScreen extends HookConsumerWidget {
       } finally {
         if (context.mounted) isDeclining.value = false;
       }
+    }
+
+    if (isBlockedInvite) {
+      return Scaffold(backgroundColor: colors.backgroundPrimary);
     }
 
     return Scaffold(

@@ -86,6 +86,9 @@ class ChatScreen extends HookConsumerWidget {
     final pubkey = ref.watch(accountPubkeyProvider);
     final isOffline = ref.watch(offlineProvider).value ?? false;
     final debugLog = ref.read(messageDebugLogProvider.notifier);
+    final blockRefreshKey = useState(0);
+    final chatList = useChatList(pubkey);
+    final hiddenPubkeys = chatList.blockedPubkeys;
     final (
       :messageCount,
       :getMessage,
@@ -103,6 +106,7 @@ class ChatScreen extends HookConsumerWidget {
       groupId,
       pubkey: pubkey,
       debugLog: debugLog,
+      hiddenPubkeys: hiddenPubkeys,
     );
     final chatProfile = useChatProfile(context, pubkey, groupId);
     final isGroupChat = chatProfile.data?.isDm == false;
@@ -132,13 +136,11 @@ class ChatScreen extends HookConsumerWidget {
 
     final debugViewEnabled = ref.watch(debugViewProvider).value ?? false;
 
-    final chatList = useChatList(pubkey);
     final isRemovedFromGroup =
         chatList.chats.where((c) => c.mlsGroupId == groupId).firstOrNull?.removedAt != null;
     final isRemovedNoticeCollapsed = useState(false);
 
     final peerPubkey = chatProfile.data?.otherMemberPubkey;
-    final blockRefreshKey = useState(0);
     final blockState = useBlockActions(
       accountPubkey: pubkey,
       userPubkey: peerPubkey,
@@ -163,6 +165,7 @@ class ChatScreen extends HookConsumerWidget {
       pubkey: pubkey,
       groupId: groupId,
       query: isSearchActive.value ? searchQuery.value : '',
+      hiddenPubkeys: hiddenPubkeys,
     );
 
     void showNotice(String message) {
@@ -177,6 +180,8 @@ class ChatScreen extends HookConsumerWidget {
       if (!blockState.isBlocked) return;
       try {
         await blockState.toggleBlock();
+        blockRefreshKey.value++;
+        chatList.refresh();
       } catch (_) {
         if (context.mounted) showNotice(context.l10n.failedToUnblockUser);
       }

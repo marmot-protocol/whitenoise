@@ -11,6 +11,7 @@ import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/src/rust/api/mute_list.dart';
 import 'package:whitenoise/src/rust/api/user_search.dart';
 import 'package:whitenoise/src/rust/api/users.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -54,6 +55,7 @@ class MockWnApi implements RustLibApi {
   Completer<List<Account>>? getAccountsCompleter;
 
   List<User> follows = [];
+  final blockedPubkeys = <String>{};
   KeyPackageStatus userHasKeyPackageStatus = KeyPackageStatus.valid;
   Completer<KeyPackageStatus>? userHasKeyPackageCompleter;
   StreamController<UserSearchUpdate>? searchUsersController;
@@ -224,6 +226,46 @@ class MockWnApi implements RustLibApi {
     required String userPubkey,
   }) async {
     return follows.any((user) => user.pubkey == userPubkey);
+  }
+
+  @override
+  Future<void> crateApiMuteListBlockUser({
+    required String accountPubkey,
+    required String targetPubkey,
+  }) async {
+    blockedPubkeys.add(targetPubkey);
+  }
+
+  @override
+  Future<void> crateApiMuteListUnblockUser({
+    required String accountPubkey,
+    required String targetPubkey,
+  }) async {
+    blockedPubkeys.remove(targetPubkey);
+  }
+
+  @override
+  Future<List<MuteListEntry>> crateApiMuteListGetBlockedUsers({
+    required String accountPubkey,
+  }) async {
+    return blockedPubkeys
+        .map(
+          (pubkey) => MuteListEntry(
+            accountPubkey: accountPubkey,
+            mutedPubkey: pubkey,
+            isPrivate: true,
+            createdAt: DateTime(2024),
+          ),
+        )
+        .toList();
+  }
+
+  @override
+  Future<bool> crateApiMuteListIsUserBlocked({
+    required String accountPubkey,
+    required String targetPubkey,
+  }) async {
+    return blockedPubkeys.contains(targetPubkey);
   }
 
   @override
@@ -848,6 +890,7 @@ class MockWnApi implements RustLibApi {
     shouldFailHexFromNpub = false;
     accounts = [];
     follows = [];
+    blockedPubkeys.clear();
     getAccountsCompleter = null;
     userHasKeyPackageStatus = KeyPackageStatus.valid;
     searchUsersController?.close();
