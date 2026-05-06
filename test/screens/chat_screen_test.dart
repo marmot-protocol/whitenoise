@@ -21,6 +21,7 @@ import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/src/rust/api/mute_list.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
@@ -110,6 +111,7 @@ class _MockApi extends MockWnApi {
   Completer<MediaFile>? uploadCompleter;
   Map<String, FlutterMetadata>? metadataByPubkey;
   Completer<List<ChatMessage>>? fetchOlderCompleter;
+  Completer<List<MuteListEntry>>? blockedUsersCompleter;
   DateTime? removedAt;
   bool blockedUser = false;
   bool shouldFailUnblockUser = false;
@@ -143,6 +145,7 @@ class _MockApi extends MockWnApi {
     uploadCompleter = null;
     metadataByPubkey = null;
     fetchOlderCompleter = null;
+    blockedUsersCompleter = null;
     removedAt = null;
     blockedUser = false;
     shouldFailUnblockUser = false;
@@ -168,6 +171,14 @@ class _MockApi extends MockWnApi {
       }
     }
     return Future.value([]);
+  }
+
+  @override
+  Future<List<MuteListEntry>> crateApiMuteListGetBlockedUsers({
+    required String accountPubkey,
+  }) {
+    if (blockedUsersCompleter != null) return blockedUsersCompleter!.future;
+    return super.crateApiMuteListGetBlockedUsers(accountPubkey: accountPubkey);
   }
 
   @override
@@ -897,6 +908,42 @@ void main() {
         _api.emitChatListUpdate(ChatListUpdateTrigger.userBlockChanged);
         await tester.pumpAndSettle();
         _api.emitMessage(_message('blocked', DateTime.now()));
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Message blocked'), findsNothing);
+        expect(find.textContaining('Message visible'), findsOneWidget);
+      });
+
+      testWidgets('does not show messages while blocked users are loading', (tester) async {
+        _api.blockedUsersCompleter = Completer<List<MuteListEntry>>();
+        _api.initialMessages = [
+          _message('blocked', DateTime(2024)),
+          _message('visible', DateTime(2024, 1, 2), pubkey: testPubkeyC),
+        ];
+
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            offlineProvider.overrideWith((ref) => Stream.value(false)),
+          ],
+        );
+        await tester.pumpAndSettle();
+        Routes.goToChat(tester.element(find.byType(Scaffold)), _testGroupId);
+        await tester.pump();
+        await tester.pump();
+        await tester.pump();
+
+        expect(find.byType(WnMessageBubble), findsNothing);
+
+        _api.blockedUsersCompleter!.complete([
+          MuteListEntry(
+            accountPubkey: _testPubkey,
+            mutedPubkey: testPubkeyB,
+            isPrivate: true,
+            createdAt: DateTime(2024),
+          ),
+        ]);
         await tester.pumpAndSettle();
 
         expect(find.textContaining('Message blocked'), findsNothing);

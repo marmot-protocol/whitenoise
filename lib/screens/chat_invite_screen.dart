@@ -70,9 +70,12 @@ class ChatInviteScreen extends HookConsumerWidget {
       [pubkey, mlsGroupId],
     );
     final accountGroupSnapshot = useFuture(accountGroup);
-    final welcomerPubkey = accountGroupSnapshot.data?.welcomerPubkey;
+    final accountGroupIsLoading = accountGroupSnapshot.connectionState == ConnectionState.waiting;
+    final welcomerPubkey = accountGroupIsLoading ? null : accountGroupSnapshot.data?.welcomerPubkey;
     final isBlockedInvite =
-        welcomerPubkey != null && blockedPubkeysState.blockedPubkeys.contains(welcomerPubkey);
+        !accountGroupIsLoading &&
+        welcomerPubkey != null &&
+        blockedPubkeysState.blockedPubkeys.contains(welcomerPubkey);
     final inviterName = useStream(
       useMemoized(() {
         if (welcomerPubkey == null) return null;
@@ -142,7 +145,7 @@ class ChatInviteScreen extends HookConsumerWidget {
       }
     }
 
-    if (blockedPubkeysState.isLoading || isBlockedInvite) {
+    if (blockedPubkeysState.isLoading || accountGroupIsLoading || isBlockedInvite) {
       return Scaffold(backgroundColor: colors.backgroundPrimary);
     }
 

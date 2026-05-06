@@ -71,6 +71,7 @@ class _MockApi extends MockWnApi {
   bool isDm = false;
   List<String> groupMembers = [];
   String? welcomerPubkey;
+  Completer<AccountGroup>? accountGroupCompleter;
   List<List<ChatMessage>> olderMessagePages = [];
   int _fetchPageIndex = 0;
   int fetchOlderCallCount = 0;
@@ -90,6 +91,7 @@ class _MockApi extends MockWnApi {
     isDm = false;
     groupMembers = [];
     welcomerPubkey = null;
+    accountGroupCompleter = null;
     olderMessagePages = [];
     _fetchPageIndex = 0;
     fetchOlderCallCount = 0;
@@ -175,6 +177,7 @@ class _MockApi extends MockWnApi {
     required String accountPubkey,
     required String mlsGroupId,
   }) async {
+    if (accountGroupCompleter != null) return accountGroupCompleter!.future;
     return AccountGroup(
       accountPubkey: accountPubkey,
       mlsGroupId: mlsGroupId,
@@ -327,6 +330,21 @@ void main() {
       expect(find.text('Decline'), findsNothing);
 
       _api.blockedUsersCompleter!.complete([]);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Accept'), findsOneWidget);
+      expect(find.text('Decline'), findsOneWidget);
+    });
+
+    testWidgets('does not show invite controls while welcomer lookup is loading', (tester) async {
+      _api.accountGroupCompleter = Completer<AccountGroup>();
+
+      await pumpInviteScreen(tester);
+
+      expect(find.text('Accept'), findsNothing);
+      expect(find.text('Decline'), findsNothing);
+
+      _api.accountGroupCompleter!.complete(_accountGroup());
       await tester.pumpAndSettle();
 
       expect(find.text('Accept'), findsOneWidget);

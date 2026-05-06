@@ -328,7 +328,7 @@ class ChatScreen extends HookConsumerWidget {
     }, [searchQuery.value]);
 
     Widget messageListContent;
-    if (isLoading) {
+    if (isLoading || blockedPubkeysState.isLoading) {
       messageListContent = Center(
         child: CircularProgressIndicator(color: colors.backgroundContentPrimary),
       );
@@ -516,11 +516,13 @@ class ChatScreen extends HookConsumerWidget {
                         onAvatarTap: () async {
                           if (chatProfile.data?.isDm == true) {
                             final result = await Routes.pushToChatInfo(context, groupId);
+                            if (!context.mounted) return;
                             blockActionsRefreshKey.value++;
                             chatList.refresh();
                             if (result == true) openSearch();
                           } else {
                             final result = await Routes.pushToGroupInfo(context, groupId);
+                            if (!context.mounted) return;
                             if (result == true) openSearch();
                           }
                         },
