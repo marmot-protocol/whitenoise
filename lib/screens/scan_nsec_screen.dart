@@ -5,7 +5,7 @@ import 'package:go_router/go_router.dart' show GoRouter;
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/theme.dart';
-import 'package:whitenoise/widgets/wn_scan_box.dart' show WnScanBox;
+import 'package:whitenoise/widgets/qr_scanner.dart' show QrScanner;
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 
@@ -41,7 +41,7 @@ class ScanNsecScreen extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     Expanded(
-                      child: WnScanBox(
+                      child: QrScanner(
                         onBarcodeDetected: (value) => GoRouter.of(context).pop(value),
                       ),
                     ),
