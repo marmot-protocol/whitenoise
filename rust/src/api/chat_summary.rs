@@ -78,3 +78,21 @@ impl From<WhitenoiseChatListItem> for ChatSummary {
         }
     }
 }
+
+#[frb]
+pub async fn get_chat_summary(
+    account_pubkey: String,
+    mls_group_id: String,
+) -> Result<ChatSummary, ApiError> {
+    let whitenoise = Whitenoise::get_instance()?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let chat_list = whitenoise.get_chat_list(&account).await?;
+    let item = chat_list
+        .into_iter()
+        .find(|item| group_id_to_string(&item.mls_group_id) == mls_group_id)
+        .ok_or_else(|| ApiError::Other {
+            message: format!("Chat not found: {}", mls_group_id),
+        })?;
+    Ok(item.into())
+}

@@ -6,10 +6,19 @@
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 import '../frb_generated.dart';
+import 'error.dart';
 import 'groups.dart';
 import 'messages.dart';
 
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`, `from`
+
+Future<ChatSummary> getChatSummary({
+  required String accountPubkey,
+  required String mlsGroupId,
+}) => RustLib.instance.api.crateApiChatSummaryGetChatSummary(
+  accountPubkey: accountPubkey,
+  mlsGroupId: mlsGroupId,
+);
 
 class ChatSummary {
   /// MLS group identifier (hex string)
