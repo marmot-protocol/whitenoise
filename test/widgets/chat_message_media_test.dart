@@ -235,6 +235,18 @@ void main() {
       expect(find.byKey(const Key('media_image')), findsOneWidget);
     });
 
+    testWidgets('shows video loading indicator while video is downloading', (tester) async {
+      _api.downloadCompleter = Completer<MediaFile>();
+      await mountWidget(
+        ChatMessageMedia(
+          mediaFiles: [_mediaFile(mimeType: 'video/mp4', mediaType: 'video')],
+        ),
+        tester,
+      );
+
+      expect(find.byKey(const Key('media_video_loading_indicator')), findsOneWidget);
+    });
+
     testWidgets('shows video preview with play indicator on success', (tester) async {
       setUpFakeVideoPlayerPlatform();
       final tempDir = Directory.systemTemp.createTempSync('chat_media_video_test');
