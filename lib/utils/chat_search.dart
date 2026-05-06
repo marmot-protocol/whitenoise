@@ -1,4 +1,4 @@
-import 'package:whitenoise/src/rust/api/chat_list.dart';
+import 'package:whitenoise/src/rust/api/chat_summary.dart' show ChatSummary;
 
 List<ChatSummary> filterChatsBySearchWithMessageMatches(
   List<ChatSummary> chats,

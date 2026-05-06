@@ -13,6 +13,7 @@ import 'api/account_groups.dart';
 import 'api/accounts.dart';
 import 'api/bug_report.dart';
 import 'api/chat_list.dart';
+import 'api/chat_summary.dart';
 import 'api/drafts.dart';
 import 'api/error.dart';
 import 'api/groups.dart';

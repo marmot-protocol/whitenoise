@@ -16,6 +16,7 @@ import 'package:whitenoise/screens/chat_screen.dart';
 import 'package:whitenoise/screens/group_info_screen.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
 import 'package:whitenoise/src/rust/api/chat_list.dart';
+import 'package:whitenoise/src/rust/api/chat_summary.dart';
 import 'package:whitenoise/src/rust/api/drafts.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';

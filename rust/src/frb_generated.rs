@@ -6000,7 +6000,7 @@ impl SseDecode for crate::api::chat_list::ChatListStreamItem {
         match tag_ {
             0 => {
                 let mut var_items =
-                    <Vec<crate::api::chat_list::ChatSummary>>::sse_decode(deserializer);
+                    <Vec<crate::api::chat_summary::ChatSummary>>::sse_decode(deserializer);
                 return crate::api::chat_list::ChatListStreamItem::InitialSnapshot {
                     items: var_items,
                 };
@@ -6022,7 +6022,7 @@ impl SseDecode for crate::api::chat_list::ChatListUpdate {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_trigger =
             <crate::api::chat_list::ChatListUpdateTrigger>::sse_decode(deserializer);
-        let mut var_item = <crate::api::chat_list::ChatSummary>::sse_decode(deserializer);
+        let mut var_item = <crate::api::chat_summary::ChatSummary>::sse_decode(deserializer);
         return crate::api::chat_list::ChatListUpdate {
             trigger: var_trigger,
             item: var_item,
@@ -6138,7 +6138,7 @@ impl SseDecode for crate::api::chat_list::ChatMuteDuration {
     }
 }
 
-impl SseDecode for crate::api::chat_list::ChatSummary {
+impl SseDecode for crate::api::chat_summary::ChatSummary {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_mlsGroupId = <String>::sse_decode(deserializer);
@@ -6158,7 +6158,7 @@ impl SseDecode for crate::api::chat_list::ChatSummary {
         let mut var_pinOrder = <Option<i64>>::sse_decode(deserializer);
         let mut var_dmPeerPubkey = <Option<String>>::sse_decode(deserializer);
         let mut var_mutedUntil = <Option<chrono::DateTime<chrono::Utc>>>::sse_decode(deserializer);
-        return crate::api::chat_list::ChatSummary {
+        return crate::api::chat_summary::ChatSummary {
             mls_group_id: var_mlsGroupId,
             name: var_name,
             group_type: var_groupType,
@@ -6541,13 +6541,13 @@ impl SseDecode for Vec<crate::api::messages::ChatMessage> {
     }
 }
 
-impl SseDecode for Vec<crate::api::chat_list::ChatSummary> {
+impl SseDecode for Vec<crate::api::chat_summary::ChatSummary> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut len_ = <i32>::sse_decode(deserializer);
         let mut ans_ = vec![];
         for idx_ in 0..len_ {
-            ans_.push(<crate::api::chat_list::ChatSummary>::sse_decode(
+            ans_.push(<crate::api::chat_summary::ChatSummary>::sse_decode(
                 deserializer,
             ));
         }
@@ -8472,7 +8472,7 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::chat_list::ChatMuteDuration>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::api::chat_list::ChatSummary {
+impl flutter_rust_bridge::IntoDart for crate::api::chat_summary::ChatSummary {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
             self.mls_group_id.into_into_dart().into_dart(),
@@ -8496,13 +8496,13 @@ impl flutter_rust_bridge::IntoDart for crate::api::chat_list::ChatSummary {
     }
 }
 impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::api::chat_list::ChatSummary
+    for crate::api::chat_summary::ChatSummary
 {
 }
-impl flutter_rust_bridge::IntoIntoDart<crate::api::chat_list::ChatSummary>
-    for crate::api::chat_list::ChatSummary
+impl flutter_rust_bridge::IntoIntoDart<crate::api::chat_summary::ChatSummary>
+    for crate::api::chat_summary::ChatSummary
 {
-    fn into_into_dart(self) -> crate::api::chat_list::ChatSummary {
+    fn into_into_dart(self) -> crate::api::chat_summary::ChatSummary {
         self
     }
 }
@@ -9975,7 +9975,7 @@ impl SseEncode for crate::api::chat_list::ChatListStreamItem {
         match self {
             crate::api::chat_list::ChatListStreamItem::InitialSnapshot { items } => {
                 <i32>::sse_encode(0, serializer);
-                <Vec<crate::api::chat_list::ChatSummary>>::sse_encode(items, serializer);
+                <Vec<crate::api::chat_summary::ChatSummary>>::sse_encode(items, serializer);
             }
             crate::api::chat_list::ChatListStreamItem::Update { update } => {
                 <i32>::sse_encode(1, serializer);
@@ -9992,7 +9992,7 @@ impl SseEncode for crate::api::chat_list::ChatListUpdate {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <crate::api::chat_list::ChatListUpdateTrigger>::sse_encode(self.trigger, serializer);
-        <crate::api::chat_list::ChatSummary>::sse_encode(self.item, serializer);
+        <crate::api::chat_summary::ChatSummary>::sse_encode(self.item, serializer);
     }
 }
 
@@ -10084,7 +10084,7 @@ impl SseEncode for crate::api::chat_list::ChatMuteDuration {
     }
 }
 
-impl SseEncode for crate::api::chat_list::ChatSummary {
+impl SseEncode for crate::api::chat_summary::ChatSummary {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.mls_group_id, serializer);
@@ -10385,12 +10385,12 @@ impl SseEncode for Vec<crate::api::messages::ChatMessage> {
     }
 }
 
-impl SseEncode for Vec<crate::api::chat_list::ChatSummary> {
+impl SseEncode for Vec<crate::api::chat_summary::ChatSummary> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <i32>::sse_encode(self.len() as _, serializer);
         for item in self {
-            <crate::api::chat_list::ChatSummary>::sse_encode(item, serializer);
+            <crate::api::chat_summary::ChatSummary>::sse_encode(item, serializer);
         }
     }
 }
