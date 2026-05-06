@@ -14,6 +14,7 @@ import 'package:whitenoise/src/rust/api/account_groups.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/src/rust/api/mute_list.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
@@ -73,6 +74,7 @@ class _MockApi extends MockWnApi {
   List<List<ChatMessage>> olderMessagePages = [];
   int _fetchPageIndex = 0;
   int fetchOlderCallCount = 0;
+  Completer<List<MuteListEntry>>? blockedUsersCompleter;
 
   @override
   void reset() {
@@ -91,6 +93,7 @@ class _MockApi extends MockWnApi {
     olderMessagePages = [];
     _fetchPageIndex = 0;
     fetchOlderCallCount = 0;
+    blockedUsersCompleter = null;
   }
 
   void emitMessage(ChatMessage message) {
@@ -179,6 +182,14 @@ class _MockApi extends MockWnApi {
       createdAt: PlatformInt64Util.from(0),
       updatedAt: PlatformInt64Util.from(0),
     );
+  }
+
+  @override
+  Future<List<MuteListEntry>> crateApiMuteListGetBlockedUsers({
+    required String accountPubkey,
+  }) {
+    if (blockedUsersCompleter != null) return blockedUsersCompleter!.future;
+    return super.crateApiMuteListGetBlockedUsers(accountPubkey: accountPubkey);
   }
 
   @override
@@ -305,6 +316,21 @@ void main() {
       expect(find.byType(ChatListScreen), findsOneWidget);
       expect(find.text('Accept'), findsNothing);
       expect(find.text('Decline'), findsNothing);
+    });
+
+    testWidgets('does not show invite controls while blocked users are loading', (tester) async {
+      _api.blockedUsersCompleter = Completer<List<MuteListEntry>>();
+
+      await pumpInviteScreen(tester);
+
+      expect(find.text('Accept'), findsNothing);
+      expect(find.text('Decline'), findsNothing);
+
+      _api.blockedUsersCompleter!.complete([]);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Accept'), findsOneWidget);
+      expect(find.text('Decline'), findsOneWidget);
     });
 
     group('avatar color', () {

@@ -113,6 +113,7 @@ class _MockApi extends MockWnApi {
   DateTime? removedAt;
   bool blockedUser = false;
   bool shouldFailUnblockUser = false;
+  Completer<void>? unblockUserCompleter;
   List<SearchResult> Function(String query)? searchOverride;
 
   @override
@@ -145,6 +146,7 @@ class _MockApi extends MockWnApi {
     removedAt = null;
     blockedUser = false;
     shouldFailUnblockUser = false;
+    unblockUserCompleter = null;
     searchOverride = null;
   }
 
@@ -395,6 +397,7 @@ class _MockApi extends MockWnApi {
     required String accountPubkey,
     required String targetPubkey,
   }) async {
+    if (unblockUserCompleter != null) await unblockUserCompleter!.future;
     if (shouldFailUnblockUser) throw Exception('Unblock failed');
     blockedUser = false;
   }
@@ -2362,6 +2365,22 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Failed to unblock user. Please try again.'), findsOneWidget);
+      });
+
+      testWidgets('does not update state after unblock completes on disposed screen', (
+        tester,
+      ) async {
+        _api.unblockUserCompleter = Completer<void>();
+        await pumpChatScreen(tester);
+
+        await tester.tap(find.byKey(const Key('blocked_notice_unblock_button')));
+        await tester.pump();
+        await tester.pumpWidget(const SizedBox());
+
+        _api.unblockUserCompleter!.complete();
+        await tester.pump();
+
+        expect(tester.takeException(), isNull);
       });
 
       testWidgets('archive button shows Archive when not archived', (tester) async {

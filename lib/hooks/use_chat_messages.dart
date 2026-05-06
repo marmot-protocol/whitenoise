@@ -8,6 +8,7 @@ import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/utils/stable_set_key.dart';
 
 final _logger = Logger('useChatMessages');
 
@@ -49,6 +50,7 @@ ChatMessagesResult useChatMessages(
   Set<String> hiddenPubkeys = const {},
 }) {
   final allMessageIds = useRef<List<String>>([]);
+  final allMessageIdsSet = useRef<Set<String>>({});
   final visibleMessageIds = useRef<List<String>>([]);
   final messagesById = useRef<Map<String, ChatMessage>>({});
   final indexById = useRef<Map<String, int>>({});
@@ -79,13 +81,7 @@ ChatMessagesResult useChatMessages(
   // after the await; a mismatch means the account or group changed while the
   // fetch was in-flight and the response must be discarded.
   final requestTokenRef = useRef(0);
-  final hiddenPubkeysKey = useMemoized(
-    () {
-      final sorted = hiddenPubkeys.toList()..sort();
-      return sorted.join('|');
-    },
-    [hiddenPubkeys],
-  );
+  final hiddenPubkeysKey = stableStringSetKey(hiddenPubkeys);
 
   bool isHiddenMessage(ChatMessage message) => hiddenPubkeys.contains(message.pubkey);
 
@@ -101,6 +97,7 @@ ChatMessagesResult useChatMessages(
 
   useEffect(() {
     allMessageIds.value = [];
+    allMessageIdsSet.value = {};
     visibleMessageIds.value = [];
     messagesById.value = {};
     indexById.value = {};
@@ -156,12 +153,14 @@ ChatMessagesResult useChatMessages(
                 );
 
                 allMessageIds.value = [];
+                allMessageIdsSet.value = {};
                 visibleMessageIds.value = [];
                 messagesById.value = {};
                 indexById.value = {};
 
                 for (final message in initialChatMessages) {
                   allMessageIds.value.add(message.id);
+                  allMessageIdsSet.value.add(message.id);
                   messagesById.value[message.id] = message;
                 }
                 rebuildVisibleIndexes();
@@ -194,8 +193,9 @@ ChatMessagesResult useChatMessages(
                 messagesById.value[message.id] = message;
 
                 if (update.trigger == UpdateTrigger.newMessage &&
-                    !allMessageIds.value.contains(message.id)) {
+                    !allMessageIdsSet.value.contains(message.id)) {
                   allMessageIds.value.add(message.id);
+                  allMessageIdsSet.value.add(message.id);
                 }
                 rebuildVisibleIndexes();
 
@@ -425,7 +425,7 @@ ChatMessagesResult useChatMessages(
         messagesById.value[msg.id] = msg;
         // Only track new IDs for prepending; duplicates keep their existing
         // position in the list.
-        if (!allMessageIds.value.contains(msg.id)) {
+        if (!allMessageIdsSet.value.contains(msg.id)) {
           newIds.add(msg.id);
         }
       }
@@ -447,6 +447,7 @@ ChatMessagesResult useChatMessages(
           // Remove evicted payloads from the lookup map to free memory.
           for (final id in evicted) {
             messagesById.value.remove(id);
+            allMessageIdsSet.value.remove(id);
           }
           _logger.info(
             'loadOlderMessages groupId=$groupId: evicted ${evicted.length} newest messages (window=$_kWindowSize)',
@@ -454,6 +455,7 @@ ChatMessagesResult useChatMessages(
         }
 
         allMessageIds.value = combined;
+        allMessageIdsSet.value = combined.toSet();
         rebuildVisibleIndexes();
         // Increment to force a widget rebuild after prepending (see declaration).
         paginationVersion.value++;

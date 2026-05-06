@@ -8,6 +8,7 @@ import 'package:scroll_to_index/scroll_to_index.dart'
     show AutoScrollController, AutoScrollPosition, AutoScrollTag;
 import 'package:whitenoise/hooks/use_active_chat.dart';
 import 'package:whitenoise/hooks/use_block_actions.dart';
+import 'package:whitenoise/hooks/use_blocked_pubkeys.dart';
 import 'package:whitenoise/hooks/use_chat_archive.dart';
 import 'package:whitenoise/hooks/use_chat_input.dart';
 import 'package:whitenoise/hooks/use_chat_list.dart';
@@ -86,9 +87,13 @@ class ChatScreen extends HookConsumerWidget {
     final pubkey = ref.watch(accountPubkeyProvider);
     final isOffline = ref.watch(offlineProvider).value ?? false;
     final debugLog = ref.read(messageDebugLogProvider.notifier);
-    final blockRefreshKey = useState(0);
-    final chatList = useChatList(pubkey);
-    final hiddenPubkeys = chatList.blockedPubkeys;
+    final blockActionsRefreshKey = useState(0);
+    final blockedPubkeysState = useBlockedPubkeys(pubkey);
+    final chatList = useChatListWithBlockedPubkeys(
+      pubkey,
+      blockedState: blockedPubkeysState,
+    );
+    final hiddenPubkeys = blockedPubkeysState.blockedPubkeys;
     final (
       :messageCount,
       :getMessage,
@@ -144,7 +149,7 @@ class ChatScreen extends HookConsumerWidget {
     final blockState = useBlockActions(
       accountPubkey: pubkey,
       userPubkey: peerPubkey,
-      refreshKey: blockRefreshKey.value,
+      refreshKey: blockActionsRefreshKey.value,
     );
     final isBlocked = peerPubkey != null ? blockState.isBlocked : false;
     final isBlockedNoticeCollapsed = useState(false);
@@ -180,7 +185,8 @@ class ChatScreen extends HookConsumerWidget {
       if (!blockState.isBlocked) return;
       try {
         await blockState.toggleBlock();
-        blockRefreshKey.value++;
+        if (!context.mounted) return;
+        blockActionsRefreshKey.value++;
         chatList.refresh();
       } catch (_) {
         if (context.mounted) showNotice(context.l10n.failedToUnblockUser);
@@ -510,7 +516,8 @@ class ChatScreen extends HookConsumerWidget {
                         onAvatarTap: () async {
                           if (chatProfile.data?.isDm == true) {
                             final result = await Routes.pushToChatInfo(context, groupId);
-                            blockRefreshKey.value++;
+                            blockActionsRefreshKey.value++;
+                            chatList.refresh();
                             if (result == true) openSearch();
                           } else {
                             final result = await Routes.pushToGroupInfo(context, groupId);

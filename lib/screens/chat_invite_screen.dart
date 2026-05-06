@@ -142,7 +142,7 @@ class ChatInviteScreen extends HookConsumerWidget {
       }
     }
 
-    if (isBlockedInvite) {
+    if (blockedPubkeysState.isLoading || isBlockedInvite) {
       return Scaffold(backgroundColor: colors.backgroundPrimary);
     }
 

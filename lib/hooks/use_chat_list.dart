@@ -14,10 +14,37 @@ typedef ChatListResult = ({
 });
 
 ChatListResult useChatList(String pubkey, {bool archived = false}) {
-  final chatMap = useRef(<String, ChatSummary>{});
-  final refreshKey = useState(0);
   final blockedPubkeysRefreshKey = useState(0);
   final blockedState = useBlockedPubkeys(pubkey, refreshKey: blockedPubkeysRefreshKey.value);
+  return _useChatList(
+    pubkey,
+    archived: archived,
+    blockedState: blockedState,
+    refreshBlockedPubkeys: () => blockedPubkeysRefreshKey.value++,
+  );
+}
+
+ChatListResult useChatListWithBlockedPubkeys(
+  String pubkey, {
+  bool archived = false,
+  required BlockedPubkeysState blockedState,
+}) {
+  return _useChatList(
+    pubkey,
+    archived: archived,
+    blockedState: blockedState,
+    refreshBlockedPubkeys: blockedState.refresh,
+  );
+}
+
+ChatListResult _useChatList(
+  String pubkey, {
+  required bool archived,
+  required BlockedPubkeysState blockedState,
+  required VoidCallback refreshBlockedPubkeys,
+}) {
+  final chatMap = useRef(<String, ChatSummary>{});
+  final refreshKey = useState(0);
   final blockedPubkeysRef = useRef<Set<String>>({});
   blockedPubkeysRef.value = blockedState.blockedPubkeys;
 
@@ -80,7 +107,7 @@ ChatListResult useChatList(String pubkey, {bool archived = false}) {
                     chatMap.value.remove(id);
                   case ChatListUpdateTrigger.userBlockChanged:
                     chatMap.value[id] = update.item;
-                    blockedPubkeysRefreshKey.value++;
+                    refreshBlockedPubkeys();
                 }
                 return chatMap.value;
               },
@@ -106,7 +133,7 @@ ChatListResult useChatList(String pubkey, {bool archived = false}) {
     blockedPubkeys: blockedState.blockedPubkeys,
     refresh: () {
       refreshKey.value++;
-      blockedPubkeysRefreshKey.value++;
+      refreshBlockedPubkeys();
     },
   );
 }
@@ -132,7 +159,7 @@ ChatSummary _sanitizeChatSummary(ChatSummary chat, Set<String> blockedPubkeys) {
     archivedAt: chat.archivedAt,
     removedAt: chat.removedAt,
     selfRemoved: chat.selfRemoved,
-    unreadCount: BigInt.zero,
+    unreadCount: chat.unreadCount,
     pinOrder: chat.pinOrder,
     dmPeerPubkey: chat.dmPeerPubkey,
     mutedUntil: chat.mutedUntil,

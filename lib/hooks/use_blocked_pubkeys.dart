@@ -16,7 +16,7 @@ BlockedPubkeysState useBlockedPubkeys(String accountPubkey, {int refreshKey = 0}
   final blockedPubkeys = useState<Set<String>>({});
   final isLoading = useState(true);
   final error = useState<String?>(null);
-  final localRefreshKey = useState(0);
+  final manualRefreshKey = useState(0);
 
   useEffect(() {
     var cancelled = false;
@@ -30,6 +30,7 @@ BlockedPubkeysState useBlockedPubkeys(String accountPubkey, {int refreshKey = 0}
         error.value = null;
       } catch (e, st) {
         if (cancelled) return;
+        blockedPubkeys.value = {};
         _logger.severe('Failed to fetch blocked users', e, st);
         error.value = 'failedToFetchBlockedUsers';
       } finally {
@@ -39,12 +40,12 @@ BlockedPubkeysState useBlockedPubkeys(String accountPubkey, {int refreshKey = 0}
 
     fetchBlockedPubkeys();
     return () => cancelled = true;
-  }, [accountPubkey, refreshKey, localRefreshKey.value]);
+  }, [accountPubkey, refreshKey, manualRefreshKey.value]);
 
   return (
     blockedPubkeys: blockedPubkeys.value,
     isLoading: isLoading.value,
     error: error.value,
-    refresh: () => localRefreshKey.value++,
+    refresh: () => manualRefreshKey.value++,
   );
 }

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
+import 'package:whitenoise/utils/stable_set_key.dart';
 
 final _logger = Logger('useChatListSearch');
 
@@ -24,13 +25,7 @@ ChatListSearchResult useChatListSearch({
   final isSearching = useState(false);
   final debouncedQuery = _useDebouncedValue(query, _searchDebounceMs);
   final trimmedQuery = debouncedQuery.trim();
-  final hiddenPubkeysKey = useMemoized(
-    () {
-      final sorted = hiddenPubkeys.toList()..sort();
-      return sorted.join('|');
-    },
-    [hiddenPubkeys],
-  );
+  final hiddenPubkeysKey = stableStringSetKey(hiddenPubkeys);
 
   useEffect(() {
     if (trimmedQuery.isEmpty) {

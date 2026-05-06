@@ -184,7 +184,7 @@ void main() {
 
         final chat = getResult().chats.single;
         expect(chat.lastMessage, isNull);
-        expect(chat.unreadCount, BigInt.zero);
+        expect(chat.unreadCount, BigInt.one);
       });
     });
 
