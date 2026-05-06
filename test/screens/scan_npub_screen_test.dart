@@ -9,7 +9,7 @@ import 'package:whitenoise/screens/share_profile_screen.dart';
 import 'package:whitenoise/screens/start_chat_screen.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
-import 'package:whitenoise/widgets/wn_scan_box.dart';
+import 'package:whitenoise/widgets/qr_scanner.dart';
 
 import '../mocks/mock_secure_storage.dart';
 import '../mocks/mock_wn_api.dart';
@@ -81,7 +81,7 @@ void main() {
     group('UI', () {
       testWidgets('displays scan box', (tester) async {
         await pumpScanNpubScreen(tester);
-        expect(find.byType(WnScanBox), findsOneWidget);
+        expect(find.byType(QrScanner), findsOneWidget);
       });
 
       testWidgets('displays mobile scanner', (tester) async {
@@ -115,7 +115,7 @@ void main() {
       ) async {
         await pumpScanNpubScreen(tester);
 
-        final scanBox = tester.widget<WnScanBox>(find.byType(WnScanBox));
+        final scanBox = tester.widget<QrScanner>(find.byType(QrScanner));
         scanBox.onBarcodeDetected(testNpubB);
         await tester.pumpAndSettle();
 
@@ -125,22 +125,22 @@ void main() {
       testWidgets('calling onBarcodeDetected with non-npub value does nothing', (tester) async {
         await pumpScanNpubScreen(tester);
 
-        final scanBox = tester.widget<WnScanBox>(find.byType(WnScanBox));
+        final scanBox = tester.widget<QrScanner>(find.byType(QrScanner));
         scanBox.onBarcodeDetected('https://example.com');
         await tester.pumpAndSettle();
 
-        expect(find.byType(WnScanBox), findsOneWidget);
+        expect(find.byType(QrScanner), findsOneWidget);
         expect(find.text('Scan a contact\'s QR code.'), findsOneWidget);
       });
 
       testWidgets('calling onBarcodeDetected with invalid npub shows error', (tester) async {
         await pumpScanNpubScreen(tester);
 
-        final scanBox = tester.widget<WnScanBox>(find.byType(WnScanBox));
+        final scanBox = tester.widget<QrScanner>(find.byType(QrScanner));
         scanBox.onBarcodeDetected('npub1invalidkey');
         await tester.pumpAndSettle();
 
-        expect(find.byType(WnScanBox), findsOneWidget);
+        expect(find.byType(QrScanner), findsOneWidget);
         expect(find.text('Invalid public key. Please try again.'), findsOneWidget);
       });
     });
@@ -162,7 +162,7 @@ void main() {
       await tester.tap(find.byKey(const Key('scan_qr_button')));
       await tester.pumpAndSettle();
 
-      expect(find.byType(WnScanBox), findsOneWidget);
+      expect(find.byType(QrScanner), findsOneWidget);
     });
   });
 }

@@ -40,6 +40,20 @@ void resetPermissionRequester() {
   _permissionRequester = _defaultPermissionRequester;
 }
 
+Future<PermissionStatus> Function() _permissionStatusChecker = _defaultPermissionStatusChecker;
+
+Future<PermissionStatus> _defaultPermissionStatusChecker() => Permission.camera.status;
+
+Future<PermissionStatus> checkCameraPermissionStatus() => _permissionStatusChecker();
+
+void setPermissionStatusChecker(Future<PermissionStatus> Function() checker) {
+  _permissionStatusChecker = checker;
+}
+
+void resetPermissionStatusChecker() {
+  _permissionStatusChecker = _defaultPermissionStatusChecker;
+}
+
 enum ScannerState {
   loading,
   ready,
@@ -48,8 +62,8 @@ enum ScannerState {
   error,
 }
 
-class WnScanBox extends HookWidget {
-  const WnScanBox({
+class QrScanner extends HookWidget {
+  const QrScanner({
     super.key,
     required this.onBarcodeDetected,
     this.width,
@@ -66,8 +80,8 @@ class WnScanBox extends HookWidget {
     final isProcessing = useState(false);
     final scannerRetryKey = useState(UniqueKey());
     final isMounted = useRef(true);
-    final controllerStarted = useRef(false);
     final boxState = useState(ScannerState.loading);
+    final lastDeniedStatus = useRef<PermissionStatus?>(null);
 
     useEffect(() {
       isMounted.value = true;
@@ -80,8 +94,12 @@ class WnScanBox extends HookWidget {
         if (!isMounted.value) return;
 
         if (status.isGranted || status.isLimited) {
+          lastDeniedStatus.value = null;
           boxState.value = ScannerState.ready;
         } else {
+          final currentStatus = await checkCameraPermissionStatus();
+          if (!isMounted.value) return;
+          lastDeniedStatus.value = currentStatus;
           boxState.value = ScannerState.permissionDenied;
         }
       }
@@ -98,26 +116,24 @@ class WnScanBox extends HookWidget {
     useEffect(() {
       if (boxState.value != ScannerState.ready) return null;
 
+      var started = false;
+
       void handleBarcode(BarcodeCapture capture) {
         if (capture.barcodes.isEmpty) return;
         if (isProcessing.value) return;
-
         final barcode = capture.barcodes.first;
         final rawValue = barcode.rawValue ?? '';
         if (rawValue.isEmpty) return;
-
         isProcessing.value = true;
         onBarcodeDetected(rawValue.trim());
         Future.delayed(const Duration(milliseconds: 500), () {
-          if (isMounted.value) {
-            isProcessing.value = false;
-          }
+          if (isMounted.value) isProcessing.value = false;
         });
       }
 
       Future<void> startController() async {
-        if (controllerStarted.value) return;
-        controllerStarted.value = true;
+        if (started) return;
+        started = true;
         await controller.start();
       }
 
@@ -125,7 +141,6 @@ class WnScanBox extends HookWidget {
       unawaited(startController());
 
       return () {
-        controllerStarted.value = false;
         unawaited(subscription.cancel());
         controller.dispose();
       };
@@ -137,10 +152,20 @@ class WnScanBox extends HookWidget {
     }
 
     useOnAppLifecycleStateChange((previous, current) {
-      if (current == AppLifecycleState.resumed) {
-        if (isMounted.value) {
-          retryScanner();
-        }
+      if (current != AppLifecycleState.resumed || !isMounted.value) return;
+      if (boxState.value == ScannerState.permissionDenied) {
+        unawaited(() async {
+          final status = await checkCameraPermissionStatus();
+          if (!isMounted.value) return;
+          final snapshotWasDenied =
+              lastDeniedStatus.value != null &&
+              !(lastDeniedStatus.value!.isGranted || lastDeniedStatus.value!.isLimited);
+          if (snapshotWasDenied && (status.isGranted || status.isLimited)) {
+            retryScanner();
+          }
+        }());
+      } else if (boxState.value == ScannerState.ready) {
+        retryScanner();
       }
     });
 
@@ -148,7 +173,7 @@ class WnScanBox extends HookWidget {
     final isError = boxState.value != ScannerState.loading && !showScanner;
 
     return Container(
-      key: const Key('scan_box'),
+      key: const Key('qr_scanner'),
       width: width,
       height: height,
       decoration: BoxDecoration(
@@ -172,14 +197,14 @@ class WnScanBox extends HookWidget {
                       boxState.value = newState;
                     }
                   });
-                  return _ScannerError(
-                    scannerState: ScannerState.error,
+                  return _ScannerNotice(
+                    scannerState: newState,
                     onRetry: retryScanner,
                   );
                 },
               )
             : isError
-            ? _ScannerError(
+            ? _ScannerNotice(
                 scannerState: boxState.value,
                 onRetry: retryScanner,
               )
@@ -203,8 +228,8 @@ class _ScannerPlaceholder extends StatelessWidget {
   }
 }
 
-class _ScannerError extends StatelessWidget {
-  const _ScannerError({required this.scannerState, this.onRetry});
+class _ScannerNotice extends StatelessWidget {
+  const _ScannerNotice({required this.scannerState, this.onRetry});
 
   final ScannerState scannerState;
   final VoidCallback? onRetry;
@@ -215,11 +240,14 @@ class _ScannerError extends StatelessWidget {
     final l10n = context.l10n;
     final typography = context.typographyScaled;
     final isPermissionDenied = scannerState == ScannerState.permissionDenied;
-    final errorContentColor = colors.intentionErrorContent;
+    final noticeColor = isPermissionDenied
+        ? colors.intentionWarningContent
+        : colors.intentionErrorContent;
+    final icon = isPermissionDenied ? WnIcons.warningFilled : WnIcons.errorFilled;
 
     return Container(
-      key: const Key('scanner_placeholder'),
-      color: colors.intentionErrorBackground,
+      key: const Key('scanner_notice'),
+      color: colors.backgroundSecondary,
       child: Center(
         child: Padding(
           padding: EdgeInsets.all(16.w),
@@ -227,17 +255,17 @@ class _ScannerError extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               WnIcon(
-                WnIcons.errorFilled,
-                key: const Key('scanner_error_icon'),
+                icon,
+                key: const Key('scanner_notice_icon'),
                 size: 20.w,
-                color: errorContentColor,
+                color: noticeColor,
               ),
               Gap(8.h),
               Text(
                 isPermissionDenied ? l10n.cameraPermissionDenied : l10n.scannerError,
                 key: const Key('scanner_error_title'),
                 textAlign: TextAlign.center,
-                style: typography.bold14.copyWith(color: errorContentColor),
+                style: typography.bold14.copyWith(color: noticeColor),
               ),
               Gap(4.h),
               Text(
@@ -246,17 +274,18 @@ class _ScannerError extends StatelessWidget {
                     : l10n.scannerErrorDescription,
                 key: const Key('scanner_error_description'),
                 textAlign: TextAlign.center,
-                style: typography.medium14.copyWith(
-                  color: colors.backgroundContentQuaternary,
+                style: typography.medium12.copyWith(
+                  color: colors.backgroundContentSecondary,
                 ),
               ),
-              Gap(8.h),
+              Gap(12.h),
               if (isPermissionDenied)
                 WnButton(
                   key: const Key('open_settings_button'),
                   text: l10n.openSettings,
                   onPressed: openAppSettings,
                   size: WnButtonSize.small,
+                  type: WnButtonType.outline,
                 )
               else
                 WnButton(
@@ -264,6 +293,7 @@ class _ScannerError extends StatelessWidget {
                   text: l10n.retry,
                   onPressed: onRetry,
                   size: WnButtonSize.small,
+                  type: WnButtonType.outline,
                 ),
             ],
           ),

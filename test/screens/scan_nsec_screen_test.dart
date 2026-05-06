@@ -9,7 +9,7 @@ import 'package:whitenoise/screens/login_screen.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
-import 'package:whitenoise/widgets/wn_scan_box.dart';
+import 'package:whitenoise/widgets/qr_scanner.dart';
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
@@ -81,7 +81,7 @@ void main() {
     group('UI', () {
       testWidgets('displays scan box', (tester) async {
         await pumpScanNsecScreen(tester);
-        expect(find.byType(WnScanBox), findsOneWidget);
+        expect(find.byType(QrScanner), findsOneWidget);
       });
 
       testWidgets('displays mobile scanner', (tester) async {
@@ -120,7 +120,7 @@ void main() {
       testWidgets('calling onBarcodeDetected pops with scanned value', (tester) async {
         await pumpScanNsecScreen(tester);
 
-        final scanBox = tester.widget<WnScanBox>(find.byType(WnScanBox));
+        final scanBox = tester.widget<QrScanner>(find.byType(QrScanner));
         scanBox.onBarcodeDetected('nsec1scannedvalue');
         await tester.pumpAndSettle();
 
@@ -145,7 +145,7 @@ void main() {
       await tester.tap(find.byKey(const Key('scan_button')));
       await tester.pumpAndSettle();
 
-      expect(find.byType(WnScanBox), findsOneWidget);
+      expect(find.byType(QrScanner), findsOneWidget);
     });
   });
 }

@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-import 'package:whitenoise/widgets/wn_scan_box.dart';
+import 'package:whitenoise/widgets/qr_scanner.dart';
 
 class MockScannerController implements MobileScannerController {
   MockScannerController();
