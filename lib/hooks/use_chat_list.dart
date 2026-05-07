@@ -30,11 +30,14 @@ ChatListResult useChatListWithBlockedPubkeys(
   bool archived = false,
   required BlockedPubkeysState blockedState,
 }) {
+  final refreshBlockedPubkeysRef = useRef<VoidCallback>(() {});
+  refreshBlockedPubkeysRef.value = blockedState.refresh;
+
   return _useChatList(
     pubkey,
     archived: archived,
     blockedState: blockedState,
-    refreshBlockedPubkeys: blockedState.refresh,
+    refreshBlockedPubkeys: () => refreshBlockedPubkeysRef.value(),
   );
 }
 

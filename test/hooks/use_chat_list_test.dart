@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_list.dart';
 import 'package:whitenoise/src/rust/api/chat_list.dart';
@@ -506,6 +508,39 @@ void main() {
         expect(c2.createdAt, DateTime(2024, 1, 5));
         expect(chats.map((c) => c.mlsGroupId).toList(), equals(['mls_c1', 'mls_c2']));
         expect(chats.indexWhere((c) => c.mlsGroupId == 'mls_c2'), 1);
+      });
+
+      testWidgets('uses latest blocked-pubkeys refresh callback', (tester) async {
+        final refreshVersions = <int>[];
+        late ValueNotifier<int> refreshVersion;
+
+        await mountHook(tester, () {
+          refreshVersion = useState(0);
+          final currentRefreshVersion = refreshVersion.value;
+          return useChatListWithBlockedPubkeys(
+            testPubkeyA,
+            blockedState: (
+              blockedPubkeys: <String>{},
+              isLoading: false,
+              error: null,
+              refresh: () => refreshVersions.add(currentRefreshVersion),
+            ),
+          );
+        });
+
+        _api.emitInitialSnapshot([_chatSummary('c1', DateTime(2024))]);
+        await tester.pumpAndSettle();
+
+        refreshVersion.value = 1;
+        await tester.pump();
+
+        _api.emitUpdate(
+          ChatListUpdateTrigger.userBlockChanged,
+          _chatSummary('c1', DateTime(2024, 1, 2)),
+        );
+        await tester.pumpAndSettle();
+
+        expect(refreshVersions, [1]);
       });
 
       testWidgets('re-applies pending invite filtering when block state changes', (tester) async {

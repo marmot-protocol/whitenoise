@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/screens/chat_info_screen.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart';
 import 'package:whitenoise/src/rust/api/chat_summary.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
@@ -38,9 +39,23 @@ ChatSummary _dmSummary({
   name: name,
 );
 
+ChatSummary _groupSummary({
+  String? name = 'Test Group',
+}) => ChatSummary(
+  mlsGroupId: testGroupId,
+  groupType: GroupType.group,
+  createdAt: DateTime(2024),
+  pendingConfirmation: false,
+  selfRemoved: false,
+  unreadCount: BigInt.zero,
+  name: name,
+);
+
 class _MockApi extends MockWnApi {
   String? dmDisplayName;
   String? dmPeerPubkey = _otherPubkey;
+  bool returnGroupSummary = false;
+  String? groupDisplayName = 'Test Group';
   bool archivedAtResult = false;
   Completer<ChatSummary>? chatSummaryCompleter;
   Completer<void>? followCompleter;
@@ -66,6 +81,7 @@ class _MockApi extends MockWnApi {
   }) async {
     if (chatSummaryCompleter != null) return chatSummaryCompleter!.future;
     if (chatSummaryError != null) throw chatSummaryError!;
+    if (returnGroupSummary) return _groupSummary(name: groupDisplayName);
     return _dmSummary(dmPeerPubkey: dmPeerPubkey, name: dmDisplayName);
   }
 
@@ -147,6 +163,8 @@ class _MockApi extends MockWnApi {
     super.reset();
     dmDisplayName = null;
     dmPeerPubkey = _otherPubkey;
+    returnGroupSummary = false;
+    groupDisplayName = 'Test Group';
     chatSummaryCompleter = null;
     followCompleter = null;
     unfollowCompleter = null;
@@ -340,6 +358,33 @@ void main() {
       expect(find.byKey(const Key('archive_button')), findsNothing);
       expect(_api.followCalls, isEmpty);
       expect(_api.unfollowCalls, isEmpty);
+    });
+
+    testWidgets('does not treat loading chat summary as unresolved dm', (tester) async {
+      _api.chatSummaryCompleter = Completer<ChatSummary>();
+      await mountWidget(
+        const ChatInfoScreen(mlsGroupId: testGroupId),
+        tester,
+        overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
+      );
+      await tester.pump();
+
+      expect(find.text('Chat Information'), findsOneWidget);
+      expect(find.byKey(const Key('search_button')), findsOneWidget);
+    });
+
+    testWidgets('renders group summary without peer actions', (tester) async {
+      _api.returnGroupSummary = true;
+      _api.groupDisplayName = 'Family Group';
+      await pumpChatInfoScreen(tester);
+
+      expect(find.text('Family Group'), findsOneWidget);
+      expect(find.byType(WnAvatar), findsOneWidget);
+      expect(find.byKey(const Key('search_button')), findsOneWidget);
+      expect(find.byKey(const Key('archive_button')), findsOneWidget);
+      expect(find.byKey(const Key('contact_button')), findsNothing);
+      expect(find.byKey(const Key('add_to_group_button')), findsNothing);
+      expect(find.byKey(const Key('block_button')), findsNothing);
     });
 
     testWidgets('hides block button while block status is loading', (tester) async {

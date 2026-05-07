@@ -116,7 +116,6 @@ class _MockApi extends MockWnApi {
   List<Completer<List<MuteListEntry>>> blockedUsersCompleters = [];
   int getBlockedUsersCallCount = 0;
   DateTime? removedAt;
-  bool blockedUser = false;
   bool shouldFailUnblockUser = false;
   Completer<void>? unblockUserCompleter;
   List<SearchResult> Function(String query)? searchOverride;
@@ -152,7 +151,6 @@ class _MockApi extends MockWnApi {
     blockedUsersCompleters = [];
     getBlockedUsersCallCount = 0;
     removedAt = null;
-    blockedUser = false;
     shouldFailUnblockUser = false;
     unblockUserCompleter = null;
     searchOverride = null;
@@ -424,7 +422,7 @@ class _MockApi extends MockWnApi {
   Future<bool> crateApiMuteListIsUserBlocked({
     required String accountPubkey,
     required String targetPubkey,
-  }) async => blockedUser;
+  }) async => blockedPubkeys.contains(targetPubkey);
 
   @override
   Future<void> crateApiMuteListUnblockUser({
@@ -433,7 +431,7 @@ class _MockApi extends MockWnApi {
   }) async {
     if (unblockUserCompleter != null) await unblockUserCompleter!.future;
     if (shouldFailUnblockUser) throw Exception('Unblock failed');
-    blockedUser = false;
+    blockedPubkeys.remove(targetPubkey);
   }
 
   @override
@@ -2404,7 +2402,7 @@ void main() {
       setUp(() {
         _api.isDm = true;
         _api.groupMembers = [_testPubkey, testPubkeyC];
-        _api.blockedUser = true;
+        _api.blockedPubkeys.add(testPubkeyC);
       });
 
       testWidgets('shows blocked notice when peer is blocked', (tester) async {
@@ -2525,6 +2523,7 @@ void main() {
       testWidgets('messages from unblocked peer become visible after unblock', (tester) async {
         final firstCompleter = Completer<List<MuteListEntry>>();
         final secondCompleter = Completer<List<MuteListEntry>>();
+        _api.blockedPubkeys.add(testPubkeyC);
         _api.blockedUsersCompleters = [firstCompleter, secondCompleter];
         _api.initialMessages = [
           _message('peer_msg', DateTime(2024), pubkey: testPubkeyC),
@@ -2577,7 +2576,7 @@ void main() {
         _api.removedAt = DateTime(2024, 6);
         _api.isDm = true;
         _api.groupMembers = [_testPubkey, testPubkeyC];
-        _api.blockedUser = true;
+        _api.blockedPubkeys.add(testPubkeyC);
       });
 
       testWidgets('shows removed notice and not blocked notice', (tester) async {

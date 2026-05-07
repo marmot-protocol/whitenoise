@@ -38,7 +38,7 @@ class ChatInfoScreen extends HookConsumerWidget {
     final accountPubkey = ref.watch(accountPubkeyProvider);
     final chatSummary = useChatSummary(context, accountPubkey, mlsGroupId);
 
-    final isDm = chatSummary.data == null || chatSummary.data!.groupType == GroupType.directMessage;
+    final isDm = chatSummary.data?.groupType == GroupType.directMessage;
     final peerPubkey = chatSummary.data?.dmPeerPubkey;
     final hasPeerPubkey = peerPubkey != null;
     final isUnresolvedDm = isDm && !hasPeerPubkey;
