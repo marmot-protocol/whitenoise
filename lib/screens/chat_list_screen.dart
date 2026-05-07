@@ -21,15 +21,14 @@ import 'package:whitenoise/widgets/offline_system_notice.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_chat_list.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_search_field.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 const _zapstoreUrl = 'https://zapstore.dev/apps/org.parres.whitenoise';
 
 const _slateHeight = 80;
-const _searchAndFiltersHeight = 68;
-const _searchAndFiltersWithChipsHeight = 108;
-const _filterChipsHeight = 48;
+const _filterChipsHeight = 40;
 
 enum ChatListFilter { chats, archive }
 
@@ -202,6 +201,9 @@ class ChatListScreen extends HookConsumerWidget {
     }, [pubkey]);
 
     final isArchiveView = selectedFilter.value == ChatListFilter.archive;
+    final searchFieldH = WnSearchField.heightOf(context);
+    final archiveHeaderH = 16.h + searchFieldH;
+    final chatsHeaderH = archiveHeaderH + 8.h + 32.h;
     final activeChatList = isArchiveView ? archivedChatListResult.chats : chatListResult.chats;
     final filteredChats = filterChatsBySearchWithMessageMatches(
       activeChatList,
@@ -232,9 +234,7 @@ class ChatListScreen extends HookConsumerWidget {
                 onChatsSelected: (_) => selectedFilter.value = ChatListFilter.chats,
                 onArchiveSelected: (_) => selectedFilter.value = ChatListFilter.archive,
               ),
-              headerHeight: isArchiveView
-                  ? _searchAndFiltersHeight.h
-                  : _searchAndFiltersWithChipsHeight.h,
+              headerHeight: isArchiveView ? archiveHeaderH : chatsHeaderH,
               pinnedHeader: isArchiveView
                   ? Padding(
                       padding: EdgeInsets.only(top: 8.h),
@@ -247,6 +247,7 @@ class ChatListScreen extends HookConsumerWidget {
                     )
                   : null,
               pinnedHeaderHeight: isArchiveView ? _filterChipsHeight.h : 0,
+              pinnedHeaderMinOffset: isArchiveView ? 8.h : 0,
               emptyStateContent: isEmpty
                   ? isArchiveView
                         ? Center(
