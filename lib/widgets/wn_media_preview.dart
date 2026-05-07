@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_icon_button.dart';
 import 'package:whitenoise/widgets/wn_media_thumbnail.dart';
 
 class WnMediaPreview extends HookWidget {
@@ -23,8 +23,6 @@ class WnMediaPreview extends HookWidget {
   @override
   Widget build(BuildContext context) {
     if (children.isEmpty) return const SizedBox.shrink();
-
-    final colors = context.colors;
     final pageController = usePageController(initialPage: selectedIndex);
 
     useEffect(() {
@@ -60,10 +58,11 @@ class WnMediaPreview extends HookWidget {
                 Positioned(
                   top: 10.h,
                   right: 10.w,
-                  child: _DeleteButton(
+                  child: WnIconButton(
                     key: const Key('media_preview_delete_button'),
-                    onTap: onDelete!,
-                    colors: colors,
+                    icon: WnIcons.trashCan,
+                    onPressed: onDelete!,
+                    type: WnIconButtonType.outline,
                   ),
                 ),
             ],
@@ -79,40 +78,6 @@ class WnMediaPreview extends HookWidget {
           ),
         ],
       ],
-    );
-  }
-}
-
-class _DeleteButton extends StatelessWidget {
-  const _DeleteButton({
-    super.key,
-    required this.onTap,
-    required this.colors,
-  });
-
-  final VoidCallback onTap;
-  final SemanticColors colors;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        width: 44.w,
-        height: 44.h,
-        decoration: BoxDecoration(
-          color: colors.fillSecondary,
-          borderRadius: BorderRadius.circular(8.r),
-          border: Border.all(color: colors.borderTertiary),
-        ),
-        child: Center(
-          child: WnIcon(
-            WnIcons.trashCan,
-            color: colors.backgroundContentPrimary,
-            size: 18.sp,
-          ),
-        ),
-      ),
     );
   }
 }

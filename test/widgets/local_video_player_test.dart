@@ -130,6 +130,58 @@ void main() {
       expect(disposeIndex, lessThan(secondCreateIndex));
       expect(fakeVideoPlatform.dataSources.last.uri, contains('clip2.mp4'));
     });
+
+    testWidgets('renders overlay at fallback position before initialization', (tester) async {
+      fakeVideoPlatform.forceInitError = true;
+
+      await mountWidget(
+        LocalVideoPlayer(
+          filePath: videoFile.path,
+          overlay: const SizedBox.square(key: Key('test_overlay'), dimension: 40),
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('test_overlay')), findsOneWidget);
+    });
+
+    testWidgets('renders overlay inside video bounds after initialization', (tester) async {
+      await mountWidget(
+        LocalVideoPlayer(
+          filePath: videoFile.path,
+          overlay: const SizedBox.square(key: Key('test_overlay'), dimension: 40),
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('video_player')), findsOneWidget);
+      expect(find.byKey(const Key('test_overlay')), findsOneWidget);
+    });
+
+    testWidgets('hides overlay while video is playing, restores when paused', (tester) async {
+      await mountWidget(
+        LocalVideoPlayer(
+          filePath: videoFile.path,
+          overlay: const SizedBox.square(key: Key('test_overlay'), dimension: 40),
+        ),
+        tester,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('test_overlay')), findsOneWidget);
+
+      await tester.tap(find.byKey(const Key('local_video_tap_area')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('test_overlay')), findsNothing);
+
+      await tester.tap(find.byKey(const Key('local_video_tap_area')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('test_overlay')), findsOneWidget);
+    });
   });
 
   group('VideoPlayIndicator', () {

@@ -4,22 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:whitenoise/hooks/use_media_download.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
+import 'package:whitenoise/utils/aspect_ratio.dart';
 import 'package:whitenoise/widgets/wn_media_error_placeholder.dart';
 import 'package:whitenoise/widgets/wn_media_placeholder.dart';
 
 const _doubleTapScale = 2.5;
 const _minScale = 1.0;
 const _maxScale = 4.0;
-
-double? _parseAspectRatio(String? dimensions) {
-  if (dimensions == null) return null;
-  final parts = dimensions.split('x');
-  if (parts.length != 2) return null;
-  final w = double.tryParse(parts[0]);
-  final h = double.tryParse(parts[1]);
-  if (w == null || h == null || w <= 0 || h <= 0) return null;
-  return w / h;
-}
 
 Matrix4 _buildZoomMatrix(Offset focalPoint, double scale) {
   return Matrix4.identity()
@@ -107,7 +98,7 @@ class MediaImage extends HookWidget {
     final thumbHash = mediaFile.fileMetadata?.thumbhash;
     final blurhash = mediaFile.fileMetadata?.blurhash;
     final dimensions = mediaFile.fileMetadata?.dimensions;
-    final aspectRatio = _parseAspectRatio(dimensions);
+    final aspectRatio = getAspectRatioFromDimensions(dimensions);
 
     final fadeController = useAnimationController(
       duration: const Duration(milliseconds: 300),

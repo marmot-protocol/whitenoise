@@ -423,5 +423,9 @@
   "leaveGroup": "Salir del grupo",
   "leaveGroupWarning": "¿Estás seguro de que quieres salir de este grupo? El chat permanecerá en tu lista si no lo eliminas, pero no podrás enviar ni recibir mensajes nuevos a menos que alguien te vuelva a invitar.",
   "failedToLeaveGroup": "No se pudo salir del grupo. Por favor, inténtalo de nuevo.",
-  "youLeftTheGroup": "Saliste del grupo"
+  "youLeftTheGroup": "Saliste del grupo",
+  "saveToGalleryPermissionDenied": "Permiso denegado para guardar imagen",
+  "saveToGalleryNotEnoughSpace": "No hay suficiente espacio de almacenamiento",
+  "saveToGalleryNotSupportedFormat": "Formato de imagen no compatible",
+  "saveToGalleryError": "Error al guardar imagen en la galería"
 }

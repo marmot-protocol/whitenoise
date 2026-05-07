@@ -28,5 +28,11 @@
 	<string>MainMenu</string>
 	<key>NSPrincipalClass</key>
 	<string>NSApplication</string>
+	<key>NSCameraUsageDescription</key>
+	<string>Camera access is required to scan QR codes</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>White Noise needs access to save images and videos to your library.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>White Noise needs access to save images and videos to your library.</string>
 </dict>
 </plist>

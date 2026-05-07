@@ -423,5 +423,9 @@
   "leaveGroup": "Gruppe verlassen",
   "leaveGroupWarning": "Bist du sicher, dass du diese Gruppe verlassen möchtest? Der Chat bleibt in deiner Liste, wenn du ihn nicht löschst, aber du kannst keine neuen Nachrichten senden oder empfangen, es sei denn, jemand lädt dich erneut ein.",
   "failedToLeaveGroup": "Gruppe konnte nicht verlassen werden. Bitte versuche es erneut.",
-  "youLeftTheGroup": "Du hast die Gruppe verlassen"
+  "youLeftTheGroup": "Du hast die Gruppe verlassen",
+  "saveToGalleryPermissionDenied": "Speicherberechtigung verweigert",
+  "saveToGalleryNotEnoughSpace": "Nicht genügend Speicherplatz",
+  "saveToGalleryNotSupportedFormat": "Medienformat nicht unterstützt",
+  "saveToGalleryError": "Medium konnte nicht gespeichert werden"
 }

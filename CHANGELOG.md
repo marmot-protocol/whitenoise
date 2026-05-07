@@ -30,6 +30,7 @@ and this project adheres to Calendar Versioning (CalVer).
 - Block/unblock users [PR #573](https://github.com/marmot-protocol/whitenoise/pull/573), [PR #574](https://github.com/marmot-protocol/whitenoise/pull/574)
 - Video media attachment support[PR #574](https://github.com/marmot-protocol/whitenoise/pull/574)
 - Leave group from chat list (but disabled with a feature flag) [PR #604](https://github.com/marmot-protocol/whitenoise/pull/604), [PR #600](https://github.com/marmot-protocol/whitenoise/pull/600), [PR #571](https://github.com/marmot-protocol/whitenoise/pull/571)
+- Save to gallery [PR #619](https://github.com/marmot-protocol/whitenoise/pull/619)
 
 ### Changed
 - Update System Notice colors [PR #579](https://github.com/marmot-protocol/whitenoise/pull/579)
