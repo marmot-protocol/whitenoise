@@ -107,12 +107,14 @@ class _MockApi extends MockWnApi {
   Exception? retryError;
   int _sendCallCount = 0;
   bool isDm = false;
-  Completer<bool>? isDmCompleter;
+  Completer<ChatSummary>? chatSummaryCompleter;
   List<String> groupMembers = [];
   Completer<MediaFile>? uploadCompleter;
   Map<String, FlutterMetadata>? metadataByPubkey;
   Completer<List<ChatMessage>>? fetchOlderCompleter;
   Completer<List<MuteListEntry>>? blockedUsersCompleter;
+  List<Completer<List<MuteListEntry>>> blockedUsersCompleters = [];
+  int getBlockedUsersCallCount = 0;
   DateTime? removedAt;
   bool blockedUser = false;
   bool shouldFailUnblockUser = false;
@@ -141,12 +143,14 @@ class _MockApi extends MockWnApi {
     retryError = null;
     _sendCallCount = 0;
     isDm = false;
-    isDmCompleter = null;
+    chatSummaryCompleter = null;
     groupMembers = [];
     uploadCompleter = null;
     metadataByPubkey = null;
     fetchOlderCompleter = null;
     blockedUsersCompleter = null;
+    blockedUsersCompleters = [];
+    getBlockedUsersCallCount = 0;
     removedAt = null;
     blockedUser = false;
     shouldFailUnblockUser = false;
@@ -178,6 +182,11 @@ class _MockApi extends MockWnApi {
   Future<List<MuteListEntry>> crateApiMuteListGetBlockedUsers({
     required String accountPubkey,
   }) {
+    final callIndex = getBlockedUsersCallCount;
+    getBlockedUsersCallCount++;
+    if (blockedUsersCompleters.isNotEmpty && callIndex < blockedUsersCompleters.length) {
+      return blockedUsersCompleters[callIndex].future;
+    }
     if (blockedUsersCompleter != null) return blockedUsersCompleter!.future;
     return super.crateApiMuteListGetBlockedUsers(accountPubkey: accountPubkey);
   }
@@ -201,15 +210,29 @@ class _MockApi extends MockWnApi {
   }
 
   ChatSummary _chatSummary() {
+    final groupType = isDm ? GroupType.directMessage : GroupType.group;
+    final dmPeerPubkey = isDm ? groupMembers.where((p) => p != _testPubkey).firstOrNull : null;
+    final name = isDm ? null : groupName;
     return ChatSummary(
       mlsGroupId: _testGroupId,
-      groupType: GroupType.group,
+      groupType: groupType,
+      name: name,
       createdAt: DateTime(2024),
       pendingConfirmation: false,
       selfRemoved: false,
       unreadCount: BigInt.zero,
       removedAt: removedAt,
+      dmPeerPubkey: dmPeerPubkey,
     );
+  }
+
+  @override
+  Future<ChatSummary> crateApiChatSummaryGetChatSummary({
+    required String accountPubkey,
+    required String mlsGroupId,
+  }) {
+    if (chatSummaryCompleter != null) return chatSummaryCompleter!.future;
+    return Future.value(_chatSummary());
   }
 
   void emitChatListUpdate(ChatListUpdateTrigger trigger) {
@@ -348,7 +371,6 @@ class _MockApi extends MockWnApi {
     required Group that,
     required String accountPubkey,
   }) {
-    if (isDmCompleter != null) return isDmCompleter!.future;
     return Future.value(isDm);
   }
 
@@ -691,7 +713,7 @@ void main() {
           _message('m1', DateTime(2024)),
         ];
         _api.isDm = true;
-        _api.isDmCompleter = Completer<bool>();
+        _api.chatSummaryCompleter = Completer<ChatSummary>();
         _api.groupMembers = [_testPubkey, testPubkeyC];
 
         await mountWidget(
@@ -709,7 +731,17 @@ void main() {
         expect(find.byType(WnMessageBubble), findsOneWidget);
         expect(avatarsInBubbles(), findsNothing);
 
-        _api.isDmCompleter!.complete(true);
+        _api.chatSummaryCompleter!.complete(
+          ChatSummary(
+            mlsGroupId: _testGroupId,
+            groupType: GroupType.directMessage,
+            createdAt: DateTime(2024),
+            pendingConfirmation: false,
+            selfRemoved: false,
+            unreadCount: BigInt.zero,
+            dmPeerPubkey: testPubkeyC,
+          ),
+        );
         await tester.pumpAndSettle();
 
         expect(avatarsInBubbles(), findsNothing);
@@ -784,6 +816,22 @@ void main() {
         await tester.tap(find.byKey(const Key('header_name_tap_area')));
         await tester.pumpAndSettle();
         expect(find.byType(ChatInfoScreen), findsOneWidget);
+      });
+
+      testWidgets('returning from chat info reloads blocked pubkeys', (tester) async {
+        _api.isDm = true;
+        _api.groupMembers = [_testPubkey, testPubkeyC];
+        await pumpChatScreen(tester);
+
+        final callCountBefore = _api.getBlockedUsersCallCount;
+        await tester.tap(find.byKey(const Key('header_avatar_tap_area')));
+        await tester.pumpAndSettle();
+        expect(find.byType(ChatInfoScreen), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('slate_back_button')));
+        await tester.pumpAndSettle();
+
+        expect(_api.getBlockedUsersCallCount, greaterThanOrEqualTo(callCountBefore + 1));
       });
     });
 
@@ -901,13 +949,13 @@ void main() {
         expect(find.textContaining('Message visible'), findsOneWidget);
       });
 
-      testWidgets('does not show new messages after block state changes', (tester) async {
+      testWidgets('does not show new messages from users blocked before screen loaded', (
+        tester,
+      ) async {
+        _api.blockedPubkeys.add(testPubkeyB);
         _api.initialMessages = [_message('visible', DateTime(2024), pubkey: testPubkeyC)];
 
         await pumpChatScreen(tester);
-        _api.blockedPubkeys.add(testPubkeyB);
-        _api.emitChatListUpdate(ChatListUpdateTrigger.userBlockChanged);
-        await tester.pumpAndSettle();
         _api.emitMessage(_message('blocked', DateTime.now()));
         await tester.pumpAndSettle();
 
@@ -2462,6 +2510,57 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Failed to archive chat. Please try again.'), findsOneWidget);
+      });
+
+      testWidgets('unblocking reloads blocked pubkeys', (tester) async {
+        await pumpChatScreen(tester);
+
+        final callCountBefore = _api.getBlockedUsersCallCount;
+        await tester.tap(find.byKey(const Key('blocked_notice_unblock_button')));
+        await tester.pumpAndSettle();
+
+        expect(_api.getBlockedUsersCallCount, greaterThanOrEqualTo(callCountBefore + 1));
+      });
+
+      testWidgets('messages from unblocked peer become visible after unblock', (tester) async {
+        final firstCompleter = Completer<List<MuteListEntry>>();
+        final secondCompleter = Completer<List<MuteListEntry>>();
+        _api.blockedUsersCompleters = [firstCompleter, secondCompleter];
+        _api.initialMessages = [
+          _message('peer_msg', DateTime(2024), pubkey: testPubkeyC),
+        ];
+
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            offlineProvider.overrideWith((ref) => Stream.value(false)),
+          ],
+        );
+        await tester.pumpAndSettle();
+        Routes.goToChat(tester.element(find.byType(Scaffold)), _testGroupId);
+        await tester.pump();
+        await tester.pump();
+
+        firstCompleter.complete([
+          MuteListEntry(
+            accountPubkey: _testPubkey,
+            mutedPubkey: testPubkeyC,
+            isPrivate: true,
+            createdAt: DateTime(2024),
+          ),
+        ]);
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Message peer_msg'), findsNothing);
+
+        await tester.tap(find.byKey(const Key('blocked_notice_unblock_button')));
+        await tester.pump();
+
+        secondCompleter.complete([]);
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Message peer_msg'), findsOneWidget);
       });
     });
 
