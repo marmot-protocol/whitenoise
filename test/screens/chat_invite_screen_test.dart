@@ -11,7 +11,8 @@ import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/chat_screen.dart';
 import 'package:whitenoise/screens/group_info_screen.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart';
-import 'package:whitenoise/src/rust/api/groups.dart';
+import 'package:whitenoise/src/rust/api/chat_summary.dart';
+import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/mute_list.dart';
@@ -69,7 +70,8 @@ class _MockApi extends MockWnApi {
   Exception? errorToThrow;
   FlutterMetadata? userMetadataResponse;
   bool isDm = false;
-  List<String> groupMembers = [];
+  String? dmPeerPubkey = testPubkeyB;
+  String? dmDisplayName;
   String? welcomerPubkey;
   Completer<AccountGroup>? accountGroupCompleter;
   List<List<ChatMessage>> olderMessagePages = [];
@@ -89,7 +91,8 @@ class _MockApi extends MockWnApi {
     errorToThrow = null;
     userMetadataResponse = null;
     isDm = false;
-    groupMembers = [];
+    dmPeerPubkey = testPubkeyB;
+    dmDisplayName = null;
     welcomerPubkey = null;
     accountGroupCompleter = null;
     olderMessagePages = [];
@@ -103,6 +106,35 @@ class _MockApi extends MockWnApi {
       MessageStreamItem.update(
         update: MessageUpdate(trigger: UpdateTrigger.newMessage, message: message),
       ),
+    );
+  }
+
+  @override
+  Future<ChatSummary> crateApiChatSummaryGetChatSummary({
+    required String accountPubkey,
+    required String mlsGroupId,
+  }) async {
+    if (isDm) {
+      return ChatSummary(
+        mlsGroupId: mlsGroupId,
+        groupType: GroupType.directMessage,
+        createdAt: DateTime(2024),
+        pendingConfirmation: false,
+        selfRemoved: false,
+        unreadCount: BigInt.zero,
+        dmPeerPubkey: dmPeerPubkey,
+        name: dmDisplayName,
+      );
+    }
+    final name = groupName.isNotEmpty ? groupName : null;
+    return ChatSummary(
+      mlsGroupId: mlsGroupId,
+      groupType: GroupType.group,
+      createdAt: DateTime(2024),
+      pendingConfirmation: false,
+      selfRemoved: false,
+      unreadCount: BigInt.zero,
+      name: name,
     );
   }
 
@@ -143,34 +175,6 @@ class _MockApi extends MockWnApi {
     });
     return controller!.stream;
   }
-
-  @override
-  Future<Group> crateApiGroupsGetGroup({
-    required String accountPubkey,
-    required String groupId,
-  }) async {
-    return Group(
-      mlsGroupId: groupId,
-      nostrGroupId: '',
-      name: groupName,
-      description: '',
-      adminPubkeys: const [],
-      epoch: BigInt.zero,
-      state: GroupState.active,
-    );
-  }
-
-  @override
-  Future<bool> crateApiGroupsGroupIsDirectMessageType({
-    required Group that,
-    required String accountPubkey,
-  }) async => isDm;
-
-  @override
-  Future<List<String>> crateApiGroupsGroupMembers({
-    required String pubkey,
-    required String groupId,
-  }) async => groupMembers;
 
   @override
   Future<AccountGroup> crateApiAccountGroupsGetAccountGroup({
@@ -264,11 +268,7 @@ void main() {
       group('when DM', () {
         setUp(() {
           _api.isDm = true;
-          _api.groupMembers = [_testPubkey, testPubkeyB];
-          _api.userMetadataResponse = const FlutterMetadata(
-            displayName: 'Alice',
-            custom: {},
-          );
+          _api.dmDisplayName = 'Alice';
         });
 
         testWidgets('shows other member display name', (tester) async {
@@ -278,7 +278,7 @@ void main() {
         });
 
         testWidgets('shows Unknown user when member name is null', (tester) async {
-          _api.userMetadataResponse = const FlutterMetadata(custom: {});
+          _api.dmDisplayName = null;
           await pumpInviteScreen(tester);
 
           expect(find.text('Unknown user'), findsWidgets);
@@ -367,7 +367,6 @@ void main() {
       group('when DM', () {
         setUp(() {
           _api.isDm = true;
-          _api.groupMembers = [_testPubkey, testPubkeyB];
         });
 
         testWidgets('uses other member pubkey', (tester) async {
@@ -654,7 +653,6 @@ void main() {
       group('when DM', () {
         setUp(() {
           _api.isDm = true;
-          _api.groupMembers = [_testPubkey, testPubkeyB];
           _api.initialMessages = [_message('m1')];
         });
 
@@ -787,7 +785,6 @@ void main() {
       group('when DM', () {
         setUp(() {
           _api.isDm = true;
-          _api.groupMembers = [_testPubkey, testPubkeyB];
         });
 
         testWidgets('header avatar navigates to chat info', (tester) async {

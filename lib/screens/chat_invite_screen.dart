@@ -7,7 +7,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_active_chat.dart';
 import 'package:whitenoise/hooks/use_blocked_pubkeys.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart';
-import 'package:whitenoise/hooks/use_chat_profile.dart';
+import 'package:whitenoise/hooks/use_chat_summary.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/active_chat_provider.dart';
@@ -16,8 +16,10 @@ import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart' as account_groups_api;
+import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart';
+import 'package:whitenoise/utils/chat_summary_display.dart';
 import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/widgets/chat_message_bubble.dart';
 import 'package:whitenoise/widgets/chat_scroll_down_button.dart';
@@ -55,7 +57,8 @@ class ChatInviteScreen extends HookConsumerWidget {
       noticeMessage.value = null;
     }
 
-    final chatProfile = useChatProfile(context, pubkey, mlsGroupId);
+    final chatSummary = useChatSummary(context, pubkey, mlsGroupId);
+    final display = chatSummaryDisplay(chatSummary.data, mlsGroupId);
     final chatMessages = useChatMessages(
       mlsGroupId,
       pubkey: pubkey,
@@ -98,10 +101,12 @@ class ChatInviteScreen extends HookConsumerWidget {
       cancelGroupNotifications: ref.read(notificationServiceProvider).cancelForGroup,
     );
 
+    final isDm = chatSummary.data == null || chatSummary.data!.groupType == GroupType.directMessage;
+    final peerPubkey = chatSummary.data?.dmPeerPubkey;
+
     void handleAvatarTap() {
-      final otherPubkey = chatProfile.data?.otherMemberPubkey;
-      if (otherPubkey != null) {
-        unawaited(Routes.pushToInviteInfo(context, otherPubkey));
+      if (peerPubkey != null) {
+        unawaited(Routes.pushToInviteInfo(context, peerPubkey));
       } else {
         unawaited(Routes.pushToGroupInfo(context, mlsGroupId));
       }
@@ -168,12 +173,10 @@ class ChatInviteScreen extends HookConsumerWidget {
                         : null),
               header: WnSlateChatHeader(
                 displayName:
-                    chatProfile.data?.displayName ??
-                    (chatProfile.data?.isDm == true
-                        ? context.l10n.unknownUser
-                        : context.l10n.unknownGroup),
-                avatarColor: chatProfile.data?.color ?? AvatarColor.neutral,
-                pictureUrl: chatProfile.data?.pictureUrl,
+                    display.displayName ??
+                    (isDm ? context.l10n.unknownUser : context.l10n.unknownGroup),
+                avatarColor: display.color,
+                pictureUrl: display.pictureUrl,
                 onBack: () => Routes.goToChatList(context),
                 onAvatarTap: handleAvatarTap,
               ),
@@ -185,18 +188,16 @@ class ChatInviteScreen extends HookConsumerWidget {
                   key: const Key('large_avatar_tap_area'),
                   onTap: handleAvatarTap,
                   child: WnAvatar(
-                    pictureUrl: chatProfile.data?.pictureUrl,
-                    displayName: chatProfile.data?.displayName,
+                    pictureUrl: display.pictureUrl,
+                    displayName: display.displayName,
                     size: WnAvatarSize.large,
-                    color: chatProfile.data?.color ?? AvatarColor.neutral,
+                    color: display.color,
                   ),
                 ),
                 SizedBox(height: 16.h),
                 Text(
-                  chatProfile.data?.displayName ??
-                      (chatProfile.data?.isDm == true
-                          ? context.l10n.unknownUser
-                          : context.l10n.unknownGroup),
+                  display.displayName ??
+                      (isDm ? context.l10n.unknownUser : context.l10n.unknownGroup),
                   style: typography.semiBold18.copyWith(
                     color: colors.backgroundContentPrimary,
                   ),
@@ -235,7 +236,7 @@ class ChatInviteScreen extends HookConsumerWidget {
                       chatMessages: chatMessages,
                       pubkey: pubkey,
                       groupId: mlsGroupId,
-                      isGroupChat: chatProfile.data?.isDm != true,
+                      isGroupChat: !isDm,
                     ),
             ),
             WnSlate(
