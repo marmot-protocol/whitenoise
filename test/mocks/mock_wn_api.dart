@@ -5,6 +5,7 @@ import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/api/account_groups.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/chat_list.dart';
+import 'package:whitenoise/src/rust/api/chat_summary.dart';
 import 'package:whitenoise/src/rust/api/drafts.dart';
 import 'package:whitenoise/src/rust/api/error.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
@@ -439,6 +440,14 @@ class MockWnApi implements RustLibApi {
     required String accountPubkey,
   }) async {
     return [];
+  }
+
+  @override
+  Future<ChatSummary> crateApiChatSummaryGetChatSummary({
+    required String accountPubkey,
+    required String mlsGroupId,
+  }) async {
+    throw UnimplementedError('crateApiChatSummaryGetChatSummary');
   }
 
   @override

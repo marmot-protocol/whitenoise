@@ -7,13 +7,14 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 
 import '../frb_generated.dart';
+import 'chat_summary.dart';
 import 'error.dart';
 import 'groups.dart';
 import 'messages.dart';
 
 part 'chat_list.freezed.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`
 
 /// Sets the pin order for a chat.
 ///
@@ -183,123 +184,4 @@ sealed class ChatMuteDuration with _$ChatMuteDuration {
   const factory ChatMuteDuration.custom({
     required DateTime until,
   }) = ChatMuteDuration_Custom;
-}
-
-class ChatSummary {
-  /// MLS group identifier (hex string)
-  final String mlsGroupId;
-
-  /// Display name for this chat:
-  /// - Groups: The group name (may be empty)
-  /// - DMs: The other user's display name (None if no metadata)
-  final String? name;
-
-  /// Type of chat: Group or DirectMessage
-  final GroupType groupType;
-
-  /// When this group was created
-  final DateTime createdAt;
-
-  /// Path to cached decrypted group image (Groups only)
-  final String? groupImagePath;
-
-  /// Profile picture URL of the other user (DMs only)
-  final String? groupImageUrl;
-
-  /// Preview of the last message (None if no messages)
-  final ChatMessageSummary? lastMessage;
-
-  /// Whether the group is pending user confirmation
-  final bool pendingConfirmation;
-
-  /// Public key (hex) of the user who invited this account to the group.
-  /// `Some` when invited by another user, `None` when the user created the group.
-  final String? welcomerPubkey;
-
-  /// When this chat was archived, if at all.
-  final DateTime? archivedAt;
-
-  /// When this account was removed from the group by an admin, if at all.
-  /// `Some` means the group is read-only; the user must archive/delete to hide it.
-  final DateTime? removedAt;
-
-  /// Whether the user voluntarily left the group. Only meaningful when `removed_at` is `Some`.
-  final bool selfRemoved;
-
-  /// Number of unread messages in this chat
-  final BigInt unreadCount;
-
-  /// Pin order for chat list sorting.
-  /// - `None` = not pinned (appears after pinned chats)
-  /// - `Some(n)` = pinned, lower values appear first
-  final PlatformInt64? pinOrder;
-
-  /// For DMs: the public key (hex) of the other participant.
-  /// `None` for Group chats.
-  final String? dmPeerPubkey;
-
-  /// When this chat is muted until, if at all.
-  /// `None` = not muted.
-  /// `Some(far-future)` = muted forever.
-  final DateTime? mutedUntil;
-
-  const ChatSummary({
-    required this.mlsGroupId,
-    this.name,
-    required this.groupType,
-    required this.createdAt,
-    this.groupImagePath,
-    this.groupImageUrl,
-    this.lastMessage,
-    required this.pendingConfirmation,
-    this.welcomerPubkey,
-    this.archivedAt,
-    this.removedAt,
-    required this.selfRemoved,
-    required this.unreadCount,
-    this.pinOrder,
-    this.dmPeerPubkey,
-    this.mutedUntil,
-  });
-
-  @override
-  int get hashCode =>
-      mlsGroupId.hashCode ^
-      name.hashCode ^
-      groupType.hashCode ^
-      createdAt.hashCode ^
-      groupImagePath.hashCode ^
-      groupImageUrl.hashCode ^
-      lastMessage.hashCode ^
-      pendingConfirmation.hashCode ^
-      welcomerPubkey.hashCode ^
-      archivedAt.hashCode ^
-      removedAt.hashCode ^
-      selfRemoved.hashCode ^
-      unreadCount.hashCode ^
-      pinOrder.hashCode ^
-      dmPeerPubkey.hashCode ^
-      mutedUntil.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is ChatSummary &&
-          runtimeType == other.runtimeType &&
-          mlsGroupId == other.mlsGroupId &&
-          name == other.name &&
-          groupType == other.groupType &&
-          createdAt == other.createdAt &&
-          groupImagePath == other.groupImagePath &&
-          groupImageUrl == other.groupImageUrl &&
-          lastMessage == other.lastMessage &&
-          pendingConfirmation == other.pendingConfirmation &&
-          welcomerPubkey == other.welcomerPubkey &&
-          archivedAt == other.archivedAt &&
-          removedAt == other.removedAt &&
-          selfRemoved == other.selfRemoved &&
-          unreadCount == other.unreadCount &&
-          pinOrder == other.pinOrder &&
-          dmPeerPubkey == other.dmPeerPubkey &&
-          mutedUntil == other.mutedUntil;
 }

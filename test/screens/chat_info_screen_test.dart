@@ -6,8 +6,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart';
-import 'package:whitenoise/src/rust/api/groups.dart';
-import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/src/rust/api/chat_summary.dart';
+import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
@@ -24,11 +24,25 @@ import '../test_helpers.dart';
 const _testPubkey = testPubkeyA;
 const _otherPubkey = testPubkeyB;
 
+ChatSummary _dmSummary({
+  String? dmPeerPubkey = _otherPubkey,
+  String? name,
+}) => ChatSummary(
+  mlsGroupId: testGroupId,
+  groupType: GroupType.directMessage,
+  createdAt: DateTime(2024),
+  pendingConfirmation: false,
+  selfRemoved: false,
+  unreadCount: BigInt.zero,
+  dmPeerPubkey: dmPeerPubkey,
+  name: name,
+);
+
 class _MockApi extends MockWnApi {
-  List<String> dmMembers = [_testPubkey, _otherPubkey];
-  FlutterMetadata metadata = const FlutterMetadata(custom: {});
+  String? dmDisplayName;
+  String? dmPeerPubkey = _otherPubkey;
   bool archivedAtResult = false;
-  Completer<FlutterMetadata>? metadataCompleter;
+  Completer<ChatSummary>? chatSummaryCompleter;
   Completer<void>? followCompleter;
   Completer<void>? unfollowCompleter;
   Completer<bool>? isBlockedCompleter;
@@ -38,7 +52,7 @@ class _MockApi extends MockWnApi {
   Exception? unfollowError;
   Exception? blockError;
   Exception? unblockError;
-  Exception? groupError;
+  Exception? chatSummaryError;
   final followCalls = <({String account, String target})>[];
   final unfollowCalls = <({String account, String target})>[];
   final blockCalls = <({String account, String target})>[];
@@ -46,41 +60,13 @@ class _MockApi extends MockWnApi {
   final Set<String> followingPubkeys = {};
 
   @override
-  Future<Group> crateApiGroupsGetGroup({
+  Future<ChatSummary> crateApiChatSummaryGetChatSummary({
     required String accountPubkey,
-    required String groupId,
+    required String mlsGroupId,
   }) async {
-    if (groupError != null) throw groupError!;
-    return Group(
-      mlsGroupId: groupId,
-      nostrGroupId: testNostrGroupId,
-      name: '',
-      description: '',
-      adminPubkeys: const [],
-      epoch: BigInt.zero,
-      state: GroupState.active,
-    );
-  }
-
-  @override
-  Future<bool> crateApiGroupsGroupIsDirectMessageType({
-    required Group that,
-    required String accountPubkey,
-  }) async => true;
-
-  @override
-  Future<List<String>> crateApiGroupsGroupMembers({
-    required String pubkey,
-    required String groupId,
-  }) async => dmMembers;
-
-  @override
-  Future<FlutterMetadata> crateApiUsersUserMetadata({
-    required String pubkey,
-    required bool blockingDataSync,
-  }) async {
-    if (metadataCompleter != null) return metadataCompleter!.future;
-    return metadata;
+    if (chatSummaryCompleter != null) return chatSummaryCompleter!.future;
+    if (chatSummaryError != null) throw chatSummaryError!;
+    return _dmSummary(dmPeerPubkey: dmPeerPubkey, name: dmDisplayName);
   }
 
   @override
@@ -159,8 +145,9 @@ class _MockApi extends MockWnApi {
   @override
   void reset() {
     super.reset();
-    metadata = const FlutterMetadata(custom: {});
-    metadataCompleter = null;
+    dmDisplayName = null;
+    dmPeerPubkey = _otherPubkey;
+    chatSummaryCompleter = null;
     followCompleter = null;
     unfollowCompleter = null;
     isBlockedCompleter = null;
@@ -170,7 +157,7 @@ class _MockApi extends MockWnApi {
     unfollowError = null;
     blockError = null;
     unblockError = null;
-    groupError = null;
+    chatSummaryError = null;
     followCalls.clear();
     unfollowCalls.clear();
     blockCalls.clear();
@@ -178,7 +165,6 @@ class _MockApi extends MockWnApi {
     followingPubkeys.clear();
     blockedPubkeys.clear();
     archivedAtResult = false;
-    dmMembers = [_testPubkey, _otherPubkey];
   }
 }
 
@@ -253,7 +239,7 @@ void main() {
     });
 
     testWidgets('renders profile card and copy card', (tester) async {
-      _api.metadata = const FlutterMetadata(displayName: 'Alice', custom: {});
+      _api.dmDisplayName = 'Alice';
       await pumpChatInfoScreen(tester);
 
       expect(find.byType(WnAvatar), findsOneWidget);
@@ -262,12 +248,7 @@ void main() {
     });
 
     testWidgets('does not render nip05 and about in chat info card', (tester) async {
-      _api.metadata = const FlutterMetadata(
-        displayName: 'Alice',
-        nip05: 'alice@example.com',
-        about: 'I love Nostr!',
-        custom: {},
-      );
+      _api.dmDisplayName = 'Alice';
       await pumpChatInfoScreen(tester);
 
       expect(find.text('alice@example.com'), findsNothing);
@@ -349,7 +330,7 @@ void main() {
     });
 
     testWidgets('hides peer actions when dm peer pubkey is unresolved', (tester) async {
-      _api.dmMembers = [_testPubkey];
+      _api.dmPeerPubkey = null;
       await pumpChatInfoScreen(tester);
 
       expect(find.byKey(const Key('contact_button')), findsNothing);
@@ -579,7 +560,7 @@ void main() {
     });
 
     testWidgets('shows profile load error when chat profile fails', (tester) async {
-      _api.groupError = Exception('group load failed');
+      _api.chatSummaryError = Exception('chat summary load failed');
       await pumpChatInfoScreen(tester);
 
       expect(find.text('Unable to load profile. Please try again.'), findsOneWidget);
