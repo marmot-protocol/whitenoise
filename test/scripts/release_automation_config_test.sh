@@ -61,4 +61,74 @@ raise 'Zap Store match must include production arm64 APK' unless regex.match?(pr
 raise 'Zap Store match must exclude staging APK' if regex.match?(staging_apk)
 RUBY
 
+ruby <<'RUBY'
+require 'digest'
+require 'fileutils'
+require 'tmpdir'
+
+def opt_out_usage; end
+def desc(_text); end
+def lane(_name); end
+
+module UI
+  def self.user_error!(message)
+    raise message
+  end
+
+  def self.important(_message); end
+  def self.message(_message); end
+end
+
+load 'fastlane/Fastfile'
+
+def release_info(_options = {})
+  {
+    'full_version' => '2026.5.7+24',
+    'version_name' => '2026.5.7',
+    'build_number' => '24',
+  }
+end
+
+def run_from_root(_parts); end
+
+def assert_sidecar_matches(artifact_path)
+  checksum_path = "#{artifact_path}.sha256"
+  raise "missing checksum sidecar for #{artifact_path}" unless File.file?(checksum_path)
+
+  expected_digest = Digest::SHA256.file(artifact_path).hexdigest
+  expected_contents = "#{expected_digest}  #{File.basename(artifact_path)}\n"
+  actual_contents = File.read(checksum_path)
+
+  raise "unexpected checksum contents: #{actual_contents.inspect}" unless actual_contents == expected_contents
+end
+
+Dir.mktmpdir do |dir|
+  Object.send(:remove_const, :ROOT)
+  Object.const_set(:ROOT, dir)
+
+  apk_dir = File.join(ROOT, 'build', 'app', 'outputs', 'flutter-apk')
+  aab_dir = File.join(ROOT, 'build', 'app', 'outputs', 'bundle', 'productionRelease')
+  FileUtils.mkdir_p(apk_dir)
+  FileUtils.mkdir_p(aab_dir)
+
+  File.write(File.join(apk_dir, 'app-arm64-v8a-production-release.apk'), 'arm64 apk bytes')
+  File.write(File.join(apk_dir, 'app-x86_64-production-release.apk'), 'x86 apk bytes')
+  File.write(File.join(aab_dir, 'app-production-release.aab'), 'aab bytes')
+
+  build_android_flavor('production', {}, build_native: true)
+
+  output_dir = File.join(ROOT, 'build', 'releases', 'v2026.5.7+24', 'production', 'android')
+  [
+    'whitenoise-2026.5.7-arm64-v8a.apk',
+    'whitenoise-2026.5.7-x86_64.apk',
+    'whitenoise-2026.5.7.aab',
+  ].each do |artifact_name|
+    artifact_path = File.join(output_dir, artifact_name)
+    raise "missing staged artifact #{artifact_path}" unless File.file?(artifact_path)
+
+    assert_sidecar_matches(artifact_path)
+  end
+end
+RUBY
+
 echo "release_automation_config_test passed"

@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'digest'
 require 'open3'
 require 'shellwords'
 
@@ -69,13 +70,21 @@ def release_output_dir(info, flavor, *parts)
   File.join(ROOT, 'build', 'releases', "v#{info['full_version']}", flavor.to_s, *parts)
 end
 
-def stage_artifact(source, destination_dir, destination_name)
+def stage_artifact(source, destination_dir, destination_name, checksum: false)
   UI.user_error!("Missing artifact: #{source}") unless File.file?(source)
 
   FileUtils.mkdir_p(destination_dir)
   destination = File.join(destination_dir, destination_name)
   FileUtils.cp(source, destination)
   UI.message("Staged #{destination}")
+
+  if checksum
+    digest = Digest::SHA256.file(destination).hexdigest
+    checksum_path = "#{destination}.sha256"
+    File.write(checksum_path, "#{digest}  #{destination_name}\n")
+    UI.message("Staged #{checksum_path}")
+  end
+
   destination
 end
 
@@ -112,13 +121,23 @@ def build_android_flavor(flavor, options, build_native: true)
       UI.user_error!("Required APK was not found: #{source}")
     end
 
-    stage_artifact(source, output_dir, "#{config[:artifact_prefix]}-#{info['version_name']}-#{abi}.apk")
+    stage_artifact(
+      source,
+      output_dir,
+      "#{config[:artifact_prefix]}-#{info['version_name']}-#{abi}.apk",
+      checksum: true,
+    )
   end
 
   source = android_aab(flavor)
   UI.user_error!("#{flavor.capitalize} AAB was not found") unless source
 
-  stage_artifact(source, output_dir, "#{config[:artifact_prefix]}-#{info['version_name']}.aab")
+  stage_artifact(
+    source,
+    output_dir,
+    "#{config[:artifact_prefix]}-#{info['version_name']}.aab",
+    checksum: true,
+  )
 end
 
 def build_ios_flavor(flavor, options, build_native: true)

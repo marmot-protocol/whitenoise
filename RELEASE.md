@@ -14,6 +14,7 @@ The first release automation layer is build-only:
 - builds staging iOS IPA for `dev.ipf.whitenoise.staging`
 - builds production iOS IPA for `org.parres.whitenoise`
 - stages artifacts under `build/releases/v<version>+<build>/<flavor>/`
+- creates `.sha256` sidecar files for staged Android APK and AAB artifacts
 
 Staging and production are separate apps on both Android and iOS. Current iOS
 publishing target for both apps is App Store Connect/TestFlight. Store release
