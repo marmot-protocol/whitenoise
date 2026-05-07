@@ -1,9 +1,13 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_list.dart';
 import 'package:whitenoise/src/rust/api/chat_list.dart';
+import 'package:whitenoise/src/rust/api/chat_summary.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
+import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessageSummary;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import '../mocks/mock_wn_api.dart';
@@ -16,17 +20,37 @@ ChatSummary _chatSummary(
   DateTime? archivedAt,
   DateTime? removedAt,
   DateTime? mutedUntil,
+  GroupType groupType = GroupType.group,
+  String? welcomerPubkey,
+  String? dmPeerPubkey,
+  ChatMessageSummary? lastMessage,
+  BigInt? unreadCount,
 }) => ChatSummary(
   mlsGroupId: 'mls_$id',
   name: 'Chat $id',
-  groupType: GroupType.group,
+  groupType: groupType,
   createdAt: createdAt,
   pendingConfirmation: pendingConfirmation,
+  welcomerPubkey: welcomerPubkey,
   selfRemoved: false,
   archivedAt: archivedAt,
   removedAt: removedAt,
   mutedUntil: mutedUntil,
-  unreadCount: BigInt.zero,
+  dmPeerPubkey: dmPeerPubkey,
+  lastMessage: lastMessage,
+  unreadCount: unreadCount ?? BigInt.zero,
+);
+
+ChatMessageSummary _lastMessage({
+  required String id,
+  required String author,
+  String content = 'last message',
+}) => ChatMessageSummary(
+  mlsGroupId: 'mls_$id',
+  author: author,
+  content: content,
+  createdAt: DateTime(2024),
+  mediaAttachmentCount: BigInt.zero,
 );
 
 class _MockApi extends MockWnApi {
@@ -87,6 +111,7 @@ void main() {
     _api.archivedController?.close();
     _api.controller = null;
     _api.archivedController = null;
+    _api.blockedPubkeys.clear();
   });
 
   group('useChatList', () {
@@ -125,6 +150,44 @@ void main() {
 
         final ids = getResult().chats.map((c) => c.mlsGroupId).toList();
         expect(ids, ['mls_c1', 'mls_c2']);
+      });
+
+      testWidgets('hides pending invites from blocked welcomers', (tester) async {
+        _api.blockedPubkeys.add(testPubkeyB);
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([
+          _chatSummary(
+            'blocked_invite',
+            DateTime(2024),
+            pendingConfirmation: true,
+            welcomerPubkey: testPubkeyB,
+          ),
+          _chatSummary('visible_chat', DateTime(2024, 1, 2)),
+        ]);
+        await tester.pumpAndSettle();
+
+        final ids = getResult().chats.map((c) => c.mlsGroupId).toList();
+        expect(ids, ['mls_visible_chat']);
+      });
+
+      testWidgets('redacts last message preview from blocked authors', (tester) async {
+        _api.blockedPubkeys.add(testPubkeyB);
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([
+          _chatSummary(
+            'group',
+            DateTime(2024),
+            lastMessage: _lastMessage(id: 'group', author: testPubkeyB, content: 'blocked'),
+            unreadCount: BigInt.one,
+          ),
+        ]);
+        await tester.pumpAndSettle();
+
+        final chat = getResult().chats.single;
+        expect(chat.lastMessage, isNull);
+        expect(chat.unreadCount, BigInt.one);
       });
     });
 
@@ -209,6 +272,33 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(getResult().chats.first.name, 'Updated Pending Chat');
+      });
+
+      testWidgets('does not reorder chat for last message from blocked author', (tester) async {
+        _api.blockedPubkeys.add(testPubkeyB);
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([
+          _chatSummary('c1', DateTime(2024)),
+          _chatSummary('c2', DateTime(2024, 1, 2)),
+        ]);
+        await tester.pumpAndSettle();
+
+        _api.emitUpdate(
+          ChatListUpdateTrigger.newLastMessage,
+          _chatSummary(
+            'c2',
+            DateTime(2024, 1, 3),
+            lastMessage: _lastMessage(id: 'c2', author: testPubkeyB, content: 'blocked'),
+            unreadCount: BigInt.one,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final chats = getResult().chats;
+        expect(chats.map((c) => c.mlsGroupId).toList(), ['mls_c1', 'mls_c2']);
+        expect(chats.last.lastMessage, isNull);
+        expect(chats.last.unreadCount, BigInt.one);
       });
     });
 
@@ -418,6 +508,67 @@ void main() {
         expect(c2.createdAt, DateTime(2024, 1, 5));
         expect(chats.map((c) => c.mlsGroupId).toList(), equals(['mls_c1', 'mls_c2']));
         expect(chats.indexWhere((c) => c.mlsGroupId == 'mls_c2'), 1);
+      });
+
+      testWidgets('uses latest blocked-pubkeys refresh callback', (tester) async {
+        final refreshVersions = <int>[];
+        late ValueNotifier<int> refreshVersion;
+
+        await mountHook(tester, () {
+          refreshVersion = useState(0);
+          final currentRefreshVersion = refreshVersion.value;
+          return useChatListWithBlockedPubkeys(
+            testPubkeyA,
+            blockedState: (
+              blockedPubkeys: <String>{},
+              isLoading: false,
+              error: null,
+              refresh: () => refreshVersions.add(currentRefreshVersion),
+            ),
+          );
+        });
+
+        _api.emitInitialSnapshot([_chatSummary('c1', DateTime(2024))]);
+        await tester.pumpAndSettle();
+
+        refreshVersion.value = 1;
+        await tester.pump();
+
+        _api.emitUpdate(
+          ChatListUpdateTrigger.userBlockChanged,
+          _chatSummary('c1', DateTime(2024, 1, 2)),
+        );
+        await tester.pumpAndSettle();
+
+        expect(refreshVersions, [1]);
+      });
+
+      testWidgets('re-applies pending invite filtering when block state changes', (tester) async {
+        _api.blockedPubkeys.add(testPubkeyB);
+        final getResult = await _pump(tester, testPubkeyA);
+        final invite = _chatSummary(
+          'invite',
+          DateTime(2024),
+          pendingConfirmation: true,
+          welcomerPubkey: testPubkeyB,
+        );
+
+        _api.emitInitialSnapshot([invite]);
+        await tester.pumpAndSettle();
+
+        expect(getResult().chats, isEmpty);
+
+        _api.blockedPubkeys.clear();
+        _api.emitUpdate(ChatListUpdateTrigger.userBlockChanged, invite);
+        await tester.pumpAndSettle();
+
+        expect(getResult().chats.map((c) => c.mlsGroupId).toList(), ['mls_invite']);
+
+        _api.blockedPubkeys.add(testPubkeyB);
+        _api.emitUpdate(ChatListUpdateTrigger.userBlockChanged, invite);
+        await tester.pumpAndSettle();
+
+        expect(getResult().chats, isEmpty);
       });
     });
 

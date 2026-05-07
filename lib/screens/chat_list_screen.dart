@@ -193,6 +193,7 @@ class ChatListScreen extends HookConsumerWidget {
     final chatListSearch = useChatListSearch(
       pubkey: pubkey,
       query: searchQuery.value,
+      hiddenPubkeys: chatListResult.blockedPubkeys,
     );
 
     useEffect(() {

@@ -16,11 +16,13 @@ import 'package:whitenoise/screens/chat_screen.dart';
 import 'package:whitenoise/screens/group_info_screen.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
 import 'package:whitenoise/src/rust/api/chat_list.dart';
+import 'package:whitenoise/src/rust/api/chat_summary.dart';
 import 'package:whitenoise/src/rust/api/drafts.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/src/rust/api/mute_list.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
@@ -91,6 +93,7 @@ ChatMessage _message(
 
 class _MockApi extends MockWnApi {
   StreamController<MessageStreamItem>? controller;
+  final List<StreamController<ChatListStreamItem>> chatListControllers = [];
   List<ChatMessage> initialMessages = [];
   String groupName = 'Test Group';
   final List<String> sentMessages = [];
@@ -104,14 +107,17 @@ class _MockApi extends MockWnApi {
   Exception? retryError;
   int _sendCallCount = 0;
   bool isDm = false;
-  Completer<bool>? isDmCompleter;
+  Completer<ChatSummary>? chatSummaryCompleter;
   List<String> groupMembers = [];
   Completer<MediaFile>? uploadCompleter;
   Map<String, FlutterMetadata>? metadataByPubkey;
   Completer<List<ChatMessage>>? fetchOlderCompleter;
+  Completer<List<MuteListEntry>>? blockedUsersCompleter;
+  List<Completer<List<MuteListEntry>>> blockedUsersCompleters = [];
+  int getBlockedUsersCallCount = 0;
   DateTime? removedAt;
-  bool blockedUser = false;
   bool shouldFailUnblockUser = false;
+  Completer<void>? unblockUserCompleter;
   List<SearchResult> Function(String query)? searchOverride;
 
   @override
@@ -119,6 +125,10 @@ class _MockApi extends MockWnApi {
     super.reset();
     controller?.close();
     controller = null;
+    for (final chatListController in [...chatListControllers]) {
+      chatListController.close();
+    }
+    chatListControllers.clear();
     initialMessages = [];
     groupName = 'Test Group';
     sentMessages.clear();
@@ -132,14 +142,17 @@ class _MockApi extends MockWnApi {
     retryError = null;
     _sendCallCount = 0;
     isDm = false;
-    isDmCompleter = null;
+    chatSummaryCompleter = null;
     groupMembers = [];
     uploadCompleter = null;
     metadataByPubkey = null;
     fetchOlderCompleter = null;
+    blockedUsersCompleter = null;
+    blockedUsersCompleters = [];
+    getBlockedUsersCallCount = 0;
     removedAt = null;
-    blockedUser = false;
     shouldFailUnblockUser = false;
+    unblockUserCompleter = null;
     searchOverride = null;
   }
 
@@ -164,19 +177,72 @@ class _MockApi extends MockWnApi {
   }
 
   @override
+  Future<List<MuteListEntry>> crateApiMuteListGetBlockedUsers({
+    required String accountPubkey,
+  }) {
+    final callIndex = getBlockedUsersCallCount;
+    getBlockedUsersCallCount++;
+    if (blockedUsersCompleters.isNotEmpty && callIndex < blockedUsersCompleters.length) {
+      return blockedUsersCompleters[callIndex].future;
+    }
+    if (blockedUsersCompleter != null) return blockedUsersCompleter!.future;
+    return super.crateApiMuteListGetBlockedUsers(accountPubkey: accountPubkey);
+  }
+
+  @override
   Stream<ChatListStreamItem> crateApiChatListSubscribeToChatList({
     required String accountPubkey,
   }) {
-    final summary = ChatSummary(
+    final controller = StreamController<ChatListStreamItem>();
+    chatListControllers.add(controller);
+    Future.microtask(() {
+      if (!controller.isClosed) {
+        controller.add(ChatListStreamItem.initialSnapshot(items: [_chatSummary()]));
+      }
+    });
+    controller.onCancel = () {
+      chatListControllers.remove(controller);
+      if (!controller.isClosed) controller.close();
+    };
+    return controller.stream;
+  }
+
+  ChatSummary _chatSummary() {
+    final groupType = isDm ? GroupType.directMessage : GroupType.group;
+    final dmPeerPubkey = isDm ? groupMembers.where((p) => p != _testPubkey).firstOrNull : null;
+    final name = isDm ? null : groupName;
+    return ChatSummary(
       mlsGroupId: _testGroupId,
-      groupType: GroupType.group,
+      groupType: groupType,
+      name: name,
       createdAt: DateTime(2024),
       pendingConfirmation: false,
       selfRemoved: false,
       unreadCount: BigInt.zero,
       removedAt: removedAt,
+      dmPeerPubkey: dmPeerPubkey,
     );
-    return Stream.value(ChatListStreamItem.initialSnapshot(items: [summary]));
+  }
+
+  @override
+  Future<ChatSummary> crateApiChatSummaryGetChatSummary({
+    required String accountPubkey,
+    required String mlsGroupId,
+  }) {
+    if (chatSummaryCompleter != null) return chatSummaryCompleter!.future;
+    return Future.value(_chatSummary());
+  }
+
+  void emitChatListUpdate(ChatListUpdateTrigger trigger) {
+    final item = ChatListStreamItem.update(
+      update: ChatListUpdate(
+        item: _chatSummary(),
+        trigger: trigger,
+      ),
+    );
+    for (final controller in [...chatListControllers]) {
+      if (!controller.isClosed) controller.add(item);
+    }
   }
 
   @override
@@ -303,7 +369,6 @@ class _MockApi extends MockWnApi {
     required Group that,
     required String accountPubkey,
   }) {
-    if (isDmCompleter != null) return isDmCompleter!.future;
     return Future.value(isDm);
   }
 
@@ -357,15 +422,16 @@ class _MockApi extends MockWnApi {
   Future<bool> crateApiMuteListIsUserBlocked({
     required String accountPubkey,
     required String targetPubkey,
-  }) async => blockedUser;
+  }) async => blockedPubkeys.contains(targetPubkey);
 
   @override
   Future<void> crateApiMuteListUnblockUser({
     required String accountPubkey,
     required String targetPubkey,
   }) async {
+    if (unblockUserCompleter != null) await unblockUserCompleter!.future;
     if (shouldFailUnblockUser) throw Exception('Unblock failed');
-    blockedUser = false;
+    blockedPubkeys.remove(targetPubkey);
   }
 
   @override
@@ -645,7 +711,7 @@ void main() {
           _message('m1', DateTime(2024)),
         ];
         _api.isDm = true;
-        _api.isDmCompleter = Completer<bool>();
+        _api.chatSummaryCompleter = Completer<ChatSummary>();
         _api.groupMembers = [_testPubkey, testPubkeyC];
 
         await mountWidget(
@@ -663,7 +729,17 @@ void main() {
         expect(find.byType(WnMessageBubble), findsOneWidget);
         expect(avatarsInBubbles(), findsNothing);
 
-        _api.isDmCompleter!.complete(true);
+        _api.chatSummaryCompleter!.complete(
+          ChatSummary(
+            mlsGroupId: _testGroupId,
+            groupType: GroupType.directMessage,
+            createdAt: DateTime(2024),
+            pendingConfirmation: false,
+            selfRemoved: false,
+            unreadCount: BigInt.zero,
+            dmPeerPubkey: testPubkeyC,
+          ),
+        );
         await tester.pumpAndSettle();
 
         expect(avatarsInBubbles(), findsNothing);
@@ -738,6 +814,22 @@ void main() {
         await tester.tap(find.byKey(const Key('header_name_tap_area')));
         await tester.pumpAndSettle();
         expect(find.byType(ChatInfoScreen), findsOneWidget);
+      });
+
+      testWidgets('returning from chat info reloads blocked pubkeys', (tester) async {
+        _api.isDm = true;
+        _api.groupMembers = [_testPubkey, testPubkeyC];
+        await pumpChatScreen(tester);
+
+        final callCountBefore = _api.getBlockedUsersCallCount;
+        await tester.tap(find.byKey(const Key('header_avatar_tap_area')));
+        await tester.pumpAndSettle();
+        expect(find.byType(ChatInfoScreen), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('slate_back_button')));
+        await tester.pumpAndSettle();
+
+        expect(_api.getBlockedUsersCallCount, greaterThanOrEqualTo(callCountBefore + 1));
       });
     });
 
@@ -828,6 +920,81 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.textContaining('Message new_msg'), findsOneWidget);
+      });
+
+      testWidgets('does not show initial messages from blocked authors', (tester) async {
+        _api.blockedPubkeys.add(testPubkeyB);
+        _api.initialMessages = [
+          _message('blocked', DateTime(2024)),
+          _message('visible', DateTime(2024, 1, 2), pubkey: testPubkeyC),
+        ];
+
+        await pumpChatScreen(tester);
+
+        expect(find.textContaining('Message blocked'), findsNothing);
+        expect(find.textContaining('Message visible'), findsOneWidget);
+      });
+
+      testWidgets('does not show new messages from blocked authors', (tester) async {
+        _api.blockedPubkeys.add(testPubkeyB);
+        _api.initialMessages = [_message('visible', DateTime(2024), pubkey: testPubkeyC)];
+
+        await pumpChatScreen(tester);
+        _api.emitMessage(_message('blocked', DateTime.now()));
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Message blocked'), findsNothing);
+        expect(find.textContaining('Message visible'), findsOneWidget);
+      });
+
+      testWidgets('does not show new messages from users blocked before screen loaded', (
+        tester,
+      ) async {
+        _api.blockedPubkeys.add(testPubkeyB);
+        _api.initialMessages = [_message('visible', DateTime(2024), pubkey: testPubkeyC)];
+
+        await pumpChatScreen(tester);
+        _api.emitMessage(_message('blocked', DateTime.now()));
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Message blocked'), findsNothing);
+        expect(find.textContaining('Message visible'), findsOneWidget);
+      });
+
+      testWidgets('does not show messages while blocked users are loading', (tester) async {
+        _api.blockedUsersCompleter = Completer<List<MuteListEntry>>();
+        _api.initialMessages = [
+          _message('blocked', DateTime(2024)),
+          _message('visible', DateTime(2024, 1, 2), pubkey: testPubkeyC),
+        ];
+
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            offlineProvider.overrideWith((ref) => Stream.value(false)),
+          ],
+        );
+        await tester.pumpAndSettle();
+        Routes.goToChat(tester.element(find.byType(Scaffold)), _testGroupId);
+        await tester.pump();
+        await tester.pump();
+        await tester.pump();
+
+        expect(find.byType(WnMessageBubble), findsNothing);
+
+        _api.blockedUsersCompleter!.complete([
+          MuteListEntry(
+            accountPubkey: _testPubkey,
+            mutedPubkey: testPubkeyB,
+            isPrivate: true,
+            createdAt: DateTime(2024),
+          ),
+        ]);
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Message blocked'), findsNothing);
+        expect(find.textContaining('Message visible'), findsOneWidget);
       });
     });
 
@@ -2235,7 +2402,7 @@ void main() {
       setUp(() {
         _api.isDm = true;
         _api.groupMembers = [_testPubkey, testPubkeyC];
-        _api.blockedUser = true;
+        _api.blockedPubkeys.add(testPubkeyC);
       });
 
       testWidgets('shows blocked notice when peer is blocked', (tester) async {
@@ -2294,6 +2461,22 @@ void main() {
         expect(find.text('Failed to unblock user. Please try again.'), findsOneWidget);
       });
 
+      testWidgets('does not update state after unblock completes on disposed screen', (
+        tester,
+      ) async {
+        _api.unblockUserCompleter = Completer<void>();
+        await pumpChatScreen(tester);
+
+        await tester.tap(find.byKey(const Key('blocked_notice_unblock_button')));
+        await tester.pump();
+        await tester.pumpWidget(const SizedBox());
+
+        _api.unblockUserCompleter!.complete();
+        await tester.pump();
+
+        expect(tester.takeException(), isNull);
+      });
+
       testWidgets('archive button shows Archive when not archived', (tester) async {
         await pumpChatScreen(tester);
 
@@ -2326,6 +2509,58 @@ void main() {
 
         expect(find.text('Failed to archive chat. Please try again.'), findsOneWidget);
       });
+
+      testWidgets('unblocking reloads blocked pubkeys', (tester) async {
+        await pumpChatScreen(tester);
+
+        final callCountBefore = _api.getBlockedUsersCallCount;
+        await tester.tap(find.byKey(const Key('blocked_notice_unblock_button')));
+        await tester.pumpAndSettle();
+
+        expect(_api.getBlockedUsersCallCount, greaterThanOrEqualTo(callCountBefore + 1));
+      });
+
+      testWidgets('messages from unblocked peer become visible after unblock', (tester) async {
+        final firstCompleter = Completer<List<MuteListEntry>>();
+        final secondCompleter = Completer<List<MuteListEntry>>();
+        _api.blockedPubkeys.add(testPubkeyC);
+        _api.blockedUsersCompleters = [firstCompleter, secondCompleter];
+        _api.initialMessages = [
+          _message('peer_msg', DateTime(2024), pubkey: testPubkeyC),
+        ];
+
+        await mountTestApp(
+          tester,
+          overrides: [
+            authProvider.overrideWith(() => _MockAuthNotifier()),
+            offlineProvider.overrideWith((ref) => Stream.value(false)),
+          ],
+        );
+        await tester.pumpAndSettle();
+        Routes.goToChat(tester.element(find.byType(Scaffold)), _testGroupId);
+        await tester.pump();
+        await tester.pump();
+
+        firstCompleter.complete([
+          MuteListEntry(
+            accountPubkey: _testPubkey,
+            mutedPubkey: testPubkeyC,
+            isPrivate: true,
+            createdAt: DateTime(2024),
+          ),
+        ]);
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Message peer_msg'), findsNothing);
+
+        await tester.tap(find.byKey(const Key('blocked_notice_unblock_button')));
+        await tester.pump();
+
+        secondCompleter.complete([]);
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Message peer_msg'), findsOneWidget);
+      });
     });
 
     group('not blocked user', () {
@@ -2341,7 +2576,7 @@ void main() {
         _api.removedAt = DateTime(2024, 6);
         _api.isDm = true;
         _api.groupMembers = [_testPubkey, testPubkeyC];
-        _api.blockedUser = true;
+        _api.blockedPubkeys.add(testPubkeyC);
       });
 
       testWidgets('shows removed notice and not blocked notice', (tester) async {

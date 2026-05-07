@@ -15,6 +15,7 @@ import 'package:whitenoise/screens/settings_screen.dart';
 import 'package:whitenoise/screens/share_profile_screen.dart';
 import 'package:whitenoise/screens/user_search_screen.dart';
 import 'package:whitenoise/src/rust/api/chat_list.dart';
+import 'package:whitenoise/src/rust/api/chat_summary.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage;
 import 'package:whitenoise/src/rust/frb_generated.dart';

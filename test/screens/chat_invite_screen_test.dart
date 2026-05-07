@@ -11,9 +11,11 @@ import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/chat_screen.dart';
 import 'package:whitenoise/screens/group_info_screen.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart';
-import 'package:whitenoise/src/rust/api/groups.dart';
+import 'package:whitenoise/src/rust/api/chat_summary.dart';
+import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/src/rust/api/mute_list.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
@@ -68,11 +70,14 @@ class _MockApi extends MockWnApi {
   Exception? errorToThrow;
   FlutterMetadata? userMetadataResponse;
   bool isDm = false;
-  List<String> groupMembers = [];
+  String? dmPeerPubkey = testPubkeyB;
+  String? dmDisplayName;
   String? welcomerPubkey;
+  Completer<AccountGroup>? accountGroupCompleter;
   List<List<ChatMessage>> olderMessagePages = [];
   int _fetchPageIndex = 0;
   int fetchOlderCallCount = 0;
+  Completer<List<MuteListEntry>>? blockedUsersCompleter;
 
   @override
   void reset() {
@@ -86,11 +91,14 @@ class _MockApi extends MockWnApi {
     errorToThrow = null;
     userMetadataResponse = null;
     isDm = false;
-    groupMembers = [];
+    dmPeerPubkey = testPubkeyB;
+    dmDisplayName = null;
     welcomerPubkey = null;
+    accountGroupCompleter = null;
     olderMessagePages = [];
     _fetchPageIndex = 0;
     fetchOlderCallCount = 0;
+    blockedUsersCompleter = null;
   }
 
   void emitMessage(ChatMessage message) {
@@ -98,6 +106,35 @@ class _MockApi extends MockWnApi {
       MessageStreamItem.update(
         update: MessageUpdate(trigger: UpdateTrigger.newMessage, message: message),
       ),
+    );
+  }
+
+  @override
+  Future<ChatSummary> crateApiChatSummaryGetChatSummary({
+    required String accountPubkey,
+    required String mlsGroupId,
+  }) async {
+    if (isDm) {
+      return ChatSummary(
+        mlsGroupId: mlsGroupId,
+        groupType: GroupType.directMessage,
+        createdAt: DateTime(2024),
+        pendingConfirmation: false,
+        selfRemoved: false,
+        unreadCount: BigInt.zero,
+        dmPeerPubkey: dmPeerPubkey,
+        name: dmDisplayName,
+      );
+    }
+    final name = groupName.isNotEmpty ? groupName : null;
+    return ChatSummary(
+      mlsGroupId: mlsGroupId,
+      groupType: GroupType.group,
+      createdAt: DateTime(2024),
+      pendingConfirmation: false,
+      selfRemoved: false,
+      unreadCount: BigInt.zero,
+      name: name,
     );
   }
 
@@ -140,38 +177,11 @@ class _MockApi extends MockWnApi {
   }
 
   @override
-  Future<Group> crateApiGroupsGetGroup({
-    required String accountPubkey,
-    required String groupId,
-  }) async {
-    return Group(
-      mlsGroupId: groupId,
-      nostrGroupId: '',
-      name: groupName,
-      description: '',
-      adminPubkeys: const [],
-      epoch: BigInt.zero,
-      state: GroupState.active,
-    );
-  }
-
-  @override
-  Future<bool> crateApiGroupsGroupIsDirectMessageType({
-    required Group that,
-    required String accountPubkey,
-  }) async => isDm;
-
-  @override
-  Future<List<String>> crateApiGroupsGroupMembers({
-    required String pubkey,
-    required String groupId,
-  }) async => groupMembers;
-
-  @override
   Future<AccountGroup> crateApiAccountGroupsGetAccountGroup({
     required String accountPubkey,
     required String mlsGroupId,
   }) async {
+    if (accountGroupCompleter != null) return accountGroupCompleter!.future;
     return AccountGroup(
       accountPubkey: accountPubkey,
       mlsGroupId: mlsGroupId,
@@ -179,6 +189,14 @@ class _MockApi extends MockWnApi {
       createdAt: PlatformInt64Util.from(0),
       updatedAt: PlatformInt64Util.from(0),
     );
+  }
+
+  @override
+  Future<List<MuteListEntry>> crateApiMuteListGetBlockedUsers({
+    required String accountPubkey,
+  }) {
+    if (blockedUsersCompleter != null) return blockedUsersCompleter!.future;
+    return super.crateApiMuteListGetBlockedUsers(accountPubkey: accountPubkey);
   }
 
   @override
@@ -250,11 +268,7 @@ void main() {
       group('when DM', () {
         setUp(() {
           _api.isDm = true;
-          _api.groupMembers = [_testPubkey, testPubkeyB];
-          _api.userMetadataResponse = const FlutterMetadata(
-            displayName: 'Alice',
-            custom: {},
-          );
+          _api.dmDisplayName = 'Alice';
         });
 
         testWidgets('shows other member display name', (tester) async {
@@ -264,7 +278,7 @@ void main() {
         });
 
         testWidgets('shows Unknown user when member name is null', (tester) async {
-          _api.userMetadataResponse = const FlutterMetadata(custom: {});
+          _api.dmDisplayName = null;
           await pumpInviteScreen(tester);
 
           expect(find.text('Unknown user'), findsWidgets);
@@ -296,6 +310,47 @@ void main() {
       expect(find.text('Decline'), findsOneWidget);
     });
 
+    testWidgets('returns to chat list when inviter is blocked', (tester) async {
+      _api.welcomerPubkey = testPubkeyB;
+      _api.blockedPubkeys.add(testPubkeyB);
+
+      await pumpInviteScreen(tester);
+
+      expect(find.byType(ChatListScreen), findsOneWidget);
+      expect(find.text('Accept'), findsNothing);
+      expect(find.text('Decline'), findsNothing);
+    });
+
+    testWidgets('does not show invite controls while blocked users are loading', (tester) async {
+      _api.blockedUsersCompleter = Completer<List<MuteListEntry>>();
+
+      await pumpInviteScreen(tester);
+
+      expect(find.text('Accept'), findsNothing);
+      expect(find.text('Decline'), findsNothing);
+
+      _api.blockedUsersCompleter!.complete([]);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Accept'), findsOneWidget);
+      expect(find.text('Decline'), findsOneWidget);
+    });
+
+    testWidgets('does not show invite controls while welcomer lookup is loading', (tester) async {
+      _api.accountGroupCompleter = Completer<AccountGroup>();
+
+      await pumpInviteScreen(tester);
+
+      expect(find.text('Accept'), findsNothing);
+      expect(find.text('Decline'), findsNothing);
+
+      _api.accountGroupCompleter!.complete(_accountGroup());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Accept'), findsOneWidget);
+      expect(find.text('Decline'), findsOneWidget);
+    });
+
     group('avatar color', () {
       group('when group', () {
         testWidgets('uses group ID', (tester) async {
@@ -312,7 +367,6 @@ void main() {
       group('when DM', () {
         setUp(() {
           _api.isDm = true;
-          _api.groupMembers = [_testPubkey, testPubkeyB];
         });
 
         testWidgets('uses other member pubkey', (tester) async {
@@ -369,6 +423,19 @@ void main() {
         await pumpInviteScreen(tester);
 
         expect(find.byType(WnMessageBubble), findsNWidgets(2));
+      });
+
+      testWidgets('does not display messages from blocked authors', (tester) async {
+        _api.blockedPubkeys.add(testPubkeyB);
+        _api.initialMessages = [
+          _message('blocked'),
+          _message('visible', pubkey: testPubkeyC),
+        ];
+
+        await pumpInviteScreen(tester);
+
+        expect(find.textContaining('Message blocked'), findsNothing);
+        expect(find.textContaining('Message visible'), findsOneWidget);
       });
 
       testWidgets('does not display deleted message text', (tester) async {
@@ -586,7 +653,6 @@ void main() {
       group('when DM', () {
         setUp(() {
           _api.isDm = true;
-          _api.groupMembers = [_testPubkey, testPubkeyB];
           _api.initialMessages = [_message('m1')];
         });
 
@@ -719,7 +785,6 @@ void main() {
       group('when DM', () {
         setUp(() {
           _api.isDm = true;
-          _api.groupMembers = [_testPubkey, testPubkeyB];
         });
 
         testWidgets('header avatar navigates to chat info', (tester) async {

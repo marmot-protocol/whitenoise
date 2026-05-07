@@ -9,7 +9,7 @@ import 'package:whitenoise/constants/feature_flags.dart' show FeatureFlag;
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/feature_flags_provider.dart';
-import 'package:whitenoise/src/rust/api/chat_list.dart';
+import 'package:whitenoise/src/rust/api/chat_summary.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';

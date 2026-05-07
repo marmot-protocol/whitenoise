@@ -13,6 +13,7 @@ analyzer:
   exclude:
     - rust_builder/**
     - trees/**
+    - widgetbook/**
 
 linter:
   # The lint rules applied to this project can be customized in the

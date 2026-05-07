@@ -551,6 +551,40 @@ void main() {
       expect(mockNotificationService.showCalls, isEmpty);
     });
 
+    test('skips new message notification from blocked sender', () async {
+      mockApi.blockedPubkeys.add(testPubkeyB);
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: testGroupId,
+        isDm: false,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+        content: 'Hello',
+        timestamp: DateTime.now(),
+      );
+
+      await _newSubscription(mockNotificationService).handleUpdate(update);
+
+      expect(mockNotificationService.showCalls, isEmpty);
+    });
+
+    test('skips invite notification from blocked sender', () async {
+      mockApi.blockedPubkeys.add(testPubkeyB);
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.groupInvite,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+        content: '',
+        timestamp: DateTime.now(),
+      );
+
+      await _newSubscription(mockNotificationService).handleUpdate(update);
+
+      expect(mockNotificationService.showCalls, isEmpty);
+    });
+
     test('shows notification when active chat is different group', () async {
       final update = NotificationUpdate(
         trigger: NotificationTrigger.newMessage,

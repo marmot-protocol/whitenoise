@@ -1,19 +1,56 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
+import 'package:whitenoise/hooks/use_blocked_pubkeys.dart';
 import 'package:whitenoise/src/rust/api/chat_list.dart';
+import 'package:whitenoise/src/rust/api/chat_summary.dart';
 
 final _logger = Logger('useChatList');
 
 typedef ChatListResult = ({
   bool isLoading,
   List<ChatSummary> chats,
+  Set<String> blockedPubkeys,
   VoidCallback refresh,
 });
 
 ChatListResult useChatList(String pubkey, {bool archived = false}) {
+  final blockedPubkeysRefreshKey = useState(0);
+  final blockedState = useBlockedPubkeys(pubkey, refreshKey: blockedPubkeysRefreshKey.value);
+  return _useChatList(
+    pubkey,
+    archived: archived,
+    blockedState: blockedState,
+    refreshBlockedPubkeys: () => blockedPubkeysRefreshKey.value++,
+  );
+}
+
+ChatListResult useChatListWithBlockedPubkeys(
+  String pubkey, {
+  bool archived = false,
+  required BlockedPubkeysState blockedState,
+}) {
+  final refreshBlockedPubkeysRef = useRef<VoidCallback>(() {});
+  refreshBlockedPubkeysRef.value = blockedState.refresh;
+
+  return _useChatList(
+    pubkey,
+    archived: archived,
+    blockedState: blockedState,
+    refreshBlockedPubkeys: () => refreshBlockedPubkeysRef.value(),
+  );
+}
+
+ChatListResult _useChatList(
+  String pubkey, {
+  required bool archived,
+  required BlockedPubkeysState blockedState,
+  required VoidCallback refreshBlockedPubkeys,
+}) {
   final chatMap = useRef(<String, ChatSummary>{});
   final refreshKey = useState(0);
+  final blockedPubkeysRef = useRef<Set<String>>({});
+  blockedPubkeysRef.value = blockedState.blockedPubkeys;
 
   final stream = useMemoized(
     () {
@@ -44,6 +81,12 @@ ChatListResult useChatList(String pubkey, {bool archived = false}) {
                   case ChatListUpdateTrigger.newGroup:
                     chatMap.value[id] = update.item;
                   case ChatListUpdateTrigger.newLastMessage:
+                    final lastMessage = update.item.lastMessage;
+                    final blockedPubkeys = blockedPubkeysRef.value;
+                    if (lastMessage != null && blockedPubkeys.contains(lastMessage.author)) {
+                      chatMap.value[id] = _sanitizeChatSummary(update.item, blockedPubkeys);
+                      return chatMap.value;
+                    }
                     if (update.item.pendingConfirmation) {
                       chatMap.value[id] = update.item;
                     } else {
@@ -69,6 +112,7 @@ ChatListResult useChatList(String pubkey, {bool archived = false}) {
                     chatMap.value.remove(id);
                   case ChatListUpdateTrigger.userBlockChanged:
                     chatMap.value[id] = update.item;
+                    refreshBlockedPubkeys();
                 }
                 return chatMap.value;
               },
@@ -79,10 +123,50 @@ ChatListResult useChatList(String pubkey, {bool archived = false}) {
   );
 
   final snapshot = useStream(stream, initialData: <String, ChatSummary>{});
-  final isLoading = snapshot.connectionState == ConnectionState.waiting;
+  final isLoading = snapshot.connectionState == ConnectionState.waiting || blockedState.isLoading;
+  final chats = blockedState.isLoading
+      ? <ChatSummary>[]
+      : chatMap.value.values
+            .where((chat) => !_shouldHideChatSummary(chat, blockedState.blockedPubkeys))
+            .map((chat) => _sanitizeChatSummary(chat, blockedState.blockedPubkeys))
+            .toList()
+            .reversed
+            .toList();
   return (
     isLoading: isLoading,
-    chats: chatMap.value.values.toList().reversed.toList(),
-    refresh: () => refreshKey.value++,
+    chats: chats,
+    blockedPubkeys: blockedState.blockedPubkeys,
+    refresh: () {
+      refreshKey.value++;
+      refreshBlockedPubkeys();
+    },
+  );
+}
+
+bool _shouldHideChatSummary(ChatSummary chat, Set<String> blockedPubkeys) {
+  if (!chat.pendingConfirmation) return false;
+  final inviterPubkey = chat.welcomerPubkey ?? chat.dmPeerPubkey;
+  return inviterPubkey != null && blockedPubkeys.contains(inviterPubkey);
+}
+
+ChatSummary _sanitizeChatSummary(ChatSummary chat, Set<String> blockedPubkeys) {
+  final lastMessage = chat.lastMessage;
+  if (lastMessage == null || !blockedPubkeys.contains(lastMessage.author)) return chat;
+  return ChatSummary(
+    mlsGroupId: chat.mlsGroupId,
+    name: chat.name,
+    groupType: chat.groupType,
+    createdAt: chat.createdAt,
+    groupImagePath: chat.groupImagePath,
+    groupImageUrl: chat.groupImageUrl,
+    pendingConfirmation: chat.pendingConfirmation,
+    welcomerPubkey: chat.welcomerPubkey,
+    archivedAt: chat.archivedAt,
+    removedAt: chat.removedAt,
+    selfRemoved: chat.selfRemoved,
+    unreadCount: chat.unreadCount,
+    pinOrder: chat.pinOrder,
+    dmPeerPubkey: chat.dmPeerPubkey,
+    mutedUntil: chat.mutedUntil,
   );
 }

@@ -5,13 +5,16 @@ import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_block_actions.dart';
 import 'package:whitenoise/hooks/use_chat_archive.dart';
-import 'package:whitenoise/hooks/use_chat_profile.dart';
+import 'package:whitenoise/hooks/use_chat_summary.dart';
 import 'package:whitenoise/hooks/use_follow_actions.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/src/rust/api/chat_summary.dart';
+import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/chat_summary_display.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_chat_info_profile_card.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
@@ -33,12 +36,12 @@ class ChatInfoScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final accountPubkey = ref.watch(accountPubkeyProvider);
-    final chatProfile = useChatProfile(context, accountPubkey, mlsGroupId);
-    final profile = chatProfile.data;
+    final chatSummary = useChatSummary(context, accountPubkey, mlsGroupId);
 
-    final peerPubkey = profile?.otherMemberPubkey;
+    final isDm = chatSummary.data?.groupType == GroupType.directMessage;
+    final peerPubkey = chatSummary.data?.dmPeerPubkey;
     final hasPeerPubkey = peerPubkey != null;
-    final isUnresolvedDm = profile?.isDm == true && !hasPeerPubkey;
+    final isUnresolvedDm = isDm && !hasPeerPubkey;
 
     final followState = useFollowActions(
       accountPubkey: accountPubkey,
@@ -131,7 +134,7 @@ class ChatInfoScreen extends HookConsumerWidget {
                     children: [
                       Gap(8.h),
                       _ChatInfoProfileBlock(
-                        chatProfile: chatProfile,
+                        chatSummary: chatSummary,
                         mlsGroupId: mlsGroupId,
                         onPublicKeyCopied: () => showSuccessNotice(context.l10n.publicKeyCopied),
                         onPublicKeyCopyError: () =>
@@ -174,20 +177,20 @@ class ChatInfoScreen extends HookConsumerWidget {
 
 class _ChatInfoProfileBlock extends StatelessWidget {
   const _ChatInfoProfileBlock({
-    required this.chatProfile,
+    required this.chatSummary,
     required this.mlsGroupId,
     required this.onPublicKeyCopied,
     required this.onPublicKeyCopyError,
   });
 
-  final AsyncSnapshot<ChatProfile> chatProfile;
+  final AsyncSnapshot<ChatSummary> chatSummary;
   final String mlsGroupId;
   final VoidCallback onPublicKeyCopied;
   final VoidCallback onPublicKeyCopyError;
 
   @override
   Widget build(BuildContext context) {
-    if (chatProfile.hasError) {
+    if (chatSummary.hasError) {
       return SizedBox(
         width: double.infinity,
         child: Text(
@@ -200,7 +203,7 @@ class _ChatInfoProfileBlock extends StatelessWidget {
       );
     }
 
-    if (!chatProfile.hasData) {
+    if (!chatSummary.hasData) {
       return SizedBox(
         height: 120.h,
         width: double.infinity,
@@ -212,19 +215,20 @@ class _ChatInfoProfileBlock extends StatelessWidget {
       );
     }
 
-    final profile = chatProfile.data!;
-    if (!profile.isDm) {
+    final display = chatSummaryDisplay(chatSummary.data!, mlsGroupId);
+    final isDm = chatSummary.data!.groupType == GroupType.directMessage;
+    if (!isDm) {
       return WnChatInfoProfileCard(
         userPubkey: mlsGroupId,
-        displayName: profile.displayName,
-        pictureUrl: profile.pictureUrl,
-        avatarColor: profile.color,
+        displayName: display.displayName,
+        pictureUrl: display.pictureUrl,
+        avatarColor: display.color,
         onPublicKeyCopied: onPublicKeyCopied,
         onPublicKeyCopyError: onPublicKeyCopyError,
       );
     }
 
-    final peer = profile.otherMemberPubkey;
+    final peer = chatSummary.data!.dmPeerPubkey;
     if (peer == null) {
       return SizedBox(
         width: double.infinity,
@@ -240,9 +244,9 @@ class _ChatInfoProfileBlock extends StatelessWidget {
 
     return WnChatInfoProfileCard(
       userPubkey: peer,
-      displayName: profile.displayName,
-      pictureUrl: profile.pictureUrl,
-      avatarColor: profile.color,
+      displayName: display.displayName,
+      pictureUrl: display.pictureUrl,
+      avatarColor: display.color,
       onPublicKeyCopied: onPublicKeyCopied,
       onPublicKeyCopyError: onPublicKeyCopyError,
     );

@@ -8,9 +8,13 @@ import 'package:whitenoise/src/rust/frb_generated.dart';
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
-ChatMessage _messageFactory(String id, String content) => ChatMessage(
+ChatMessage _messageFactory(
+  String id,
+  String content, {
+  String pubkey = testPubkeyA,
+}) => ChatMessage(
   id: id,
-  pubkey: testPubkeyA,
+  pubkey: pubkey,
   content: content,
   createdAt: DateTime(2024),
   tags: const [],
@@ -28,8 +32,9 @@ SearchResult _searchResultFactory(
   String groupId = testGroupId,
   List<HighlightSpan> spans = const [],
   int position = 0,
+  String pubkey = testPubkeyA,
 }) => SearchResult(
-  message: _messageFactory(id, content),
+  message: _messageFactory(id, content, pubkey: pubkey),
   mlsGroupId: groupId,
   highlightSpans: spans,
   position: BigInt.from(position),
@@ -77,10 +82,15 @@ void main() {
     WidgetTester tester, {
     String pubkey = testPubkeyA,
     String query = '',
+    Set<String> hiddenPubkeys = const {},
   }) async {
     getState = await mountHook(
       tester,
-      () => useChatListSearch(pubkey: pubkey, query: query),
+      () => useChatListSearch(
+        pubkey: pubkey,
+        query: query,
+        hiddenPubkeys: hiddenPubkeys,
+      ),
     );
   }
 
@@ -152,6 +162,20 @@ void main() {
         expect(getState().messageSnippets[testGroupId], 'hello world');
         expect(getState().messageSnippets[otherTestGroupId], 'say hello');
         expect(getState().isSearching, isFalse);
+      });
+
+      testWidgets('filters snippets from blocked authors', (tester) async {
+        api.searchResults = [
+          _searchResultFactory('blocked', 'blocked hello', pubkey: testPubkeyB),
+          _searchResultFactory('visible', 'visible hello', pubkey: testPubkeyC),
+        ];
+
+        await pump(tester, query: 'hello', hiddenPubkeys: {testPubkeyB});
+        await tester.pump(const Duration(milliseconds: 150));
+        await tester.pump();
+
+        expect(getState().matchedGroupIds, {testGroupId});
+        expect(getState().messageSnippets[testGroupId], 'visible hello');
       });
 
       testWidgets('groups results by mlsGroupId keeping first match per group', (tester) async {

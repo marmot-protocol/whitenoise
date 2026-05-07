@@ -8,6 +8,7 @@ import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/utils/stable_set_key.dart';
 
 final _logger = Logger('useChatMessages');
 
@@ -46,8 +47,11 @@ ChatMessagesResult useChatMessages(
   String groupId, {
   required String pubkey,
   MessageDebugLogNotifier? debugLog,
+  Set<String> hiddenPubkeys = const {},
 }) {
-  final messageIds = useRef<List<String>>([]);
+  final allMessageIds = useRef<List<String>>([]);
+  final allMessageIdsSet = useRef<Set<String>>({});
+  final visibleMessageIds = useRef<List<String>>([]);
   final messagesById = useRef<Map<String, ChatMessage>>({});
   final indexById = useRef<Map<String, int>>({});
   final authorsMetadataByPubkey = useState<Map<String, FlutterMetadata>>({});
@@ -56,8 +60,8 @@ ChatMessagesResult useChatMessages(
   );
   final isLoadingOlderMessages = useState(false);
   final hasMoreMessages = useState(true);
-  // Incremented whenever older messages are prepended to messageIds. Because
-  // messageIds is stored in a useRef it does not trigger rebuilds on its own;
+  // Incremented whenever older messages are prepended to allMessageIds. Because
+  // allMessageIds is stored in a useRef it does not trigger rebuilds on its own;
   // this counter forces a rebuild so the list reflects the newly prepended
   // pages. Do not remove.
   final paginationVersion = useState(0);
@@ -77,9 +81,24 @@ ChatMessagesResult useChatMessages(
   // after the await; a mismatch means the account or group changed while the
   // fetch was in-flight and the response must be discarded.
   final requestTokenRef = useRef(0);
+  final hiddenPubkeysKey = stableStringSetKey(hiddenPubkeys);
+
+  bool isHiddenMessage(ChatMessage message) => hiddenPubkeys.contains(message.pubkey);
+
+  void rebuildVisibleIndexes() {
+    visibleMessageIds.value = [
+      for (final id in allMessageIds.value)
+        if (messagesById.value[id] != null && !isHiddenMessage(messagesById.value[id]!)) id,
+    ];
+    indexById.value = {
+      for (var i = 0; i < visibleMessageIds.value.length; i++) visibleMessageIds.value[i]: i,
+    };
+  }
 
   useEffect(() {
-    messageIds.value = [];
+    allMessageIds.value = [];
+    allMessageIdsSet.value = {};
+    visibleMessageIds.value = [];
     messagesById.value = {};
     indexById.value = {};
     isLoadingOlderMessages.value = false;
@@ -88,7 +107,7 @@ ChatMessagesResult useChatMessages(
     paginationVersion.value = 0;
     requestTokenRef.value++;
     return null;
-  }, [groupId, pubkey]);
+  }, [groupId, pubkey, hiddenPubkeysKey]);
 
   final stream = useMemoized(
     () {
@@ -133,22 +152,25 @@ ChatMessagesResult useChatMessages(
                   ),
                 );
 
-                messageIds.value = [];
+                allMessageIds.value = [];
+                allMessageIdsSet.value = {};
+                visibleMessageIds.value = [];
                 messagesById.value = {};
                 indexById.value = {};
 
-                for (var i = 0; i < initialChatMessages.length; i++) {
-                  final message = initialChatMessages[i];
-                  messageIds.value.add(message.id);
+                for (final message in initialChatMessages) {
+                  allMessageIds.value.add(message.id);
+                  allMessageIdsSet.value.add(message.id);
                   messagesById.value[message.id] = message;
-                  indexById.value[message.id] = i;
                 }
+                rebuildVisibleIndexes();
 
-                final lastMessage = initialChatMessages.isNotEmpty
-                    ? initialChatMessages.last
+                final lastId = visibleMessageIds.value.isNotEmpty
+                    ? visibleMessageIds.value.last
                     : null;
+                final lastMessage = lastId != null ? messagesById.value[lastId] : null;
                 return (
-                  messageCount: initialChatMessages.length,
+                  messageCount: visibleMessageIds.value.length,
                   latestMessageId: lastMessage?.id,
                   latestMessagePubkey: lastMessage?.pubkey,
                 );
@@ -171,16 +193,18 @@ ChatMessagesResult useChatMessages(
                 messagesById.value[message.id] = message;
 
                 if (update.trigger == UpdateTrigger.newMessage &&
-                    !indexById.value.containsKey(message.id)) {
-                  final newIndex = messageIds.value.length;
-                  messageIds.value.add(message.id);
-                  indexById.value[message.id] = newIndex;
+                    !allMessageIdsSet.value.contains(message.id)) {
+                  allMessageIds.value.add(message.id);
+                  allMessageIdsSet.value.add(message.id);
                 }
+                rebuildVisibleIndexes();
 
-                final lastId = messageIds.value.isNotEmpty ? messageIds.value.last : null;
+                final lastId = visibleMessageIds.value.isNotEmpty
+                    ? visibleMessageIds.value.last
+                    : null;
                 final lastPubkey = lastId != null ? messagesById.value[lastId]?.pubkey : null;
                 return (
-                  messageCount: messageIds.value.length,
+                  messageCount: visibleMessageIds.value.length,
                   latestMessageId: lastId,
                   latestMessagePubkey: lastPubkey,
                 );
@@ -188,7 +212,7 @@ ChatMessagesResult useChatMessages(
             );
           });
     },
-    [groupId, pubkey],
+    [groupId, pubkey, hiddenPubkeysKey],
   );
 
   final initialData = (
@@ -235,20 +259,22 @@ ChatMessagesResult useChatMessages(
   );
 
   ChatMessage getMessage(int reversedIndex) {
-    final length = messageIds.value.length;
+    final length = visibleMessageIds.value.length;
     final naturalIndex = length - 1 - reversedIndex;
-    final messageId = messageIds.value[naturalIndex];
+    final messageId = visibleMessageIds.value[naturalIndex];
     return messagesById.value[messageId]!;
   }
 
   int? getReversedMessageIndex(String messageId) {
     final naturalIndex = indexById.value[messageId];
     if (naturalIndex == null) return null;
-    return messageIds.value.length - 1 - naturalIndex;
+    return visibleMessageIds.value.length - 1 - naturalIndex;
   }
 
   ChatMessage? getMessageById(String messageId) {
-    return messagesById.value[messageId];
+    final message = messagesById.value[messageId];
+    if (message == null || isHiddenMessage(message)) return null;
+    return message;
   }
 
   void removeAuthorMetadataSubscription(String pubkey) {
@@ -341,12 +367,12 @@ ChatMessagesResult useChatMessages(
       _logger.info('loadOlderMessages groupId=$groupId: skipped (no more messages)');
       return;
     }
-    if (messageIds.value.isEmpty) {
+    if (allMessageIds.value.isEmpty) {
       _logger.info('loadOlderMessages groupId=$groupId: skipped (no messages loaded yet)');
       return;
     }
 
-    final oldestId = messageIds.value.first;
+    final oldestId = allMessageIds.value.first;
     final oldestMessage = messagesById.value[oldestId];
     if (oldestMessage == null) return;
 
@@ -354,13 +380,13 @@ ChatMessagesResult useChatMessages(
     final requestToken = requestTokenRef.value;
     isLoadingOlderMessages.value = true;
     _logger.info(
-      'loadOlderMessages groupId=$groupId: fetching page before=${oldestMessage.createdAt} cursorId=$oldestId totalLoaded=${messageIds.value.length}',
+      'loadOlderMessages groupId=$groupId: fetching page before=${oldestMessage.createdAt} cursorId=$oldestId totalLoaded=${allMessageIds.value.length}',
     );
     debugLog?.logPageFetch(
       groupId: groupId,
       outcome: 'fetching',
       cursorId: oldestId,
-      totalCount: messageIds.value.length,
+      totalCount: allMessageIds.value.length,
     );
 
     try {
@@ -399,18 +425,18 @@ ChatMessagesResult useChatMessages(
         messagesById.value[msg.id] = msg;
         // Only track new IDs for prepending; duplicates keep their existing
         // position in the list.
-        if (!indexById.value.containsKey(msg.id)) {
+        if (!allMessageIdsSet.value.contains(msg.id)) {
           newIds.add(msg.id);
         }
       }
 
       if (newIds.isNotEmpty) {
-        var combined = [...newIds, ...messageIds.value];
+        var combined = [...newIds, ...allMessageIds.value];
 
         // Sliding-window eviction: keep the list bounded so long sessions do
         // not cause OOM. When the merged list exceeds _kWindowSize we drop the
         // newest entries from the tail. combined = [newIds (older) …
-        // messageIds.value (newer)], so trimming the tail discards the
+        // allMessageIds.value (newer)], so trimming the tail discards the
         // most-recent history while keeping the just-loaded older messages.
         // This ensures the pagination cursor always advances: the newly
         // prepended messages remain in the window, so the next page load
@@ -421,16 +447,16 @@ ChatMessagesResult useChatMessages(
           // Remove evicted payloads from the lookup map to free memory.
           for (final id in evicted) {
             messagesById.value.remove(id);
+            allMessageIdsSet.value.remove(id);
           }
           _logger.info(
             'loadOlderMessages groupId=$groupId: evicted ${evicted.length} newest messages (window=$_kWindowSize)',
           );
         }
 
-        messageIds.value = combined;
-        indexById.value = {
-          for (var i = 0; i < combined.length; i++) combined[i]: i,
-        };
+        allMessageIds.value = combined;
+        allMessageIdsSet.value = combined.toSet();
+        rebuildVisibleIndexes();
         // Increment to force a widget rebuild after prepending (see declaration).
         paginationVersion.value++;
         _logger.info(
@@ -441,7 +467,7 @@ ChatMessagesResult useChatMessages(
           outcome: 'prepended',
           cursorId: oldestId,
           newCount: newIds.length,
-          totalCount: combined.length,
+          totalCount: visibleMessageIds.value.length,
         );
       } else {
         hasMoreMessages.value = false;
@@ -474,7 +500,7 @@ ChatMessagesResult useChatMessages(
   }
 
   return (
-    messageCount: messageIds.value.length,
+    messageCount: visibleMessageIds.value.length,
     getMessage: getMessage,
     getReversedMessageIndex: getReversedMessageIndex,
     getMessageById: getMessageById,

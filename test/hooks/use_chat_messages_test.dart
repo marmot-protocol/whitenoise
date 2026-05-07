@@ -209,8 +209,19 @@ class _MockApi extends MockWnApi {
 
 final _api = _MockApi();
 
-Future<ChatMessagesResult Function()> _pump(WidgetTester tester, String groupId) async {
-  return await mountHook(tester, () => useChatMessages(groupId, pubkey: testPubkeyA));
+Future<ChatMessagesResult Function()> _pump(
+  WidgetTester tester,
+  String groupId, {
+  Set<String> hiddenPubkeys = const {},
+}) async {
+  return await mountHook(
+    tester,
+    () => useChatMessages(
+      groupId,
+      pubkey: testPubkeyA,
+      hiddenPubkeys: hiddenPubkeys,
+    ),
+  );
 }
 
 void main() {
@@ -254,6 +265,24 @@ void main() {
       expect(getResult().messageCount, 2);
     });
 
+    testWidgets('hides initial messages from blocked authors', (tester) async {
+      final getResult = await _pump(
+        tester,
+        'group1',
+        hiddenPubkeys: {testPubkeyB},
+      );
+
+      _api.emitInitialSnapshot([
+        _message('blocked', DateTime(2024), pubkey: testPubkeyB),
+        _message('visible', DateTime(2024, 1, 2), pubkey: testPubkeyC),
+      ]);
+      await tester.pump();
+
+      final result = getResult();
+      expect(result.messageCount, 1);
+      expect(result.getMessage(0).id, 'visible');
+    });
+
     testWidgets('returns messages in reversed order (newest first)', (tester) async {
       final getResult = await _pump(tester, 'group1');
 
@@ -282,6 +311,27 @@ void main() {
       final result = getResult();
       expect(result.messageCount, 2);
       expect(result.getMessage(0).id, 'm2');
+    });
+
+    testWidgets('hides new messages from blocked authors', (tester) async {
+      final getResult = await _pump(
+        tester,
+        'group1',
+        hiddenPubkeys: {testPubkeyB},
+      );
+
+      _api.emitInitialSnapshot([
+        _message('m1', DateTime(2024), pubkey: testPubkeyC),
+      ]);
+      await tester.pumpAndSettle();
+
+      _api.emitNewMessage(_message('blocked', DateTime(2024, 1, 2), pubkey: testPubkeyB));
+      await tester.pumpAndSettle();
+
+      final result = getResult();
+      expect(result.messageCount, 1);
+      expect(result.getMessage(0).id, 'm1');
+      expect(result.latestMessageId, 'm1');
     });
 
     testWidgets('passes the correct pubkey to the subscription', (tester) async {

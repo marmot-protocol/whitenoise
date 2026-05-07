@@ -8,9 +8,13 @@ import 'package:whitenoise/src/rust/frb_generated.dart';
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
-ChatMessage _messageFactory(String id, String content) => ChatMessage(
+ChatMessage _messageFactory(
+  String id,
+  String content, {
+  String pubkey = testPubkeyA,
+}) => ChatMessage(
   id: id,
-  pubkey: testPubkeyA,
+  pubkey: pubkey,
   content: content,
   createdAt: DateTime(2024),
   tags: const [],
@@ -27,8 +31,9 @@ SearchResult _searchResultFactory(
   String content, {
   List<HighlightSpan> spans = const [],
   int position = 0,
+  String pubkey = testPubkeyA,
 }) => SearchResult(
-  message: _messageFactory(id, content),
+  message: _messageFactory(id, content, pubkey: pubkey),
   mlsGroupId: testGroupId,
   highlightSpans: spans,
   position: BigInt.from(position),
@@ -95,10 +100,16 @@ void main() {
     String pubkey = testPubkeyA,
     String groupId = testGroupId,
     String query = '',
+    Set<String> hiddenPubkeys = const {},
   }) async {
     getState = await mountHook(
       tester,
-      () => useMessageSearch(pubkey: pubkey, groupId: groupId, query: query),
+      () => useMessageSearch(
+        pubkey: pubkey,
+        groupId: groupId,
+        query: query,
+        hiddenPubkeys: hiddenPubkeys,
+      ),
     );
   }
 
@@ -154,6 +165,22 @@ void main() {
         expect(getState().results[0].message.id, 'msg1');
         expect(getState().results[1].message.id, 'msg2');
         expect(getState().isSearching, isFalse);
+      });
+
+      testWidgets('filters out results from blocked authors', (tester) async {
+        api.searchResults = [
+          _searchResultFactory('blocked', 'hello blocked', pubkey: testPubkeyB),
+          _searchResultFactory('visible', 'hello visible', pubkey: testPubkeyC),
+        ];
+
+        await pump(tester, query: 'hello', hiddenPubkeys: {testPubkeyB});
+        await tester.pump(const Duration(milliseconds: 300));
+        await tester.pump();
+        await tester.pump();
+
+        expect(getState().results.map((result) => result.message.id), ['visible']);
+        expect(getState().displayItems.map((item) => item.message?.id), contains('visible'));
+        expect(getState().displayItems.map((item) => item.message?.id), isNot(contains('blocked')));
       });
 
       testWidgets('populates displayItems with match items', (tester) async {

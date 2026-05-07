@@ -8,12 +8,12 @@ import 'package:scroll_to_index/scroll_to_index.dart'
     show AutoScrollController, AutoScrollPosition, AutoScrollTag;
 import 'package:whitenoise/hooks/use_active_chat.dart';
 import 'package:whitenoise/hooks/use_block_actions.dart';
+import 'package:whitenoise/hooks/use_blocked_pubkeys.dart';
 import 'package:whitenoise/hooks/use_chat_archive.dart';
 import 'package:whitenoise/hooks/use_chat_input.dart';
-import 'package:whitenoise/hooks/use_chat_list.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData, useChatMessages;
-import 'package:whitenoise/hooks/use_chat_profile.dart';
 import 'package:whitenoise/hooks/use_chat_scroll.dart';
+import 'package:whitenoise/hooks/use_chat_summary.dart';
 import 'package:whitenoise/hooks/use_media_upload.dart';
 import 'package:whitenoise/hooks/use_message_search.dart';
 import 'package:whitenoise/hooks/use_scroll_to_message.dart';
@@ -27,11 +27,13 @@ import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
 import 'package:whitenoise/services/message_service.dart';
+import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage, DeliveryStatus_Failed;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart';
+import 'package:whitenoise/utils/chat_summary_display.dart';
 import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/utils/scroll_duration.dart';
 import 'package:whitenoise/utils/search_context.dart';
@@ -86,6 +88,9 @@ class ChatScreen extends HookConsumerWidget {
     final pubkey = ref.watch(accountPubkeyProvider);
     final isOffline = ref.watch(offlineProvider).value ?? false;
     final debugLog = ref.read(messageDebugLogProvider.notifier);
+    final blockActionsRefreshKey = useState(0);
+    final blockedPubkeysState = useBlockedPubkeys(pubkey);
+    final hiddenPubkeys = blockedPubkeysState.blockedPubkeys;
     final (
       :messageCount,
       :getMessage,
@@ -103,9 +108,11 @@ class ChatScreen extends HookConsumerWidget {
       groupId,
       pubkey: pubkey,
       debugLog: debugLog,
+      hiddenPubkeys: hiddenPubkeys,
     );
-    final chatProfile = useChatProfile(context, pubkey, groupId);
-    final isGroupChat = chatProfile.data?.isDm == false;
+    final chatSummary = useChatSummary(context, pubkey, groupId);
+    final header = chatSummaryDisplay(chatSummary.data, groupId);
+    final isGroupChat = chatSummary.data?.groupType == GroupType.group;
     final scrollToMessageResult = useScrollToMessage(
       getReversedMessageIndex: getReversedMessageIndex,
       loadOlderMessages: loadOlderMessages,
@@ -132,17 +139,14 @@ class ChatScreen extends HookConsumerWidget {
 
     final debugViewEnabled = ref.watch(debugViewProvider).value ?? false;
 
-    final chatList = useChatList(pubkey);
-    final isRemovedFromGroup =
-        chatList.chats.where((c) => c.mlsGroupId == groupId).firstOrNull?.removedAt != null;
+    final isRemovedFromGroup = chatSummary.data?.removedAt != null;
     final isRemovedNoticeCollapsed = useState(false);
 
-    final peerPubkey = chatProfile.data?.otherMemberPubkey;
-    final blockRefreshKey = useState(0);
+    final peerPubkey = chatSummary.data?.dmPeerPubkey;
     final blockState = useBlockActions(
       accountPubkey: pubkey,
       userPubkey: peerPubkey,
-      refreshKey: blockRefreshKey.value,
+      refreshKey: blockActionsRefreshKey.value,
     );
     final isBlocked = peerPubkey != null ? blockState.isBlocked : false;
     final isBlockedNoticeCollapsed = useState(false);
@@ -163,6 +167,7 @@ class ChatScreen extends HookConsumerWidget {
       pubkey: pubkey,
       groupId: groupId,
       query: isSearchActive.value ? searchQuery.value : '',
+      hiddenPubkeys: hiddenPubkeys,
     );
 
     void showNotice(String message) {
@@ -177,6 +182,9 @@ class ChatScreen extends HookConsumerWidget {
       if (!blockState.isBlocked) return;
       try {
         await blockState.toggleBlock();
+        if (!context.mounted) return;
+        blockActionsRefreshKey.value++;
+        blockedPubkeysState.refresh();
       } catch (_) {
         if (context.mounted) showNotice(context.l10n.failedToUnblockUser);
       }
@@ -317,7 +325,7 @@ class ChatScreen extends HookConsumerWidget {
     }, [searchQuery.value]);
 
     Widget messageListContent;
-    if (isLoading) {
+    if (isLoading || blockedPubkeysState.isLoading) {
       messageListContent = Center(
         child: CircularProgressIndicator(color: colors.backgroundContentPrimary),
       );
@@ -493,22 +501,23 @@ class ChatScreen extends HookConsumerWidget {
                     WnSlate(
                       header: WnSlateChatHeader(
                         displayName:
-                            chatProfile.data?.displayName ??
-                            (chatProfile.data?.isDm == true
-                                ? context.l10n.unknownUser
-                                : context.l10n.unknownGroup),
-                        avatarColor: chatProfile.data?.color ?? AvatarColor.neutral,
-                        pictureUrl: chatProfile.data?.pictureUrl,
+                            header.displayName ??
+                            (isGroupChat ? context.l10n.unknownGroup : context.l10n.unknownUser),
+                        avatarColor: header.color,
+                        pictureUrl: header.pictureUrl,
                         onBack: isSearchActive.value
                             ? closeSearch
                             : () => Routes.goToChatList(context),
                         onAvatarTap: () async {
-                          if (chatProfile.data?.isDm == true) {
-                            final result = await Routes.pushToChatInfo(context, groupId);
-                            blockRefreshKey.value++;
+                          if (isGroupChat) {
+                            final result = await Routes.pushToGroupInfo(context, groupId);
+                            if (!context.mounted) return;
                             if (result == true) openSearch();
                           } else {
-                            final result = await Routes.pushToGroupInfo(context, groupId);
+                            final result = await Routes.pushToChatInfo(context, groupId);
+                            if (!context.mounted) return;
+                            blockActionsRefreshKey.value++;
+                            blockedPubkeysState.refresh();
                             if (result == true) openSearch();
                           }
                         },
