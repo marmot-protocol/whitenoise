@@ -1,5 +1,13 @@
 import 'package:flutter/material.dart'
-    show CircularProgressIndicator, EditableText, Key, TextField, TextEditingController;
+    show
+        BuildContext,
+        Builder,
+        CircularProgressIndicator,
+        EditableText,
+        Key,
+        TextField,
+        TextEditingController,
+        kMinInteractiveDimension;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/theme/semantic_colors.dart' show SemanticColors;
 import 'package:whitenoise/widgets/wn_search_field.dart' show WnSearchField;
@@ -119,6 +127,37 @@ void main() {
         );
         expect(find.byKey(const Key('scan_button')), findsOneWidget);
         expect(find.byKey(const Key('search_loading_indicator')), findsNothing);
+      });
+    });
+
+    group('heightOf', () {
+      testWidgets('is at least the minimum interactive dimension', (tester) async {
+        late double reportedHeight;
+        await mountWidget(
+          Builder(
+            builder: (BuildContext context) {
+              reportedHeight = WnSearchField.heightOf(context);
+              return const WnSearchField(placeholder: 'Search');
+            },
+          ),
+          tester,
+        );
+        expect(reportedHeight, greaterThanOrEqualTo(kMinInteractiveDimension));
+      });
+
+      testWidgets('matches the rendered TextField height', (tester) async {
+        late double reportedHeight;
+        await mountWidget(
+          Builder(
+            builder: (BuildContext context) {
+              reportedHeight = WnSearchField.heightOf(context);
+              return const WnSearchField(placeholder: 'Search');
+            },
+          ),
+          tester,
+        );
+        final renderedHeight = tester.getSize(find.byType(TextField)).height;
+        expect(reportedHeight, renderedHeight);
       });
     });
   });

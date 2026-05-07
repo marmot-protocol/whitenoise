@@ -4,6 +4,10 @@ import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_input_field_button.dart';
 
+const double _verticalPadding = 12;
+const double _horizontalPadding = 14;
+const double _borderWidth = 1;
+
 class WnSearchField extends StatelessWidget {
   const WnSearchField({
     super.key,
@@ -21,6 +25,15 @@ class WnSearchField extends StatelessWidget {
   final bool autofocus;
   final VoidCallback? onScan;
   final bool isLoading;
+
+  static double heightOf(BuildContext context) {
+    final style = context.typographyScaled.medium14;
+    final fontSize = style.fontSize ?? 14.sp;
+    final lineHeightFactor = style.height ?? 1.0;
+    final textLineHeight = fontSize * lineHeightFactor;
+    final raw = (_verticalPadding * 2).h + textLineHeight + (_borderWidth * 2);
+    return raw < kMinInteractiveDimension ? kMinInteractiveDimension : raw;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,8 +93,8 @@ class WnSearchField extends StatelessWidget {
         filled: true,
         fillColor: colors.backgroundPrimary,
         contentPadding: EdgeInsets.symmetric(
-          vertical: 12.h,
-          horizontal: 14.w,
+          vertical: _verticalPadding.h,
+          horizontal: _horizontalPadding.w,
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8.r),

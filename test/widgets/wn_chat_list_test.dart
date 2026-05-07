@@ -594,7 +594,7 @@ void main() {
         expect(find.byKey(const Key('chat_list_pinned_header')), findsNothing);
       });
 
-      testWidgets('list top padding includes extra 24 spacing after pinned header', (tester) async {
+      testWidgets('list top padding includes 16 spacing after pinned header', (tester) async {
         await mountWidget(
           const WnChatList(
             itemCount: 1,
@@ -609,7 +609,51 @@ void main() {
 
         final listView = tester.widget<ListView>(find.byType(ListView));
         final resolved = listView.padding!.resolve(TextDirection.ltr);
-        expect(resolved.top, greaterThanOrEqualTo(80 + 40 + 24));
+        expect(resolved.top, greaterThanOrEqualTo(80 + 40 + 16));
+      });
+
+      testWidgets('pinnedHeaderMinOffset shifts pinned header down when header is hidden', (
+        tester,
+      ) async {
+        await mountWidget(
+          const WnChatList(
+            itemCount: 1,
+            itemBuilder: _textBuilder,
+            topPadding: 80,
+            pinnedHeader: Text('Pinned'),
+            pinnedHeaderHeight: 40,
+            pinnedHeaderMinOffset: 8,
+          ),
+          tester,
+        );
+        await tester.pump();
+
+        final pinnedHeader = tester.getRect(find.byKey(const Key('chat_list_pinned_header')));
+        expect(pinnedHeader.top, equals(80 + 8));
+      });
+
+      testWidgets('pinnedHeaderMinOffset does not apply when header is fully revealed', (
+        tester,
+      ) async {
+        await mountWidget(
+          WnChatList(
+            itemCount: 50,
+            itemBuilder: (context, index) => SizedBox(height: 76, child: Text('Item $index')),
+            topPadding: 80,
+            header: const Text('Header'),
+            headerHeight: 60,
+            pinnedHeader: const Text('Pinned'),
+            pinnedHeaderHeight: 40,
+            pinnedHeaderMinOffset: 8,
+          ),
+          tester,
+        );
+        await tester.drag(find.byKey(const Key('chat_list')), const Offset(0, 300));
+        await tester.pumpAndSettle();
+
+        final listView = tester.widget<ListView>(find.byType(ListView));
+        final resolved = listView.padding!.resolve(TextDirection.ltr);
+        expect(resolved.top, greaterThanOrEqualTo(80 + 60 + 40 + 16));
       });
     });
 

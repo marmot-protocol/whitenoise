@@ -25,6 +25,7 @@ class WnChatList extends HookWidget {
     this.headerHeight = 0,
     this.pinnedHeader,
     this.pinnedHeaderHeight = 0,
+    this.pinnedHeaderMinOffset = 0,
     this.emptyStateContent,
   });
 
@@ -39,6 +40,7 @@ class WnChatList extends HookWidget {
 
   final Widget? pinnedHeader;
   final double pinnedHeaderHeight;
+  final double pinnedHeaderMinOffset;
 
   final Widget? emptyStateContent;
 
@@ -171,10 +173,12 @@ class WnChatList extends HookWidget {
     }
 
     final effectiveHeaderHeight = headerHeight * headerRevealAnimation;
-    final emptyStateTopInset = topPadding + effectiveHeaderHeight + pinnedHeaderHeight;
+    final effectivePinnedOffset = effectiveHeaderHeight > pinnedHeaderMinOffset
+        ? effectiveHeaderHeight
+        : pinnedHeaderMinOffset;
+    final emptyStateTopInset = topPadding + effectivePinnedOffset + pinnedHeaderHeight;
     final listPadding = EdgeInsets.only(
-      top:
-          topPadding + effectiveHeaderHeight + pinnedHeaderHeight + (hasPinnedHeader ? 24.h : 16.h),
+      top: topPadding + effectivePinnedOffset + pinnedHeaderHeight + 16.h,
       left: horizontalPadding,
       right: horizontalPadding,
     );
@@ -239,7 +243,7 @@ class WnChatList extends HookWidget {
             if (hasPinnedHeader)
               Positioned(
                 key: const Key('chat_list_pinned_header'),
-                top: topPadding + effectiveHeaderHeight,
+                top: topPadding + effectivePinnedOffset,
                 left: horizontalPadding,
                 right: horizontalPadding,
                 height: pinnedHeaderHeight,

@@ -24,7 +24,7 @@ and this project adheres to Calendar Versioning (CalVer).
 - Add bug report screen with NIP-44 encrypted anonymous reports [PR #478](https://github.com/marmot-protocol/whitenoise/pull/478)
 - Chat with support [PR #486](https://github.com/marmot-protocol/whitenoise/pull/486)
 - Add notifications settings screen for android to allow disabling/enabling local notifications [PR #535](https://github.com/marmot-protocol/whitenoise/pull/535)
-- Archive chats [PR #532](https://github.com/marmot-protocol/whitenoise/pull/532), [PR #603](https://github.com/marmot-protocol/whitenoise/pull/603)
+- Archive chats [PR #532](https://github.com/marmot-protocol/whitenoise/pull/532), [PR #603](https://github.com/marmot-protocol/whitenoise/pull/603), [#632](https://github.com/marmot-protocol/whitenoise/pull/632)
 - Search by content in chat list [PR #557](https://github.com/marmot-protocol/whitenoise/pull/557)
 - No internet notice [PR #565](https://github.com/marmot-protocol/whitenoise/pull/565), [PR #576](https://github.com/marmot-protocol/whitenoise/pull/576), [PR #586](https://github.com/marmot-protocol/whitenoise/pull/586)
 - Block/unblock users [PR #573](https://github.com/marmot-protocol/whitenoise/pull/573), [PR #574](https://github.com/marmot-protocol/whitenoise/pull/574)
