@@ -18,6 +18,17 @@ print_error() {
   echo -e "\033[1;31m❌ $1\033[0m"
 }
 
+without_bundler_env() {
+  env \
+    -u BUNDLE_BIN_PATH \
+    -u BUNDLE_GEMFILE \
+    -u BUNDLE_PATH \
+    -u BUNDLER_VERSION \
+    -u BUNDLER_SETUP \
+    -u RUBYOPT \
+    "$@"
+}
+
 # Check if required tools are installed
 print_step "Checking development environment"
 if ! command -v rustup &>/dev/null; then
@@ -75,7 +86,7 @@ pushd ios >/dev/null || {
   print_error "Failed to enter ios directory"
   exit 1
 }
-if ! pod install --silent; then
+if ! without_bundler_env pod install --silent; then
   print_error "pod install failed"
   popd >/dev/null
   exit 1

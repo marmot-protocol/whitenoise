@@ -57,6 +57,13 @@ export RELEASE_TAG=v2026.4.28+23
    version: 2026.4.28+23
    ```
 
+   Then refresh Flutter dependencies so the Widgetbook path dependency records
+   the same app version in `widgetbook/pubspec.lock`.
+
+   ```bash
+   just deps-flutter
+   ```
+
 2. Update `CHANGELOG.md`.
 
    Move the current `Unreleased` content into a dated release section and add a
@@ -91,7 +98,7 @@ export RELEASE_TAG=v2026.4.28+23
 4. Commit the release prep.
 
    ```bash
-   git add pubspec.yaml CHANGELOG.md RELEASE.md
+   git add pubspec.yaml widgetbook/pubspec.lock CHANGELOG.md RELEASE.md
    git commit -m "chore: prepare ${RELEASE_TAG}"
    ```
 

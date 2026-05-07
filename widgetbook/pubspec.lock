@@ -1583,7 +1583,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "2026.5.4+23"
+    version: "2026.5.7+24"
   widgetbook:
     dependency: "direct main"
     description:
