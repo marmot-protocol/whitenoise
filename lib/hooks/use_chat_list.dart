@@ -82,8 +82,9 @@ ChatListResult _useChatList(
                     chatMap.value[id] = update.item;
                   case ChatListUpdateTrigger.newLastMessage:
                     final lastMessage = update.item.lastMessage;
-                    if (lastMessage != null &&
-                        blockedPubkeysRef.value.contains(lastMessage.author)) {
+                    final blockedPubkeys = blockedPubkeysRef.value;
+                    if (lastMessage != null && blockedPubkeys.contains(lastMessage.author)) {
+                      chatMap.value[id] = _sanitizeChatSummary(update.item, blockedPubkeys);
                       return chatMap.value;
                     }
                     if (update.item.pendingConfirmation) {

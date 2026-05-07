@@ -298,7 +298,7 @@ void main() {
         final chats = getResult().chats;
         expect(chats.map((c) => c.mlsGroupId).toList(), ['mls_c1', 'mls_c2']);
         expect(chats.last.lastMessage, isNull);
-        expect(chats.last.unreadCount, BigInt.zero);
+        expect(chats.last.unreadCount, BigInt.one);
       });
     });
 
