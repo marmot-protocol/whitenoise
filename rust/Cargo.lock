@@ -5495,7 +5495,7 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "whitenoise"
 version = "0.2.1"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=9938e7ad49aacb1a9c8b592a05e1c6e8c378269f#9938e7ad49aacb1a9c8b592a05e1c6e8c378269f"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=49e5f20c43fd72f1d07ea3675350754650955371#49e5f20c43fd72f1d07ea3675350754650955371"
 dependencies = [
  "android-native-keyring-store",
  "apple-native-keyring-store",
@@ -5539,7 +5539,7 @@ dependencies = [
 [[package]]
 name = "whitenoise-macros"
 version = "0.1.0"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=9938e7ad49aacb1a9c8b592a05e1c6e8c378269f#9938e7ad49aacb1a9c8b592a05e1c6e8c378269f"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=49e5f20c43fd72f1d07ea3675350754650955371#49e5f20c43fd72f1d07ea3675350754650955371"
 dependencies = [
  "proc-macro2",
  "quote",
