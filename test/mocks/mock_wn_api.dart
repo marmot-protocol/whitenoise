@@ -477,6 +477,15 @@ class MockWnApi implements RustLibApi {
   String? lastLeaveGroupId;
   String? lastLeaveGroupPubkey;
 
+  bool shouldFailSelfDemote = false;
+  int selfDemoteCallCount = 0;
+  String? lastSelfDemotePubkey;
+  String? lastSelfDemoteGroupId;
+
+  List<String> mockGroupAdmins = [];
+  bool shouldFailGroupAdmins = false;
+  int groupAdminsCallCount = 0;
+
   GroupState mockGroupState = GroupState.active;
   bool shouldFailGetGroup = false;
 
@@ -526,6 +535,27 @@ class MockWnApi implements RustLibApi {
     lastLeaveGroupPubkey = pubkey;
     lastLeaveGroupId = groupId;
     if (shouldFailLeaveGroup) throw Exception('leave_group failed');
+  }
+
+  @override
+  Future<void> crateApiGroupsSelfDemote({
+    required String pubkey,
+    required String groupId,
+  }) async {
+    selfDemoteCallCount++;
+    lastSelfDemotePubkey = pubkey;
+    lastSelfDemoteGroupId = groupId;
+    if (shouldFailSelfDemote) throw Exception('self_demote failed');
+  }
+
+  @override
+  Future<List<String>> crateApiGroupsGroupAdmins({
+    required String pubkey,
+    required String groupId,
+  }) async {
+    groupAdminsCallCount++;
+    if (shouldFailGroupAdmins) throw Exception('group_admins failed');
+    return mockGroupAdmins;
   }
 
   @override
@@ -957,6 +987,13 @@ class MockWnApi implements RustLibApi {
     leaveGroupCallCount = 0;
     lastLeaveGroupId = null;
     lastLeaveGroupPubkey = null;
+    shouldFailSelfDemote = false;
+    selfDemoteCallCount = 0;
+    lastSelfDemotePubkey = null;
+    lastSelfDemoteGroupId = null;
+    mockGroupAdmins = [];
+    shouldFailGroupAdmins = false;
+    groupAdminsCallCount = 0;
     mockGroupState = GroupState.active;
     shouldFailGetGroup = false;
   }

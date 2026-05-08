@@ -13,6 +13,7 @@ import '../test_helpers.dart';
 class _MockApi extends MockWnApi {
   bool shouldThrow = false;
   bool shouldThrowOnProposals = false;
+  bool shouldThrowOnAdmins = false;
   bool wasLeaveCalled = false;
   int leaveCallCount = 0;
   int proposalsCallCount = 0;
@@ -21,6 +22,9 @@ class _MockApi extends MockWnApi {
   Completer<void>? leaveCompleter;
   List<RequiredProposal> requiredProposals = [RequiredProposal.selfRemove];
   Completer<List<RequiredProposal>>? proposalsCompleter;
+  List<String> adminPubkeys = [];
+  int selfDemoteCount = 0;
+  bool shouldThrowOnSelfDemote = false;
 
   @override
   Future<void> crateApiGroupsLeaveGroup({
@@ -55,6 +59,28 @@ class _MockApi extends MockWnApi {
     }
     return requiredProposals;
   }
+
+  @override
+  Future<List<String>> crateApiGroupsGroupAdmins({
+    required String pubkey,
+    required String groupId,
+  }) async {
+    if (shouldThrowOnAdmins) {
+      throw const ApiError.other(message: 'Failed to fetch admins');
+    }
+    return adminPubkeys;
+  }
+
+  @override
+  Future<void> crateApiGroupsSelfDemote({
+    required String pubkey,
+    required String groupId,
+  }) async {
+    selfDemoteCount++;
+    if (shouldThrowOnSelfDemote) {
+      throw const ApiError.other(message: 'Failed to self-demote');
+    }
+  }
 }
 
 void main() {
@@ -67,6 +93,7 @@ void main() {
   setUp(() {
     mockApi.shouldThrow = false;
     mockApi.shouldThrowOnProposals = false;
+    mockApi.shouldThrowOnAdmins = false;
     mockApi.wasLeaveCalled = false;
     mockApi.leaveCallCount = 0;
     mockApi.proposalsCallCount = 0;
@@ -75,6 +102,9 @@ void main() {
     mockApi.leaveCompleter = null;
     mockApi.requiredProposals = [RequiredProposal.selfRemove];
     mockApi.proposalsCompleter = null;
+    mockApi.adminPubkeys = [];
+    mockApi.selfDemoteCount = 0;
+    mockApi.shouldThrowOnSelfDemote = false;
   });
 
   LeaveGroupState useLeaveGroupEnabled({
@@ -90,8 +120,8 @@ void main() {
     selfRemoved: selfRemoved,
   );
 
-  group('canLeave initial state', () {
-    testWidgets('is false when featureEnabled is false', (tester) async {
+  group('visibility == hidden', () {
+    testWidgets('is hidden when featureEnabled is false', (tester) async {
       final hook = await mountHook(
         tester,
         () => useLeaveGroup(
@@ -105,48 +135,143 @@ void main() {
       );
 
       await tester.pump();
-      expect(hook().canLeave, isFalse);
+      expect(hook().visibility, LeaveGroupVisibility.hidden);
+      expect(hook().message, isNull);
     });
 
-    testWidgets('is false when group is a DM', (tester) async {
+    testWidgets('is hidden when group is a DM', (tester) async {
       final hook = await mountHook(
         tester,
         () => useLeaveGroupEnabled(groupType: GroupType.directMessage),
       );
 
       await tester.pumpAndSettle();
-      expect(hook().canLeave, isFalse);
+      expect(hook().visibility, LeaveGroupVisibility.hidden);
+      expect(hook().message, isNull);
     });
 
-    testWidgets('is false when group is pending confirmation', (tester) async {
+    testWidgets('is hidden when group is pending confirmation', (tester) async {
       final hook = await mountHook(
         tester,
         () => useLeaveGroupEnabled(pendingConfirmation: true),
       );
 
       await tester.pumpAndSettle();
-      expect(hook().canLeave, isFalse);
+      expect(hook().visibility, LeaveGroupVisibility.hidden);
+      expect(hook().message, isNull);
     });
 
-    testWidgets('is false when user already left (selfRemoved)', (tester) async {
+    testWidgets('is hidden when user already left (selfRemoved)', (tester) async {
       final hook = await mountHook(
         tester,
         () => useLeaveGroupEnabled(selfRemoved: true),
       );
 
       await tester.pumpAndSettle();
-      expect(hook().canLeave, isFalse);
-    });
-
-    testWidgets('is true when featureEnabled and group is leavable', (tester) async {
-      final hook = await mountHook(tester, useLeaveGroupEnabled);
-
-      await tester.pumpAndSettle();
-      expect(hook().canLeave, isTrue);
+      expect(hook().visibility, LeaveGroupVisibility.hidden);
+      expect(hook().message, isNull);
     });
   });
 
-  group('groupRequiredProposals not called when ineligible', () {
+  group('visibility == disabled', () {
+    testWidgets('disabled with noCapabilities when group lacks selfRemove', (tester) async {
+      mockApi.requiredProposals = [];
+      final hook = await mountHook(tester, useLeaveGroupEnabled);
+
+      await tester.pumpAndSettle();
+      expect(hook().visibility, LeaveGroupVisibility.disabled);
+      expect(hook().message, LeaveGroupMessage.noCapabilities);
+    });
+
+    testWidgets('disabled with lastAdminWarning when user is only admin', (tester) async {
+      mockApi.requiredProposals = [RequiredProposal.selfRemove];
+      mockApi.adminPubkeys = [testPubkeyA];
+      final hook = await mountHook(tester, useLeaveGroupEnabled);
+
+      await tester.pumpAndSettle();
+      expect(hook().visibility, LeaveGroupVisibility.disabled);
+      expect(hook().message, LeaveGroupMessage.lastAdminWarning);
+    });
+
+    testWidgets('disabled with noCapabilities while proposals are loading', (tester) async {
+      mockApi.proposalsCompleter = Completer<List<RequiredProposal>>();
+      final hook = await mountHook(tester, useLeaveGroupEnabled);
+
+      await tester.pump();
+      expect(hook().visibility, LeaveGroupVisibility.disabled);
+      expect(hook().message, LeaveGroupMessage.noCapabilities);
+
+      mockApi.proposalsCompleter!.complete([RequiredProposal.selfRemove]);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('disabled with fetchError when proposals fetch throws', (tester) async {
+      mockApi.shouldThrowOnProposals = true;
+      final hook = await mountHook(tester, useLeaveGroupEnabled);
+
+      await tester.pumpAndSettle();
+      expect(hook().visibility, LeaveGroupVisibility.disabled);
+      expect(hook().message, LeaveGroupMessage.fetchError);
+    });
+
+    testWidgets('proposals failure shows fetchError even when admins succeeds', (
+      tester,
+    ) async {
+      mockApi.shouldThrowOnProposals = true;
+      mockApi.adminPubkeys = [testPubkeyB];
+      final hook = await mountHook(tester, useLeaveGroupEnabled);
+
+      await tester.pumpAndSettle();
+      expect(hook().visibility, LeaveGroupVisibility.disabled);
+      expect(hook().message, LeaveGroupMessage.fetchError);
+    });
+  });
+
+  group('visibility == visible', () {
+    testWidgets('visible with defaultWarning when eligible non-admin', (tester) async {
+      mockApi.requiredProposals = [RequiredProposal.selfRemove];
+      mockApi.adminPubkeys = [testPubkeyB];
+      final hook = await mountHook(tester, useLeaveGroupEnabled);
+
+      await tester.pumpAndSettle();
+      expect(hook().visibility, LeaveGroupVisibility.visible);
+      expect(hook().message, LeaveGroupMessage.defaultWarning);
+    });
+
+    testWidgets('visible with defaultWarning when eligible non-last admin', (tester) async {
+      mockApi.requiredProposals = [RequiredProposal.selfRemove];
+      mockApi.adminPubkeys = [testPubkeyA, testPubkeyB];
+      final hook = await mountHook(tester, useLeaveGroupEnabled);
+
+      await tester.pumpAndSettle();
+      expect(hook().visibility, LeaveGroupVisibility.visible);
+      expect(hook().message, LeaveGroupMessage.defaultWarning);
+    });
+
+    testWidgets('visible with defaultWarning when eligible with no admins list', (tester) async {
+      mockApi.requiredProposals = [RequiredProposal.selfRemove];
+      mockApi.adminPubkeys = [];
+      final hook = await mountHook(tester, useLeaveGroupEnabled);
+
+      await tester.pumpAndSettle();
+      expect(hook().visibility, LeaveGroupVisibility.visible);
+      expect(hook().message, LeaveGroupMessage.defaultWarning);
+    });
+
+    testWidgets('admins failure does not reset hasNostrCapabilities when proposals succeeds', (
+      tester,
+    ) async {
+      mockApi.requiredProposals = [RequiredProposal.selfRemove];
+      mockApi.shouldThrowOnAdmins = true;
+      final hook = await mountHook(tester, useLeaveGroupEnabled);
+
+      await tester.pumpAndSettle();
+      expect(hook().visibility, LeaveGroupVisibility.visible);
+      expect(hook().message, LeaveGroupMessage.defaultWarning);
+    });
+  });
+
+  group('fetch skipped for hidden cases', () {
     testWidgets('skips fetch when featureEnabled is false', (tester) async {
       await mountHook(
         tester,
@@ -185,7 +310,7 @@ void main() {
       expect(mockApi.proposalsCallCount, 0);
     });
 
-    testWidgets('resets canLeave immediately when featureEnabled changes to false', (tester) async {
+    testWidgets('resets immediately when featureEnabled changes to false', (tester) async {
       LeaveGroupState? hookState;
 
       setUpTestView(tester);
@@ -207,7 +332,7 @@ void main() {
         ),
       );
       await tester.pumpAndSettle();
-      expect(hookState!.canLeave, isTrue);
+      expect(hookState!.visibility, isNot(LeaveGroupVisibility.hidden));
 
       await tester.pumpWidget(
         MaterialApp(
@@ -227,44 +352,7 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(hookState!.canLeave, isFalse);
-    });
-  });
-
-  group('canLeave Nostr capabilities', () {
-    testWidgets('is false when group lacks selfRemove capability', (tester) async {
-      mockApi.requiredProposals = [];
-      final hook = await mountHook(tester, useLeaveGroupEnabled);
-
-      await tester.pumpAndSettle();
-      expect(hook().canLeave, isFalse);
-    });
-
-    testWidgets('is false while proposals are loading', (tester) async {
-      mockApi.proposalsCompleter = Completer<List<RequiredProposal>>();
-      final hook = await mountHook(tester, useLeaveGroupEnabled);
-
-      await tester.pump();
-      expect(hook().canLeave, isFalse);
-
-      mockApi.proposalsCompleter!.complete([RequiredProposal.selfRemove]);
-      await tester.pumpAndSettle();
-    });
-
-    testWidgets('is true once selfRemove capability is confirmed', (tester) async {
-      mockApi.requiredProposals = [RequiredProposal.selfRemove];
-      final hook = await mountHook(tester, useLeaveGroupEnabled);
-
-      await tester.pumpAndSettle();
-      expect(hook().canLeave, isTrue);
-    });
-
-    testWidgets('is false when proposals fetch throws', (tester) async {
-      mockApi.shouldThrowOnProposals = true;
-      final hook = await mountHook(tester, useLeaveGroupEnabled);
-
-      await tester.pumpAndSettle();
-      expect(hook().canLeave, isFalse);
+      expect(hookState!.visibility, LeaveGroupVisibility.hidden);
     });
   });
 
@@ -297,7 +385,7 @@ void main() {
     expect(mockApi.passedGroupId, testGroupId);
   });
 
-  testWidgets('leaveGroup error resets loading and canLeave stays true', (tester) async {
+  testWidgets('leaveGroup error resets loading and visibility stays visible', (tester) async {
     mockApi.leaveCompleter = Completer<void>();
     mockApi.shouldThrow = true;
 
@@ -314,7 +402,7 @@ void main() {
 
     await tester.pump();
     expect(hook().isLoading, isFalse);
-    expect(hook().canLeave, isTrue);
+    expect(hook().visibility, LeaveGroupVisibility.visible);
     expect(mockApi.wasLeaveCalled, isTrue);
   });
 
@@ -353,7 +441,7 @@ void main() {
     expect(hook().isLoading, isTrue);
   });
 
-  testWidgets('leaveGroup is a no-op when canLeave is false', (tester) async {
+  testWidgets('leaveGroup is a no-op when visibility is hidden', (tester) async {
     final hook = await mountHook(
       tester,
       () => useLeaveGroup(
@@ -367,11 +455,93 @@ void main() {
     );
 
     await tester.pumpAndSettle();
-    expect(hook().canLeave, isFalse);
+    expect(hook().visibility, LeaveGroupVisibility.hidden);
 
     await hook().leaveGroup();
 
     expect(mockApi.wasLeaveCalled, isFalse);
     expect(hook().isLoading, isFalse);
+  });
+
+  testWidgets('leaveGroup is a no-op when visibility is disabled', (tester) async {
+    mockApi.requiredProposals = [];
+    final hook = await mountHook(tester, useLeaveGroupEnabled);
+
+    await tester.pumpAndSettle();
+    expect(hook().visibility, LeaveGroupVisibility.disabled);
+
+    await hook().leaveGroup();
+
+    expect(mockApi.wasLeaveCalled, isFalse);
+    expect(hook().isLoading, isFalse);
+  });
+
+  group('admin leave behavior', () {
+    testWidgets('selfDemote then leaveGroup called when user is admin', (tester) async {
+      mockApi.requiredProposals = [RequiredProposal.selfRemove];
+      mockApi.adminPubkeys = [testPubkeyA, testPubkeyB];
+
+      final hook = await mountHook(tester, useLeaveGroupEnabled);
+      await tester.pumpAndSettle();
+
+      expect(hook().visibility, LeaveGroupVisibility.visible);
+
+      await hook().leaveGroup();
+      await tester.pumpAndSettle();
+
+      expect(mockApi.selfDemoteCount, 1);
+      expect(mockApi.wasLeaveCalled, isTrue);
+    });
+
+    testWidgets('leaveGroup called without selfDemote when user is not admin', (tester) async {
+      mockApi.requiredProposals = [RequiredProposal.selfRemove];
+      mockApi.adminPubkeys = [testPubkeyB];
+
+      final hook = await mountHook(tester, useLeaveGroupEnabled);
+      await tester.pumpAndSettle();
+
+      await hook().leaveGroup();
+      await tester.pumpAndSettle();
+
+      expect(mockApi.selfDemoteCount, 0);
+      expect(mockApi.wasLeaveCalled, isTrue);
+    });
+
+    testWidgets('error from selfDemote propagates, leave is not called, loading resets', (
+      tester,
+    ) async {
+      mockApi.requiredProposals = [RequiredProposal.selfRemove];
+      mockApi.adminPubkeys = [testPubkeyA, testPubkeyB];
+      mockApi.shouldThrowOnSelfDemote = true;
+
+      final hook = await mountHook(tester, useLeaveGroupEnabled);
+      await tester.pumpAndSettle();
+
+      final future = hook().leaveGroup();
+      await expectLater(future, throwsA(isA<ApiError>()));
+      await tester.pump();
+
+      expect(hook().isLoading, isFalse);
+      expect(mockApi.wasLeaveCalled, isFalse);
+    });
+
+    testWidgets('error from leaveGroup after selfDemote propagates and resets loading', (
+      tester,
+    ) async {
+      mockApi.requiredProposals = [RequiredProposal.selfRemove];
+      mockApi.adminPubkeys = [testPubkeyA, testPubkeyB];
+      mockApi.shouldThrow = true;
+
+      final hook = await mountHook(tester, useLeaveGroupEnabled);
+      await tester.pumpAndSettle();
+
+      final future = hook().leaveGroup();
+      await expectLater(future, throwsA(isA<ApiError>()));
+      await tester.pump();
+
+      expect(hook().isLoading, isFalse);
+      expect(mockApi.selfDemoteCount, 1);
+      expect(mockApi.wasLeaveCalled, isTrue);
+    });
   });
 }
