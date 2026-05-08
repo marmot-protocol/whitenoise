@@ -17,6 +17,7 @@ import 'api/chat_list.dart';
 import 'api/chat_summary.dart';
 import 'api/drafts.dart';
 import 'api/error.dart';
+import 'api/group_state.dart';
 import 'api/groups.dart';
 import 'api/logs.dart';
 import 'api/media_files.dart';
@@ -226,6 +227,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   RustStreamSink<ChatListStreamItem> dco_decode_StreamSink_chat_list_stream_item_Sse(dynamic raw);
 
   @protected
+  RustStreamSink<GroupStateUpdate> dco_decode_StreamSink_group_state_update_Sse(
+    dynamic raw,
+  );
+
+  @protected
   RustStreamSink<MessageStreamItem> dco_decode_StreamSink_message_stream_item_Sse(dynamic raw);
 
   @protected
@@ -377,6 +383,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   GroupState dco_decode_group_state(dynamic raw);
+
+  @protected
+  GroupStateUpdate dco_decode_group_state_update(dynamic raw);
 
   @protected
   GroupType dco_decode_group_type(dynamic raw);
@@ -813,6 +822,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  RustStreamSink<GroupStateUpdate> sse_decode_StreamSink_group_state_update_Sse(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   RustStreamSink<MessageStreamItem> sse_decode_StreamSink_message_stream_item_Sse(
     SseDeserializer deserializer,
   );
@@ -996,6 +1010,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   GroupState sse_decode_group_state(SseDeserializer deserializer);
+
+  @protected
+  GroupStateUpdate sse_decode_group_state_update(SseDeserializer deserializer);
 
   @protected
   GroupType sse_decode_group_type(SseDeserializer deserializer);
@@ -1521,6 +1538,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_StreamSink_group_state_update_Sse(
+    RustStreamSink<GroupStateUpdate> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_StreamSink_message_stream_item_Sse(
     RustStreamSink<MessageStreamItem> self,
     SseSerializer serializer,
@@ -1756,6 +1779,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_group_state(GroupState self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_group_state_update(
+    GroupStateUpdate self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_group_type(GroupType self, SseSerializer serializer);
