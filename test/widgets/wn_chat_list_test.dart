@@ -476,6 +476,73 @@ void main() {
         expect(find.text('Header'), findsOneWidget);
       });
 
+      testWidgets('external notifier reveals header when set to true', (tester) async {
+        final notifier = ValueNotifier<bool>(false);
+        addTearDown(notifier.dispose);
+        await mountWidget(
+          WnChatList(
+            itemCount: 3,
+            itemBuilder: _textBuilder,
+            header: const Text('Header'),
+            headerHeight: 142,
+            headerOpenNotifier: notifier,
+          ),
+          tester,
+        );
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('chat_list_header')), findsNothing);
+
+        notifier.value = true;
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('chat_list_header')), findsOneWidget);
+        expect(find.text('Header'), findsOneWidget);
+      });
+
+      testWidgets('external notifier hides header and scrolls list to top', (tester) async {
+        final notifier = ValueNotifier<bool>(false);
+        addTearDown(notifier.dispose);
+        await mountWidget(
+          WnChatList(
+            itemCount: 50,
+            itemBuilder: (context, index) => SizedBox(
+              height: 76,
+              child: Text('Item $index'),
+            ),
+            header: const Text('Header'),
+            headerHeight: 142,
+            headerOpenNotifier: notifier,
+          ),
+          tester,
+        );
+        await tester.pumpAndSettle();
+
+        await tester.drag(find.byKey(const Key('chat_list')), const Offset(0, -800));
+        await tester.pumpAndSettle();
+
+        final scrollableBefore = tester.widget<Scrollable>(
+          find.descendant(
+            of: find.byKey(const Key('chat_list')),
+            matching: find.byType(Scrollable),
+          ),
+        );
+        expect(scrollableBefore.controller!.offset, greaterThan(0));
+
+        notifier.value = true;
+        await tester.pumpAndSettle();
+        notifier.value = false;
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('chat_list_header')), findsNothing);
+        final scrollableAfter = tester.widget<Scrollable>(
+          find.descendant(
+            of: find.byKey(const Key('chat_list')),
+            matching: find.byType(Scrollable),
+          ),
+        );
+        expect(scrollableAfter.controller!.offset, 0);
+      });
+
       testWidgets('does not render header when header is null', (tester) async {
         await mountWidget(
           const WnChatList(itemCount: 3, itemBuilder: _textBuilder),

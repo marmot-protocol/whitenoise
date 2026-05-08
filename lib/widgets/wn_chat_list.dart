@@ -84,15 +84,9 @@ class WnChatList extends HookWidget {
     useEffect(() {
       void syncRevealToOpenState() {
         if (!hasHeader) return;
-        final target = headerOpen.value ? 1.0 : 0.0;
-        if (headerRevealController.value == target) return;
-        if (headerRevealController.isAnimating &&
-            headerRevealController.upperBound > 0 &&
-            ((target == 1.0 && headerRevealController.value > 0.99) ||
-                (target == 0.0 && headerRevealController.value < 0.01))) {
-          return;
-        }
-        if (target == 0.0) {
+        if (headerOpen.value) {
+          headerRevealController.animateTo(1.0, curve: Curves.easeOut);
+        } else {
           isAnimatingClosed.value = true;
           headerRevealController.animateTo(0.0, curve: Curves.easeOut).then((_) {
             isAnimatingClosed.value = false;
@@ -104,8 +98,6 @@ class WnChatList extends HookWidget {
               curve: Curves.easeOut,
             );
           }
-        } else {
-          headerRevealController.animateTo(1.0, curve: Curves.easeOut);
         }
       }
 
