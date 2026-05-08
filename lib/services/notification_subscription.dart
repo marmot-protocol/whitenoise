@@ -28,14 +28,17 @@ class NotificationSubscription {
     required ActiveChatGetter getActiveChatId,
     required LocaleGetter getLocale,
     bool? enabled,
+    bool requestPermissionOnStart = true,
   }) : _notificationService = notificationService,
        _getActiveChatId = getActiveChatId,
        _getLocale = getLocale,
+       _requestPermissionOnStart = requestPermissionOnStart,
        _enabled = enabled ?? Platform.isAndroid;
 
   final NotificationService _notificationService;
   final ActiveChatGetter _getActiveChatId;
   final LocaleGetter _getLocale;
+  final bool _requestPermissionOnStart;
   final bool _enabled;
 
   StreamSubscription<notifications_api.NotificationUpdate>? _subscription;
@@ -51,13 +54,19 @@ class NotificationSubscription {
     try {
       await _notificationService.initialize();
       if (_stopped) return;
-      await _notificationService.requestPermission();
-      if (_stopped) return;
+      if (_requestPermissionOnStart) {
+        await _notificationService.requestPermission();
+        if (_stopped) return;
+      } else {
+        _logger.fine('Skipping notification permission request for this subscription');
+      }
 
       final stream = notifications_api.subscribeToNotifications();
+      _logger.fine('Rust notification stream subscribed');
       _subscription = stream.listen(
         (update) async {
           try {
+            _logger.fine('Received notification update ${update.trigger.name}');
             await _handleUpdate(update);
           } catch (error, stackTrace) {
             _logger.severe('Error handling notification update', error, stackTrace);
@@ -136,6 +145,7 @@ class NotificationSubscription {
       receiverPubkey: update.receiver.pubkey,
       isInvite: isInvite,
     );
+    _logger.fine('Displayed notification for ${update.trigger.name}');
   }
 
   Future<String?> _resolveSenderName(notifications_api.NotificationUser sender) async {
