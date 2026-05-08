@@ -147,6 +147,7 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     unawaited(ref.read(foregroundServiceProvider).handleAppLifecycleChange(state));
     if (state == AppLifecycleState.resumed) {
+      unawaited(ref.read(authProvider.notifier).ensureExternalSignersRegistered());
       unawaited(_consumePendingNotificationTap());
     }
   }

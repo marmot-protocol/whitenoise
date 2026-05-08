@@ -14,24 +14,33 @@ final secureStorageProvider = Provider<FlutterSecureStorage>(
 );
 
 class AuthNotifier extends AsyncNotifier<String?> {
+  final Set<String> _registeredExternalSignerPubkeys = {};
+  final Map<String, Future<void>> _externalSignerRegistrationFutures = {};
+
   @override
   Future<String?> build() async {
     final storage = ref.read(secureStorageProvider);
     final pubkey = await storage.read(key: _storageKey);
-    if (pubkey == null || pubkey.isEmpty) return null;
+    accounts_api.Account? activeAccount;
+    var activePubkey = pubkey;
 
-    try {
-      final account = await accounts_api.getAccount(pubkey: pubkey);
-      if (account.accountType == accounts_api.AccountType.external_) {
-        await const AndroidSignerService().registerExternalSigner(pubkey);
-      }
-    } catch (e) {
-      if (e is ApiError_Whitenoise && e.message.contains('Account not found')) {
-        await storage.delete(key: _storageKey);
-        return null;
+    if (pubkey != null && pubkey.isNotEmpty) {
+      try {
+        activeAccount = await accounts_api.getAccount(pubkey: pubkey);
+      } catch (e) {
+        if (e is ApiError_Whitenoise && e.message.contains('Account not found')) {
+          await storage.delete(key: _storageKey);
+          activePubkey = null;
+        }
       }
     }
-    return pubkey;
+
+    await _ensureExternalSignersRegistered(
+      knownAccounts: activeAccount == null ? const [] : [activeAccount],
+    );
+
+    if (activePubkey == null || activePubkey.isEmpty) return null;
+    return activePubkey;
   }
 
   // ---------------------------------------------------------------------------
@@ -43,7 +52,7 @@ class AuthNotifier extends AsyncNotifier<String?> {
     final result = await accounts_api.loginStart(nsecOrHexPrivkey: nsec);
 
     if (result.status == accounts_api.LoginStatus.complete) {
-      await _completeLogin(result.account.pubkey);
+      await _completeLogin(result.account);
     }
 
     return result;
@@ -54,7 +63,7 @@ class AuthNotifier extends AsyncNotifier<String?> {
     final result = await accounts_api.loginPublishDefaultRelays(pubkey: pubkey);
 
     if (result.status == accounts_api.LoginStatus.complete) {
-      await _completeLogin(result.account.pubkey);
+      await _completeLogin(result.account);
     }
 
     return result;
@@ -71,7 +80,7 @@ class AuthNotifier extends AsyncNotifier<String?> {
     );
 
     if (result.status == accounts_api.LoginStatus.complete) {
-      await _completeLogin(result.account.pubkey);
+      await _completeLogin(result.account);
     }
 
     return result;
@@ -94,7 +103,7 @@ class AuthNotifier extends AsyncNotifier<String?> {
     final result = await signerService.loginExternalSignerStart(pubkey);
 
     if (result.status == accounts_api.LoginStatus.complete) {
-      await _completeLogin(result.account.pubkey);
+      await _completeLogin(result.account);
     }
 
     return result;
@@ -108,7 +117,7 @@ class AuthNotifier extends AsyncNotifier<String?> {
     final result = await signerService.loginExternalSignerPublishDefaultRelays(pubkey);
 
     if (result.status == accounts_api.LoginStatus.complete) {
-      await _completeLogin(result.account.pubkey);
+      await _completeLogin(result.account);
     }
 
     return result;
@@ -123,7 +132,7 @@ class AuthNotifier extends AsyncNotifier<String?> {
     final result = await signerService.loginExternalSignerWithCustomRelay(pubkey, relayUrl);
 
     if (result.status == accounts_api.LoginStatus.complete) {
-      await _completeLogin(result.account.pubkey);
+      await _completeLogin(result.account);
     }
 
     return result;
@@ -152,10 +161,12 @@ class AuthNotifier extends AsyncNotifier<String?> {
     final storage = ref.read(secureStorageProvider);
 
     await accounts_api.logout(pubkey: pubkey);
+    _registeredExternalSignerPubkeys.remove(pubkey);
     await storage.delete(key: _storageKey);
 
     try {
       final remainingAccounts = await accounts_api.getAccounts();
+      await _reconcileExternalSigners(remainingAccounts);
       final otherAccounts = remainingAccounts.where((a) => a.pubkey != pubkey).toList();
       if (otherAccounts.isNotEmpty) {
         final nextAccount = otherAccounts.first;
@@ -185,7 +196,8 @@ class AuthNotifier extends AsyncNotifier<String?> {
     _logger.info('Switching profile');
     final storage = ref.read(secureStorageProvider);
     try {
-      await accounts_api.getAccount(pubkey: pubkey);
+      final account = await accounts_api.getAccount(pubkey: pubkey);
+      await _ensureExternalSignersRegistered(knownAccounts: [account]);
       await storage.write(key: _storageKey, value: pubkey);
       state = AsyncData(pubkey);
       _logger.info('Profile switched successfully');
@@ -200,16 +212,82 @@ class AuthNotifier extends AsyncNotifier<String?> {
     }
   }
 
+  Future<void> ensureExternalSignersRegistered() async {
+    await _ensureExternalSignersRegistered();
+  }
+
   // ---------------------------------------------------------------------------
   // Private helpers
   // ---------------------------------------------------------------------------
 
-  Future<void> _completeLogin(String pubkey) async {
+  Future<void> _completeLogin(accounts_api.Account account) async {
+    if (account.accountType == accounts_api.AccountType.external_) {
+      await _ensureExternalSignersRegistered(knownAccounts: [account]);
+    }
     final storage = ref.read(secureStorageProvider);
-    await storage.write(key: _storageKey, value: pubkey);
-    state = AsyncData(pubkey);
+    await storage.write(key: _storageKey, value: account.pubkey);
+    state = AsyncData(account.pubkey);
     ref.read(isAddingAccountProvider.notifier).set(false);
-    _logger.info('Login completed for $pubkey');
+    _logger.info('Login completed for ${account.pubkey}');
+  }
+
+  Future<void> _ensureExternalSignersRegistered({
+    Iterable<accounts_api.Account> knownAccounts = const [],
+  }) async {
+    try {
+      final persistedAccounts = await accounts_api.getAccounts();
+      await _reconcileExternalSigners([...persistedAccounts, ...knownAccounts]);
+    } catch (e, stackTrace) {
+      if (knownAccounts.isEmpty) {
+        _logger.warning('Failed to reconcile external signers', e, stackTrace);
+        return;
+      }
+      _logger.warning('Failed to fetch accounts while reconciling external signers', e, stackTrace);
+      await _registerMissingExternalSigners(knownAccounts);
+    }
+  }
+
+  Future<void> _reconcileExternalSigners(Iterable<accounts_api.Account> accounts) async {
+    final externalAccountsByPubkey = <String, accounts_api.Account>{};
+    for (final account in accounts) {
+      if (account.accountType == accounts_api.AccountType.external_) {
+        externalAccountsByPubkey[account.pubkey] = account;
+      }
+    }
+
+    _registeredExternalSignerPubkeys.removeWhere(
+      (pubkey) => !externalAccountsByPubkey.containsKey(pubkey),
+    );
+
+    await _registerMissingExternalSigners(externalAccountsByPubkey.values);
+  }
+
+  Future<void> _registerMissingExternalSigners(Iterable<accounts_api.Account> accounts) async {
+    for (final account in accounts) {
+      await _registerExternalSignerIfMissing(account);
+    }
+  }
+
+  Future<void> _registerExternalSignerIfMissing(accounts_api.Account account) async {
+    if (account.accountType != accounts_api.AccountType.external_) return;
+    final pubkey = account.pubkey;
+    if (_registeredExternalSignerPubkeys.contains(pubkey)) return;
+
+    final inFlightRegistration = _externalSignerRegistrationFutures[pubkey];
+    if (inFlightRegistration != null) {
+      await inFlightRegistration;
+      return;
+    }
+
+    final registration = const AndroidSignerService().registerExternalSigner(pubkey).then((_) {
+      _registeredExternalSignerPubkeys.add(pubkey);
+    });
+    _externalSignerRegistrationFutures[pubkey] = registration;
+    try {
+      await registration;
+    } finally {
+      _externalSignerRegistrationFutures.remove(pubkey);
+    }
   }
 }
 

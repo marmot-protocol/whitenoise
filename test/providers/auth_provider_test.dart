@@ -26,6 +26,8 @@ class _MockRustLibApi implements RustLibApi {
   String? loginWithSignerPubkey;
   Object? loginWithSignerError;
   bool registerExternalSignerCalled = false;
+  String? registerExternalSignerPubkey;
+  final List<String> registeredExternalSignerPubkeys = [];
   FutureOr<String> Function(String)? signEventCallback;
   FutureOr<String> Function(String, String)? nip04EncryptCallback;
   FutureOr<String> Function(String, String)? nip04DecryptCallback;
@@ -121,6 +123,8 @@ class _MockRustLibApi implements RustLibApi {
     required FutureOr<String> Function(String, String) nip44Decrypt,
   }) async {
     registerExternalSignerCalled = true;
+    registerExternalSignerPubkey = pubkey;
+    registeredExternalSignerPubkeys.add(pubkey);
     signEventCallback = signEvent;
     nip04EncryptCallback = nip04Encrypt;
     nip04DecryptCallback = nip04Decrypt;
@@ -241,6 +245,8 @@ void main() {
     mockApi.loginWithSignerPubkey = null;
     mockApi.loginWithSignerError = null;
     mockApi.registerExternalSignerCalled = false;
+    mockApi.registerExternalSignerPubkey = null;
+    mockApi.registeredExternalSignerPubkeys.clear();
     mockApi.signEventCallback = null;
     mockApi.nip04EncryptCallback = null;
     mockApi.nip04DecryptCallback = null;
@@ -526,6 +532,26 @@ void main() {
         expect(container.read(authProvider).value, testPubkeyD);
       });
 
+      test('re-registers external signer callbacks when switching to remaining account', () async {
+        await container.read(authProvider.notifier).loginStart('nsec123');
+        mockApi.existingAccounts.add(testPubkeyD);
+        mockApi.accountTypes[testPubkeyD] = AccountType.external_;
+        mockApi.allAccounts = [
+          Account(
+            accountType: AccountType.external_,
+            pubkey: testPubkeyD,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        ];
+
+        final nextPubkey = await container.read(authProvider.notifier).logout();
+
+        expect(nextPubkey, testPubkeyD);
+        expect(mockApi.registerExternalSignerCalled, isTrue);
+        expect(mockApi.registerExternalSignerPubkey, testPubkeyD);
+      });
+
       test('returns null when no other accounts', () async {
         await container.read(authProvider.notifier).loginStart('nsec123');
         final nextPubkey = await container.read(authProvider.notifier).logout();
@@ -580,6 +606,42 @@ void main() {
         expect(await mockStorage.read(key: 'active_account_pubkey'), 'new_pubkey');
       });
 
+      test('re-registers external signer callbacks for external account', () async {
+        await container.read(authProvider.notifier).loginStart('nsec123');
+        mockApi.existingAccounts.add(testPubkeyA);
+        mockApi.accountTypes[testPubkeyA] = AccountType.external_;
+
+        await container.read(authProvider.notifier).switchProfile(testPubkeyA);
+
+        expect(mockApi.registerExternalSignerCalled, isTrue);
+        expect(mockApi.registerExternalSignerPubkey, testPubkeyA);
+      });
+
+      test('reconciles all missing external signer accounts', () async {
+        await container.read(authProvider.notifier).loginStart('nsec123');
+        mockApi.existingAccounts.addAll([testPubkeyA, testPubkeyD]);
+        mockApi.accountTypes[testPubkeyA] = AccountType.external_;
+        mockApi.accountTypes[testPubkeyD] = AccountType.external_;
+        mockApi.allAccounts = [
+          Account(
+            pubkey: testPubkeyA,
+            accountType: AccountType.external_,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+          Account(
+            pubkey: testPubkeyD,
+            accountType: AccountType.external_,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        ];
+
+        await container.read(authProvider.notifier).switchProfile(testPubkeyD);
+
+        expect(mockApi.registeredExternalSignerPubkeys, [testPubkeyA, testPubkeyD]);
+      });
+
       test('clears state when account not found', () async {
         await container.read(authProvider.notifier).loginStart('nsec123');
         await container.read(authProvider.notifier).switchProfile('nonexistent');
@@ -616,6 +678,16 @@ void main() {
             );
         expect(mockApi.loginWithSignerCalled, isTrue);
         expect(mockApi.loginWithSignerPubkey, testPubkeyA);
+      });
+
+      test('registers external signer callbacks after login completes', () async {
+        await container
+            .read(authProvider.notifier)
+            .loginExternalSignerStart(
+              pubkey: testPubkeyA,
+            );
+
+        expect(mockApi.registeredExternalSignerPubkeys, [testPubkeyA]);
       });
 
       test('does not prefetch metadata', () async {
@@ -660,6 +732,7 @@ void main() {
         await container.read(authProvider.future);
 
         expect(mockApi.registerExternalSignerCalled, isTrue);
+        expect(mockApi.registerExternalSignerPubkey, testPubkeyA);
       });
 
       test('does not re-register for local account', () async {
@@ -670,6 +743,81 @@ void main() {
         await container.read(authProvider.future);
 
         expect(mockApi.registerExternalSignerCalled, isFalse);
+      });
+
+      test('re-registers inactive external signer accounts', () async {
+        mockApi.existingAccounts.add(testPubkeyA);
+        mockApi.accountTypes[testPubkeyA] = AccountType.local;
+        mockApi.accountTypes[testPubkeyD] = AccountType.external_;
+        mockApi.allAccounts = [
+          Account(
+            pubkey: testPubkeyA,
+            accountType: AccountType.local,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+          Account(
+            pubkey: testPubkeyD,
+            accountType: AccountType.external_,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        ];
+        await mockStorage.write(key: 'active_account_pubkey', value: testPubkeyA);
+
+        await container.read(authProvider.future);
+
+        expect(mockApi.registeredExternalSignerPubkeys, [testPubkeyD]);
+      });
+
+      test('reconciles persisted external signer accounts without active storage', () async {
+        mockApi.allAccounts = [
+          Account(
+            pubkey: testPubkeyA,
+            accountType: AccountType.external_,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+          Account(
+            pubkey: testPubkeyB,
+            accountType: AccountType.local,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+          Account(
+            pubkey: testPubkeyD,
+            accountType: AccountType.external_,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        ];
+
+        final pubkey = await container.read(authProvider.future);
+
+        expect(pubkey, isNull);
+        expect(mockApi.registeredExternalSignerPubkeys, [testPubkeyA, testPubkeyD]);
+      });
+
+      test('does not re-register external signer callbacks already live in this process', () async {
+        mockApi.allAccounts = [
+          Account(
+            pubkey: testPubkeyA,
+            accountType: AccountType.external_,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+          Account(
+            pubkey: testPubkeyD,
+            accountType: AccountType.external_,
+            createdAt: DateTime.now(),
+            updatedAt: DateTime.now(),
+          ),
+        ];
+
+        await container.read(authProvider.notifier).ensureExternalSignersRegistered();
+        await container.read(authProvider.notifier).ensureExternalSignersRegistered();
+
+        expect(mockApi.registeredExternalSignerPubkeys, [testPubkeyA, testPubkeyD]);
       });
     });
   });
