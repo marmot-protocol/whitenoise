@@ -27,6 +27,7 @@ class WnChatList extends HookWidget {
     this.pinnedHeaderHeight = 0,
     this.pinnedHeaderMinOffset = 0,
     this.emptyStateContent,
+    this.headerOpenNotifier,
   });
 
   final int itemCount;
@@ -44,6 +45,8 @@ class WnChatList extends HookWidget {
 
   final Widget? emptyStateContent;
 
+  final ValueNotifier<bool>? headerOpenNotifier;
+
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
@@ -56,7 +59,9 @@ class WnChatList extends HookWidget {
       duration: _kAnimationDuration,
     );
     final headerRevealAnimation = useAnimation(headerRevealController);
-    final headerOpen = useState(false);
+    final fallbackHeaderOpen = useState(false);
+    final headerOpen = headerOpenNotifier ?? fallbackHeaderOpen;
+    useListenable(headerOpen);
     final isAnimatingClosed = useRef(false);
     final peakReveal = useRef(0.0);
     final scrollController = useScrollController();
@@ -75,6 +80,38 @@ class WnChatList extends HookWidget {
       }
       return null;
     }, [isSearchActive, hasHeader]);
+
+    useEffect(() {
+      void syncRevealToOpenState() {
+        if (!hasHeader) return;
+        final target = headerOpen.value ? 1.0 : 0.0;
+        if (headerRevealController.value == target) return;
+        if (headerRevealController.isAnimating &&
+            headerRevealController.upperBound > 0 &&
+            ((target == 1.0 && headerRevealController.value > 0.99) ||
+                (target == 0.0 && headerRevealController.value < 0.01))) {
+          return;
+        }
+        if (target == 0.0) {
+          isAnimatingClosed.value = true;
+          headerRevealController.animateTo(0.0, curve: Curves.easeOut).then((_) {
+            isAnimatingClosed.value = false;
+          });
+          if (scrollController.hasClients && scrollController.offset > 0) {
+            scrollController.animateTo(
+              0,
+              duration: _kAnimationDuration,
+              curve: Curves.easeOut,
+            );
+          }
+        } else {
+          headerRevealController.animateTo(1.0, curve: Curves.easeOut);
+        }
+      }
+
+      headerOpen.addListener(syncRevealToOpenState);
+      return () => headerOpen.removeListener(syncRevealToOpenState);
+    }, [headerOpen, hasHeader]);
 
     void updateScrollState(ScrollMetrics metrics) {
       final newValue = metrics.extentBefore > 0;

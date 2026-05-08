@@ -10,6 +10,7 @@ import 'package:url_launcher_platform_interface/url_launcher_platform_interface.
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/screens/chat_invite_screen.dart';
+import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/chat_screen.dart';
 import 'package:whitenoise/screens/settings_screen.dart';
 import 'package:whitenoise/screens/share_profile_screen.dart';
@@ -661,6 +662,41 @@ void main() {
           find.byType(ChatListSearchAndFilters),
         );
         expect(widget.onSearchChanged, isNotNull);
+      });
+
+      testWidgets('OS back closes search header without popping screen', (tester) async {
+        await pumpChatListScreen(tester);
+        await revealSearchBar(tester);
+        expect(find.byType(ChatListSearchAndFilters), findsOneWidget);
+
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ChatListScreen), findsOneWidget);
+        expect(find.byType(ChatListSearchAndFilters), findsNothing);
+      });
+
+      testWidgets('OS back clears search query without popping screen', (tester) async {
+        await pumpChatListScreen(tester);
+        await revealSearchBar(tester);
+        await tester.enterText(find.byType(TextField), 'Alice');
+        await tester.pump();
+        expect(find.byType(ChatListTile), findsOneWidget);
+
+        await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ChatListScreen), findsOneWidget);
+        expect(find.byType(ChatListTile), findsNWidgets(3));
+      });
+
+      testWidgets('OS back with no search active does not consume pop', (tester) async {
+        await pumpChatListScreen(tester);
+
+        final handled = await tester.binding.handlePopRoute();
+        await tester.pumpAndSettle();
+
+        expect(handled, isFalse);
       });
     });
 
