@@ -476,6 +476,25 @@ void main() {
         expect(find.text('Header'), findsOneWidget);
       });
 
+      testWidgets('external notifier reveals header on mount when initially true', (tester) async {
+        final notifier = ValueNotifier<bool>(true);
+        addTearDown(notifier.dispose);
+        await mountWidget(
+          WnChatList(
+            itemCount: 3,
+            itemBuilder: _textBuilder,
+            header: const Text('Header'),
+            headerHeight: 142,
+            headerOpenNotifier: notifier,
+          ),
+          tester,
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('chat_list_header')), findsOneWidget);
+        expect(find.text('Header'), findsOneWidget);
+      });
+
       testWidgets('external notifier reveals header when set to true', (tester) async {
         final notifier = ValueNotifier<bool>(false);
         addTearDown(notifier.dispose);

@@ -101,6 +101,7 @@ class WnChatList extends HookWidget {
         }
       }
 
+      if (headerOpen.value) syncRevealToOpenState();
       headerOpen.addListener(syncRevealToOpenState);
       return () => headerOpen.removeListener(syncRevealToOpenState);
     }, [headerOpen, hasHeader]);
