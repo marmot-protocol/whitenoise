@@ -87,7 +87,13 @@ class ReportBugScreen extends HookConsumerWidget {
         );
 
         if (!context.mounted) return;
-        notice.showSuccessNotice(l10n.reportBugSuccess);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.reportBugSuccess),
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        Routes.goBack(context);
       } catch (e) {
         _logger.severe('send_bug_report failed', e);
         if (!context.mounted) return;

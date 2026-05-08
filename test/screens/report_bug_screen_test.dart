@@ -142,15 +142,19 @@ void main() {
       expect(mockApi.lastBugReportAppVersion, appVersion);
     });
 
-    testWidgets('shows success notice after successful send', (tester) async {
+    testWidgets('shows success snackbar and navigates back after successful send', (tester) async {
       await pumpScreen(tester);
+      expect(find.byType(ReportBugScreen), findsOneWidget);
+
       await tester.enterText(
         find.byKey(const Key('report_bug_description')),
         'Something broke',
       );
       await tester.tap(find.text('Send report'));
       await tester.pumpAndSettle();
-      expect(find.text('Bug report sent. Thank you!'), findsOneWidget);
+
+      expect(find.byType(ReportBugScreen), findsNothing);
+      expect(find.widgetWithText(SnackBar, 'Bug report sent. Thank you!'), findsOneWidget);
     });
 
     testWidgets('shows error notice when send fails', (tester) async {
