@@ -9,6 +9,7 @@ import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/offline_provider.dart';
+import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_invite_screen.dart';
 import 'package:whitenoise/screens/chat_screen.dart';
 import 'package:whitenoise/screens/settings_screen.dart';
@@ -398,6 +399,23 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(ChatScreen), findsOneWidget);
+      });
+
+      testWidgets('returning from chat screen renders cached chats with isLoading=false (#483)', (
+        tester,
+      ) async {
+        await pumpChatListScreen(tester);
+        await tester.tap(find.byType(ChatListTile).last);
+        await tester.pumpAndSettle();
+        expect(find.byType(ChatScreen), findsOneWidget);
+
+        Routes.goToChatList(tester.element(find.byType(ChatScreen)));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('chat_list_loading')), findsNothing);
+        expect(find.byType(ChatListTile), findsWidgets);
+        final wnChatList = tester.widget<WnChatList>(find.byType(WnChatList));
+        expect(wnChatList.isLoading, isFalse, reason: 'cached chats must skip the loading state');
       });
     });
 

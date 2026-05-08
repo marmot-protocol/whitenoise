@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
@@ -13,6 +14,18 @@ typedef ChatListResult = ({
   Set<String> blockedPubkeys,
   VoidCallback refresh,
 });
+
+class _ChatListCacheEntry {
+  Map<String, ChatSummary> chatMap = <String, ChatSummary>{};
+  bool hasInitialSnapshot = false;
+}
+
+typedef _ChatListCacheKey = ({String pubkey, bool archived});
+
+final Map<_ChatListCacheKey, _ChatListCacheEntry> _chatListCaches = {};
+
+@visibleForTesting
+void resetChatListCacheForTests() => _chatListCaches.clear();
 
 ChatListResult useChatList(String pubkey, {bool archived = false}) {
   final blockedPubkeysRefreshKey = useState(0);
@@ -47,7 +60,10 @@ ChatListResult _useChatList(
   required BlockedPubkeysState blockedState,
   required VoidCallback refreshBlockedPubkeys,
 }) {
-  final chatMap = useRef(<String, ChatSummary>{});
+  final cache = _chatListCaches.putIfAbsent(
+    (pubkey: pubkey, archived: archived),
+    _ChatListCacheEntry.new,
+  );
   final refreshKey = useState(0);
   final blockedPubkeysRef = useRef<Set<String>>({});
   blockedPubkeysRef.value = blockedState.blockedPubkeys;
@@ -66,8 +82,9 @@ ChatListResult _useChatList(
                 _logger.info(
                   'chatList stream initialSnapshot pubkey=${pubkey.substring(0, 8)}… count=${items.length}',
                 );
-                chatMap.value = {for (final c in items.reversed) c.mlsGroupId: c};
-                return chatMap.value;
+                cache.chatMap = {for (final c in items.reversed) c.mlsGroupId: c};
+                cache.hasInitialSnapshot = true;
+                return cache.chatMap;
               },
               update: (update) {
                 final id = update.item.mlsGroupId;
@@ -77,44 +94,44 @@ ChatListResult _useChatList(
                 );
                 switch (update.trigger) {
                   case ChatListUpdateTrigger.lastMessageDeleted:
-                    chatMap.value[id] = update.item;
+                    cache.chatMap[id] = update.item;
                   case ChatListUpdateTrigger.newGroup:
-                    chatMap.value[id] = update.item;
+                    cache.chatMap[id] = update.item;
                   case ChatListUpdateTrigger.newLastMessage:
                     final lastMessage = update.item.lastMessage;
                     final blockedPubkeys = blockedPubkeysRef.value;
                     if (lastMessage != null && blockedPubkeys.contains(lastMessage.author)) {
-                      chatMap.value[id] = _sanitizeChatSummary(update.item, blockedPubkeys);
-                      return chatMap.value;
+                      cache.chatMap[id] = _sanitizeChatSummary(update.item, blockedPubkeys);
+                      return cache.chatMap;
                     }
                     if (update.item.pendingConfirmation) {
-                      chatMap.value[id] = update.item;
+                      cache.chatMap[id] = update.item;
                     } else {
-                      chatMap.value.remove(id);
-                      chatMap.value[id] = update.item;
+                      cache.chatMap.remove(id);
+                      cache.chatMap[id] = update.item;
                     }
                   case ChatListUpdateTrigger.chatArchiveChanged:
-                    chatMap.value.remove(id);
+                    cache.chatMap.remove(id);
                     final addToArchivedList = archived && update.item.archivedAt != null;
                     final addToUnarchivedList = !archived && update.item.archivedAt == null;
                     if (addToArchivedList || addToUnarchivedList) {
-                      chatMap.value[id] = update.item;
+                      cache.chatMap[id] = update.item;
                     }
                   case ChatListUpdateTrigger.removedFromGroup:
-                    chatMap.value[id] = update.item;
+                    cache.chatMap[id] = update.item;
                   case ChatListUpdateTrigger.chatMuteChanged:
-                    chatMap.value[id] = update.item;
+                    cache.chatMap[id] = update.item;
                   case ChatListUpdateTrigger.leftGroup:
-                    chatMap.value[id] = update.item;
+                    cache.chatMap[id] = update.item;
                   case ChatListUpdateTrigger.chatCleared:
-                    chatMap.value[id] = update.item;
+                    cache.chatMap[id] = update.item;
                   case ChatListUpdateTrigger.chatDeleted:
-                    chatMap.value.remove(id);
+                    cache.chatMap.remove(id);
                   case ChatListUpdateTrigger.userBlockChanged:
-                    chatMap.value[id] = update.item;
+                    cache.chatMap[id] = update.item;
                     refreshBlockedPubkeys();
                 }
-                return chatMap.value;
+                return cache.chatMap;
               },
             );
           });
@@ -122,11 +139,11 @@ ChatListResult _useChatList(
     [pubkey, refreshKey.value, archived],
   );
 
-  final snapshot = useStream(stream, initialData: <String, ChatSummary>{});
-  final isLoading = snapshot.connectionState == ConnectionState.waiting || blockedState.isLoading;
+  useStream(stream, initialData: cache.chatMap);
+  final isLoading = !cache.hasInitialSnapshot || blockedState.isLoading;
   final chats = blockedState.isLoading
       ? <ChatSummary>[]
-      : chatMap.value.values
+      : cache.chatMap.values
             .where((chat) => !_shouldHideChatSummary(chat, blockedState.blockedPubkeys))
             .map((chat) => _sanitizeChatSummary(chat, blockedState.blockedPubkeys))
             .toList()

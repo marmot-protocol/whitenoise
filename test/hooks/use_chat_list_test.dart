@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_list.dart';
@@ -111,7 +111,7 @@ void main() {
     _api.archivedController?.close();
     _api.controller = null;
     _api.archivedController = null;
-    _api.blockedPubkeys.clear();
+    _api.reset();
   });
 
   group('useChatList', () {
@@ -700,6 +700,35 @@ void main() {
         final ids = getResult().chats.map((c) => c.mlsGroupId).toList();
         expect(ids, ['mls_c1']);
       });
+    });
+
+    group('regression #483: returning to chat list', () {
+      testWidgets(
+        'preserves chats across hook remounts so no spinner flashes',
+        (tester) async {
+          final getResult1 = await _pump(tester, testPubkeyA);
+
+          _api.emitInitialSnapshot([
+            _chatSummary('c1', DateTime(2024)),
+            _chatSummary('c2', DateTime(2024, 1, 2)),
+          ]);
+          await tester.pumpAndSettle();
+
+          expect(getResult1().isLoading, isFalse);
+          expect(getResult1().chats, hasLength(2));
+
+          await tester.pumpWidget(const SizedBox.shrink());
+
+          final getResult2 = await _pump(tester, testPubkeyA);
+
+          expect(
+            getResult2().isLoading,
+            isFalse,
+            reason: 'must not flash spinner on remount when chats are cached',
+          );
+          expect(getResult2().chats, hasLength(2));
+        },
+      );
     });
   });
 }

@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
@@ -12,21 +13,38 @@ typedef BlockedPubkeysState = ({
   VoidCallback refresh,
 });
 
+class _BlockedPubkeysCacheEntry {
+  Set<String> blockedPubkeys = <String>{};
+  bool hasLoaded = false;
+}
+
+final Map<String, _BlockedPubkeysCacheEntry> _blockedPubkeysCaches = {};
+
+@visibleForTesting
+void resetBlockedPubkeysCacheForTests() => _blockedPubkeysCaches.clear();
+
 BlockedPubkeysState useBlockedPubkeys(String accountPubkey, {int refreshKey = 0}) {
-  final blockedPubkeys = useState<Set<String>>({});
-  final isLoading = useState(true);
+  final cache = _blockedPubkeysCaches.putIfAbsent(
+    accountPubkey,
+    _BlockedPubkeysCacheEntry.new,
+  );
+  final blockedPubkeys = useState<Set<String>>(cache.blockedPubkeys);
+  final isLoading = useState(!cache.hasLoaded);
   final error = useState<String?>(null);
   final manualRefreshKey = useState(0);
 
   useEffect(() {
     var cancelled = false;
-    isLoading.value = true;
+    if (!cache.hasLoaded) isLoading.value = true;
 
     Future<void> fetchBlockedPubkeys() async {
       try {
         final entries = await mute_list_api.getBlockedUsers(accountPubkey: accountPubkey);
         if (cancelled) return;
-        blockedPubkeys.value = entries.map((entry) => entry.mutedPubkey).toSet();
+        final next = entries.map((entry) => entry.mutedPubkey).toSet();
+        cache.blockedPubkeys = next;
+        cache.hasLoaded = true;
+        blockedPubkeys.value = next;
         error.value = null;
       } catch (e, st) {
         if (cancelled) return;

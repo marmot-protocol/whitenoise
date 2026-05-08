@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
+import 'package:whitenoise/hooks/use_blocked_pubkeys.dart';
+import 'package:whitenoise/hooks/use_chat_list.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/api/account_groups.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
@@ -953,6 +955,8 @@ class MockWnApi implements RustLibApi {
     lastLeaveGroupPubkey = null;
     mockGroupState = GroupState.active;
     shouldFailGetGroup = false;
+    resetChatListCacheForTests();
+    resetBlockedPubkeysCacheForTests();
   }
 
   String? zapstoreVersion;
