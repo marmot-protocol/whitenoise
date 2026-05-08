@@ -1456,6 +1456,18 @@ class AppLocalizationsEn extends AppLocalizations {
       'Are you sure you want to leave this group? The chat will stay in your list if you don\'t delete it, but you won\'t be able to send or receive new messages unless someone re-invites you.';
 
   @override
+  String get leaveGroupLastAdminWarning =>
+      'You\'re the only admin in this group. Promote at least one member to admin before you can leave.';
+
+  @override
+  String get leaveGroupNoCapabilitiesWarning =>
+      'This group was created with an older version and doesn\'t support leaving. Admins may upgrade the group capabilities once all members are on a version that supports leaving.';
+
+  @override
+  String get leaveGroupFetchError =>
+      'Something went wrong loading group info. You won\'t be able to leave right now.';
+
+  @override
   String get failedToLeaveGroup => 'Failed to leave group. Please try again.';
 
   @override

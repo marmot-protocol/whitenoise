@@ -1470,6 +1470,18 @@ class AppLocalizationsPt extends AppLocalizations {
       'Tem certeza de que deseja sair deste grupo? O chat permanecerá na sua lista se você não o excluir, mas você não poderá enviar ou receber novas mensagens a menos que alguém o convide novamente.';
 
   @override
+  String get leaveGroupLastAdminWarning =>
+      'Você é o único administrador deste grupo. Promova pelo menos um membro a administrador antes de poder sair.';
+
+  @override
+  String get leaveGroupNoCapabilitiesWarning =>
+      'Este grupo foi criado com uma versão mais antiga e não suporta a saída. Os administradores podem atualizar as capacidades do grupo assim que todos os membros estiverem numa versão que suporte sair.';
+
+  @override
+  String get leaveGroupFetchError =>
+      'Algo correu mal ao carregar as informações do grupo. Não poderás sair agora.';
+
+  @override
   String get failedToLeaveGroup => 'Falha ao sair do grupo. Por favor, tente novamente.';
 
   @override

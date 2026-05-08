@@ -1857,6 +1857,18 @@
   "@leaveGroup": { "description": "Title of the leave group confirmation dialog" },
   "leaveGroupWarning": "Are you sure you want to leave this group? The chat will stay in your list if you don't delete it, but you won't be able to send or receive new messages unless someone re-invites you.",
   "@leaveGroupWarning": { "description": "Warning shown in the leave group confirmation dialog" },
+  "leaveGroupLastAdminWarning": "You're the only admin in this group. Promote at least one member to admin before you can leave.",
+  "@leaveGroupLastAdminWarning": {
+    "description": "Shown in leave group menu when the user is the last admin and cannot leave yet"
+  },
+  "leaveGroupNoCapabilitiesWarning": "This group was created with an older version and doesn't support leaving. Admins may upgrade the group capabilities once all members are on a version that supports leaving.",
+  "@leaveGroupNoCapabilitiesWarning": {
+    "description": "Shown in leave group menu when the group lacks SelfRemove capability, typically because it was created in an older version of the protocol"
+  },
+  "leaveGroupFetchError": "Something went wrong loading group info. You won't be able to leave right now.",
+  "@leaveGroupFetchError": {
+    "description": "Shown in leave group slate when group info could not be fetched"
+  },
   "failedToLeaveGroup": "Failed to leave group. Please try again.",
   "@failedToLeaveGroup": { "description": "Error shown when leaving a group fails" },
   "youLeftTheGroup": "You left the group",
