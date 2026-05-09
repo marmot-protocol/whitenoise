@@ -108,7 +108,6 @@ abstract class AppLocalizations {
     Locale('ru'),
     Locale('tr'),
     Locale('zh'),
-    Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans'),
     Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
   ];
 
@@ -2681,7 +2680,8 @@ abstract class AppLocalizations {
   String get youLeftTheGroup;
 }
 
-class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {
+class _AppLocalizationsDelegate
+    extends LocalizationsDelegate<AppLocalizations> {
   const _AppLocalizationsDelegate();
 
   @override
@@ -2703,8 +2703,6 @@ AppLocalizations lookupAppLocalizations(Locale locale) {
     case 'zh':
       {
         switch (locale.scriptCode) {
-          case 'Hans':
-            return AppLocalizationsZhHans();
           case 'Hant':
             return AppLocalizationsZhHant();
         }

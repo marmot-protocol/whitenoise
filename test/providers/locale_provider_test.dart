@@ -320,8 +320,25 @@ void main() {
       expect(getLanguageDisplayName('tr'), 'Türkçe');
     });
 
+    test('returns correct display name for Simplified Chinese', () {
+      expect(getLanguageDisplayName('zh'), '简体中文');
+    });
+
     test('returns language code for unknown languages', () {
       expect(getLanguageDisplayName('xx'), 'xx');
+    });
+  });
+
+  group('getLocaleDisplayName', () {
+    test('returns correct display name for Traditional Chinese', () {
+      expect(
+        getLocaleDisplayName(const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant')),
+        '繁體中文',
+      );
+    });
+
+    test('returns language display name for other locales', () {
+      expect(getLocaleDisplayName(const Locale('fr')), 'Français');
     });
   });
 

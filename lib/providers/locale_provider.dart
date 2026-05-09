@@ -124,8 +124,16 @@ String getLanguageDisplayName(String languageCode) {
     'pt' => 'Português',
     'ru' => 'Русский',
     'tr' => 'Türkçe',
+    'zh' => '简体中文',
     _ => languageCode,
   };
+}
+
+String getLocaleDisplayName(Locale locale) {
+  if (locale.languageCode == 'zh' && locale.scriptCode == 'Hant') {
+    return '繁體中文';
+  }
+  return getLanguageDisplayName(locale.languageCode);
 }
 
 class LocaleFormatters {
