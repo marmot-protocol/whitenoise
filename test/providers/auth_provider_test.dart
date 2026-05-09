@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show TargetPlatform, debugDefaultTargetPlatformOverride;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
@@ -228,8 +229,13 @@ void main() {
 
   setUpAll(() {
     TestWidgetsFlutterBinding.ensureInitialized();
+    debugDefaultTargetPlatformOverride = TargetPlatform.android;
     mockApi = _MockRustLibApi();
     RustLib.initMock(api: mockApi);
+  });
+
+  tearDownAll(() {
+    debugDefaultTargetPlatformOverride = null;
   });
 
   setUp(() {

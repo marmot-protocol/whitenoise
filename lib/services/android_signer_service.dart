@@ -371,6 +371,11 @@ class AndroidSignerService {
   }
 
   Future<void> registerExternalSigner(String pubkey) async {
+    if (defaultTargetPlatform != TargetPlatform.android) {
+      _logger.fine('Skipping external signer registration outside Android');
+      return;
+    }
+
     _logger.info('Re-registering external signer for account $pubkey');
     final callbacks = _createSignerCallbacks(pubkey);
     await signer_api.registerExternalSigner(

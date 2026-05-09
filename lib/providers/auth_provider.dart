@@ -3,7 +3,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/providers/is_adding_account_provider.dart';
 import 'package:whitenoise/services/android_signer_service.dart';
-import 'package:whitenoise/services/external_signer_registration_service.dart';
+import 'package:whitenoise/services/external_signer_callback_registry.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart' as accounts_api;
 import 'package:whitenoise/src/rust/api/error.dart';
 
@@ -15,7 +15,7 @@ final secureStorageProvider = Provider<FlutterSecureStorage>(
 );
 
 class AuthNotifier extends AsyncNotifier<String?> {
-  final _externalSignerRegistrationService = ExternalSignerRegistrationService();
+  final _externalSignerCallbackRegistry = ExternalSignerCallbackRegistry();
 
   @override
   Future<String?> build() async {
@@ -168,7 +168,7 @@ class AuthNotifier extends AsyncNotifier<String?> {
       final remainingAccounts = await accounts_api.getAccounts();
       final otherAccounts = remainingAccounts.where((a) => a.pubkey != pubkey).toList();
       final nextAccount = otherAccounts.isEmpty ? null : otherAccounts.first;
-      await _externalSignerRegistrationService.reconcile(
+      await _externalSignerCallbackRegistry.reconcile(
         remainingAccounts,
         requiredPubkeys: nextAccount == null ? const {} : {nextAccount.pubkey},
       );
@@ -244,7 +244,7 @@ class AuthNotifier extends AsyncNotifier<String?> {
     Iterable<accounts_api.Account> knownAccounts = const [],
     Set<String> requiredPubkeys = const {},
   }) async {
-    await _externalSignerRegistrationService.ensureRegistered(
+    await _externalSignerCallbackRegistry.ensureRegistered(
       knownAccounts: knownAccounts,
       requiredPubkeys: requiredPubkeys,
     );

@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise/services/external_signer_registration_service.dart';
+import 'package:whitenoise/services/external_signer_callback_registry.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 
 import '../test_helpers.dart';
@@ -16,8 +16,9 @@ Account _account(String pubkey, AccountType accountType) {
 void main() {
   test('reconcile keeps registering optional accounts after one registration fails', () async {
     final registeredPubkeys = <String>[];
-    final service = ExternalSignerRegistrationService(
-      registerExternalSigner: (pubkey) async {
+    final registry = ExternalSignerCallbackRegistry(
+      enabled: true,
+      registerSignerCallback: (pubkey) async {
         if (pubkey == testPubkeyA) {
           throw Exception('signer unavailable');
         }
@@ -25,7 +26,7 @@ void main() {
       },
     );
 
-    await service.reconcile([
+    await registry.reconcile([
       _account(testPubkeyA, AccountType.external_),
       _account(testPubkeyB, AccountType.external_),
       _account(testPubkeyC, AccountType.local),
@@ -37,8 +38,9 @@ void main() {
 
   test('reconcile rethrows when a required account registration fails', () async {
     final registeredPubkeys = <String>[];
-    final service = ExternalSignerRegistrationService(
-      registerExternalSigner: (pubkey) async {
+    final registry = ExternalSignerCallbackRegistry(
+      enabled: true,
+      registerSignerCallback: (pubkey) async {
         if (pubkey == testPubkeyB) {
           throw Exception('active signer unavailable');
         }
@@ -47,7 +49,7 @@ void main() {
     );
 
     await expectLater(
-      service.reconcile(
+      registry.reconcile(
         [
           _account(testPubkeyA, AccountType.external_),
           _account(testPubkeyB, AccountType.external_),
@@ -59,5 +61,21 @@ void main() {
     );
 
     expect(registeredPubkeys, [testPubkeyA]);
+  });
+
+  test('reconcile skips Android callback registration when disabled', () async {
+    final registeredPubkeys = <String>[];
+    final registry = ExternalSignerCallbackRegistry(
+      enabled: false,
+      registerSignerCallback: (pubkey) async {
+        registeredPubkeys.add(pubkey);
+      },
+    );
+
+    await registry.reconcile([
+      _account(testPubkeyA, AccountType.external_),
+    ]);
+
+    expect(registeredPubkeys, isEmpty);
   });
 }

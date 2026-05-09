@@ -77,6 +77,7 @@ class NotificationSubscription {
         },
         onDone: () {
           _logger.info('Notification stream closed');
+          _subscription = null;
         },
       );
 

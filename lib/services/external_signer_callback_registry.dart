@@ -1,19 +1,23 @@
+import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:logging/logging.dart';
 import 'package:whitenoise/services/android_signer_service.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart' as accounts_api;
 
-final _logger = Logger('ExternalSignerRegistration');
+final _logger = Logger('ExternalSignerCallbackRegistry');
 
-class ExternalSignerRegistrationService {
-  ExternalSignerRegistrationService({
+class ExternalSignerCallbackRegistry {
+  ExternalSignerCallbackRegistry({
+    bool? enabled,
     Future<List<accounts_api.Account>> Function()? getAccounts,
-    Future<void> Function(String pubkey)? registerExternalSigner,
-  }) : _getAccounts = getAccounts ?? accounts_api.getAccounts,
-       _registerExternalSigner =
-           registerExternalSigner ?? const AndroidSignerService().registerExternalSigner;
+    Future<void> Function(String pubkey)? registerSignerCallback,
+  }) : _enabled = enabled ?? (defaultTargetPlatform == TargetPlatform.android),
+       _getAccounts = getAccounts ?? accounts_api.getAccounts,
+       _registerSignerCallback =
+           registerSignerCallback ?? const AndroidSignerService().registerExternalSigner;
 
+  final bool _enabled;
   final Future<List<accounts_api.Account>> Function() _getAccounts;
-  final Future<void> Function(String pubkey) _registerExternalSigner;
+  final Future<void> Function(String pubkey) _registerSignerCallback;
   final Set<String> _registeredExternalSignerPubkeys = {};
   final Map<String, Future<void>> _externalSignerRegistrationFutures = {};
 
@@ -21,6 +25,8 @@ class ExternalSignerRegistrationService {
     Iterable<accounts_api.Account> knownAccounts = const [],
     Set<String> requiredPubkeys = const {},
   }) async {
+    if (!_enabled) return;
+
     List<accounts_api.Account> persistedAccounts;
     try {
       persistedAccounts = await _getAccounts();
@@ -44,6 +50,8 @@ class ExternalSignerRegistrationService {
     Iterable<accounts_api.Account> accounts, {
     Set<String> requiredPubkeys = const {},
   }) async {
+    if (!_enabled) return;
+
     final externalAccountsByPubkey = <String, accounts_api.Account>{};
     for (final account in accounts) {
       if (account.accountType == accounts_api.AccountType.external_) {
@@ -76,7 +84,7 @@ class ExternalSignerRegistrationService {
       } catch (e, stackTrace) {
         if (requiredPubkeys.contains(account.pubkey)) rethrow;
         _logger.warning(
-          'Failed to register external signer callback for ${_pubkeyPreview(account.pubkey)}',
+          'Failed to register optional external signer callback',
           e,
           stackTrace,
         );
@@ -95,9 +103,9 @@ class ExternalSignerRegistrationService {
       return;
     }
 
-    final registration = _registerExternalSigner(pubkey).then((_) {
+    final registration = _registerSignerCallback(pubkey).then((_) {
       _registeredExternalSignerPubkeys.add(pubkey);
-      _logger.info('Registered external signer callback for ${_pubkeyPreview(pubkey)}');
+      _logger.info('Registered external signer callback');
     });
     _externalSignerRegistrationFutures[pubkey] = registration;
     try {
@@ -105,10 +113,5 @@ class ExternalSignerRegistrationService {
     } finally {
       _externalSignerRegistrationFutures.remove(pubkey);
     }
-  }
-
-  String _pubkeyPreview(String pubkey) {
-    if (pubkey.length <= 8) return pubkey;
-    return '${pubkey.substring(0, 8)}...';
   }
 }

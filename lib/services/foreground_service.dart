@@ -3,13 +3,13 @@ import 'dart:convert' show jsonDecode, jsonEncode;
 import 'dart:io' show Directory, Platform;
 import 'dart:ui' show DartPluginRegistrant, Locale;
 
-import 'package:flutter/foundation.dart' show debugPrint, kDebugMode, visibleForTesting;
+import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/widgets.dart' show AppLifecycleState, WidgetsFlutterBinding;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDirectory;
-import 'package:whitenoise/services/external_signer_registration_service.dart';
+import 'package:whitenoise/services/external_signer_callback_registry.dart';
 import 'package:whitenoise/services/notification_service.dart';
 import 'package:whitenoise/services/notification_subscription.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
@@ -35,7 +35,7 @@ void _startCallback() {
   Logger.root.level = kDebugMode ? Level.INFO : Level.WARNING;
   Logger.root.onRecord.listen((record) {
     if (record.loggerName != 'ForegroundService' &&
-        record.loggerName != 'ExternalSignerRegistration' &&
+        record.loggerName != 'ExternalSignerCallbackRegistry' &&
         record.loggerName != 'NotificationSubscription') {
       return;
     }
@@ -66,12 +66,14 @@ class NotificationTaskHandler extends TaskHandler {
     Future<void> Function()? ensureExternalSigners,
     Future<void> Function()? ensureSubscriptions,
     Future<bool> Function()? startSubscription,
+    bool Function()? isSubscriptionRunning,
     Future<void> Function()? stopSubscription,
   }) : _bootstrapIsolateOverride = bootstrapIsolate,
        _loadLocaleOverride = loadLocale,
        _ensureExternalSignersOverride = ensureExternalSigners,
        _ensureSubscriptionsOverride = ensureSubscriptions,
        _startSubscriptionOverride = startSubscription,
+       _isSubscriptionRunningOverride = isSubscriptionRunning,
        _stopSubscriptionOverride = stopSubscription;
 
   final Future<bool> Function()? _bootstrapIsolateOverride;
@@ -79,14 +81,14 @@ class NotificationTaskHandler extends TaskHandler {
   final Future<void> Function()? _ensureExternalSignersOverride;
   final Future<void> Function()? _ensureSubscriptionsOverride;
   final Future<bool> Function()? _startSubscriptionOverride;
+  final bool Function()? _isSubscriptionRunningOverride;
   final Future<void> Function()? _stopSubscriptionOverride;
 
   NotificationSubscription? _subscription;
-  ExternalSignerRegistrationService? _externalSignerRegistrationService;
+  ExternalSignerCallbackRegistry? _externalSignerCallbackRegistry;
   Locale _cachedLocale = const Locale('en');
   bool _bootstrapped = false;
   bool _shouldOwnSubscription = false;
-  bool _subscriptionRunning = false;
 
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
@@ -99,7 +101,7 @@ class NotificationTaskHandler extends TaskHandler {
     _cachedLocale = await _runLoadLocale();
 
     if (_shouldOwnSubscription) {
-      await ensureSubscriptionRunning();
+      await _ensureSubscriptionRunning();
     } else {
       _logger.info('Task started by main isolate; awaiting coordination message');
     }
@@ -109,7 +111,7 @@ class NotificationTaskHandler extends TaskHandler {
   void onRepeatEvent(DateTime timestamp) {
     if (!_shouldOwnSubscription) return;
     _logger.fine('Repeat event while task owns subscription');
-    unawaited(ensureSubscriptionRunning());
+    unawaited(_ensureSubscriptionRunning());
   }
 
   @override
@@ -123,7 +125,7 @@ class NotificationTaskHandler extends TaskHandler {
     } else if (event == _kEventMainStopped) {
       _logger.info('Received main_stopped — taking over subscription');
       _shouldOwnSubscription = true;
-      unawaited(ensureSubscriptionRunning());
+      unawaited(_ensureSubscriptionRunning());
     }
   }
 
@@ -145,8 +147,7 @@ class NotificationTaskHandler extends TaskHandler {
   @override
   void onNotificationDismissed() {}
 
-  @visibleForTesting
-  Future<void> ensureSubscriptionRunning() async {
+  Future<void> _ensureSubscriptionRunning() async {
     if (!_shouldOwnSubscription) return;
 
     if (!_bootstrapped) {
@@ -172,7 +173,7 @@ class NotificationTaskHandler extends TaskHandler {
       return;
     }
 
-    if (_subscriptionRunning) {
+    if (_subscriptionIsRunning) {
       _logger.fine('Subscription already running');
       return;
     }
@@ -197,7 +198,7 @@ class NotificationTaskHandler extends TaskHandler {
     final override = _ensureExternalSignersOverride;
     if (override != null) return override();
     _logger.fine('Ensuring external signer callbacks are registered');
-    final service = _externalSignerRegistrationService ??= ExternalSignerRegistrationService();
+    final service = _externalSignerCallbackRegistry ??= ExternalSignerCallbackRegistry();
     return service.ensureRegistered();
   }
 
@@ -250,15 +251,15 @@ class NotificationTaskHandler extends TaskHandler {
   Future<bool> _startSubscription() async {
     final override = _startSubscriptionOverride;
     if (override != null) {
-      _subscriptionRunning = await override();
-      return _subscriptionRunning;
+      return override();
     }
 
     if (!_bootstrapped) {
       _logger.warning('Cannot start subscription: bootstrap failed earlier');
       return false;
     }
-    if (_subscription != null) return true;
+    if (_subscriptionIsRunning) return true;
+    _subscription = null;
 
     final notificationService = NotificationService(
       onNotificationTap: _persistTapAndLaunch,
@@ -278,11 +279,9 @@ class NotificationTaskHandler extends TaskHandler {
       _logger.warning(
         'Headless notification subscription did not attach; will retry on next coordination signal',
       );
-      _subscriptionRunning = false;
       return false;
     }
     _subscription = sub;
-    _subscriptionRunning = true;
     _logger.info('Headless notification subscription started');
     return true;
   }
@@ -291,16 +290,20 @@ class NotificationTaskHandler extends TaskHandler {
     final override = _stopSubscriptionOverride;
     if (override != null) {
       await override();
-      _subscriptionRunning = false;
       return;
     }
 
     final sub = _subscription;
     if (sub == null) return;
     _subscription = null;
-    _subscriptionRunning = false;
     await sub.stop();
     _logger.info('Headless notification subscription stopped');
+  }
+
+  bool get _subscriptionIsRunning {
+    final override = _isSubscriptionRunningOverride;
+    if (override != null) return override();
+    return _subscription?.isRunning ?? false;
   }
 
   /// Persists the tapped notification's payload so the main isolate can route
@@ -441,7 +444,6 @@ class ForegroundService {
   final ForegroundTaskApi _api;
   final String? _packageName;
   bool _initialized = false;
-  bool _startedWithCurrentOptions = false;
 
   static const _serviceId = 888;
   static const _channelId = 'whitenoise_foreground';
@@ -480,19 +482,6 @@ class ForegroundService {
     }
 
     if (await _api.isRunningService) {
-      if (!_startedWithCurrentOptions) {
-        final result = await _api.stopService();
-        if (result is! ServiceRequestSuccess) {
-          _logger.warning('Failed to refresh foreground service options: $result');
-          return;
-        }
-      } else {
-        _logger.info('Foreground service already running');
-        return;
-      }
-    }
-
-    if (await _api.isRunningService) {
       _logger.info('Foreground service already running');
       return;
     }
@@ -511,7 +500,6 @@ class ForegroundService {
     );
 
     if (result is ServiceRequestSuccess) {
-      _startedWithCurrentOptions = true;
       _logger.info('Foreground service started');
     } else {
       _logger.warning('Failed to start foreground service: $result');
@@ -523,7 +511,6 @@ class ForegroundService {
 
     final result = await _api.stopService();
     if (result is ServiceRequestSuccess) {
-      _startedWithCurrentOptions = false;
       _logger.info('Foreground service stopped');
     } else {
       _logger.warning('Failed to stop foreground service: $result');

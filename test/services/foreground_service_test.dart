@@ -72,6 +72,8 @@ class _MockForegroundTaskApi extends ForegroundTaskApi {
   }
 }
 
+Future<void> _flushTaskHandler() => Future<void>.delayed(const Duration(milliseconds: 10));
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
@@ -88,6 +90,7 @@ void main() {
           loadLocaleCalls++;
           return const Locale('en');
         },
+        ensureExternalSigners: () async {},
         ensureSubscriptions: () async {
           ensureSubscriptionsCalls++;
         },
@@ -103,7 +106,8 @@ void main() {
       expect(loadLocaleCalls, 0);
       expect(startSubscriptionCalls, 0);
 
-      await handler.ensureSubscriptionRunning();
+      handler.onRepeatEvent(DateTime(2026));
+      await _flushTaskHandler();
 
       expect(bootstrapCalls, 2);
       expect(loadLocaleCalls, 1);
@@ -115,6 +119,7 @@ void main() {
       var bootstrapCalls = 0;
       var ensureSubscriptionsCalls = 0;
       var startSubscriptionCalls = 0;
+      var subscriptionRunning = false;
 
       final handler = NotificationTaskHandler(
         bootstrapIsolate: () async {
@@ -122,17 +127,21 @@ void main() {
           return true;
         },
         loadLocale: () async => const Locale('en'),
+        ensureExternalSigners: () async {},
         ensureSubscriptions: () async {
           ensureSubscriptionsCalls++;
         },
         startSubscription: () async {
           startSubscriptionCalls++;
+          subscriptionRunning = true;
           return true;
         },
+        isSubscriptionRunning: () => subscriptionRunning,
       );
 
       await handler.onStart(DateTime(2026), TaskStarter.system);
-      await handler.ensureSubscriptionRunning();
+      handler.onRepeatEvent(DateTime(2026));
+      await _flushTaskHandler();
 
       expect(bootstrapCalls, 1);
       expect(ensureSubscriptionsCalls, 2);
@@ -173,6 +182,7 @@ void main() {
       final handler = NotificationTaskHandler(
         bootstrapIsolate: () async => true,
         loadLocale: () async => const Locale('en'),
+        ensureExternalSigners: () async {},
         ensureSubscriptions: () async {
           ensureSubscriptionsCalls++;
         },
@@ -184,13 +194,13 @@ void main() {
 
       await handler.onStart(DateTime(2026), TaskStarter.developer);
       handler.onRepeatEvent(DateTime(2026));
-      await Future<void>.delayed(Duration.zero);
+      await _flushTaskHandler();
 
       expect(ensureSubscriptionsCalls, 0);
       expect(startSubscriptionCalls, 0);
 
       handler.onReceiveData({'event': 'main_stopped'});
-      await Future<void>.delayed(Duration.zero);
+      await _flushTaskHandler();
 
       expect(ensureSubscriptionsCalls, 1);
       expect(startSubscriptionCalls, 1);
@@ -202,6 +212,7 @@ void main() {
       final handler = NotificationTaskHandler(
         bootstrapIsolate: () async => true,
         loadLocale: () async => const Locale('en'),
+        ensureExternalSigners: () async {},
         ensureSubscriptions: () async {
           throw Exception('relay subscription failure');
         },
@@ -299,15 +310,14 @@ void main() {
           expect(mockApi.calls, ['startService']);
         });
 
-        test('restarts a stale running service to refresh options', () async {
+        test('does not restart an already running service', () async {
           await service.initialize();
           mockApi.calls.clear();
           mockApi.isRunning = true;
 
           await service.start();
 
-          expect(mockApi.calls, ['stopService', 'startService']);
-          expect(mockApi.lastServiceTypes, const [ForegroundServiceTypes.dataSync]);
+          expect(mockApi.calls, isEmpty);
         });
 
         test('does not restart after starting with current options', () async {

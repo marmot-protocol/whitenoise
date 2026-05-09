@@ -696,6 +696,7 @@ void main() {
         mockAndroidSigner = mockAndroidSignerChannel();
         debugDefaultTargetPlatformOverride = TargetPlatform.android;
         signerMock.registerExternalSignerCalled = false;
+        signerMock.signEventCallback = null;
       });
 
       tearDown(() {
@@ -707,6 +708,15 @@ void main() {
         await const AndroidSignerService().registerExternalSigner(testPubkeyA);
         expect(signerMock.registerExternalSignerCalled, isTrue);
         expect(signerMock.signEventCallback, isNotNull);
+      });
+
+      test('skips Rust callback registration outside Android', () async {
+        debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+
+        await const AndroidSignerService().registerExternalSigner(testPubkeyA);
+
+        expect(signerMock.registerExternalSignerCalled, isFalse);
+        expect(signerMock.signEventCallback, isNull);
       });
 
       test('signEvent callback uses channel and returns signed event', () async {
