@@ -41,7 +41,7 @@ class AppearanceScreen extends HookConsumerWidget {
       ...AppLocalizations.supportedLocales.map(
         (locale) => WnDropdownOption<LocaleSetting>(
           value: SpecificLocale(locale),
-          label: getLanguageDisplayName(locale.languageCode),
+          label: getLocaleDisplayName(locale),
         ),
       ),
     ];

@@ -30,10 +30,13 @@ class SpecificLocale extends LocaleSetting {
 
   @override
   bool operator ==(Object other) =>
-      other is SpecificLocale && other.locale.languageCode == locale.languageCode;
+      other is SpecificLocale &&
+      other.locale.languageCode == locale.languageCode &&
+      other.locale.scriptCode == locale.scriptCode &&
+      other.locale.countryCode == locale.countryCode;
 
   @override
-  int get hashCode => locale.languageCode.hashCode;
+  int get hashCode => Object.hash(locale.languageCode, locale.scriptCode, locale.countryCode);
 }
 
 class LocaleNotifier extends AsyncNotifier<LocaleSetting> {
@@ -99,6 +102,7 @@ class LocaleNotifier extends AsyncNotifier<LocaleSetting> {
       'pt' => rust_utils.languagePortuguese(),
       'ru' => rust_utils.languageRussian(),
       'tr' => rust_utils.languageTurkish(),
+      'zh' => rust_utils.languageSystem(),
       _ => rust_utils.languageEnglish(),
     };
   }
@@ -124,8 +128,20 @@ String getLanguageDisplayName(String languageCode) {
     'pt' => 'Português',
     'ru' => 'Русский',
     'tr' => 'Türkçe',
+    'zh' => '中文',
     _ => languageCode,
   };
+}
+
+String getLocaleDisplayName(Locale locale) {
+  if (locale.languageCode == 'zh') {
+    return switch (locale.scriptCode) {
+      'Hans' => '简体中文',
+      'Hant' => '繁體中文',
+      _ => '中文',
+    };
+  }
+  return getLanguageDisplayName(locale.languageCode);
 }
 
 class LocaleFormatters {
