@@ -30,10 +30,12 @@ class SpecificLocale extends LocaleSetting {
 
   @override
   bool operator ==(Object other) =>
-      other is SpecificLocale && other.locale.languageCode == locale.languageCode;
+      other is SpecificLocale &&
+      other.locale.languageCode == locale.languageCode &&
+      other.locale.scriptCode == locale.scriptCode;
 
   @override
-  int get hashCode => locale.languageCode.hashCode;
+  int get hashCode => Object.hash(locale.languageCode, locale.scriptCode);
 }
 
 class LocaleNotifier extends AsyncNotifier<LocaleSetting> {

@@ -279,6 +279,13 @@ void main() {
       expect(locale1, isNot(equals(locale2)));
     });
 
+    test('SpecificLocale instances with different Chinese scripts are not equal', () {
+      const locale1 = SpecificLocale(Locale('zh'));
+      const locale2 = SpecificLocale(Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'));
+
+      expect(locale1, isNot(equals(locale2)));
+    });
+
     test('SystemLocale and SpecificLocale are not equal', () {
       const systemLocale = SystemLocale();
       const specificLocale = SpecificLocale(Locale('en'));
