@@ -105,10 +105,12 @@ class WnSystemNotice extends HookWidget {
     final autoHideTimer = useRef<Timer?>(null);
 
     void handleDismiss() {
+      if (!context.mounted) return;
       if (isDismissing.value) return;
       isDismissing.value = true;
       autoHideTimer.value?.cancel();
       slideController.reverse().then((_) {
+        if (!context.mounted) return;
         onDismiss?.call();
       });
     }
