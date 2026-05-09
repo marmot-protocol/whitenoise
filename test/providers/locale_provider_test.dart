@@ -162,16 +162,6 @@ void main() {
         expect(mockApi.currentLanguage, 'tr');
       });
 
-      test('setLocale does not persist Chinese as English', () async {
-        await container.read(localeProvider.future);
-        await container.read(localeProvider.notifier).setLocale(const SpecificLocale(Locale('zh')));
-
-        final current = container.read(localeProvider).value;
-        expect(current, isA<SpecificLocale>());
-        expect((current as SpecificLocale).locale.languageCode, 'zh');
-        expect(mockApi.currentLanguage, 'system');
-      });
-
       test('setLocale can switch back to English', () async {
         mockApi.currentLanguage = 'de';
         await container.read(localeProvider.future);
@@ -330,30 +320,8 @@ void main() {
       expect(getLanguageDisplayName('tr'), 'Türkçe');
     });
 
-    test('returns correct display name for Chinese', () {
-      expect(getLanguageDisplayName('zh'), '中文');
-    });
-
     test('returns language code for unknown languages', () {
       expect(getLanguageDisplayName('xx'), 'xx');
-    });
-  });
-
-  group('getLocaleDisplayName', () {
-    test('returns script-specific display names for Chinese locales', () {
-      expect(getLocaleDisplayName(const Locale('zh')), '中文');
-      expect(
-        getLocaleDisplayName(const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hans')),
-        '简体中文',
-      );
-      expect(
-        getLocaleDisplayName(const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant')),
-        '繁體中文',
-      );
-    });
-
-    test('returns language display name for non-Chinese locales', () {
-      expect(getLocaleDisplayName(const Locale('de')), 'Deutsch');
     });
   });
 

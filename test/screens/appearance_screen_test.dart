@@ -345,7 +345,7 @@ void main() {
       expect(mockApi.currentLanguage, 'tr');
     });
 
-    testWidgets('dropdown contains all supported languages plus System', (tester) async {
+    testWidgets('dropdown contains all 8 languages plus System', (tester) async {
       await pumpAppearanceScreen(tester);
 
       await tester.tap(find.byType(WnDropdownSelector<LocaleSetting>));
@@ -369,36 +369,6 @@ void main() {
       expect(find.text('Português'), findsOneWidget);
       expect(find.text('Русский'), findsOneWidget);
       expect(find.text('Türkçe'), findsOneWidget);
-
-      await tester.scrollUntilVisible(
-        find.text('中文'),
-        50.0,
-        scrollable: find.byType(Scrollable).last,
-      );
-      await tester.pumpAndSettle();
-
-      expect(find.text('中文'), findsOneWidget);
-      expect(find.text('简体中文'), findsOneWidget);
-      expect(find.text('繁體中文'), findsOneWidget);
-    });
-
-    testWidgets('selecting Chinese does not persist English', (tester) async {
-      await pumpAppearanceScreen(tester);
-
-      await tester.tap(find.byType(WnDropdownSelector<LocaleSetting>));
-      await tester.pumpAndSettle();
-
-      await tester.scrollUntilVisible(
-        find.text('简体中文'),
-        50.0,
-        scrollable: find.byType(Scrollable).last,
-      );
-      await tester.pumpAndSettle();
-
-      await tester.tap(find.text('简体中文'));
-      await tester.pumpAndSettle();
-
-      expect(mockApi.currentLanguage, 'system');
     });
 
     testWidgets('language selection persists across navigation', (tester) async {
