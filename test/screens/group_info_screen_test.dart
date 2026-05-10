@@ -327,6 +327,25 @@ void main() {
       expect(find.text('Bob'), findsOneWidget);
     });
 
+    testWidgets('scrolls to members that overflow the group info screen', (tester) async {
+      final members = List.generate(24, (index) => index.toRadixString(16).padLeft(64, '0'));
+      _api.membersList = members;
+      _api.adminsList = [members.first];
+      for (final (index, pubkey) in members.indexed) {
+        _api.metadataMap[pubkey] = FlutterMetadata(displayName: 'Member $index', custom: const {});
+      }
+
+      await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+      final lastMember = find.byKey(Key('member_${members.last}'));
+      expect(tester.getTopLeft(lastMember).dy, greaterThan(tester.view.physicalSize.height));
+
+      await tester.drag(groupInfoSlateFinder(), const Offset(0, -700));
+      await tester.pumpAndSettle();
+
+      expect(tester.getBottomLeft(lastMember).dy, lessThan(tester.view.physicalSize.height));
+    });
+
     testWidgets('shows admin badge for admin members', (tester) async {
       _api.membersList = [_testPubkey, testPubkeyB];
       _api.adminsList = [_testPubkey];
