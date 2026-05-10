@@ -105,6 +105,7 @@ class GroupInfoScreen extends HookConsumerWidget {
           SafeArea(
             child: WnSlate(
               showTopScrollEffect: true,
+              showBottomScrollEffect: true,
               header: WnSlateNavigationHeader(
                 title: context.l10n.groupInformation,
                 onNavigate: () => Routes.goBack(context),
@@ -117,7 +118,7 @@ class GroupInfoScreen extends HookConsumerWidget {
                       onDismiss: dismissNotice,
                     )
                   : null,
-              child: Padding(
+              child: SingleChildScrollView(
                 padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
