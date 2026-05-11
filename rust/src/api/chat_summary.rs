@@ -1,7 +1,7 @@
 use crate::api::error::ApiError;
 use crate::api::groups::GroupType;
 use crate::api::messages::ChatMessageSummary;
-use crate::api::utils::group_id_to_string;
+use crate::api::utils::{group_id_from_string, group_id_to_string};
 use chrono::{DateTime, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::PublicKey;
@@ -87,12 +87,7 @@ pub async fn get_chat_summary(
     let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    let chat_list = whitenoise.get_chat_list(&account).await?;
-    let item = chat_list
-        .into_iter()
-        .find(|item| group_id_to_string(&item.mls_group_id) == mls_group_id)
-        .ok_or_else(|| ApiError::Other {
-            message: format!("Chat not found: {}", mls_group_id),
-        })?;
+    let group_id = group_id_from_string(&mls_group_id)?;
+    let item = whitenoise.get_chat_list_item(&account, &group_id).await?;
     Ok(item.into())
 }
