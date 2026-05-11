@@ -96,12 +96,14 @@ NotificationSubscription _newSubscription(
   String? activeChatId,
   Locale locale = const Locale('en'),
   bool enabled = true,
+  bool requestPermissionOnStart = true,
 }) {
   return NotificationSubscription(
     notificationService: notificationService,
     getActiveChatId: () => activeChatId,
     getLocale: () => locale,
     enabled: enabled,
+    requestPermissionOnStart: requestPermissionOnStart,
   );
 }
 
@@ -966,6 +968,22 @@ void main() {
       expect(sub.isRunning, isTrue);
       expect(mockNotificationService.initializeCalls, 1);
       expect(mockNotificationService.requestPermissionCalls, 1);
+      expect(mockApi.streamController, isNotNull);
+
+      await sub.stop();
+    });
+
+    test('start can subscribe without requesting notification permission', () async {
+      final sub = _newSubscription(
+        mockNotificationService,
+        requestPermissionOnStart: false,
+      );
+
+      await sub.start();
+
+      expect(sub.isRunning, isTrue);
+      expect(mockNotificationService.initializeCalls, 1);
+      expect(mockNotificationService.requestPermissionCalls, 0);
       expect(mockApi.streamController, isNotNull);
 
       await sub.stop();

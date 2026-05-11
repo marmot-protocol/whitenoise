@@ -1,17 +1,20 @@
 import 'dart:async' show unawaited;
 import 'dart:convert' show jsonDecode, jsonEncode;
+import 'dart:developer' as developer;
 import 'dart:io' show Directory, Platform;
-import 'dart:ui' show Locale;
+import 'dart:ui' show DartPluginRegistrant, Locale;
 
-import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/widgets.dart' show AppLifecycleState, WidgetsFlutterBinding;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDirectory;
+import 'package:whitenoise/services/external_signer_callback_registry.dart';
 import 'package:whitenoise/services/notification_service.dart';
 import 'package:whitenoise/services/notification_subscription.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
+import 'package:whitenoise/src/rust/api/relays.dart' as relays_api;
 import 'package:whitenoise/src/rust/api/utils.dart' as rust_utils;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
@@ -28,22 +31,27 @@ const _kPendingNotificationTapKey = 'pending_notification_tap';
 // coverage:ignore-start
 @pragma('vm:entry-point')
 void _startCallback() {
-  // Task handler runs in its own Dart isolate; forward only this file's
-  // logger to logcat so task-side logs are visible during development.
-  // Gated to debug builds so boot/package-replaced events don't emit
-  // process state to production logcat.
-  if (kDebugMode) {
-    Logger.root.onRecord.listen((record) {
-      if (record.loggerName != 'ForegroundService' &&
-          record.loggerName != 'NotificationSubscription') {
-        return;
-      }
-      final buf = StringBuffer('[${record.level.name}] ${record.loggerName}: ${record.message}');
-      if (record.error != null) buf.write(' | error: ${record.error}');
-      debugPrint(buf.toString());
-    });
-  }
-  FlutterForegroundTask.setTaskHandler(_NotificationTaskHandler());
+  DartPluginRegistrant.ensureInitialized();
+
+  Logger.root.level = kDebugMode ? Level.INFO : Level.WARNING;
+  Logger.root.onRecord.listen((record) {
+    if (record.loggerName != 'ForegroundService' &&
+        record.loggerName != 'ExternalSignerCallbackRegistry' &&
+        record.loggerName != 'NotificationSubscription') {
+      return;
+    }
+    final buf = StringBuffer('[${record.level.name}] ${record.loggerName}: ${record.message}');
+    if (record.error != null) buf.write(' | error: ${record.error}');
+    if (record.stackTrace != null) buf.write(' | stackTrace: ${record.stackTrace}');
+    developer.log(
+      buf.toString(),
+      name: record.loggerName,
+      level: record.level.value,
+      error: record.error,
+      stackTrace: record.stackTrace,
+    );
+  });
+  FlutterForegroundTask.setTaskHandler(NotificationTaskHandler());
 }
 
 /// Task handler that runs inside the foreground-task background isolate.
@@ -58,29 +66,66 @@ void _startCallback() {
 /// The main isolate coordinates via [FlutterForegroundTask.sendDataToTask]:
 /// `{'event': 'main_started'}` → we stop our subscription.
 /// `{'event': 'main_stopped'}` → we start our subscription.
-class _NotificationTaskHandler extends TaskHandler {
+class NotificationTaskHandler extends TaskHandler {
+  NotificationTaskHandler({
+    Future<bool> Function()? bootstrapIsolate,
+    Future<Locale> Function()? loadLocale,
+    Future<void> Function()? ensureExternalSigners,
+    Future<void> Function()? ensureSubscriptions,
+    Future<bool> Function()? startSubscription,
+    bool Function()? isSubscriptionRunning,
+    Future<void> Function()? stopSubscription,
+  }) : _bootstrapIsolateOverride = bootstrapIsolate,
+       _loadLocaleOverride = loadLocale,
+       _ensureExternalSignersOverride = ensureExternalSigners,
+       _ensureSubscriptionsOverride = ensureSubscriptions,
+       _startSubscriptionOverride = startSubscription,
+       _isSubscriptionRunningOverride = isSubscriptionRunning,
+       _stopSubscriptionOverride = stopSubscription;
+
+  final Future<bool> Function()? _bootstrapIsolateOverride;
+  final Future<Locale> Function()? _loadLocaleOverride;
+  final Future<void> Function()? _ensureExternalSignersOverride;
+  final Future<void> Function()? _ensureSubscriptionsOverride;
+  final Future<bool> Function()? _startSubscriptionOverride;
+  final bool Function()? _isSubscriptionRunningOverride;
+  final Future<void> Function()? _stopSubscriptionOverride;
+
   NotificationSubscription? _subscription;
+  ExternalSignerCallbackRegistry? _externalSignerCallbackRegistry;
+  final _registeredExternalSignerPubkeys = <String>{};
+  final _externalSignerRegistrationFutures = <String, Future<void>>{};
   Locale _cachedLocale = const Locale('en');
   bool _bootstrapped = false;
+  bool _shouldOwnSubscription = false;
+  int _ownershipGeneration = 0;
 
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     _logger.info('Foreground task started: ${starter.name}');
 
-    _bootstrapped = await _bootstrapIsolate();
+    final ownershipGeneration = _setShouldOwnSubscription(starter == TaskStarter.system);
+    _bootstrapped = await _runBootstrapIsolate();
+    if (!_matchesOwnershipGeneration(ownershipGeneration)) return;
     if (!_bootstrapped) return;
 
-    _cachedLocale = await _loadLocale();
+    _cachedLocale = await _runLoadLocale();
+    if (!_matchesOwnershipGeneration(ownershipGeneration)) return;
 
-    if (starter == TaskStarter.system) {
-      await _startSubscription();
+    if (_shouldOwnSubscription) {
+      await _ensureSubscriptionRunning(ownershipGeneration);
     } else {
       _logger.info('Task started by main isolate; awaiting coordination message');
     }
   }
 
   @override
-  void onRepeatEvent(DateTime timestamp) {}
+  void onRepeatEvent(DateTime timestamp) {
+    final ownershipGeneration = _ownershipGeneration;
+    if (!_ownsSubscription(ownershipGeneration)) return;
+    _logger.fine('Repeat event while task owns subscription');
+    unawaited(_ensureSubscriptionRunning(ownershipGeneration));
+  }
 
   @override
   void onReceiveData(Object data) {
@@ -88,17 +133,20 @@ class _NotificationTaskHandler extends TaskHandler {
     final event = data[_kTaskEventKey];
     if (event == _kEventMainStarted) {
       _logger.info('Received main_started — yielding subscription');
-      unawaited(_stopSubscription());
+      final ownershipGeneration = _setShouldOwnSubscription(false);
+      unawaited(_stopSubscription(ownershipGeneration));
     } else if (event == _kEventMainStopped) {
       _logger.info('Received main_stopped — taking over subscription');
-      unawaited(_startSubscription());
+      final ownershipGeneration = _setShouldOwnSubscription(true);
+      unawaited(_ensureSubscriptionRunning(ownershipGeneration));
     }
   }
 
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
     _logger.info('Foreground task destroyed (isTimeout: $isTimeout)');
-    await _stopSubscription();
+    final ownershipGeneration = _setShouldOwnSubscription(false);
+    await _stopSubscription(ownershipGeneration);
   }
 
   @override
@@ -112,6 +160,77 @@ class _NotificationTaskHandler extends TaskHandler {
   @override
   void onNotificationDismissed() {}
 
+  Future<void> _ensureSubscriptionRunning(int ownershipGeneration) async {
+    if (!_ownsSubscription(ownershipGeneration)) return;
+
+    if (!_bootstrapped) {
+      _logger.info('Bootstrapping task isolate before subscription retry');
+      _bootstrapped = await _runBootstrapIsolate();
+      if (!_ownsSubscription(ownershipGeneration)) return;
+      if (!_bootstrapped) {
+        _logger.warning('Task isolate bootstrap still failing');
+        return;
+      }
+      _cachedLocale = await _runLoadLocale();
+      if (!_ownsSubscription(ownershipGeneration)) return;
+    }
+
+    try {
+      await _runEnsureExternalSigners();
+    } catch (e, st) {
+      _logger.warning('Failed to ensure external signer callbacks', e, st);
+      return;
+    }
+    if (!_ownsSubscription(ownershipGeneration)) return;
+
+    try {
+      await _runEnsureSubscriptions();
+    } catch (e, st) {
+      _logger.warning('Failed to ensure Rust relay subscriptions', e, st);
+      return;
+    }
+    if (!_ownsSubscription(ownershipGeneration)) return;
+
+    if (_subscriptionIsRunning) {
+      _logger.fine('Subscription already running');
+      return;
+    }
+
+    _logger.info('Ensuring headless notification subscription is running');
+    await _startSubscription(ownershipGeneration);
+  }
+
+  Future<bool> _runBootstrapIsolate() {
+    final override = _bootstrapIsolateOverride;
+    if (override != null) return override();
+    return _bootstrapIsolate();
+  }
+
+  Future<Locale> _runLoadLocale() {
+    final override = _loadLocaleOverride;
+    if (override != null) return override();
+    return _loadLocale();
+  }
+
+  Future<void> _runEnsureExternalSigners() {
+    final override = _ensureExternalSignersOverride;
+    if (override != null) return override();
+    _logger.fine('Ensuring external signer callbacks are registered');
+    final service = _externalSignerCallbackRegistry ??= ExternalSignerCallbackRegistry();
+    return service.ensureRegistered(
+      registeredExternalSignerPubkeys: _registeredExternalSignerPubkeys,
+      externalSignerRegistrationFutures: _externalSignerRegistrationFutures,
+      requireAll: true,
+    );
+  }
+
+  Future<void> _runEnsureSubscriptions() {
+    final override = _ensureSubscriptionsOverride;
+    if (override != null) return override();
+    _logger.fine('Ensuring Rust relay subscriptions are active');
+    return relays_api.ensureAllSubscriptions();
+  }
+
   /// Initializes Flutter bindings, Rust FFI, and the whitenoise singleton
   /// inside this isolate. Idempotent — if the main isolate already
   /// initialized whitenoise, we accept the "already initialized" error.
@@ -119,10 +238,12 @@ class _NotificationTaskHandler extends TaskHandler {
     try {
       WidgetsFlutterBinding.ensureInitialized();
       await RustLib.init();
+      _logger.info('RustLib initialized in task isolate');
 
       final dir = await getApplicationDocumentsDirectory();
       final dataDir = '${dir.path}/whitenoise/data';
       final logsDir = '${dir.path}/whitenoise/logs';
+      _logger.fine('Task isolate data dir: $dataDir');
       await Directory(dataDir).create(recursive: true);
       await Directory(logsDir).create(recursive: true);
 
@@ -149,12 +270,23 @@ class _NotificationTaskHandler extends TaskHandler {
     }
   }
 
-  Future<void> _startSubscription() async {
+  Future<bool> _startSubscription(int ownershipGeneration) async {
+    if (!_ownsSubscription(ownershipGeneration)) return false;
+
+    final override = _startSubscriptionOverride;
+    if (override != null) {
+      final started = await override();
+      if (!_ownsSubscription(ownershipGeneration)) return false;
+      return started;
+    }
+
+    if (!_ownsSubscription(ownershipGeneration)) return false;
     if (!_bootstrapped) {
       _logger.warning('Cannot start subscription: bootstrap failed earlier');
-      return;
+      return false;
     }
-    if (_subscription != null) return;
+    if (_subscriptionIsRunning) return true;
+    _subscription = null;
 
     final notificationService = NotificationService(
       onNotificationTap: _persistTapAndLaunch,
@@ -163,8 +295,13 @@ class _NotificationTaskHandler extends TaskHandler {
       notificationService: notificationService,
       getActiveChatId: () => null,
       getLocale: () => _cachedLocale,
+      requestPermissionOnStart: false,
     );
     await sub.start();
+    if (!_ownsSubscription(ownershipGeneration)) {
+      await sub.stop();
+      return false;
+    }
     // NotificationSubscription.start() catches its own failures and logs
     // them, so a successful return doesn't mean the stream is attached.
     // Check isRunning and clear our reference on failure so a follow-up
@@ -173,18 +310,47 @@ class _NotificationTaskHandler extends TaskHandler {
       _logger.warning(
         'Headless notification subscription did not attach; will retry on next coordination signal',
       );
-      return;
+      return false;
     }
     _subscription = sub;
     _logger.info('Headless notification subscription started');
+    return true;
   }
 
-  Future<void> _stopSubscription() async {
+  Future<void> _stopSubscription(int ownershipGeneration) async {
+    if (!_matchesOwnershipGeneration(ownershipGeneration)) return;
+
+    final override = _stopSubscriptionOverride;
+    if (override != null) {
+      await override();
+      return;
+    }
+
     final sub = _subscription;
     if (sub == null) return;
     _subscription = null;
     await sub.stop();
     _logger.info('Headless notification subscription stopped');
+  }
+
+  int _setShouldOwnSubscription(bool shouldOwnSubscription) {
+    if (_shouldOwnSubscription != shouldOwnSubscription) {
+      _shouldOwnSubscription = shouldOwnSubscription;
+      _ownershipGeneration++;
+    }
+    return _ownershipGeneration;
+  }
+
+  bool _ownsSubscription(int ownershipGeneration) =>
+      _shouldOwnSubscription && _matchesOwnershipGeneration(ownershipGeneration);
+
+  bool _matchesOwnershipGeneration(int ownershipGeneration) =>
+      _ownershipGeneration == ownershipGeneration;
+
+  bool get _subscriptionIsRunning {
+    final override = _isSubscriptionRunningOverride;
+    if (override != null) return override();
+    return _subscription?.isRunning ?? false;
   }
 
   /// Persists the tapped notification's payload so the main isolate can route
@@ -213,6 +379,7 @@ class _NotificationTaskHandler extends TaskHandler {
       final settings = await rust_api.getAppSettings();
       final language = await rust_api.appSettingsLanguage(appSettings: settings);
       final code = rust_utils.languageToString(language: language);
+      _logger.fine('Loaded task isolate locale setting: $code');
       const supported = ['en', 'es', 'fr', 'de', 'it', 'pt', 'ru', 'tr'];
       if (code == 'system' || code.isEmpty || !supported.contains(code)) {
         return const Locale('en');
@@ -288,12 +455,14 @@ class ForegroundTaskApi {
 
   Future<ServiceRequestResult> startService({
     required int serviceId,
+    List<ForegroundServiceTypes>? serviceTypes,
     required String notificationTitle,
     required String notificationText,
     NotificationIcon? notificationIcon,
     required Function callback,
   }) => FlutterForegroundTask.startService(
     serviceId: serviceId,
+    serviceTypes: serviceTypes,
     notificationTitle: notificationTitle,
     notificationText: notificationText,
     notificationIcon: notificationIcon,
@@ -368,6 +537,7 @@ class ForegroundService {
 
     final result = await _api.startService(
       serviceId: _serviceId,
+      serviceTypes: const [ForegroundServiceTypes.dataSync],
       notificationTitle: 'White Noise',
       notificationText: 'Connected to relays',
       notificationIcon: NotificationIcon(

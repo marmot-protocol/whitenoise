@@ -1,3 +1,6 @@
+import 'dart:async' show Completer;
+import 'dart:ui' show Locale;
+
 import 'package:flutter/widgets.dart' show AppLifecycleState;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -11,6 +14,7 @@ class _MockForegroundTaskApi extends ForegroundTaskApi {
   bool isIgnoringBattery = false;
   ServiceRequestResult startResult = const ServiceRequestSuccess();
   ServiceRequestResult stopResult = const ServiceRequestSuccess();
+  List<ForegroundServiceTypes>? lastServiceTypes;
 
   @override
   void initCommunicationPort() => calls.add('initCommunicationPort');
@@ -33,19 +37,27 @@ class _MockForegroundTaskApi extends ForegroundTaskApi {
   @override
   Future<ServiceRequestResult> startService({
     required int serviceId,
+    List<ForegroundServiceTypes>? serviceTypes,
     required String notificationTitle,
     required String notificationText,
     NotificationIcon? notificationIcon,
     required Function callback,
   }) async {
     calls.add('startService');
-    lastNotificationIcon = notificationIcon;
+    if (startResult is ServiceRequestSuccess) {
+      isRunning = true;
+      lastServiceTypes = serviceTypes;
+      lastNotificationIcon = notificationIcon;
+    }
     return startResult;
   }
 
   @override
   Future<ServiceRequestResult> stopService() async {
     calls.add('stopService');
+    if (stopResult is ServiceRequestSuccess) {
+      isRunning = false;
+    }
     return stopResult;
   }
 
@@ -65,8 +77,216 @@ class _MockForegroundTaskApi extends ForegroundTaskApi {
   }
 }
 
+Future<void> _flushTaskHandler() => Future<void>.delayed(const Duration(milliseconds: 10));
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  group('NotificationTaskHandler', () {
+    test('repeat retries bootstrap and subscription after boot startup failure', () async {
+      var bootstrapCalls = 0;
+      var loadLocaleCalls = 0;
+      var ensureSubscriptionsCalls = 0;
+      var startSubscriptionCalls = 0;
+
+      final handler = NotificationTaskHandler(
+        bootstrapIsolate: () async => ++bootstrapCalls > 1,
+        loadLocale: () async {
+          loadLocaleCalls++;
+          return const Locale('en');
+        },
+        ensureExternalSigners: () async {},
+        ensureSubscriptions: () async {
+          ensureSubscriptionsCalls++;
+        },
+        startSubscription: () async {
+          startSubscriptionCalls++;
+          return true;
+        },
+      );
+
+      await handler.onStart(DateTime(2026), TaskStarter.system);
+
+      expect(bootstrapCalls, 1);
+      expect(loadLocaleCalls, 0);
+      expect(startSubscriptionCalls, 0);
+
+      handler.onRepeatEvent(DateTime(2026));
+      await _flushTaskHandler();
+
+      expect(bootstrapCalls, 2);
+      expect(loadLocaleCalls, 1);
+      expect(ensureSubscriptionsCalls, 1);
+      expect(startSubscriptionCalls, 1);
+    });
+
+    test('repeat health-checks relay subscriptions without duplicating stream', () async {
+      var bootstrapCalls = 0;
+      var ensureSubscriptionsCalls = 0;
+      var startSubscriptionCalls = 0;
+      var subscriptionRunning = false;
+
+      final handler = NotificationTaskHandler(
+        bootstrapIsolate: () async {
+          bootstrapCalls++;
+          return true;
+        },
+        loadLocale: () async => const Locale('en'),
+        ensureExternalSigners: () async {},
+        ensureSubscriptions: () async {
+          ensureSubscriptionsCalls++;
+        },
+        startSubscription: () async {
+          startSubscriptionCalls++;
+          subscriptionRunning = true;
+          return true;
+        },
+        isSubscriptionRunning: () => subscriptionRunning,
+      );
+
+      await handler.onStart(DateTime(2026), TaskStarter.system);
+      handler.onRepeatEvent(DateTime(2026));
+      await _flushTaskHandler();
+
+      expect(bootstrapCalls, 1);
+      expect(ensureSubscriptionsCalls, 2);
+      expect(startSubscriptionCalls, 1);
+    });
+
+    test('system-started task registers external signers before subscribing', () async {
+      final calls = <String>[];
+
+      final handler = NotificationTaskHandler(
+        bootstrapIsolate: () async => true,
+        loadLocale: () async => const Locale('en'),
+        ensureExternalSigners: () async {
+          calls.add('externalSigners');
+        },
+        ensureSubscriptions: () async {
+          calls.add('relaySubscriptions');
+        },
+        startSubscription: () async {
+          calls.add('notificationStream');
+          return true;
+        },
+      );
+
+      await handler.onStart(DateTime(2026), TaskStarter.system);
+
+      expect(calls, [
+        'externalSigners',
+        'relaySubscriptions',
+        'notificationStream',
+      ]);
+    });
+
+    test('developer-started task waits for main_stopped before subscribing', () async {
+      var ensureSubscriptionsCalls = 0;
+      var startSubscriptionCalls = 0;
+
+      final handler = NotificationTaskHandler(
+        bootstrapIsolate: () async => true,
+        loadLocale: () async => const Locale('en'),
+        ensureExternalSigners: () async {},
+        ensureSubscriptions: () async {
+          ensureSubscriptionsCalls++;
+        },
+        startSubscription: () async {
+          startSubscriptionCalls++;
+          return true;
+        },
+      );
+
+      await handler.onStart(DateTime(2026), TaskStarter.developer);
+      handler.onRepeatEvent(DateTime(2026));
+      await _flushTaskHandler();
+
+      expect(ensureSubscriptionsCalls, 0);
+      expect(startSubscriptionCalls, 0);
+
+      handler.onReceiveData({'event': 'main_stopped'});
+      await _flushTaskHandler();
+
+      expect(ensureSubscriptionsCalls, 1);
+      expect(startSubscriptionCalls, 1);
+    });
+
+    test('does not start notification stream when relay subscription health check fails', () async {
+      var startSubscriptionCalls = 0;
+
+      final handler = NotificationTaskHandler(
+        bootstrapIsolate: () async => true,
+        loadLocale: () async => const Locale('en'),
+        ensureExternalSigners: () async {},
+        ensureSubscriptions: () async {
+          throw Exception('relay subscription failure');
+        },
+        startSubscription: () async {
+          startSubscriptionCalls++;
+          return true;
+        },
+      );
+
+      await handler.onStart(DateTime(2026), TaskStarter.system);
+
+      expect(startSubscriptionCalls, 0);
+    });
+
+    test('does not start relay or notification streams when signer registration fails', () async {
+      var ensureSubscriptionsCalls = 0;
+      var startSubscriptionCalls = 0;
+
+      final handler = NotificationTaskHandler(
+        bootstrapIsolate: () async => true,
+        loadLocale: () async => const Locale('en'),
+        ensureExternalSigners: () async {
+          throw Exception('required signer unavailable');
+        },
+        ensureSubscriptions: () async {
+          ensureSubscriptionsCalls++;
+        },
+        startSubscription: () async {
+          startSubscriptionCalls++;
+          return true;
+        },
+      );
+
+      await handler.onStart(DateTime(2026), TaskStarter.system);
+
+      expect(ensureSubscriptionsCalls, 0);
+      expect(startSubscriptionCalls, 0);
+    });
+
+    test('does not subscribe after ownership is yielded during startup', () async {
+      final signerCompleter = Completer<void>();
+      var ensureSubscriptionsCalls = 0;
+      var startSubscriptionCalls = 0;
+
+      final handler = NotificationTaskHandler(
+        bootstrapIsolate: () async => true,
+        loadLocale: () async => const Locale('en'),
+        ensureExternalSigners: () => signerCompleter.future,
+        ensureSubscriptions: () async {
+          ensureSubscriptionsCalls++;
+        },
+        startSubscription: () async {
+          startSubscriptionCalls++;
+          return true;
+        },
+      );
+
+      final startFuture = handler.onStart(DateTime(2026), TaskStarter.system);
+      await _flushTaskHandler();
+
+      handler.onReceiveData({'event': 'main_started'});
+      signerCompleter.complete();
+      await startFuture;
+      await _flushTaskHandler();
+
+      expect(ensureSubscriptionsCalls, 0);
+      expect(startSubscriptionCalls, 0);
+    });
+  });
 
   group('ForegroundService', () {
     group('when disabled', () {
@@ -150,14 +370,23 @@ void main() {
           expect(mockApi.calls, ['startService']);
         });
 
-        test('does not start when already running', () async {
+        test('does not restart an already running service', () async {
           await service.initialize();
           mockApi.calls.clear();
           mockApi.isRunning = true;
 
           await service.start();
 
-          expect(mockApi.calls, isNot(contains('startService')));
+          expect(mockApi.calls, isEmpty);
+        });
+
+        test('does not restart after starting with current options', () async {
+          await service.start();
+          mockApi.calls.clear();
+
+          await service.start();
+
+          expect(mockApi.calls, isEmpty);
         });
 
         test('passes notification icon from metadata', () async {
@@ -168,12 +397,21 @@ void main() {
           );
         });
 
+        test('passes dataSync foreground service type', () async {
+          await service.start();
+
+          expect(mockApi.lastServiceTypes, const [ForegroundServiceTypes.dataSync]);
+        });
+
         test('handles start failure', () async {
           mockApi.startResult = const ServiceRequestFailure(error: 'test error');
 
           await service.start();
 
           expect(mockApi.calls, contains('startService'));
+          expect(mockApi.isRunning, isFalse);
+          expect(mockApi.lastServiceTypes, isNull);
+          expect(mockApi.lastNotificationIcon, isNull);
         });
       });
 
@@ -185,11 +423,13 @@ void main() {
         });
 
         test('handles stop failure', () async {
+          mockApi.isRunning = true;
           mockApi.stopResult = const ServiceRequestFailure(error: 'test error');
 
           await service.stop();
 
           expect(mockApi.calls, ['stopService']);
+          expect(mockApi.isRunning, isTrue);
         });
       });
 

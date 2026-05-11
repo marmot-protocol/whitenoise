@@ -63,10 +63,17 @@ void Function() _mockSecureStorage() {
 }
 
 class _MockAuthNotifier extends AuthNotifier {
+  int ensureExternalSignersRegisteredCount = 0;
+
   @override
   Future<String?> build() async {
     state = const AsyncData(testPubkeyA);
     return testPubkeyA;
+  }
+
+  @override
+  Future<void> ensureExternalSignersRegistered() async {
+    ensureExternalSignersRegisteredCount++;
   }
 }
 
@@ -132,15 +139,17 @@ void main() {
   });
 
   group('WnApp', () {
+    late _MockAuthNotifier mockAuth;
     late _MockThemeNotifier mockTheme;
 
     Future<void> pumpWnApp(WidgetTester tester) async {
       setUpTestView(tester);
+      mockAuth = _MockAuthNotifier();
       mockTheme = _MockThemeNotifier();
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
-            authProvider.overrideWith(() => _MockAuthNotifier()),
+            authProvider.overrideWith(() => mockAuth),
             themeProvider.overrideWith(() => mockTheme),
             secureStorageProvider.overrideWithValue(MockSecureStorage()),
           ],
@@ -193,6 +202,16 @@ void main() {
       await tester.pumpAndSettle();
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
+    });
+
+    testWidgets('reconciles external signer callbacks on app resume', (tester) async {
+      await pumpWnApp(tester);
+      mockAuth.ensureExternalSignersRegisteredCount = 0;
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(mockAuth.ensureExternalSignersRegisteredCount, 1);
     });
   });
 
