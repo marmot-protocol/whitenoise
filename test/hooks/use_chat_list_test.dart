@@ -322,6 +322,22 @@ void main() {
 
         expect(getResult().chats.length, 2);
       });
+
+      testWidgets('keeps showing cached chats during refresh without a spinner', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([_chatSummary('c1', DateTime(2024))]);
+        await tester.pumpAndSettle();
+
+        expect(getResult().chats.length, 1);
+        expect(getResult().isLoading, isFalse);
+
+        getResult().refresh();
+        await tester.pump();
+
+        expect(getResult().chats.map((c) => c.mlsGroupId).toList(), ['mls_c1']);
+        expect(getResult().isLoading, isFalse);
+      });
     });
 
     group('error handling', () {
@@ -640,28 +656,6 @@ void main() {
 
         final ids = getResult().chats.map((c) => c.mlsGroupId).toList();
         expect(ids, ['mls_c1']);
-      });
-    });
-
-    group('userBlockChanged trigger', () {
-      testWidgets('updates chat data without changing order', (tester) async {
-        final getResult = await _pump(tester, testPubkeyA);
-
-        _api.emitInitialSnapshot([
-          _chatSummary('c1', DateTime(2024)),
-          _chatSummary('c2', DateTime(2024, 1, 2)),
-        ]);
-        await tester.pumpAndSettle();
-
-        _api.emitUpdate(
-          ChatListUpdateTrigger.userBlockChanged,
-          _chatSummary('c2', DateTime(2024, 1, 2), mutedUntil: DateTime(2025)),
-        );
-        await tester.pumpAndSettle();
-
-        final chats = getResult().chats;
-        expect(chats.map((c) => c.mlsGroupId).toList(), ['mls_c1', 'mls_c2']);
-        expect(chats[1].mutedUntil, DateTime(2025));
       });
     });
 

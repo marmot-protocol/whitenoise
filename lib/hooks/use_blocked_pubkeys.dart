@@ -35,6 +35,11 @@ BlockedPubkeysState useBlockedPubkeys(String accountPubkey, {int refreshKey = 0}
 
   useEffect(() {
     var cancelled = false;
+    // Only surface a loading state on the first fetch. Subsequent refreshes
+    // (refreshKey or manualRefreshKey changes after the cache is populated)
+    // intentionally keep `isLoading` false so callers like `_useChatList`
+    // keep showing the existing chat list while we re-fetch in the
+    // background, rather than blanking out and showing a spinner.
     if (!cache.hasLoaded) isLoading.value = true;
 
     Future<void> fetchBlockedPubkeys() async {

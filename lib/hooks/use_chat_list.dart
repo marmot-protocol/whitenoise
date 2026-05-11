@@ -139,6 +139,12 @@ ChatListResult _useChatList(
     [pubkey, refreshKey.value, archived],
   );
 
+  // useStream drives rebuilds via subscription side-effect; state lives in
+  // `cache` so it survives screen remounts. `isLoading` is gated on whether
+  // we already have a snapshot in cache, not on stream connection state —
+  // this is what lets the list show stale chats without a spinner while a
+  // fresh subscription is warming up (e.g. after navigating back, or after
+  // a manual refresh).
   useStream(stream, initialData: cache.chatMap);
   final isLoading = !cache.hasInitialSnapshot || blockedState.isLoading;
   final chats = blockedState.isLoading
