@@ -85,23 +85,19 @@ mod tests {
 
     #[test]
     fn test_mute_list_entry_conversion() {
-        let account_keys = Keys::generate();
+        let account_pubkey = Keys::generate().public_key();
         let muted_keys = Keys::generate();
         let now = Utc::now();
 
         let entry = WhitenoiseEntry {
-            account_pubkey: account_keys.public_key(),
             muted_pubkey: muted_keys.public_key(),
             is_private: true,
             created_at: now,
         };
 
-        let flutter_entry: MuteListEntry = entry.into();
+        let flutter_entry = MuteListEntry::from_entry(&account_pubkey, entry);
 
-        assert_eq!(
-            flutter_entry.account_pubkey,
-            account_keys.public_key().to_hex()
-        );
+        assert_eq!(flutter_entry.account_pubkey, account_pubkey.to_hex());
         assert_eq!(flutter_entry.muted_pubkey, muted_keys.public_key().to_hex());
         assert!(flutter_entry.is_private);
         assert_eq!(flutter_entry.created_at, now);
@@ -109,17 +105,16 @@ mod tests {
 
     #[test]
     fn test_mute_list_entry_conversion_public() {
-        let account_keys = Keys::generate();
+        let account_pubkey = Keys::generate().public_key();
         let muted_keys = Keys::generate();
 
         let entry = WhitenoiseEntry {
-            account_pubkey: account_keys.public_key(),
             muted_pubkey: muted_keys.public_key(),
             is_private: false,
             created_at: Utc::now(),
         };
 
-        let flutter_entry: MuteListEntry = entry.into();
+        let flutter_entry = MuteListEntry::from_entry(&account_pubkey, entry);
         assert!(!flutter_entry.is_private);
     }
 }
