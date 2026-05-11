@@ -1,10 +1,11 @@
 // Re-export everything from the whitenoise crate
 use flutter_rust_bridge::frb;
 use std::path::Path;
-use std::sync::{Arc, OnceLock};
+use std::sync::Arc;
+use tokio::sync::OnceCell;
 pub use whitenoise::{AppSettings, Language, RelayType, ThemeMode, Whitenoise};
 
-static GLOBAL_WN: OnceLock<Arc<Whitenoise>> = OnceLock::new();
+static GLOBAL_WN: OnceCell<Arc<Whitenoise>> = OnceCell::const_new();
 
 pub(crate) fn wn() -> Result<&'static Whitenoise, error::ApiError> {
     GLOBAL_WN
@@ -126,18 +127,18 @@ pub use zapstore::*;
 
 #[frb]
 pub async fn initialize_whitenoise(config: WhitenoiseConfig) -> Result<(), ApiError> {
-    if GLOBAL_WN.get().is_some() {
-        return Ok(());
-    }
     let core_config = whitenoise::WhitenoiseConfig::new(
         Path::new(&config.data_dir),
         Path::new(&config.logs_dir),
         "com.whitenoise.app",
     );
-    let arc = Whitenoise::ensure_initialized(core_config)
-        .await
-        .map_err(ApiError::from)?;
-    let _ = GLOBAL_WN.set(arc);
+    GLOBAL_WN
+        .get_or_try_init(|| async {
+            Whitenoise::ensure_initialized(core_config)
+                .await
+                .map_err(ApiError::from)
+        })
+        .await?;
     Ok(())
 }
 
