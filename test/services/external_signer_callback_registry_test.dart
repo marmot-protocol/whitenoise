@@ -73,6 +73,88 @@ void main() {
     expect(recordedRegistrations, [testPubkeyA]);
   });
 
+  test('reconcile rethrows when requireAll registration fails', () async {
+    final registeredPubkeys = <String>{};
+    final registrationFutures = <String, Future<void>>{};
+    final registry = ExternalSignerCallbackRegistry(
+      enabled: true,
+      registerSignerCallback: (pubkey) async {
+        if (pubkey == testPubkeyB) {
+          throw Exception('signer unavailable');
+        }
+      },
+    );
+
+    await expectLater(
+      registry.reconcile(
+        [
+          _account(testPubkeyA, AccountType.external_),
+          _account(testPubkeyB, AccountType.external_),
+        ],
+        registeredExternalSignerPubkeys: registeredPubkeys,
+        externalSignerRegistrationFutures: registrationFutures,
+        requireAll: true,
+      ),
+      throwsException,
+    );
+  });
+
+  test('ensureRegistered returns when account lookup fails without known accounts', () async {
+    final recordedRegistrations = <String>[];
+    final registry = ExternalSignerCallbackRegistry(
+      enabled: true,
+      getAccounts: () async => throw Exception('accounts unavailable'),
+      registerSignerCallback: (pubkey) async {
+        recordedRegistrations.add(pubkey);
+      },
+    );
+
+    await registry.ensureRegistered(
+      registeredExternalSignerPubkeys: <String>{},
+      externalSignerRegistrationFutures: <String, Future<void>>{},
+    );
+
+    expect(recordedRegistrations, isEmpty);
+  });
+
+  test('ensureRegistered rethrows account lookup failure when all accounts are required', () async {
+    final registry = ExternalSignerCallbackRegistry(
+      enabled: true,
+      getAccounts: () async => throw Exception('accounts unavailable'),
+    );
+
+    await expectLater(
+      registry.ensureRegistered(
+        registeredExternalSignerPubkeys: <String>{},
+        externalSignerRegistrationFutures: <String, Future<void>>{},
+        requireAll: true,
+      ),
+      throwsException,
+    );
+  });
+
+  test('ensureRegistered reconciles known accounts when account lookup fails', () async {
+    final recordedRegistrations = <String>[];
+    final registry = ExternalSignerCallbackRegistry(
+      enabled: true,
+      getAccounts: () async => throw Exception('accounts unavailable'),
+      registerSignerCallback: (pubkey) async {
+        recordedRegistrations.add(pubkey);
+      },
+    );
+
+    await registry.ensureRegistered(
+      registeredExternalSignerPubkeys: <String>{},
+      externalSignerRegistrationFutures: <String, Future<void>>{},
+      knownAccounts: [
+        _account(testPubkeyA, AccountType.external_),
+        _account(testPubkeyB, AccountType.local),
+      ],
+    );
+
+    expect(recordedRegistrations, [testPubkeyA]);
+  });
+
   test('reconcile skips Android callback registration when disabled', () async {
     final recordedRegistrations = <String>[];
     final registry = ExternalSignerCallbackRegistry(
