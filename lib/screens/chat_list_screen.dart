@@ -188,6 +188,7 @@ class ChatListScreen extends HookConsumerWidget {
     final notice = useSystemNotice();
     final updateState = useZapstoreUpdate();
     final searchQuery = useState('');
+    final headerOpen = useState(false);
     final welcomeNoticeDismissed = useState(false);
     final chatListTopPadding = useMemoized(() => ValueNotifier(safeAreaTop + _slateHeight.h));
     final chatListSearch = useChatListSearch(
@@ -216,108 +217,120 @@ class ChatListScreen extends HookConsumerWidget {
     final showWelcomeNotice = !isArchiveView && isEmpty && !welcomeNoticeDismissed.value;
     final activeUpdateVersion = updateState.isDismissed ? null : updateState.availableVersion;
 
-    return Scaffold(
-      backgroundColor: colors.backgroundPrimary,
-      body: Stack(
-        children: [
-          ValueListenableBuilder<double>(
-            valueListenable: chatListTopPadding,
-            builder: (context, topPadding, _) => WnChatList(
-              itemCount: filteredChats.length,
-              isLoading: isLoading,
-              isSearchActive: searchQuery.value.isNotEmpty,
-              topPadding: topPadding,
-              header: ChatListSearchAndFilters(
-                onSearchChanged: (value) => searchQuery.value = value,
-                isLoading: chatListSearch.isSearching,
-                showFilterChips: !isArchiveView,
-                isChatsSelected: !isArchiveView,
-                onChatsSelected: (_) => selectedFilter.value = ChatListFilter.chats,
-                onArchiveSelected: (_) => selectedFilter.value = ChatListFilter.archive,
-              ),
-              headerHeight: isArchiveView ? archiveHeaderH : chatsHeaderH,
-              pinnedHeader: isArchiveView
-                  ? Padding(
-                      padding: EdgeInsets.only(top: 8.h),
-                      child: ChatListFilters(
-                        isChatsSelected: selectedFilter.value == ChatListFilter.chats,
-                        isArchiveSelected: selectedFilter.value == ChatListFilter.archive,
-                        onChatsSelected: (_) => selectedFilter.value = ChatListFilter.chats,
-                        onArchiveSelected: (_) {},
-                      ),
-                    )
-                  : null,
-              pinnedHeaderHeight: isArchiveView ? _filterChipsHeight.h : 0,
-              pinnedHeaderMinOffset: isArchiveView ? 8.h : 0,
-              emptyStateContent: isEmpty
-                  ? isArchiveView
-                        ? Center(
-                            key: const Key('archived_chats_empty'),
-                            child: Text(
-                              context.l10n.archivedChatsEmpty,
-                              style: typography.medium14.copyWith(
-                                color: colors.backgroundContentQuaternary,
-                              ),
-                            ),
-                          )
-                        : Padding(
-                            padding: EdgeInsets.symmetric(horizontal: 40.w),
-                            child: Text(
-                              key: const Key('welcome_slogan'),
-                              context.l10n.sloganFull,
-                              style: typography.medium16.copyWith(
-                                color: colors.backgroundContentTertiary,
-                              ),
-                              textAlign: TextAlign.center,
-                            ),
-                          )
-                  : null,
-              itemBuilder: (context, index) {
-                final chatSummary = filteredChats[index];
-                return ChatListTile(
-                  key: Key(chatSummary.mlsGroupId),
-                  chatSummary: chatSummary,
-                  isArchived: isArchiveView,
-                  searchSnippet: chatListSearch.messageSnippets[chatSummary.mlsGroupId],
-                  onChatListChanged: isArchiveView
-                      ? archivedChatListResult.refresh
-                      : chatListResult.refresh,
-                  onError: notice.showErrorNotice,
-                );
-              },
-            ),
-          ),
-          _MeasuredSlate(
-            onHeightChanged: (height) {
-              if (chatListTopPadding.value != height) {
-                chatListTopPadding.value = height;
-              }
-            },
-            child: SafeArea(
-              bottom: false,
-              child: WnSlate(
-                systemNotice: _buildSystemNotice(
-                  context,
-                  typography,
-                  colors,
-                  showWelcomeNotice: showWelcomeNotice,
-                  isOffline: isOffline,
-                  updateVersion: activeUpdateVersion,
-                  onUpdateDismiss: updateState.dismiss,
-                  onWelcomeDismiss: () {
-                    if (context.mounted) {
-                      welcomeNoticeDismissed.value = true;
-                    }
-                  },
-                  noticeMessage: notice.noticeMessage,
-                  noticeType: notice.noticeType,
-                  onNoticeDismiss: notice.dismissNotice,
+    final isSearchVisible = headerOpen.value || searchQuery.value.isNotEmpty;
+
+    return PopScope(
+      canPop: !isSearchVisible,
+      onPopInvokedWithResult: (didPop, _) {
+        if (didPop) return;
+        FocusScope.of(context).unfocus();
+        searchQuery.value = '';
+        headerOpen.value = false;
+      },
+      child: Scaffold(
+        backgroundColor: colors.backgroundPrimary,
+        body: Stack(
+          children: [
+            ValueListenableBuilder<double>(
+              valueListenable: chatListTopPadding,
+              builder: (context, topPadding, _) => WnChatList(
+                itemCount: filteredChats.length,
+                isLoading: isLoading,
+                isSearchActive: searchQuery.value.isNotEmpty,
+                topPadding: topPadding,
+                headerOpenNotifier: headerOpen,
+                header: ChatListSearchAndFilters(
+                  onSearchChanged: (value) => searchQuery.value = value,
+                  isLoading: chatListSearch.isSearching,
+                  showFilterChips: !isArchiveView,
+                  isChatsSelected: !isArchiveView,
+                  onChatsSelected: (_) => selectedFilter.value = ChatListFilter.chats,
+                  onArchiveSelected: (_) => selectedFilter.value = ChatListFilter.archive,
                 ),
-                header: const ChatListHeader(),
+                headerHeight: isArchiveView ? archiveHeaderH : chatsHeaderH,
+                pinnedHeader: isArchiveView
+                    ? Padding(
+                        padding: EdgeInsets.only(top: 8.h),
+                        child: ChatListFilters(
+                          isChatsSelected: selectedFilter.value == ChatListFilter.chats,
+                          isArchiveSelected: selectedFilter.value == ChatListFilter.archive,
+                          onChatsSelected: (_) => selectedFilter.value = ChatListFilter.chats,
+                          onArchiveSelected: (_) {},
+                        ),
+                      )
+                    : null,
+                pinnedHeaderHeight: isArchiveView ? _filterChipsHeight.h : 0,
+                pinnedHeaderMinOffset: isArchiveView ? 8.h : 0,
+                emptyStateContent: isEmpty
+                    ? isArchiveView
+                          ? Center(
+                              key: const Key('archived_chats_empty'),
+                              child: Text(
+                                context.l10n.archivedChatsEmpty,
+                                style: typography.medium14.copyWith(
+                                  color: colors.backgroundContentQuaternary,
+                                ),
+                              ),
+                            )
+                          : Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 40.w),
+                              child: Text(
+                                key: const Key('welcome_slogan'),
+                                context.l10n.sloganFull,
+                                style: typography.medium16.copyWith(
+                                  color: colors.backgroundContentTertiary,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            )
+                    : null,
+                itemBuilder: (context, index) {
+                  final chatSummary = filteredChats[index];
+                  return ChatListTile(
+                    key: Key(chatSummary.mlsGroupId),
+                    chatSummary: chatSummary,
+                    isArchived: isArchiveView,
+                    searchSnippet: chatListSearch.messageSnippets[chatSummary.mlsGroupId],
+                    onChatListChanged: isArchiveView
+                        ? archivedChatListResult.refresh
+                        : chatListResult.refresh,
+                    onError: notice.showErrorNotice,
+                  );
+                },
               ),
             ),
-          ),
-        ],
+            _MeasuredSlate(
+              onHeightChanged: (height) {
+                if (chatListTopPadding.value != height) {
+                  chatListTopPadding.value = height;
+                }
+              },
+              child: SafeArea(
+                bottom: false,
+                child: WnSlate(
+                  systemNotice: _buildSystemNotice(
+                    context,
+                    typography,
+                    colors,
+                    showWelcomeNotice: showWelcomeNotice,
+                    isOffline: isOffline,
+                    updateVersion: activeUpdateVersion,
+                    onUpdateDismiss: updateState.dismiss,
+                    onWelcomeDismiss: () {
+                      if (context.mounted) {
+                        welcomeNoticeDismissed.value = true;
+                      }
+                    },
+                    noticeMessage: notice.noticeMessage,
+                    noticeType: notice.noticeType,
+                    onNoticeDismiss: notice.dismissNotice,
+                  ),
+                  header: const ChatListHeader(),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
