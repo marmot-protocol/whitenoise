@@ -126,6 +126,9 @@ pub use zapstore::*;
 
 #[frb]
 pub async fn initialize_whitenoise(config: WhitenoiseConfig) -> Result<(), ApiError> {
+    if GLOBAL_WN.get().is_some() {
+        return Ok(());
+    }
     let core_config = whitenoise::WhitenoiseConfig::new(
         Path::new(&config.data_dir),
         Path::new(&config.logs_dir),

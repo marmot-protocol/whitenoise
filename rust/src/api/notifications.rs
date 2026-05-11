@@ -173,7 +173,6 @@ pub async fn upsert_push_registration(
     server_pubkey: String,
     relay_hint: Option<String>,
 ) -> Result<PushRegistration, ApiError> {
-    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let server_pk = PublicKey::parse(&server_pubkey)?;
     let relay = relay_hint
@@ -181,11 +180,7 @@ pub async fn upsert_push_registration(
         .map(RelayUrl::parse)
         .transpose()
         .map_err(ApiError::from)?;
-    let session = whitenoise
-        .session(&pubkey)
-        .ok_or_else(|| ApiError::Whitenoise {
-            message: "Account session not found".to_string(),
-        })?;
+    let session = wn_session(&pubkey)?;
     let registration = session
         .push()
         .upsert_registration(platform.into(), &raw_token, &server_pk, relay.as_ref())
@@ -195,13 +190,8 @@ pub async fn upsert_push_registration(
 
 #[frb]
 pub async fn clear_push_registration(pubkey: String) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let session = whitenoise
-        .session(&pubkey)
-        .ok_or_else(|| ApiError::Whitenoise {
-            message: "Account session not found".to_string(),
-        })?;
+    let session = wn_session(&pubkey)?;
     session.push().clear_registration().await?;
     Ok(())
 }

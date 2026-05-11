@@ -476,13 +476,8 @@ impl From<WhitenoiseGroupWithInfoAndMembership> for GroupWithInfoAndMembership {
 pub async fn visible_groups_with_info(
     account_pubkey: String,
 ) -> Result<Vec<GroupWithInfoAndMembership>, ApiError> {
-    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = whitenoise
-        .session(&pubkey)
-        .ok_or_else(|| ApiError::Whitenoise {
-            message: "Account session not found".to_string(),
-        })?;
+    let session = wn_session(&pubkey)?;
     let groups = session.groups().visible_with_info().await?;
     Ok(groups.into_iter().map(|g| g.into()).collect())
 }
