@@ -41,6 +41,7 @@ class ReportBugScreen extends HookConsumerWidget {
     final frequency = useState<String?>(null);
     final includeNpub = useState(false);
     final isSending = useState(false);
+    final shouldPopOnDismiss = useState(false);
     final notice = useSystemNotice();
     final descriptionError = useState<String?>(null);
 
@@ -87,13 +88,8 @@ class ReportBugScreen extends HookConsumerWidget {
         );
 
         if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(l10n.reportBugSuccess),
-            duration: const Duration(seconds: 3),
-          ),
-        );
-        Routes.goBack(context);
+        shouldPopOnDismiss.value = true;
+        notice.showSuccessNotice(l10n.reportBugSuccess);
       } catch (e) {
         _logger.severe('send_bug_report failed', e);
         if (!context.mounted) return;
@@ -120,7 +116,14 @@ class ReportBugScreen extends HookConsumerWidget {
                         key: ValueKey(notice.noticeMessage),
                         title: notice.noticeMessage!,
                         type: notice.noticeType,
-                        onDismiss: notice.dismissNotice,
+                        onDismiss: () {
+                          final shouldPop = shouldPopOnDismiss.value;
+                          shouldPopOnDismiss.value = false;
+                          notice.dismissNotice();
+                          if (shouldPop && context.mounted) {
+                            Routes.goBack(context);
+                          }
+                        },
                       )
                     : null),
           child: KeyboardDismissOnTap(
