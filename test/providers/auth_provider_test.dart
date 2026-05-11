@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/foundation.dart' show TargetPlatform, debugDefaultTargetPlatformOverride;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:logging/logging.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/is_adding_account_provider.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
@@ -353,6 +354,32 @@ void main() {
         expect(container.read(isAddingAccountProvider), true);
         await container.read(authProvider.notifier).loginStart('nsec123');
         expect(container.read(isAddingAccountProvider), false);
+      });
+
+      test('does not log full pubkey on completion', () async {
+        final previousLevel = Logger.root.level;
+        Logger.root.level = Level.ALL;
+        final records = <LogRecord>[];
+        final sub = Logger.root.onRecord.listen(records.add);
+        addTearDown(() async {
+          await sub.cancel();
+          Logger.root.level = previousLevel;
+        });
+        await container.read(authProvider.future);
+
+        await container.read(authProvider.notifier).loginStart('nsec123');
+
+        final messages = records
+            .where((record) => record.loggerName == 'AuthNotifier')
+            .map((record) => record.message)
+            .toList();
+        expect(
+          messages,
+          contains(predicate<String>((message) => message.startsWith('Login completed'))),
+        );
+        expect(messages.any((message) => message.contains(testPubkeyB)), isFalse);
+        expect(await mockStorage.read(key: 'active_account_pubkey'), testPubkeyB);
+        expect(container.read(authProvider).value, testPubkeyB);
       });
     });
 

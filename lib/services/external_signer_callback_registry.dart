@@ -18,12 +18,13 @@ class ExternalSignerCallbackRegistry {
   final bool _enabled;
   final Future<List<accounts_api.Account>> Function() _getAccounts;
   final Future<void> Function(String pubkey) _registerSignerCallback;
-  final Set<String> _registeredExternalSignerPubkeys = {};
-  final Map<String, Future<void>> _externalSignerRegistrationFutures = {};
 
   Future<void> ensureRegistered({
+    required Set<String> registeredExternalSignerPubkeys,
+    required Map<String, Future<void>> externalSignerRegistrationFutures,
     Iterable<accounts_api.Account> knownAccounts = const [],
     Set<String> requiredPubkeys = const {},
+    bool requireAll = false,
   }) async {
     if (!_enabled) return;
 
@@ -33,22 +34,35 @@ class ExternalSignerCallbackRegistry {
     } catch (e, stackTrace) {
       if (knownAccounts.isEmpty) {
         _logger.warning('Failed to reconcile external signers', e, stackTrace);
+        if (requireAll) rethrow;
         return;
       }
       _logger.warning('Failed to fetch accounts while reconciling external signers', e, stackTrace);
-      await _registerMissingExternalSigners(knownAccounts, requiredPubkeys: requiredPubkeys);
+      await reconcile(
+        knownAccounts,
+        registeredExternalSignerPubkeys: registeredExternalSignerPubkeys,
+        externalSignerRegistrationFutures: externalSignerRegistrationFutures,
+        requiredPubkeys: requiredPubkeys,
+        requireAll: requireAll,
+      );
       return;
     }
 
     await reconcile(
       [...persistedAccounts, ...knownAccounts],
+      registeredExternalSignerPubkeys: registeredExternalSignerPubkeys,
+      externalSignerRegistrationFutures: externalSignerRegistrationFutures,
       requiredPubkeys: requiredPubkeys,
+      requireAll: requireAll,
     );
   }
 
   Future<void> reconcile(
     Iterable<accounts_api.Account> accounts, {
+    required Set<String> registeredExternalSignerPubkeys,
+    required Map<String, Future<void>> externalSignerRegistrationFutures,
     Set<String> requiredPubkeys = const {},
+    bool requireAll = false,
   }) async {
     if (!_enabled) return;
 
@@ -59,7 +73,7 @@ class ExternalSignerCallbackRegistry {
       }
     }
 
-    _registeredExternalSignerPubkeys.removeWhere(
+    registeredExternalSignerPubkeys.removeWhere(
       (pubkey) => !externalAccountsByPubkey.containsKey(pubkey),
     );
 
@@ -70,17 +84,25 @@ class ExternalSignerCallbackRegistry {
     );
     await _registerMissingExternalSigners(
       externalAccountsByPubkey.values,
-      requiredPubkeys: requiredPubkeys,
+      registeredExternalSignerPubkeys: registeredExternalSignerPubkeys,
+      externalSignerRegistrationFutures: externalSignerRegistrationFutures,
+      requiredPubkeys: requireAll ? externalAccountsByPubkey.keys.toSet() : requiredPubkeys,
     );
   }
 
   Future<void> _registerMissingExternalSigners(
     Iterable<accounts_api.Account> accounts, {
+    required Set<String> registeredExternalSignerPubkeys,
+    required Map<String, Future<void>> externalSignerRegistrationFutures,
     Set<String> requiredPubkeys = const {},
   }) async {
     for (final account in accounts) {
       try {
-        await _registerExternalSignerIfMissing(account);
+        await _registerExternalSignerIfMissing(
+          account,
+          registeredExternalSignerPubkeys: registeredExternalSignerPubkeys,
+          externalSignerRegistrationFutures: externalSignerRegistrationFutures,
+        );
       } catch (e, stackTrace) {
         if (requiredPubkeys.contains(account.pubkey)) rethrow;
         _logger.warning(
@@ -92,26 +114,30 @@ class ExternalSignerCallbackRegistry {
     }
   }
 
-  Future<void> _registerExternalSignerIfMissing(accounts_api.Account account) async {
+  Future<void> _registerExternalSignerIfMissing(
+    accounts_api.Account account, {
+    required Set<String> registeredExternalSignerPubkeys,
+    required Map<String, Future<void>> externalSignerRegistrationFutures,
+  }) async {
     if (account.accountType != accounts_api.AccountType.external_) return;
     final pubkey = account.pubkey;
-    if (_registeredExternalSignerPubkeys.contains(pubkey)) return;
+    if (registeredExternalSignerPubkeys.contains(pubkey)) return;
 
-    final inFlightRegistration = _externalSignerRegistrationFutures[pubkey];
+    final inFlightRegistration = externalSignerRegistrationFutures[pubkey];
     if (inFlightRegistration != null) {
       await inFlightRegistration;
       return;
     }
 
     final registration = _registerSignerCallback(pubkey).then((_) {
-      _registeredExternalSignerPubkeys.add(pubkey);
+      registeredExternalSignerPubkeys.add(pubkey);
       _logger.info('Registered external signer callback');
     });
-    _externalSignerRegistrationFutures[pubkey] = registration;
+    externalSignerRegistrationFutures[pubkey] = registration;
     try {
       await registration;
     } finally {
-      _externalSignerRegistrationFutures.remove(pubkey);
+      externalSignerRegistrationFutures.remove(pubkey);
     }
   }
 }

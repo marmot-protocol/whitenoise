@@ -86,22 +86,27 @@ class NotificationTaskHandler extends TaskHandler {
 
   NotificationSubscription? _subscription;
   ExternalSignerCallbackRegistry? _externalSignerCallbackRegistry;
+  final _registeredExternalSignerPubkeys = <String>{};
+  final _externalSignerRegistrationFutures = <String, Future<void>>{};
   Locale _cachedLocale = const Locale('en');
   bool _bootstrapped = false;
   bool _shouldOwnSubscription = false;
+  int _ownershipGeneration = 0;
 
   @override
   Future<void> onStart(DateTime timestamp, TaskStarter starter) async {
     _logger.info('Foreground task started: ${starter.name}');
 
-    _shouldOwnSubscription = starter == TaskStarter.system;
+    final ownershipGeneration = _setShouldOwnSubscription(starter == TaskStarter.system);
     _bootstrapped = await _runBootstrapIsolate();
+    if (!_matchesOwnershipGeneration(ownershipGeneration)) return;
     if (!_bootstrapped) return;
 
     _cachedLocale = await _runLoadLocale();
+    if (!_matchesOwnershipGeneration(ownershipGeneration)) return;
 
     if (_shouldOwnSubscription) {
-      await _ensureSubscriptionRunning();
+      await _ensureSubscriptionRunning(ownershipGeneration);
     } else {
       _logger.info('Task started by main isolate; awaiting coordination message');
     }
@@ -109,9 +114,10 @@ class NotificationTaskHandler extends TaskHandler {
 
   @override
   void onRepeatEvent(DateTime timestamp) {
-    if (!_shouldOwnSubscription) return;
+    final ownershipGeneration = _ownershipGeneration;
+    if (!_ownsSubscription(ownershipGeneration)) return;
     _logger.fine('Repeat event while task owns subscription');
-    unawaited(_ensureSubscriptionRunning());
+    unawaited(_ensureSubscriptionRunning(ownershipGeneration));
   }
 
   @override
@@ -120,20 +126,20 @@ class NotificationTaskHandler extends TaskHandler {
     final event = data[_kTaskEventKey];
     if (event == _kEventMainStarted) {
       _logger.info('Received main_started — yielding subscription');
-      _shouldOwnSubscription = false;
-      unawaited(_stopSubscription());
+      final ownershipGeneration = _setShouldOwnSubscription(false);
+      unawaited(_stopSubscription(ownershipGeneration));
     } else if (event == _kEventMainStopped) {
       _logger.info('Received main_stopped — taking over subscription');
-      _shouldOwnSubscription = true;
-      unawaited(_ensureSubscriptionRunning());
+      final ownershipGeneration = _setShouldOwnSubscription(true);
+      unawaited(_ensureSubscriptionRunning(ownershipGeneration));
     }
   }
 
   @override
   Future<void> onDestroy(DateTime timestamp, bool isTimeout) async {
     _logger.info('Foreground task destroyed (isTimeout: $isTimeout)');
-    _shouldOwnSubscription = false;
-    await _stopSubscription();
+    final ownershipGeneration = _setShouldOwnSubscription(false);
+    await _stopSubscription(ownershipGeneration);
   }
 
   @override
@@ -147,24 +153,28 @@ class NotificationTaskHandler extends TaskHandler {
   @override
   void onNotificationDismissed() {}
 
-  Future<void> _ensureSubscriptionRunning() async {
-    if (!_shouldOwnSubscription) return;
+  Future<void> _ensureSubscriptionRunning(int ownershipGeneration) async {
+    if (!_ownsSubscription(ownershipGeneration)) return;
 
     if (!_bootstrapped) {
       _logger.info('Bootstrapping task isolate before subscription retry');
       _bootstrapped = await _runBootstrapIsolate();
+      if (!_ownsSubscription(ownershipGeneration)) return;
       if (!_bootstrapped) {
         _logger.warning('Task isolate bootstrap still failing');
         return;
       }
       _cachedLocale = await _runLoadLocale();
+      if (!_ownsSubscription(ownershipGeneration)) return;
     }
 
     try {
       await _runEnsureExternalSigners();
     } catch (e, st) {
       _logger.warning('Failed to ensure external signer callbacks', e, st);
+      return;
     }
+    if (!_ownsSubscription(ownershipGeneration)) return;
 
     try {
       await _runEnsureSubscriptions();
@@ -172,6 +182,7 @@ class NotificationTaskHandler extends TaskHandler {
       _logger.warning('Failed to ensure Rust relay subscriptions', e, st);
       return;
     }
+    if (!_ownsSubscription(ownershipGeneration)) return;
 
     if (_subscriptionIsRunning) {
       _logger.fine('Subscription already running');
@@ -179,7 +190,7 @@ class NotificationTaskHandler extends TaskHandler {
     }
 
     _logger.info('Ensuring headless notification subscription is running');
-    await _startSubscription();
+    await _startSubscription(ownershipGeneration);
   }
 
   Future<bool> _runBootstrapIsolate() {
@@ -199,7 +210,11 @@ class NotificationTaskHandler extends TaskHandler {
     if (override != null) return override();
     _logger.fine('Ensuring external signer callbacks are registered');
     final service = _externalSignerCallbackRegistry ??= ExternalSignerCallbackRegistry();
-    return service.ensureRegistered();
+    return service.ensureRegistered(
+      registeredExternalSignerPubkeys: _registeredExternalSignerPubkeys,
+      externalSignerRegistrationFutures: _externalSignerRegistrationFutures,
+      requireAll: true,
+    );
   }
 
   Future<void> _runEnsureSubscriptions() {
@@ -248,12 +263,17 @@ class NotificationTaskHandler extends TaskHandler {
     }
   }
 
-  Future<bool> _startSubscription() async {
+  Future<bool> _startSubscription(int ownershipGeneration) async {
+    if (!_ownsSubscription(ownershipGeneration)) return false;
+
     final override = _startSubscriptionOverride;
     if (override != null) {
-      return override();
+      final started = await override();
+      if (!_ownsSubscription(ownershipGeneration)) return false;
+      return started;
     }
 
+    if (!_ownsSubscription(ownershipGeneration)) return false;
     if (!_bootstrapped) {
       _logger.warning('Cannot start subscription: bootstrap failed earlier');
       return false;
@@ -271,6 +291,10 @@ class NotificationTaskHandler extends TaskHandler {
       requestPermissionOnStart: false,
     );
     await sub.start();
+    if (!_ownsSubscription(ownershipGeneration)) {
+      await sub.stop();
+      return false;
+    }
     // NotificationSubscription.start() catches its own failures and logs
     // them, so a successful return doesn't mean the stream is attached.
     // Check isRunning and clear our reference on failure so a follow-up
@@ -286,7 +310,9 @@ class NotificationTaskHandler extends TaskHandler {
     return true;
   }
 
-  Future<void> _stopSubscription() async {
+  Future<void> _stopSubscription(int ownershipGeneration) async {
+    if (!_matchesOwnershipGeneration(ownershipGeneration)) return;
+
     final override = _stopSubscriptionOverride;
     if (override != null) {
       await override();
@@ -299,6 +325,20 @@ class NotificationTaskHandler extends TaskHandler {
     await sub.stop();
     _logger.info('Headless notification subscription stopped');
   }
+
+  int _setShouldOwnSubscription(bool shouldOwnSubscription) {
+    if (_shouldOwnSubscription != shouldOwnSubscription) {
+      _shouldOwnSubscription = shouldOwnSubscription;
+      _ownershipGeneration++;
+    }
+    return _ownershipGeneration;
+  }
+
+  bool _ownsSubscription(int ownershipGeneration) =>
+      _shouldOwnSubscription && _matchesOwnershipGeneration(ownershipGeneration);
+
+  bool _matchesOwnershipGeneration(int ownershipGeneration) =>
+      _ownershipGeneration == ownershipGeneration;
 
   bool get _subscriptionIsRunning {
     final override = _isSubscriptionRunningOverride;

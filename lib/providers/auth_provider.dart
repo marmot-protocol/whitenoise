@@ -16,6 +16,8 @@ final secureStorageProvider = Provider<FlutterSecureStorage>(
 
 class AuthNotifier extends AsyncNotifier<String?> {
   final _externalSignerCallbackRegistry = ExternalSignerCallbackRegistry();
+  final _registeredExternalSignerPubkeys = <String>{};
+  final _externalSignerRegistrationFutures = <String, Future<void>>{};
 
   @override
   Future<String?> build() async {
@@ -170,6 +172,8 @@ class AuthNotifier extends AsyncNotifier<String?> {
       final nextAccount = otherAccounts.isEmpty ? null : otherAccounts.first;
       await _externalSignerCallbackRegistry.reconcile(
         remainingAccounts,
+        registeredExternalSignerPubkeys: _registeredExternalSignerPubkeys,
+        externalSignerRegistrationFutures: _externalSignerRegistrationFutures,
         requiredPubkeys: nextAccount == null ? const {} : {nextAccount.pubkey},
       );
       if (nextAccount != null) {
@@ -237,7 +241,7 @@ class AuthNotifier extends AsyncNotifier<String?> {
     await storage.write(key: _storageKey, value: account.pubkey);
     state = AsyncData(account.pubkey);
     ref.read(isAddingAccountProvider.notifier).set(false);
-    _logger.info('Login completed for ${account.pubkey}');
+    _logger.info('Login completed for ${account.accountType.name} account');
   }
 
   Future<void> _ensureExternalSignersRegistered({
@@ -245,6 +249,8 @@ class AuthNotifier extends AsyncNotifier<String?> {
     Set<String> requiredPubkeys = const {},
   }) async {
     await _externalSignerCallbackRegistry.ensureRegistered(
+      registeredExternalSignerPubkeys: _registeredExternalSignerPubkeys,
+      externalSignerRegistrationFutures: _externalSignerRegistrationFutures,
       knownAccounts: knownAccounts,
       requiredPubkeys: requiredPubkeys,
     );

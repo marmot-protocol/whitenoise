@@ -15,36 +15,44 @@ Account _account(String pubkey, AccountType accountType) {
 
 void main() {
   test('reconcile keeps registering optional accounts after one registration fails', () async {
-    final registeredPubkeys = <String>[];
+    final recordedRegistrations = <String>[];
+    final registeredPubkeys = <String>{};
+    final registrationFutures = <String, Future<void>>{};
     final registry = ExternalSignerCallbackRegistry(
       enabled: true,
       registerSignerCallback: (pubkey) async {
         if (pubkey == testPubkeyA) {
           throw Exception('signer unavailable');
         }
-        registeredPubkeys.add(pubkey);
+        recordedRegistrations.add(pubkey);
       },
     );
 
-    await registry.reconcile([
-      _account(testPubkeyA, AccountType.external_),
-      _account(testPubkeyB, AccountType.external_),
-      _account(testPubkeyC, AccountType.local),
-      _account(testPubkeyD, AccountType.external_),
-    ]);
+    await registry.reconcile(
+      [
+        _account(testPubkeyA, AccountType.external_),
+        _account(testPubkeyB, AccountType.external_),
+        _account(testPubkeyC, AccountType.local),
+        _account(testPubkeyD, AccountType.external_),
+      ],
+      registeredExternalSignerPubkeys: registeredPubkeys,
+      externalSignerRegistrationFutures: registrationFutures,
+    );
 
-    expect(registeredPubkeys, [testPubkeyB, testPubkeyD]);
+    expect(recordedRegistrations, [testPubkeyB, testPubkeyD]);
   });
 
   test('reconcile rethrows when a required account registration fails', () async {
-    final registeredPubkeys = <String>[];
+    final recordedRegistrations = <String>[];
+    final registeredPubkeys = <String>{};
+    final registrationFutures = <String, Future<void>>{};
     final registry = ExternalSignerCallbackRegistry(
       enabled: true,
       registerSignerCallback: (pubkey) async {
         if (pubkey == testPubkeyB) {
           throw Exception('active signer unavailable');
         }
-        registeredPubkeys.add(pubkey);
+        recordedRegistrations.add(pubkey);
       },
     );
 
@@ -55,27 +63,60 @@ void main() {
           _account(testPubkeyB, AccountType.external_),
           _account(testPubkeyD, AccountType.external_),
         ],
+        registeredExternalSignerPubkeys: registeredPubkeys,
+        externalSignerRegistrationFutures: registrationFutures,
         requiredPubkeys: {testPubkeyB},
       ),
       throwsException,
     );
 
-    expect(registeredPubkeys, [testPubkeyA]);
+    expect(recordedRegistrations, [testPubkeyA]);
   });
 
   test('reconcile skips Android callback registration when disabled', () async {
-    final registeredPubkeys = <String>[];
+    final recordedRegistrations = <String>[];
     final registry = ExternalSignerCallbackRegistry(
       enabled: false,
       registerSignerCallback: (pubkey) async {
-        registeredPubkeys.add(pubkey);
+        recordedRegistrations.add(pubkey);
       },
     );
 
-    await registry.reconcile([
-      _account(testPubkeyA, AccountType.external_),
-    ]);
+    await registry.reconcile(
+      [
+        _account(testPubkeyA, AccountType.external_),
+      ],
+      registeredExternalSignerPubkeys: <String>{},
+      externalSignerRegistrationFutures: <String, Future<void>>{},
+    );
 
-    expect(registeredPubkeys, isEmpty);
+    expect(recordedRegistrations, isEmpty);
+  });
+
+  test('reconcile uses owner-owned registration state across registry instances', () async {
+    final recordedRegistrations = <String>[];
+    final registeredPubkeys = <String>{};
+    final registrationFutures = <String, Future<void>>{};
+
+    ExternalSignerCallbackRegistry newRegistry() {
+      return ExternalSignerCallbackRegistry(
+        enabled: true,
+        registerSignerCallback: (pubkey) async {
+          recordedRegistrations.add(pubkey);
+        },
+      );
+    }
+
+    for (final registry in [newRegistry(), newRegistry()]) {
+      await registry.reconcile(
+        [
+          _account(testPubkeyA, AccountType.external_),
+        ],
+        registeredExternalSignerPubkeys: registeredPubkeys,
+        externalSignerRegistrationFutures: registrationFutures,
+      );
+    }
+
+    expect(recordedRegistrations, [testPubkeyA]);
   });
 }

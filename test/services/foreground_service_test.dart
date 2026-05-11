@@ -1,3 +1,4 @@
+import 'dart:async' show Completer;
 import 'dart:ui' show Locale;
 
 import 'package:flutter/widgets.dart' show AppLifecycleState;
@@ -43,16 +44,20 @@ class _MockForegroundTaskApi extends ForegroundTaskApi {
     required Function callback,
   }) async {
     calls.add('startService');
-    isRunning = true;
-    lastServiceTypes = serviceTypes;
-    lastNotificationIcon = notificationIcon;
+    if (startResult is ServiceRequestSuccess) {
+      isRunning = true;
+      lastServiceTypes = serviceTypes;
+      lastNotificationIcon = notificationIcon;
+    }
     return startResult;
   }
 
   @override
   Future<ServiceRequestResult> stopService() async {
     calls.add('stopService');
-    isRunning = false;
+    if (stopResult is ServiceRequestSuccess) {
+      isRunning = false;
+    }
     return stopResult;
   }
 
@@ -226,6 +231,61 @@ void main() {
 
       expect(startSubscriptionCalls, 0);
     });
+
+    test('does not start relay or notification streams when signer registration fails', () async {
+      var ensureSubscriptionsCalls = 0;
+      var startSubscriptionCalls = 0;
+
+      final handler = NotificationTaskHandler(
+        bootstrapIsolate: () async => true,
+        loadLocale: () async => const Locale('en'),
+        ensureExternalSigners: () async {
+          throw Exception('required signer unavailable');
+        },
+        ensureSubscriptions: () async {
+          ensureSubscriptionsCalls++;
+        },
+        startSubscription: () async {
+          startSubscriptionCalls++;
+          return true;
+        },
+      );
+
+      await handler.onStart(DateTime(2026), TaskStarter.system);
+
+      expect(ensureSubscriptionsCalls, 0);
+      expect(startSubscriptionCalls, 0);
+    });
+
+    test('does not subscribe after ownership is yielded during startup', () async {
+      final signerCompleter = Completer<void>();
+      var ensureSubscriptionsCalls = 0;
+      var startSubscriptionCalls = 0;
+
+      final handler = NotificationTaskHandler(
+        bootstrapIsolate: () async => true,
+        loadLocale: () async => const Locale('en'),
+        ensureExternalSigners: () => signerCompleter.future,
+        ensureSubscriptions: () async {
+          ensureSubscriptionsCalls++;
+        },
+        startSubscription: () async {
+          startSubscriptionCalls++;
+          return true;
+        },
+      );
+
+      final startFuture = handler.onStart(DateTime(2026), TaskStarter.system);
+      await _flushTaskHandler();
+
+      handler.onReceiveData({'event': 'main_started'});
+      signerCompleter.complete();
+      await startFuture;
+      await _flushTaskHandler();
+
+      expect(ensureSubscriptionsCalls, 0);
+      expect(startSubscriptionCalls, 0);
+    });
   });
 
   group('ForegroundService', () {
@@ -349,6 +409,9 @@ void main() {
           await service.start();
 
           expect(mockApi.calls, contains('startService'));
+          expect(mockApi.isRunning, isFalse);
+          expect(mockApi.lastServiceTypes, isNull);
+          expect(mockApi.lastNotificationIcon, isNull);
         });
       });
 
@@ -360,11 +423,13 @@ void main() {
         });
 
         test('handles stop failure', () async {
+          mockApi.isRunning = true;
           mockApi.stopResult = const ServiceRequestFailure(error: 'test error');
 
           await service.stop();
 
           expect(mockApi.calls, ['stopService']);
+          expect(mockApi.isRunning, isTrue);
         });
       });
 
