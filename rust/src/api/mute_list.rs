@@ -1,7 +1,8 @@
+use crate::api::wn_session;
 use chrono::{DateTime, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::PublicKey;
-use whitenoise::{MuteListEntry as WhitenoiseEntry, Whitenoise};
+use whitenoise::MuteListEntry as WhitenoiseEntry;
 
 use crate::api::ApiError;
 
@@ -14,10 +15,10 @@ pub struct MuteListEntry {
     pub created_at: DateTime<Utc>,
 }
 
-impl From<WhitenoiseEntry> for MuteListEntry {
-    fn from(e: WhitenoiseEntry) -> Self {
+impl MuteListEntry {
+    fn from_entry(account_pubkey: &PublicKey, e: WhitenoiseEntry) -> Self {
         Self {
-            account_pubkey: e.account_pubkey.to_hex(),
+            account_pubkey: account_pubkey.to_hex(),
             muted_pubkey: e.muted_pubkey.to_hex(),
             is_private: e.is_private,
             created_at: e.created_at,
@@ -27,35 +28,37 @@ impl From<WhitenoiseEntry> for MuteListEntry {
 
 #[frb]
 pub async fn block_user(account_pubkey: String, target_pubkey: String) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let account_pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&account_pubkey).await?;
+    let session = wn_session(&account_pubkey)?;
     let target = PublicKey::parse(&target_pubkey)?;
-    whitenoise
-        .block_user(&account, &target)
+    session
+        .mute_list()
+        .block_user(&target)
         .await
         .map_err(ApiError::from)
 }
 
 #[frb]
 pub async fn unblock_user(account_pubkey: String, target_pubkey: String) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let account_pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&account_pubkey).await?;
+    let session = wn_session(&account_pubkey)?;
     let target = PublicKey::parse(&target_pubkey)?;
-    whitenoise
-        .unblock_user(&account, &target)
+    session
+        .mute_list()
+        .unblock_user(&target)
         .await
         .map_err(ApiError::from)
 }
 
 #[frb]
 pub async fn get_blocked_users(account_pubkey: String) -> Result<Vec<MuteListEntry>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let account_pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&account_pubkey).await?;
-    let entries = whitenoise.get_blocked_users(&account).await?;
-    Ok(entries.into_iter().map(|e| e.into()).collect())
+    let session = wn_session(&account_pubkey)?;
+    let entries = session.mute_list().get_blocked_users().await?;
+    Ok(entries
+        .into_iter()
+        .map(|e| MuteListEntry::from_entry(&account_pubkey, e))
+        .collect())
 }
 
 #[frb]
@@ -63,11 +66,12 @@ pub async fn is_user_blocked(
     account_pubkey: String,
     target_pubkey: String,
 ) -> Result<bool, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let account_pubkey = PublicKey::parse(&account_pubkey)?;
+    let session = wn_session(&account_pubkey)?;
     let target = PublicKey::parse(&target_pubkey)?;
-    whitenoise
-        .is_user_blocked(&account_pubkey, &target)
+    session
+        .mute_list()
+        .is_user_blocked(&target)
         .await
         .map_err(ApiError::from)
 }

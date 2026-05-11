@@ -1,3 +1,4 @@
+use crate::api::wn_session;
 use crate::api::{
     error::ApiError,
     media_files::MediaFile,
@@ -6,7 +7,7 @@ use crate::api::{
 use chrono::{DateTime, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
-use whitenoise::{Draft as WhitenoiseDraft, MediaFile as WhitenoiseMediaFile, Whitenoise};
+use whitenoise::{Draft as WhitenoiseDraft, MediaFile as WhitenoiseMediaFile};
 
 /// Flutter-compatible draft message for a specific group.
 ///
@@ -54,23 +55,17 @@ pub async fn save_draft(
     reply_to_id: Option<String>,
     media_attachments: Vec<MediaFile>,
 ) -> Result<Draft, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let reply_to = reply_to_id.as_deref().map(EventId::parse).transpose()?;
     let attachments = media_attachments
         .into_iter()
         .map(WhitenoiseMediaFile::try_from)
         .collect::<Result<Vec<_>, _>>()?;
-    let draft = whitenoise
-        .save_draft(
-            &account,
-            &group_id,
-            &content,
-            reply_to.as_ref(),
-            &attachments,
-        )
+    let draft = session
+        .drafts()
+        .save(&group_id, &content, reply_to.as_ref(), &attachments)
         .await?;
     Ok(draft.into())
 }
@@ -78,11 +73,10 @@ pub async fn save_draft(
 /// Loads the draft for the given account and group, if one exists.
 #[frb]
 pub async fn load_draft(pubkey: String, group_id: String) -> Result<Option<Draft>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let draft = whitenoise.load_draft(&account, &group_id).await?;
+    let draft = session.drafts().load(&group_id).await?;
     Ok(draft.map(|d| d.into()))
 }
 
@@ -91,10 +85,9 @@ pub async fn load_draft(pubkey: String, group_id: String) -> Result<Option<Draft
 /// No-op if no draft exists.
 #[frb]
 pub async fn delete_draft(pubkey: String, group_id: String) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    whitenoise.delete_draft(&account, &group_id).await?;
+    session.drafts().delete(&group_id).await?;
     Ok(())
 }
