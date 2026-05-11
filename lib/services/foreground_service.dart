@@ -1,9 +1,10 @@
 import 'dart:async' show unawaited;
 import 'dart:convert' show jsonDecode, jsonEncode;
+import 'dart:developer' as developer;
 import 'dart:io' show Directory, Platform;
 import 'dart:ui' show DartPluginRegistrant, Locale;
 
-import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/widgets.dart' show AppLifecycleState, WidgetsFlutterBinding;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:logging/logging.dart';
@@ -42,7 +43,13 @@ void _startCallback() {
     final buf = StringBuffer('[${record.level.name}] ${record.loggerName}: ${record.message}');
     if (record.error != null) buf.write(' | error: ${record.error}');
     if (record.stackTrace != null) buf.write(' | stackTrace: ${record.stackTrace}');
-    debugPrint(buf.toString());
+    developer.log(
+      buf.toString(),
+      name: record.loggerName,
+      level: record.level.value,
+      error: record.error,
+      stackTrace: record.stackTrace,
+    );
   });
   FlutterForegroundTask.setTaskHandler(NotificationTaskHandler());
 }
