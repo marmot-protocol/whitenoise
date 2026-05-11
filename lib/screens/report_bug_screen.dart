@@ -41,7 +41,7 @@ class ReportBugScreen extends HookConsumerWidget {
     final frequency = useState<String?>(null);
     final includeNpub = useState(false);
     final isSending = useState(false);
-    final shouldPopOnDismiss = useState(false);
+    final shouldClearOnDismiss = useState(false);
     final notice = useSystemNotice();
     final descriptionError = useState<String?>(null);
 
@@ -88,7 +88,7 @@ class ReportBugScreen extends HookConsumerWidget {
         );
 
         if (!context.mounted) return;
-        shouldPopOnDismiss.value = true;
+        shouldClearOnDismiss.value = true;
         notice.showSuccessNotice(l10n.reportBugSuccess);
       } catch (e) {
         _logger.severe('send_bug_report failed', e);
@@ -117,11 +117,14 @@ class ReportBugScreen extends HookConsumerWidget {
                         title: notice.noticeMessage!,
                         type: notice.noticeType,
                         onDismiss: () {
-                          final shouldPop = shouldPopOnDismiss.value;
-                          shouldPopOnDismiss.value = false;
+                          final shouldClear = shouldClearOnDismiss.value;
+                          shouldClearOnDismiss.value = false;
                           notice.dismissNotice();
-                          if (shouldPop && context.mounted) {
-                            Routes.goBack(context);
+                          if (shouldClear && context.mounted) {
+                            description.clear();
+                            stepsToReproduce.clear();
+                            frequency.value = null;
+                            includeNpub.value = false;
                           }
                         },
                       )

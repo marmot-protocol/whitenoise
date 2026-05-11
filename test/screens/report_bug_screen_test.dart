@@ -143,15 +143,21 @@ void main() {
     });
 
     testWidgets(
-      'shows success notice then navigates back after it auto-hides',
+      'clears the form after success notice auto-hides',
       (tester) async {
         await pumpScreen(tester);
-        expect(find.byType(ReportBugScreen), findsOneWidget);
 
         await tester.enterText(
           find.byKey(const Key('report_bug_description')),
           'Something broke',
         );
+        await tester.enterText(
+          find.byKey(const Key('report_bug_steps_to_reproduce')),
+          '1. Open app\n2. Crash',
+        );
+        await tester.tap(find.byKey(const Key('include_npub_checkbox')));
+        await tester.pumpAndSettle();
+
         await tester.tap(find.text('Send report'));
         await tester.pumpAndSettle();
 
@@ -161,7 +167,10 @@ void main() {
         await tester.pump(const Duration(seconds: 3));
         await tester.pumpAndSettle();
 
-        expect(find.byType(ReportBugScreen), findsNothing);
+        expect(find.byType(ReportBugScreen), findsOneWidget);
+        expect(find.text('Bug report sent. Thank you!'), findsNothing);
+        expect(find.text('Something broke'), findsNothing);
+        expect(find.text('1. Open app\n2. Crash'), findsNothing);
       },
     );
 
