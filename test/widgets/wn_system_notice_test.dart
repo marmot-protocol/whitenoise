@@ -473,6 +473,54 @@ void main() {
 
       expect(dismissCount, 1);
     });
+
+    testWidgets('ignores queued dismiss callback after unmount', (tester) async {
+      var dismissed = false;
+      await mountWidget(
+        WnSystemNotice(
+          title: 'Auto-hide while navigating',
+          variant: WnSystemNoticeVariant.dismissible,
+          onDismiss: () => dismissed = true,
+        ),
+        tester,
+      );
+
+      await tester.pumpAndSettle();
+      final dismissGesture = tester.widget<GestureDetector>(
+        find.ancestor(
+          of: find.byKey(const ValueKey('systemNotice_actionIcon')),
+          matching: find.byType(GestureDetector),
+        ),
+      );
+      final queuedDismiss = dismissGesture.onTap;
+      expect(queuedDismiss, isNotNull);
+
+      await tester.pumpWidget(const SizedBox.shrink());
+      queuedDismiss!();
+      await tester.pump();
+
+      expect(tester.takeException(), isNull);
+      expect(dismissed, isFalse);
+    });
+
+    testWidgets('cancels pending auto-hide timer on unmount', (tester) async {
+      var dismissed = false;
+      await mountWidget(
+        WnSystemNotice(
+          title: 'Auto-hide timer while navigating',
+          autoHideDuration: const Duration(milliseconds: 50),
+          onDismiss: () => dismissed = true,
+        ),
+        tester,
+      );
+
+      await tester.pump(const Duration(milliseconds: 30));
+      await tester.pumpWidget(const SizedBox.shrink());
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(tester.takeException(), isNull);
+      expect(dismissed, isFalse);
+    });
   });
 
   group('Expand/Collapse Animation', () {
