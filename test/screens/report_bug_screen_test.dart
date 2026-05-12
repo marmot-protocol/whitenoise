@@ -142,16 +142,37 @@ void main() {
       expect(mockApi.lastBugReportAppVersion, appVersion);
     });
 
-    testWidgets('shows success notice after successful send', (tester) async {
-      await pumpScreen(tester);
-      await tester.enterText(
-        find.byKey(const Key('report_bug_description')),
-        'Something broke',
-      );
-      await tester.tap(find.text('Send report'));
-      await tester.pumpAndSettle();
-      expect(find.text('Bug report sent. Thank you!'), findsOneWidget);
-    });
+    testWidgets(
+      'clears the form after success notice auto-hides',
+      (tester) async {
+        await pumpScreen(tester);
+
+        await tester.enterText(
+          find.byKey(const Key('report_bug_description')),
+          'Something broke',
+        );
+        await tester.enterText(
+          find.byKey(const Key('report_bug_steps_to_reproduce')),
+          '1. Open app\n2. Crash',
+        );
+        await tester.tap(find.byKey(const Key('include_npub_checkbox')));
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Send report'));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ReportBugScreen), findsOneWidget);
+        expect(find.text('Bug report sent. Thank you!'), findsOneWidget);
+
+        await tester.pump(const Duration(seconds: 3));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ReportBugScreen), findsOneWidget);
+        expect(find.text('Bug report sent. Thank you!'), findsNothing);
+        expect(find.text('Something broke'), findsNothing);
+        expect(find.text('1. Open app\n2. Crash'), findsNothing);
+      },
+    );
 
     testWidgets('shows error notice when send fails', (tester) async {
       mockApi.sendBugReportShouldFail = true;
