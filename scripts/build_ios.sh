@@ -57,6 +57,10 @@ print_step "Fetching whitenoise-rs source"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_ROOT"
+
+# Catch FRB rev drift between pubspec orphan-ref and .whitenoise-rs-rev before
+# wasting a full cross-compile (would otherwise fail the hash check at startup).
+"$SCRIPT_DIR/check_frb_revs.sh"
 WHITENOISE_RS_CACHE="$PROJECT_ROOT/.whitenoise-rs-cache/whitenoise-rs"
 WHITENOISE_RS_URL="https://github.com/marmot-protocol/whitenoise-rs.git"
 REV_FILE="$PROJECT_ROOT/.whitenoise-rs-rev"
