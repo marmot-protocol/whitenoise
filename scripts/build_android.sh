@@ -98,13 +98,20 @@ export AR_armv7_linux_androideabi="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$H
 # ships the Dart bindings + cargokit shell, not the Rust source — so we clone
 # it here to produce the per-ABI .so files for jniLibs.
 print_step "Fetching whitenoise-rs source"
-PROJECT_ROOT="$PWD"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+cd "$PROJECT_ROOT"
 WHITENOISE_RS_CACHE="$PROJECT_ROOT/.whitenoise-rs-cache/whitenoise-rs"
 WHITENOISE_RS_URL="https://github.com/marmot-protocol/whitenoise-rs.git"
-WHITENOISE_RS_REV="$(tr -d '[:space:]' <.whitenoise-rs-rev)"
+REV_FILE="$PROJECT_ROOT/.whitenoise-rs-rev"
+if [ ! -f "$REV_FILE" ]; then
+  print_error ".whitenoise-rs-rev is missing at $REV_FILE"
+  exit 1
+fi
+WHITENOISE_RS_REV="$(tr -d '[:space:]' <"$REV_FILE")"
 
 if [ -z "$WHITENOISE_RS_REV" ]; then
-  print_error ".whitenoise-rs-rev is empty or missing"
+  print_error ".whitenoise-rs-rev is empty"
   exit 1
 fi
 
