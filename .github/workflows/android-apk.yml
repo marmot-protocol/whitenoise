@@ -100,15 +100,15 @@ jobs:
       with:
         targets: aarch64-linux-android,armv7-linux-androideabi,x86_64-linux-android
 
-    - name: Cache Rust dependencies
+    - name: Cache whitenoise-rs source + Rust build artifacts
       if: steps.jnilibs-cache.outputs.cache-hit != 'true'
       uses: actions/cache@v4
       with:
         path: |
           ~/.cargo/registry
           ~/.cargo/git
-          rust/target
-        key: ${{ runner.os }}-cargo-android-${{ hashFiles('**/Cargo.lock') }}
+          .whitenoise-rs-cache/whitenoise-rs
+        key: ${{ runner.os }}-cargo-android-${{ hashFiles('.whitenoise-rs-rev') }}
         restore-keys: |
           ${{ runner.os }}-cargo-android-
 
@@ -116,7 +116,7 @@ jobs:
       if: steps.jnilibs-cache.outputs.cache-hit != 'true'
       uses: actions/cache@v4
       with:
-        path: rust/target/openssl/install
+        path: .whitenoise-rs-cache/openssl/install
         key: ${{ runner.os }}-openssl-android-${{ hashFiles('scripts/build_openssl_android.sh') }}
 
     - name: Cache Android SDK & NDK

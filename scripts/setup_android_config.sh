@@ -43,11 +43,13 @@ if [ -z "$ANDROID_NDK_HOME" ] || [ ! -d "$ANDROID_NDK_HOME" ]; then
   exit 1
 fi
 
-# Create .cargo directory if it doesn't exist
-mkdir -p rust/.cargo
+# Destination for the generated cargo config — caller may override CARGO_CONFIG_DIR
+# (build_android.sh points this at the cached whitenoise-rs checkout).
+CARGO_CONFIG_DIR="${CARGO_CONFIG_DIR:-.whitenoise-rs-cache/whitenoise-rs/.cargo}"
+mkdir -p "$CARGO_CONFIG_DIR"
 
 # Generate config.toml
-cat >rust/.cargo/config.toml <<EOF
+cat >"$CARGO_CONFIG_DIR/config.toml" <<EOF
 [target.aarch64-linux-android]
 ar = "${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/${HOST_TAG}/bin/llvm-ar"
 linker = "${ANDROID_NDK_HOME}/toolchains/llvm/prebuilt/${HOST_TAG}/bin/aarch64-linux-android33-clang"

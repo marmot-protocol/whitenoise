@@ -57,7 +57,7 @@ ANDROID_API=33
 # Resolve paths
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
-OPENSSL_BUILD_DIR="$PROJECT_ROOT/rust/target/openssl"
+OPENSSL_BUILD_DIR="${OPENSSL_BUILD_DIR:-$PROJECT_ROOT/.whitenoise-rs-cache/openssl}"
 OPENSSL_SRC_DIR="$OPENSSL_BUILD_DIR/openssl-$OPENSSL_VERSION"
 OPENSSL_INSTALL_DIR="$OPENSSL_BUILD_DIR/install"
 

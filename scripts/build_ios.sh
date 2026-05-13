@@ -51,24 +51,48 @@ if ! command -v pod &>/dev/null; then
   exit 1
 fi
 
+# Fetch the Rust wrapper source from whitenoise-rs at the pinned rev (see
+# scripts/build_android.sh for context — same mechanism, same cache).
+print_step "Fetching whitenoise-rs source"
+PROJECT_ROOT="$PWD"
+WHITENOISE_RS_CACHE="$PROJECT_ROOT/.whitenoise-rs-cache/whitenoise-rs"
+WHITENOISE_RS_URL="https://github.com/marmot-protocol/whitenoise-rs.git"
+WHITENOISE_RS_REV="$(tr -d '[:space:]' <.whitenoise-rs-rev)"
+
+if [ -z "$WHITENOISE_RS_REV" ]; then
+  print_error ".whitenoise-rs-rev is empty or missing"
+  exit 1
+fi
+
+if [ ! -d "$WHITENOISE_RS_CACHE/.git" ]; then
+  mkdir -p "$(dirname "$WHITENOISE_RS_CACHE")"
+  git clone --quiet --filter=blob:none --no-checkout "$WHITENOISE_RS_URL" "$WHITENOISE_RS_CACHE"
+fi
+
+(
+  cd "$WHITENOISE_RS_CACHE"
+  if ! git cat-file -e "${WHITENOISE_RS_REV}^{commit}" 2>/dev/null; then
+    git fetch --quiet --filter=blob:none origin "$WHITENOISE_RS_REV"
+  fi
+  git -c advice.detachedHead=false checkout --quiet --force "$WHITENOISE_RS_REV"
+)
+print_success "whitenoise-rs checked out at $WHITENOISE_RS_REV"
+
+WHITENOISE_FRB_DIR="$WHITENOISE_RS_CACHE/crates/whitenoise-frb"
+
 # Add iOS targets
 print_step "Adding iOS targets to Rust"
 rustup target add aarch64-apple-ios     # Physical devices (arm64)
 rustup target add aarch64-apple-ios-sim # Simulator on Apple Silicon
 print_success "iOS targets added to Rust"
 
-# Build for each iOS architecture
-print_step "Building for iOS architectures"
-if ! test -d "rust"; then
-  print_error "rust directory not found"
-  exit 1
-fi
-
 IOS_DEPLOYMENT_TARGET="${IOS_DEPLOYMENT_TARGET:-13.0}"
 export IPHONEOS_DEPLOYMENT_TARGET="$IOS_DEPLOYMENT_TARGET"
 print_step "Using iOS deployment target $IPHONEOS_DEPLOYMENT_TARGET"
 
-cd rust
+# Build for each iOS architecture
+print_step "Building for iOS architectures"
+cd "$WHITENOISE_FRB_DIR"
 
 print_step "Building for aarch64-apple-ios (physical devices)"
 cargo build --target aarch64-apple-ios --release --quiet
@@ -78,7 +102,7 @@ print_step "Building for aarch64-apple-ios-sim (simulator)"
 cargo build --target aarch64-apple-ios-sim --release --quiet
 print_success "Built for aarch64-apple-ios-sim"
 
-cd ..
+cd "$PROJECT_ROOT"
 
 # Run pod install to ensure pods are up to date
 print_step "Installing CocoaPods dependencies"

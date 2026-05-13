@@ -58,13 +58,11 @@ app.*.map.json
 .fvm/
 
 
-# Rust documentation build cache
-rust/tmp_docs/
-RUST_FFI_GUIDE.md
-# Generated Cargo config (auto-generated per environment)
-rust/.cargo/config.toml
 # Rust build artifacts (Cargo/rust-analyzer)
 target/
+
+# whitenoise-rs source cache (fetched by scripts/build_*.sh per .whitenoise-rs-rev)
+.whitenoise-rs-cache/
 
 # Git worktrees
 /trees/*

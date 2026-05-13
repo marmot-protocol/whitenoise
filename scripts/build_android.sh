@@ -92,10 +92,42 @@ export CC_armv7_linux_androideabi="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$H
 export CXX_armv7_linux_androideabi="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG/bin/armv7a-linux-androideabi33-clang++"
 export AR_armv7_linux_androideabi="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG/bin/llvm-ar"
 
+# Fetch the Rust wrapper source from whitenoise-rs at the pinned rev.
+# The wrapper crate (rust_lib_whitenoise) lives at crates/whitenoise-frb/ on the
+# frb-gen branch of marmot-protocol/whitenoise-rs. The pubspec git dep only
+# ships the Dart bindings + cargokit shell, not the Rust source — so we clone
+# it here to produce the per-ABI .so files for jniLibs.
+print_step "Fetching whitenoise-rs source"
+PROJECT_ROOT="$PWD"
+WHITENOISE_RS_CACHE="$PROJECT_ROOT/.whitenoise-rs-cache/whitenoise-rs"
+WHITENOISE_RS_URL="https://github.com/marmot-protocol/whitenoise-rs.git"
+WHITENOISE_RS_REV="$(tr -d '[:space:]' <.whitenoise-rs-rev)"
+
+if [ -z "$WHITENOISE_RS_REV" ]; then
+  print_error ".whitenoise-rs-rev is empty or missing"
+  exit 1
+fi
+
+if [ ! -d "$WHITENOISE_RS_CACHE/.git" ]; then
+  mkdir -p "$(dirname "$WHITENOISE_RS_CACHE")"
+  git clone --quiet --filter=blob:none --no-checkout "$WHITENOISE_RS_URL" "$WHITENOISE_RS_CACHE"
+fi
+
+(
+  cd "$WHITENOISE_RS_CACHE"
+  if ! git cat-file -e "${WHITENOISE_RS_REV}^{commit}" 2>/dev/null; then
+    git fetch --quiet --filter=blob:none origin "$WHITENOISE_RS_REV"
+  fi
+  git -c advice.detachedHead=false checkout --quiet --force "$WHITENOISE_RS_REV"
+)
+print_success "whitenoise-rs checked out at $WHITENOISE_RS_REV"
+
+WHITENOISE_FRB_DIR="$WHITENOISE_RS_CACHE/crates/whitenoise-frb"
+
 # Build static OpenSSL for Android targets (SQLCipher requires libcrypto)
 print_step "Building OpenSSL for Android"
 ./scripts/build_openssl_android.sh
-OPENSSL_ANDROID_DIR="$PWD/rust/target/openssl/install"
+OPENSSL_ANDROID_DIR="$PROJECT_ROOT/.whitenoise-rs-cache/openssl/install"
 
 # Check if required tools are installed
 print_step "Checking development environment"
@@ -104,26 +136,27 @@ if ! command -v rustup &>/dev/null; then
   exit 1
 fi
 
-# Generate Cargo config for current environment
+# Generate Cargo config inside the cached whitenoise-rs workspace
 print_step "Setting up Cargo configuration"
-./scripts/setup_android_config.sh
+CARGO_CONFIG_DIR="$WHITENOISE_RS_CACHE/.cargo" ./scripts/setup_android_config.sh
 
-# Add Android targets
-print_step "Adding Android targets to Rust"
+# Create output directories
+print_step "Creating output directories"
+mkdir -p "$PROJECT_ROOT/android/app/src/main/jniLibs/arm64-v8a"
+mkdir -p "$PROJECT_ROOT/android/app/src/main/jniLibs/armeabi-v7a"
+mkdir -p "$PROJECT_ROOT/android/app/src/main/jniLibs/x86_64"
+
+# Build for each Android architecture
+print_step "Building for Android architectures"
+cd "$WHITENOISE_FRB_DIR"
+
+# Add Android targets to the toolchain pinned by whitenoise-rs's rust-toolchain.toml.
+# Running rustup after `cd` ensures the override activates the right toolchain.
+print_step "Adding Android targets to Rust ($(rustup show active-toolchain | awk '{print $1}'))"
 rustup target add aarch64-linux-android   # arm64-v8a (64-bit ARM)
 rustup target add armv7-linux-androideabi # armeabi-v7a (32-bit ARM)
 rustup target add x86_64-linux-android    # x86_64 (64-bit Intel)
 print_success "Android targets added to Rust"
-
-# Create output directories
-print_step "Creating output directories"
-mkdir -p android/app/src/main/jniLibs/arm64-v8a
-mkdir -p android/app/src/main/jniLibs/armeabi-v7a
-mkdir -p android/app/src/main/jniLibs/x86_64
-
-# Build for each Android architecture
-print_step "Building for Android architectures"
-cd rust
 
 # Build helper: sets per-target OpenSSL env vars and runs cargo build
 build_for_target() {
@@ -138,7 +171,8 @@ build_for_target() {
     OPENSSL_STATIC=1 \
     OPENSSL_NO_VENDOR=1 \
     cargo build --target "$target" --release --quiet
-  cp "target/$target/release/librust_lib_whitenoise.so" "../android/app/src/main/jniLibs/$jni_dir/"
+  cp "$WHITENOISE_RS_CACHE/target/$target/release/librust_lib_whitenoise.so" \
+    "$PROJECT_ROOT/android/app/src/main/jniLibs/$jni_dir/"
   print_success "Built for $label"
 }
 
@@ -146,7 +180,7 @@ build_for_target "aarch64-linux-android" "aarch64 (arm64-v8a)" "arm64-v8a"
 build_for_target "armv7-linux-androideabi" "armv7 (armeabi-v7a)" "armeabi-v7a"
 build_for_target "x86_64-linux-android" "x86_64" "x86_64"
 
-cd ..
+cd "$PROJECT_ROOT"
 
 print_success "All Rust libraries built and copied to Android project"
 print_success "Android build completed successfully!"
