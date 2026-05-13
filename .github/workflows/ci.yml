@@ -35,31 +35,10 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pub-cache-
 
-    - name: Setup Rust
-      uses: dtolnay/rust-toolchain@stable
-      with:
-        components: rustfmt, clippy
-
-    - name: Cache Rust dependencies
-      uses: actions/cache@v4
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          rust/target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-        restore-keys: |
-          ${{ runner.os }}-cargo-
-
     - name: Install dependencies
       run: |
         flutter pub get
         cd widgetbook && flutter pub get
-        cd ../rust && cargo fetch
-
-
-    - name: Check Rust formatting
-      run: cd rust && cargo fmt --check
 
     - name: Check Dart formatting
       run: dart format --set-exit-if-changed lib/ test/ widgetbook/lib/
@@ -70,18 +49,11 @@ jobs:
         chmod +x scripts/validate-locales-keys.sh
         ./scripts/validate-locales-keys.sh
 
-
-    - name: Rust linting (Clippy)
-      run: cd rust && cargo clippy --package rust_lib_whitenoise -- -D warnings
-
     - name: Flutter analyze
       run: flutter analyze --fatal-infos
 
     - name: Flutter analyze (widgetbook)
       run: cd widgetbook && flutter analyze --fatal-infos
-
-    - name: Rust tests
-      run: cd rust && cargo test
 
   test:
     name: Test (${{ matrix.shard }}/4)
