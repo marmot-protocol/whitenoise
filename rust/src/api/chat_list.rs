@@ -1,5 +1,6 @@
 use crate::api::chat_summary::ChatSummary;
 use crate::api::error::ApiError;
+use crate::api::{wn, wn_session};
 use crate::frb_generated::StreamSink;
 use chrono::{DateTime, Utc};
 use flutter_rust_bridge::frb;
@@ -7,7 +8,7 @@ use nostr_sdk::PublicKey;
 use whitenoise::mdk::GroupId;
 use whitenoise::{
     ChatListUpdate as WhitenoiseChatListUpdate,
-    ChatListUpdateTrigger as WhitenoiseChatListUpdateTrigger, MuteDuration, Whitenoise,
+    ChatListUpdateTrigger as WhitenoiseChatListUpdateTrigger, MuteDuration,
 };
 
 /// How long to mute a chat.
@@ -133,14 +134,15 @@ pub async fn set_chat_pin_order(
     mls_group_id: String,
     pin_order: Option<i64>,
 ) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
 
-    whitenoise
-        .set_chat_pin_order(&account, &group_id, pin_order)
+    session
+        .membership()
+        .for_group(&group_id)
+        .set_pin_order(pin_order)
         .await?;
 
     Ok(())
@@ -156,14 +158,15 @@ pub async fn mute_chat(
     mls_group_id: String,
     duration: ChatMuteDuration,
 ) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
 
-    whitenoise
-        .mute_chat(&account, &group_id, duration.into())
+    session
+        .membership()
+        .for_group(&group_id)
+        .mute(duration.into())
         .await?;
 
     Ok(())
@@ -174,13 +177,12 @@ pub async fn mute_chat(
 /// Notifications for this chat will resume immediately.
 #[frb]
 pub async fn unmute_chat(account_pubkey: String, mls_group_id: String) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
 
-    whitenoise.unmute_chat(&account, &group_id).await?;
+    session.membership().for_group(&group_id).unmute().await?;
 
     Ok(())
 }
@@ -193,10 +195,9 @@ pub async fn unmute_chat(account_pubkey: String, mls_group_id: String) -> Result
 /// 3. Groups without messages are sorted by creation date
 #[frb]
 pub async fn get_chat_list(account_pubkey: String) -> Result<Vec<ChatSummary>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    let chat_list = whitenoise.get_chat_list(&account).await?;
+    let session = wn_session(&pubkey)?;
+    let chat_list = session.chat_list().active().await?;
     Ok(chat_list.into_iter().map(|item| item.into()).collect())
 }
 
@@ -212,7 +213,7 @@ pub async fn subscribe_to_chat_list(
     account_pubkey: String,
     sink: StreamSink<ChatListStreamItem>,
 ) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
 
@@ -265,7 +266,7 @@ pub async fn subscribe_to_archived_chat_list(
     account_pubkey: String,
     sink: StreamSink<ChatListStreamItem>,
 ) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
 

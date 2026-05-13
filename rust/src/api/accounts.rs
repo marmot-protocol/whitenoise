@@ -1,13 +1,14 @@
 use crate::api::{
     DEFAULT_RELAY_URLS, error::ApiError, metadata::FlutterMetadata, relays::Relay, users::User,
 };
+use crate::api::{wn, wn_session};
 use chrono::{DateTime, TimeZone, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
 use whitenoise::{
     Account as WhitenoiseAccount, AccountSettings as WhitenoiseAccountSettings,
     AccountType as WhitenoiseAccountType, ImageType, LoginResult as WhitenoiseLoginResult,
-    LoginStatus as WhitenoiseLoginStatus, RelayType, Whitenoise,
+    LoginStatus as WhitenoiseLoginStatus, RelayType,
 };
 
 /// The type of account authentication.
@@ -124,14 +125,14 @@ impl From<Event> for FlutterEvent {
 
 #[frb]
 pub async fn get_accounts() -> Result<Vec<Account>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let accounts = whitenoise.all_accounts().await?;
     Ok(accounts.into_iter().map(|a| a.into()).collect())
 }
 
 #[frb]
 pub async fn get_account(pubkey: String) -> Result<Account, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     Ok(account.into())
@@ -139,7 +140,7 @@ pub async fn get_account(pubkey: String) -> Result<Account, ApiError> {
 
 #[frb]
 pub async fn create_identity() -> Result<Account, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let account = whitenoise.create_identity().await?;
     Ok(account.into())
 }
@@ -150,14 +151,14 @@ pub async fn create_identity() -> Result<Account, ApiError> {
 
 #[frb]
 pub async fn login_start(nsec_or_hex_privkey: String) -> Result<LoginResult, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let result = whitenoise.login_start(nsec_or_hex_privkey).await?;
     Ok(result.into())
 }
 
 #[frb]
 pub async fn login_publish_default_relays(pubkey: String) -> Result<LoginResult, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let result = whitenoise.login_publish_default_relays(&pubkey).await?;
     Ok(result.into())
@@ -168,7 +169,7 @@ pub async fn login_with_custom_relay(
     pubkey: String,
     relay_url: String,
 ) -> Result<LoginResult, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let relay_url = RelayUrl::parse(&relay_url)?;
     let result = whitenoise
@@ -179,7 +180,7 @@ pub async fn login_with_custom_relay(
 
 #[frb]
 pub async fn login_cancel(pubkey: String) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     whitenoise.login_cancel(&pubkey).await?;
     Ok(())
@@ -187,14 +188,14 @@ pub async fn login_cancel(pubkey: String) -> Result<(), ApiError> {
 
 #[frb]
 pub async fn logout(pubkey: String) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     whitenoise.logout(&pubkey).await.map_err(ApiError::from)
 }
 
 #[frb]
 pub async fn export_account_nsec(pubkey: String) -> Result<String, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     whitenoise
@@ -208,7 +209,7 @@ pub async fn update_account_metadata(
     pubkey: String,
     metadata: &FlutterMetadata,
 ) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     account
@@ -224,7 +225,7 @@ pub async fn upload_account_profile_picture(
     file_path: String,
     image_type: String,
 ) -> Result<String, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let image_type = ImageType::try_from(image_type).map_err(|error| ApiError::Other {
         message: error.to_string(),
@@ -241,21 +242,23 @@ pub async fn upload_account_profile_picture(
 
 #[frb]
 pub async fn account_relays(pubkey: String, relay_type: RelayType) -> Result<Vec<Relay>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    let relays = account.relays(relay_type, whitenoise).await?;
+    let relays = account.relays(relay_type, &whitenoise.shared).await?;
     Ok(relays.into_iter().map(|r| r.into()).collect())
 }
 
 #[frb]
 pub async fn restore_default_relays(pubkey: String) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
 
     for relay_type in [RelayType::Nip65, RelayType::Inbox, RelayType::KeyPackage] {
-        let current_relays = account.relays(relay_type.clone(), whitenoise).await?;
+        let current_relays = account
+            .relays(relay_type.clone(), &whitenoise.shared)
+            .await?;
         for relay in &current_relays {
             account
                 .remove_relay(relay, relay_type.clone(), whitenoise)
@@ -279,7 +282,7 @@ pub async fn add_account_relay(
     url: String,
     relay_type: RelayType,
 ) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let relay_url = RelayUrl::parse(&url)?;
@@ -296,7 +299,7 @@ pub async fn remove_account_relay(
     url: String,
     relay_type: RelayType,
 ) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let relay_url = RelayUrl::parse(&url)?;
@@ -309,31 +312,28 @@ pub async fn remove_account_relay(
 
 #[frb]
 pub async fn account_key_package(pubkey: String) -> Result<Option<FlutterEvent>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let user = whitenoise.find_user_by_pubkey(&pubkey).await?;
-    let event = user.key_package_event(whitenoise).await?;
+    let event = user.key_package_event(&whitenoise.shared).await?;
     Ok(event.map(|e| e.into()))
 }
 
 #[frb]
 pub async fn account_key_packages(account_pubkey: String) -> Result<Vec<FlutterEvent>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    let key_packages = whitenoise
-        .fetch_all_key_packages_for_account(&account)
-        .await?;
+    let session = wn_session(&pubkey)?;
+    let key_packages = session.key_packages().fetch_all().await?;
     Ok(key_packages.into_iter().map(|e| e.into()).collect())
 }
 
 #[frb]
 pub async fn publish_account_key_package(account_pubkey: String) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    whitenoise
-        .publish_key_package_for_account(&account)
+    let session = wn_session(&pubkey)?;
+    session
+        .key_packages()
+        .publish()
         .await
         .map_err(ApiError::from)
 }
@@ -343,33 +343,29 @@ pub async fn delete_account_key_package(
     account_pubkey: String,
     key_package_id: String,
 ) -> Result<bool, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
     let key_package_id = EventId::parse(&key_package_id)?;
-    whitenoise
-        .delete_key_package_for_account(&account, &key_package_id, true)
+    session
+        .key_packages()
+        .delete(&key_package_id, true)
         .await
         .map_err(ApiError::from)
 }
 
 #[frb]
 pub async fn delete_account_key_packages(account_pubkey: String) -> Result<usize, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    let deleted_count = whitenoise
-        .delete_legacy_key_packages_for_account(&account)
-        .await?;
+    let session = wn_session(&pubkey)?;
+    let deleted_count = session.key_packages().delete_legacy().await?;
     Ok(deleted_count)
 }
 
 #[frb]
 pub async fn account_follows(pubkey: String) -> Result<Vec<User>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    let follows = whitenoise.follows(&account).await?;
+    let session = wn_session(&pubkey)?;
+    let follows = session.social().follows().await?;
     Ok(follows.into_iter().map(|u| u.into()).collect())
 }
 
@@ -378,12 +374,12 @@ pub async fn follow_user(
     account_pubkey: String,
     user_to_follow_pubkey: String,
 ) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
     let user_to_follow_pubkey = PublicKey::parse(&user_to_follow_pubkey)?;
-    whitenoise
-        .follow_user(&account, &user_to_follow_pubkey)
+    session
+        .social()
+        .follow_user(&user_to_follow_pubkey)
         .await
         .map_err(ApiError::from)
 }
@@ -393,12 +389,12 @@ pub async fn unfollow_user(
     account_pubkey: String,
     user_to_unfollow_pubkey: String,
 ) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
     let user_to_unfollow_pubkey = PublicKey::parse(&user_to_unfollow_pubkey)?;
-    whitenoise
-        .unfollow_user(&account, &user_to_unfollow_pubkey)
+    session
+        .social()
+        .unfollow_user(&user_to_unfollow_pubkey)
         .await
         .map_err(ApiError::from)
 }
@@ -408,12 +404,12 @@ pub async fn is_following_user(
     account_pubkey: String,
     user_pubkey: String,
 ) -> Result<bool, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
     let user_pubkey = PublicKey::parse(&user_pubkey)?;
-    whitenoise
-        .is_following_user(&account, &user_pubkey)
+    session
+        .social()
+        .is_following(&user_pubkey)
         .await
         .map_err(ApiError::from)
 }
@@ -434,10 +430,14 @@ impl From<WhitenoiseAccountSettings> for AccountSettings {
 
 #[frb]
 pub async fn account_settings(pubkey: String) -> Result<AccountSettings, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    let settings = whitenoise.account_settings(&account).await?;
+    let session = whitenoise
+        .session(&pubkey)
+        .ok_or_else(|| ApiError::Whitenoise {
+            message: "Account session not found".to_string(),
+        })?;
+    let settings = session.settings().get().await?;
     Ok(settings.into())
 }
 
@@ -446,11 +446,16 @@ pub async fn update_notifications_enabled(
     pubkey: String,
     enabled: bool,
 ) -> Result<AccountSettings, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    let settings = whitenoise
-        .update_notifications_enabled(&account, enabled)
+    let session = whitenoise
+        .session(&pubkey)
+        .ok_or_else(|| ApiError::Whitenoise {
+            message: "Account session not found".to_string(),
+        })?;
+    let settings = session
+        .settings()
+        .update_notifications_enabled(enabled)
         .await?;
     Ok(settings.into())
 }

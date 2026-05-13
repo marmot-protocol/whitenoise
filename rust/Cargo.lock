@@ -2664,10 +2664,10 @@ dependencies = [
  "mdk-macros",
  "mdk-storage-traits",
  "nostr",
- "openmls",
+ "openmls 0.8.1 (git+https://github.com/openmls/openmls?rev=04c50d7fb12d52f4f9aee26de5f5234f3df29fa8)",
  "openmls_basic_credential",
  "openmls_rust_crypto",
- "openmls_traits",
+ "openmls_traits 0.5.0 (git+https://github.com/openmls/openmls?rev=04c50d7fb12d52f4f9aee26de5f5234f3df29fa8)",
  "serde",
  "sha2",
  "thiserror 2.0.18",
@@ -2692,8 +2692,8 @@ dependencies = [
  "keyring-core",
  "mdk-storage-traits",
  "nostr",
- "openmls",
- "openmls_traits",
+ "openmls 0.8.1 (git+https://github.com/openmls/openmls?rev=04c50d7fb12d52f4f9aee26de5f5234f3df29fa8)",
+ "openmls_traits 0.5.0 (git+https://github.com/openmls/openmls?rev=04c50d7fb12d52f4f9aee26de5f5234f3df29fa8)",
  "refinery",
  "rusqlite",
  "serde",
@@ -2709,8 +2709,8 @@ version = "0.8.0"
 source = "git+https://github.com/marmot-protocol/mdk?rev=7f809f8549458a0d7f7d885bcdd694023abf299c#7f809f8549458a0d7f7d885bcdd694023abf299c"
 dependencies = [
  "nostr",
- "openmls",
- "openmls_traits",
+ "openmls 0.8.1 (git+https://github.com/openmls/openmls?rev=04c50d7fb12d52f4f9aee26de5f5234f3df29fa8)",
+ "openmls_traits 0.5.0 (git+https://github.com/openmls/openmls?rev=04c50d7fb12d52f4f9aee26de5f5234f3df29fa8)",
  "pastey 0.2.1",
  "postcard",
  "serde",
@@ -3060,10 +3060,26 @@ checksum = "c08d65885ee38876c4f86fa503fb49d7b507c2b62552df7c70b2fce627e06381"
 [[package]]
 name = "openmls"
 version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dcb512bfe6a55777518853ea535c6241f069cb0e8984678c117151d2a1e7e903"
+dependencies = [
+ "log",
+ "openmls_traits 0.5.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "rayon",
+ "serde",
+ "serde_bytes",
+ "thiserror 2.0.18",
+ "tls_codec",
+ "zeroize",
+]
+
+[[package]]
+name = "openmls"
+version = "0.8.1"
 source = "git+https://github.com/openmls/openmls?rev=04c50d7fb12d52f4f9aee26de5f5234f3df29fa8#04c50d7fb12d52f4f9aee26de5f5234f3df29fa8"
 dependencies = [
  "log",
- "openmls_traits",
+ "openmls_traits 0.5.0 (git+https://github.com/openmls/openmls?rev=04c50d7fb12d52f4f9aee26de5f5234f3df29fa8)",
  "rayon",
  "serde",
  "serde_bytes",
@@ -3078,7 +3094,7 @@ version = "0.5.0"
 source = "git+https://github.com/openmls/openmls?rev=04c50d7fb12d52f4f9aee26de5f5234f3df29fa8#04c50d7fb12d52f4f9aee26de5f5234f3df29fa8"
 dependencies = [
  "ed25519-dalek",
- "openmls_traits",
+ "openmls_traits 0.5.0 (git+https://github.com/openmls/openmls?rev=04c50d7fb12d52f4f9aee26de5f5234f3df29fa8)",
  "p256",
  "rand 0.8.5",
  "serde",
@@ -3091,7 +3107,7 @@ version = "0.5.0"
 source = "git+https://github.com/openmls/openmls?rev=04c50d7fb12d52f4f9aee26de5f5234f3df29fa8#04c50d7fb12d52f4f9aee26de5f5234f3df29fa8"
 dependencies = [
  "log",
- "openmls_traits",
+ "openmls_traits 0.5.0 (git+https://github.com/openmls/openmls?rev=04c50d7fb12d52f4f9aee26de5f5234f3df29fa8)",
  "serde",
  "serde_json",
  "thiserror 2.0.18",
@@ -3111,13 +3127,23 @@ dependencies = [
  "hpke-rs-crypto",
  "hpke-rs-rust-crypto",
  "openmls_memory_storage",
- "openmls_traits",
+ "openmls_traits 0.5.0 (git+https://github.com/openmls/openmls?rev=04c50d7fb12d52f4f9aee26de5f5234f3df29fa8)",
  "p256",
  "rand 0.8.5",
  "rand_chacha 0.3.1",
  "serde",
  "sha2",
  "thiserror 2.0.18",
+ "tls_codec",
+]
+
+[[package]]
+name = "openmls_traits"
+version = "0.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4f88ccdd53448dfdbfa5b8da8ba4e527c418fdb966418172bace2e3b41eedd56"
+dependencies = [
+ "serde",
  "tls_codec",
 ]
 
@@ -5495,7 +5521,7 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "whitenoise"
 version = "0.2.1"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=59aa42cc4cb5257beff49fd337b6c55857c80f73#59aa42cc4cb5257beff49fd337b6c55857c80f73"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=df5f6ae9f7396ccdf96bf49a5d7a139014db9516#df5f6ae9f7396ccdf96bf49a5d7a139014db9516"
 dependencies = [
  "android-native-keyring-store",
  "apple-native-keyring-store",
@@ -5516,6 +5542,7 @@ dependencies = [
  "nostr-blossom",
  "nostr-sdk",
  "once_cell",
+ "openmls 0.8.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "rand 0.9.4",
  "reqwest 0.13.2",
  "rustls",
@@ -5539,7 +5566,7 @@ dependencies = [
 [[package]]
 name = "whitenoise-macros"
 version = "0.1.0"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=59aa42cc4cb5257beff49fd337b6c55857c80f73#59aa42cc4cb5257beff49fd337b6c55857c80f73"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=df5f6ae9f7396ccdf96bf49a5d7a139014db9516#df5f6ae9f7396ccdf96bf49a5d7a139014db9516"
 dependencies = [
  "proc-macro2",
  "quote",

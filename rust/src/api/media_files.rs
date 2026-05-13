@@ -1,11 +1,10 @@
+use crate::api::wn_session;
 use crate::api::{error::ApiError, group_id_from_string, group_id_to_string};
 use chrono::{DateTime, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
 use std::path::PathBuf;
-use whitenoise::{
-    FileMetadata as WhitenoiseFileMetadata, MediaFile as WhitenoiseMediaFile, Whitenoise,
-};
+use whitenoise::{FileMetadata as WhitenoiseFileMetadata, MediaFile as WhitenoiseMediaFile};
 
 #[frb(non_opaque)]
 #[derive(Debug, Clone)]
@@ -122,13 +121,14 @@ pub async fn upload_chat_media(
     group_id: String,
     file_path: String,
 ) -> Result<MediaFile, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
 
-    let media_file = whitenoise
-        .upload_chat_media(&account, &group_id, &file_path, None, None)
+    let media_file = session
+        .groups()
+        .media()
+        .upload_chat_media(&group_id, &file_path, None, None)
         .await?;
 
     Ok(media_file.into())
@@ -140,9 +140,8 @@ pub async fn download_chat_media(
     group_id: String,
     original_file_hash: String,
 ) -> Result<MediaFile, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let original_file_hash_bytes = ::hex::decode(&original_file_hash)?;
     let hash_array: [u8; 32] =
@@ -152,8 +151,10 @@ pub async fn download_chat_media(
                 message: "Invalid original_file_hash length; must be 32 bytes.".to_string(),
             })?;
 
-    let media_file = whitenoise
-        .download_chat_media(&account, &group_id, &hash_array)
+    let media_file = session
+        .groups()
+        .media()
+        .download_chat_media(&group_id, &hash_array)
         .await?;
 
     Ok(media_file.into())

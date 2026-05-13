@@ -1,7 +1,30 @@
 // Re-export everything from the whitenoise crate
 use flutter_rust_bridge::frb;
 use std::path::Path;
+use std::sync::Arc;
+use tokio::sync::OnceCell;
 pub use whitenoise::{AppSettings, Language, RelayType, ThemeMode, Whitenoise};
+
+static GLOBAL_WN: OnceCell<Arc<Whitenoise>> = OnceCell::const_new();
+
+pub(crate) fn wn() -> Result<&'static Whitenoise, error::ApiError> {
+    GLOBAL_WN
+        .get()
+        .map(|arc| arc.as_ref())
+        .ok_or_else(|| error::ApiError::Whitenoise {
+            message: "Whitenoise not initialized".to_string(),
+        })
+}
+
+pub(crate) fn wn_session(
+    pubkey: &nostr_sdk::PublicKey,
+) -> Result<Arc<whitenoise::whitenoise::session::AccountSession>, error::ApiError> {
+    wn()?
+        .session(pubkey)
+        .ok_or_else(|| error::ApiError::Whitenoise {
+            message: "Account session not found".to_string(),
+        })
+}
 
 // Re-export types that flutter_rust_bridge needs
 pub use nostr_sdk::{Event, PublicKey, RelayUrl, Tag};
@@ -109,26 +132,31 @@ pub async fn initialize_whitenoise(config: WhitenoiseConfig) -> Result<(), ApiEr
         Path::new(&config.logs_dir),
         "com.whitenoise.app",
     );
-    Whitenoise::initialize_whitenoise(core_config)
-        .await
-        .map_err(ApiError::from)
+    GLOBAL_WN
+        .get_or_try_init(|| async {
+            Whitenoise::ensure_initialized(core_config)
+                .await
+                .map_err(ApiError::from)
+        })
+        .await?;
+    Ok(())
 }
 
 #[frb]
 pub async fn delete_all_data() -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     whitenoise.delete_all_data().await.map_err(ApiError::from)
 }
 
 #[frb]
 pub async fn get_app_settings() -> Result<AppSettings, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     whitenoise.app_settings().await.map_err(ApiError::from)
 }
 
 #[frb]
 pub async fn update_theme_mode(theme_mode: ThemeMode) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     whitenoise
         .update_theme_mode(theme_mode)
         .await
@@ -142,7 +170,7 @@ pub fn app_settings_theme_mode(app_settings: &AppSettings) -> ThemeMode {
 
 #[frb]
 pub async fn update_language(language: Language) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     whitenoise
         .update_language(language)
         .await

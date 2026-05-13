@@ -1,6 +1,7 @@
 use crate::api::{
     default_relay_urls_parsed, error::ApiError, group_id_from_string, group_id_to_string,
 };
+use crate::api::{wn, wn_session};
 use chrono::{DateTime, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
@@ -9,7 +10,7 @@ use whitenoise::mdk::{NostrGroupConfigData, NostrGroupDataUpdate};
 use whitenoise::whitenoise::groups::RequiredProposal as WhitenoiseRequiredProposal;
 use whitenoise::{
     GroupInformation as WhitenoiseGroupInformation, GroupType as WhitenoiseGroupType,
-    GroupWithInfoAndMembership as WhitenoiseGroupWithInfoAndMembership, Whitenoise,
+    GroupWithInfoAndMembership as WhitenoiseGroupWithInfoAndMembership,
 };
 #[frb(non_opaque)]
 #[derive(Debug, Clone)]
@@ -90,7 +91,7 @@ impl From<FlutterGroupDataUpdate> for NostrGroupDataUpdate {
 impl Group {
     #[frb]
     pub async fn group_type(&self, account_pubkey: String) -> Result<GroupType, ApiError> {
-        let whitenoise = Whitenoise::get_instance()?;
+        let whitenoise = wn()?;
         let mls_group_id = group_id_from_string(&self.mls_group_id)?;
         let parsed_pubkey = PublicKey::parse(&account_pubkey)?;
         let group_information = whitenoise
@@ -101,7 +102,7 @@ impl Group {
 
     #[frb]
     pub async fn is_direct_message_type(&self, account_pubkey: String) -> Result<bool, ApiError> {
-        let whitenoise = Whitenoise::get_instance()?;
+        let whitenoise = wn()?;
         let mls_group_id = group_id_from_string(&self.mls_group_id)?;
         let parsed_pubkey = PublicKey::parse(&account_pubkey)?;
         let group_information = whitenoise
@@ -112,7 +113,7 @@ impl Group {
 
     #[frb]
     pub async fn is_group_type(&self, account_pubkey: String) -> Result<bool, ApiError> {
-        let whitenoise = Whitenoise::get_instance()?;
+        let whitenoise = wn()?;
         let mls_group_id = group_id_from_string(&self.mls_group_id)?;
         let parsed_pubkey = PublicKey::parse(&account_pubkey)?;
         let group_information = whitenoise
@@ -127,12 +128,12 @@ impl Group {
         account_pubkey: String,
         group_data: FlutterGroupDataUpdate,
     ) -> Result<(), ApiError> {
-        let whitenoise = Whitenoise::get_instance()?;
         let mls_group_id = group_id_from_string(&self.mls_group_id)?;
         let parsed_pubkey = PublicKey::parse(&account_pubkey)?;
-        let account = whitenoise.find_account_by_pubkey(&parsed_pubkey).await?;
-        whitenoise
-            .update_group_data(&account, &mls_group_id, group_data.into())
+        let session = wn_session(&parsed_pubkey)?;
+        session
+            .groups()
+            .update_group_data(&mls_group_id, group_data.into())
             .await
             .map_err(ApiError::from)
     }
@@ -216,30 +217,27 @@ impl From<WhitenoiseGroupInformation> for GroupInformation {
 
 #[frb]
 pub async fn active_groups(pubkey: String) -> Result<Vec<Group>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    let groups = whitenoise.groups(&account, true).await?;
+    let session = wn_session(&pubkey)?;
+    let groups = session.groups().all(true)?;
     Ok(groups.into_iter().map(|g| g.into()).collect())
 }
 
 #[frb]
 pub async fn group_members(pubkey: String, group_id: String) -> Result<Vec<String>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    let members = whitenoise.group_members(&account, &group_id).await?;
+    let session = wn_session(&pubkey)?;
+    let members = session.groups().members(&group_id)?;
     Ok(members.into_iter().map(|m| m.to_hex()).collect())
 }
 
 #[frb]
 pub async fn group_admins(pubkey: String, group_id: String) -> Result<Vec<String>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    let admins = whitenoise.group_admins(&account, &group_id).await?;
+    let session = wn_session(&pubkey)?;
+    let admins = session.groups().admins(&group_id)?;
     Ok(admins.into_iter().map(|a| a.to_hex()).collect())
 }
 
@@ -257,9 +255,8 @@ pub async fn create_group(
         GroupType::Group => WhitenoiseGroupType::Group,
     };
 
-    let whitenoise = Whitenoise::get_instance()?;
     let creator_pubkey = PublicKey::parse(&creator_pubkey)?;
-    let creator_account = whitenoise.find_account_by_pubkey(&creator_pubkey).await?;
+    let session = wn_session(&creator_pubkey)?;
 
     let admin_pubkeys = admin_pubkeys
         .into_iter()
@@ -281,9 +278,9 @@ pub async fn create_group(
         .map(|pk| PublicKey::parse(&pk))
         .collect::<Result<Vec<_>, _>>()?;
 
-    let group = whitenoise
+    let group = session
+        .groups()
         .create_group(
-            &creator_account,
             member_pubkeys,
             nostr_group_config,
             Some(whitenoise_group_type),
@@ -298,16 +295,16 @@ pub async fn add_members_to_group(
     group_id: String,
     member_pubkeys: Vec<String>,
 ) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
     let member_pubkeys = member_pubkeys
         .into_iter()
         .map(|pk| PublicKey::parse(&pk))
         .collect::<Result<Vec<_>, _>>()?;
-    whitenoise
-        .add_members_to_group(&account, &group_id, member_pubkeys)
+    session
+        .groups()
+        .add_members(&group_id, member_pubkeys)
         .await
         .map_err(ApiError::from)
 }
@@ -318,16 +315,16 @@ pub async fn remove_members_from_group(
     group_id: String,
     member_pubkeys: Vec<String>,
 ) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
     let member_pubkeys = member_pubkeys
         .into_iter()
         .map(|pk| PublicKey::parse(&pk))
         .collect::<Result<Vec<_>, _>>()?;
-    whitenoise
-        .remove_members_from_group(&account, &group_id, member_pubkeys)
+    session
+        .groups()
+        .remove_members(&group_id, member_pubkeys)
         .await
         .map_err(ApiError::from)
 }
@@ -338,11 +335,14 @@ pub async fn remove_members_from_group(
 /// Local-only: nothing is published to relays.
 #[frb]
 pub async fn clear_chat(account_pubkey: String, group_id: String) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    whitenoise.clear_chat(&account, &group_id).await?;
+    let session = wn_session(&pubkey)?;
+    session
+        .membership()
+        .for_group(&group_id)
+        .clear_chat()
+        .await?;
     Ok(())
 }
 
@@ -353,7 +353,7 @@ pub async fn clear_chat(account_pubkey: String, group_id: String) -> Result<(), 
 /// to exit the group entirely.
 #[frb]
 pub async fn delete_chat(account_pubkey: String, group_id: String) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
@@ -370,34 +370,34 @@ pub async fn leave_and_delete_group(
     account_pubkey: String,
     group_id: String,
 ) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    whitenoise.leave_group(&account, &group_id).await?;
+    let session = wn_session(&pubkey)?;
+    session.groups().leave(&group_id).await?;
     whitenoise.delete_chat(&account, &group_id).await?;
     Ok(())
 }
 
 #[frb]
 pub async fn leave_group(pubkey: String, group_id: String) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    whitenoise
-        .leave_group(&account, &group_id)
+    let session = wn_session(&pubkey)?;
+    session
+        .groups()
+        .leave(&group_id)
         .await
         .map_err(ApiError::from)
 }
 
 #[frb]
 pub async fn get_group(account_pubkey: String, group_id: String) -> Result<Group, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let group = whitenoise.group(&account, &group_id).await?;
+    let group = session.groups().get(&group_id)?;
     Ok(group.into())
 }
 
@@ -406,7 +406,7 @@ pub async fn group_required_proposals(
     account_pubkey: String,
     group_id: String,
 ) -> Result<Vec<RequiredProposal>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let group_id = group_id_from_string(&group_id)?;
@@ -424,7 +424,7 @@ pub async fn get_group_information(
     account_pubkey: String,
     group_id: String,
 ) -> Result<GroupInformation, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let group_id = group_id_from_string(&group_id)?;
     let parsed_pubkey = PublicKey::parse(&account_pubkey)?;
     Ok(whitenoise
@@ -438,7 +438,7 @@ pub async fn get_groups_informations(
     account_pubkey: String,
     group_ids: Vec<String>,
 ) -> Result<Vec<GroupInformation>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let group_ids = group_ids
         .into_iter()
         .map(|id| group_id_from_string(&id))
@@ -476,10 +476,9 @@ impl From<WhitenoiseGroupWithInfoAndMembership> for GroupWithInfoAndMembership {
 pub async fn visible_groups_with_info(
     account_pubkey: String,
 ) -> Result<Vec<GroupWithInfoAndMembership>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    let groups = whitenoise.visible_groups_with_info(&account).await?;
+    let session = wn_session(&pubkey)?;
+    let groups = session.groups().visible_with_info().await?;
     Ok(groups.into_iter().map(|g| g.into()).collect())
 }
 
@@ -499,14 +498,15 @@ pub async fn upload_group_image(
     file_path: String,
     server_url: String,
 ) -> Result<UploadGroupImageResult, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let session = wn_session(&pubkey)?;
     let server = Url::parse(&server_url)?;
 
-    let (encrypted_hash, image_key, image_nonce) = whitenoise
-        .upload_group_image(&account, &group_id, &file_path, Some(server), None)
+    let (encrypted_hash, image_key, image_nonce) = session
+        .groups()
+        .media()
+        .upload_group_image(&group_id, &file_path, Some(server), None)
         .await?;
 
     Ok(UploadGroupImageResult {
@@ -538,11 +538,14 @@ pub async fn get_group_image_path(
     account_pubkey: String,
     group_id: String,
 ) -> Result<Option<String>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    let path = whitenoise.get_group_image_path(&account, &group_id).await?;
+    let session = wn_session(&pubkey)?;
+    let path = session
+        .groups()
+        .media()
+        .get_group_image_path(&group_id)
+        .await?;
     Ok(path.map(|p| p.to_string_lossy().to_string()))
 }
 
@@ -577,7 +580,7 @@ pub async fn get_ratchet_tree_info(
     account_pubkey: String,
     group_id: String,
 ) -> Result<RatchetTreeInfo, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;

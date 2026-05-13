@@ -1,9 +1,9 @@
 use crate::api::error::ApiError;
 use crate::api::utils::group_id_from_string;
+use crate::api::wn;
 use crate::frb_generated::StreamSink;
 use flutter_rust_bridge::frb;
 use nostr_sdk::PublicKey;
-use whitenoise::Whitenoise;
 use whitenoise::whitenoise::group_state_streaming::GroupStateUpdate as WhitenoiseGroupStateUpdate;
 
 /// Real-time group state event for the subscribed `(account, group)` pair.
@@ -45,7 +45,7 @@ pub async fn subscribe_to_group_state(
     mls_group_id: String,
     sink: StreamSink<GroupStateUpdate>,
 ) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id = group_id_from_string(&mls_group_id)?;
 

@@ -1,8 +1,8 @@
+use crate::api::wn_session;
 use crate::api::{error::ApiError, utils::group_id_to_string};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
 use whitenoise::AccountGroup as WhitenoiseAccountGroup;
-use whitenoise::Whitenoise;
 use whitenoise::mdk::GroupId;
 
 /// Represents the relationship between an account and an MLS group.
@@ -76,18 +76,11 @@ pub async fn accept_account_group(
     account_pubkey: String,
     mls_group_id: String,
 ) -> Result<AccountGroup, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = ::hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-
-    let ag = WhitenoiseAccountGroup::get(whitenoise, &pubkey, &group_id)
-        .await?
-        .ok_or_else(|| ApiError::Other {
-            message: "AccountGroup not found".to_string(),
-        })?;
-
-    let updated = ag.accept(whitenoise).await?;
+    let session = wn_session(&pubkey)?;
+    let updated = session.membership().for_group(&group_id).accept().await?;
     Ok(updated.into())
 }
 
@@ -98,18 +91,11 @@ pub async fn decline_account_group(
     account_pubkey: String,
     mls_group_id: String,
 ) -> Result<AccountGroup, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = ::hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-
-    let ag = WhitenoiseAccountGroup::get(whitenoise, &pubkey, &group_id)
-        .await?
-        .ok_or_else(|| ApiError::Other {
-            message: "AccountGroup not found".to_string(),
-        })?;
-
-    let updated = ag.decline(whitenoise).await?;
+    let session = wn_session(&pubkey)?;
+    let updated = session.membership().for_group(&group_id).decline().await?;
     Ok(updated.into())
 }
 
@@ -118,17 +104,15 @@ pub async fn get_account_group(
     account_pubkey: String,
     mls_group_id: String,
 ) -> Result<AccountGroup, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = ::hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-
-    let ag = WhitenoiseAccountGroup::get(whitenoise, &pubkey, &group_id)
-        .await?
-        .ok_or_else(|| ApiError::Other {
-            message: "AccountGroup not found".to_string(),
-        })?;
-
+    let session = wn_session(&pubkey)?;
+    let (ag, _) = session
+        .membership()
+        .for_group(&group_id)
+        .get_or_create(None)
+        .await?;
     Ok(ag.into())
 }
 
@@ -137,33 +121,34 @@ pub async fn get_dm_group_with_peer(
     account_pubkey: String,
     peer_pubkey: String,
 ) -> Result<Option<String>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let peer = PublicKey::parse(&peer_pubkey)?;
-    let group_id = whitenoise.get_dm_group_with_peer(&account, &peer).await?;
+    let session = wn_session(&pubkey)?;
+    let group_id = session.membership().dm_group_with_peer(&peer).await?;
     Ok(group_id.map(|id| group_id_to_string(&id)))
 }
 
 #[frb]
 pub async fn archive_chat(account_pubkey: String, mls_group_id: String) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = ::hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    whitenoise.archive_chat(&account, &group_id).await?;
+    let session = wn_session(&pubkey)?;
+    session.membership().for_group(&group_id).archive().await?;
     Ok(())
 }
 
 #[frb]
 pub async fn unarchive_chat(account_pubkey: String, mls_group_id: String) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = ::hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    whitenoise.unarchive_chat(&account, &group_id).await?;
+    let session = wn_session(&pubkey)?;
+    session
+        .membership()
+        .for_group(&group_id)
+        .unarchive()
+        .await?;
     Ok(())
 }
 
@@ -176,11 +161,9 @@ pub async fn mark_message_read(
     account_pubkey: String,
     message_id: String,
 ) -> Result<AccountGroup, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let event_id = EventId::from_hex(&message_id)?;
-
-    let updated = whitenoise.mark_message_read(&account, &event_id).await?;
+    let session = wn_session(&pubkey)?;
+    let updated = session.membership().mark_message_read(&event_id).await?;
     Ok(updated.into())
 }

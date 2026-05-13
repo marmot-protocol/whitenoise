@@ -1,10 +1,10 @@
 use crate::api::error::ApiError;
 use crate::api::utils::group_id_to_string;
+use crate::api::{wn, wn_session};
 use crate::frb_generated::StreamSink;
 use chrono::{DateTime, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::{PublicKey, RelayUrl};
-use whitenoise::Whitenoise;
 use whitenoise::whitenoise::notification_streaming::{
     NotificationTrigger as WhitenoiseNotificationTrigger,
     NotificationUpdate as WhitenoiseNotificationUpdate,
@@ -80,7 +80,7 @@ impl From<WhitenoiseNotificationUpdate> for NotificationUpdate {
 pub async fn subscribe_to_notifications(
     sink: StreamSink<NotificationUpdate>,
 ) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let subscription = whitenoise.subscribe_to_notifications();
     let mut rx = subscription.updates;
 
@@ -159,10 +159,9 @@ impl From<WhitenoisePushRegistration> for PushRegistration {
 
 #[frb]
 pub async fn get_push_registration(pubkey: String) -> Result<Option<PushRegistration>, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    let registration = whitenoise.push_registration(&account).await?;
+    let session = wn_session(&pubkey)?;
+    let registration = session.push().registration().await?;
     Ok(registration.map(PushRegistration::from))
 }
 
@@ -174,33 +173,26 @@ pub async fn upsert_push_registration(
     server_pubkey: String,
     relay_hint: Option<String>,
 ) -> Result<PushRegistration, ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let server_pk = PublicKey::parse(&server_pubkey)?;
     let relay = relay_hint
         .as_deref()
         .map(RelayUrl::parse)
         .transpose()
         .map_err(ApiError::from)?;
-    let registration = whitenoise
-        .upsert_push_registration(
-            &account,
-            platform.into(),
-            &raw_token,
-            &server_pk,
-            relay.as_ref(),
-        )
+    let session = wn_session(&pubkey)?;
+    let registration = session
+        .push()
+        .upsert_registration(platform.into(), &raw_token, &server_pk, relay.as_ref())
         .await?;
     Ok(registration.into())
 }
 
 #[frb]
 pub async fn clear_push_registration(pubkey: String) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    whitenoise.clear_push_registration(&account).await?;
+    let session = wn_session(&pubkey)?;
+    session.push().clear_registration().await?;
     Ok(())
 }
 

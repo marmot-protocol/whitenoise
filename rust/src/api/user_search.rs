@@ -1,5 +1,6 @@
 use crate::api::error::ApiError;
 use crate::api::metadata::FlutterMetadata;
+use crate::api::wn;
 use crate::frb_generated::StreamSink;
 use flutter_rust_bridge::frb;
 use nostr_sdk::PublicKey;
@@ -7,7 +8,7 @@ use whitenoise::whitenoise::user_search::UserSearchParams;
 use whitenoise::{
     MatchQuality as WnMatchQuality, MatchedField as WnMatchedField,
     SearchUpdateTrigger as WnSearchUpdateTrigger, UserSearchResult as WnUserSearchResult,
-    UserSearchUpdate as WnUserSearchUpdate, Whitenoise,
+    UserSearchUpdate as WnUserSearchUpdate,
 };
 
 #[frb]
@@ -150,7 +151,7 @@ pub async fn search_users(
     radius_end: u8,
     sink: StreamSink<UserSearchUpdate>,
 ) -> Result<(), ApiError> {
-    let whitenoise = Whitenoise::get_instance()?;
+    let whitenoise = wn()?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
 
     let params = UserSearchParams {
