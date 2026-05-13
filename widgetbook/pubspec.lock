@@ -1072,9 +1072,11 @@ packages:
   rust_lib_whitenoise:
     dependency: transitive
     description:
-      path: "../rust_builder"
-      relative: true
-    source: path
+      path: "."
+      ref: flutter-package
+      resolved-ref: "977d28ef52584e2d7201e595032d64fe0368c98c"
+      url: "https://github.com/marmot-protocol/whitenoise-rs"
+    source: git
     version: "0.0.1"
   rxdart:
     dependency: transitive
