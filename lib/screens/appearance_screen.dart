@@ -28,7 +28,10 @@ class AppearanceScreen extends HookConsumerWidget {
     ];
 
     final systemLocale = View.of(context).platformDispatcher.locale;
-    final systemLanguageName = getLanguageDisplayName(systemLocale.languageCode);
+    final systemLocaleTag = systemLocale.scriptCode == null
+        ? systemLocale.languageCode
+        : '${systemLocale.languageCode}_${systemLocale.scriptCode}';
+    final systemLanguageName = getLanguageDisplayName(systemLocaleTag);
     final systemLabel = systemLanguageName != systemLocale.languageCode
         ? '${context.l10n.languageSystem} ($systemLanguageName)'
         : context.l10n.languageSystem;
@@ -41,7 +44,7 @@ class AppearanceScreen extends HookConsumerWidget {
       ...AppLocalizations.supportedLocales.map(
         (locale) => WnDropdownOption<LocaleSetting>(
           value: SpecificLocale(locale),
-          label: getLanguageDisplayName(locale.languageCode),
+          label: getLocaleDisplayName(locale),
         ),
       ),
     ];

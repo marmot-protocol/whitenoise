@@ -1,6 +1,4 @@
-import 'dart:ui' show PlatformDispatcher;
-
-import 'package:flutter/material.dart' show Locale;
+import 'package:flutter/material.dart' show Locale, WidgetsBinding;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
@@ -30,10 +28,12 @@ class SpecificLocale extends LocaleSetting {
 
   @override
   bool operator ==(Object other) =>
-      other is SpecificLocale && other.locale.languageCode == locale.languageCode;
+      other is SpecificLocale &&
+      other.locale.languageCode == locale.languageCode &&
+      other.locale.scriptCode == locale.scriptCode;
 
   @override
-  int get hashCode => locale.languageCode.hashCode;
+  int get hashCode => Object.hash(locale.languageCode, locale.scriptCode);
 }
 
 class LocaleNotifier extends AsyncNotifier<LocaleSetting> {
@@ -73,11 +73,12 @@ class LocaleNotifier extends AsyncNotifier<LocaleSetting> {
     if (code == 'system') {
       return const SystemLocale();
     }
-    final isSupported = AppLocalizations.supportedLocales.any(
-      (l) => l.languageCode == code,
-    );
+    final locale = _localeFromLanguageCode(code);
+    final isSupported = AppLocalizations.supportedLocales.any((l) {
+      return l.languageCode == locale.languageCode && l.scriptCode == locale.scriptCode;
+    });
     if (isSupported) {
-      return SpecificLocale(Locale(code));
+      return SpecificLocale(locale);
     }
     return const SystemLocale();
   }
@@ -85,30 +86,49 @@ class LocaleNotifier extends AsyncNotifier<LocaleSetting> {
   rust_api.Language _settingToRustLanguage(LocaleSetting setting) {
     return switch (setting) {
       SystemLocale() => rust_utils.languageSystem(),
-      SpecificLocale(locale: final locale) => _languageCodeToRust(locale.languageCode),
+      SpecificLocale(locale: final locale) => _localeToRustLanguage(locale),
     };
   }
 
-  rust_api.Language _languageCodeToRust(String code) {
+  Locale _localeFromLanguageCode(String code) {
     return switch (code) {
-      'en' => rust_utils.languageEnglish(),
-      'es' => rust_utils.languageSpanish(),
-      'fr' => rust_utils.languageFrench(),
-      'de' => rust_utils.languageGerman(),
-      'it' => rust_utils.languageItalian(),
-      'pt' => rust_utils.languagePortuguese(),
-      'ru' => rust_utils.languageRussian(),
-      'tr' => rust_utils.languageTurkish(),
+      'zh_Hant' => const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+      'zh_Hans' => const Locale('zh'),
+      _ => Locale(code),
+    };
+  }
+
+  rust_api.Language _localeToRustLanguage(Locale locale) {
+    return switch ((locale.languageCode, locale.scriptCode)) {
+      ('zh', 'Hant') => rust_utils.languageChineseTraditional(),
+      ('zh', _) => rust_utils.languageChineseSimplified(),
+      ('en', _) => rust_utils.languageEnglish(),
+      ('es', _) => rust_utils.languageSpanish(),
+      ('fr', _) => rust_utils.languageFrench(),
+      ('de', _) => rust_utils.languageGerman(),
+      ('it', _) => rust_utils.languageItalian(),
+      ('pt', _) => rust_utils.languagePortuguese(),
+      ('ru', _) => rust_utils.languageRussian(),
+      ('tr', _) => rust_utils.languageTurkish(),
       _ => rust_utils.languageEnglish(),
     };
   }
 
   Locale _resolveSystemLocale() {
-    final deviceLocale = PlatformDispatcher.instance.locale;
-    final isSupported = AppLocalizations.supportedLocales.any(
-      (l) => l.languageCode == deviceLocale.languageCode,
+    final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
+    for (final locale in AppLocalizations.supportedLocales) {
+      if (locale.languageCode == deviceLocale.languageCode &&
+          locale.scriptCode == deviceLocale.scriptCode) {
+        return Locale.fromSubtags(
+          languageCode: deviceLocale.languageCode,
+          scriptCode: deviceLocale.scriptCode,
+        );
+      }
+    }
+    final isLanguageSupported = AppLocalizations.supportedLocales.any(
+      (locale) => locale.languageCode == deviceLocale.languageCode,
     );
-    return isSupported ? Locale(deviceLocale.languageCode) : const Locale('en');
+    return isLanguageSupported ? Locale(deviceLocale.languageCode) : const Locale('en');
   }
 }
 
@@ -124,8 +144,18 @@ String getLanguageDisplayName(String languageCode) {
     'pt' => 'Português',
     'ru' => 'Русский',
     'tr' => 'Türkçe',
+    'zh_Hans' || 'zh-Hans' => '简体中文',
+    'zh_Hant' || 'zh-Hant' => '繁體中文',
+    'zh' => '简体中文',
     _ => languageCode,
   };
+}
+
+String getLocaleDisplayName(Locale locale) {
+  if (locale.languageCode == 'zh' && locale.scriptCode == 'Hant') {
+    return '繁體中文';
+  }
+  return getLanguageDisplayName(locale.languageCode);
 }
 
 class LocaleFormatters {
@@ -202,7 +232,7 @@ final localeFormattersProvider = Provider<LocaleFormatters>((ref) {
 });
 
 String _resolveSystemLanguageCode() {
-  final deviceLocale = PlatformDispatcher.instance.locale;
+  final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
   final isSupported = AppLocalizations.supportedLocales.any(
     (l) => l.languageCode == deviceLocale.languageCode,
   );

@@ -27,12 +27,13 @@ void main() {
   Future<void> pumpAppearanceScreen(
     WidgetTester tester, {
     String? initialThemeMode,
+    Locale platformLocale = const Locale('en', 'US'),
   }) async {
     if (initialThemeMode != null) {
       mockApi.currentThemeMode = initialThemeMode;
     }
 
-    tester.platformDispatcher.localeTestValue = const Locale('en', 'US');
+    tester.platformDispatcher.localeTestValue = platformLocale;
     addTearDown(tester.platformDispatcher.clearLocaleTestValue);
 
     await mountTestApp(
@@ -64,6 +65,24 @@ void main() {
         find.descendant(
           of: find.byType(WnDropdownSelector<LocaleSetting>),
           matching: find.textContaining('System'),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('system language label preserves Traditional Chinese script', (tester) async {
+      await pumpAppearanceScreen(
+        tester,
+        platformLocale: const Locale.fromSubtags(
+          languageCode: 'zh',
+          scriptCode: 'Hant',
+        ),
+      );
+
+      expect(
+        find.descendant(
+          of: find.byType(WnDropdownSelector<LocaleSetting>),
+          matching: find.text('System (繁體中文)'),
         ),
         findsOneWidget,
       );
@@ -345,7 +364,7 @@ void main() {
       expect(mockApi.currentLanguage, 'tr');
     });
 
-    testWidgets('dropdown contains all 8 languages plus System', (tester) async {
+    testWidgets('dropdown contains all languages plus System', (tester) async {
       await pumpAppearanceScreen(tester);
 
       await tester.tap(find.byType(WnDropdownSelector<LocaleSetting>));
@@ -359,16 +378,34 @@ void main() {
       expect(find.text('Français'), findsOneWidget);
 
       await tester.scrollUntilVisible(
-        find.text('Türkçe'),
+        find.text('Italiano'),
         50.0,
         scrollable: find.byType(Scrollable).last,
       );
       await tester.pumpAndSettle();
 
       expect(find.text('Italiano'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text('Türkçe'),
+        50.0,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
+
       expect(find.text('Português'), findsOneWidget);
       expect(find.text('Русский'), findsOneWidget);
       expect(find.text('Türkçe'), findsOneWidget);
+
+      await tester.scrollUntilVisible(
+        find.text('简体中文'),
+        50.0,
+        scrollable: find.byType(Scrollable).last,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('简体中文'), findsOneWidget);
+      expect(find.text('繁體中文'), findsOneWidget);
     });
 
     testWidgets('language selection persists across navigation', (tester) async {

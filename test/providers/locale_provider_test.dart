@@ -66,6 +66,17 @@ void main() {
         expect((localeSetting as SpecificLocale).locale.languageCode, 'de');
       });
 
+      test('initializes with Traditional Chinese from Rust app settings', () async {
+        mockApi.currentLanguage = 'zh_Hant';
+
+        final localeSetting = await container.read(localeProvider.future);
+
+        expect(localeSetting, isA<SpecificLocale>());
+        final locale = (localeSetting as SpecificLocale).locale;
+        expect(locale.languageCode, 'zh');
+        expect(locale.scriptCode, 'Hant');
+      });
+
       test('initializes with SystemLocale when Rust returns system', () async {
         mockApi.currentLanguage = 'system';
 
@@ -162,6 +173,37 @@ void main() {
         expect(mockApi.currentLanguage, 'tr');
       });
 
+      test('setLocale updates to Simplified Chinese', () async {
+        await container.read(localeProvider.future);
+        await container.read(localeProvider.notifier).setLocale(const SpecificLocale(Locale('zh')));
+
+        final current = container.read(localeProvider).value;
+        expect(current, isA<SpecificLocale>());
+        expect((current as SpecificLocale).locale.languageCode, 'zh');
+        expect(mockApi.currentLanguage, 'zh');
+      });
+
+      test('setLocale updates to Traditional Chinese', () async {
+        await container.read(localeProvider.future);
+        await container
+            .read(localeProvider.notifier)
+            .setLocale(
+              const SpecificLocale(
+                Locale.fromSubtags(
+                  languageCode: 'zh',
+                  scriptCode: 'Hant',
+                ),
+              ),
+            );
+
+        final current = container.read(localeProvider).value;
+        expect(current, isA<SpecificLocale>());
+        final locale = (current as SpecificLocale).locale;
+        expect(locale.languageCode, 'zh');
+        expect(locale.scriptCode, 'Hant');
+        expect(mockApi.currentLanguage, 'zh_Hant');
+      });
+
       test('setLocale can switch back to English', () async {
         mockApi.currentLanguage = 'de';
         await container.read(localeProvider.future);
@@ -236,6 +278,40 @@ void main() {
 
         expect(resolved.languageCode, isNotEmpty);
       });
+
+      testWidgets('resolveLocale preserves supported system locale script code', (tester) async {
+        tester.platformDispatcher.localeTestValue = const Locale.fromSubtags(
+          languageCode: 'zh',
+          scriptCode: 'Hant',
+        );
+        addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+
+        mockApi.currentLanguage = 'system';
+        await container.read(localeProvider.future);
+
+        final resolved = container.read(localeProvider.notifier).resolveLocale();
+
+        expect(resolved.languageCode, 'zh');
+        expect(resolved.scriptCode, 'Hant');
+      });
+
+      testWidgets('resolveLocale falls back to language when system script is unsupported', (
+        tester,
+      ) async {
+        tester.platformDispatcher.localeTestValue = const Locale.fromSubtags(
+          languageCode: 'zh',
+          scriptCode: 'Hans',
+        );
+        addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+
+        mockApi.currentLanguage = 'system';
+        await container.read(localeProvider.future);
+
+        final resolved = container.read(localeProvider.notifier).resolveLocale();
+
+        expect(resolved.languageCode, 'zh');
+        expect(resolved.scriptCode, isNull);
+      });
     });
 
     test('can switch languages multiple times', () async {
@@ -275,6 +351,13 @@ void main() {
     test('SpecificLocale instances with different language codes are not equal', () {
       const locale1 = SpecificLocale(Locale('en'));
       const locale2 = SpecificLocale(Locale('de'));
+
+      expect(locale1, isNot(equals(locale2)));
+    });
+
+    test('SpecificLocale instances with different Chinese scripts are not equal', () {
+      const locale1 = SpecificLocale(Locale('zh'));
+      const locale2 = SpecificLocale(Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'));
 
       expect(locale1, isNot(equals(locale2)));
     });
@@ -320,8 +403,25 @@ void main() {
       expect(getLanguageDisplayName('tr'), 'Türkçe');
     });
 
+    test('returns correct display name for Simplified Chinese', () {
+      expect(getLanguageDisplayName('zh'), '简体中文');
+    });
+
     test('returns language code for unknown languages', () {
       expect(getLanguageDisplayName('xx'), 'xx');
+    });
+  });
+
+  group('getLocaleDisplayName', () {
+    test('returns correct display name for Traditional Chinese', () {
+      expect(
+        getLocaleDisplayName(const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant')),
+        '繁體中文',
+      );
+    });
+
+    test('returns language display name for other locales', () {
+      expect(getLocaleDisplayName(const Locale('fr')), 'Français');
     });
   });
 
