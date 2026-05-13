@@ -278,6 +278,40 @@ void main() {
 
         expect(resolved.languageCode, isNotEmpty);
       });
+
+      testWidgets('resolveLocale preserves supported system locale script code', (tester) async {
+        tester.platformDispatcher.localeTestValue = const Locale.fromSubtags(
+          languageCode: 'zh',
+          scriptCode: 'Hant',
+        );
+        addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+
+        mockApi.currentLanguage = 'system';
+        await container.read(localeProvider.future);
+
+        final resolved = container.read(localeProvider.notifier).resolveLocale();
+
+        expect(resolved.languageCode, 'zh');
+        expect(resolved.scriptCode, 'Hant');
+      });
+
+      testWidgets('resolveLocale falls back to language when system script is unsupported', (
+        tester,
+      ) async {
+        tester.platformDispatcher.localeTestValue = const Locale.fromSubtags(
+          languageCode: 'zh',
+          scriptCode: 'Hans',
+        );
+        addTearDown(tester.platformDispatcher.clearLocaleTestValue);
+
+        mockApi.currentLanguage = 'system';
+        await container.read(localeProvider.future);
+
+        final resolved = container.read(localeProvider.notifier).resolveLocale();
+
+        expect(resolved.languageCode, 'zh');
+        expect(resolved.scriptCode, isNull);
+      });
     });
 
     test('can switch languages multiple times', () async {

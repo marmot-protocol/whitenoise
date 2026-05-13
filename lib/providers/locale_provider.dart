@@ -1,6 +1,4 @@
-import 'dart:ui' show PlatformDispatcher;
-
-import 'package:flutter/material.dart' show Locale;
+import 'package:flutter/material.dart' show Locale, WidgetsBinding;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
@@ -117,11 +115,20 @@ class LocaleNotifier extends AsyncNotifier<LocaleSetting> {
   }
 
   Locale _resolveSystemLocale() {
-    final deviceLocale = PlatformDispatcher.instance.locale;
-    final isSupported = AppLocalizations.supportedLocales.any(
-      (l) => l.languageCode == deviceLocale.languageCode,
+    final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
+    for (final locale in AppLocalizations.supportedLocales) {
+      if (locale.languageCode == deviceLocale.languageCode &&
+          locale.scriptCode == deviceLocale.scriptCode) {
+        return Locale.fromSubtags(
+          languageCode: deviceLocale.languageCode,
+          scriptCode: deviceLocale.scriptCode,
+        );
+      }
+    }
+    final isLanguageSupported = AppLocalizations.supportedLocales.any(
+      (locale) => locale.languageCode == deviceLocale.languageCode,
     );
-    return isSupported ? Locale(deviceLocale.languageCode) : const Locale('en');
+    return isLanguageSupported ? Locale(deviceLocale.languageCode) : const Locale('en');
   }
 }
 
@@ -137,6 +144,8 @@ String getLanguageDisplayName(String languageCode) {
     'pt' => 'Português',
     'ru' => 'Русский',
     'tr' => 'Türkçe',
+    'zh_Hans' || 'zh-Hans' => '简体中文',
+    'zh_Hant' || 'zh-Hant' => '繁體中文',
     'zh' => '简体中文',
     _ => languageCode,
   };
@@ -223,7 +232,7 @@ final localeFormattersProvider = Provider<LocaleFormatters>((ref) {
 });
 
 String _resolveSystemLanguageCode() {
-  final deviceLocale = PlatformDispatcher.instance.locale;
+  final deviceLocale = WidgetsBinding.instance.platformDispatcher.locale;
   final isSupported = AppLocalizations.supportedLocales.any(
     (l) => l.languageCode == deviceLocale.languageCode,
   );
