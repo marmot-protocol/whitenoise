@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/hooks/use_media_download.dart';
-import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/utils/aspect_ratio.dart';
 import 'package:whitenoise/widgets/wn_media_error_placeholder.dart';
 import 'package:whitenoise/widgets/wn_media_placeholder.dart';

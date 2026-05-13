@@ -1,13 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart';
+import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/hooks/use_clipboard_guard.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/home_screen.dart';
-import 'package:whitenoise/src/rust/api/accounts.dart';
-import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_copyable_field.dart' show WnCopyableField;
 
 import '../mocks/mock_secure_storage.dart';

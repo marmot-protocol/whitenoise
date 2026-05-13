@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:logging/logging.dart';
-import 'package:whitenoise/src/rust/api/metadata.dart';
-import 'package:whitenoise/src/rust/api/users.dart' as users_api;
-import 'package:whitenoise/src/rust/api/users.dart' show User, UserStreamItem;
+import 'package:rust_lib_whitenoise/src/rust/api/metadata.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/users.dart' as users_api;
+import 'package:rust_lib_whitenoise/src/rust/api/users.dart' show User, UserStreamItem;
 import 'package:whitenoise/utils/logging.dart';
 
 final _logger = Logger('UserService');

@@ -1,21 +1,21 @@
 import 'dart:async';
 
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-import 'package:whitenoise/src/rust/api.dart' as rust_api;
-import 'package:whitenoise/src/rust/api/account_groups.dart';
-import 'package:whitenoise/src/rust/api/accounts.dart';
-import 'package:whitenoise/src/rust/api/chat_list.dart';
-import 'package:whitenoise/src/rust/api/chat_summary.dart';
-import 'package:whitenoise/src/rust/api/drafts.dart';
-import 'package:whitenoise/src/rust/api/error.dart';
-import 'package:whitenoise/src/rust/api/groups.dart';
-import 'package:whitenoise/src/rust/api/media_files.dart';
-import 'package:whitenoise/src/rust/api/messages.dart';
-import 'package:whitenoise/src/rust/api/metadata.dart';
-import 'package:whitenoise/src/rust/api/mute_list.dart';
-import 'package:whitenoise/src/rust/api/user_search.dart';
-import 'package:whitenoise/src/rust/api/users.dart';
-import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:rust_lib_whitenoise/src/rust/api.dart' as rust_api;
+import 'package:rust_lib_whitenoise/src/rust/api/account_groups.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/chat_list.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/chat_summary.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/drafts.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/error.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/groups.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/media_files.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/messages.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/metadata.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/mute_list.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/user_search.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/users.dart';
+import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
 
 import '../test_helpers.dart' show testHexToNpub, testNpubToHex, testPubkeyA;
 

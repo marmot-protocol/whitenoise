@@ -1,6 +1,6 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
-import 'package:whitenoise/src/rust/api/account_groups.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/account_groups.dart';
 
 final _logger = Logger('useChatArchive');
 

@@ -2,9 +2,9 @@ import 'dart:async' show Completer, unawaited;
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart';
+import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/hooks/use_notifications_settings.dart';
-import 'package:whitenoise/src/rust/api/accounts.dart';
-import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';

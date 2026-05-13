@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/formatting.dart';
 import 'package:whitenoise/utils/metadata.dart' show presentName, sanitizeForDisplay;

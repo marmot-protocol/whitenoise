@@ -26,8 +26,9 @@ This is a secure messaging app that uses the [whitenoise Rust crate](https://git
 ## Tech Stack
 
 - **Flutter/Dart** - UI and application logic
-- **Rust** - Core messaging/crypto functionality via FFI
-- **flutter_rust_bridge** - Dart-Rust FFI bindings
+- **rust_lib_whitenoise** - Rust core (MLS+Nostr) via FFI; published from
+  [whitenoise-rs](https://github.com/marmot-protocol/whitenoise-rs) on the
+  `flutter-package` orphan branch and consumed via pubspec git dep
 - **Riverpod** - State management (shared state)
 - **flutter_hooks** - Ephemeral widget state
 - **go_router** - Navigation/routing
@@ -62,28 +63,28 @@ Use `constants/` only for fixed, related sets (e.g. NIP kinds) or constants repe
 ## Setup Commands
 
 ```bash
-# Install all dependencies
+# Install Flutter dependencies (resolves rust_lib_whitenoise from git)
 just deps
-
-# Install Flutter dependencies only
-just deps-flutter
-
-# Install Rust dependencies only
-just deps-rust
 ```
+
+The Rust core is consumed as a published Flutter package via `pubspec.yaml`'s
+git dep on `whitenoise-rs#flutter-package`. There is no local Rust source in
+this repo. To work on the Rust side, see
+[whitenoise-rs](https://github.com/marmot-protocol/whitenoise-rs); after a
+codeowner push to its master, CI republishes the package automatically and a
+`flutter pub upgrade` here picks it up.
 
 ## Development Commands
 
 ```bash
-# Format all code (Rust + Dart)
+# Format all code
 just format
 
 # Lint all code
 just lint
 
-# Run all tests (verbose output)
+# Run tests
 just test-flutter
-just test-rust
 
 # Run tests with coverage (99% minimum)
 just coverage
@@ -97,10 +98,7 @@ just precommit
 # Pre-commit with verbose output (for debugging failures)
 just precommit-verbose
 
-# Regenerate flutter_rust_bridge code
-just generate
-
-# Rebuild Android native libraries (after Rust code/dependency changes)
+# Rebuild Android native libraries
 just build-android-quiet
 ```
 
@@ -111,7 +109,6 @@ just build-android-quiet
 ```bash
 # Quiet test commands - USE THESE for verification
 just test-flutter-quiet    # Output: "+1093: All tests passed!" or error details
-just test-rust-quiet       # Output: "....... test result: ok" or error details
 just build-android-quiet   # Output: "✅ Android build complete" or error details
 
 # Quiet pre-commit - USE THIS before committing

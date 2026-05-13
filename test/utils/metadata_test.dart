@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/utils/metadata.dart';
 
 void main() {

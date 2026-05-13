@@ -4,9 +4,9 @@ import 'package:flutter/material.dart' show Locale;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:logging/logging.dart';
+import 'package:rust_lib_whitenoise/src/rust/api.dart' as rust_api;
+import 'package:rust_lib_whitenoise/src/rust/api/utils.dart' as rust_utils;
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
-import 'package:whitenoise/src/rust/api.dart' as rust_api;
-import 'package:whitenoise/src/rust/api/utils.dart' as rust_utils;
 
 final _logger = Logger('LocaleNotifier');
 

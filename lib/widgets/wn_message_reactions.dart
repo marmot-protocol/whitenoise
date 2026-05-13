@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:whitenoise/src/rust/api/messages.dart' show EmojiReaction;
+import 'package:rust_lib_whitenoise/src/rust/api/messages.dart' show EmojiReaction;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart' show MessageDirection;
 

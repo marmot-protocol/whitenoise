@@ -3,11 +3,11 @@ import 'dart:async' show Completer, unawaited;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart';
+import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/hooks/use_accounts.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
-import 'package:whitenoise/src/rust/api/accounts.dart';
-import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import '../mocks/mock_secure_storage.dart';
 import '../mocks/mock_wn_api.dart';

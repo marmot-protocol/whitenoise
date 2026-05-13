@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/metadata.dart';
+import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/providers/app_version_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/offline_provider.dart';
@@ -23,8 +25,6 @@ import 'package:whitenoise/screens/report_bug_screen.dart';
 import 'package:whitenoise/screens/share_profile_screen.dart';
 import 'package:whitenoise/screens/sign_out_screen.dart';
 import 'package:whitenoise/screens/start_support_chat_screen.dart';
-import 'package:whitenoise/src/rust/api/metadata.dart';
-import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 

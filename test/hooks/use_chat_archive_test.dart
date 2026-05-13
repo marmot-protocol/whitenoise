@@ -3,9 +3,9 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/account_groups.dart';
+import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/hooks/use_chat_archive.dart';
-import 'package:whitenoise/src/rust/api/account_groups.dart';
-import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';

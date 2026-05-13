@@ -35,7 +35,9 @@ dependencies:
     sdk: flutter
   intl: ^0.20.2
   rust_lib_whitenoise:
-    path: rust_builder
+    git:
+      url: https://github.com/marmot-protocol/whitenoise-rs
+      ref: flutter-package
   flutter_rust_bridge: 2.11.1
   logging: ^1.2.0
   freezed_annotation: ^3.1.0

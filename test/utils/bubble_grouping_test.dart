@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise/src/rust/api/messages.dart';
-import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/messages.dart';
+import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart' show BubbleLeadingVariant;
 

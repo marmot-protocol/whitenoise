@@ -3,12 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/metadata.dart';
+import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/share_profile_screen.dart';
 import 'package:whitenoise/screens/start_chat_screen.dart';
-import 'package:whitenoise/src/rust/api/metadata.dart';
-import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/qr_scanner.dart';
 
 import '../mocks/mock_secure_storage.dart';

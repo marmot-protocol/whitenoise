@@ -1,4 +1,4 @@
-import 'package:whitenoise/src/rust/api/utils.dart' as utils_api;
+import 'package:rust_lib_whitenoise/src/rust/api/utils.dart' as utils_api;
 
 String? npubFromHex(String hexPubkey) {
   try {

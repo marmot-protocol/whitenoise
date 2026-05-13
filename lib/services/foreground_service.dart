@@ -10,13 +10,13 @@ import 'package:flutter_foreground_task/flutter_foreground_task.dart';
 import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDirectory;
+import 'package:rust_lib_whitenoise/src/rust/api.dart' as rust_api;
+import 'package:rust_lib_whitenoise/src/rust/api/relays.dart' as relays_api;
+import 'package:rust_lib_whitenoise/src/rust/api/utils.dart' as rust_utils;
+import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/services/external_signer_callback_registry.dart';
 import 'package:whitenoise/services/notification_service.dart';
 import 'package:whitenoise/services/notification_subscription.dart';
-import 'package:whitenoise/src/rust/api.dart' as rust_api;
-import 'package:whitenoise/src/rust/api/relays.dart' as relays_api;
-import 'package:whitenoise/src/rust/api/utils.dart' as rust_utils;
-import 'package:whitenoise/src/rust/frb_generated.dart';
 
 final _logger = Logger('ForegroundService');
 

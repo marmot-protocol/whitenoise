@@ -1,5 +1,5 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:whitenoise/src/rust/api/users.dart' show User;
+import 'package:rust_lib_whitenoise/src/rust/api/users.dart' show User;
 
 typedef UserSelectionState = ({
   List<User> selectedUsers,

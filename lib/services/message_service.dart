@@ -1,8 +1,8 @@
 import 'package:logging/logging.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/media_files.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/messages.dart' as messages_api;
+import 'package:rust_lib_whitenoise/src/rust/api/utils.dart' as utils_api;
 import 'package:whitenoise/constants/nostr_event_kinds.dart';
-import 'package:whitenoise/src/rust/api/media_files.dart';
-import 'package:whitenoise/src/rust/api/messages.dart' as messages_api;
-import 'package:whitenoise/src/rust/api/utils.dart' as utils_api;
 
 final _logger = Logger('MessageService');
 

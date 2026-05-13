@@ -4,12 +4,12 @@ import 'package:flutter/foundation.dart' show TargetPlatform, debugDefaultTarget
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:logging/logging.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/error.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/metadata.dart';
+import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/is_adding_account_provider.dart';
-import 'package:whitenoise/src/rust/api/accounts.dart';
-import 'package:whitenoise/src/rust/api/error.dart';
-import 'package:whitenoise/src/rust/api/metadata.dart';
-import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import '../mocks/mock_secure_storage.dart';
 import '../test_helpers.dart';

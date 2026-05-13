@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart';
+import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/constants/nostr_event_kinds.dart';
 import 'package:whitenoise/services/android_signer_service.dart';
-import 'package:whitenoise/src/rust/api/accounts.dart';
-import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import '../mocks/mock_android_signer_channel.dart';
 import '../mocks/mock_wn_api.dart';

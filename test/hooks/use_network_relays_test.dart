@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart' show RelayType;
+import 'package:rust_lib_whitenoise/src/rust/api/relays.dart';
+import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/hooks/use_network_relays.dart';
-import 'package:whitenoise/src/rust/api/accounts.dart' show RelayType;
-import 'package:whitenoise/src/rust/api/relays.dart';
-import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import '../mocks/mock_relay_type.dart';
 import '../mocks/mock_wn_api.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise/src/rust/api/messages.dart' show HighlightSpan;
-import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/messages.dart' show HighlightSpan;
+import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_reaction.dart';

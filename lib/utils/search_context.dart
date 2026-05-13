@@ -1,4 +1,4 @@
-import 'package:whitenoise/src/rust/api/messages.dart';
+import 'package:rust_lib_whitenoise/src/rust/api/messages.dart';
 
 const searchContextSize = 2;
 

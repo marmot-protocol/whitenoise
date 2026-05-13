@@ -11,7 +11,6 @@ include: package:flutter_lints/flutter.yaml
 
 analyzer:
   exclude:
-    - rust_builder/**
     - trees/**
     - widgetbook/**
 
@@ -37,6 +36,10 @@ linter:
     avoid_redundant_argument_values: true
     directives_ordering: true
     avoid_slow_async_io: true
+    # rust_lib_whitenoise (the FRB-published package) deliberately exposes
+    # its `src/rust/...` tree as the public API. Suppress the lint that flags
+    # importing from another package's lib/src directory.
+    implementation_imports: false
 
 formatter:
   page_width: 100

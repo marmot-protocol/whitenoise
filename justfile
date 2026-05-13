@@ -7,27 +7,23 @@ default:
 # Pre-commit checks: run the same checks as CI locally (quiet mode - minimal output)
 precommit:
     @just _run-quiet "deps-flutter"    "flutter deps"
-    @just _run-quiet "deps-rust"       "rust deps"
     @just _run-quiet "l10n"            "l10n generation"
     @just _run-quiet "validate-locales-keys" "l10n validation"
     @just _run-quiet "fix"             "auto-fix"
     @just _run-quiet "format"          "formatting"
     @just _run-quiet "lint"            "linting"
     @just _run-quiet "test-flutter"    "flutter tests"
-    @just _run-quiet "test-rust"       "rust tests"
     @echo "✅ PRECOMMIT PASSED"
 
 # Pre-commit checks with verbose output (shows all command output)
 precommit-verbose:
     just deps-flutter
-    just deps-rust
     just l10n
     just validate-locales-keys
     just fix
     just format
     just lint
     just test-flutter
-    just test-rust
     @echo ""
     @echo "════════════════════════════════════════"
     @echo "✅ ALL PRECOMMIT CHECKS PASSED"
@@ -36,27 +32,20 @@ precommit-verbose:
 # Pre-commit checks without auto-fixing (for releases)
 precommit-check:
     just deps-flutter
-    just deps-rust
     just l10n-check
     just validate-locales-keys
-    just check-rust-format
     just check-dart-format
     just lint
     just test-flutter
-    just test-rust
     @echo "✅ All pre-commit checks passed!"
 
 # ==============================================================================
 # CODE GENERATION
 # ==============================================================================
 
-# Generate Rust bridge code
-generate:
-	@echo "🔄 Generating flutter_rust_bridge code..."
-	@flutter_rust_bridge_codegen generate > /dev/null 2>&1 || flutter_rust_bridge_codegen generate
-
-# Clean and regenerate Rust bridge code
-regenerate: clean-bridge generate
+# FRB codegen lives in whitenoise-rs now. Bindings are published to the
+# flutter-package orphan branch and consumed via pubspec.yaml as a git dep.
+# See: https://github.com/marmot-protocol/whitenoise-rs/blob/master/docs/frb-flutter-migration.md
 
 # Generate localizations from ARB files
 l10n:
@@ -80,56 +69,13 @@ l10n-check:
 # ==============================================================================
 
 # Install/update all dependencies
-deps: deps-rust deps-flutter
-
-# Install/update Rust dependencies
-deps-rust:
-    @echo "📦 Installing Rust dependencies..."
-    cd rust && cargo fetch
+deps: deps-flutter
 
 # Install/update Flutter dependencies
 deps-flutter:
     @echo "📦 Installing Flutter dependencies..."
     @flutter pub get > /dev/null 2>&1 || flutter pub get
     @cd widgetbook && (flutter pub get > /dev/null 2>&1 || flutter pub get)
-
-# ==============================================================================
-# RUST OPERATIONS
-# ==============================================================================
-
-# Build Rust library for development (debug)
-build-rust-debug:
-    @echo "🔨 Building Rust library (debug)..."
-    cd rust && cargo build
-
-# Test Rust code
-test-rust:
-    @echo "🧪 Testing Rust code..."
-    cd rust && cargo test
-
-# Test Rust code with minimal output (for agents/CI)
-test-rust-quiet:
-    @cd rust && cargo test -q
-
-# Format Rust code
-format-rust:
-    @echo "💅 Formatting Rust code..."
-    cd rust && cargo fmt
-
-# Check Rust code formatting (CI-style check)
-check-rust-format:
-    @echo "🔍 Checking Rust code formatting..."
-    cd rust && cargo fmt --check
-
-# Lint Rust code
-lint-rust:
-    @echo "🧹 Linting Rust code..."
-    cd rust && cargo clippy --package rust_lib_whitenoise -- -D warnings
-
-# Run Rust documentation
-docs-rust:
-    @echo "📚 Generating Rust documentation..."
-    cd rust && cargo doc --open
 
 # ==============================================================================
 # FLUTTER OPERATIONS
@@ -194,24 +140,13 @@ test-release-scripts:
 # CLEANING
 # ==============================================================================
 
-# Clean generated bridge files only
-clean-bridge:
-    @echo "🧹 Cleaning generated bridge files..."
-    rm -f rust/src/frb_generated.rs
-    rm -rf lib/src/rust/
-
 # Clean Flutter build cache
 clean-flutter:
     @echo "🧹 Cleaning Flutter build cache..."
     flutter clean
 
-# Clean Rust build cache
-clean-rust:
-    @echo "🧹 Cleaning Rust build cache..."
-    cd rust && cargo clean
-
-# Clean everything (bridge files + flutter + rust)
-clean-all: clean-bridge clean-flutter clean-rust
+# Clean everything
+clean-all: clean-flutter
     @echo "✨ All clean!"
 
 # ==============================================================================
@@ -238,16 +173,15 @@ widgetbook-linux: deps-widgetbook generate-widgetbook
 # FORMATTING & LINTING
 # ==============================================================================
 
-# Format all code (Rust + Dart)
-format: format-rust format-dart
+# Format all code
+format: format-dart
 
-# Lint all code (Rust + Dart)
-lint: lint-rust analyze
+# Lint all code
+lint: analyze
 
 # Fix common issues
 fix:
     @echo "🔧 Fixing common issues..."
-    cd rust && cargo fix --allow-dirty
     dart fix --apply
 
 # ==============================================================================

@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:whitenoise/src/rust/api/relay_defaults.dart' as relay_defaults;
+import 'package:rust_lib_whitenoise/src/rust/api/relay_defaults.dart' as relay_defaults;
 
 typedef ReachAnyRelayFunction = Future<bool> Function(List<String> hosts);
 typedef CheckConnectivityFunction = Future<List<ConnectivityResult>> Function();
