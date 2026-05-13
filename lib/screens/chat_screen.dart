@@ -6,7 +6,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
 import 'package:rust_lib_whitenoise/src/rust/api/groups.dart' show GroupType;
 import 'package:rust_lib_whitenoise/src/rust/api/media_files.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/messages.dart' show ChatMessage, DeliveryStatus_Failed;
+import 'package:rust_lib_whitenoise/src/rust/api/messages.dart'
+    show ChatMessage, DeliveryStatus_Failed;
 import 'package:scroll_to_index/scroll_to_index.dart'
     show AutoScrollController, AutoScrollPosition, AutoScrollTag;
 import 'package:whitenoise/hooks/use_active_chat.dart';
