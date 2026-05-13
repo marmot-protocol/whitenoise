@@ -89,6 +89,16 @@ pub fn language_english() -> Language {
 }
 
 #[frb(sync)]
+pub fn language_chinese_simplified() -> Language {
+    Language::ChineseSimplified
+}
+
+#[frb(sync)]
+pub fn language_chinese_traditional() -> Language {
+    Language::ChineseTraditional
+}
+
+#[frb(sync)]
 pub fn language_spanish() -> Language {
     Language::Spanish
 }
@@ -130,17 +140,7 @@ pub fn language_system() -> Language {
 
 #[frb(sync)]
 pub fn language_to_string(language: &Language) -> String {
-    match language {
-        Language::System => "system".to_string(),
-        Language::English => "en".to_string(),
-        Language::Spanish => "es".to_string(),
-        Language::French => "fr".to_string(),
-        Language::German => "de".to_string(),
-        Language::Italian => "it".to_string(),
-        Language::Portuguese => "pt".to_string(),
-        Language::Russian => "ru".to_string(),
-        Language::Turkish => "tr".to_string(),
-    }
+    language.to_string()
 }
 
 /// Build a `nostr:nevent1...` URI from a hex event ID and author pubkey (NIP-C7).

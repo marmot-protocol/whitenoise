@@ -46,6 +46,12 @@ String themeModeToString({required ThemeMode themeMode}) =>
 
 Language languageEnglish() => RustLib.instance.api.crateApiUtilsLanguageEnglish();
 
+Language languageChineseSimplified() =>
+    RustLib.instance.api.crateApiUtilsLanguageChineseSimplified();
+
+Language languageChineseTraditional() =>
+    RustLib.instance.api.crateApiUtilsLanguageChineseTraditional();
+
 Language languageSpanish() => RustLib.instance.api.crateApiUtilsLanguageSpanish();
 
 Language languageFrench() => RustLib.instance.api.crateApiUtilsLanguageFrench();
