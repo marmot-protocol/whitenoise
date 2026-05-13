@@ -70,7 +70,11 @@ if ! [[ "$ORPHAN_URL" =~ ^https?://github\.com/ ]]; then
   print_fail "pubspec.lock rust_lib_whitenoise url is not on github.com: $ORPHAN_URL"
   exit 1
 fi
-REPO_SLUG="$(echo "$ORPHAN_URL" | sed -E 's#^https?://github\.com/([^/]+/[^/]+?)(\.git)?/?$#\1#')"
+REPO_SLUG="${ORPHAN_URL#http://}"
+REPO_SLUG="${REPO_SLUG#https://}"
+REPO_SLUG="${REPO_SLUG#github.com/}"
+REPO_SLUG="${REPO_SLUG%/}"
+REPO_SLUG="${REPO_SLUG%.git}"
 
 print_step "Locating the latest CI commit on origin/flutter-package"
 WS_CACHE="$PROJECT_ROOT/.whitenoise-rs-cache/whitenoise-rs"

@@ -68,7 +68,11 @@ if ! [[ "$ORPHAN_URL" =~ ^https?://github\.com/ ]]; then
   exit 0
 fi
 
-REPO_SLUG="$(echo "$ORPHAN_URL" | sed -E 's#^https?://github\.com/([^/]+/[^/]+?)(\.git)?/?$#\1#')"
+REPO_SLUG="${ORPHAN_URL#http://}"
+REPO_SLUG="${REPO_SLUG#https://}"
+REPO_SLUG="${REPO_SLUG#github.com/}"
+REPO_SLUG="${REPO_SLUG%/}"
+REPO_SLUG="${REPO_SLUG%.git}"
 RAW_URL="https://raw.githubusercontent.com/${REPO_SLUG}/${ORPHAN_REF}/REGENERATED.txt"
 HTTP_BODY="$(curl --silent --fail --location "$RAW_URL" 2>/dev/null || true)"
 
