@@ -79,8 +79,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get writeSomethingAboutYourself => '介绍一下你自己';
 
   @override
-  String get profilePrivacyDescription =>
-      '名称、照片和简介在全局 Nostr 网络中是公开可见的。请仅分享您愿意公开的内容。';
+  String get profilePrivacyDescription => '名称、照片和简介在全局 Nostr 网络中是公开可见的。请仅分享您愿意公开的内容。';
 
   @override
   String get cancel => '取消';
@@ -179,8 +178,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get publicKeyCopied => '公钥已复制到剪贴板';
 
   @override
-  String get publicKeyDescription =>
-      '您的公钥是您在 Nostr 网络上的唯一标识。分享它可以让其他人找到、识别并与您建立连接。';
+  String get publicKeyDescription => '您的公钥是您在 Nostr 网络上的唯一标识。分享它可以让其他人找到、识别并与您建立连接。';
 
   @override
   String get privateKey => '私钥';
@@ -201,8 +199,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get nsecOnExternalSigner => '私钥存储在外部签名器中';
 
   @override
-  String get nsecOnExternalSignerDescription =>
-      '您的私钥在 White Noise 中不可用。请打开您的签名器应用来查看或管理它。';
+  String get nsecOnExternalSignerDescription => '您的私钥在 White Noise 中不可用。请打开您的签名器应用来查看或管理它。';
 
   @override
   String get editProfileTitle => '编辑个人资料';
@@ -361,11 +358,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get welcomeNoticeTitle => '您的个人资料已准备就绪';
 
   @override
-  String welcomeNoticeDescription(
-    String findPeople,
-    String shareProfile,
-    String startANewChat,
-  ) {
+  String welcomeNoticeDescription(String findPeople, String shareProfile, String startANewChat) {
     return '点击 $findPeople 寻找好友。您也可以通过 $shareProfile 与认识的人建立连接，或点击聊天加号图标 $startANewChat。';
   }
 
@@ -603,8 +596,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get chatWithSupport => '联系客服';
 
   @override
-  String get supportChatWelcomeMessage =>
-      '您好！请告诉我们您的想法 —— 无论是疑问、Bug 还是建议。我们通常会在几小时内给予回复。';
+  String get supportChatWelcomeMessage => '您好！请告诉我们您的想法 —— 无论是疑问、Bug 还是建议。我们通常会在几小时内给予回复。';
 
   @override
   String get addRelay => '添加中继器';
@@ -616,8 +608,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get restoreDefaultRelaysConfirmationTitle => '要恢复默认中继器吗？';
 
   @override
-  String get restoreDefaultRelaysConfirmationMessage =>
-      '您确定要恢复应用的默认中继器吗？这将抹除并替换您当前的中继器配置。';
+  String get restoreDefaultRelaysConfirmationMessage => '您确定要恢复应用的默认中继器吗？这将抹除并替换您当前的中继器配置。';
 
   @override
   String get restoreDefaultRelaysError => '恢复默认中继器失败。请重试。';
@@ -964,8 +955,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get carouselDecentralizedTitle => '去中心化且无准入门槛';
 
   @override
-  String get carouselDecentralizedDescription =>
-      '没有任何中央机构可以控制您的通信 —— 无需许可，无法审查。';
+  String get carouselDecentralizedDescription => '没有任何中央机构可以控制您的通信 —— 无需许可，无法审查。';
 
   @override
   String get learnMore => '了解更多';
@@ -1184,15 +1174,13 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get unknownInviteToWhiteNoiseDescription =>
-      '该用户尚未加入 White Noise。分享此应用以开始安全聊天。';
+  String get unknownInviteToWhiteNoiseDescription => '该用户尚未加入 White Noise。分享此应用以开始安全聊天。';
 
   @override
   String get unknownUserNeedsUpdate => '需要更新';
 
   @override
-  String get unknownUserNeedsUpdateDescription =>
-      '您还无法与此用户开始安全聊天。他们需要先更新 White Noise 才能使用安全通讯。';
+  String get unknownUserNeedsUpdateDescription => '您还无法与此用户开始安全聊天。他们需要先更新 White Noise 才能使用安全通讯。';
 
   @override
   String get add => '添加';
@@ -1319,8 +1307,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get fatalErrorTitle => '哎呀！';
 
   @override
-  String get fatalErrorDescription =>
-      '加载应用时遇到了一点问题。抱歉，这不是您的错，是我们的问题。\n\n请帮我们修复它。点击下方将此错误发送给我们的团队。';
+  String get fatalErrorDescription => '加载应用时遇到了一点问题。抱歉，这不是您的错，是我们的问题。\n\n请帮我们修复它。点击下方将此错误发送给我们的团队。';
 
   @override
   String get reportBug => '报告 Bug';
@@ -1338,8 +1325,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get reportBugStepsToReproduce => '复现步骤';
 
   @override
-  String get reportBugStepsToReproducePlaceholder =>
-      '1. 前往...\n2. 点击...\n3. 看到错误';
+  String get reportBugStepsToReproducePlaceholder => '1. 前往...\n2. 点击...\n3. 看到错误';
 
   @override
   String get reportBugFrequency => '问题发生的频率？';
@@ -1381,8 +1367,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get youLeftThisGroup => '您已退出此群组';
 
   @override
-  String get removedFromGroupDescription =>
-      '您仍可以查看已保存的消息，但无法发送或接收新消息。您可以随时归档此聊天。';
+  String get removedFromGroupDescription => '您仍可以查看已保存的消息，但无法发送或接收新消息。您可以随时归档此聊天。';
 
   @override
   String get notificationSettings => '通知';
@@ -1424,8 +1409,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get leaveGroup => '退出群组';
 
   @override
-  String get leaveGroupWarning =>
-      '确定要退出此群组吗？如果您不删除，聊天记录将保留在列表中，但您将无法发送或接收新消息，除非有人再次邀请您。';
+  String get leaveGroupWarning => '确定要退出此群组吗？如果您不删除，聊天记录将保留在列表中，但您将无法发送或接收新消息，除非有人再次邀请您。';
 
   @override
   String get failedToLeaveGroup => '退出群组失败。请重试。';
@@ -1509,8 +1493,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get writeSomethingAboutYourself => '介紹一下自己';
 
   @override
-  String get profilePrivacyDescription =>
-      '名稱、照片和簡介會在全球 Nostr 網路上公開顯示。請只分享您願意公開的內容。';
+  String get profilePrivacyDescription => '名稱、照片和簡介會在全球 Nostr 網路上公開顯示。請只分享您願意公開的內容。';
 
   @override
   String get cancel => '取消';
@@ -1585,8 +1568,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get deleteAllAppDataConfirmation => '確定要刪除所有應用程式資料嗎？';
 
   @override
-  String get deleteAllAppDataWarning =>
-      '這會清除這台裝置上的所有個人檔案、金鑰、聊天記錄和本機檔案。此操作無法復原。';
+  String get deleteAllAppDataWarning => '這會清除這台裝置上的所有個人檔案、金鑰、聊天記錄和本機檔案。此操作無法復原。';
 
   @override
   String get theme => '主題';
@@ -1610,8 +1592,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get publicKeyCopied => '公鑰已複製到剪貼簿';
 
   @override
-  String get publicKeyDescription =>
-      '您的公鑰是您在 Nostr 網路上的唯一識別碼。分享它可讓其他人找到、辨識並與您連結。';
+  String get publicKeyDescription => '您的公鑰是您在 Nostr 網路上的唯一識別碼。分享它可讓其他人找到、辨識並與您連結。';
 
   @override
   String get privateKey => '私鑰';
@@ -1632,8 +1613,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get nsecOnExternalSigner => '私鑰儲存在外部簽署器中';
 
   @override
-  String get nsecOnExternalSignerDescription =>
-      'White Noise 無法存取您的私鑰。請開啟您的簽署器應用程式查看或管理。';
+  String get nsecOnExternalSignerDescription => 'White Noise 無法存取您的私鑰。請開啟您的簽署器應用程式查看或管理。';
 
   @override
   String get editProfileTitle => '編輯個人檔案';
@@ -1792,11 +1772,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get welcomeNoticeTitle => '您的個人檔案已準備就緒';
 
   @override
-  String welcomeNoticeDescription(
-    String findPeople,
-    String shareProfile,
-    String startANewChat,
-  ) {
+  String welcomeNoticeDescription(String findPeople, String shareProfile, String startANewChat) {
     return '點一下 $findPeople 尋找好友。您也可以透過 $shareProfile 與認識的人建立連結，或點選聊天加號圖示 $startANewChat。';
   }
 
@@ -2034,8 +2010,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get chatWithSupport => '聯絡客服';
 
   @override
-  String get supportChatWelcomeMessage =>
-      '您好！請告訴我們您的想法，不論是問題、Bug 或建議都可以。我們通常會在幾小時內回覆。';
+  String get supportChatWelcomeMessage => '您好！請告訴我們您的想法，不論是問題、Bug 或建議都可以。我們通常會在幾小時內回覆。';
 
   @override
   String get addRelay => '新增中繼站';
@@ -2047,8 +2022,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get restoreDefaultRelaysConfirmationTitle => '要還原預設中繼站嗎？';
 
   @override
-  String get restoreDefaultRelaysConfirmationMessage =>
-      '確定要還原應用程式的預設中繼站嗎？這會清除並取代您目前的中繼站設定。';
+  String get restoreDefaultRelaysConfirmationMessage => '確定要還原應用程式的預設中繼站嗎？這會清除並取代您目前的中繼站設定。';
 
   @override
   String get restoreDefaultRelaysError => '還原預設中繼站失敗。請再試一次。';
@@ -2389,15 +2363,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get carouselIdentityTitle => '選擇您的身分';
 
   @override
-  String get carouselIdentityDescription =>
-      '聊天時不必透露手機號碼或電子郵件。您可以自由選擇身分：真名、筆名或匿名。';
+  String get carouselIdentityDescription => '聊天時不必透露手機號碼或電子郵件。您可以自由選擇身分：真名、筆名或匿名。';
 
   @override
   String get carouselDecentralizedTitle => '去中心化且無需許可';
 
   @override
-  String get carouselDecentralizedDescription =>
-      '沒有任何中央機構能控制您的通訊，不需取得許可，也無法被審查。';
+  String get carouselDecentralizedDescription => '沒有任何中央機構能控制您的通訊，不需取得許可，也無法被審查。';
 
   @override
   String get learnMore => '了解更多';
@@ -2451,8 +2423,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get relayResolutionTitle => '中繼站設定';
 
   @override
-  String get relayResolutionDescription =>
-      '我們無法在網路上找到您的中繼站清單。您可以提供已發布這些清單的中繼站地址，或使用我們的預設中繼站開始使用。';
+  String get relayResolutionDescription => '我們無法在網路上找到您的中繼站清單。您可以提供已發布這些清單的中繼站地址，或使用我們的預設中繼站開始使用。';
 
   @override
   String get relayResolutionUseDefaults => '使用預設中繼站';
@@ -2616,15 +2587,13 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   }
 
   @override
-  String get unknownInviteToWhiteNoiseDescription =>
-      '此使用者尚未加入 White Noise。分享此應用程式即可開始安全聊天。';
+  String get unknownInviteToWhiteNoiseDescription => '此使用者尚未加入 White Noise。分享此應用程式即可開始安全聊天。';
 
   @override
   String get unknownUserNeedsUpdate => '需要更新';
 
   @override
-  String get unknownUserNeedsUpdateDescription =>
-      '您目前還無法與此使用者開始安全聊天。對方需要先更新 White Noise，才能使用安全通訊。';
+  String get unknownUserNeedsUpdateDescription => '您目前還無法與此使用者開始安全聊天。對方需要先更新 White Noise，才能使用安全通訊。';
 
   @override
   String get add => '新增';
@@ -2770,8 +2739,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get reportBugStepsToReproduce => '重現步驟';
 
   @override
-  String get reportBugStepsToReproducePlaceholder =>
-      '1. 前往...\n2. 點選...\n3. 看到錯誤';
+  String get reportBugStepsToReproducePlaceholder => '1. 前往...\n2. 點選...\n3. 看到錯誤';
 
   @override
   String get reportBugFrequency => '這個問題發生的頻率？';
@@ -2813,8 +2781,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get youLeftThisGroup => '您已離開此群組';
 
   @override
-  String get removedFromGroupDescription =>
-      '您仍可查看已儲存的訊息，但無法傳送或接收新訊息。您可以隨時封存此聊天。';
+  String get removedFromGroupDescription => '您仍可查看已儲存的訊息，但無法傳送或接收新訊息。您可以隨時封存此聊天。';
 
   @override
   String get notificationSettings => '通知';
@@ -2856,8 +2823,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get leaveGroup => '離開群組';
 
   @override
-  String get leaveGroupWarning =>
-      '確定要離開此群組嗎？如果您沒有刪除聊天，它仍會留在列表中；但除非有人再次邀請您，否則您將無法傳送或接收新訊息。';
+  String get leaveGroupWarning => '確定要離開此群組嗎？如果您沒有刪除聊天，它仍會留在列表中；但除非有人再次邀請您，否則您將無法傳送或接收新訊息。';
 
   @override
   String get failedToLeaveGroup => '離開群組失敗。請再試一次。';

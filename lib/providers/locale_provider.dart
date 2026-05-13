@@ -75,11 +75,12 @@ class LocaleNotifier extends AsyncNotifier<LocaleSetting> {
     if (code == 'system') {
       return const SystemLocale();
     }
-    final isSupported = AppLocalizations.supportedLocales.any(
-      (l) => l.languageCode == code,
-    );
+    final locale = _localeFromLanguageCode(code);
+    final isSupported = AppLocalizations.supportedLocales.any((l) {
+      return l.languageCode == locale.languageCode && l.scriptCode == locale.scriptCode;
+    });
     if (isSupported) {
-      return SpecificLocale(Locale(code));
+      return SpecificLocale(locale);
     }
     return const SystemLocale();
   }
@@ -87,20 +88,30 @@ class LocaleNotifier extends AsyncNotifier<LocaleSetting> {
   rust_api.Language _settingToRustLanguage(LocaleSetting setting) {
     return switch (setting) {
       SystemLocale() => rust_utils.languageSystem(),
-      SpecificLocale(locale: final locale) => _languageCodeToRust(locale.languageCode),
+      SpecificLocale(locale: final locale) => _localeToRustLanguage(locale),
     };
   }
 
-  rust_api.Language _languageCodeToRust(String code) {
+  Locale _localeFromLanguageCode(String code) {
     return switch (code) {
-      'en' => rust_utils.languageEnglish(),
-      'es' => rust_utils.languageSpanish(),
-      'fr' => rust_utils.languageFrench(),
-      'de' => rust_utils.languageGerman(),
-      'it' => rust_utils.languageItalian(),
-      'pt' => rust_utils.languagePortuguese(),
-      'ru' => rust_utils.languageRussian(),
-      'tr' => rust_utils.languageTurkish(),
+      'zh_Hant' => const Locale.fromSubtags(languageCode: 'zh', scriptCode: 'Hant'),
+      'zh_Hans' => const Locale('zh'),
+      _ => Locale(code),
+    };
+  }
+
+  rust_api.Language _localeToRustLanguage(Locale locale) {
+    return switch ((locale.languageCode, locale.scriptCode)) {
+      ('zh', 'Hant') => rust_utils.languageChineseTraditional(),
+      ('zh', _) => rust_utils.languageChineseSimplified(),
+      ('en', _) => rust_utils.languageEnglish(),
+      ('es', _) => rust_utils.languageSpanish(),
+      ('fr', _) => rust_utils.languageFrench(),
+      ('de', _) => rust_utils.languageGerman(),
+      ('it', _) => rust_utils.languageItalian(),
+      ('pt', _) => rust_utils.languagePortuguese(),
+      ('ru', _) => rust_utils.languageRussian(),
+      ('tr', _) => rust_utils.languageTurkish(),
       _ => rust_utils.languageEnglish(),
     };
   }

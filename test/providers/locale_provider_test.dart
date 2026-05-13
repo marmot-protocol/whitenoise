@@ -66,6 +66,17 @@ void main() {
         expect((localeSetting as SpecificLocale).locale.languageCode, 'de');
       });
 
+      test('initializes with Traditional Chinese from Rust app settings', () async {
+        mockApi.currentLanguage = 'zh_Hant';
+
+        final localeSetting = await container.read(localeProvider.future);
+
+        expect(localeSetting, isA<SpecificLocale>());
+        final locale = (localeSetting as SpecificLocale).locale;
+        expect(locale.languageCode, 'zh');
+        expect(locale.scriptCode, 'Hant');
+      });
+
       test('initializes with SystemLocale when Rust returns system', () async {
         mockApi.currentLanguage = 'system';
 
@@ -160,6 +171,37 @@ void main() {
         expect(current, isA<SpecificLocale>());
         expect((current as SpecificLocale).locale.languageCode, 'tr');
         expect(mockApi.currentLanguage, 'tr');
+      });
+
+      test('setLocale updates to Simplified Chinese', () async {
+        await container.read(localeProvider.future);
+        await container.read(localeProvider.notifier).setLocale(const SpecificLocale(Locale('zh')));
+
+        final current = container.read(localeProvider).value;
+        expect(current, isA<SpecificLocale>());
+        expect((current as SpecificLocale).locale.languageCode, 'zh');
+        expect(mockApi.currentLanguage, 'zh');
+      });
+
+      test('setLocale updates to Traditional Chinese', () async {
+        await container.read(localeProvider.future);
+        await container
+            .read(localeProvider.notifier)
+            .setLocale(
+              const SpecificLocale(
+                Locale.fromSubtags(
+                  languageCode: 'zh',
+                  scriptCode: 'Hant',
+                ),
+              ),
+            );
+
+        final current = container.read(localeProvider).value;
+        expect(current, isA<SpecificLocale>());
+        final locale = (current as SpecificLocale).locale;
+        expect(locale.languageCode, 'zh');
+        expect(locale.scriptCode, 'Hant');
+        expect(mockApi.currentLanguage, 'zh_Hant');
       });
 
       test('setLocale can switch back to English', () async {
