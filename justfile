@@ -184,6 +184,12 @@ fix:
     @echo "🔧 Fixing common issues..."
     dart fix --apply
 
+# Soft-warn (never block) when .whitenoise-rs-rev lags origin/master of the
+# upstream whitenoise-rs repo. Build scripts invoke this too, so warnings
+# appear automatically; this recipe is for explicit standalone use.
+check-rev-freshness:
+    @./scripts/check_frb_rev_freshness.sh
+
 # ==============================================================================
 # BUILDING - ANDROID
 # ==============================================================================

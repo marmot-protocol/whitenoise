@@ -102,6 +102,9 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
 cd "$PROJECT_ROOT"
 
+# Soft-warn if .whitenoise-rs-rev lags upstream master (informational only).
+"$SCRIPT_DIR/check_frb_rev_freshness.sh"
+
 # Catch FRB rev drift between pubspec orphan-ref and .whitenoise-rs-rev before
 # wasting a full cross-compile (would otherwise fail the hash check at startup).
 "$SCRIPT_DIR/check_frb_revs.sh"
