@@ -6,17 +6,17 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_screenutil/flutter_screenutil.dart' show ScreenUtilInit;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart' show GoRoute, GoRouter;
-import 'package:whitenoise_frb/src/rust/api/accounts.dart'
-    show LoginResult, LoginStatus, Account, AccountType;
-import 'package:whitenoise_frb/src/rust/api/error.dart';
-import 'package:whitenoise_frb/src/rust/api/metadata.dart';
-import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/screens/relay_resolution_screen.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_overlay.dart' show WnOverlay;
 import 'package:whitenoise/widgets/wn_system_notice.dart';
+import 'package:whitenoise_frb/src/rust/api/accounts.dart'
+    show LoginResult, LoginStatus, Account, AccountType;
+import 'package:whitenoise_frb/src/rust/api/error.dart';
+import 'package:whitenoise_frb/src/rust/api/metadata.dart';
+import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';

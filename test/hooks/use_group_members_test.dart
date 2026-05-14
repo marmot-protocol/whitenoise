@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/hooks/use_group_members.dart';
 import 'package:whitenoise_frb/src/rust/api/groups.dart';
 import 'package:whitenoise_frb/src/rust/frb_generated.dart';
-import 'package:whitenoise/hooks/use_group_members.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise_frb/src/rust/api/messages.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart' show MessageDirection;
 import 'package:whitenoise/widgets/wn_message_reactions.dart';
+import 'package:whitenoise_frb/src/rust/api/messages.dart';
+
 import '../test_helpers.dart';
 
 void main() {

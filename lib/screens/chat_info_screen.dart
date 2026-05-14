@@ -3,8 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:whitenoise_frb/src/rust/api/chat_summary.dart';
-import 'package:whitenoise_frb/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/hooks/use_block_actions.dart';
 import 'package:whitenoise/hooks/use_chat_archive.dart';
 import 'package:whitenoise/hooks/use_chat_summary.dart';
@@ -22,6 +20,8 @@ import 'package:whitenoise/widgets/wn_overlay.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart' show WnSystemNotice;
+import 'package:whitenoise_frb/src/rust/api/chat_summary.dart';
+import 'package:whitenoise_frb/src/rust/api/groups.dart' show GroupType;
 
 class ChatInfoScreen extends HookConsumerWidget {
   const ChatInfoScreen({

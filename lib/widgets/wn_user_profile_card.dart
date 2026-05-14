@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:whitenoise_frb/src/rust/api/metadata.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/formatting.dart';
 import 'package:whitenoise/utils/metadata.dart' show presentName, sanitizeForDisplay;
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_copy_card.dart';
+import 'package:whitenoise_frb/src/rust/api/metadata.dart';
 
 class WnUserProfileCard extends StatelessWidget {
   const WnUserProfileCard({

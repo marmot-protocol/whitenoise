@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise_frb/src/rust/api/messages.dart';
 import 'package:whitenoise/utils/search_context.dart';
+import 'package:whitenoise_frb/src/rust/api/messages.dart';
 
 import '../test_helpers.dart';
 

@@ -1,7 +1,7 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
-import 'package:whitenoise_frb/src/rust/api/accounts.dart' show LoginResult;
 import 'package:whitenoise/services/android_signer_service.dart';
+import 'package:whitenoise_frb/src/rust/api/accounts.dart' show LoginResult;
 
 final _logger = Logger('useLoginWithAndroidSigner');
 

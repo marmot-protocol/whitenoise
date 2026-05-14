@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart' show useState;
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart' show HookConsumerWidget, WidgetRef;
-import 'package:whitenoise_frb/src/rust/api/accounts.dart' show LoginResult, LoginStatus;
 import 'package:whitenoise/hooks/use_login_with_android_signer.dart' show useLoginWithAndroidSigner;
 import 'package:whitenoise/hooks/use_login_with_nsec.dart' show useLoginWithNsec;
 import 'package:whitenoise/hooks/use_onboarding_carousel.dart' show onboardingCarouselSlideCount;
@@ -23,6 +22,7 @@ import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart'
     show WnSystemNotice, WnSystemNoticeType, WnSystemNoticeVariant;
+import 'package:whitenoise_frb/src/rust/api/accounts.dart' show LoginResult, LoginStatus;
 
 String _signerErrorL10n(String code, AppLocalizations l10n) {
   switch (code) {

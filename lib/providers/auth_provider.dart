@@ -1,11 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:logging/logging.dart';
-import 'package:whitenoise_frb/src/rust/api/accounts.dart' as accounts_api;
-import 'package:whitenoise_frb/src/rust/api/error.dart';
 import 'package:whitenoise/providers/is_adding_account_provider.dart';
 import 'package:whitenoise/services/android_signer_service.dart';
 import 'package:whitenoise/services/external_signer_callback_registry.dart';
+import 'package:whitenoise_frb/src/rust/api/accounts.dart' as accounts_api;
+import 'package:whitenoise_frb/src/rust/api/error.dart';
 
 const _storageKey = 'active_account_pubkey';
 final _logger = Logger('AuthNotifier');

@@ -3,13 +3,13 @@ import 'dart:async' show Completer;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise_frb/src/rust/api/accounts.dart';
-import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/notification_settings_screen.dart';
 import 'package:whitenoise/widgets/wn_checkbox.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
+import 'package:whitenoise_frb/src/rust/api/accounts.dart';
+import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 
 import '../mocks/mock_secure_storage.dart';
 import '../mocks/mock_wn_api.dart';

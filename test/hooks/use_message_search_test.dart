@@ -1,9 +1,9 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/hooks/use_message_search.dart';
 import 'package:whitenoise_frb/src/rust/api/messages.dart';
 import 'package:whitenoise_frb/src/rust/frb_generated.dart';
-import 'package:whitenoise/hooks/use_message_search.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';

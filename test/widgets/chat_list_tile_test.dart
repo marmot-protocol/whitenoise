@@ -5,11 +5,6 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart' show
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:whitenoise_frb/src/rust/api/chat_summary.dart';
-import 'package:whitenoise_frb/src/rust/api/groups.dart' show GroupType;
-import 'package:whitenoise_frb/src/rust/api/messages.dart';
-import 'package:whitenoise_frb/src/rust/api/metadata.dart';
-import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 import 'package:whitenoise/constants/feature_flags.dart' show FeatureFlag;
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
@@ -19,6 +14,11 @@ import 'package:whitenoise/widgets/chat_list_tile.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_chat_list_item.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
+import 'package:whitenoise_frb/src/rust/api/chat_summary.dart';
+import 'package:whitenoise_frb/src/rust/api/groups.dart' show GroupType;
+import 'package:whitenoise_frb/src/rust/api/messages.dart';
+import 'package:whitenoise_frb/src/rust/api/metadata.dart';
+import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';

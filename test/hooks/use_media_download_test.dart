@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/hooks/use_media_download.dart';
 import 'package:whitenoise_frb/src/rust/api/media_files.dart';
 import 'package:whitenoise_frb/src/rust/frb_generated.dart';
-import 'package:whitenoise/hooks/use_media_download.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';

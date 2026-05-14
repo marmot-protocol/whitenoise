@@ -4,8 +4,8 @@ import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart';
-import 'package:whitenoise_frb/src/rust/api/logs.dart' as logs_api;
 import 'package:whitenoise/providers/app_log_provider.dart' show appLogStore;
+import 'package:whitenoise_frb/src/rust/api/logs.dart' as logs_api;
 
 final _logger = Logger('appLogs');
 

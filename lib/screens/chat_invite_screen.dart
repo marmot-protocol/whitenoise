@@ -4,8 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:whitenoise_frb/src/rust/api/account_groups.dart' as account_groups_api;
-import 'package:whitenoise_frb/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/hooks/use_active_chat.dart';
 import 'package:whitenoise/hooks/use_blocked_pubkeys.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart';
@@ -30,6 +28,8 @@ import 'package:whitenoise/widgets/wn_chat_system_message.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_chat_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
+import 'package:whitenoise_frb/src/rust/api/account_groups.dart' as account_groups_api;
+import 'package:whitenoise_frb/src/rust/api/groups.dart' show GroupType;
 
 class ChatInviteScreen extends HookConsumerWidget {
   final String mlsGroupId;

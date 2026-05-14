@@ -5,10 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:whitenoise_frb/src/rust/api/groups.dart';
-import 'package:whitenoise_frb/src/rust/api/media_files.dart';
-import 'package:whitenoise_frb/src/rust/api/messages.dart';
-import 'package:whitenoise_frb/src/rust/api/metadata.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
@@ -20,6 +16,10 @@ import 'package:whitenoise/widgets/debug_section_card.dart';
 import 'package:whitenoise/widgets/wn_pill.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
+import 'package:whitenoise_frb/src/rust/api/groups.dart';
+import 'package:whitenoise_frb/src/rust/api/media_files.dart';
+import 'package:whitenoise_frb/src/rust/api/messages.dart';
+import 'package:whitenoise_frb/src/rust/api/metadata.dart';
 
 Future<void> _copyDebugText(BuildContext context, String text) async {
   await Clipboard.setData(ClipboardData(text: text));

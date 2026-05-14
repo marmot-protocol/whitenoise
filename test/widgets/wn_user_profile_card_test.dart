@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise_frb/src/rust/api/metadata.dart';
-import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_copy_card.dart';
 import 'package:whitenoise/widgets/wn_user_profile_card.dart';
+import 'package:whitenoise_frb/src/rust/api/metadata.dart';
+import 'package:whitenoise_frb/src/rust/frb_generated.dart';
+
 import '../mocks/mock_clipboard.dart' show clearClipboardMock, mockClipboard, mockClipboardFailing;
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';

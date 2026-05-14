@@ -5,7 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
-import 'package:whitenoise_frb/src/rust/api/messages.dart' show ChatMessage;
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/theme.dart';
@@ -16,6 +15,7 @@ import 'package:whitenoise/widgets/wn_emoji_picker.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
+import 'package:whitenoise_frb/src/rust/api/messages.dart' show ChatMessage;
 
 const _modalViewportVerticalInset = 96.0;
 const _modalPreviewTopPadding = 10.0;

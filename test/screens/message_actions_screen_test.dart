@@ -5,9 +5,6 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gap/gap.dart';
-import 'package:whitenoise_frb/src/rust/api/media_files.dart';
-import 'package:whitenoise_frb/src/rust/api/messages.dart';
-import 'package:whitenoise_frb/src/rust/api/metadata.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
@@ -15,6 +12,9 @@ import 'package:whitenoise/widgets/chat_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
+import 'package:whitenoise_frb/src/rust/api/media_files.dart';
+import 'package:whitenoise_frb/src/rust/api/messages.dart';
+import 'package:whitenoise_frb/src/rust/api/metadata.dart';
 
 import '../test_helpers.dart';
 

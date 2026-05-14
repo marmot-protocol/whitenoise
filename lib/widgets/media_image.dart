@@ -2,11 +2,11 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
-import 'package:whitenoise_frb/src/rust/api/media_files.dart';
 import 'package:whitenoise/hooks/use_media_download.dart';
 import 'package:whitenoise/utils/aspect_ratio.dart';
 import 'package:whitenoise/widgets/wn_media_error_placeholder.dart';
 import 'package:whitenoise/widgets/wn_media_placeholder.dart';
+import 'package:whitenoise_frb/src/rust/api/media_files.dart';
 
 const _doubleTapScale = 2.5;
 const _minScale = 1.0;

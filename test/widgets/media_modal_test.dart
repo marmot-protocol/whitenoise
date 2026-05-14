@@ -5,8 +5,6 @@ import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:gal/gal.dart';
 import 'package:gal/src/gal_platform_interface.dart';
-import 'package:whitenoise_frb/src/rust/api/media_files.dart';
-import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/media_image.dart';
 import 'package:whitenoise/widgets/media_modal.dart';
 import 'package:whitenoise/widgets/media_video.dart';
@@ -15,6 +13,8 @@ import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_icon_button.dart';
 import 'package:whitenoise/widgets/wn_overlay.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
+import 'package:whitenoise_frb/src/rust/api/media_files.dart';
+import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';

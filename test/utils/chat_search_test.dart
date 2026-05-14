@@ -1,7 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/utils/chat_search.dart';
 import 'package:whitenoise_frb/src/rust/api/chat_summary.dart';
 import 'package:whitenoise_frb/src/rust/api/groups.dart' show GroupType;
-import 'package:whitenoise/utils/chat_search.dart';
 
 ChatSummary _chatSummary({required String id, String? name, GroupType? groupType}) => ChatSummary(
   mlsGroupId: id,

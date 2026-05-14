@@ -3,11 +3,11 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/hooks/use_relay_resolution.dart';
+import 'package:whitenoise/widgets/wn_icon.dart' show WnIcons;
 import 'package:whitenoise_frb/src/rust/api/accounts.dart'
     show LoginResult, LoginStatus, Account, AccountType;
 import 'package:whitenoise_frb/src/rust/api/error.dart';
-import 'package:whitenoise/hooks/use_relay_resolution.dart';
-import 'package:whitenoise/widgets/wn_icon.dart' show WnIcons;
 
 import '../mocks/mock_clipboard_paste.dart';
 import '../test_helpers.dart';

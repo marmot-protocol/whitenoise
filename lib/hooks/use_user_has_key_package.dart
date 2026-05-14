@@ -1,8 +1,8 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
-import 'package:whitenoise_frb/src/rust/api/users.dart' as users_api;
 import 'package:whitenoise/utils/logging.dart';
+import 'package:whitenoise_frb/src/rust/api/users.dart' as users_api;
 
 final _logger = Logger('useUserHasKeyPackage');
 

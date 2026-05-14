@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
-import 'package:whitenoise_frb/src/rust/api/accounts.dart' as accounts_api;
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise_frb/src/rust/api/accounts.dart' as accounts_api;
 
 final _logger = Logger('useAccounts');
 

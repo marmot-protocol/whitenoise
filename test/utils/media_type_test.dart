@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise_frb/src/rust/api/media_files.dart';
 import 'package:whitenoise/utils/media_type.dart';
+import 'package:whitenoise_frb/src/rust/api/media_files.dart';
 
 import '../test_helpers.dart';
 

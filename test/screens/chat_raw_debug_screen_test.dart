@@ -3,13 +3,13 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/providers/account_pubkey_provider.dart';
+import 'package:whitenoise/providers/message_debug_log_provider.dart';
+import 'package:whitenoise/screens/chat_raw_debug_screen.dart';
 import 'package:whitenoise_frb/src/rust/api/groups.dart';
 import 'package:whitenoise_frb/src/rust/api/media_files.dart';
 import 'package:whitenoise_frb/src/rust/api/messages.dart';
 import 'package:whitenoise_frb/src/rust/frb_generated.dart';
-import 'package:whitenoise/providers/account_pubkey_provider.dart';
-import 'package:whitenoise/providers/message_debug_log_provider.dart';
-import 'package:whitenoise/screens/chat_raw_debug_screen.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';

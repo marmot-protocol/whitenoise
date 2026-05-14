@@ -3,7 +3,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:whitenoise_frb/src/rust/api/users.dart' show User;
 import 'package:whitenoise/hooks/use_create_group.dart';
 import 'package:whitenoise/hooks/use_image_picker.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
@@ -21,6 +20,7 @@ import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart' show WnSystemNotice;
 import 'package:whitenoise/widgets/wn_user_item.dart';
+import 'package:whitenoise_frb/src/rust/api/users.dart' show User;
 
 class SetUpGroupScreen extends HookConsumerWidget {
   const SetUpGroupScreen({

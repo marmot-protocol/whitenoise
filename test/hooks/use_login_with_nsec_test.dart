@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise_frb/src/rust/api/accounts.dart';
 import 'package:whitenoise/hooks/use_login_with_nsec.dart';
+import 'package:whitenoise_frb/src/rust/api/accounts.dart';
 
 import '../mocks/mock_clipboard_paste.dart';
 import '../test_helpers.dart';

@@ -1,6 +1,6 @@
+import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise_frb/src/rust/api/chat_summary.dart';
 import 'package:whitenoise_frb/src/rust/api/groups.dart' show GroupType;
-import 'package:whitenoise/utils/avatar_color.dart';
 
 typedef ChatSummaryDisplay = ({
   String? displayName,

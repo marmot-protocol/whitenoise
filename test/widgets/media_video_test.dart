@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/widgets/media_video.dart';
 import 'package:whitenoise_frb/src/rust/api/media_files.dart';
 import 'package:whitenoise_frb/src/rust/frb_generated.dart';
-import 'package:whitenoise/widgets/media_video.dart';
 
 import '../fakes/fake_video_player_platform.dart';
 import '../mocks/mock_wn_api.dart';

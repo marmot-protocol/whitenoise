@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:whitenoise_frb/src/rust/api/messages.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/theme.dart';
@@ -10,6 +9,7 @@ import 'package:whitenoise/widgets/media_modal.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
+import 'package:whitenoise_frb/src/rust/api/messages.dart';
 
 class ChatMessageBubble extends StatelessWidget {
   final ChatMessage message;

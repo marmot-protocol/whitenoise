@@ -1,9 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise_frb/src/rust/api/media_files.dart';
-import 'package:whitenoise_frb/src/rust/api/messages.dart';
-import 'package:whitenoise_frb/src/rust/api/metadata.dart';
-import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/widgets/chat_message_bubble.dart';
 import 'package:whitenoise/widgets/chat_message_media.dart';
@@ -13,6 +9,10 @@ import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_reaction.dart';
+import 'package:whitenoise_frb/src/rust/api/media_files.dart';
+import 'package:whitenoise_frb/src/rust/api/messages.dart';
+import 'package:whitenoise_frb/src/rust/api/metadata.dart';
+import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';

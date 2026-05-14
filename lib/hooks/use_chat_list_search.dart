@@ -2,8 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
-import 'package:whitenoise_frb/src/rust/api/messages.dart';
 import 'package:whitenoise/utils/stable_set_key.dart';
+import 'package:whitenoise_frb/src/rust/api/messages.dart';
 
 final _logger = Logger('useChatListSearch');
 

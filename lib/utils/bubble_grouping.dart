@@ -1,5 +1,5 @@
-import 'package:whitenoise_frb/src/rust/api/messages.dart' show ChatMessage;
 import 'package:whitenoise/widgets/wn_message_bubble.dart' show BubbleLeadingVariant;
+import 'package:whitenoise_frb/src/rust/api/messages.dart' show ChatMessage;
 
 BubbleLeadingVariant leadingVariant({
   required bool isOwnMessage,

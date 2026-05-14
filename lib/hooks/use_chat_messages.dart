@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
-import 'package:whitenoise_frb/src/rust/api/media_files.dart';
-import 'package:whitenoise_frb/src/rust/api/messages.dart';
-import 'package:whitenoise_frb/src/rust/api/metadata.dart';
 import 'package:whitenoise/providers/message_debug_log_provider.dart';
 import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/utils/stable_set_key.dart';
+import 'package:whitenoise_frb/src/rust/api/media_files.dart';
+import 'package:whitenoise_frb/src/rust/api/messages.dart';
+import 'package:whitenoise_frb/src/rust/api/metadata.dart';
 
 final _logger = Logger('useChatMessages');
 

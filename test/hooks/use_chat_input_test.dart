@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/hooks/use_chat_input.dart';
 import 'package:whitenoise_frb/src/rust/api/drafts.dart';
 import 'package:whitenoise_frb/src/rust/api/messages.dart';
 import 'package:whitenoise_frb/src/rust/frb_generated.dart';
-import 'package:whitenoise/hooks/use_chat_input.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';

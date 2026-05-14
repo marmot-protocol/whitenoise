@@ -12,8 +12,6 @@ import 'package:hooks_riverpod/hooks_riverpod.dart'
     show ConsumerStatefulWidget, ConsumerState, ProviderContainer, UncontrolledProviderScope;
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDirectory;
-import 'package:whitenoise_frb/src/rust/api.dart' as rust_api;
-import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/app_log_provider.dart' show appLogStore;
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
@@ -25,6 +23,8 @@ import 'package:whitenoise/providers/theme_provider.dart' show themeProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/screens/fatal_error_screen.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise_frb/src/rust/api.dart' as rust_api;
+import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 
 // TODO: Remove migration gate and related code in the next release.
 const kDataVersion = 1;

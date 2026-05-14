@@ -4,9 +4,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
-import 'package:whitenoise_frb/src/rust/api/groups.dart' as groups_api;
-import 'package:whitenoise_frb/src/rust/api/metadata.dart' show FlutterMetadata;
-import 'package:whitenoise_frb/src/rust/api/users.dart' show User;
 import 'package:whitenoise/hooks/use_groups.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_user_metadata.dart';
@@ -19,6 +16,9 @@ import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 import 'package:whitenoise/widgets/wn_user_item.dart';
+import 'package:whitenoise_frb/src/rust/api/groups.dart' as groups_api;
+import 'package:whitenoise_frb/src/rust/api/metadata.dart' show FlutterMetadata;
+import 'package:whitenoise_frb/src/rust/api/users.dart' show User;
 
 final _logger = Logger('AddToGroupScreen');
 
