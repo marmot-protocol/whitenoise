@@ -43,6 +43,30 @@ void main() {
       expect(controller.messageText, 'Hi nostr:$testNpubB there');
     });
 
+    test('keeps mention identity when a mention is inserted before it', () {
+      final controller = MentionTextEditingController();
+      addTearDown(controller.dispose);
+
+      controller.insertMention(
+        start: 0,
+        end: 0,
+        displayName: 'Bob',
+        uri: 'nostr:$testNpubB',
+      );
+      controller.value = controller.value.copyWith(
+        selection: const TextSelection.collapsed(offset: 0),
+      );
+      controller.insertMention(
+        start: controller.selection.start,
+        end: controller.selection.end,
+        displayName: 'Alice',
+        uri: 'nostr:$testNpubC',
+      );
+
+      expect(controller.text, '@Alice @Bob ');
+      expect(controller.messageText, 'nostr:$testNpubC nostr:$testNpubB ');
+    });
+
     test('drops mention identity when the display text is edited', () {
       final controller = MentionTextEditingController();
       addTearDown(controller.dispose);

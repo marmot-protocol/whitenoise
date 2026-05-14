@@ -31,19 +31,18 @@ class MentionTextEditingController extends TextEditingController {
     final displayText = _displayTextFor(displayName, uri);
     final replacement = '$displayText ';
     final updatedText = text.replaceRange(start, end, replacement);
-    final updatedMentions =
-        _mentions
-            .where((mention) => !_rangesOverlap(mention.start, mention.end, start, end))
-            .toList()
-          ..add(
-            _TrackedMention(
-              start: start,
-              end: start + displayText.length,
-              displayText: displayText,
-              uri: uri,
-            ),
-          )
-          ..sort((a, b) => a.start.compareTo(b.start));
+    final delta = replacement.length - (end - start);
+    final updatedMentions = [
+      for (final mention in _mentions)
+        if (!_rangesOverlap(mention.start, mention.end, start, end))
+          mention.start >= end ? mention.shift(delta) : mention,
+      _TrackedMention(
+        start: start,
+        end: start + displayText.length,
+        displayText: displayText,
+        uri: uri,
+      ),
+    ]..sort((a, b) => a.start.compareTo(b.start));
 
     _mentions
       ..clear()
