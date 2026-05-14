@@ -7,8 +7,10 @@ import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
+import 'package:whitenoise/providers/deep_link_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/deep_links.dart';
 import 'package:whitenoise/utils/formatting.dart';
 import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
@@ -29,6 +31,10 @@ class ShareProfileScreen extends HookConsumerWidget {
     final pubkey = ref.watch(accountPubkeyProvider);
     final metadataSnapshot = useUserMetadata(context, pubkey);
     final npub = npubFromHex(pubkey);
+    final deepLinkScheme = ref.watch(deepLinkSchemeProvider).value ?? DeepLinks.productionScheme;
+    final profileLink = npub == null
+        ? null
+        : (npub: npub, uri: DeepLinks.userUri(npub, scheme: deepLinkScheme));
     final (:noticeMessage, :noticeType, :showSuccessNotice, :showErrorNotice, :dismissNotice) =
         useSystemNotice();
 
@@ -71,12 +77,12 @@ class ShareProfileScreen extends HookConsumerWidget {
                       ),
                     ),
                   Gap(16.h),
-                  if (npub != null) ...[
+                  if (profileLink != null) ...[
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
                       child: WnCopyCard(
-                        textToDisplay: formatPublicKey(npub),
-                        textToCopy: npub,
+                        textToDisplay: formatPublicKey(profileLink.npub),
+                        textToCopy: profileLink.npub,
                         onCopySuccess: () => showSuccessNotice(context.l10n.publicKeyCopied),
                         onCopyError: () => showErrorNotice(
                           context.l10n.publicKeyCopyError,
@@ -92,7 +98,8 @@ class ShareProfileScreen extends HookConsumerWidget {
                         child: FittedBox(
                           fit: BoxFit.fill,
                           child: QrImageView(
-                            data: npub,
+                            key: ValueKey<String>(profileLink.uri),
+                            data: profileLink.uri,
                             size: 98,
                             padding: EdgeInsets.zero,
                             backgroundColor: colors.backgroundSecondary,

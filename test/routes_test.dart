@@ -18,6 +18,7 @@ import 'package:whitenoise/screens/login_screen.dart';
 import 'package:whitenoise/screens/notification_settings_screen.dart';
 import 'package:whitenoise/screens/settings_screen.dart';
 import 'package:whitenoise/screens/signup_screen.dart';
+import 'package:whitenoise/screens/start_chat_screen.dart';
 import 'package:whitenoise/screens/start_support_chat_screen.dart';
 import 'package:whitenoise/screens/user_search_screen.dart';
 import 'package:whitenoise/screens/user_selection_screen.dart';
@@ -181,6 +182,66 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byType(LoginScreen), findsOneWidget);
       });
+    });
+  });
+
+  group('deep links', () {
+    testWidgets('opens user links on the user profile screen', (tester) async {
+      await pumpRouter(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
+        ],
+      );
+
+      router.go('whitenoise://user/$testNpubB');
+      await tester.pumpAndSettle();
+
+      final screen = tester.widget<StartChatScreen>(find.byType(StartChatScreen));
+      expect(screen.userPubkey, testPubkeyB);
+    });
+
+    testWidgets('opens chat links on the chat screen', (tester) async {
+      await pumpRouter(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
+        ],
+      );
+
+      router.go('whitenoise://chat/$testGroupId');
+      await tester.pumpAndSettle();
+
+      final screen = tester.widget<ChatScreen>(find.byType(ChatScreen));
+      expect(screen.groupId, testGroupId);
+    });
+
+    testWidgets('opens settings links on the target settings screen', (tester) async {
+      await pumpRouter(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
+        ],
+      );
+
+      router.go('whitenoise://settings/notifications');
+      await tester.pumpAndSettle();
+
+      expect(find.byType(NotificationSettingsScreen), findsOneWidget);
+    });
+
+    testWidgets('preserves protected deep-link target while redirecting to login', (tester) async {
+      await pumpRouter(tester);
+
+      router.go('whitenoise://chat/$testGroupId');
+      await tester.pumpAndSettle();
+
+      final context = tester.element(find.byType(LoginScreen));
+      expect(find.byType(LoginScreen), findsOneWidget);
+      expect(
+        GoRouterState.of(context).uri.queryParameters['redirect'],
+        '/chats/$testGroupId',
+      );
     });
   });
 

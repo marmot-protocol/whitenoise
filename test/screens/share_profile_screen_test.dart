@@ -7,6 +7,7 @@ import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/utils/deep_links.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_copy_card.dart';
 
@@ -86,6 +87,12 @@ void main() {
       await pumpShareProfileScreen(tester);
       await tester.pumpAndSettle();
       expect(find.byType(QrImageView), findsOneWidget);
+    });
+
+    testWidgets('QR code encodes user deep link', (tester) async {
+      await pumpShareProfileScreen(tester);
+
+      expect(find.byKey(ValueKey(DeepLinks.userUri(testNpubA))), findsOneWidget);
     });
 
     testWidgets('tapping back button returns to previous screen', (tester) async {

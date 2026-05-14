@@ -41,6 +41,19 @@ assert_contains "$fastfile" "[[:space:]]*ios_app_identifier: 'org\\.parres\\.whi
 android_gradle="$(cat android/app/build.gradle.kts)"
 assert_contains "$android_gradle" '[[:space:]]*applicationIdSuffix = "\.staging"'
 assert_contains "$android_gradle" '[[:space:]]*applicationId = "org\.parres\.whitenoise"'
+assert_contains "$android_gradle" '[[:space:]]*manifestPlaceholders\["deepLinkScheme"\] = "whitenoise-staging"'
+assert_contains "$android_gradle" '[[:space:]]*manifestPlaceholders\["deepLinkScheme"\] = "whitenoise"'
+
+android_manifest="$(cat android/app/src/main/AndroidManifest.xml)"
+assert_contains "$android_manifest" '[[:space:]]*<data android:scheme="\$\{deepLinkScheme\}"/>'
+
+ios_info="$(cat ios/Runner/Info.plist)"
+assert_contains "$ios_info" '[[:space:]]*<key>CFBundleURLTypes</key>'
+assert_contains "$ios_info" '[[:space:]]*<string>\$\(DEEPLINK_SCHEME\)</string>'
+
+ios_project="$(cat ios/Runner.xcodeproj/project.pbxproj)"
+assert_contains "$ios_project" '[[:space:]]*DEEPLINK_SCHEME = "whitenoise";'
+assert_contains "$ios_project" '[[:space:]]*DEEPLINK_SCHEME = "whitenoise-staging";'
 
 ruby <<'RUBY'
 require 'yaml'

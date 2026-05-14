@@ -122,6 +122,19 @@ void main() {
         expect(find.byType(StartChatScreen), findsOneWidget);
       });
 
+      testWidgets('calling onBarcodeDetected with user deep link navigates to start chat', (
+        tester,
+      ) async {
+        await pumpScanNpubScreen(tester);
+
+        final scanBox = tester.widget<QrScanner>(find.byType(QrScanner));
+        scanBox.onBarcodeDetected('whitenoise://user/$testNpubB');
+        await tester.pumpAndSettle();
+
+        final screen = tester.widget<StartChatScreen>(find.byType(StartChatScreen));
+        expect(screen.userPubkey, testPubkeyB);
+      });
+
       testWidgets('calling onBarcodeDetected with non-npub value does nothing', (tester) async {
         await pumpScanNpubScreen(tester);
 

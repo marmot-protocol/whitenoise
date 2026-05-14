@@ -50,6 +50,7 @@ import 'package:whitenoise/screens/switch_profile_screen.dart' show SwitchProfil
 import 'package:whitenoise/screens/user_search_screen.dart' show UserSearchScreen;
 import 'package:whitenoise/screens/user_selection_screen.dart' show UserSelectionScreen;
 import 'package:whitenoise/src/rust/api/users.dart' show User;
+import 'package:whitenoise/utils/deep_links.dart' show DeepLinks;
 import 'package:whitenoise/widgets/wn_slate_content_transition.dart' show WnSlateContentTransition;
 
 final class AddRelayArgs {
@@ -116,6 +117,12 @@ abstract final class Routes {
       observers: [routeObserver, ActiveChatRouteObserver(ref.read(activeChatProvider.notifier))],
       redirect: (context, state) {
         final pubkey = ref.read(authProvider).value;
+        final deepLinkLocation = DeepLinks.parse(state.uri)?.location;
+        if (deepLinkLocation != null) {
+          if (pubkey == null) return _loginLocation(redirect: deepLinkLocation);
+          return deepLinkLocation;
+        }
+
         final isOnPublicPage = _publicRoutes.contains(state.matchedLocation);
         final isAddingAccount = ref.read(isAddingAccountProvider);
 
@@ -498,6 +505,15 @@ abstract final class Routes {
     GoRouter.of(context).go(_login);
   }
 
+  static void goToPostAuthDestination(BuildContext context) {
+    final redirect = _safeRedirect(GoRouterState.of(context).uri.queryParameters['redirect']);
+    if (redirect != null) {
+      GoRouter.of(context).go(redirect);
+    } else {
+      goToChatList(context);
+    }
+  }
+
   static void pushToLogin(BuildContext context) {
     GoRouter.of(context).push(_login);
   }
@@ -697,5 +713,22 @@ abstract final class Routes {
 
   static void pushToChatRawDebug(BuildContext context, String groupId) {
     GoRouter.of(context).pushNamed('chatRawDebug', pathParameters: {'groupId': groupId});
+  }
+
+  static String _loginLocation({String? redirect}) {
+    if (redirect == null) return _login;
+    return Uri(path: _login, queryParameters: {'redirect': redirect}).toString();
+  }
+
+  static String? _safeRedirect(String? location) {
+    if (location == null || location.isEmpty) return null;
+
+    final uri = Uri.tryParse(location);
+    if (uri == null) return null;
+    if (uri.hasScheme || uri.hasAuthority) return null;
+    if (!uri.path.startsWith('/')) return null;
+    if (_publicRoutes.contains(uri.path)) return null;
+
+    return location;
   }
 }
