@@ -105,6 +105,7 @@ class ChatMessageBubble extends StatelessWidget {
           : null,
       showTail: showTail,
       content: message.content.isNotEmpty ? message.content : null,
+      contentTokens: message.contentTokens,
       highlightSpans: highlightSpans,
       mediaContent: message.mediaAttachments.isNotEmpty
           ? ChatMessageMedia(

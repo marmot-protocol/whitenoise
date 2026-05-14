@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:whitenoise/src/rust/api/messages.dart' show HighlightSpan;
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
+import 'package:whitenoise/src/rust/api/messages.dart' show HighlightSpan, SerializableToken;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
@@ -10,6 +13,19 @@ import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
 const _avatarKey = Key('test_avatar');
+
+class _MockUrlLauncher extends UrlLauncherPlatform with MockPlatformInterfaceMixin {
+  final List<({String url, LaunchOptions options})> calls = [];
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    calls.add((url: url, options: options));
+    return true;
+  }
+}
 
 Finder _findTail() => find.descendant(
   of: find.byType(WnMessageBubble),
@@ -40,6 +56,32 @@ void main() {
       );
 
       expect(find.byType(Text), findsNothing);
+    });
+
+    testWidgets('launches URL content tokens externally', (tester) async {
+      final originalUrlLauncher = UrlLauncherPlatform.instance;
+      final mockLauncher = _MockUrlLauncher();
+      UrlLauncherPlatform.instance = mockLauncher;
+      addTearDown(() => UrlLauncherPlatform.instance = originalUrlLauncher);
+
+      await mountWidget(
+        const WnMessageBubble(
+          direction: MessageDirection.incoming,
+          isDeleted: false,
+          content: 'https://example.com',
+          contentTokens: [
+            SerializableToken(tokenType: 'Url', content: 'https://example.com/'),
+          ],
+        ),
+        tester,
+      );
+
+      await tester.tap(find.textContaining('https://example.com', findRichText: true));
+      await tester.pump();
+
+      expect(mockLauncher.calls, hasLength(1));
+      expect(mockLauncher.calls.single.url, 'https://example.com/');
+      expect(mockLauncher.calls.single.options.mode, PreferredLaunchMode.externalApplication);
     });
 
     testWidgets('does not display text when content is empty', (tester) async {

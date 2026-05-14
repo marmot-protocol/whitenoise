@@ -5,49 +5,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/message_content_text.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_reaction.dart';
 export 'package:whitenoise/src/rust/api/messages.dart' show EmojiReaction;
-
-int _codePointToCodeUnit(String text, int codePointIndex) {
-  var codeUnits = 0;
-  var codePoints = 0;
-  for (final rune in text.runes) {
-    if (codePoints >= codePointIndex) break;
-    codeUnits += rune > 0xFFFF ? 2 : 1;
-    codePoints++;
-  }
-  return codeUnits;
-}
-
-List<TextSpan> _buildHighlightedSpans(
-  String text,
-  TextStyle baseStyle,
-  List<HighlightSpan> spans,
-  Color highlightColor,
-) {
-  if (spans.isEmpty) return [TextSpan(text: text, style: baseStyle)];
-
-  final highlightStyle = baseStyle.copyWith(backgroundColor: highlightColor);
-
-  final result = <TextSpan>[];
-  var cursor = 0;
-  for (final span in spans) {
-    final start = _codePointToCodeUnit(text, span.start).clamp(0, text.length);
-    final end = _codePointToCodeUnit(text, span.end).clamp(start, text.length);
-    if (start > cursor) {
-      result.add(TextSpan(text: text.substring(cursor, start), style: baseStyle));
-    }
-    if (end > start) {
-      result.add(TextSpan(text: text.substring(start, end), style: highlightStyle));
-    }
-    cursor = end;
-  }
-  if (cursor < text.length) {
-    result.add(TextSpan(text: text.substring(cursor), style: baseStyle));
-  }
-  return result;
-}
 
 const _timestampMinPadding = 16.0;
 const _chatStatusW = 18.0;
@@ -66,6 +27,7 @@ const _tailOverhang = 8.0;
 class _TextWithTimestamp extends StatelessWidget {
   const _TextWithTimestamp({
     required this.content,
+    required this.contentTokens,
     required this.timestamp,
     required this.textStyle,
     required this.tsStyle,
@@ -79,6 +41,7 @@ class _TextWithTimestamp extends StatelessWidget {
   });
 
   final String content;
+  final List<SerializableToken> contentTokens;
   final String timestamp;
   final TextStyle textStyle;
   final TextStyle tsStyle;
@@ -120,9 +83,10 @@ class _TextWithTimestamp extends StatelessWidget {
       );
     }
 
-    final textChildren = highlightSpans != null && highlightSpans!.isNotEmpty
-        ? _buildHighlightedSpans(content, textStyle, highlightSpans!, highlightColor!)
-        : [TextSpan(text: content, style: textStyle)];
+    final linkStyle = textStyle.copyWith(
+      decoration: TextDecoration.underline,
+      decorationColor: textStyle.color,
+    );
 
     if (maxLines != null) {
       return LayoutBuilder(
@@ -188,9 +152,13 @@ class _TextWithTimestamp extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       Expanded(
-                        child: Text(
-                          content,
+                        child: MessageContentText(
+                          content: content,
+                          contentTokens: contentTokens,
                           style: textStyle,
+                          linkStyle: linkStyle,
+                          highlightSpans: highlightSpans,
+                          highlightColor: highlightColor,
                           maxLines: effectiveMaxLines,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -205,9 +173,13 @@ class _TextWithTimestamp extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    content,
+                  MessageContentText(
+                    content: content,
+                    contentTokens: contentTokens,
                     style: textStyle,
+                    linkStyle: linkStyle,
+                    highlightSpans: highlightSpans,
+                    highlightColor: highlightColor,
                     maxLines: effectiveMaxLines,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -220,13 +192,14 @@ class _TextWithTimestamp extends StatelessWidget {
             return Stack(
               alignment: isOutgoing && isSingleLine ? Alignment.topRight : Alignment.topLeft,
               children: [
-                Text.rich(
-                  TextSpan(
-                    children: [
-                      ...textChildren,
-                      WidgetSpan(child: SizedBox(width: reservedWidth)),
-                    ],
-                  ),
+                MessageContentText(
+                  content: content,
+                  contentTokens: contentTokens,
+                  style: textStyle,
+                  linkStyle: linkStyle,
+                  highlightSpans: highlightSpans,
+                  highlightColor: highlightColor,
+                  trailingSpans: [WidgetSpan(child: SizedBox(width: reservedWidth))],
                   maxLines: maxLines,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -242,13 +215,14 @@ class _TextWithTimestamp extends StatelessWidget {
 
     return Stack(
       children: [
-        Text.rich(
-          TextSpan(
-            children: [
-              ...textChildren,
-              WidgetSpan(child: SizedBox(width: reservedWidth)),
-            ],
-          ),
+        MessageContentText(
+          content: content,
+          contentTokens: contentTokens,
+          style: textStyle,
+          linkStyle: linkStyle,
+          highlightSpans: highlightSpans,
+          highlightColor: highlightColor,
+          trailingSpans: [WidgetSpan(child: SizedBox(width: reservedWidth))],
         ),
         Positioned(bottom: 0, right: 0, child: statusRow),
       ],
@@ -373,6 +347,7 @@ class _BubbleContent extends StatelessWidget {
     required this.hasText,
     required this.hasTimestamp,
     required this.content,
+    required this.contentTokens,
     this.highlightSpans,
     this.highlightColor,
     required this.timestamp,
@@ -400,6 +375,7 @@ class _BubbleContent extends StatelessWidget {
   final bool hasText;
   final bool hasTimestamp;
   final String? content;
+  final List<SerializableToken> contentTokens;
   final List<HighlightSpan>? highlightSpans;
   final Color? highlightColor;
   final String? timestamp;
@@ -476,6 +452,7 @@ class _BubbleContent extends StatelessWidget {
           if (hasText && hasTimestamp)
             _TextWithTimestamp(
               content: content!,
+              contentTokens: contentTokens,
               timestamp: timestamp!,
               textStyle: textStyle,
               tsStyle: tsStyle,
@@ -488,25 +465,19 @@ class _BubbleContent extends StatelessWidget {
               maxLines: contentMaxLines,
             )
           else if (hasText)
-            highlightSpans != null && highlightSpans!.isNotEmpty
-                ? Text.rich(
-                    TextSpan(
-                      children: _buildHighlightedSpans(
-                        content!,
-                        textStyle,
-                        highlightSpans!,
-                        highlightColor!,
-                      ),
-                    ),
-                    maxLines: contentMaxLines,
-                    overflow: contentMaxLines != null ? TextOverflow.ellipsis : TextOverflow.clip,
-                  )
-                : Text(
-                    content!,
-                    style: textStyle,
-                    maxLines: contentMaxLines,
-                    overflow: contentMaxLines != null ? TextOverflow.ellipsis : TextOverflow.clip,
-                  )
+            MessageContentText(
+              content: content!,
+              contentTokens: contentTokens,
+              style: textStyle,
+              linkStyle: textStyle.copyWith(
+                decoration: TextDecoration.underline,
+                decorationColor: textStyle.color,
+              ),
+              highlightSpans: highlightSpans,
+              highlightColor: highlightColor,
+              maxLines: contentMaxLines,
+              overflow: contentMaxLines != null ? TextOverflow.ellipsis : TextOverflow.clip,
+            )
           else if (hasTimestamp) ...[
             SizedBox(height: 2.h),
             _buildTimestampRow(),
@@ -700,6 +671,7 @@ class WnMessageBubble extends StatelessWidget {
   final String? deletedLabel;
   final bool showTail;
   final String? content;
+  final List<SerializableToken> contentTokens;
   final List<HighlightSpan>? highlightSpans;
   final Widget? mediaContent;
   final Widget? replyContent;
@@ -726,6 +698,7 @@ class WnMessageBubble extends StatelessWidget {
     this.deletedLabel,
     this.showTail = false,
     this.content,
+    this.contentTokens = const [],
     this.highlightSpans,
     this.mediaContent,
     this.replyContent,
@@ -780,6 +753,7 @@ class WnMessageBubble extends StatelessWidget {
     final radius = 8.r;
 
     final actualContent = isDeleted ? deletedLabel : content;
+    final actualContentTokens = isDeleted ? const <SerializableToken>[] : contentTokens;
     final hasText = actualContent != null && actualContent.isNotEmpty;
     final actualMediaContent = isDeleted ? null : mediaContent;
     final actualReplyContent = isDeleted ? null : replyContent;
@@ -812,6 +786,7 @@ class WnMessageBubble extends StatelessWidget {
       hasText: hasText,
       hasTimestamp: hasTimestamp,
       content: actualContent,
+      contentTokens: actualContentTokens,
       highlightSpans: highlightSpans,
       highlightColor: highlightColor,
       timestamp: actualTimestamp,

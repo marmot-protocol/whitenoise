@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
@@ -16,6 +19,19 @@ import 'package:whitenoise/widgets/wn_reaction.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
+
+class _MockUrlLauncher extends UrlLauncherPlatform with MockPlatformInterfaceMixin {
+  final List<({String url, LaunchOptions options})> calls = [];
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    calls.add((url: url, options: options));
+    return true;
+  }
+}
 
 ChatMessageQuoteData _replyPreview({
   String messageId = 'original-msg',
@@ -56,6 +72,7 @@ ChatMessage _message({
   String? replyToId,
   ReactionSummary reactions = const ReactionSummary(byEmoji: [], userReactions: []),
   List<MediaFile> mediaAttachments = const [],
+  List<SerializableToken> contentTokens = const [],
   DateTime? createdAt,
   DeliveryStatus? deliveryStatus,
 }) => ChatMessage(
@@ -67,7 +84,7 @@ ChatMessage _message({
   isReply: isReply,
   replyToId: replyToId,
   isDeleted: isDeleted,
-  contentTokens: const [],
+  contentTokens: contentTokens,
   reactions: reactions,
   mediaAttachments: mediaAttachments,
   kind: 9,
@@ -94,6 +111,33 @@ void main() {
       );
 
       expect(find.textContaining('Test message'), findsOneWidget);
+    });
+
+    testWidgets('uses parsed content tokens for URL taps', (tester) async {
+      final originalUrlLauncher = UrlLauncherPlatform.instance;
+      final mockLauncher = _MockUrlLauncher();
+      UrlLauncherPlatform.instance = mockLauncher;
+      addTearDown(() => UrlLauncherPlatform.instance = originalUrlLauncher);
+
+      await mountWidget(
+        ChatMessageBubble(
+          message: _message(
+            content: 'https://example.com',
+            contentTokens: const [
+              SerializableToken(tokenType: 'Url', content: 'https://example.com/'),
+            ],
+          ),
+          isOwnMessage: false,
+        ),
+        tester,
+      );
+
+      final urlText = find.textContaining('https://example.com', findRichText: true);
+      await tester.tapAt(tester.getTopLeft(urlText) + const Offset(8, 8));
+      await tester.pump();
+
+      expect(mockLauncher.calls, hasLength(1));
+      expect(mockLauncher.calls.single.url, 'https://example.com/');
     });
 
     group('own message', () {
