@@ -79,18 +79,6 @@ class _MentionMember {
   final String? pictureUrl;
 }
 
-class _MentionQuery {
-  const _MentionQuery({
-    required this.start,
-    required this.end,
-    required this.query,
-  });
-
-  final int start;
-  final int end;
-  final String query;
-}
-
 void _scrollToMatch(
   AutoScrollController controller,
   List<SearchDisplayItem>? items,
@@ -135,20 +123,6 @@ Future<_MentionMember?> _loadMentionMember(String pubkey) async {
     displayName: presentName(metadata) ?? pubkey.substring(0, 8),
     pictureUrl: metadata?.picture,
   );
-}
-
-_MentionQuery? _activeMentionQuery(TextEditingValue value) {
-  final selection = value.selection;
-  final caret = selection.baseOffset;
-  if (!selection.isCollapsed || caret < 0 || caret > value.text.length) return null;
-
-  var start = caret;
-  while (start > 0 && !isMentionBoundary(value.text.codeUnitAt(start - 1))) {
-    start--;
-  }
-
-  if (start >= caret || value.text[start] != '@') return null;
-  return _MentionQuery(start: start, end: caret, query: value.text.substring(start + 1, caret));
 }
 
 List<_MentionMember> _filterMentionMembers(List<_MentionMember> members, String query) {
@@ -891,7 +865,7 @@ class _ChatInput extends HookWidget {
     final hasMedia = mediaUpload.items.isNotEmpty;
     final showSend = input.hasContent || hasMedia;
     final textValue = useListenableSelector(input.controller, () => input.controller.value);
-    final mentionQuery = _activeMentionQuery(textValue);
+    final mentionQuery = activeMentionQuery(textValue);
     final mentionSuggestions = mentionQuery != null && actionsEnabled
         ? _filterMentionMembers(mentionMembers, mentionQuery.query)
         : const <_MentionMember>[];

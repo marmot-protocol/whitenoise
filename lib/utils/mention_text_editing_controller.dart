@@ -10,6 +10,20 @@ class MentionTextTarget {
   final String displayText;
 }
 
+({int start, int end, String query})? activeMentionQuery(TextEditingValue value) {
+  final selection = value.selection;
+  final caret = selection.baseOffset;
+  if (!selection.isCollapsed || caret < 0 || caret > value.text.length) return null;
+
+  var start = caret;
+  while (start > 0 && !_isMentionBoundary(value.text.codeUnitAt(start - 1))) {
+    start--;
+  }
+
+  if (start >= caret || value.text[start] != '@') return null;
+  return (start: start, end: caret, query: value.text.substring(start + 1, caret));
+}
+
 class MentionTextEditingController extends TextEditingController {
   MentionTextEditingController({super.text});
 
@@ -252,7 +266,7 @@ List<_TrackedMention> _shiftMentions(
     final insertedInsideMentionBoundary =
         mention.end == prefix &&
         newChangeEnd > prefix &&
-        (prefix >= newText.length || !isMentionBoundary(newText.codeUnitAt(prefix)));
+        (prefix >= newText.length || !_isMentionBoundary(newText.codeUnitAt(prefix)));
     if (insertedInsideMentionBoundary) continue;
 
     final nextMention = mention.end <= prefix
@@ -283,7 +297,7 @@ bool _isValidMention(String text, _TrackedMention mention) {
 
 bool _rangesOverlap(int startA, int endA, int startB, int endB) => startA < endB && startB < endA;
 
-bool isMentionBoundary(int codeUnit) =>
+bool _isMentionBoundary(int codeUnit) =>
     codeUnit == 0x20 || codeUnit == 0x09 || codeUnit == 0x0A || codeUnit == 0x0D;
 
 int _commonPrefixLength(String a, String b) {
