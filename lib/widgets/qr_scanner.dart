@@ -80,7 +80,7 @@ class QrScanner extends HookWidget {
     final isProcessing = useState(false);
     final scannerRetryKey = useState(UniqueKey());
     final isMounted = useRef(true);
-    final boxState = useState(ScannerState.loading);
+    final scannerState = useState(ScannerState.loading);
     final lastDeniedStatus = useRef<PermissionStatus?>(null);
 
     useEffect(() {
@@ -95,12 +95,12 @@ class QrScanner extends HookWidget {
 
         if (status.isGranted || status.isLimited) {
           lastDeniedStatus.value = null;
-          boxState.value = ScannerState.ready;
+          scannerState.value = ScannerState.ready;
         } else {
           final currentStatus = await checkCameraPermissionStatus();
           if (!isMounted.value) return;
           lastDeniedStatus.value = currentStatus;
-          boxState.value = ScannerState.permissionDenied;
+          scannerState.value = ScannerState.permissionDenied;
         }
       }
 
@@ -114,7 +114,7 @@ class QrScanner extends HookWidget {
     );
 
     useEffect(() {
-      if (boxState.value != ScannerState.ready) return null;
+      if (scannerState.value != ScannerState.ready) return null;
 
       var started = false;
 
@@ -144,33 +144,34 @@ class QrScanner extends HookWidget {
         unawaited(subscription.cancel());
         controller.dispose();
       };
-    }, [controller, boxState.value]);
+    }, [controller, scannerState.value]);
 
     void retryScanner() {
-      boxState.value = ScannerState.loading;
+      scannerState.value = ScannerState.loading;
       scannerRetryKey.value = UniqueKey();
     }
 
     useOnAppLifecycleStateChange((previous, current) {
       if (current != AppLifecycleState.resumed || !isMounted.value) return;
-      if (boxState.value == ScannerState.permissionDenied) {
+      if (scannerState.value == ScannerState.permissionDenied) {
         unawaited(() async {
-          final status = await checkCameraPermissionStatus();
+          final cameraPermissionStatus = await checkCameraPermissionStatus();
           if (!isMounted.value) return;
           final snapshotWasDenied =
               lastDeniedStatus.value != null &&
               !(lastDeniedStatus.value!.isGranted || lastDeniedStatus.value!.isLimited);
-          if (snapshotWasDenied && (status.isGranted || status.isLimited)) {
+          if (snapshotWasDenied &&
+              (cameraPermissionStatus.isGranted || cameraPermissionStatus.isLimited)) {
             retryScanner();
           }
         }());
-      } else if (boxState.value == ScannerState.ready) {
+      } else {
         retryScanner();
       }
     });
 
-    final showScanner = boxState.value == ScannerState.ready;
-    final isError = boxState.value != ScannerState.loading && !showScanner;
+    final showScanner = scannerState.value == ScannerState.ready;
+    final isError = scannerState.value != ScannerState.loading && !showScanner;
 
     return Container(
       key: const Key('qr_scanner'),
@@ -194,7 +195,7 @@ class QrScanner extends HookWidget {
                   };
                   Future.microtask(() {
                     if (isMounted.value) {
-                      boxState.value = newState;
+                      scannerState.value = newState;
                     }
                   });
                   return _ScannerNotice(
@@ -205,7 +206,7 @@ class QrScanner extends HookWidget {
               )
             : isError
             ? _ScannerNotice(
-                scannerState: boxState.value,
+                scannerState: scannerState.value,
                 onRetry: retryScanner,
               )
             : _ScannerPlaceholder(colors: colors),

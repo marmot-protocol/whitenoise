@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ui' show AppLifecycleState;
 
 import 'package:flutter/material.dart' show Key, SizedBox;
@@ -288,7 +289,7 @@ void main() {
     });
 
     group('lifecycle', () {
-      testWidgets('recreates scanner on resume', (tester) async {
+      testWidgets('recreates scanner controller on resume', (tester) async {
         setPermissionStatusChecker(() async => PermissionStatus.granted);
 
         await mountWidget(
@@ -297,17 +298,45 @@ void main() {
         );
         await tester.pump();
 
-        final scanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
-        final initialKey = scanner.key;
+        expect(mockController.startCallCount, 1);
+        expect(mockController.disposeCalled, isFalse);
 
         tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
         await tester.pump();
         await tester.pump();
         await tester.pump();
 
-        final newScanner = tester.widget<MobileScanner>(find.byType(MobileScanner));
-        expect(newScanner.key, isNot(equals(initialKey)));
+        expect(mockController.startCallCount, 2);
+        expect(mockController.disposeCalled, isTrue);
+        expect(find.byType(MobileScanner), findsOneWidget);
       });
+
+      testWidgets(
+        'recreates scanner controller after first-time permission grant when app resumes',
+        (tester) async {
+          final completer = Completer<PermissionStatus>();
+          setPermissionRequester(() => completer.future);
+
+          await mountWidget(QrScanner(onBarcodeDetected: (_) {}), tester);
+          await tester.pump();
+
+          expect(find.byKey(const Key('scanner_placeholder')), findsOneWidget);
+
+          completer.complete(PermissionStatus.granted);
+          await tester.pump();
+          await tester.pump();
+          expect(find.byType(MobileScanner), findsOneWidget);
+          expect(mockController.startCallCount, 1);
+
+          tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+          await tester.pump();
+          await tester.pump();
+
+          expect(mockController.startCallCount, 2);
+          expect(mockController.disposeCalled, isTrue);
+          expect(find.byType(MobileScanner), findsOneWidget);
+        },
+      );
 
       testWidgets('does not re-request permission on resume when denied', (tester) async {
         var requestCount = 0;
@@ -476,7 +505,7 @@ void main() {
         expect(mockController.startCallCount, 1);
       });
 
-      testWidgets('resets start guard on retry', (tester) async {
+      testWidgets('resets start guard on resume', (tester) async {
         setPermissionStatusChecker(() async => PermissionStatus.granted);
 
         await mountWidget(

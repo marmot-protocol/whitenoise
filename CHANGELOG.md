@@ -29,6 +29,7 @@ and this project adheres to Calendar Versioning (CalVer).
 ### Removed
 
 ### Fixed
+- Fixed QR scanner not showing camera on first attempt after giving permission [PR #654](https://github.com/marmot-protocol/whitenoise/pull/654)
 
 ### Security
 
