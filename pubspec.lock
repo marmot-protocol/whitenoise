@@ -1085,15 +1085,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "3.2.1"
-  whitenoise_frb:
-    dependency: "direct main"
-    description:
-      path: "."
-      ref: flutter-package
-      resolved-ref: "91c492b0fad5c04499ea54d5bfd92090635bc047"
-      url: "https://github.com/marmot-protocol/whitenoise-rs"
-    source: git
-    version: "0.0.1"
   rxdart:
     dependency: transitive
     description:
@@ -1603,6 +1594,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.2.1"
+  whitenoise_frb:
+    dependency: "direct main"
+    description:
+      name: whitenoise_frb
+      sha256: "7eee94742cea3eb26adb1b778f99f97f10cc605af7e4d6124ab16b9af656891e"
+      url: "https://marmot-protocol.github.io/whitenoise-rs/"
+    source: hosted
+    version: "0.0.0-dev+5b969505f"
   widgetbook:
     dependency: "direct dev"
     description:

@@ -3,8 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
-import 'package:whitenoise_frb/src/rust/api/account_groups.dart'
-    show archiveChat, unarchiveChat;
+import 'package:whitenoise_frb/src/rust/api/account_groups.dart' show archiveChat, unarchiveChat;
 import 'package:whitenoise_frb/src/rust/api/chat_list.dart' show setChatPinOrder;
 import 'package:whitenoise_frb/src/rust/api/chat_summary.dart' show ChatSummary;
 import 'package:whitenoise_frb/src/rust/api/groups.dart' show GroupType;
