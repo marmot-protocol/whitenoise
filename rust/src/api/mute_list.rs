@@ -29,7 +29,7 @@ impl MuteListEntry {
 #[frb]
 pub async fn block_user(account_pubkey: String, target_pubkey: String) -> Result<(), ApiError> {
     let account_pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&account_pubkey)?;
+    let session = wn_session(&account_pubkey).await?;
     let target = PublicKey::parse(&target_pubkey)?;
     session
         .mute_list()
@@ -41,7 +41,7 @@ pub async fn block_user(account_pubkey: String, target_pubkey: String) -> Result
 #[frb]
 pub async fn unblock_user(account_pubkey: String, target_pubkey: String) -> Result<(), ApiError> {
     let account_pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&account_pubkey)?;
+    let session = wn_session(&account_pubkey).await?;
     let target = PublicKey::parse(&target_pubkey)?;
     session
         .mute_list()
@@ -53,7 +53,7 @@ pub async fn unblock_user(account_pubkey: String, target_pubkey: String) -> Resu
 #[frb]
 pub async fn get_blocked_users(account_pubkey: String) -> Result<Vec<MuteListEntry>, ApiError> {
     let account_pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&account_pubkey)?;
+    let session = wn_session(&account_pubkey).await?;
     let entries = session.mute_list().get_blocked_users().await?;
     Ok(entries
         .into_iter()
@@ -67,7 +67,7 @@ pub async fn is_user_blocked(
     target_pubkey: String,
 ) -> Result<bool, ApiError> {
     let account_pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&account_pubkey)?;
+    let session = wn_session(&account_pubkey).await?;
     let target = PublicKey::parse(&target_pubkey)?;
     session
         .mute_list()

@@ -8,8 +8,9 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'api/error.dart';
 import 'frb_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `wn_session`, `wn`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`, `from`
+// These functions are ignored because they are not marked as `pub`: `to_core_config`, `wn_session`, `wn`
+// These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `WnHandle`, `WnSessionHandle`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `deref`, `deref`, `fmt`, `from`
 
 /// Creates a `WhitenoiseConfig` object from string directory paths.
 ///
@@ -41,6 +42,10 @@ Future<WhitenoiseConfig> createWhitenoiseConfig({
 Future<void> initializeWhitenoise({required WhitenoiseConfig config}) =>
     RustLib.instance.api.crateApiInitializeWhitenoise(config: config);
 
+/// Wipes all on-disk data and installs a fresh Whitenoise instance before
+/// returning. The lifecycle write lock waits for in-flight bridge calls before
+/// the old database pool is closed, then blocks new bridge calls until the fresh
+/// instance is ready.
 Future<void> deleteAllData() => RustLib.instance.api.crateApiDeleteAllData();
 
 Future<AppSettings> getAppSettings() => RustLib.instance.api.crateApiGetAppSettings();

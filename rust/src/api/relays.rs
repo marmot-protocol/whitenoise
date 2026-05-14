@@ -40,7 +40,7 @@ pub fn relay_type_key_package() -> RelayType {
 
 #[frb]
 pub async fn debug_relay_control_state() -> Result<String, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     whitenoise
         .debug_relay_control_state()
         .await
@@ -49,7 +49,7 @@ pub async fn debug_relay_control_state() -> Result<String, ApiError> {
 
 #[frb]
 pub async fn ensure_all_subscriptions() -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     whitenoise
         .ensure_all_subscriptions()
         .await

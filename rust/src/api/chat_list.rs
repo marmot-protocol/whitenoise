@@ -137,7 +137,7 @@ pub async fn set_chat_pin_order(
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
 
     session
         .membership()
@@ -161,7 +161,7 @@ pub async fn mute_chat(
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
 
     session
         .membership()
@@ -180,7 +180,7 @@ pub async fn unmute_chat(account_pubkey: String, mls_group_id: String) -> Result
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
 
     session.membership().for_group(&group_id).unmute().await?;
 
@@ -196,7 +196,7 @@ pub async fn unmute_chat(account_pubkey: String, mls_group_id: String) -> Result
 #[frb]
 pub async fn get_chat_list(account_pubkey: String) -> Result<Vec<ChatSummary>, ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let chat_list = session.chat_list().active().await?;
     Ok(chat_list.into_iter().map(|item| item.into()).collect())
 }
@@ -213,7 +213,7 @@ pub async fn subscribe_to_chat_list(
     account_pubkey: String,
     sink: StreamSink<ChatListStreamItem>,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
 
@@ -237,6 +237,7 @@ pub async fn subscribe_to_chat_list(
 
     // Stream real-time updates
     let mut rx = subscription.updates;
+    whitenoise.release_lifecycle();
     loop {
         match rx.recv().await {
             Ok(update) => {
@@ -266,7 +267,7 @@ pub async fn subscribe_to_archived_chat_list(
     account_pubkey: String,
     sink: StreamSink<ChatListStreamItem>,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
 
@@ -288,6 +289,7 @@ pub async fn subscribe_to_archived_chat_list(
     }
 
     let mut rx = subscription.updates;
+    whitenoise.release_lifecycle();
     loop {
         match rx.recv().await {
             Ok(update) => {

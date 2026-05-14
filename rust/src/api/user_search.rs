@@ -151,7 +151,7 @@ pub async fn search_users(
     radius_end: u8,
     sink: StreamSink<UserSearchUpdate>,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
 
     let params = UserSearchParams {
@@ -163,6 +163,7 @@ pub async fn search_users(
 
     let subscription = whitenoise.search_users(params).await?;
     let mut rx = subscription.updates;
+    whitenoise.release_lifecycle();
 
     loop {
         match rx.recv().await {

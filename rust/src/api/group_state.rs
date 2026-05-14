@@ -45,7 +45,7 @@ pub async fn subscribe_to_group_state(
     mls_group_id: String,
     sink: StreamSink<GroupStateUpdate>,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id = group_id_from_string(&mls_group_id)?;
 
@@ -53,6 +53,7 @@ pub async fn subscribe_to_group_state(
         .subscribe_to_group_state(&pubkey, &group_id)
         .await?;
     let mut rx = subscription.updates;
+    whitenoise.release_lifecycle();
 
     loop {
         match rx.recv().await {
