@@ -26,7 +26,6 @@ abstract final class DeepLinks {
     'settings/privacy-security': '/privacy-security',
     'settings/appearance': '/appearance',
     'settings/notifications': '/notification-settings',
-    'settings/sign-out': '/sign-out',
     'settings/report-bug': '/report-bug',
     'settings/donate': '/donate',
     'settings/developer': '/developer-settings',

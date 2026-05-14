@@ -46,7 +46,6 @@ void main() {
         'whitenoise://settings/privacy-security': '/privacy-security',
         'whitenoise://settings/appearance': '/appearance',
         'whitenoise://settings/notifications': '/notification-settings',
-        'whitenoise://settings/sign-out': '/sign-out',
         'whitenoise://settings/report-bug': '/report-bug',
         'whitenoise://settings/donate': '/donate',
         'whitenoise://settings/developer': '/developer-settings',
@@ -68,6 +67,7 @@ void main() {
       expect(DeepLinks.parse(Uri.parse('https://user/$testNpubB')), isNull);
       expect(DeepLinks.parse(Uri.parse('whitenoise://unknown/$testNpubB')), isNull);
       expect(DeepLinks.parse(Uri.parse('whitenoise://user/npub1invalid')), isNull);
+      expect(DeepLinks.parse(Uri.parse('whitenoise://settings/sign-out')), isNull);
     });
   });
 

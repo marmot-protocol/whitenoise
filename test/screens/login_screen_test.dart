@@ -230,6 +230,30 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.byType(RelayResolutionScreen), findsOneWidget);
         });
+
+        testWidgets('preserves deep-link redirect when navigating to relay resolution', (
+          tester,
+        ) async {
+          await pumpLoginScreen(tester);
+          GoRouter.of(
+            tester.element(find.byType(LoginScreen)),
+          ).go('/login?redirect=${Uri.encodeComponent('/chats/$testGroupId')}');
+          await tester.pumpAndSettle();
+
+          mockAuth.loginResultStatus = LoginStatus.needsRelayLists;
+          await tester.enterText(find.byType(TextField), 'nsec1test');
+          await tester.pump();
+          await tester.tap(find.byKey(const Key('login_button')));
+          await tester.pumpAndSettle();
+
+          expect(find.byType(RelayResolutionScreen), findsOneWidget);
+          expect(
+            GoRouterState.of(
+              tester.element(find.byType(RelayResolutionScreen)),
+            ).uri.queryParameters['redirect'],
+            '/chats/$testGroupId',
+          );
+        });
       });
 
       group('when login fails', () {

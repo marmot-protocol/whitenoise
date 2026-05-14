@@ -507,11 +507,7 @@ abstract final class Routes {
 
   static void goToPostAuthDestination(BuildContext context) {
     final redirect = _safeRedirect(GoRouterState.of(context).uri.queryParameters['redirect']);
-    if (redirect != null) {
-      GoRouter.of(context).go(redirect);
-    } else {
-      goToChatList(context);
-    }
+    GoRouter.of(context).go(redirect ?? _chatList);
   }
 
   static void pushToLogin(BuildContext context) {
@@ -646,8 +642,9 @@ abstract final class Routes {
     required String pubkey,
     required bool isExternalSigner,
   }) {
+    final redirect = _safeRedirect(GoRouterState.of(context).uri.queryParameters['redirect']);
     GoRouter.of(context).push(
-      _relayResolution,
+      _relayResolutionLocation(redirect: redirect),
       extra: RelayResolutionArgs(pubkey: pubkey, isExternalSigner: isExternalSigner),
     );
   }
@@ -718,6 +715,11 @@ abstract final class Routes {
   static String _loginLocation({String? redirect}) {
     if (redirect == null) return _login;
     return Uri(path: _login, queryParameters: {'redirect': redirect}).toString();
+  }
+
+  static String _relayResolutionLocation({String? redirect}) {
+    if (redirect == null) return _relayResolution;
+    return Uri(path: _relayResolution, queryParameters: {'redirect': redirect}).toString();
   }
 
   static String? _safeRedirect(String? location) {

@@ -43,6 +43,10 @@ assert_contains "$android_gradle" '[[:space:]]*applicationIdSuffix = "\.staging"
 assert_contains "$android_gradle" '[[:space:]]*applicationId = "org\.parres\.whitenoise"'
 assert_contains "$android_gradle" '[[:space:]]*manifestPlaceholders\["deepLinkScheme"\] = "whitenoise-staging"'
 assert_contains "$android_gradle" '[[:space:]]*manifestPlaceholders\["deepLinkScheme"\] = "whitenoise"'
+deep_link_scheme_count="$(printf '%s\n' "$android_gradle" | grep -c 'manifestPlaceholders\["deepLinkScheme"\]')"
+if [ "$deep_link_scheme_count" -ne 2 ]; then
+  fail "expected each Android flavor to define exactly one deepLinkScheme placeholder"
+fi
 
 android_manifest="$(cat android/app/src/main/AndroidManifest.xml)"
 assert_contains "$android_manifest" '[[:space:]]*<data android:scheme="\$\{deepLinkScheme\}"/>'
