@@ -307,6 +307,22 @@ void main() {
         expect(_api.lastSavedDraftContent, equals('hello draft'));
       });
 
+      testWidgets('saves mention drafts as Nostr URIs', (tester) async {
+        final getResult = await _mountInput(tester);
+        getResult().controller.insertMention(
+          start: 0,
+          end: 0,
+          displayName: 'Bob',
+          uri: 'nostr:$testNpubB',
+        );
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 600));
+
+        expect(getResult().controller.text, equals('@Bob '));
+        expect(_api.saveDraftCallCount, equals(1));
+        expect(_api.lastSavedDraftContent, equals('nostr:$testNpubB '));
+      });
+
       testWidgets('debounced: only fires once for rapid changes', (tester) async {
         final getResult = await _mountInput(tester);
 

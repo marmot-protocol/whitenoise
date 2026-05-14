@@ -5,11 +5,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/src/rust/api/drafts.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
+import 'package:whitenoise/utils/mention_text_editing_controller.dart';
 
 final _logger = Logger('useChatInput');
 
 typedef ChatInputState = ({
-  TextEditingController controller,
+  MentionTextEditingController controller,
   FocusNode focusNode,
   bool hasFocus,
   bool hasContent,
@@ -24,7 +25,7 @@ ChatInputState useChatInput({
   required String groupId,
   required ChatMessage? Function(String messageId) findMessage,
 }) {
-  final controller = useTextEditingController();
+  final controller = useMemoized(MentionTextEditingController.new, const []);
   final focusNode = useFocusNode();
   final hasContent = useListenableSelector(controller, () => controller.text.isNotEmpty);
   final hasFocus = useListenableSelector(focusNode, () => focusNode.hasFocus);
@@ -67,11 +68,13 @@ ChatInputState useChatInput({
     [pubkey, groupId],
   );
 
+  useEffect(() => controller.dispose, [controller]);
+
   useEffect(
     () {
       void scheduleDraft() {
         debounceTimer.value?.cancel();
-        final content = controller.text;
+        final content = controller.messageText;
         final replyToId = replyingTo.value?.id;
         debounceTimer.value = Timer(const Duration(milliseconds: 500), () {
           if (content.isEmpty && replyToId == null) {

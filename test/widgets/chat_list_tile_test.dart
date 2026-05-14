@@ -388,6 +388,20 @@ void main() {
         expect(item.subtitle, 'Hello world');
       });
 
+      testWidgets('shows known Nostr mentions as friendly names in last message preview', (
+        tester,
+      ) async {
+        _api.welcomerMetadata = const FlutterMetadata(displayName: 'Bob', custom: {});
+        await pumpTile(
+          tester,
+          _chatSummary(lastMessageContent: 'This is for nostr:$testNpubB'),
+        );
+
+        final item = tester.widget<WnChatListItem>(find.byType(WnChatListItem));
+        expect(item.subtitle, 'This is for @Bob');
+        expect(find.textContaining('nostr:$testNpubB', findRichText: true), findsNothing);
+      });
+
       testWidgets('shows prefix "You: " when last message is from me', (
         tester,
       ) async {

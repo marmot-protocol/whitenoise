@@ -49,6 +49,29 @@ void main() {
       expect(find.text('Test message'), findsOneWidget);
     });
 
+    testWidgets('renders fenced code blocks inside the message bubble', (tester) async {
+      await mountWidget(
+        const WnMessageBubble(
+          direction: MessageDirection.incoming,
+          isDeleted: false,
+          content: 'Before\n```shell\necho "hello"\n```\nAfter',
+        ),
+        tester,
+      );
+
+      final codeBlock = find.byKey(const Key('message_code_block'));
+      final header = find.byKey(const Key('message_code_block_header'));
+      final codeText = tester.widget<Text>(find.byKey(const Key('message_code_block_text')));
+
+      expect(find.textContaining('Before', findRichText: true), findsOneWidget);
+      expect(find.text('After', findRichText: true), findsOneWidget);
+      expect(codeBlock, findsOneWidget);
+      expect(header, findsOneWidget);
+      expect(find.byKey(const Key('message_code_block_copy_button')), findsOneWidget);
+      expect(codeText.data, 'echo "hello"');
+      expect(tester.getSize(header).width, closeTo(tester.getSize(codeBlock).width, 2));
+    });
+
     testWidgets('does not display text when content is null', (tester) async {
       await mountWidget(
         const WnMessageBubble(direction: MessageDirection.incoming, isDeleted: false),
@@ -82,6 +105,32 @@ void main() {
       expect(mockLauncher.calls, hasLength(1));
       expect(mockLauncher.calls.single.url, 'https://example.com/');
       expect(mockLauncher.calls.single.options.mode, PreferredLaunchMode.externalApplication);
+    });
+
+    testWidgets('passes Nostr token taps through message content', (tester) async {
+      const nostrUri = 'nostr:$testNpubB';
+      String? tappedNostrUri;
+
+      await mountWidget(
+        WnMessageBubble(
+          direction: MessageDirection.incoming,
+          isDeleted: false,
+          content: nostrUri,
+          contentTokens: const [
+            SerializableToken(tokenType: 'Nostr', content: nostrUri),
+          ],
+          onNostrTap: (uri) {
+            tappedNostrUri = uri;
+          },
+        ),
+        tester,
+      );
+
+      final nostrText = find.textContaining(nostrUri, findRichText: true);
+      await tester.tapAt(tester.getTopLeft(nostrText) + const Offset(8, 8));
+      await tester.pump();
+
+      expect(tappedNostrUri, nostrUri);
     });
 
     testWidgets('does not display text when content is empty', (tester) async {

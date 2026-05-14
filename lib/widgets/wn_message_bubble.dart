@@ -35,9 +35,11 @@ class _TextWithTimestamp extends StatelessWidget {
     required this.showDeliveryStatus,
     this.highlightSpans,
     this.highlightColor,
+    this.nostrDisplayNamesByUri = const {},
     this.deliveryStatus,
     this.onStatusTap,
     this.maxLines,
+    this.onNostrTap,
   });
 
   final String content;
@@ -49,9 +51,11 @@ class _TextWithTimestamp extends StatelessWidget {
   final bool showDeliveryStatus;
   final List<HighlightSpan>? highlightSpans;
   final Color? highlightColor;
+  final Map<String, String> nostrDisplayNamesByUri;
   final ChatStatusType? deliveryStatus;
   final VoidCallback? onStatusTap;
   final int? maxLines;
+  final MessageNostrTap? onNostrTap;
 
   @override
   Widget build(BuildContext context) {
@@ -159,6 +163,8 @@ class _TextWithTimestamp extends StatelessWidget {
                           linkStyle: linkStyle,
                           highlightSpans: highlightSpans,
                           highlightColor: highlightColor,
+                          nostrDisplayNamesByUri: nostrDisplayNamesByUri,
+                          onNostrTap: onNostrTap,
                           maxLines: effectiveMaxLines,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -180,6 +186,8 @@ class _TextWithTimestamp extends StatelessWidget {
                     linkStyle: linkStyle,
                     highlightSpans: highlightSpans,
                     highlightColor: highlightColor,
+                    nostrDisplayNamesByUri: nostrDisplayNamesByUri,
+                    onNostrTap: onNostrTap,
                     maxLines: effectiveMaxLines,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -199,6 +207,8 @@ class _TextWithTimestamp extends StatelessWidget {
                   linkStyle: linkStyle,
                   highlightSpans: highlightSpans,
                   highlightColor: highlightColor,
+                  nostrDisplayNamesByUri: nostrDisplayNamesByUri,
+                  onNostrTap: onNostrTap,
                   trailingSpans: [WidgetSpan(child: SizedBox(width: reservedWidth))],
                   maxLines: maxLines,
                   overflow: TextOverflow.ellipsis,
@@ -222,6 +232,8 @@ class _TextWithTimestamp extends StatelessWidget {
           linkStyle: linkStyle,
           highlightSpans: highlightSpans,
           highlightColor: highlightColor,
+          nostrDisplayNamesByUri: nostrDisplayNamesByUri,
+          onNostrTap: onNostrTap,
           trailingSpans: [WidgetSpan(child: SizedBox(width: reservedWidth))],
         ),
         Positioned(bottom: 0, right: 0, child: statusRow),
@@ -350,6 +362,7 @@ class _BubbleContent extends StatelessWidget {
     required this.contentTokens,
     this.highlightSpans,
     this.highlightColor,
+    this.nostrDisplayNamesByUri = const {},
     required this.timestamp,
     required this.textStyle,
     required this.tsStyle,
@@ -363,6 +376,7 @@ class _BubbleContent extends StatelessWidget {
     this.deliveryStatus,
     this.onStatusTap,
     this.contentMaxLines,
+    this.onNostrTap,
   });
 
   final Color bubbleColor;
@@ -378,6 +392,7 @@ class _BubbleContent extends StatelessWidget {
   final List<SerializableToken> contentTokens;
   final List<HighlightSpan>? highlightSpans;
   final Color? highlightColor;
+  final Map<String, String> nostrDisplayNamesByUri;
   final String? timestamp;
   final TextStyle textStyle;
   final TextStyle tsStyle;
@@ -391,6 +406,7 @@ class _BubbleContent extends StatelessWidget {
   final ChatStatusType? deliveryStatus;
   final VoidCallback? onStatusTap;
   final int? contentMaxLines;
+  final MessageNostrTap? onNostrTap;
 
   Widget _buildTimestampRow() {
     Widget row = Row(
@@ -460,9 +476,11 @@ class _BubbleContent extends StatelessWidget {
               showDeliveryStatus: showDeliveryStatus,
               highlightSpans: highlightSpans,
               highlightColor: highlightColor,
+              nostrDisplayNamesByUri: nostrDisplayNamesByUri,
               deliveryStatus: deliveryStatus,
               onStatusTap: onStatusTap,
               maxLines: contentMaxLines,
+              onNostrTap: onNostrTap,
             )
           else if (hasText)
             MessageContentText(
@@ -475,6 +493,8 @@ class _BubbleContent extends StatelessWidget {
               ),
               highlightSpans: highlightSpans,
               highlightColor: highlightColor,
+              nostrDisplayNamesByUri: nostrDisplayNamesByUri,
+              onNostrTap: onNostrTap,
               maxLines: contentMaxLines,
               overflow: contentMaxLines != null ? TextOverflow.ellipsis : TextOverflow.clip,
             )
@@ -673,6 +693,7 @@ class WnMessageBubble extends StatelessWidget {
   final String? content;
   final List<SerializableToken> contentTokens;
   final List<HighlightSpan>? highlightSpans;
+  final Map<String, String> nostrDisplayNamesByUri;
   final Widget? mediaContent;
   final Widget? replyContent;
   final String? timestamp;
@@ -690,6 +711,7 @@ class WnMessageBubble extends StatelessWidget {
   final int? contentMaxLines;
   final double bubbleWidthFactor;
   final bool forceTightHeight;
+  final MessageNostrTap? onNostrTap;
 
   const WnMessageBubble({
     super.key,
@@ -700,6 +722,7 @@ class WnMessageBubble extends StatelessWidget {
     this.content,
     this.contentTokens = const [],
     this.highlightSpans,
+    this.nostrDisplayNamesByUri = const {},
     this.mediaContent,
     this.replyContent,
     this.timestamp,
@@ -717,6 +740,7 @@ class WnMessageBubble extends StatelessWidget {
     this.contentMaxLines,
     this.bubbleWidthFactor = 0.8,
     this.forceTightHeight = false,
+    this.onNostrTap,
   });
 
   bool get _isOutgoing => direction == MessageDirection.outgoing;
@@ -754,6 +778,9 @@ class WnMessageBubble extends StatelessWidget {
 
     final actualContent = isDeleted ? deletedLabel : content;
     final actualContentTokens = isDeleted ? const <SerializableToken>[] : contentTokens;
+    final actualNostrDisplayNamesByUri = isDeleted
+        ? const <String, String>{}
+        : nostrDisplayNamesByUri;
     final hasText = actualContent != null && actualContent.isNotEmpty;
     final actualMediaContent = isDeleted ? null : mediaContent;
     final actualReplyContent = isDeleted ? null : replyContent;
@@ -788,6 +815,7 @@ class WnMessageBubble extends StatelessWidget {
       content: actualContent,
       contentTokens: actualContentTokens,
       highlightSpans: highlightSpans,
+      nostrDisplayNamesByUri: actualNostrDisplayNamesByUri,
       highlightColor: highlightColor,
       timestamp: actualTimestamp,
       textStyle: textStyle,
@@ -802,6 +830,7 @@ class WnMessageBubble extends StatelessWidget {
       deliveryStatus: actualDeliveryStatus,
       onStatusTap: isDeleted ? null : onStatusTap,
       contentMaxLines: contentMaxLines,
+      onNostrTap: isDeleted ? null : onNostrTap,
     );
 
     return LayoutBuilder(

@@ -69,22 +69,24 @@ class _MockTag implements Tag {
 ChatMessage _message(
   String id,
   DateTime createdAt, {
+  String? content,
   String pubkey = testPubkeyB,
   bool isDeleted = false,
   bool isReply = false,
   String? replyToId,
   ReactionSummary reactions = const ReactionSummary(byEmoji: [], userReactions: []),
   DeliveryStatus? deliveryStatus,
+  List<SerializableToken> contentTokens = const [],
 }) => ChatMessage(
   id: id,
   pubkey: pubkey,
-  content: 'Message $id',
+  content: content ?? 'Message $id',
   createdAt: createdAt,
   tags: const [],
   isReply: isReply,
   replyToId: replyToId,
   isDeleted: isDeleted,
-  contentTokens: const [],
+  contentTokens: contentTokens,
   reactions: reactions,
   mediaAttachments: const [],
   kind: 9,
@@ -636,6 +638,35 @@ void main() {
         expect(find.textContaining('Message m1'), findsOneWidget);
       });
 
+      testWidgets('renders known Nostr mentions as friendly names', (tester) async {
+        const nostrUri = 'nostr:$testNpubB';
+        _api.groupMembers = [_testPubkey, testPubkeyB];
+        _api.metadataByPubkey = {
+          testPubkeyB: const FlutterMetadata(displayName: 'Bob', custom: {}),
+        };
+        _api.initialMessages = [
+          _message(
+            'm1',
+            DateTime(2024, 1, 4),
+            content: 'This is for $nostrUri',
+            contentTokens: const [
+              SerializableToken(tokenType: 'Text', content: 'This'),
+              SerializableToken(tokenType: 'Whitespace'),
+              SerializableToken(tokenType: 'Text', content: 'is'),
+              SerializableToken(tokenType: 'Whitespace'),
+              SerializableToken(tokenType: 'Text', content: 'for'),
+              SerializableToken(tokenType: 'Whitespace'),
+              SerializableToken(tokenType: 'Nostr', content: nostrUri),
+            ],
+          ),
+        ];
+        await pumpChatScreen(tester);
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('@Bob', findRichText: true), findsOneWidget);
+        expect(find.textContaining(nostrUri, findRichText: true), findsNothing);
+      });
+
       testWidgets('does not display deleted message text', (tester) async {
         _api.initialMessages = [
           _message('m1', DateTime(2024, 1, 2)),
@@ -840,6 +871,37 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byKey(const Key('send_button')), findsOneWidget);
+      });
+
+      testWidgets('typing @ lets the user insert another member as a Nostr mention', (
+        tester,
+      ) async {
+        _api.groupMembers = [_testPubkey, testPubkeyB, testPubkeyC];
+        _api.metadataByPubkey = {
+          testPubkeyB: const FlutterMetadata(displayName: 'Bob', custom: {}),
+          testPubkeyC: const FlutterMetadata(displayName: 'Carol', custom: {}),
+        };
+        await pumpChatScreen(tester);
+
+        await tester.enterText(find.byType(TextField), '@');
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsOneWidget);
+        expect(find.byKey(const Key('mention_suggestion_$testPubkeyB')), findsOneWidget);
+        expect(find.byKey(const Key('mention_suggestion_$testPubkeyC')), findsOneWidget);
+        expect(find.byKey(const Key('mention_suggestion_$_testPubkey')), findsNothing);
+
+        await tester.tap(find.byKey(const Key('mention_suggestion_$testPubkeyB')));
+        await tester.pumpAndSettle();
+
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.controller!.text, '@Bob ');
+        expect(textField.controller!.text, isNot(contains('nostr:')));
+
+        await tester.tap(find.byKey(const Key('send_button')));
+        await tester.pumpAndSettle();
+
+        expect(_api.sentMessages, ['nostr:$testNpubB']);
       });
 
       testWidgets('input is cleared after sending', (tester) async {
@@ -1690,6 +1752,31 @@ void main() {
 
           expect(find.byKey(const Key('send_button')), findsOneWidget);
         });
+      });
+
+      testWidgets('restores a stored Nostr mention as a friendly composer mention', (tester) async {
+        _api.groupMembers = [_testPubkey, testPubkeyB];
+        _api.metadataByPubkey = {
+          testPubkeyB: const FlutterMetadata(displayName: 'Bob', custom: {}),
+        };
+        _api.loadDraftResult = Draft(
+          accountPubkey: _testPubkey,
+          mlsGroupId: _testGroupId,
+          content: 'Hi nostr:$testNpubB',
+          mediaAttachments: const [],
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        );
+
+        await pumpChatScreenWithDraftSettle(tester);
+
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.controller!.text, 'Hi @Bob');
+
+        await tester.tap(find.byKey(const Key('send_button')));
+        await tester.pumpAndSettle();
+
+        expect(_api.sentMessages, ['Hi nostr:$testNpubB']);
       });
 
       group('when draft reply message not in list', () {

@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/l10n/l10n.dart';
+import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart' show leadingVariant;
+import 'package:whitenoise/utils/encoding.dart' show hexFromNpub;
 import 'package:whitenoise/widgets/chat_message_media.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/media_modal.dart';
+import 'package:whitenoise/widgets/message_content_text.dart' show MessageNostrTap;
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
@@ -14,6 +17,7 @@ import 'package:whitenoise/widgets/wn_message_bubble.dart';
 class ChatMessageBubble extends StatelessWidget {
   final ChatMessage message;
   final List<HighlightSpan>? highlightSpans;
+  final Map<String, String> nostrDisplayNamesByUri;
   final bool isOwnMessage;
   final String? currentUserPubkey;
   final ChatMessageQuoteData? replyPreview;
@@ -30,11 +34,13 @@ class ChatMessageBubble extends StatelessWidget {
   final VoidCallback? onReplyTap;
   final VoidCallback? onHorizontalDragEnd;
   final VoidCallback? onRetry;
+  final MessageNostrTap? onNostrTap;
 
   const ChatMessageBubble({
     super.key,
     required this.message,
     this.highlightSpans,
+    this.nostrDisplayNamesByUri = const {},
     required this.isOwnMessage,
     this.currentUserPubkey,
     this.replyPreview,
@@ -51,6 +57,7 @@ class ChatMessageBubble extends StatelessWidget {
     this.onReplyTap,
     this.onHorizontalDragEnd,
     this.onRetry,
+    this.onNostrTap,
   });
 
   ChatStatusType? get _deliveryStatusType {
@@ -83,6 +90,21 @@ class ChatMessageBubble extends StatelessWidget {
     return '$h:$m';
   }
 
+  static String? _npubFromNostrUri(String nostrUri) {
+    final value = nostrUri.startsWith('nostr:') ? nostrUri.substring('nostr:'.length) : nostrUri;
+    return value.startsWith('npub1') ? value : null;
+  }
+
+  static void _openNostrProfile(BuildContext context, String nostrUri) {
+    final npub = _npubFromNostrUri(nostrUri);
+    if (npub == null) return;
+
+    final userPubkey = hexFromNpub(npub);
+    if (userPubkey == null) return;
+
+    Routes.pushToStartChat(context, userPubkey);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isOwnMessage && message.deliveryStatus is DeliveryStatus_Retried) {
@@ -107,6 +129,7 @@ class ChatMessageBubble extends StatelessWidget {
       content: message.content.isNotEmpty ? message.content : null,
       contentTokens: message.contentTokens,
       highlightSpans: highlightSpans,
+      nostrDisplayNamesByUri: nostrDisplayNamesByUri,
       mediaContent: message.mediaAttachments.isNotEmpty
           ? ChatMessageMedia(
               key: const Key('message_media'),
@@ -148,6 +171,7 @@ class ChatMessageBubble extends StatelessWidget {
       contentMaxLines: contentMaxLines,
       bubbleWidthFactor: bubbleWidthFactor,
       forceTightHeight: forceTightHeight,
+      onNostrTap: onNostrTap ?? (uri) => _openNostrProfile(context, uri),
     );
   }
 }

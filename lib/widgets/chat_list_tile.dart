@@ -16,7 +16,10 @@ import 'package:whitenoise/src/rust/api/chat_list.dart' show setChatPinOrder;
 import 'package:whitenoise/src/rust/api/chat_summary.dart' show ChatSummary;
 import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessageSummary;
+import 'package:whitenoise/src/rust/api/metadata.dart' show FlutterMetadata;
+import 'package:whitenoise/src/rust/api/users.dart' as users_api;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/encoding.dart' show hexFromNpub;
 import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/widgets/chat_list_menu.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
@@ -25,6 +28,7 @@ import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 
 final _logger = Logger('ChatListTile');
+final _nostrNpubUriPattern = RegExp(r'nostr:npub1[0-9a-z]+', caseSensitive: false);
 
 typedef _TileDisplay = ({
   String title,
@@ -57,6 +61,40 @@ typedef _TileDisplay = ({
       size: 16.w,
       color: context.colors.backgroundContentSecondary,
     ),
+  );
+}
+
+Future<Map<String, String>> _loadPreviewNostrDisplayNames(String text) async {
+  final uris = _nostrNpubUriPattern.allMatches(text).map((match) => match.group(0)!).toSet();
+  if (uris.isEmpty) return const <String, String>{};
+
+  final displayNames = <String, String>{};
+  await Future.wait(
+    uris.map((uri) async {
+      final npub = uri.substring('nostr:'.length);
+      final pubkey = hexFromNpub(npub);
+      if (pubkey == null) return;
+
+      FlutterMetadata? metadata;
+      try {
+        metadata = await users_api.userMetadata(pubkey: pubkey, blockingDataSync: false);
+      } catch (_) {
+        metadata = null;
+      }
+
+      final displayName = presentName(metadata);
+      if (displayName == null || displayName.isEmpty) return;
+      displayNames[uri] = '@$displayName';
+    }),
+  );
+  return displayNames;
+}
+
+String _replacePreviewNostrMentions(String text, Map<String, String> displayNamesByUri) {
+  if (displayNamesByUri.isEmpty) return text;
+  return text.replaceAllMapped(
+    _nostrNpubUriPattern,
+    (match) => displayNamesByUri[match.group(0)!] ?? match.group(0)!,
   );
 }
 
@@ -282,6 +320,18 @@ class ChatListTile extends HookConsumerWidget {
       formattedTime: formattedTime,
       searchSnippet: searchSnippet,
     );
+    final previewNostrDisplayNamesFuture = useMemoized(
+      () => _loadPreviewNostrDisplayNames(display.subtitle),
+      [display.subtitle],
+    );
+    final previewNostrDisplayNamesSnapshot = useFuture(
+      previewNostrDisplayNamesFuture,
+      initialData: const <String, String>{},
+    );
+    final subtitle = _replacePreviewNostrMentions(
+      display.subtitle,
+      previewNostrDisplayNamesSnapshot.data ?? const <String, String>{},
+    );
 
     void showContextMenu() {
       final renderBox = itemKey.currentContext?.findRenderObject() as RenderBox?;
@@ -366,7 +416,7 @@ class ChatListTile extends HookConsumerWidget {
         childRenderBox: renderBox,
         child: WnChatListItem(
           title: display.title,
-          subtitle: display.subtitle,
+          subtitle: subtitle,
           timestamp: display.formattedTime,
           avatarUrl: display.pictureUrl,
           avatarName: display.avatarName,
@@ -388,7 +438,7 @@ class ChatListTile extends HookConsumerWidget {
           : () => Routes.goToChat(context, chatSummary.mlsGroupId),
       onLongPress: isPending ? null : showContextMenu,
       title: display.title,
-      subtitle: display.subtitle,
+      subtitle: subtitle,
       timestamp: display.formattedTime,
       avatarUrl: display.pictureUrl,
       avatarName: display.avatarName,

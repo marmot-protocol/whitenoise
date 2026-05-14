@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
@@ -138,6 +140,83 @@ void main() {
 
       expect(mockLauncher.calls, hasLength(1));
       expect(mockLauncher.calls.single.url, 'https://example.com/');
+    });
+
+    testWidgets('passes Nostr token taps through parsed message content', (tester) async {
+      const nostrUri = 'nostr:$testNpubB';
+      String? tappedNostrUri;
+
+      await mountWidget(
+        ChatMessageBubble(
+          message: _message(
+            content: nostrUri,
+            contentTokens: const [
+              SerializableToken(tokenType: 'Nostr', content: nostrUri),
+            ],
+          ),
+          isOwnMessage: false,
+          onNostrTap: (uri) {
+            tappedNostrUri = uri;
+          },
+        ),
+        tester,
+      );
+
+      final nostrText = find.textContaining(nostrUri, findRichText: true);
+      await tester.tapAt(tester.getTopLeft(nostrText) + const Offset(8, 8));
+      await tester.pump();
+
+      expect(tappedNostrUri, nostrUri);
+    });
+
+    testWidgets('opens start chat route for Nostr npub mentions by default', (tester) async {
+      const nostrUri = 'nostr:$testNpubB';
+      setUpTestView(tester);
+
+      final router = GoRouter(
+        initialLocation: '/',
+        routes: [
+          GoRoute(
+            path: '/',
+            builder: (context, state) => Scaffold(
+              body: ChatMessageBubble(
+                message: _message(
+                  content: nostrUri,
+                  contentTokens: const [
+                    SerializableToken(tokenType: 'Nostr', content: nostrUri),
+                  ],
+                ),
+                isOwnMessage: false,
+              ),
+            ),
+          ),
+          GoRoute(
+            name: 'startChat',
+            path: '/start-chat/:userPubkey',
+            builder: (context, state) => Scaffold(
+              body: Text(state.pathParameters['userPubkey']!),
+            ),
+          ),
+        ],
+      );
+      addTearDown(router.dispose);
+
+      await tester.pumpWidget(
+        ScreenUtilInit(
+          designSize: testDesignSize,
+          builder: (_, _) => MaterialApp.router(
+            theme: testMaterialAppTheme,
+            routerConfig: router,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      final nostrText = find.textContaining(nostrUri, findRichText: true);
+      await tester.tapAt(tester.getTopLeft(nostrText) + const Offset(8, 8));
+      await tester.pumpAndSettle();
+
+      expect(find.text(testPubkeyB), findsOneWidget);
     });
 
     group('own message', () {
