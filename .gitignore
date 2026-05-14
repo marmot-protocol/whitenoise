@@ -99,3 +99,5 @@ devtools_options.yaml
 
 # .so files
 *.so
+
+rust/
