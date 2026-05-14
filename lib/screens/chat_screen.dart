@@ -4,9 +4,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/groups.dart' show GroupType;
-import 'package:rust_lib_whitenoise/src/rust/api/media_files.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/messages.dart'
+import 'package:whitenoise_frb/src/rust/api/groups.dart' show GroupType;
+import 'package:whitenoise_frb/src/rust/api/media_files.dart';
+import 'package:whitenoise_frb/src/rust/api/messages.dart'
     show ChatMessage, DeliveryStatus_Failed;
 import 'package:scroll_to_index/scroll_to_index.dart'
     show AutoScrollController, AutoScrollPosition, AutoScrollTag;

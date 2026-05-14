@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart' as accounts_api;
-import 'package:rust_lib_whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise_frb/src/rust/api/accounts.dart' as accounts_api;
+import 'package:whitenoise_frb/src/rust/api/metadata.dart';
 import 'package:whitenoise/services/profile_service.dart';
 import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/utils/metadata.dart';

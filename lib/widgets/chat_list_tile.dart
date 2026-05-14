@@ -3,12 +3,12 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/account_groups.dart'
+import 'package:whitenoise_frb/src/rust/api/account_groups.dart'
     show archiveChat, unarchiveChat;
-import 'package:rust_lib_whitenoise/src/rust/api/chat_list.dart' show setChatPinOrder;
-import 'package:rust_lib_whitenoise/src/rust/api/chat_summary.dart' show ChatSummary;
-import 'package:rust_lib_whitenoise/src/rust/api/groups.dart' show GroupType;
-import 'package:rust_lib_whitenoise/src/rust/api/messages.dart' show ChatMessageSummary;
+import 'package:whitenoise_frb/src/rust/api/chat_list.dart' show setChatPinOrder;
+import 'package:whitenoise_frb/src/rust/api/chat_summary.dart' show ChatSummary;
+import 'package:whitenoise_frb/src/rust/api/groups.dart' show GroupType;
+import 'package:whitenoise_frb/src/rust/api/messages.dart' show ChatMessageSummary;
 import 'package:whitenoise/constants/feature_flags.dart';
 import 'package:whitenoise/hooks/use_leave_group.dart';
 import 'package:whitenoise/l10n/l10n.dart';

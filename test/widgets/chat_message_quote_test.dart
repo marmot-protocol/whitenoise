@@ -3,9 +3,9 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/media_files.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/metadata.dart';
-import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise_frb/src/rust/api/media_files.dart';
+import 'package:whitenoise_frb/src/rust/api/metadata.dart';
+import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 

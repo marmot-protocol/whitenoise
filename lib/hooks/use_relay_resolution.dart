@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart' show LoginResult, LoginStatus;
-import 'package:rust_lib_whitenoise/src/rust/api/error.dart';
+import 'package:whitenoise_frb/src/rust/api/accounts.dart' show LoginResult, LoginStatus;
+import 'package:whitenoise_frb/src/rust/api/error.dart';
 import 'package:whitenoise/hooks/use_relay_input.dart';
 import 'package:whitenoise/utils/relay_url_validation.dart' show isRelayUrlEmpty;
 import 'package:whitenoise/widgets/wn_icon.dart' show WnIcons;

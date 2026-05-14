@@ -32,9 +32,9 @@ if [ -z "$REV" ]; then
 fi
 
 # Optionally derive the URL from pubspec.lock so we stay aligned with the
-# rust_lib_whitenoise dep instead of hardcoding marmot-protocol.
+# whitenoise_frb dep instead of hardcoding marmot-protocol.
 if [ -f "$LOCK_FILE" ]; then
-  LOCK_URL="$(awk '/^  rust_lib_whitenoise:/{flag=1; next} flag && /^  [a-zA-Z_]/{flag=0} flag' "$LOCK_FILE" \
+  LOCK_URL="$(awk '/^  whitenoise_frb:/{flag=1; next} flag && /^  [a-zA-Z_]/{flag=0} flag' "$LOCK_FILE" \
               | sed -n 's|.*url: *"\([^"]*\)".*|\1|p' | head -1)"
   if [[ "$LOCK_URL" =~ ^https?://github\.com/ ]]; then
     WHITENOISE_RS_URL="${LOCK_URL%.git}.git"

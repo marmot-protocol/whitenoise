@@ -26,7 +26,7 @@ This is a secure messaging app that uses the [whitenoise Rust crate](https://git
 ## Tech Stack
 
 - **Flutter/Dart** - UI and application logic
-- **rust_lib_whitenoise** - Rust core (MLS+Nostr) via FFI; published from
+- **whitenoise_frb** - Rust core (MLS+Nostr) via FFI; published from
   [whitenoise-rs](https://github.com/marmot-protocol/whitenoise-rs) on the
   `flutter-package` orphan branch and consumed via pubspec git dep
 - **Riverpod** - State management (shared state)
@@ -63,7 +63,7 @@ Use `constants/` only for fixed, related sets (e.g. NIP kinds) or constants repe
 ## Setup Commands
 
 ```bash
-# Install Flutter dependencies (resolves rust_lib_whitenoise from git)
+# Install Flutter dependencies (resolves whitenoise_frb from git)
 just deps
 ```
 

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart' show ThemeMode;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:logging/logging.dart';
-import 'package:rust_lib_whitenoise/src/rust/api.dart' as rust_api;
-import 'package:rust_lib_whitenoise/src/rust/api/utils.dart' as rust_utils;
+import 'package:whitenoise_frb/src/rust/api.dart' as rust_api;
+import 'package:whitenoise_frb/src/rust/api/utils.dart' as rust_utils;
 
 final _logger = Logger('ThemeNotifier');
 

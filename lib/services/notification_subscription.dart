@@ -4,9 +4,9 @@ import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
 import 'package:logging/logging.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart' as accounts_api;
-import 'package:rust_lib_whitenoise/src/rust/api/mute_list.dart' as mute_list_api;
-import 'package:rust_lib_whitenoise/src/rust/api/notifications.dart' as notifications_api;
+import 'package:whitenoise_frb/src/rust/api/accounts.dart' as accounts_api;
+import 'package:whitenoise_frb/src/rust/api/mute_list.dart' as mute_list_api;
+import 'package:whitenoise_frb/src/rust/api/notifications.dart' as notifications_api;
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/services/notification_service.dart';
 import 'package:whitenoise/services/user_service.dart';

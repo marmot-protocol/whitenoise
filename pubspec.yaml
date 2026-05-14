@@ -34,10 +34,9 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
-  rust_lib_whitenoise:
-    git:
-      url: https://github.com/marmot-protocol/whitenoise-rs
-      ref: flutter-package
+  whitenoise_frb:
+    hosted: https://marmot-protocol.github.io/whitenoise-rs
+    version: "0.0.0-dev+5b969505f"
   flutter_rust_bridge: 2.11.1
   logging: ^1.2.0
   freezed_annotation: ^3.1.0

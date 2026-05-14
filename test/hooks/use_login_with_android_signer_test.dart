@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart';
+import 'package:whitenoise_frb/src/rust/api/accounts.dart';
 import 'package:whitenoise/hooks/use_login_with_android_signer.dart';
 
 import '../mocks/mock_android_signer_channel.dart';

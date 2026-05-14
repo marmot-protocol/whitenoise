@@ -2,10 +2,10 @@ import 'dart:async';
 import 'dart:ui' show Locale;
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/metadata.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/notifications.dart';
-import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise_frb/src/rust/api/accounts.dart';
+import 'package:whitenoise_frb/src/rust/api/metadata.dart';
+import 'package:whitenoise_frb/src/rust/api/notifications.dart';
+import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 import 'package:whitenoise/l10n/generated/app_localizations_en.dart';
 import 'package:whitenoise/services/notification_service.dart';
 import 'package:whitenoise/services/notification_subscription.dart';

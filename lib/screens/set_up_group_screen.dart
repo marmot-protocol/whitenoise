@@ -3,7 +3,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/users.dart' show User;
+import 'package:whitenoise_frb/src/rust/api/users.dart' show User;
 import 'package:whitenoise/hooks/use_create_group.dart';
 import 'package:whitenoise/hooks/use_image_picker.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';

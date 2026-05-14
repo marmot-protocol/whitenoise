@@ -5,7 +5,7 @@ import android.content.Context
 class Keyring {
     companion object {
         init {
-            System.loadLibrary("rust_lib_whitenoise")
+            System.loadLibrary("whitenoise_frb")
         }
 
         external fun initializeNdkContext(context: Context)

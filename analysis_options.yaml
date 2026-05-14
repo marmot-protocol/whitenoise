@@ -36,7 +36,7 @@ linter:
     avoid_redundant_argument_values: true
     directives_ordering: true
     avoid_slow_async_io: true
-    # rust_lib_whitenoise (the FRB-published package) deliberately exposes
+    # whitenoise_frb (the FRB-published package) deliberately exposes
     # its `src/rust/...` tree as the public API. Suppress the lint that flags
     # importing from another package's lib/src directory.
     implementation_imports: false

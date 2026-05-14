@@ -1,7 +1,7 @@
 import 'package:logging/logging.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart' as accounts_api;
-import 'package:rust_lib_whitenoise/src/rust/api/metadata.dart' show FlutterMetadata;
-import 'package:rust_lib_whitenoise/src/rust/api/utils.dart' as utils_api;
+import 'package:whitenoise_frb/src/rust/api/accounts.dart' as accounts_api;
+import 'package:whitenoise_frb/src/rust/api/metadata.dart' show FlutterMetadata;
+import 'package:whitenoise_frb/src/rust/api/utils.dart' as utils_api;
 import 'package:whitenoise/utils/mime_type.dart' show getMimeType;
 
 final _logger = Logger('ProfileService');

@@ -4,7 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:go_router/go_router.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/groups.dart' as groups_api;
+import 'package:whitenoise_frb/src/rust/api/groups.dart' as groups_api;
 import 'package:whitenoise/hooks/use_chat_archive.dart';
 import 'package:whitenoise/hooks/use_group_members.dart';
 import 'package:whitenoise/hooks/use_route_refresh.dart';

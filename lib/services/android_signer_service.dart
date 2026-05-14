@@ -4,8 +4,8 @@ import 'dart:math' show min;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:logging/logging.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/signer.dart' as signer_api;
+import 'package:whitenoise_frb/src/rust/api/accounts.dart';
+import 'package:whitenoise_frb/src/rust/api/signer.dart' as signer_api;
 import 'package:whitenoise/constants/nostr_event_kinds.dart';
 
 final _logger = Logger('AndroidSignerService');

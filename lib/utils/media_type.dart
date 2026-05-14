@@ -1,5 +1,5 @@
 import 'package:mime/mime.dart' show lookupMimeType;
-import 'package:rust_lib_whitenoise/src/rust/api/media_files.dart';
+import 'package:whitenoise_frb/src/rust/api/media_files.dart';
 
 const _videoExtensions = {'.mp4', '.mov', '.m4v', '.webm', '.mkv', '.avi'};
 

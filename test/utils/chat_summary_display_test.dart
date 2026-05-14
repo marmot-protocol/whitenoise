@@ -1,6 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/chat_summary.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/groups.dart' show GroupType;
+import 'package:whitenoise_frb/src/rust/api/chat_summary.dart';
+import 'package:whitenoise_frb/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/chat_summary_display.dart';
 import '../test_helpers.dart';

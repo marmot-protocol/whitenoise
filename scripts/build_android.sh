@@ -93,7 +93,7 @@ export CXX_armv7_linux_androideabi="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$
 export AR_armv7_linux_androideabi="$ANDROID_NDK_HOME/toolchains/llvm/prebuilt/$HOST_TAG/bin/llvm-ar"
 
 # Fetch the Rust wrapper source from whitenoise-rs at the pinned rev.
-# The wrapper crate (rust_lib_whitenoise) lives at crates/whitenoise-frb/ on the
+# The wrapper crate (whitenoise_frb) lives at crates/whitenoise-frb/ on the
 # frb-gen branch of marmot-protocol/whitenoise-rs. The pubspec git dep only
 # ships the Dart bindings + cargokit shell, not the Rust source — so we clone
 # it here to produce the per-ABI .so files for jniLibs.
@@ -185,7 +185,7 @@ build_for_target() {
     OPENSSL_STATIC=1 \
     OPENSSL_NO_VENDOR=1 \
     cargo build --target "$target" --release --quiet
-  cp "$WHITENOISE_RS_CACHE/target/$target/release/librust_lib_whitenoise.so" \
+  cp "$WHITENOISE_RS_CACHE/target/$target/release/libwhitenoise_frb.so" \
     "$PROJECT_ROOT/android/app/src/main/jniLibs/$jni_dir/"
   print_success "Built for $label"
 }

@@ -1,6 +1,6 @@
 import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform;
 import 'package:logging/logging.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart' as accounts_api;
+import 'package:whitenoise_frb/src/rust/api/accounts.dart' as accounts_api;
 import 'package:whitenoise/services/android_signer_service.dart';
 
 final _logger = Logger('ExternalSignerCallbackRegistry');

@@ -3,9 +3,9 @@ import 'dart:io' show File, IOOverrides;
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/metadata.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/users.dart';
-import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise_frb/src/rust/api/metadata.dart';
+import 'package:whitenoise_frb/src/rust/api/users.dart';
+import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 import 'package:whitenoise/hooks/use_edit_profile.dart'
     show EditProfileLoadingState, EditProfileState, useEditProfile;
 import 'package:whitenoise/providers/account_pubkey_provider.dart';

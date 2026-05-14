@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 import 'package:whitenoise/hooks/use_network_relays.dart' show RelayCategory;
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';

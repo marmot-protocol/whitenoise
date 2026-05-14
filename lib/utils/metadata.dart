@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:rust_lib_whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise_frb/src/rust/api/metadata.dart';
 
 String? presentName(FlutterMetadata? metadata) {
   if (metadata == null) return null;

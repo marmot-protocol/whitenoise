@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/groups.dart' as groups_api;
-import 'package:rust_lib_whitenoise/src/rust/api/users.dart'
+import 'package:whitenoise_frb/src/rust/api/groups.dart' as groups_api;
+import 'package:whitenoise_frb/src/rust/api/users.dart'
     show KeyPackageStatus, User, userHasKeyPackage;
-import 'package:rust_lib_whitenoise/src/rust/api/utils.dart' as rust_utils;
+import 'package:whitenoise_frb/src/rust/api/utils.dart' as rust_utils;
 
 final _logger = Logger('useCreateGroup');
 

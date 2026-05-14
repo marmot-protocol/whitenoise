@@ -12,8 +12,8 @@ import 'package:hooks_riverpod/hooks_riverpod.dart'
     show ConsumerStatefulWidget, ConsumerState, ProviderContainer, UncontrolledProviderScope;
 import 'package:logging/logging.dart';
 import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDirectory;
-import 'package:rust_lib_whitenoise/src/rust/api.dart' as rust_api;
-import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise_frb/src/rust/api.dart' as rust_api;
+import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/app_log_provider.dart' show appLogStore;
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;

@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:package_info_plus/package_info_plus.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/zapstore.dart';
+import 'package:whitenoise_frb/src/rust/api/zapstore.dart';
 
 ({String? availableVersion, bool isDismissed, void Function() dismiss}) useZapstoreUpdate() {
   final isDismissed = useState(false);

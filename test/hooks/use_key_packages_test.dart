@@ -3,8 +3,8 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart';
-import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise_frb/src/rust/api/accounts.dart';
+import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 import 'package:whitenoise/constants/nostr_event_kinds.dart';
 import 'package:whitenoise/hooks/use_key_packages.dart';
 

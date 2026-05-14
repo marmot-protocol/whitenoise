@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/messages.dart';
+import 'package:whitenoise_frb/src/rust/api/messages.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/theme.dart';

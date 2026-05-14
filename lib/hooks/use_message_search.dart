@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/messages.dart';
+import 'package:whitenoise_frb/src/rust/api/messages.dart';
 import 'package:whitenoise/utils/search_context.dart';
 import 'package:whitenoise/utils/stable_set_key.dart';
 

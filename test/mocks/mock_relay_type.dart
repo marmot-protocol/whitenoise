@@ -1,4 +1,4 @@
-import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart';
+import 'package:whitenoise_frb/src/rust/api/accounts.dart';
 
 class MockRelayType implements RelayType {
   final String type;

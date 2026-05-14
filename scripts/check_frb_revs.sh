@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Verifies that the orphan-branch ref pinned in pubspec.lock for
-# rust_lib_whitenoise was regenerated from the same whitenoise-rs source SHA
+# whitenoise_frb was regenerated from the same whitenoise-rs source SHA
 # we're about to compile (read from .whitenoise-rs-rev). When they disagree,
 # the Dart bindings and the compiled .so embed different FRB content hashes
 # and the app fails at startup with:
@@ -44,9 +44,9 @@ if [ -z "$REV" ]; then
   exit 0
 fi
 
-# Extract resolved-ref + url from the rust_lib_whitenoise block in pubspec.lock.
+# Extract resolved-ref + url from the whitenoise_frb block in pubspec.lock.
 # The lock format is:
-#   rust_lib_whitenoise:
+#   whitenoise_frb:
 #     dependency: "direct main"
 #     description:
 #       path: "."
@@ -54,17 +54,17 @@ fi
 #       resolved-ref: "<sha>"
 #       url: "<url>"
 #     source: git
-LOCK_BLOCK="$(awk '/^  rust_lib_whitenoise:/{flag=1; next} flag && /^  [a-zA-Z_]/{flag=0} flag' "$LOCK_FILE")"
+LOCK_BLOCK="$(awk '/^  whitenoise_frb:/{flag=1; next} flag && /^  [a-zA-Z_]/{flag=0} flag' "$LOCK_FILE")"
 ORPHAN_REF="$(echo "$LOCK_BLOCK" | sed -n 's/.*resolved-ref: *"\([^"]*\)".*/\1/p' | head -1)"
 ORPHAN_URL="$(echo "$LOCK_BLOCK" | sed -n 's|.*url: *"\([^"]*\)".*|\1|p' | head -1)"
 
 if [ -z "$ORPHAN_REF" ] || [ -z "$ORPHAN_URL" ]; then
-  print_warning "FRB rev check: couldn't parse rust_lib_whitenoise from pubspec.lock — skipping."
+  print_warning "FRB rev check: couldn't parse whitenoise_frb from pubspec.lock — skipping."
   exit 0
 fi
 
 if ! [[ "$ORPHAN_URL" =~ ^https?://github\.com/ ]]; then
-  print_warning "FRB rev check: rust_lib_whitenoise url ($ORPHAN_URL) is not on github.com — skipping."
+  print_warning "FRB rev check: whitenoise_frb url ($ORPHAN_URL) is not on github.com — skipping."
   exit 0
 fi
 
@@ -93,7 +93,7 @@ fi
 
 if [ "$SOURCE_SHA" != "$REV" ]; then
   print_error "FRB rev mismatch:"
-  print_error "  pubspec.lock rust_lib_whitenoise ref:  $ORPHAN_REF"
+  print_error "  pubspec.lock whitenoise_frb ref:  $ORPHAN_REF"
   print_error "  that ref's REGENERATED.txt source SHA: $SOURCE_SHA"
   print_error "  .whitenoise-rs-rev (this build):       $REV"
   print_error ""

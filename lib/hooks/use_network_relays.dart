@@ -1,7 +1,7 @@
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
-import 'package:rust_lib_whitenoise/src/rust/api/accounts.dart' as accounts_api;
-import 'package:rust_lib_whitenoise/src/rust/api/relays.dart' as relays_api;
+import 'package:whitenoise_frb/src/rust/api/accounts.dart' as accounts_api;
+import 'package:whitenoise_frb/src/rust/api/relays.dart' as relays_api;
 
 final _logger = Logger('useNetworkRelays');
 

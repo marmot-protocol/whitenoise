@@ -3,7 +3,7 @@ import 'package:flutter/material.dart'
 import 'package:flutter_riverpod/flutter_riverpod.dart' show WidgetRef;
 import 'package:go_router/go_router.dart'
     show CustomTransitionPage, GoRoute, GoRouter, GoRouterState;
-import 'package:rust_lib_whitenoise/src/rust/api/users.dart' show User;
+import 'package:whitenoise_frb/src/rust/api/users.dart' show User;
 import 'package:whitenoise/hooks/use_network_relays.dart' show RelayCategory;
 import 'package:whitenoise/hooks/use_route_refresh.dart' show routeObserver;
 import 'package:whitenoise/observers/active_chat_route_observer.dart' show ActiveChatRouteObserver;

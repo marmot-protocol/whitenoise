@@ -64,10 +64,10 @@ trap restore EXIT
 
 # Parse the orphan repo URL from the current pubspec.lock — same logic
 # check_frb_revs.sh uses, so we agree on the repo slug.
-LOCK_BLOCK="$(awk '/^  rust_lib_whitenoise:/{flag=1; next} flag && /^  [a-zA-Z_]/{flag=0} flag' "$LOCK")"
+LOCK_BLOCK="$(awk '/^  whitenoise_frb:/{flag=1; next} flag && /^  [a-zA-Z_]/{flag=0} flag' "$LOCK")"
 ORPHAN_URL="$(echo "$LOCK_BLOCK" | sed -n 's|.*url: *"\([^"]*\)".*|\1|p' | head -1)"
 if ! [[ "$ORPHAN_URL" =~ ^https?://github\.com/ ]]; then
-  print_fail "pubspec.lock rust_lib_whitenoise url is not on github.com: $ORPHAN_URL"
+  print_fail "pubspec.lock whitenoise_frb url is not on github.com: $ORPHAN_URL"
   exit 1
 fi
 REPO_SLUG="${ORPHAN_URL#http://}"
@@ -126,13 +126,13 @@ if [ -z "$WRONG_SHA" ] || [ "$WRONG_SHA" = "$SOURCE_SHA" ]; then
 fi
 print_ok "  Wrong SHA for hard-fail test: $WRONG_SHA"
 
-# Repoint pubspec.lock at the CI commit. The rust_lib_whitenoise block has a
+# Repoint pubspec.lock at the CI commit. The whitenoise_frb block has a
 # 'ref:' line (symbolic or sha) and a 'resolved-ref:' line (always a real sha).
 # Rewrite both so check_frb_revs.sh — which reads resolved-ref — sees the CI ref.
 print_step "Rewriting pubspec.lock to point at CI commit (temporary)"
 awk -v ci="$CI_SHA" '
-  /^  rust_lib_whitenoise:/ { in_block = 1 }
-  in_block && /^  [a-zA-Z_][a-zA-Z_]*:/ && !/^  rust_lib_whitenoise:/ { in_block = 0 }
+  /^  whitenoise_frb:/ { in_block = 1 }
+  in_block && /^  [a-zA-Z_][a-zA-Z_]*:/ && !/^  whitenoise_frb:/ { in_block = 0 }
   in_block && /resolved-ref:/ { sub(/"[^"]*"/, "\"" ci "\"") }
   in_block && /^      ref:/   { sub(/"[^"]*"/, "\"" ci "\"") }
   { print }

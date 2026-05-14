@@ -2,8 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
-import 'package:rust_lib_whitenoise/src/rust/api.dart' as rust_api;
-import 'package:rust_lib_whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise_frb/src/rust/api.dart' as rust_api;
+import 'package:whitenoise_frb/src/rust/frb_generated.dart';
 import 'package:whitenoise/l10n/generated/app_localizations_en.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
 
