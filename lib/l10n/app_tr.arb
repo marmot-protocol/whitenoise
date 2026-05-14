@@ -194,6 +194,8 @@
   "messageActions": "Mesaj işlemleri",
   "reply": "Yanıtla",
   "copyMessage": "Kopyala",
+  "copyCode": "Kodu kopyala",
+  "copied": "Kopyalandı",
   "delete": "Sil",
   "failedToDeleteMessage": "Mesaj silinemedi. Lütfen tekrar deneyin.",
   "failedToSendReaction": "Tepki gönderilemedi. Lütfen tekrar deneyin.",

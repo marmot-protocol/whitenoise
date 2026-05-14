@@ -678,6 +678,12 @@ class AppLocalizationsEs extends AppLocalizations {
   String get copyMessage => 'Copiar';
 
   @override
+  String get copyCode => 'Copiar código';
+
+  @override
+  String get copied => 'Copiado';
+
+  @override
   String get delete => 'Eliminar';
 
   @override

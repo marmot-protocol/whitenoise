@@ -136,12 +136,14 @@ void main() {
     WidgetTester tester, {
     required String accountPubkey,
     required String groupId,
+    bool enabled = true,
   }) async {
     getState = await mountHook(
       tester,
       () => useGroupMembers(
         accountPubkey: accountPubkey,
         groupId: groupId,
+        enabled: enabled,
       ),
     );
   }
@@ -198,6 +200,25 @@ void main() {
 
         expect(getState().members, isEmpty);
         expect(getState().admins, isEmpty);
+      });
+
+      testWidgets('does not fetch members or admins when disabled', (tester) async {
+        _api.membersList = [testPubkeyB];
+        _api.adminsList = [testPubkeyA];
+
+        await pump(
+          tester,
+          accountPubkey: testPubkeyA,
+          groupId: testGroupId,
+          enabled: false,
+        );
+        await tester.pumpAndSettle();
+
+        expect(getState().isLoading, isFalse);
+        expect(getState().members, isEmpty);
+        expect(getState().admins, isEmpty);
+        expect(_api.membersCalls, isEmpty);
+        expect(_api.adminsCalls, isEmpty);
       });
     });
 

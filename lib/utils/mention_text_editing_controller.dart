@@ -31,26 +31,29 @@ class MentionTextEditingController extends TextEditingController {
     final displayText = _displayTextFor(displayName, uri);
     final replacement = '$displayText ';
     final updatedText = text.replaceRange(start, end, replacement);
+    final updatedMentions =
+        _mentions
+            .where((mention) => !_rangesOverlap(mention.start, mention.end, start, end))
+            .toList()
+          ..add(
+            _TrackedMention(
+              start: start,
+              end: start + displayText.length,
+              displayText: displayText,
+              uri: uri,
+            ),
+          )
+          ..sort((a, b) => a.start.compareTo(b.start));
 
+    _mentions
+      ..clear()
+      ..addAll(updatedMentions);
     _isApplyingInternalChange = true;
     value = TextEditingValue(
       text: updatedText,
       selection: TextSelection.collapsed(offset: start + replacement.length),
     );
     _isApplyingInternalChange = false;
-
-    _mentions
-      ..removeWhere((mention) => _rangesOverlap(mention.start, mention.end, start, end))
-      ..add(
-        _TrackedMention(
-          start: start,
-          end: start + displayText.length,
-          displayText: displayText,
-          uri: uri,
-        ),
-      )
-      ..sort((a, b) => a.start.compareTo(b.start));
-    notifyListeners();
   }
 
   void setMentionTargets(List<MentionTextTarget> targets) {
@@ -164,17 +167,15 @@ class MentionTextEditingController extends TextEditingController {
     }
     buffer.write(text.substring(cursor));
 
+    _mentions
+      ..clear()
+      ..addAll(restoredMentions);
     _isApplyingInternalChange = true;
     value = TextEditingValue(
       text: buffer.toString(),
       selection: TextSelection.collapsed(offset: selectionOffset.clamp(0, buffer.length)),
     );
     _isApplyingInternalChange = false;
-
-    _mentions
-      ..clear()
-      ..addAll(restoredMentions);
-    notifyListeners();
   }
 }
 
@@ -252,7 +253,7 @@ List<_TrackedMention> _shiftMentions(
     final insertedInsideMentionBoundary =
         mention.end == prefix &&
         newChangeEnd > prefix &&
-        (prefix >= newText.length || !_isMentionBoundary(newText.codeUnitAt(prefix)));
+        (prefix >= newText.length || !isMentionBoundary(newText.codeUnitAt(prefix)));
     if (insertedInsideMentionBoundary) continue;
 
     final nextMention = mention.end <= prefix
@@ -283,7 +284,7 @@ bool _isValidMention(String text, _TrackedMention mention) {
 
 bool _rangesOverlap(int startA, int endA, int startB, int endB) => startA < endB && startB < endA;
 
-bool _isMentionBoundary(int codeUnit) =>
+bool isMentionBoundary(int codeUnit) =>
     codeUnit == 0x20 || codeUnit == 0x09 || codeUnit == 0x0A || codeUnit == 0x0D;
 
 int _commonPrefixLength(String a, String b) {

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show HighlightSpan, SerializableToken;
 import 'package:whitenoise/widgets/wn_icon.dart';
 
@@ -279,7 +280,7 @@ class _MessageCodeBlock extends HookWidget {
                     alignment: Alignment.centerRight,
                     child: Semantics(
                       button: true,
-                      label: 'Copy code',
+                      label: context.l10n.copyCode,
                       child: GestureDetector(
                         key: const Key('message_code_block_copy_button'),
                         behavior: HitTestBehavior.opaque,
@@ -324,7 +325,7 @@ class _MessageCodeBlock extends HookWidget {
                   ),
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                    child: Text('Copied', style: copiedStyle),
+                    child: Text(context.l10n.copied, style: copiedStyle),
                   ),
                 ),
               ),
@@ -949,13 +950,11 @@ InlineSpan _spanForSegmentText({
 String? _nostrDisplayText(_ContentSegment segment, Map<String, String> displayNamesByUri) {
   if (!segment.isNostr || segment.target == null || displayNamesByUri.isEmpty) return null;
 
-  final target = segment.target!;
-  return displayNamesByUri[target] ??
-      displayNamesByUri[segment.text] ??
-      (target.startsWith('nostr:')
-          ? displayNamesByUri[target.substring('nostr:'.length)]
-          : displayNamesByUri['nostr:$target']);
+  return displayNamesByUri[_nostrUri(segment.target!)] ??
+      displayNamesByUri[_nostrUri(segment.text)];
 }
+
+String _nostrUri(String value) => value.startsWith('nostr:') ? value : 'nostr:$value';
 
 bool _segmentOverlapsHighlight(_ContentSegment segment, List<_HighlightRange> ranges) {
   for (final range in ranges) {

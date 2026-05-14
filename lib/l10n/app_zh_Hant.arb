@@ -194,6 +194,8 @@
   "messageActions": "訊息操作",
   "reply": "回覆",
   "copyMessage": "複製",
+  "copyCode": "複製程式碼",
+  "copied": "已複製",
   "delete": "刪除",
   "failedToDeleteMessage": "刪除訊息失敗。請再試一次。",
   "failedToSendReaction": "傳送表情回應失敗。請再試一次。",

@@ -143,16 +143,13 @@ _MentionQuery? _activeMentionQuery(TextEditingValue value) {
   if (!selection.isCollapsed || caret < 0 || caret > value.text.length) return null;
 
   var start = caret;
-  while (start > 0 && !_isMentionBoundary(value.text.codeUnitAt(start - 1))) {
+  while (start > 0 && !isMentionBoundary(value.text.codeUnitAt(start - 1))) {
     start--;
   }
 
   if (start >= caret || value.text[start] != '@') return null;
   return _MentionQuery(start: start, end: caret, query: value.text.substring(start + 1, caret));
 }
-
-bool _isMentionBoundary(int codeUnit) =>
-    codeUnit == 0x20 || codeUnit == 0x09 || codeUnit == 0x0A || codeUnit == 0x0D;
 
 List<_MentionMember> _filterMentionMembers(List<_MentionMember> members, String query) {
   final normalizedQuery = query.toLowerCase();
@@ -165,6 +162,11 @@ List<_MentionMember> _filterMentionMembers(List<_MentionMember> members, String 
       })
       .take(_mentionSuggestionLimit)
       .toList();
+}
+
+String _mentionMemberPubkeyKey(List<String> pubkeys) {
+  if (pubkeys.isEmpty) return '';
+  return (pubkeys.toSet().toList()..sort()).join('\u001f');
 }
 
 class ChatScreen extends HookConsumerWidget {
@@ -204,19 +206,27 @@ class ChatScreen extends HookConsumerWidget {
     final chatSummary = useChatSummary(context, pubkey, groupId);
     final header = chatSummaryDisplay(chatSummary.data, groupId);
     final isGroupChat = chatSummary.data?.groupType == GroupType.group;
-    final groupMembers = useGroupMembers(accountPubkey: pubkey, groupId: groupId);
+    final groupMembers = useGroupMembers(
+      accountPubkey: pubkey,
+      groupId: groupId,
+      enabled: isGroupChat,
+    );
+    final mentionMemberPubkeys = isGroupChat ? groupMembers.members : const <String>[];
+    final mentionMemberPubkeyKey = _mentionMemberPubkeyKey(mentionMemberPubkeys);
     final mentionMembersFuture = useMemoized(
       () => _loadMentionMembers(
-        pubkeys: groupMembers.members,
+        pubkeys: mentionMemberPubkeys,
         currentUserPubkey: pubkey,
       ),
-      [groupMembers.members, pubkey],
+      [mentionMemberPubkeyKey, pubkey],
     );
     final mentionMembersSnapshot = useFuture(
       mentionMembersFuture,
       initialData: const <_MentionMember>[],
     );
-    final mentionMembers = mentionMembersSnapshot.data ?? const <_MentionMember>[];
+    final mentionMembers = isGroupChat
+        ? mentionMembersSnapshot.data ?? const <_MentionMember>[]
+        : const <_MentionMember>[];
     final mentionDisplayNamesByUri = useMemoized(
       () => {
         for (final member in mentionMembers) 'nostr:${member.npub}': '@${member.displayName}',

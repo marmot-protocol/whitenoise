@@ -194,6 +194,8 @@
   "messageActions": "Nachrichtenaktionen",
   "reply": "Antworten",
   "copyMessage": "Kopieren",
+  "copyCode": "Code kopieren",
+  "copied": "Kopiert",
   "delete": "Löschen",
   "failedToDeleteMessage": "Nachricht konnte nicht gelöscht werden. Bitte erneut versuchen.",
   "failedToSendReaction": "Reaktion konnte nicht gesendet werden. Bitte erneut versuchen.",

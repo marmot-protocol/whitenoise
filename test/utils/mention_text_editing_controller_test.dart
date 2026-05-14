@@ -72,5 +72,35 @@ void main() {
       expect(controller.text, 'Hi @Bob');
       expect(controller.messageText, 'Hi nostr:$testNpubB');
     });
+
+    test('notifies once when inserting a mention', () {
+      final controller = MentionTextEditingController();
+      addTearDown(controller.dispose);
+      var notifications = 0;
+      controller.addListener(() => notifications++);
+
+      controller.insertMention(
+        start: 0,
+        end: 0,
+        displayName: 'Bob',
+        uri: 'nostr:$testNpubB',
+      );
+
+      expect(notifications, 1);
+    });
+
+    test('notifies once when restoring known stored Nostr URIs', () {
+      final controller = MentionTextEditingController(text: 'Hi nostr:$testNpubB');
+      addTearDown(controller.dispose);
+      var notifications = 0;
+      controller.addListener(() => notifications++);
+
+      controller.setMentionTargets([
+        const MentionTextTarget(uri: 'nostr:$testNpubB', displayText: '@Bob'),
+      ]);
+
+      expect(notifications, 1);
+      expect(controller.text, 'Hi @Bob');
+    });
   });
 }

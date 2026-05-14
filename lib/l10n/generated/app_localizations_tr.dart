@@ -672,6 +672,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get copyMessage => 'Kopyala';
 
   @override
+  String get copyCode => 'Kodu kopyala';
+
+  @override
+  String get copied => 'Kopyalandı';
+
+  @override
   String get delete => 'Sil';
 
   @override

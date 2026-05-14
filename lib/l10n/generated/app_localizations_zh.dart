@@ -647,6 +647,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get copyMessage => '复制';
 
   @override
+  String get copyCode => '复制代码';
+
+  @override
+  String get copied => '已复制';
+
+  @override
   String get delete => '删除';
 
   @override
@@ -2059,6 +2065,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get copyMessage => '複製';
+
+  @override
+  String get copyCode => '複製程式碼';
+
+  @override
+  String get copied => '已複製';
 
   @override
   String get delete => '刪除';

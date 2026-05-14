@@ -65,6 +65,8 @@ typedef _TileDisplay = ({
 }
 
 Future<Map<String, String>> _loadPreviewNostrDisplayNames(String text) async {
+  if (!_hasPreviewNostrUri(text)) return const <String, String>{};
+
   final uris = _nostrNpubUriPattern.allMatches(text).map((match) => match.group(0)!).toSet();
   if (uris.isEmpty) return const <String, String>{};
 
@@ -89,6 +91,8 @@ Future<Map<String, String>> _loadPreviewNostrDisplayNames(String text) async {
   );
   return displayNames;
 }
+
+bool _hasPreviewNostrUri(String text) => text.contains('nostr:npub1');
 
 String _replacePreviewNostrMentions(String text, Map<String, String> displayNamesByUri) {
   if (displayNamesByUri.isEmpty) return text;
@@ -320,9 +324,12 @@ class ChatListTile extends HookConsumerWidget {
       formattedTime: formattedTime,
       searchSnippet: searchSnippet,
     );
+    final shouldLoadPreviewNostrDisplayNames = _hasPreviewNostrUri(display.subtitle);
     final previewNostrDisplayNamesFuture = useMemoized(
-      () => _loadPreviewNostrDisplayNames(display.subtitle),
-      [display.subtitle],
+      () => shouldLoadPreviewNostrDisplayNames
+          ? _loadPreviewNostrDisplayNames(display.subtitle)
+          : Future.value(const <String, String>{}),
+      [shouldLoadPreviewNostrDisplayNames ? display.subtitle : ''],
     );
     final previewNostrDisplayNamesSnapshot = useFuture(
       previewNostrDisplayNamesFuture,

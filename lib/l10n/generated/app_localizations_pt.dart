@@ -675,6 +675,12 @@ class AppLocalizationsPt extends AppLocalizations {
   String get copyMessage => 'Copiar';
 
   @override
+  String get copyCode => 'Copiar código';
+
+  @override
+  String get copied => 'Copiado';
+
+  @override
   String get delete => 'Excluir';
 
   @override

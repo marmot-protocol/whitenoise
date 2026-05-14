@@ -845,6 +845,14 @@
   "@copyMessage": {
     "description": "Copy message button text"
   },
+  "copyCode": "Copy code",
+  "@copyCode": {
+    "description": "Accessibility label for copying a code block"
+  },
+  "copied": "Copied",
+  "@copied": {
+    "description": "Short success label shown after copying content"
+  },
   "delete": "Delete",
   "@delete": {
     "description": "Delete button text"

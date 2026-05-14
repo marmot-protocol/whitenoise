@@ -21,6 +21,7 @@ GroupMembersState useGroupMembers({
   required String accountPubkey,
   required String groupId,
   Object? refreshKey,
+  bool enabled = true,
 }) {
   final members = useState<List<String>>([]);
   final admins = useState<List<String>>([]);
@@ -30,6 +31,16 @@ GroupMembersState useGroupMembers({
   final groupRef = useRef<groups_api.Group?>(null);
 
   useEffect(() {
+    if (!enabled) {
+      members.value = const [];
+      admins.value = const [];
+      isLoading.value = false;
+      isActionLoading.value = false;
+      error.value = null;
+      groupRef.value = null;
+      return null;
+    }
+
     Future<void> fetchMembersAndAdmins() async {
       isLoading.value = true;
       try {
@@ -51,7 +62,7 @@ GroupMembersState useGroupMembers({
 
     fetchMembersAndAdmins();
     return null;
-  }, [accountPubkey, groupId, refreshKey]);
+  }, [accountPubkey, groupId, refreshKey, enabled]);
 
   void clearError() {
     error.value = null;

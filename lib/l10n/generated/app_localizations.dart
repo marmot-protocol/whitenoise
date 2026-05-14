@@ -1275,6 +1275,18 @@ abstract class AppLocalizations {
   /// **'Copy'**
   String get copyMessage;
 
+  /// Accessibility label for copying a code block
+  ///
+  /// In en, this message translates to:
+  /// **'Copy code'**
+  String get copyCode;
+
+  /// Short success label shown after copying content
+  ///
+  /// In en, this message translates to:
+  /// **'Copied'**
+  String get copied;
+
   /// Delete button text
   ///
   /// In en, this message translates to:

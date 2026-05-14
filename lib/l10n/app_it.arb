@@ -194,6 +194,8 @@
   "messageActions": "Azioni messaggio",
   "reply": "Rispondi",
   "copyMessage": "Copia",
+  "copyCode": "Copia codice",
+  "copied": "Copiato",
   "delete": "Elimina",
   "failedToDeleteMessage": "Eliminazione del messaggio fallita. Riprova.",
   "failedToSendReaction": "Invio della reazione fallito. Riprova.",

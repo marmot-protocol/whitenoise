@@ -690,6 +690,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get copyMessage => 'Копировать';
 
   @override
+  String get copyCode => 'Скопировать код';
+
+  @override
+  String get copied => 'Скопировано';
+
+  @override
   String get delete => 'Удалить';
 
   @override

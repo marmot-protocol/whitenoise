@@ -670,6 +670,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get copyMessage => 'Copy';
 
   @override
+  String get copyCode => 'Copy code';
+
+  @override
+  String get copied => 'Copied';
+
+  @override
   String get delete => 'Delete';
 
   @override

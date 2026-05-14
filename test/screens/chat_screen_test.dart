@@ -111,6 +111,8 @@ class _MockApi extends MockWnApi {
   bool isDm = false;
   Completer<ChatSummary>? chatSummaryCompleter;
   List<String> groupMembers = [];
+  int groupMembersCallCount = 0;
+  int groupAdminsCallCount = 0;
   Completer<MediaFile>? uploadCompleter;
   Map<String, FlutterMetadata>? metadataByPubkey;
   Completer<List<ChatMessage>>? fetchOlderCompleter;
@@ -146,6 +148,8 @@ class _MockApi extends MockWnApi {
     isDm = false;
     chatSummaryCompleter = null;
     groupMembers = [];
+    groupMembersCallCount = 0;
+    groupAdminsCallCount = 0;
     uploadCompleter = null;
     metadataByPubkey = null;
     fetchOlderCompleter = null;
@@ -379,6 +383,7 @@ class _MockApi extends MockWnApi {
     required String pubkey,
     required String groupId,
   }) {
+    groupMembersCallCount++;
     return Future.value(groupMembers);
   }
 
@@ -387,6 +392,7 @@ class _MockApi extends MockWnApi {
     required String pubkey,
     required String groupId,
   }) {
+    groupAdminsCallCount++;
     return Future.value([]);
   }
 
@@ -902,6 +908,24 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(_api.sentMessages, ['nostr:$testNpubB']);
+      });
+
+      testWidgets('typing @ in a DM does not show mention suggestions', (tester) async {
+        _api.isDm = true;
+        _api.groupMembers = [_testPubkey, testPubkeyB];
+        _api.metadataByPubkey = {
+          testPubkeyB: const FlutterMetadata(displayName: 'Bob', custom: {}),
+        };
+
+        await pumpChatScreen(tester);
+
+        await tester.enterText(find.byType(TextField), '@');
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsNothing);
+        expect(find.byKey(const Key('mention_suggestion_$testPubkeyB')), findsNothing);
+        expect(_api.groupMembersCallCount, 0);
+        expect(_api.groupAdminsCallCount, 0);
       });
 
       testWidgets('input is cleared after sending', (tester) async {
