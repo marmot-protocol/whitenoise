@@ -97,6 +97,32 @@ void main() {
       expect(controller.messageText, 'Hi nostr:$testNpubB');
     });
 
+    test('moves selection after restored known Nostr URIs', () {
+      final controller = MentionTextEditingController(text: 'Hi nostr:$testNpubB there');
+      addTearDown(controller.dispose);
+      controller.selection = TextSelection.collapsed(offset: controller.text.length);
+
+      controller.setMentionTargets([
+        const MentionTextTarget(uri: 'nostr:$testNpubB', displayText: '@Bob'),
+      ]);
+
+      expect(controller.text, 'Hi @Bob there');
+      expect(controller.selection.baseOffset, controller.text.length);
+    });
+
+    test('moves selection inside a restored Nostr URI to the end of the mention', () {
+      final controller = MentionTextEditingController(text: 'Hi nostr:$testNpubB');
+      addTearDown(controller.dispose);
+      controller.selection = const TextSelection.collapsed(offset: 8);
+
+      controller.setMentionTargets([
+        const MentionTextTarget(uri: 'nostr:$testNpubB', displayText: '@Bob'),
+      ]);
+
+      expect(controller.text, 'Hi @Bob');
+      expect(controller.selection.baseOffset, 'Hi @Bob'.length);
+    });
+
     test('notifies once when inserting a mention', () {
       final controller = MentionTextEditingController();
       addTearDown(controller.dispose);

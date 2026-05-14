@@ -910,6 +910,34 @@ void main() {
         expect(_api.sentMessages, ['nostr:$testNpubB']);
       });
 
+      testWidgets('typing @ filters mention suggestions by name, npub, and pubkey', (
+        tester,
+      ) async {
+        _api.groupMembers = [_testPubkey, testPubkeyB, testPubkeyC];
+        _api.metadataByPubkey = {
+          testPubkeyB: const FlutterMetadata(displayName: 'Bob', custom: {}),
+          testPubkeyC: const FlutterMetadata(displayName: 'Carol', custom: {}),
+        };
+        await pumpChatScreen(tester);
+
+        final input = find.byType(TextField);
+
+        await tester.enterText(input, '@bo');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('mention_suggestion_$testPubkeyB')), findsOneWidget);
+        expect(find.byKey(const Key('mention_suggestion_$testPubkeyC')), findsNothing);
+
+        await tester.enterText(input, '@${testNpubC.substring(0, 10)}');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('mention_suggestion_$testPubkeyB')), findsNothing);
+        expect(find.byKey(const Key('mention_suggestion_$testPubkeyC')), findsOneWidget);
+
+        await tester.enterText(input, '@${testPubkeyB.substring(31, 39)}');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('mention_suggestion_$testPubkeyB')), findsOneWidget);
+        expect(find.byKey(const Key('mention_suggestion_$testPubkeyC')), findsNothing);
+      });
+
       testWidgets('typing @ in a DM does not show mention suggestions', (tester) async {
         _api.isDm = true;
         _api.groupMembers = [_testPubkey, testPubkeyB];
@@ -2609,6 +2637,21 @@ void main() {
         expect(button.text, 'Unarchive');
       });
 
+      testWidgets('archive button updates back to Archive after unarchiving', (tester) async {
+        await pumpChatScreen(tester);
+
+        await tester.tap(find.byKey(const Key('blocked_notice_archive_button')));
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('blocked_notice_archive_button')));
+        await tester.pumpAndSettle();
+
+        final button = tester.widget<WnButton>(
+          find.byKey(const Key('blocked_notice_archive_button')),
+        );
+        expect(button.text, 'Archive');
+        expect(_api.unarchiveChatCallCount, 1);
+      });
+
       testWidgets('shows error notice when archive action fails from blocked notice', (
         tester,
       ) async {
@@ -2619,6 +2662,20 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Failed to archive chat. Please try again.'), findsOneWidget);
+      });
+
+      testWidgets('shows error notice when unarchive action fails from blocked notice', (
+        tester,
+      ) async {
+        await pumpChatScreen(tester);
+
+        await tester.tap(find.byKey(const Key('blocked_notice_archive_button')));
+        await tester.pumpAndSettle();
+        _api.shouldFailUnarchiveChat = true;
+        await tester.tap(find.byKey(const Key('blocked_notice_archive_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Failed to unarchive chat. Please try again.'), findsOneWidget);
       });
 
       testWidgets('unblocking reloads blocked pubkeys', (tester) async {
