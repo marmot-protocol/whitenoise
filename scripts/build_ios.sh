@@ -94,12 +94,6 @@ print_success "whitenoise-rs checked out at $WHITENOISE_RS_REV"
 
 WHITENOISE_FRB_DIR="$WHITENOISE_RS_CACHE/crates/whitenoise-frb"
 
-# Add iOS targets
-print_step "Adding iOS targets to Rust"
-rustup target add aarch64-apple-ios     # Physical devices (arm64)
-rustup target add aarch64-apple-ios-sim # Simulator on Apple Silicon
-print_success "iOS targets added to Rust"
-
 IOS_DEPLOYMENT_TARGET="${IOS_DEPLOYMENT_TARGET:-13.0}"
 export IPHONEOS_DEPLOYMENT_TARGET="$IOS_DEPLOYMENT_TARGET"
 print_step "Using iOS deployment target $IPHONEOS_DEPLOYMENT_TARGET"
@@ -107,6 +101,12 @@ print_step "Using iOS deployment target $IPHONEOS_DEPLOYMENT_TARGET"
 # Build for each iOS architecture
 print_step "Building for iOS architectures"
 cd "$WHITENOISE_FRB_DIR"
+
+
+print_step "Adding iOS targets to Rust"
+rustup target add aarch64-apple-ios 
+rustup target add aarch64-apple-ios-sim 
+print_success "iOS targets added to Rust"
 
 print_step "Building for aarch64-apple-ios (physical devices)"
 cargo build --target aarch64-apple-ios --release --quiet
