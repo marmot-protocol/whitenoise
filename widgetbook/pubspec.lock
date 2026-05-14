@@ -1073,7 +1073,7 @@ packages:
     dependency: transitive
     description:
       path: "."
-      ref: "91c492b0fad5c04499ea54d5bfd92090635bc047"
+      ref: flutter-package
       resolved-ref: "91c492b0fad5c04499ea54d5bfd92090635bc047"
       url: "https://github.com/marmot-protocol/whitenoise-rs"
     source: git
