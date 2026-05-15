@@ -297,6 +297,7 @@ class ChatScreen extends HookConsumerWidget {
         getChatMessageQuote: getChatMessageQuote,
         senderPictureUrl: senderPictureUrl,
         isGroupChat: isGroupChat,
+        mentionDisplayName: (hexPubkey) => presentName(getAuthorMetadata(hexPubkey)),
       );
       if (context.mounted) FocusManager.instance.primaryFocus?.unfocus();
     }
