@@ -24,6 +24,8 @@ class _MockApi extends MockWnApi {
   Completer<Group>? createGroupCompleter;
   final createGroupCalls =
       <({String creatorPubkey, List<String> memberPubkeys, GroupType groupType})>[];
+  Exception? getGroupError;
+  final getGroupCalls = <({String accountPubkey, String groupId})>[];
 
   @override
   Future<String?> crateApiAccountGroupsGetDmGroupWithPeer({
@@ -65,6 +67,24 @@ class _MockApi extends MockWnApi {
   }
 
   @override
+  Future<Group> crateApiGroupsGetGroup({
+    required String accountPubkey,
+    required String groupId,
+  }) async {
+    getGroupCalls.add((accountPubkey: accountPubkey, groupId: groupId));
+    if (getGroupError != null) throw getGroupError!;
+    return Group(
+      mlsGroupId: groupId,
+      nostrGroupId: testNostrGroupId,
+      name: '',
+      description: '',
+      adminPubkeys: const [],
+      epoch: BigInt.zero,
+      state: GroupState.active,
+    );
+  }
+
+  @override
   void reset() {
     super.reset();
     dmGroupWithPeerResult = null;
@@ -75,6 +95,8 @@ class _MockApi extends MockWnApi {
     createGroupError = null;
     createGroupCompleter = null;
     createGroupCalls.clear();
+    getGroupError = null;
+    getGroupCalls.clear();
   }
 }
 
@@ -109,6 +131,30 @@ void main() {
       expect(groupId, _existingGroupId);
       expect(_api.createGroupCalls, isEmpty);
       expect(_api.dmGroupWithPeerCallCount, 1);
+      expect(_api.getGroupCalls.length, 1);
+      expect(_api.getGroupCalls[0].accountPubkey, _accountPubkey);
+      expect(_api.getGroupCalls[0].groupId, _existingGroupId);
+    });
+
+    testWidgets('creates new DM when existing DM group is stale', (tester) async {
+      _api.dmGroupWithPeerResult = _existingGroupId;
+      _api.getGroupError = Exception('Group not found');
+
+      final getResult = await mountHook(
+        tester,
+        () => useStartDm(accountPubkey: _accountPubkey, peerPubkey: _peerPubkey),
+      );
+
+      final state = getResult();
+      final groupId = await state.startDm();
+
+      expect(groupId, _newGroupId);
+      expect(_api.getGroupCalls.length, 1);
+      expect(_api.getGroupCalls[0].groupId, _existingGroupId);
+      expect(_api.createGroupCalls.length, 1);
+      expect(_api.createGroupCalls[0].creatorPubkey, _accountPubkey);
+      expect(_api.createGroupCalls[0].memberPubkeys, [_peerPubkey]);
+      expect(_api.createGroupCalls[0].groupType, GroupType.directMessage);
     });
 
     testWidgets('creates new DM when no existing DM found', (tester) async {

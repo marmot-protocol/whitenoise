@@ -27,12 +27,22 @@ StartDmState useStartDm({
       );
 
       if (existingGroupId != null) {
-        logDuration(
-          _logger,
-          'getDmGroupWithPeer found existing DM',
-          totalStopWatch.elapsedMilliseconds,
-        );
-        return existingGroupId;
+        try {
+          await groups_api.getGroup(
+            accountPubkey: accountPubkey,
+            groupId: existingGroupId,
+          );
+          logDuration(
+            _logger,
+            'getDmGroupWithPeer found existing DM',
+            totalStopWatch.elapsedMilliseconds,
+          );
+          return existingGroupId;
+        } catch (e) {
+          _logger.warning(
+            'Ignoring stale DM group $existingGroupId for peer $peerPubkey: $e',
+          );
+        }
       } else {
         logDuration(
           _logger,
