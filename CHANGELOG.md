@@ -29,7 +29,7 @@ and this project adheres to Calendar Versioning (CalVer).
 ### Removed
 
 ### Fixed
-- Fix deleting all app data reusing a closed Whitenoise database instance.
+- Fix deleting all app data reusing a closed Whitenoise database instance [PR #662](https://github.com/marmot-protocol/whitenoise/pull/662)
 
 ### Security
 

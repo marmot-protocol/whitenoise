@@ -223,6 +223,10 @@ pub async fn initialize_whitenoise(config: WhitenoiseConfig) -> Result<(), ApiEr
 /// returning. The lifecycle write lock waits for in-flight bridge calls before
 /// the old database pool is closed, then blocks new bridge calls until the fresh
 /// instance is ready.
+///
+/// If fresh initialization fails after the data deletion succeeds, the global
+/// instance remains unset. Call `initialize_whitenoise` to recover before
+/// issuing more bridge calls.
 #[frb]
 pub async fn delete_all_data() -> Result<(), ApiError> {
     let _init_guard = GLOBAL_WN_INIT_LOCK.lock().await;
