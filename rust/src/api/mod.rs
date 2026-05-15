@@ -324,17 +324,25 @@ mod tests {
         // This guards the current stream pattern: `let mut rx = ...`,
         // `release_lifecycle()`, then `rx.recv().await`. Update it if stream
         // receiver naming or loop structure changes.
-        let stream_files = [
-            "chat_list.rs",
-            "group_state.rs",
-            "messages.rs",
-            "notifications.rs",
-            "user_search.rs",
-            "users.rs",
-        ];
+        let api_files = std::fs::read_dir(&api_dir)
+            .unwrap_or_else(|e| panic!("failed to read api directory {api_dir:?}: {e}"));
 
-        for file_name in stream_files {
-            let source = std::fs::read_to_string(api_dir.join(file_name))
+        for entry in api_files {
+            let path = entry
+                .unwrap_or_else(|e| panic!("failed to read api directory entry: {e}"))
+                .path();
+            let file_name = path
+                .file_name()
+                .and_then(|name| name.to_str())
+                .unwrap_or("<unknown>");
+            if !path.is_file()
+                || file_name == "mod.rs"
+                || path.extension().and_then(|ext| ext.to_str()) != Some("rs")
+            {
+                continue;
+            }
+
+            let source = std::fs::read_to_string(&path)
                 .unwrap_or_else(|e| panic!("failed to read {file_name}: {e}"));
             for (offset, segment) in source.split("rx.recv().await").enumerate().skip(1) {
                 let before = source

@@ -170,9 +170,12 @@ void main() {
       );
 
       final resultFuture = deleteAllData();
+      var completed = false;
+      unawaited(resultFuture.then((_) => completed = true));
+
       await tester.pump(const Duration(seconds: 2));
 
-      expect(resultFuture, doesNotComplete);
+      expect(completed, isFalse);
       mockApi.deleteAllDataCompleter!.complete();
 
       final result = await resultFuture;
