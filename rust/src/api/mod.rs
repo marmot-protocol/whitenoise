@@ -228,17 +228,22 @@ pub async fn delete_all_data() -> Result<(), ApiError> {
     let _init_guard = GLOBAL_WN_INIT_LOCK.lock().await;
     let _lifecycle_guard = WN_LIFECYCLE_LOCK.write().await;
     let whitenoise = GLOBAL_WN
-        .write()
+        .read()
         .map_err(|_| ApiError::Whitenoise {
             message: "Whitenoise global state lock poisoned".to_string(),
         })?
-        .take()
+        .as_ref()
+        .map(Arc::clone)
         .ok_or_else(|| ApiError::Whitenoise {
             message: "Whitenoise not initialized".to_string(),
         })?;
     let core_config = whitenoise.config().clone();
 
     whitenoise.delete_all_data().await.map_err(ApiError::from)?;
+
+    *GLOBAL_WN.write().map_err(|_| ApiError::Whitenoise {
+        message: "Whitenoise global state lock poisoned".to_string(),
+    })? = None;
     drop(whitenoise);
 
     let whitenoise = Whitenoise::new(core_config).await.map_err(ApiError::from)?;
