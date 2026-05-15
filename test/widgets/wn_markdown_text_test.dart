@@ -157,7 +157,7 @@ void main() {
   });
 
   group('WnMarkdownText — inlines', () {
-    testWidgets('soft break renders as space', (tester) async {
+    testWidgets('soft break renders as newline (chat UX, not CommonMark default)', (tester) async {
       await _pump(
         tester,
         WnMarkdownText(
@@ -169,7 +169,7 @@ void main() {
       );
       final spans = tester.widget<Text>(find.byType(Text).first).textSpan!;
       final flattened = spans.toPlainText();
-      expect(flattened, 'a b');
+      expect(flattened, 'a\nb');
     });
 
     testWidgets('hard break renders as newline', (tester) async {

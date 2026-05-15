@@ -359,7 +359,6 @@ class _MarkdownRenderer {
       case MarkdownInline_Text(:final content):
         return _highlightedTextSpan(content, style);
       case MarkdownInline_SoftBreak():
-        return TextSpan(text: ' ', style: style);
       case MarkdownInline_HardBreak():
         return TextSpan(text: '\n', style: style);
       case MarkdownInline_Code(:final content):
