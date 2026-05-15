@@ -12,6 +12,7 @@ import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/utils/deep_links.dart';
+import 'package:whitenoise/widgets/wn_icon.dart';
 
 import '../mocks/mock_clipboard.dart' show clearClipboardMock, mockClipboard;
 import '../mocks/mock_wn_api.dart';
@@ -122,11 +123,18 @@ void main() {
   Future<void> pumpDebugScreen(
     WidgetTester tester, {
     List overrides = const [],
+    Future<String> Function()? deepLinkScheme,
   }) async {
     await mountWidget(
       const ChatRawDebugScreen(groupId: _testGroupId),
       tester,
-      overrides: [accountPubkeyProvider.overrideWith(_MockAccountPubkeyNotifier.new), ...overrides],
+      overrides: [
+        accountPubkeyProvider.overrideWith(_MockAccountPubkeyNotifier.new),
+        deepLinkSchemeProvider.overrideWith(
+          (ref) => deepLinkScheme?.call() ?? Future.value(DeepLinks.productionScheme),
+        ),
+        ...overrides,
+      ],
     );
     await tester.pumpAndSettle();
   }
@@ -142,6 +150,28 @@ void main() {
 
       expect(find.byKey(const Key('debug_group_id')), findsOneWidget);
       expect(find.text(_testGroupId), findsOneWidget);
+    });
+
+    testWidgets('copy deep link button uses localized label and app icon', (tester) async {
+      await pumpDebugScreen(tester);
+
+      final button = find.byKey(const Key('debug_chat_deep_link_copy_button'));
+      final icon = find.descendant(of: button, matching: find.byType(WnIcon));
+      expect(find.text('Copy deep link'), findsOneWidget);
+      expect(tester.widget<WnIcon>(icon).icon, WnIcons.copy);
+    });
+
+    testWidgets('hides copy deep link button until deep link scheme is available', (
+      tester,
+    ) async {
+      final schemeCompleter = Completer<String>();
+
+      await pumpDebugScreen(
+        tester,
+        deepLinkScheme: () => schemeCompleter.future,
+      );
+
+      expect(find.byKey(const Key('debug_chat_deep_link_copy_button')), findsNothing);
     });
 
     testWidgets('copy deep link button copies chat deep link', (tester) async {
@@ -165,9 +195,7 @@ void main() {
 
       await pumpDebugScreen(
         tester,
-        overrides: [
-          deepLinkSchemeProvider.overrideWith((ref) async => DeepLinks.stagingScheme),
-        ],
+        deepLinkScheme: () async => DeepLinks.stagingScheme,
       );
 
       await tester.tap(find.byKey(const Key('debug_chat_deep_link_copy_button')));

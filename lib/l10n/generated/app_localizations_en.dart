@@ -1265,6 +1265,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get rawDebugViewCopied => 'Copied to clipboard';
 
   @override
+  String get rawDebugViewCopyDeepLink => 'Copy deep link';
+
+  @override
   String get appLogsTitle => 'App Logs';
 
   @override

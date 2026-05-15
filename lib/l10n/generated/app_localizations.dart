@@ -2307,6 +2307,12 @@ abstract class AppLocalizations {
   /// **'Copied to clipboard'**
   String get rawDebugViewCopied;
 
+  /// Button label for copying a debug chat deep link
+  ///
+  /// In en, this message translates to:
+  /// **'Copy deep link'**
+  String get rawDebugViewCopyDeepLink;
+
   /// Screen title for the in-app log viewer
   ///
   /// In en, this message translates to:

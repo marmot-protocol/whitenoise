@@ -218,6 +218,30 @@ void main() {
           final screen = tester.widget<ChatScreen>(find.byType(ChatScreen));
           expect(screen.groupId, testGroupId);
         });
+
+        for (final (:label, :redirect) in [
+          (label: 'blank', redirect: ''),
+          (label: 'absolute URI', redirect: 'https://example.com/chats/$testGroupId'),
+          (label: 'authority URI', redirect: '//example.com/chats/$testGroupId'),
+          (label: 'relative path', redirect: 'chats/$testGroupId'),
+          (label: 'public route', redirect: '/login'),
+        ]) {
+          testWidgets('falls back to chat list for $label redirect on success', (tester) async {
+            await pumpLoginScreen(tester);
+            GoRouter.of(
+              tester.element(find.byType(LoginScreen)),
+            ).go('/login?redirect=${Uri.encodeComponent(redirect)}');
+            await tester.pumpAndSettle();
+
+            await tester.enterText(find.byType(TextField), 'nsec1test');
+            await tester.pump();
+            await tester.tap(find.byKey(const Key('login_button')));
+            await tester.pumpAndSettle();
+
+            expect(find.byType(ChatListScreen), findsOneWidget);
+            expect(find.byType(ChatScreen), findsNothing);
+          });
+        }
       });
 
       group('when login needs relay lists', () {

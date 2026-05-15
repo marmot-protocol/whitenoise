@@ -1266,6 +1266,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get rawDebugViewCopied => 'Panoya kopyalandı';
 
   @override
+  String get rawDebugViewCopyDeepLink => 'Derin bağlantıyı kopyala';
+
+  @override
   String get appLogsTitle => 'Uygulama Günlükleri';
 
   @override

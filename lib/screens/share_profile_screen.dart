@@ -31,10 +31,10 @@ class ShareProfileScreen extends HookConsumerWidget {
     final pubkey = ref.watch(accountPubkeyProvider);
     final metadataSnapshot = useUserMetadata(context, pubkey);
     final npub = npubFromHex(pubkey);
-    final deepLinkScheme = ref.watch(deepLinkSchemeProvider).value ?? DeepLinks.productionScheme;
-    final profileLink = npub == null
-        ? null
-        : (npub: npub, uri: DeepLinks.userUri(npub, scheme: deepLinkScheme));
+    final deepLinkSchemeState = ref.watch(deepLinkSchemeProvider);
+    final profileDeepLink = npub != null && deepLinkSchemeState.hasValue
+        ? DeepLinks.userUri(npub, scheme: deepLinkSchemeState.value!)
+        : null;
     final (:noticeMessage, :noticeType, :showSuccessNotice, :showErrorNotice, :dismissNotice) =
         useSystemNotice();
 
@@ -77,12 +77,12 @@ class ShareProfileScreen extends HookConsumerWidget {
                       ),
                     ),
                   Gap(16.h),
-                  if (profileLink != null) ...[
+                  if (npub != null) ...[
                     Padding(
                       padding: EdgeInsets.symmetric(horizontal: 16.w),
                       child: WnCopyCard(
-                        textToDisplay: formatPublicKey(profileLink.npub),
-                        textToCopy: profileLink.npub,
+                        textToDisplay: formatPublicKey(npub),
+                        textToCopy: npub,
                         onCopySuccess: () => showSuccessNotice(context.l10n.publicKeyCopied),
                         onCopyError: () => showErrorNotice(
                           context.l10n.publicKeyCopyError,
@@ -90,31 +90,33 @@ class ShareProfileScreen extends HookConsumerWidget {
                         snapToWords: true,
                       ),
                     ),
-                    Gap(36.h),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12.r),
-                      child: SizedBox.square(
-                        dimension: 256.w,
-                        child: FittedBox(
-                          fit: BoxFit.fill,
-                          child: QrImageView(
-                            key: ValueKey<String>(profileLink.uri),
-                            data: profileLink.uri,
-                            size: 98,
-                            padding: EdgeInsets.zero,
-                            backgroundColor: colors.backgroundSecondary,
-                            eyeStyle: QrEyeStyle(
-                              eyeShape: QrEyeShape.square,
-                              color: colors.backgroundContentPrimary,
-                            ),
-                            dataModuleStyle: QrDataModuleStyle(
-                              dataModuleShape: QrDataModuleShape.square,
-                              color: colors.backgroundContentPrimary,
+                    if (profileDeepLink != null) ...[
+                      Gap(36.h),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12.r),
+                        child: SizedBox.square(
+                          dimension: 256.w,
+                          child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: QrImageView(
+                              key: ValueKey<String>(profileDeepLink),
+                              data: profileDeepLink,
+                              size: 98,
+                              padding: EdgeInsets.zero,
+                              backgroundColor: colors.backgroundSecondary,
+                              eyeStyle: QrEyeStyle(
+                                eyeShape: QrEyeShape.square,
+                                color: colors.backgroundContentPrimary,
+                              ),
+                              dataModuleStyle: QrDataModuleStyle(
+                                dataModuleShape: QrDataModuleShape.square,
+                                color: colors.backgroundContentPrimary,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ] else
                     Gap(32.h),
                   Gap(12.h),

@@ -1606,6 +1606,10 @@
   "@rawDebugViewCopied": {
     "description": "Feedback text after copying debug data"
   },
+  "rawDebugViewCopyDeepLink": "Copy deep link",
+  "@rawDebugViewCopyDeepLink": {
+    "description": "Button label for copying a debug chat deep link"
+  },
   "appLogsTitle": "App Logs",
   "@appLogsTitle": {
     "description": "Screen title for the in-app log viewer"
