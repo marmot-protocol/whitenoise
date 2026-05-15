@@ -20,6 +20,7 @@ import 'package:whitenoise/src/rust/api/chat_list.dart';
 import 'package:whitenoise/src/rust/api/chat_summary.dart';
 import 'package:whitenoise/src/rust/api/drafts.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
@@ -88,7 +89,7 @@ ChatMessage _message(
   isReply: isReply,
   replyToId: replyToId,
   isDeleted: isDeleted,
-  contentTokens: const [],
+  contentTokens: const MarkdownDocument(blocks: []),
   reactions: reactions,
   mediaAttachments: const [],
   kind: 9,
@@ -336,7 +337,7 @@ class _MockApi extends MockWnApi {
       kind: kind,
       createdAt: DateTime.now(),
       content: message,
-      tokens: const [],
+      tokens: const MarkdownDocument(blocks: []),
     );
   }
 

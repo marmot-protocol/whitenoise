@@ -8,6 +8,7 @@ import 'package:gap/gap.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
@@ -50,7 +51,7 @@ ChatMessage _createTestMessage({
     isReply: isReply,
     replyToId: replyToId,
     isDeleted: false,
-    contentTokens: const [],
+    contentTokens: const MarkdownDocument(blocks: []),
     reactions: reactions ?? const ReactionSummary(byEmoji: [], userReactions: []),
     mediaAttachments: mediaAttachments,
     kind: 9,

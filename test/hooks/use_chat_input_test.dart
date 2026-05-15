@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_input.dart';
 import 'package:whitenoise/src/rust/api/drafts.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
@@ -26,7 +27,7 @@ ChatMessage _createTestMessage({
     tags: const [],
     isReply: replyToId != null,
     isDeleted: false,
-    contentTokens: const [],
+    contentTokens: const MarkdownDocument(blocks: []),
     reactions: const ReactionSummary(byEmoji: [], userReactions: []),
     mediaAttachments: const [],
     kind: 9,

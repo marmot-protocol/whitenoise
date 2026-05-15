@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/services/message_service.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -58,7 +59,7 @@ class _MockApi extends MockWnApi {
       kind: kind,
       createdAt: DateTime.now(),
       content: message,
-      tokens: const [],
+      tokens: const MarkdownDocument(blocks: []),
     );
   }
 
@@ -434,7 +435,7 @@ void main() {
       tags: const [],
       isReply: false,
       isDeleted: false,
-      contentTokens: const [],
+      contentTokens: const MarkdownDocument(blocks: []),
       reactions: reactions ?? const ReactionSummary(byEmoji: [], userReactions: []),
       mediaAttachments: const [],
       kind: 9,
