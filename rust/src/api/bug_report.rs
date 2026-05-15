@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use crate::api::{DEFAULT_RELAY_URLS, error::ApiError};
+use crate::api::{BUG_REPORT_RELAY_URLS, error::ApiError};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
 use serde_json::{Value, json};
@@ -89,7 +89,7 @@ pub async fn send_bug_report(
         })?;
 
     let client = Client::new(ephemeral_keys);
-    for url in DEFAULT_RELAY_URLS {
+    for url in BUG_REPORT_RELAY_URLS {
         if let Err(e) = client.add_relay(url).await {
             warn!(%url, error = %e, "Failed to add relay for bug report");
         }
@@ -124,7 +124,7 @@ pub async fn send_bug_report(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::api::DEFAULT_RELAY_URLS;
+    use crate::api::{BUG_REPORT_RELAY_URLS, PRODUCTION_RELAY_URLS};
 
     #[test]
     fn test_recipient_pubkey_parses_and_event_builds() {
@@ -189,11 +189,7 @@ mod tests {
     }
 
     #[test]
-    fn test_bug_report_relays_match_defaults() {
-        let expected = DEFAULT_RELAY_URLS
-            .iter()
-            .map(|url| (*url).to_string())
-            .collect::<Vec<_>>();
-        assert_eq!(expected, crate::api::default_relay_urls());
+    fn test_bug_report_relays_are_production_relays() {
+        assert_eq!(BUG_REPORT_RELAY_URLS, PRODUCTION_RELAY_URLS);
     }
 }

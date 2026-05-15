@@ -25,7 +25,11 @@ class SwitchProfileScreen extends HookConsumerWidget {
     final typography = context.typographyScaled;
     final currentPubkey = ref.watch(authProvider).value;
     final isOffline = ref.watch(offlineProvider).value ?? false;
-    final (:accounts, :state, :switchTo) = useAccounts(context, ref, currentPubkey);
+    final (:accounts, :state, :switchTo) = useAccounts(
+      context,
+      ref,
+      currentPubkey,
+    );
 
     if (accounts.connectionState == ConnectionState.waiting) {
       return Scaffold(
@@ -104,6 +108,9 @@ class SwitchProfileScreen extends HookConsumerWidget {
                             final isCurrentAccount = account.pubkey == currentPubkey;
 
                             return _AccountTile(
+                              key: Key(
+                                'profile_switcher_item_${account.pubkey}',
+                              ),
                               pubkey: account.pubkey,
                               isCurrent: isCurrentAccount,
                               isSwitching: state.isSwitching,
@@ -133,6 +140,7 @@ class SwitchProfileScreen extends HookConsumerWidget {
 
 class _AccountTile extends HookConsumerWidget {
   const _AccountTile({
+    super.key,
     required this.pubkey,
     required this.isCurrent,
     required this.isSwitching,

@@ -1,5 +1,6 @@
 use crate::api::{
-    DEFAULT_RELAY_URLS, error::ApiError, metadata::FlutterMetadata, relays::Relay, users::User,
+    default_relay_urls_parsed, error::ApiError, metadata::FlutterMetadata, relays::Relay,
+    users::User,
 };
 use crate::api::{wn, wn_session};
 use chrono::{DateTime, TimeZone, Utc};
@@ -264,8 +265,7 @@ pub async fn restore_default_relays(pubkey: String) -> Result<(), ApiError> {
                 .remove_relay(relay, relay_type.clone(), whitenoise)
                 .await?;
         }
-        for url in DEFAULT_RELAY_URLS {
-            let relay_url = RelayUrl::parse(url)?;
+        for relay_url in default_relay_urls_parsed()? {
             let relay = whitenoise.find_or_create_relay_by_url(&relay_url).await?;
             account
                 .add_relay(&relay, relay_type.clone(), whitenoise)

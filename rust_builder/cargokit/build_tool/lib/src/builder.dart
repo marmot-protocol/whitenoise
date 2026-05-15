@@ -158,7 +158,7 @@ class RustBuilder {
         '--target-dir',
         environment.targetTempDir,
       ],
-      environment: await _buildEnvironment(),
+      environment: Rustup.environmentWithRustupFirst(await _buildEnvironment()),
     );
     return path.join(
       environment.targetTempDir,
