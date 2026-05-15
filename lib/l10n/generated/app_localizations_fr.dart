@@ -1281,6 +1281,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rawDebugViewCopied => 'Copié dans le presse-papiers';
 
   @override
+  String get rawDebugViewCopyDeepLink => 'Copier le lien profond';
+
+  @override
   String get appLogsTitle => 'Journaux de l\'application';
 
   @override

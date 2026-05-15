@@ -141,10 +141,12 @@ android {
         create("staging") {
             dimension = "environment"
             applicationIdSuffix = ".staging"
+            manifestPlaceholders["deepLinkScheme"] = "whitenoise-staging"
             resValue("string", "app_name", "WN Staging")
         }
         create("production") {
             dimension = "environment"
+            manifestPlaceholders["deepLinkScheme"] = "whitenoise"
             resValue("string", "app_name", "White Noise")
         }
     }

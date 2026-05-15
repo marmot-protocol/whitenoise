@@ -1228,6 +1228,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rawDebugViewCopied => '已复制到剪贴板';
 
   @override
+  String get rawDebugViewCopyDeepLink => '复制深层链接';
+
+  @override
   String get appLogsTitle => '应用日志';
 
   @override
@@ -2639,6 +2642,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get rawDebugViewCopied => '已複製到剪貼簿';
+
+  @override
+  String get rawDebugViewCopyDeepLink => '複製深層連結';
 
   @override
   String get appLogsTitle => '應用程式記錄';

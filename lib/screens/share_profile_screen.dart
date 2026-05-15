@@ -7,8 +7,10 @@ import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
+import 'package:whitenoise/providers/deep_link_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/deep_links.dart';
 import 'package:whitenoise/utils/formatting.dart';
 import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
@@ -29,6 +31,10 @@ class ShareProfileScreen extends HookConsumerWidget {
     final pubkey = ref.watch(accountPubkeyProvider);
     final metadataSnapshot = useUserMetadata(context, pubkey);
     final npub = npubFromHex(pubkey);
+    final deepLinkSchemeState = ref.watch(deepLinkSchemeProvider);
+    final profileDeepLink = npub != null && deepLinkSchemeState.hasValue
+        ? DeepLinks.userUri(npub, scheme: deepLinkSchemeState.value!)
+        : null;
     final (:noticeMessage, :noticeType, :showSuccessNotice, :showErrorNotice, :dismissNotice) =
         useSystemNotice();
 
@@ -84,30 +90,33 @@ class ShareProfileScreen extends HookConsumerWidget {
                         snapToWords: true,
                       ),
                     ),
-                    Gap(36.h),
-                    ClipRRect(
-                      borderRadius: BorderRadius.circular(12.r),
-                      child: SizedBox.square(
-                        dimension: 256.w,
-                        child: FittedBox(
-                          fit: BoxFit.fill,
-                          child: QrImageView(
-                            data: npub,
-                            size: 98,
-                            padding: EdgeInsets.zero,
-                            backgroundColor: colors.backgroundSecondary,
-                            eyeStyle: QrEyeStyle(
-                              eyeShape: QrEyeShape.square,
-                              color: colors.backgroundContentPrimary,
-                            ),
-                            dataModuleStyle: QrDataModuleStyle(
-                              dataModuleShape: QrDataModuleShape.square,
-                              color: colors.backgroundContentPrimary,
+                    if (profileDeepLink != null) ...[
+                      Gap(36.h),
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(12.r),
+                        child: SizedBox.square(
+                          dimension: 256.w,
+                          child: FittedBox(
+                            fit: BoxFit.fill,
+                            child: QrImageView(
+                              key: ValueKey<String>(profileDeepLink),
+                              data: profileDeepLink,
+                              size: 98.w,
+                              padding: EdgeInsets.zero,
+                              backgroundColor: colors.backgroundSecondary,
+                              eyeStyle: QrEyeStyle(
+                                eyeShape: QrEyeShape.square,
+                                color: colors.backgroundContentPrimary,
+                              ),
+                              dataModuleStyle: QrDataModuleStyle(
+                                dataModuleShape: QrDataModuleShape.square,
+                                color: colors.backgroundContentPrimary,
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
+                    ],
                   ] else
                     Gap(32.h),
                   Gap(12.h),

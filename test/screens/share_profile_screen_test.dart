@@ -1,12 +1,16 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:qr_flutter/qr_flutter.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/deep_link_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/utils/deep_links.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_copy_card.dart';
 
@@ -52,12 +56,20 @@ void main() {
     _mockApi.reset();
   });
 
-  Future<void> pumpShareProfileScreen(WidgetTester tester) async {
+  Future<void> pumpShareProfileScreen(
+    WidgetTester tester, {
+    List overrides = const [],
+    Future<String> Function()? deepLinkScheme,
+  }) async {
     await mountTestApp(
       tester,
       overrides: [
         authProvider.overrideWith(() => _MockAuthNotifier()),
         secureStorageProvider.overrideWithValue(MockSecureStorage()),
+        deepLinkSchemeProvider.overrideWith(
+          (ref) => deepLinkScheme?.call() ?? Future.value(DeepLinks.productionScheme),
+        ),
+        ...overrides,
       ],
     );
     await tester.pumpAndSettle();
@@ -86,6 +98,32 @@ void main() {
       await pumpShareProfileScreen(tester);
       await tester.pumpAndSettle();
       expect(find.byType(QrImageView), findsOneWidget);
+    });
+
+    testWidgets('QR code encodes user deep link', (tester) async {
+      await pumpShareProfileScreen(tester);
+
+      expect(find.byKey(ValueKey(DeepLinks.userUri(testNpubA))), findsOneWidget);
+    });
+
+    testWidgets('defers QR code until deep link scheme is available', (tester) async {
+      final schemeCompleter = Completer<String>();
+
+      await pumpShareProfileScreen(
+        tester,
+        deepLinkScheme: () => schemeCompleter.future,
+      );
+
+      expect(find.byType(WnCopyCard), findsOneWidget);
+      expect(find.byType(QrImageView), findsNothing);
+
+      schemeCompleter.complete(DeepLinks.stagingScheme);
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(ValueKey(DeepLinks.userUri(testNpubA, scheme: DeepLinks.stagingScheme))),
+        findsOneWidget,
+      );
     });
 
     testWidgets('tapping back button returns to previous screen', (tester) async {

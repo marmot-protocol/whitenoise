@@ -1283,6 +1283,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get rawDebugViewCopied => 'Copiado al portapapeles';
 
   @override
+  String get rawDebugViewCopyDeepLink => 'Copiar enlace profundo';
+
+  @override
   String get appLogsTitle => 'Registros de la aplicación';
 
   @override

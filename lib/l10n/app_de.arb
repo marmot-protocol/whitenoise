@@ -362,6 +362,7 @@
   "rawDebugViewGroupId": "Gruppen-ID",
   "rawDebugViewMessageCount": "{count, plural, =1{1 Nachricht} other{{count} Nachrichten}}",
   "rawDebugViewCopied": "In die Zwischenablage kopiert",
+  "rawDebugViewCopyDeepLink": "Deep-Link kopieren",
   "appLogsTitle": "App-Logs",
   "appLogsViewLogs": "Logs anzeigen",
   "appLogsViewLogsDescription": "Alle Logger-Ausgaben in der App anzeigen",

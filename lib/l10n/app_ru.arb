@@ -362,6 +362,7 @@
   "rawDebugViewGroupId": "ID группы",
   "rawDebugViewMessageCount": "{count, plural, =1{1 сообщение} few{{count} сообщения} many{{count} сообщений} other{{count} сообщений}}",
   "rawDebugViewCopied": "Скопировано в буфер обмена",
+  "rawDebugViewCopyDeepLink": "Скопировать диплинк",
   "appLogsTitle": "Журналы приложения",
   "appLogsViewLogs": "Просмотреть логи",
   "appLogsViewLogsDescription": "Просмотреть все записи Logger в приложении",

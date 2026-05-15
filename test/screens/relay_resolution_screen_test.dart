@@ -144,6 +144,7 @@ void main() {
     WidgetTester tester, {
     bool isExternalSigner = false,
     bool useRouter = false,
+    String initialLocation = '/relay-resolution',
     MediaQueryData? mediaQueryData,
   }) async {
     mockAuth = _MockAuthNotifier();
@@ -151,7 +152,7 @@ void main() {
 
     if (useRouter) {
       final router = GoRouter(
-        initialLocation: '/relay-resolution',
+        initialLocation: initialLocation,
         routes: [
           GoRoute(
             path: '/',
@@ -170,6 +171,12 @@ void main() {
             path: '/chats',
             builder: (context, state) => const Scaffold(
               body: Text('Chat List'),
+            ),
+          ),
+          GoRoute(
+            path: '/chats/:groupId',
+            builder: (context, state) => Scaffold(
+              body: Text('Chat ${state.pathParameters['groupId']}'),
             ),
           ),
         ],
@@ -482,6 +489,20 @@ void main() {
         expect(find.text('Chat List'), findsOneWidget);
       });
 
+      testWidgets('navigates to preserved redirect when use default relays succeeds', (
+        tester,
+      ) async {
+        await pumpRelayResolutionScreen(
+          tester,
+          useRouter: true,
+          initialLocation:
+              '/relay-resolution?redirect=${Uri.encodeComponent('/chats/$testGroupId')}',
+        );
+        await tester.tap(find.byKey(const Key('use_default_relays_button')));
+        await tester.pumpAndSettle();
+        expect(find.text('Chat $testGroupId'), findsOneWidget);
+      });
+
       testWidgets('navigates to chat list when try custom relay succeeds', (tester) async {
         await pumpRelayResolutionScreen(tester, useRouter: true);
         await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
@@ -489,6 +510,22 @@ void main() {
         await tester.tap(find.byKey(const Key('try_custom_relay_button')));
         await tester.pumpAndSettle();
         expect(find.text('Chat List'), findsOneWidget);
+      });
+
+      testWidgets('navigates to preserved redirect when try custom relay succeeds', (
+        tester,
+      ) async {
+        await pumpRelayResolutionScreen(
+          tester,
+          useRouter: true,
+          initialLocation:
+              '/relay-resolution?redirect=${Uri.encodeComponent('/chats/$testGroupId')}',
+        );
+        await tester.enterText(find.byType(TextField), 'wss://relay.example.com');
+        await tester.pump(const Duration(milliseconds: 600));
+        await tester.tap(find.byKey(const Key('try_custom_relay_button')));
+        await tester.pumpAndSettle();
+        expect(find.text('Chat $testGroupId'), findsOneWidget);
       });
     });
 

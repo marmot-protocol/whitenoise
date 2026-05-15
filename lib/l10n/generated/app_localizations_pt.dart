@@ -1279,6 +1279,9 @@ class AppLocalizationsPt extends AppLocalizations {
   String get rawDebugViewCopied => 'Copiado para a área de transferência';
 
   @override
+  String get rawDebugViewCopyDeepLink => 'Copiar link profundo';
+
+  @override
   String get appLogsTitle => 'Registros do App';
 
   @override

@@ -362,6 +362,7 @@
   "rawDebugViewGroupId": "ID du Groupe",
   "rawDebugViewMessageCount": "{count, plural, =1{1 message} other{{count} messages}}",
   "rawDebugViewCopied": "Copié dans le presse-papiers",
+  "rawDebugViewCopyDeepLink": "Copier le lien profond",
   "appLogsTitle": "Journaux de l'application",
   "appLogsViewLogs": "Voir les journaux",
   "appLogsViewLogsDescription": "Afficher toutes les sorties du journal de l'application",

@@ -366,6 +366,7 @@
   "rawDebugViewGroupId": "群组 ID",
   "rawDebugViewMessageCount": "{count, plural, =0{无消息} =1{1 条消息} other{{count} 条消息}}",
   "rawDebugViewCopied": "已复制到剪贴板",
+  "rawDebugViewCopyDeepLink": "复制深层链接",
   "appLogsTitle": "应用日志",
   "appLogsViewLogs": "查看日志",
   "appLogsViewLogsDescription": "在应用内查看所有日志输出",

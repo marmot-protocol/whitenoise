@@ -362,6 +362,7 @@
   "rawDebugViewGroupId": "Grup Kimliği",
   "rawDebugViewMessageCount": "{count, plural, =1{1 mesaj} other{{count} mesaj}}",
   "rawDebugViewCopied": "Panoya kopyalandı",
+  "rawDebugViewCopyDeepLink": "Derin bağlantıyı kopyala",
   "appLogsTitle": "Uygulama Günlükleri",
   "appLogsViewLogs": "Günlüklere bak",
   "appLogsViewLogsDescription": "Uygulamadaki tüm Logger çıktısını görüntüle",

@@ -74,7 +74,7 @@ void _handleLoginResult(
   if (!context.mounted) return;
 
   if (result.status == LoginStatus.complete) {
-    Routes.goToChatList(context);
+    Routes.goToPostAuthDestination(context);
   } else if (result.status == LoginStatus.needsRelayLists) {
     Routes.pushToRelayResolution(
       context,

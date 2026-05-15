@@ -1302,6 +1302,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get rawDebugViewCopied => 'In die Zwischenablage kopiert';
 
   @override
+  String get rawDebugViewCopyDeepLink => 'Deep-Link kopieren';
+
+  @override
   String get appLogsTitle => 'App-Logs';
 
   @override

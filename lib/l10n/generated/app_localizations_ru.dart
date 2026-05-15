@@ -1299,6 +1299,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get rawDebugViewCopied => 'Скопировано в буфер обмена';
 
   @override
+  String get rawDebugViewCopyDeepLink => 'Скопировать диплинк';
+
+  @override
   String get appLogsTitle => 'Журналы приложения';
 
   @override
