@@ -155,7 +155,7 @@ void main() {
       expect(result, false);
     });
 
-    testWidgets('deleteAllData returns false on timeout', (tester) async {
+    testWidgets('deleteAllData waits for long-running API calls', (tester) async {
       late Future<bool> Function() deleteAllData;
 
       mockApi.deleteAllDataCompleter = Completer<void>();
@@ -163,7 +163,7 @@ void main() {
       await mountHook(
         tester,
         () {
-          final hook = useDeleteAllData(timeout: const Duration(seconds: 1));
+          final hook = useDeleteAllData();
           deleteAllData = hook.deleteAllData;
           return null;
         },
@@ -172,14 +172,17 @@ void main() {
       final resultFuture = deleteAllData();
       await tester.pump(const Duration(seconds: 2));
 
+      expect(resultFuture, doesNotComplete);
+      mockApi.deleteAllDataCompleter!.complete();
+
       final result = await resultFuture;
       await tester.pumpAndSettle();
 
-      expect(result, false);
+      expect(result, true);
       expect(mockApi.deleteAllDataCalled, true);
     });
 
-    testWidgets('deleteAllData sets isDeleting to false after timeout', (tester) async {
+    testWidgets('deleteAllData keeps isDeleting true while API call is pending', (tester) async {
       late Future<bool> Function() deleteAllData;
 
       mockApi.deleteAllDataCompleter = Completer<void>();
@@ -187,7 +190,7 @@ void main() {
       final getState = await mountHook(
         tester,
         () {
-          final hook = useDeleteAllData(timeout: const Duration(seconds: 1));
+          final hook = useDeleteAllData();
           deleteAllData = hook.deleteAllData;
           return hook.state;
         },
@@ -195,6 +198,9 @@ void main() {
 
       final resultFuture = deleteAllData();
       await tester.pump(const Duration(seconds: 2));
+
+      expect(getState().isDeleting, true);
+      mockApi.deleteAllDataCompleter!.complete();
 
       await resultFuture;
       await tester.pumpAndSettle();

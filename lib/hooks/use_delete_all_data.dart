@@ -1,12 +1,8 @@
-import 'dart:async';
-
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/src/rust/api.dart' as api;
 
 final _logger = Logger('useDeleteAllData');
-
-const defaultTimeout = Duration(seconds: 30);
 
 class DeleteAllDataState {
   final bool isDeleting;
@@ -28,9 +24,7 @@ class DeleteAllDataState {
   DeleteAllDataState state,
   Future<bool> Function() deleteAllData,
 })
-useDeleteAllData({
-  Duration timeout = defaultTimeout,
-}) {
+useDeleteAllData() {
   final state = useState(const DeleteAllDataState());
   final isMountedRef = useRef(true);
 
@@ -44,18 +38,12 @@ useDeleteAllData({
     state.value = state.value.copyWith(isDeleting: true);
     try {
       _logger.info('Deleting all application data');
-      await api.deleteAllData().timeout(timeout);
+      await api.deleteAllData();
       _logger.info('All data deleted successfully');
       if (isMountedRef.value) {
         state.value = state.value.copyWith(isDeleting: false);
       }
       return true;
-    } on TimeoutException catch (e, stackTrace) {
-      _logger.severe('Delete all data timed out', e, stackTrace);
-      if (isMountedRef.value) {
-        state.value = state.value.copyWith(isDeleting: false);
-      }
-      return false;
     } catch (e, stackTrace) {
       _logger.severe('Failed to delete all data', e, stackTrace);
       if (isMountedRef.value) {

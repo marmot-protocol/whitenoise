@@ -321,6 +321,9 @@ mod tests {
     fn stream_receive_loops_release_lifecycle_before_waiting() {
         let manifest_dir = PathBuf::from(env!("CARGO_MANIFEST_DIR"));
         let api_dir = manifest_dir.join("src/api");
+        // This guards the current stream pattern: `let mut rx = ...`,
+        // `release_lifecycle()`, then `rx.recv().await`. Update it if stream
+        // receiver naming or loop structure changes.
         let stream_files = [
             "chat_list.rs",
             "group_state.rs",
