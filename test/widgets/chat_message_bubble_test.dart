@@ -832,7 +832,39 @@ void main() {
         expect(launcher.calls, isEmpty);
       });
 
-      testWidgets('nostr mention tap launches nostr: URI', (tester) async {
+      testWidgets('npub mention tap does NOT launch external URL (handled by shade)', (
+        tester,
+      ) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: withDoc(
+              const MarkdownDocument(
+                blocks: [
+                  MarkdownBlock.paragraph(
+                    inlines: [
+                      MarkdownInline.nostrMention(
+                        entity: MarkdownNostrEntity(
+                          hrp: MarkdownNostrHrp.npub,
+                          bech32: testNpubA,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
+        final entity = _firstTextSpanWithRecognizer(span);
+        (entity.recognizer as TapGestureRecognizer).onTap!();
+        await tester.pump();
+        expect(launcher.calls, isEmpty);
+      });
+
+      testWidgets('non-npub Nostr URI tap still launches nostr: URL externally', (tester) async {
         await mountWidget(
           ChatMessageBubble(
             message: withDoc(
@@ -842,8 +874,8 @@ void main() {
                     inlines: [
                       MarkdownInline.nostrUri(
                         entity: MarkdownNostrEntity(
-                          hrp: MarkdownNostrHrp.npub,
-                          bech32: 'npub1abc',
+                          hrp: MarkdownNostrHrp.nevent,
+                          bech32: 'nevent1xyz',
                         ),
                       ),
                     ],
@@ -860,7 +892,7 @@ void main() {
         (entity.recognizer as TapGestureRecognizer).onTap!();
         await tester.pump();
         expect(launcher.calls, hasLength(1));
-        expect(launcher.calls.first.url, startsWith('nostr:'));
+        expect(launcher.calls.first.url, 'nostr:nevent1xyz');
       });
     });
   });

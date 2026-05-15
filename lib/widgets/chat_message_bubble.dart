@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/l10n/l10n.dart';
+import 'package:whitenoise/screens/user_profile_shade.dart';
 import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart' show leadingVariant;
+import 'package:whitenoise/utils/encoding.dart' show hexFromNpub;
 import 'package:whitenoise/widgets/chat_message_media.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/media_modal.dart';
@@ -95,13 +97,6 @@ class ChatMessageBubble extends StatelessWidget {
     await launchUrl(uri, mode: LaunchMode.externalApplication);
   }
 
-  Future<void> _openNostrEntity(MarkdownNostrHrp hrp, String bech32) async {
-    final url = 'nostr:$bech32';
-    final uri = Uri.tryParse(url);
-    if (uri == null) return;
-    await launchUrl(uri, mode: LaunchMode.externalApplication);
-  }
-
   @override
   Widget build(BuildContext context) {
     if (isOwnMessage && message.deliveryStatus is DeliveryStatus_Retried) {
@@ -127,7 +122,18 @@ class ChatMessageBubble extends StatelessWidget {
       document: message.content.isNotEmpty ? message.contentTokens : null,
       highlightSpans: highlightSpans,
       onLinkTap: _openExternalUrl,
-      onNostrTap: _openNostrEntity,
+      onNostrTap: (hrp, bech32) async {
+        if (hrp == MarkdownNostrHrp.npub) {
+          final hex = hexFromNpub(bech32);
+          if (hex != null && context.mounted) {
+            await UserProfileShade.show(context, userPubkey: hex);
+          }
+          return;
+        }
+        final uri = Uri.tryParse('nostr:$bech32');
+        if (uri == null) return;
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      },
       mentionDisplayName: mentionDisplayName,
       mediaContent: message.mediaAttachments.isNotEmpty
           ? ChatMessageMedia(
