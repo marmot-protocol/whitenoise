@@ -33,6 +33,7 @@ class ChatMessageBubble extends StatelessWidget {
   final VoidCallback? onReplyTap;
   final VoidCallback? onHorizontalDragEnd;
   final VoidCallback? onRetry;
+  final String? Function(String hexPubkey)? mentionDisplayName;
 
   const ChatMessageBubble({
     super.key,
@@ -54,6 +55,7 @@ class ChatMessageBubble extends StatelessWidget {
     this.onReplyTap,
     this.onHorizontalDragEnd,
     this.onRetry,
+    this.mentionDisplayName,
   });
 
   ChatStatusType? get _deliveryStatusType {
@@ -126,6 +128,7 @@ class ChatMessageBubble extends StatelessWidget {
       highlightSpans: highlightSpans,
       onLinkTap: _openExternalUrl,
       onNostrTap: _openNostrEntity,
+      mentionDisplayName: mentionDisplayName,
       mediaContent: message.mediaAttachments.isNotEmpty
           ? ChatMessageMedia(
               key: const Key('message_media'),

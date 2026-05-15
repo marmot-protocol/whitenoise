@@ -421,6 +421,83 @@ void main() {
       expect(span.toPlainText(), 'E=mc^2');
     });
 
+    testWidgets('npub mention resolves display name via callback', (tester) async {
+      String? receivedHex;
+      await _pump(
+        tester,
+        WnMarkdownText(
+          document: _doc([
+            _paragraph([
+              const MarkdownInline.nostrMention(
+                entity: MarkdownNostrEntity(
+                  hrp: MarkdownNostrHrp.npub,
+                  bech32: testNpubA,
+                ),
+              ),
+            ]),
+          ]),
+          baseStyle: _baseStyle,
+          mentionDisplayName: (hex) {
+            receivedHex = hex;
+            return 'Alice';
+          },
+        ),
+      );
+      final span = tester.widget<Text>(find.byType(Text).first).textSpan! as TextSpan;
+      final mention = span.children!.first as TextSpan;
+      expect(mention.text, '@Alice');
+      expect(receivedHex, testPubkeyA);
+      expect(mention.style?.decoration, TextDecoration.underline);
+    });
+
+    testWidgets('npub mention with empty resolved name falls back to truncation', (tester) async {
+      await _pump(
+        tester,
+        WnMarkdownText(
+          document: _doc([
+            _paragraph([
+              const MarkdownInline.nostrMention(
+                entity: MarkdownNostrEntity(
+                  hrp: MarkdownNostrHrp.npub,
+                  bech32: testNpubA,
+                ),
+              ),
+            ]),
+          ]),
+          baseStyle: _baseStyle,
+          mentionDisplayName: (_) => '',
+        ),
+      );
+      final span = tester.widget<Text>(find.byType(Text).first).textSpan! as TextSpan;
+      final mention = span.children!.first as TextSpan;
+      expect(mention.text!.startsWith('@'), isTrue);
+      expect(mention.text!.contains('…'), isTrue);
+    });
+
+    testWidgets('npub mention without callback uses truncated fallback', (tester) async {
+      await _pump(
+        tester,
+        WnMarkdownText(
+          document: _doc([
+            _paragraph([
+              const MarkdownInline.nostrMention(
+                entity: MarkdownNostrEntity(
+                  hrp: MarkdownNostrHrp.npub,
+                  bech32: testNpubA,
+                ),
+              ),
+            ]),
+          ]),
+          baseStyle: _baseStyle,
+        ),
+      );
+      final span = tester.widget<Text>(find.byType(Text).first).textSpan! as TextSpan;
+      final mention = span.children!.first as TextSpan;
+      expect(mention.text!.startsWith('@'), isTrue);
+      expect(mention.text!.contains('…'), isTrue);
+      expect(mention.style?.decoration, TextDecoration.underline);
+    });
+
     testWidgets('nostr mention is tappable and gets npub hrp', (tester) async {
       MarkdownNostrHrp? gotHrp;
       String? gotB32;

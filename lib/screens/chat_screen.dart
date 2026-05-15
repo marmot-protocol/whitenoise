@@ -434,6 +434,7 @@ class ChatScreen extends HookConsumerWidget {
                     )
                   : null,
               onHorizontalDragEnd: isSearchMode ? null : () => input.setReplyingTo(message),
+              mentionDisplayName: (hexPubkey) => presentName(getAuthorMetadata(hexPubkey)),
               onRetry:
                   !isSearchMode && isOwnMessage && message.deliveryStatus is DeliveryStatus_Failed
                   ? () async {

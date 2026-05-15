@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/encoding.dart' show hexFromNpub;
 
 const Set<String> _safeUrlSchemes = {'http', 'https', 'mailto', 'nostr', 'tel'};
 
@@ -34,6 +35,7 @@ class WnMarkdownText extends HookWidget {
     required this.baseStyle,
     this.onLinkTap,
     this.onNostrTap,
+    this.mentionDisplayName,
     this.highlightQueries = const [],
     this.highlightColor,
     this.maxLines,
@@ -44,6 +46,10 @@ class WnMarkdownText extends HookWidget {
   final TextStyle baseStyle;
   final void Function(String url)? onLinkTap;
   final void Function(MarkdownNostrHrp hrp, String bech32)? onNostrTap;
+
+  /// Resolves a hex pubkey to a display name. Called for npub mentions/URIs.
+  /// Return `null` if unknown — renderer falls back to truncated npub.
+  final String? Function(String hexPubkey)? mentionDisplayName;
   final List<String> highlightQueries;
   final Color? highlightColor;
   final int? maxLines;
@@ -70,6 +76,7 @@ class WnMarkdownText extends HookWidget {
       baseStyle: baseStyle,
       onLinkTap: onLinkTap,
       onNostrTap: onNostrTap,
+      mentionDisplayName: mentionDisplayName,
       highlightQueries: highlightQueries,
       highlightColor: highlightColor ?? Colors.yellow,
       registerRecognizer: (r) => recognizers.value.add(r),
@@ -113,6 +120,7 @@ class _MarkdownRenderer {
     required this.baseStyle,
     required this.onLinkTap,
     required this.onNostrTap,
+    required this.mentionDisplayName,
     required this.highlightQueries,
     required this.highlightColor,
     required this.registerRecognizer,
@@ -122,6 +130,7 @@ class _MarkdownRenderer {
   final TextStyle baseStyle;
   final void Function(String url)? onLinkTap;
   final void Function(MarkdownNostrHrp hrp, String bech32)? onNostrTap;
+  final String? Function(String hexPubkey)? mentionDisplayName;
   final List<String> highlightQueries;
   final Color highlightColor;
   final void Function(TapGestureRecognizer) registerRecognizer;
@@ -405,9 +414,15 @@ class _MarkdownRenderer {
         );
       case MarkdownInline_NostrMention(:final entity):
       case MarkdownInline_NostrUri(:final entity):
-        final label = _formatNostrLabel(entity);
+        if (entity.hrp == MarkdownNostrHrp.npub) {
+          return TextSpan(
+            text: _resolveMentionLabel(entity.bech32),
+            style: _mentionStyle(style),
+            recognizer: _nostrRecognizer(entity.hrp, entity.bech32),
+          );
+        }
         return TextSpan(
-          text: label,
+          text: _formatNostrLabel(entity),
           style: _linkStyle,
           recognizer: _nostrRecognizer(entity.hrp, entity.bech32),
         );
@@ -463,14 +478,38 @@ class _MarkdownRenderer {
 
   String _formatNostrLabel(MarkdownNostrEntity entity) {
     final b32 = entity.bech32;
-    final truncated = b32.length > 16
-        ? '${b32.substring(0, 12)}…${b32.substring(b32.length - 4)}'
-        : b32;
-    return switch (entity.hrp) {
-      MarkdownNostrHrp.npub => '@$truncated',
-      _ => truncated,
-    };
+    if (b32.length > 16) {
+      return '${b32.substring(0, 12)}…${b32.substring(b32.length - 4)}';
+    }
+    return b32;
   }
+
+  /// Renders an `@`-prefixed display name for an npub mention.
+  /// Looks up via [mentionDisplayName]; if unresolved, falls back to a
+  /// truncated bech32 ('@npub1abcdefgh…wxyz').
+  String _resolveMentionLabel(String bech32) {
+    final lookup = mentionDisplayName;
+    if (lookup != null) {
+      final hex = hexFromNpub(bech32);
+      if (hex != null) {
+        final name = lookup(hex);
+        if (name != null && name.isNotEmpty) {
+          return '@$name';
+        }
+      }
+    }
+    final truncated = bech32.length > 16
+        ? '${bech32.substring(0, 12)}…${bech32.substring(bech32.length - 4)}'
+        : bech32;
+    return '@$truncated';
+  }
+
+  /// Style for resolved/unresolved @mention: underline only, color follows
+  /// the surrounding text. Per design — mentions are not styled like links.
+  TextStyle _mentionStyle(TextStyle style) => style.copyWith(
+    decoration: TextDecoration.underline,
+    decorationColor: style.color,
+  );
 
   String _flattenInlines(List<MarkdownInline> inlines) {
     final buffer = StringBuffer();

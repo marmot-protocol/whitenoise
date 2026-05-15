@@ -392,6 +392,7 @@ class _BubbleContent extends StatelessWidget {
     this.onStatusTap,
     this.onLinkTap,
     this.onNostrTap,
+    this.mentionDisplayName,
     this.contentMaxLines,
   });
 
@@ -422,6 +423,7 @@ class _BubbleContent extends StatelessWidget {
   final VoidCallback? onStatusTap;
   final void Function(String url)? onLinkTap;
   final void Function(MarkdownNostrHrp hrp, String bech32)? onNostrTap;
+  final String? Function(String hexPubkey)? mentionDisplayName;
   final int? contentMaxLines;
 
   bool get _shouldRenderAsMarkdown {
@@ -512,6 +514,7 @@ class _BubbleContent extends StatelessWidget {
               baseStyle: textStyle,
               onLinkTap: onLinkTap,
               onNostrTap: onNostrTap,
+              mentionDisplayName: mentionDisplayName,
               highlightQueries: _highlightQueries(),
               highlightColor: highlightColor,
               maxLines: contentMaxLines,
@@ -765,6 +768,7 @@ class WnMessageBubble extends StatelessWidget {
   final VoidCallback? onStatusTap;
   final void Function(String url)? onLinkTap;
   final void Function(MarkdownNostrHrp hrp, String bech32)? onNostrTap;
+  final String? Function(String hexPubkey)? mentionDisplayName;
   final int? contentMaxLines;
   final double bubbleWidthFactor;
   final bool forceTightHeight;
@@ -794,6 +798,7 @@ class WnMessageBubble extends StatelessWidget {
     this.onStatusTap,
     this.onLinkTap,
     this.onNostrTap,
+    this.mentionDisplayName,
     this.contentMaxLines,
     this.bubbleWidthFactor = 0.8,
     this.forceTightHeight = false,
@@ -883,6 +888,7 @@ class WnMessageBubble extends StatelessWidget {
       onStatusTap: isDeleted ? null : onStatusTap,
       onLinkTap: onLinkTap,
       onNostrTap: onNostrTap,
+      mentionDisplayName: mentionDisplayName,
       contentMaxLines: contentMaxLines,
     );
 
