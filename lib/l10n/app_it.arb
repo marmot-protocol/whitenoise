@@ -423,10 +423,13 @@
   "leave": "Lascia",
   "leaveGroup": "Lascia il gruppo",
   "leaveGroupWarning": "Sei sicuro di voler lasciare questo gruppo? La chat rimarrà nel tuo elenco se non la elimini, ma non potrai inviare o ricevere nuovi messaggi a meno che qualcuno non ti inviti di nuovo.",
+  "leaveGroupFetchError": "Si è verificato un errore nel caricamento delle info del gruppo. Non puoi uscire adesso.",
   "failedToLeaveGroup": "Impossibile lasciare il gruppo. Riprova.",
   "youLeftTheGroup": "Hai lasciato il gruppo",
   "saveToGalleryPermissionDenied": "Permesso negato per salvare l'immagine",
   "saveToGalleryNotEnoughSpace": "Spazio di archiviazione insufficiente",
   "saveToGalleryNotSupportedFormat": "Formato immagine non supportato",
-  "saveToGalleryError": "Impossibile salvare l'immagine nella galleria"
+  "saveToGalleryError": "Impossibile salvare l'immagine nella galleria",
+  "leaveGroupLastAdminWarning": "Sei l'unico amministratore di questo gruppo. Promuovi almeno un membro ad amministratore prima di poter uscire.",
+  "leaveGroupNoCapabilitiesWarning": "Questo gruppo è stato creato con una versione precedente e non supporta l'uscita. Gli amministratori possono aggiornare le capacità del gruppo una volta che tutti i membri utilizzano una versione che supporta l'uscita."
 }

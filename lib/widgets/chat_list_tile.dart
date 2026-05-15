@@ -23,6 +23,7 @@ import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_chat_list_item.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 final _logger = Logger('ChatListTile');
 
@@ -198,6 +199,25 @@ Future<void> _runAction({
   }
 }
 
+List<ChatListAction> _buildLeaveWarningActions({
+  required AppLocalizations l10n,
+  required VoidCallback onBack,
+}) => [
+  ChatListAction(
+    id: 'close_leave_warning',
+    label: l10n.cancel,
+    autoDismiss: false,
+    onTap: () async => onBack(),
+  ),
+  ChatListAction(
+    id: 'leave_group_warning',
+    label: l10n.leave,
+    icon: WnIcons.leave,
+    isDestructive: true,
+    isDisabled: true,
+  ),
+];
+
 List<ChatListAction> _buildLeaveConfirmationActions({
   required AppLocalizations l10n,
   required BuildContext context,
@@ -209,8 +229,8 @@ List<ChatListAction> _buildLeaveConfirmationActions({
   ChatListAction(
     id: 'cancel_leave',
     label: l10n.cancel,
-    icon: WnIcons.closeLarge,
-    onTap: () async {},
+    autoDismiss: false,
+    onTap: () async => onBack(),
   ),
   ChatListAction(
     id: 'confirm_leave_group',
@@ -252,7 +272,9 @@ class ChatListTile extends HookConsumerWidget {
     final isPending = chatSummary.pendingConfirmation;
     final hasWelcomer = chatSummary.welcomerPubkey != null;
 
-    final leaveGroupEnabled = ref.watch(featureFlagProvider(FeatureFlag.leaveGroup));
+    final leaveGroupEnabled = ref.watch(
+      featureFlagProvider(FeatureFlag.leaveGroup),
+    );
     final leaveGroupState = useLeaveGroup(
       accountPubkey: myPubkey,
       groupId: chatSummary.mlsGroupId,
@@ -271,7 +293,10 @@ class ChatListTile extends HookConsumerWidget {
     final welcomerName = presentName(welcomerSnapshot.data);
 
     final timestamp = chatSummary.lastMessage?.createdAt ?? chatSummary.createdAt;
-    final formattedTime = formatters.formatRelativeTime(timestamp, context.l10n);
+    final formattedTime = formatters.formatRelativeTime(
+      timestamp,
+      context.l10n,
+    );
 
     final display = _buildTileDisplay(
       context: context,
@@ -331,32 +356,66 @@ class ChatListTile extends HookConsumerWidget {
             logMessage: 'Failed to archive/unarchive chat',
           ),
         ),
-        if (leaveGroupState.canLeave)
+        if (leaveGroupState.visibility != LeaveGroupVisibility.hidden)
           ChatListAction(
             id: 'leave_group',
-            label: l10n.delete,
-            icon: WnIcons.trashCan,
+            label: l10n.leaveGroup,
+            icon: WnIcons.leave,
             isDestructive: true,
             autoDismiss: false,
             onTap: () async {
-              menuController?.updateState(
-                _buildLeaveConfirmationActions(
-                  l10n: l10n,
-                  context: context,
-                  leaveGroup: leaveGroupState.leaveGroup,
-                  onSuccess: () => onChatListChanged?.call(),
-                  onError: (msg) => onError?.call(msg),
-                  onBack: () => menuController?.updateState(buildInitialActions()),
-                ),
-                title: l10n.leaveGroup,
-                middleContent: Text(
-                  l10n.leaveGroupWarning,
-                  style: context.typographyScaled.medium14.copyWith(
-                    color: context.colors.backgroundContentPrimary,
+              if (leaveGroupState.visibility == LeaveGroupVisibility.disabled) {
+                menuController?.updateState(
+                  _buildLeaveWarningActions(
+                    l10n: l10n,
+                    onBack: () => menuController?.updateState(buildInitialActions()),
                   ),
-                ),
-                onBack: () => menuController?.updateState(buildInitialActions()),
-              );
+                  title: l10n.leaveGroup,
+                  systemNotice: leaveGroupState.message == LeaveGroupMessage.fetchError
+                      ? WnSystemNotice(
+                          type: WnSystemNoticeType.error,
+                          variant: WnSystemNoticeVariant.expanded,
+                          title: l10n.leaveGroupFetchError,
+                          animateEntrance: false,
+                        )
+                      : null,
+                  middleContent: switch (leaveGroupState.message) {
+                    LeaveGroupMessage.lastAdminWarning => Text(
+                      l10n.leaveGroupLastAdminWarning,
+                      style: context.typographyScaled.medium14.copyWith(
+                        color: context.colors.backgroundContentPrimary,
+                      ),
+                    ),
+                    LeaveGroupMessage.noCapabilities => Text(
+                      l10n.leaveGroupNoCapabilitiesWarning,
+                      style: context.typographyScaled.medium14.copyWith(
+                        color: context.colors.backgroundContentPrimary,
+                      ),
+                    ),
+                    _ => null,
+                  },
+                  onBack: () => menuController?.updateState(buildInitialActions()),
+                );
+              } else {
+                menuController?.updateState(
+                  _buildLeaveConfirmationActions(
+                    l10n: l10n,
+                    context: context,
+                    leaveGroup: leaveGroupState.leaveGroup,
+                    onSuccess: () => onChatListChanged?.call(),
+                    onError: (msg) => onError?.call(msg),
+                    onBack: () => menuController?.updateState(buildInitialActions()),
+                  ),
+                  title: l10n.leaveGroup,
+                  middleContent: Text(
+                    l10n.leaveGroupWarning,
+                    style: context.typographyScaled.medium14.copyWith(
+                      color: context.colors.backgroundContentPrimary,
+                    ),
+                  ),
+                  onBack: () => menuController?.updateState(buildInitialActions()),
+                );
+              }
             },
           ),
       ];

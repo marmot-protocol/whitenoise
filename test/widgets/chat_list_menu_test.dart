@@ -782,6 +782,64 @@ void main() {
 
         expect(find.text('Warning message'), findsOneWidget);
       });
+
+      testWidgets('systemNotice is shown after updateState', (tester) async {
+        await openContextMenu(
+          tester,
+          actions: [
+            ChatListAction(
+              id: 'pin',
+              label: 'Pin',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+        );
+
+        activeController!.updateState(
+          [
+            ChatListAction(
+              id: 'confirm',
+              label: 'Confirm',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+          systemNotice: const Text('System notice message'),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('System notice message'), findsOneWidget);
+      });
+
+      testWidgets('menu card remains visible when systemNotice is shown', (tester) async {
+        await openContextMenu(
+          tester,
+          actions: [
+            ChatListAction(
+              id: 'pin',
+              label: 'Pin',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+        );
+
+        activeController!.updateState(
+          [
+            ChatListAction(
+              id: 'confirm',
+              label: 'Confirm',
+              icon: WnIcons.pin,
+              onTap: () async {},
+            ),
+          ],
+          systemNotice: const Text('System notice message'),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('context_menu_card')), findsOneWidget);
+      });
     });
   });
 }

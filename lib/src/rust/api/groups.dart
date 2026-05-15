@@ -110,6 +110,12 @@ Future<void> leaveGroup({required String pubkey, required String groupId}) =>
       groupId: groupId,
     );
 
+Future<void> selfDemote({required String pubkey, required String groupId}) =>
+    RustLib.instance.api.crateApiGroupsSelfDemote(
+      pubkey: pubkey,
+      groupId: groupId,
+    );
+
 Future<Group> getGroup({
   required String accountPubkey,
   required String groupId,

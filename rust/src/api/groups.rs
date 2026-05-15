@@ -393,6 +393,18 @@ pub async fn leave_group(pubkey: String, group_id: String) -> Result<(), ApiErro
 }
 
 #[frb]
+pub async fn self_demote(pubkey: String, group_id: String) -> Result<(), ApiError> {
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let group_id = group_id_from_string(&group_id)?;
+    let session = wn_session(&pubkey)?;
+    session
+        .groups()
+        .self_demote(&group_id)
+        .await
+        .map_err(ApiError::from)
+}
+
+#[frb]
 pub async fn get_group(account_pubkey: String, group_id: String) -> Result<Group, ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let session = wn_session(&pubkey)?;

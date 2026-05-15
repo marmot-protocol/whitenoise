@@ -427,6 +427,9 @@
   "leave": "退出",
   "leaveGroup": "退出群组",
   "leaveGroupWarning": "确定要退出此群组吗？如果您不删除，聊天记录将保留在列表中，但您将无法发送或接收新消息，除非有人再次邀请您。",
+  "leaveGroupFetchError": "加载群组信息时出现错误。您目前无法退出。",
   "failedToLeaveGroup": "退出群组失败。请重试。",
-  "youLeftTheGroup": "您已退出群组"
+  "youLeftTheGroup": "您已退出群组",
+  "leaveGroupLastAdminWarning": "您是本群组中唯一的管理员。请先将至少一名成员提升为管理员，然后才能退出。",
+  "leaveGroupNoCapabilitiesWarning": "该群组是在旧版本中创建的，不支持退出功能。当所有成员都使用支持退出功能的版本后，管理员即可升级群组功能。"
 }
