@@ -101,7 +101,7 @@ class ShareProfileScreen extends HookConsumerWidget {
                             child: QrImageView(
                               key: ValueKey<String>(profileDeepLink),
                               data: profileDeepLink,
-                              size: 98,
+                              size: 98.w,
                               padding: EdgeInsets.zero,
                               backgroundColor: colors.backgroundSecondary,
                               eyeStyle: QrEyeStyle(
