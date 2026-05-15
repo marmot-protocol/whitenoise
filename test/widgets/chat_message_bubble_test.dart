@@ -1,5 +1,9 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
@@ -756,5 +760,172 @@ void main() {
         expect(find.text('Trent Reznor'), findsNothing);
       });
     });
+
+    group('markdown link tap handling', () {
+      late _MockUrlLauncher launcher;
+
+      setUp(() {
+        launcher = _MockUrlLauncher();
+        UrlLauncherPlatform.instance = launcher;
+      });
+
+      ChatMessage withDoc(MarkdownDocument doc) => _message(content: 'x').copyWithDocument(doc);
+
+      testWidgets('safe link tap calls launchUrl externally', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: withDoc(
+              const MarkdownDocument(
+                blocks: [
+                  MarkdownBlock.paragraph(
+                    inlines: [
+                      MarkdownInline.link(
+                        dest: 'https://example.com',
+                        children: [MarkdownInline.text(content: 'here')],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
+        final link = _firstTextSpanWithRecognizer(span);
+        (link.recognizer as TapGestureRecognizer).onTap!();
+        await tester.pump();
+        expect(launcher.calls, hasLength(1));
+        expect(launcher.calls.first.url, 'https://example.com');
+        expect(launcher.calls.first.options.mode, PreferredLaunchMode.externalApplication);
+      });
+
+      testWidgets('javascript: link tap is silently ignored at the renderer layer', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: withDoc(
+              const MarkdownDocument(
+                blocks: [
+                  MarkdownBlock.paragraph(
+                    inlines: [
+                      MarkdownInline.link(
+                        dest: 'javascript:alert(1)',
+                        children: [MarkdownInline.text(content: 'bad')],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
+        final link = _findTextSpan(
+          span,
+          (s) =>
+              s.text == 'bad' || (s.children?.any((c) => (c as TextSpan).text == 'bad') ?? false),
+        );
+        expect(link?.recognizer, isNull);
+        expect(launcher.calls, isEmpty);
+      });
+
+      testWidgets('nostr mention tap launches nostr: URI', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: withDoc(
+              const MarkdownDocument(
+                blocks: [
+                  MarkdownBlock.paragraph(
+                    inlines: [
+                      MarkdownInline.nostrUri(
+                        entity: MarkdownNostrEntity(
+                          hrp: MarkdownNostrHrp.npub,
+                          bech32: 'npub1abc',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
+        final entity = _firstTextSpanWithRecognizer(span);
+        (entity.recognizer as TapGestureRecognizer).onTap!();
+        await tester.pump();
+        expect(launcher.calls, hasLength(1));
+        expect(launcher.calls.first.url, startsWith('nostr:'));
+      });
+    });
   });
+}
+
+class _MockUrlLauncher extends UrlLauncherPlatform with MockPlatformInterfaceMixin {
+  final List<({String url, LaunchOptions options})> calls = [];
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    calls.add((url: url, options: options));
+    return true;
+  }
+}
+
+extension on ChatMessage {
+  ChatMessage copyWithDocument(MarkdownDocument doc) => ChatMessage(
+    id: id,
+    pubkey: pubkey,
+    content: content,
+    createdAt: createdAt,
+    tags: tags,
+    isReply: isReply,
+    replyToId: replyToId,
+    isDeleted: isDeleted,
+    contentTokens: doc,
+    reactions: reactions,
+    mediaAttachments: mediaAttachments,
+    kind: kind,
+    deliveryStatus: deliveryStatus,
+  );
+}
+
+TextSpan _firstTextSpanWithRecognizer(InlineSpan span) {
+  if (span is TextSpan) {
+    if (span.recognizer != null) return span;
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      final found = _findTextSpanWithRecognizer(child);
+      if (found != null) return found;
+    }
+  }
+  throw StateError('no TextSpan with recognizer');
+}
+
+TextSpan? _findTextSpanWithRecognizer(InlineSpan span) {
+  if (span is TextSpan) {
+    if (span.recognizer != null) return span;
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      final found = _findTextSpanWithRecognizer(child);
+      if (found != null) return found;
+    }
+  }
+  return null;
+}
+
+TextSpan? _findTextSpan(InlineSpan span, bool Function(TextSpan) predicate) {
+  if (span is TextSpan) {
+    if (predicate(span)) return span;
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      final found = _findTextSpan(child, predicate);
+      if (found != null) return found;
+    }
+  }
+  return null;
 }

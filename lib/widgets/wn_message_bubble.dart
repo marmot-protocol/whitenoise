@@ -3,9 +3,11 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
+import 'package:whitenoise/widgets/wn_markdown_text.dart';
 import 'package:whitenoise/widgets/wn_reaction.dart';
 export 'package:whitenoise/src/rust/api/messages.dart' show EmojiReaction;
 
@@ -373,6 +375,7 @@ class _BubbleContent extends StatelessWidget {
     required this.hasText,
     required this.hasTimestamp,
     required this.content,
+    this.document,
     this.highlightSpans,
     this.highlightColor,
     required this.timestamp,
@@ -387,6 +390,8 @@ class _BubbleContent extends StatelessWidget {
     required this.showDeliveryStatus,
     this.deliveryStatus,
     this.onStatusTap,
+    this.onLinkTap,
+    this.onNostrTap,
     this.contentMaxLines,
   });
 
@@ -400,6 +405,7 @@ class _BubbleContent extends StatelessWidget {
   final bool hasText;
   final bool hasTimestamp;
   final String? content;
+  final MarkdownDocument? document;
   final List<HighlightSpan>? highlightSpans;
   final Color? highlightColor;
   final String? timestamp;
@@ -414,7 +420,34 @@ class _BubbleContent extends StatelessWidget {
   final bool showDeliveryStatus;
   final ChatStatusType? deliveryStatus;
   final VoidCallback? onStatusTap;
+  final void Function(String url)? onLinkTap;
+  final void Function(MarkdownNostrHrp hrp, String bech32)? onNostrTap;
   final int? contentMaxLines;
+
+  bool get _shouldRenderAsMarkdown {
+    if (!hasText) return false;
+    final doc = document;
+    if (doc == null) return false;
+    if (doc.blocks.isEmpty) return false;
+    return !isPlainTextDocument(doc);
+  }
+
+  List<String> _highlightQueries() {
+    final spans = highlightSpans;
+    final raw = content;
+    if (spans == null || spans.isEmpty || raw == null || raw.isEmpty) {
+      return const [];
+    }
+    final queries = <String>{};
+    for (final span in spans) {
+      final start = _codePointToCodeUnit(raw, span.start).clamp(0, raw.length);
+      final end = _codePointToCodeUnit(raw, span.end).clamp(start, raw.length);
+      if (end > start) {
+        queries.add(raw.substring(start, end));
+      }
+    }
+    return queries.toList();
+  }
 
   Widget _buildTimestampRow() {
     Widget row = Row(
@@ -473,7 +506,21 @@ class _BubbleContent extends StatelessWidget {
             mediaContent!,
             if (hasText || hasTimestamp) SizedBox(height: 8.h),
           ],
-          if (hasText && hasTimestamp)
+          if (hasText && _shouldRenderAsMarkdown) ...[
+            WnMarkdownText(
+              document: document!,
+              baseStyle: textStyle,
+              onLinkTap: onLinkTap,
+              onNostrTap: onNostrTap,
+              highlightQueries: _highlightQueries(),
+              highlightColor: highlightColor,
+              maxLines: contentMaxLines,
+            ),
+            if (hasTimestamp) ...[
+              SizedBox(height: 4.h),
+              _buildTimestampRow(),
+            ],
+          ] else if (hasText && hasTimestamp)
             _TextWithTimestamp(
               content: content!,
               timestamp: timestamp!,
@@ -700,6 +747,7 @@ class WnMessageBubble extends StatelessWidget {
   final String? deletedLabel;
   final bool showTail;
   final String? content;
+  final MarkdownDocument? document;
   final List<HighlightSpan>? highlightSpans;
   final Widget? mediaContent;
   final Widget? replyContent;
@@ -715,6 +763,8 @@ class WnMessageBubble extends StatelessWidget {
   final void Function(String emoji)? onReaction;
   final VoidCallback? onHorizontalDragEnd;
   final VoidCallback? onStatusTap;
+  final void Function(String url)? onLinkTap;
+  final void Function(MarkdownNostrHrp hrp, String bech32)? onNostrTap;
   final int? contentMaxLines;
   final double bubbleWidthFactor;
   final bool forceTightHeight;
@@ -726,6 +776,7 @@ class WnMessageBubble extends StatelessWidget {
     this.deletedLabel,
     this.showTail = false,
     this.content,
+    this.document,
     this.highlightSpans,
     this.mediaContent,
     this.replyContent,
@@ -741,6 +792,8 @@ class WnMessageBubble extends StatelessWidget {
     this.onReaction,
     this.onHorizontalDragEnd,
     this.onStatusTap,
+    this.onLinkTap,
+    this.onNostrTap,
     this.contentMaxLines,
     this.bubbleWidthFactor = 0.8,
     this.forceTightHeight = false,
@@ -797,6 +850,7 @@ class WnMessageBubble extends StatelessWidget {
 
     final highlightColor = highlightSpans != null ? colors.intentionInfoContent : null;
 
+    final actualDocument = isDeleted ? null : document;
     final bubbleContent = _BubbleContent(
       bubbleColor: bubbleColor,
       borderRadius: _bubbleBorderRadius(
@@ -812,6 +866,7 @@ class WnMessageBubble extends StatelessWidget {
       hasText: hasText,
       hasTimestamp: hasTimestamp,
       content: actualContent,
+      document: actualDocument,
       highlightSpans: highlightSpans,
       highlightColor: highlightColor,
       timestamp: actualTimestamp,
@@ -826,6 +881,8 @@ class WnMessageBubble extends StatelessWidget {
       showDeliveryStatus: !isDeleted,
       deliveryStatus: actualDeliveryStatus,
       onStatusTap: isDeleted ? null : onStatusTap,
+      onLinkTap: onLinkTap,
+      onNostrTap: onNostrTap,
       contentMaxLines: contentMaxLines,
     );
 

@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show HighlightSpan;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
+import 'package:whitenoise/widgets/wn_markdown_text.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_reaction.dart';
 
@@ -1597,6 +1599,190 @@ void main() {
         await tester.pump();
 
         expect(called, isTrue);
+      });
+    });
+
+    group('markdown rendering', () {
+      MarkdownDocument plainTextDoc(String text) => MarkdownDocument(
+        blocks: [
+          MarkdownBlock.paragraph(
+            inlines: [MarkdownInline.text(content: text)],
+          ),
+        ],
+      );
+
+      MarkdownDocument formattedDoc(String text) => MarkdownDocument(
+        blocks: [
+          MarkdownBlock.paragraph(
+            inlines: [
+              MarkdownInline.strong(
+                children: [MarkdownInline.text(content: text)],
+              ),
+            ],
+          ),
+        ],
+      );
+
+      MarkdownDocument multiBlockDoc() => const MarkdownDocument(
+        blocks: [
+          MarkdownBlock.heading(
+            level: 1,
+            inlines: [MarkdownInline.text(content: 'Title')],
+          ),
+          MarkdownBlock.paragraph(
+            inlines: [MarkdownInline.text(content: 'body')],
+          ),
+        ],
+      );
+
+      testWidgets('null document falls back to plain Text path', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'plain',
+          ),
+          tester,
+        );
+        expect(find.byType(WnMarkdownText), findsNothing);
+        expect(find.text('plain'), findsOneWidget);
+      });
+
+      testWidgets('plain-text document falls back to plain Text path', (tester) async {
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'hello',
+            document: plainTextDoc('hello'),
+          ),
+          tester,
+        );
+        expect(find.byType(WnMarkdownText), findsNothing);
+        expect(find.text('hello'), findsOneWidget);
+      });
+
+      testWidgets('empty document falls back to plain Text path', (tester) async {
+        await mountWidget(
+          const WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'hi',
+            document: MarkdownDocument(blocks: []),
+          ),
+          tester,
+        );
+        expect(find.byType(WnMarkdownText), findsNothing);
+        expect(find.text('hi'), findsOneWidget);
+      });
+
+      testWidgets('formatted single-paragraph document renders WnMarkdownText', (tester) async {
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'bold',
+            document: formattedDoc('bold'),
+          ),
+          tester,
+        );
+        expect(find.byType(WnMarkdownText), findsOneWidget);
+      });
+
+      testWidgets(
+        'formatted document with timestamp shows timestamp below in a separate row',
+        (tester) async {
+          await mountWidget(
+            WnMessageBubble(
+              direction: MessageDirection.incoming,
+              isDeleted: false,
+              content: 'bold',
+              document: formattedDoc('bold'),
+              timestamp: '12:34',
+              showTail: true,
+            ),
+            tester,
+          );
+          expect(find.byType(WnMarkdownText), findsOneWidget);
+          expect(find.text('12:34'), findsOneWidget);
+        },
+      );
+
+      testWidgets('deleted message ignores document', (tester) async {
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: true,
+            deletedLabel: 'gone',
+            content: 'bold',
+            document: formattedDoc('bold'),
+          ),
+          tester,
+        );
+        expect(find.byType(WnMarkdownText), findsNothing);
+        expect(find.text('gone'), findsOneWidget);
+      });
+
+      testWidgets('multi-block document renders WnMarkdownText', (tester) async {
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: '# Title\n\nbody',
+            document: multiBlockDoc(),
+          ),
+          tester,
+        );
+        expect(find.byType(WnMarkdownText), findsOneWidget);
+        expect(find.text('Title'), findsOneWidget);
+        expect(find.text('body'), findsOneWidget);
+      });
+
+      testWidgets(
+        'highlight spans on formatted content propagate into renderer as queries',
+        (tester) async {
+          await mountWidget(
+            WnMessageBubble(
+              direction: MessageDirection.incoming,
+              isDeleted: false,
+              content: 'foo bar',
+              document: formattedDoc('foo bar'),
+              highlightSpans: const [HighlightSpan(start: 4, end: 7)],
+            ),
+            tester,
+          );
+          final widget = tester.widget<WnMarkdownText>(find.byType(WnMarkdownText));
+          expect(widget.highlightQueries, contains('bar'));
+        },
+      );
+
+      testWidgets('link tap callback is wired through to the renderer', (tester) async {
+        var tapped = '';
+        await mountWidget(
+          WnMessageBubble(
+            direction: MessageDirection.incoming,
+            isDeleted: false,
+            content: 'see [here](https://example.com)',
+            document: const MarkdownDocument(
+              blocks: [
+                MarkdownBlock.paragraph(
+                  inlines: [
+                    MarkdownInline.text(content: 'see '),
+                    MarkdownInline.link(
+                      dest: 'https://example.com',
+                      children: [MarkdownInline.text(content: 'here')],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            onLinkTap: (url) => tapped = url,
+          ),
+          tester,
+        );
+        final widget = tester.widget<WnMarkdownText>(find.byType(WnMarkdownText));
+        widget.onLinkTap!('https://example.com');
+        expect(tapped, 'https://example.com');
       });
     });
   });

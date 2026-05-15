@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/l10n/l10n.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart' show leadingVariant;
@@ -9,6 +11,7 @@ import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/media_modal.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
+import 'package:whitenoise/widgets/wn_markdown_text.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 
 class ChatMessageBubble extends StatelessWidget {
@@ -83,6 +86,20 @@ class ChatMessageBubble extends StatelessWidget {
     return '$h:$m';
   }
 
+  Future<void> _openExternalUrl(String url) async {
+    if (!isSafeMarkdownUrl(url)) return;
+    final uri = Uri.tryParse(url.trim());
+    if (uri == null) return;
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _openNostrEntity(MarkdownNostrHrp hrp, String bech32) async {
+    final url = 'nostr:$bech32';
+    final uri = Uri.tryParse(url);
+    if (uri == null) return;
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isOwnMessage && message.deliveryStatus is DeliveryStatus_Retried) {
@@ -105,7 +122,10 @@ class ChatMessageBubble extends StatelessWidget {
           : null,
       showTail: showTail,
       content: message.content.isNotEmpty ? message.content : null,
+      document: message.content.isNotEmpty ? message.contentTokens : null,
       highlightSpans: highlightSpans,
+      onLinkTap: _openExternalUrl,
+      onNostrTap: _openNostrEntity,
       mediaContent: message.mediaAttachments.isNotEmpty
           ? ChatMessageMedia(
               key: const Key('message_media'),
