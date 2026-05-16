@@ -6,11 +6,13 @@ import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData, ProviderScope;
 import 'package:flutter_screenutil/flutter_screenutil.dart' show ScreenUtilInit;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
+import 'package:whitenoise/screens/chat_screen.dart';
 import 'package:whitenoise/screens/home_screen.dart';
 import 'package:whitenoise/screens/login_screen.dart';
 import 'package:whitenoise/screens/relay_resolution_screen.dart';
@@ -200,6 +202,46 @@ void main() {
           await tester.pumpAndSettle();
           expect(find.byType(ChatListScreen), findsOneWidget);
         });
+
+        testWidgets('redirects to preserved deep-link target on success', (tester) async {
+          await pumpLoginScreen(tester);
+          GoRouter.of(
+            tester.element(find.byType(LoginScreen)),
+          ).go('/login?redirect=${Uri.encodeComponent('/chats/$testGroupId')}');
+          await tester.pumpAndSettle();
+
+          await tester.enterText(find.byType(TextField), 'nsec1test');
+          await tester.pump();
+          await tester.tap(find.byKey(const Key('login_button')));
+          await tester.pumpAndSettle();
+
+          final screen = tester.widget<ChatScreen>(find.byType(ChatScreen));
+          expect(screen.groupId, testGroupId);
+        });
+
+        for (final (:label, :redirect) in [
+          (label: 'blank', redirect: ''),
+          (label: 'absolute URI', redirect: 'https://example.com/chats/$testGroupId'),
+          (label: 'authority URI', redirect: '//example.com/chats/$testGroupId'),
+          (label: 'relative path', redirect: 'chats/$testGroupId'),
+          (label: 'public route', redirect: '/login'),
+        ]) {
+          testWidgets('falls back to chat list for $label redirect on success', (tester) async {
+            await pumpLoginScreen(tester);
+            GoRouter.of(
+              tester.element(find.byType(LoginScreen)),
+            ).go('/login?redirect=${Uri.encodeComponent(redirect)}');
+            await tester.pumpAndSettle();
+
+            await tester.enterText(find.byType(TextField), 'nsec1test');
+            await tester.pump();
+            await tester.tap(find.byKey(const Key('login_button')));
+            await tester.pumpAndSettle();
+
+            expect(find.byType(ChatListScreen), findsOneWidget);
+            expect(find.byType(ChatScreen), findsNothing);
+          });
+        }
       });
 
       group('when login needs relay lists', () {
@@ -211,6 +253,30 @@ void main() {
           await tester.tap(find.byKey(const Key('login_button')));
           await tester.pumpAndSettle();
           expect(find.byType(RelayResolutionScreen), findsOneWidget);
+        });
+
+        testWidgets('preserves deep-link redirect when navigating to relay resolution', (
+          tester,
+        ) async {
+          await pumpLoginScreen(tester);
+          GoRouter.of(
+            tester.element(find.byType(LoginScreen)),
+          ).go('/login?redirect=${Uri.encodeComponent('/chats/$testGroupId')}');
+          await tester.pumpAndSettle();
+
+          mockAuth.loginResultStatus = LoginStatus.needsRelayLists;
+          await tester.enterText(find.byType(TextField), 'nsec1test');
+          await tester.pump();
+          await tester.tap(find.byKey(const Key('login_button')));
+          await tester.pumpAndSettle();
+
+          expect(find.byType(RelayResolutionScreen), findsOneWidget);
+          expect(
+            GoRouterState.of(
+              tester.element(find.byType(RelayResolutionScreen)),
+            ).uri.queryParameters['redirect'],
+            '/chats/$testGroupId',
+          );
         });
       });
 

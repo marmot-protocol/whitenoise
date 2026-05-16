@@ -10,6 +10,7 @@ typedef ChatArchiveResult = ({
   bool isActionLoading,
   Future<void> Function() archive,
   Future<void> Function() unarchive,
+  Future<void> Function() toggle,
 });
 
 ChatArchiveResult useChatArchive(String accountPubkey, String mlsGroupId) {
@@ -90,11 +91,17 @@ ChatArchiveResult useChatArchive(String accountPubkey, String mlsGroupId) {
     }
   }
 
+  Future<void> toggle() async {
+    if (isLoading.value || isActionLoading.value) return;
+    return isArchived.value ? unarchive() : archive();
+  }
+
   return (
     isArchived: isArchived.value,
     isLoading: isLoading.value,
     isActionLoading: isActionLoading.value,
     archive: archive,
     unarchive: unarchive,
+    toggle: toggle,
   );
 }

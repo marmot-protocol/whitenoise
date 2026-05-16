@@ -1228,6 +1228,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get rawDebugViewCopied => '已复制到剪贴板';
 
   @override
+  String get rawDebugViewCopyDeepLink => '复制深层链接';
+
+  @override
   String get appLogsTitle => '应用日志';
 
   @override
@@ -1410,6 +1413,16 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get leaveGroupWarning => '确定要退出此群组吗？如果您不删除，聊天记录将保留在列表中，但您将无法发送或接收新消息，除非有人再次邀请您。';
+
+  @override
+  String get leaveGroupLastAdminWarning => '您是本群组中唯一的管理员。请先将至少一名成员提升为管理员，然后才能退出。';
+
+  @override
+  String get leaveGroupNoCapabilitiesWarning =>
+      '该群组是在旧版本中创建的，不支持退出功能。当所有成员都使用支持退出功能的版本后，管理员即可升级群组功能。';
+
+  @override
+  String get leaveGroupFetchError => '加载群组信息时出现错误。您目前无法退出。';
 
   @override
   String get failedToLeaveGroup => '退出群组失败。请重试。';
@@ -2641,6 +2654,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get rawDebugViewCopied => '已複製到剪貼簿';
 
   @override
+  String get rawDebugViewCopyDeepLink => '複製深層連結';
+
+  @override
   String get appLogsTitle => '應用程式記錄';
 
   @override
@@ -2824,6 +2840,16 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get leaveGroupWarning => '確定要離開此群組嗎？如果您沒有刪除聊天，它仍會留在列表中；但除非有人再次邀請您，否則您將無法傳送或接收新訊息。';
+
+  @override
+  String get leaveGroupLastAdminWarning => '您是本群組中唯一的管理員。請先將至少一名成員提升為管理員，才能離開群組。';
+
+  @override
+  String get leaveGroupNoCapabilitiesWarning =>
+      '此群組是使用舊版建立的，因此不支援退出功能。待所有成員皆升級至支援退出功能的版本後，管理員即可升級群組功能。';
+
+  @override
+  String get leaveGroupFetchError => '載入群組資訊時發生錯誤。您目前無法離開。';
 
   @override
   String get failedToLeaveGroup => '離開群組失敗。請再試一次。';

@@ -69,14 +69,14 @@ class RelayResolutionScreen extends HookConsumerWidget {
     Future<void> onPublishDefaults() async {
       final success = await publishDefaults();
       if (success && context.mounted) {
-        Routes.goToChatList(context);
+        Routes.goToPostAuthDestination(context);
       }
     }
 
     Future<void> onTryCustomRelay() async {
       final success = await tryCustomRelay();
       if (success && context.mounted) {
-        Routes.goToChatList(context);
+        Routes.goToPostAuthDestination(context);
       }
     }
 

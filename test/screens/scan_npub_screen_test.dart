@@ -5,6 +5,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/screens/chat_screen.dart';
 import 'package:whitenoise/screens/share_profile_screen.dart';
 import 'package:whitenoise/screens/start_chat_screen.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
@@ -120,6 +121,32 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(StartChatScreen), findsOneWidget);
+      });
+
+      testWidgets('calling onBarcodeDetected with user deep link navigates to start chat', (
+        tester,
+      ) async {
+        await pumpScanNpubScreen(tester);
+
+        final scanBox = tester.widget<QrScanner>(find.byType(QrScanner));
+        scanBox.onBarcodeDetected('whitenoise://user/$testNpubB');
+        await tester.pumpAndSettle();
+
+        final screen = tester.widget<StartChatScreen>(find.byType(StartChatScreen));
+        expect(screen.userPubkey, testPubkeyB);
+      });
+
+      testWidgets('calling onBarcodeDetected with chat deep link navigates to chat', (
+        tester,
+      ) async {
+        await pumpScanNpubScreen(tester);
+
+        final scanBox = tester.widget<QrScanner>(find.byType(QrScanner));
+        scanBox.onBarcodeDetected('whitenoise://chat/$testGroupId');
+        await tester.pumpAndSettle();
+
+        final screen = tester.widget<ChatScreen>(find.byType(ChatScreen));
+        expect(screen.groupId, testGroupId);
       });
 
       testWidgets('calling onBarcodeDetected with non-npub value does nothing', (tester) async {

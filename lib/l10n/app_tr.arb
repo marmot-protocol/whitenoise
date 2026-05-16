@@ -362,6 +362,7 @@
   "rawDebugViewGroupId": "Grup Kimliği",
   "rawDebugViewMessageCount": "{count, plural, =1{1 mesaj} other{{count} mesaj}}",
   "rawDebugViewCopied": "Panoya kopyalandı",
+  "rawDebugViewCopyDeepLink": "Derin bağlantıyı kopyala",
   "appLogsTitle": "Uygulama Günlükleri",
   "appLogsViewLogs": "Günlüklere bak",
   "appLogsViewLogsDescription": "Uygulamadaki tüm Logger çıktısını görüntüle",
@@ -422,10 +423,13 @@
   "leave": "Ayrıl",
   "leaveGroup": "Gruptan ayrıl",
   "leaveGroupWarning": "Bu gruptan ayrılmak istediğinize emin misiniz? Silmezseniz sohbet listenizde kalacak, ancak biri sizi yeniden davet edene kadar yeni mesaj gönderemez veya alamazsınız.",
+  "leaveGroupFetchError": "Grup bilgileri yüklenirken bir sorun oluştu. Şu anda gruptan ayrılamazsınız.",
   "failedToLeaveGroup": "Gruptan ayrılma başarısız oldu. Lütfen tekrar deneyin.",
   "youLeftTheGroup": "Gruptan ayrıldınız",
   "saveToGalleryPermissionDenied": "Görüntüyü kaydetme izni reddedildi",
   "saveToGalleryNotEnoughSpace": "Yeterli depolama alanı yok",
   "saveToGalleryNotSupportedFormat": "Görüntü formatı desteklenmiyor",
-  "saveToGalleryError": "Görüntü galeriye kaydedilemedi"
+  "saveToGalleryError": "Görüntü galeriye kaydedilemedi",
+  "leaveGroupLastAdminWarning": "Bu grupta tek yöneticisiniz. Ayrılabilmek için en az bir üyeyi yönetici olarak yükseltin.",
+  "leaveGroupNoCapabilitiesWarning": "Bu grup eski bir sürümle oluşturuldu ve ayrılmayı desteklemiyor. Tüm üyeler ayrılmayı destekleyen bir sürüme geçtiğinde, yöneticiler grup özelliklerini yükseltebilir."
 }

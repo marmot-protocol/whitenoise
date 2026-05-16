@@ -21,6 +21,8 @@ and this project adheres to Calendar Versioning (CalVer).
 ## Unreleased
 
 ### Added
+- Leave group from chat list for non-last admins [PR #638](https://github.com/marmot-protocol/whitenoise/pull/638)
+- Add archive option in chat removed warning and change wording for leave case [PR #657](https://github.com/marmot-protocol/whitenoise/pull/657)
 
 ### Changed
 

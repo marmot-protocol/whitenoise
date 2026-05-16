@@ -1281,6 +1281,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get rawDebugViewCopied => 'Copié dans le presse-papiers';
 
   @override
+  String get rawDebugViewCopyDeepLink => 'Copier le lien profond';
+
+  @override
   String get appLogsTitle => 'Journaux de l\'application';
 
   @override
@@ -1474,6 +1477,18 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get leaveGroupWarning =>
       'Êtes-vous sûr de vouloir quitter ce groupe ? La discussion restera dans votre liste si vous ne la supprimez pas, mais vous ne pourrez ni envoyer ni recevoir de nouveaux messages à moins que quelqu\'un ne vous invite à nouveau.';
+
+  @override
+  String get leaveGroupLastAdminWarning =>
+      'Vous êtes le seul administrateur de ce groupe. Promouvez au moins un membre en tant qu\'administrateur avant de pouvoir quitter.';
+
+  @override
+  String get leaveGroupNoCapabilitiesWarning =>
+      'Ce groupe a été créé avec une ancienne version et ne prend pas en charge le départ. Les administrateurs peuvent mettre à niveau les capacités du groupe une fois que tous les membres utilisent une version qui prend en charge le départ.';
+
+  @override
+  String get leaveGroupFetchError =>
+      'Une erreur s\'est produite lors du chargement des infos du groupe. Vous ne pourrez pas quitter pour l\'instant.';
 
   @override
   String get failedToLeaveGroup => 'Impossible de quitter le groupe. Veuillez réessayer.';

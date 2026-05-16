@@ -10,7 +10,7 @@ import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/feature_flags_provider.dart';
 import 'package:whitenoise/src/rust/api/chat_summary.dart';
-import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
+import 'package:whitenoise/src/rust/api/groups.dart' show GroupType, RequiredProposal;
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -19,6 +19,7 @@ import 'package:whitenoise/widgets/chat_list_tile.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_chat_list_item.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
@@ -71,6 +72,9 @@ class _MockApi extends MockWnApi {
   int setChatPinOrderCallCount = 0;
   PlatformInt64? lastPinOrder;
 
+  List<RequiredProposal> mockRequiredProposals = [RequiredProposal.selfRemove];
+  List<String> mockAdminPubkeys = [];
+
   @override
   Future<FlutterMetadata> crateApiUsersUserMetadata({
     required bool blockingDataSync,
@@ -90,6 +94,29 @@ class _MockApi extends MockWnApi {
     setChatPinOrderCallCount++;
     lastPinOrder = pinOrder;
   }
+
+  bool shouldThrowOnProposals = false;
+
+  @override
+  Future<List<RequiredProposal>> crateApiGroupsGroupRequiredProposals({
+    required String accountPubkey,
+    required String groupId,
+  }) async {
+    if (shouldThrowOnProposals) throw Exception('Failed to fetch proposals');
+    return mockRequiredProposals;
+  }
+
+  @override
+  Future<List<String>> crateApiGroupsGroupAdmins({
+    required String pubkey,
+    required String groupId,
+  }) async => mockAdminPubkeys;
+
+  @override
+  Future<void> crateApiGroupsSelfDemote({
+    required String pubkey,
+    required String groupId,
+  }) async {}
 }
 
 final _api = _MockApi();
@@ -107,6 +134,9 @@ void main() {
     _api.shouldThrowOnPin = false;
     _api.setChatPinOrderCallCount = 0;
     _api.lastPinOrder = null;
+    _api.mockRequiredProposals = [RequiredProposal.selfRemove];
+    _api.mockAdminPubkeys = [];
+    _api.shouldThrowOnProposals = false;
     _api.reset();
   });
 
@@ -1241,7 +1271,7 @@ void main() {
       );
 
       testWidgets(
-        'Cancel on confirmation dismisses overlay',
+        'Cancel on confirmation returns to initial menu',
         (tester) async {
           await pumpTile(
             tester,
@@ -1258,7 +1288,8 @@ void main() {
           await tester.tap(find.byKey(const Key('context_menu_action_cancel_leave')));
           await tester.pumpAndSettle();
 
-          expect(find.byKey(const Key('context_menu_card')), findsNothing);
+          expect(find.byKey(const Key('context_menu_action_leave_group')), findsOneWidget);
+          expect(find.byKey(const Key('context_menu_navigation_header')), findsNothing);
         },
       );
 
@@ -1377,6 +1408,387 @@ void main() {
         expect(errorMessage, isNotNull);
         expect(errorMessage, contains('leave'));
       });
+
+      testWidgets('shows Leave group item (disabled) when user is last admin', (tester) async {
+        _api.mockRequiredProposals = [RequiredProposal.selfRemove];
+        _api.mockAdminPubkeys = [testPubkeyA];
+
+        await pumpTile(
+          tester,
+          _chatSummary(name: 'My Group'),
+          extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+        );
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('context_menu_action_leave_group')), findsOneWidget);
+      });
+
+      testWidgets(
+        'tapping last admin leave item shows warning step',
+        (tester) async {
+          _api.mockRequiredProposals = [RequiredProposal.selfRemove];
+          _api.mockAdminPubkeys = [testPubkeyA];
+
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          expect(
+            find.byKey(const Key('context_menu_action_confirm_leave_group')),
+            findsNothing,
+          );
+          expect(find.byKey(const Key('context_menu_action_close_leave_warning')), findsOneWidget);
+          expect(
+            find.byKey(const Key('context_menu_action_leave_group_warning')),
+            findsOneWidget,
+          );
+        },
+      );
+
+      testWidgets('shows Leave group item (disabled) when no capabilities', (tester) async {
+        _api.mockRequiredProposals = [];
+
+        await pumpTile(
+          tester,
+          _chatSummary(name: 'My Group'),
+          extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+        );
+
+        await tester.longPress(find.byType(WnChatListItem));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('context_menu_action_leave_group')), findsOneWidget);
+      });
+
+      testWidgets(
+        'tapping noCapabilities leave item shows warning step, not confirmation',
+        (tester) async {
+          _api.mockRequiredProposals = [];
+
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          expect(
+            find.byKey(const Key('context_menu_action_confirm_leave_group')),
+            findsNothing,
+          );
+          expect(find.byKey(const Key('context_menu_action_close_leave_warning')), findsOneWidget);
+          expect(
+            find.byKey(const Key('context_menu_action_leave_group_warning')),
+            findsOneWidget,
+          );
+        },
+      );
+
+      testWidgets(
+        'tapping last admin leave item shows warning text in step 2',
+        (tester) async {
+          _api.mockRequiredProposals = [RequiredProposal.selfRemove];
+          _api.mockAdminPubkeys = [testPubkeyA];
+
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+
+          expect(
+            find.text(
+              "You're the only admin in this group. Promote at least one member to admin before you can leave.",
+            ),
+            findsNothing,
+          );
+
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          expect(
+            find.text(
+              "You're the only admin in this group. Promote at least one member to admin before you can leave.",
+            ),
+            findsOneWidget,
+          );
+        },
+      );
+
+      testWidgets(
+        'tapping noCapabilities leave item shows warning text in step 2',
+        (tester) async {
+          _api.mockRequiredProposals = [];
+
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+
+          expect(
+            find.text(
+              "This group was created with an older version and doesn't support leaving. "
+              'Admins may upgrade the group capabilities once all members are on a version that supports leaving.',
+            ),
+            findsNothing,
+          );
+
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          expect(
+            find.text(
+              "This group was created with an older version and doesn't support leaving. "
+              'Admins may upgrade the group capabilities once all members are on a version that supports leaving.',
+            ),
+            findsOneWidget,
+          );
+        },
+      );
+
+      testWidgets(
+        'tapping leave item when proposals fetch fails shows error notice in step 2',
+        (tester) async {
+          _api.shouldThrowOnProposals = true;
+
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          expect(find.byType(WnSystemNotice), findsOneWidget);
+          expect(
+            find.text(
+              "Something went wrong loading group info. You won't be able to leave right now.",
+            ),
+            findsOneWidget,
+          );
+        },
+      );
+
+      testWidgets(
+        'warning step for last admin shows navigation header with Leave group title',
+        (tester) async {
+          _api.mockRequiredProposals = [RequiredProposal.selfRemove];
+          _api.mockAdminPubkeys = [testPubkeyA];
+
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('context_menu_navigation_header')), findsOneWidget);
+          expect(
+            find.descendant(
+              of: find.byType(WnSlateNavigationHeader),
+              matching: find.text('Leave group'),
+            ),
+            findsOneWidget,
+          );
+        },
+      );
+
+      testWidgets(
+        'close button on last admin warning step returns to initial menu',
+        (tester) async {
+          _api.mockRequiredProposals = [RequiredProposal.selfRemove];
+          _api.mockAdminPubkeys = [testPubkeyA];
+
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_close_leave_warning')));
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('context_menu_action_leave_group')), findsOneWidget);
+          expect(find.byKey(const Key('context_menu_navigation_header')), findsNothing);
+        },
+      );
+
+      testWidgets(
+        'back arrow on last admin warning step returns to initial menu',
+        (tester) async {
+          _api.mockRequiredProposals = [RequiredProposal.selfRemove];
+          _api.mockAdminPubkeys = [testPubkeyA];
+
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('slate_back_button')));
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('context_menu_action_leave_group')), findsOneWidget);
+          expect(find.byKey(const Key('context_menu_navigation_header')), findsNothing);
+        },
+      );
+
+      testWidgets(
+        'back arrow on fetchError warning step returns to initial menu',
+        (tester) async {
+          _api.shouldThrowOnProposals = true;
+
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('slate_back_button')));
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('context_menu_action_leave_group')), findsOneWidget);
+          expect(find.byKey(const Key('context_menu_navigation_header')), findsNothing);
+        },
+      );
+
+      testWidgets(
+        'back arrow on noCapabilities warning step returns to initial menu',
+        (tester) async {
+          _api.mockRequiredProposals = [];
+
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('slate_back_button')));
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('context_menu_action_leave_group')), findsOneWidget);
+          expect(find.byKey(const Key('context_menu_navigation_header')), findsNothing);
+        },
+      );
+
+      testWidgets(
+        'close button on noCapabilities warning step returns to initial menu',
+        (tester) async {
+          _api.mockRequiredProposals = [];
+
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_close_leave_warning')));
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('context_menu_action_leave_group')), findsOneWidget);
+          expect(find.byKey(const Key('context_menu_navigation_header')), findsNothing);
+        },
+      );
+
+      testWidgets(
+        'close button on fetchError warning step returns to initial menu',
+        (tester) async {
+          _api.shouldThrowOnProposals = true;
+
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          await tester.tap(find.byKey(const Key('context_menu_action_close_leave_warning')));
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('context_menu_action_leave_group')), findsOneWidget);
+          expect(find.byKey(const Key('context_menu_navigation_header')), findsNothing);
+        },
+      );
+
+      testWidgets(
+        'warning step for last admin does not call leaveGroup',
+        (tester) async {
+          _api.mockRequiredProposals = [RequiredProposal.selfRemove];
+          _api.mockAdminPubkeys = [testPubkeyA];
+
+          await pumpTile(
+            tester,
+            _chatSummary(name: 'My Group'),
+            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
+          );
+
+          await tester.longPress(find.byType(WnChatListItem));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('context_menu_action_leave_group')));
+          await tester.pumpAndSettle();
+
+          expect(_api.leaveGroupCallCount, 0);
+        },
+      );
     });
   });
 }

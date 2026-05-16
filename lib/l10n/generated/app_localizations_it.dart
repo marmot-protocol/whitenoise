@@ -1269,6 +1269,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get rawDebugViewCopied => 'Copiato negli appunti';
 
   @override
+  String get rawDebugViewCopyDeepLink => 'Copia link diretto';
+
+  @override
   String get appLogsTitle => 'Registri dell\'app';
 
   @override
@@ -1459,6 +1462,18 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get leaveGroupWarning =>
       'Sei sicuro di voler lasciare questo gruppo? La chat rimarrà nel tuo elenco se non la elimini, ma non potrai inviare o ricevere nuovi messaggi a meno che qualcuno non ti inviti di nuovo.';
+
+  @override
+  String get leaveGroupLastAdminWarning =>
+      'Sei l\'unico amministratore di questo gruppo. Promuovi almeno un membro ad amministratore prima di poter uscire.';
+
+  @override
+  String get leaveGroupNoCapabilitiesWarning =>
+      'Questo gruppo è stato creato con una versione precedente e non supporta l\'uscita. Gli amministratori possono aggiornare le capacità del gruppo una volta che tutti i membri utilizzano una versione che supporta l\'uscita.';
+
+  @override
+  String get leaveGroupFetchError =>
+      'Si è verificato un errore nel caricamento delle info del gruppo. Non puoi uscire adesso.';
 
   @override
   String get failedToLeaveGroup => 'Impossibile lasciare il gruppo. Riprova.';

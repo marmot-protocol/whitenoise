@@ -2307,6 +2307,12 @@ abstract class AppLocalizations {
   /// **'Copied to clipboard'**
   String get rawDebugViewCopied;
 
+  /// Button label for copying a debug chat deep link
+  ///
+  /// In en, this message translates to:
+  /// **'Copy deep link'**
+  String get rawDebugViewCopyDeepLink;
+
   /// Screen title for the in-app log viewer
   ///
   /// In en, this message translates to:
@@ -2666,6 +2672,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Are you sure you want to leave this group? The chat will stay in your list if you don\'t delete it, but you won\'t be able to send or receive new messages unless someone re-invites you.'**
   String get leaveGroupWarning;
+
+  /// Shown in leave group menu when the user is the last admin and cannot leave yet
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re the only admin in this group. Promote at least one member to admin before you can leave.'**
+  String get leaveGroupLastAdminWarning;
+
+  /// Shown in leave group menu when the group lacks SelfRemove capability, typically because it was created in an older version of the protocol
+  ///
+  /// In en, this message translates to:
+  /// **'This group was created with an older version and doesn\'t support leaving. Admins may upgrade the group capabilities once all members are on a version that supports leaving.'**
+  String get leaveGroupNoCapabilitiesWarning;
+
+  /// Shown in leave group slate when group info could not be fetched
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong loading group info. You won\'t be able to leave right now.'**
+  String get leaveGroupFetchError;
 
   /// Error shown when leaving a group fails
   ///

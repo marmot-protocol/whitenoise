@@ -366,6 +366,7 @@
   "rawDebugViewGroupId": "群組 ID",
   "rawDebugViewMessageCount": "{count, plural, =0{沒有訊息} =1{1 則訊息} other{{count} 則訊息}}",
   "rawDebugViewCopied": "已複製到剪貼簿",
+  "rawDebugViewCopyDeepLink": "複製深層連結",
   "appLogsTitle": "應用程式記錄",
   "appLogsViewLogs": "查看記錄",
   "appLogsViewLogsDescription": "在應用程式內查看所有 Logger 輸出",
@@ -426,6 +427,9 @@
   "leave": "離開",
   "leaveGroup": "離開群組",
   "leaveGroupWarning": "確定要離開此群組嗎？如果您沒有刪除聊天，它仍會留在列表中；但除非有人再次邀請您，否則您將無法傳送或接收新訊息。",
+  "leaveGroupFetchError": "載入群組資訊時發生錯誤。您目前無法離開。",
   "failedToLeaveGroup": "離開群組失敗。請再試一次。",
-  "youLeftTheGroup": "您已離開群組"
+  "youLeftTheGroup": "您已離開群組",
+  "leaveGroupLastAdminWarning": "您是本群組中唯一的管理員。請先將至少一名成員提升為管理員，才能離開群組。",
+  "leaveGroupNoCapabilitiesWarning": "此群組是使用舊版建立的，因此不支援退出功能。待所有成員皆升級至支援退出功能的版本後，管理員即可升級群組功能。"
 }

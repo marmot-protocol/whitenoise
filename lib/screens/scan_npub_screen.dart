@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart' show Gap;
+import 'package:go_router/go_router.dart' show GoRouter;
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/deep_links.dart' show DeepLinks;
 import 'package:whitenoise/utils/encoding.dart' show hexFromNpub;
 import 'package:whitenoise/widgets/qr_scanner.dart' show QrScanner;
 import 'package:whitenoise/widgets/wn_slate.dart';
@@ -20,6 +22,13 @@ class ScanNpubScreen extends HookWidget {
     final showInvalidNpubError = useState(false);
 
     void onBarcodeDetected(String value) {
+      final deepLinkTarget = DeepLinks.parseString(value);
+      if (deepLinkTarget != null) {
+        Routes.goBack(context);
+        GoRouter.of(context).push(deepLinkTarget.location);
+        return;
+      }
+
       final hexPubkey = hexFromNpub(value);
       if (hexPubkey != null) {
         Routes.goBack(context);

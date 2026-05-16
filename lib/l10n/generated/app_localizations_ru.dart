@@ -1299,6 +1299,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get rawDebugViewCopied => 'Скопировано в буфер обмена';
 
   @override
+  String get rawDebugViewCopyDeepLink => 'Скопировать диплинк';
+
+  @override
   String get appLogsTitle => 'Журналы приложения';
 
   @override
@@ -1490,6 +1493,18 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get leaveGroupWarning =>
       'Вы уверены, что хотите покинуть эту группу? Чат останется в вашем списке, если вы его не удалите, но вы не сможете отправлять или получать новые сообщения, пока кто-нибудь не пригласит вас снова.';
+
+  @override
+  String get leaveGroupLastAdminWarning =>
+      'Вы единственный администратор в этой группе. Повысьте хотя бы одного участника до администратора, прежде чем выйти.';
+
+  @override
+  String get leaveGroupNoCapabilitiesWarning =>
+      'Эта группа была создана в более старой версии и не поддерживает выход. Администраторы могут обновить возможности группы, как только все участники перейдут на версию, поддерживающую выход.';
+
+  @override
+  String get leaveGroupFetchError =>
+      'Не удалось загрузить информацию о группе. Вы не сможете выйти прямо сейчас.';
 
   @override
   String get failedToLeaveGroup => 'Не удалось покинуть группу. Пожалуйста, попробуйте еще раз.';

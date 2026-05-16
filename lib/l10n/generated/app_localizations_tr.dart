@@ -1266,6 +1266,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get rawDebugViewCopied => 'Panoya kopyalandı';
 
   @override
+  String get rawDebugViewCopyDeepLink => 'Derin bağlantıyı kopyala';
+
+  @override
   String get appLogsTitle => 'Uygulama Günlükleri';
 
   @override
@@ -1456,6 +1459,18 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get leaveGroupWarning =>
       'Bu gruptan ayrılmak istediğinize emin misiniz? Silmezseniz sohbet listenizde kalacak, ancak biri sizi yeniden davet edene kadar yeni mesaj gönderemez veya alamazsınız.';
+
+  @override
+  String get leaveGroupLastAdminWarning =>
+      'Bu grupta tek yöneticisiniz. Ayrılabilmek için en az bir üyeyi yönetici olarak yükseltin.';
+
+  @override
+  String get leaveGroupNoCapabilitiesWarning =>
+      'Bu grup eski bir sürümle oluşturuldu ve ayrılmayı desteklemiyor. Tüm üyeler ayrılmayı destekleyen bir sürüme geçtiğinde, yöneticiler grup özelliklerini yükseltebilir.';
+
+  @override
+  String get leaveGroupFetchError =>
+      'Grup bilgileri yüklenirken bir sorun oluştu. Şu anda gruptan ayrılamazsınız.';
 
   @override
   String get failedToLeaveGroup => 'Gruptan ayrılma başarısız oldu. Lütfen tekrar deneyin.';

@@ -1283,6 +1283,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get rawDebugViewCopied => 'Copiado al portapapeles';
 
   @override
+  String get rawDebugViewCopyDeepLink => 'Copiar enlace profundo';
+
+  @override
   String get appLogsTitle => 'Registros de la aplicación';
 
   @override
@@ -1473,6 +1476,18 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get leaveGroupWarning =>
       '¿Estás seguro de que quieres salir de este grupo? El chat permanecerá en tu lista si no lo eliminas, pero no podrás enviar ni recibir mensajes nuevos a menos que alguien te vuelva a invitar.';
+
+  @override
+  String get leaveGroupLastAdminWarning =>
+      'Eres el único administrador de este grupo. Promueve al menos a un miembro como administrador antes de poder salir.';
+
+  @override
+  String get leaveGroupNoCapabilitiesWarning =>
+      'Este grupo fue creado con una versión anterior y no admite salir. Los administradores pueden mejorar las capacidades del grupo una vez que todos los miembros estén en una versión que soporte abandonar.';
+
+  @override
+  String get leaveGroupFetchError =>
+      'Algo salió mal al cargar la información del grupo. No podrás salir ahora mismo.';
 
   @override
   String get failedToLeaveGroup => 'No se pudo salir del grupo. Por favor, inténtalo de nuevo.';

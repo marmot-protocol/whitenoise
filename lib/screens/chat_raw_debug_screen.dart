@@ -8,6 +8,7 @@ import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
+import 'package:whitenoise/providers/deep_link_provider.dart';
 import 'package:whitenoise/providers/message_debug_log_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
@@ -15,8 +16,10 @@ import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/deep_links.dart';
 import 'package:whitenoise/widgets/debug_key_value_row.dart';
 import 'package:whitenoise/widgets/debug_section_card.dart';
+import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_pill.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
@@ -153,7 +156,7 @@ class ChatRawDebugScreen extends HookConsumerWidget {
   }
 }
 
-class _DebugHeader extends StatelessWidget {
+class _DebugHeader extends ConsumerWidget {
   const _DebugHeader({
     required this.groupId,
     required this.messageCount,
@@ -167,7 +170,13 @@ class _DebugHeader extends StatelessWidget {
   final String? latestMessagePubkey;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+    final deepLinkSchemeState = ref.watch(deepLinkSchemeProvider);
+    final chatDeepLink = deepLinkSchemeState.hasValue
+        ? DeepLinks.chatUri(groupId, scheme: deepLinkSchemeState.value!)
+        : null;
     final copyText = [
       'group_id:              $groupId',
       'message_count:         $messageCount',
@@ -187,6 +196,42 @@ class _DebugHeader extends StatelessWidget {
             value: groupId,
             valueKey: const Key('debug_group_id'),
           ),
+          if (chatDeepLink != null) ...[
+            SizedBox(height: 8.h),
+            Material(
+              color: Colors.transparent,
+              child: InkWell(
+                key: const Key('debug_chat_deep_link_copy_button'),
+                borderRadius: BorderRadius.circular(8.r),
+                onTap: () => _copyDebugText(context, chatDeepLink),
+                child: Ink(
+                  padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 8.h),
+                  decoration: BoxDecoration(
+                    color: colors.fillSecondary,
+                    borderRadius: BorderRadius.circular(8.r),
+                    border: Border.all(color: colors.borderTertiary),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      WnIcon(
+                        WnIcons.copy,
+                        size: 14.w,
+                        color: colors.backgroundContentSecondary,
+                      ),
+                      SizedBox(width: 6.w),
+                      Text(
+                        context.l10n.rawDebugViewCopyDeepLink,
+                        style: typography.medium10.copyWith(
+                          color: colors.backgroundContentSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ],
           SizedBox(height: 4.h),
           DebugKeyValueRow(
             label: 'message_count',

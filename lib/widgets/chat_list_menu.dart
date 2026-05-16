@@ -21,18 +21,20 @@ class _BackObserver extends WidgetsBindingObserver {
 class ChatListAction {
   final String id;
   final String label;
-  final WnIcons icon;
+  final WnIcons? icon;
   final Future<void> Function()? onTap;
   final bool isDestructive;
   final bool autoDismiss;
+  final bool isDisabled;
 
   const ChatListAction({
     required this.id,
     required this.label,
-    required this.icon,
+    this.icon,
     this.onTap,
     this.isDestructive = false,
     this.autoDismiss = true,
+    this.isDisabled = false,
   });
 }
 
@@ -40,7 +42,7 @@ class ChatListMenuController {
   OverlayEntry? _overlay;
   Future<void> Function()? _animatedDismiss;
   bool _dismissing = false;
-  void Function(List<ChatListAction>, Widget?, String?, VoidCallback?)? _applyUpdate;
+  void Function(List<ChatListAction>, Widget?, Widget?, String?, VoidCallback?)? _applyUpdate;
   VoidCallback? _onBack;
 
   bool get isShowing => _overlay != null;
@@ -65,11 +67,12 @@ class ChatListMenuController {
 
   void updateState(
     List<ChatListAction> actions, {
+    Widget? systemNotice,
     Widget? middleContent,
     String? title,
     VoidCallback? onBack,
   }) {
-    _applyUpdate?.call(actions, middleContent, title, onBack);
+    _applyUpdate?.call(actions, systemNotice, middleContent, title, onBack);
   }
 }
 
@@ -124,6 +127,7 @@ class ChatListMenu extends HookWidget {
   Widget build(BuildContext context) {
     final actionsState = useState(actions);
     final titleState = useState<String?>(null);
+    final systemNoticeState = useState<Widget?>(null);
     final middleContentState = useState<Widget?>(null);
 
     final colors = context.colors;
@@ -140,6 +144,7 @@ class ChatListMenu extends HookWidget {
 
     final currentActions = actionsState.value;
     final currentTitle = titleState.value;
+    final currentSystemNotice = systemNoticeState.value;
     final currentMiddleContent = middleContentState.value;
 
     final buttonCount = currentActions.length;
@@ -148,9 +153,11 @@ class ChatListMenu extends HookWidget {
         (estimatedButtonHeight * buttonCount) + (buttonSpacing * (buttonCount - 1));
     final estimatedHeaderHeight = currentTitle != null ? 80.h : 0.0;
     final estimatedMiddleContentHeight = currentMiddleContent != null ? 80.h : 0.0;
+    final estimatedSystemNoticeHeight = currentSystemNotice != null ? 80.h : 0.0;
     final menuContentHeight =
         menuPadding +
         estimatedHeaderHeight +
+        estimatedSystemNoticeHeight +
         itemHeight +
         containerGap +
         estimatedMiddleContentHeight +
@@ -176,8 +183,9 @@ class ChatListMenu extends HookWidget {
     useEffect(() {
       animController.forward();
       controller._animatedDismiss = () => animController.reverse();
-      controller._applyUpdate = (newActions, middleContent, title, onBack) {
+      controller._applyUpdate = (newActions, systemNotice, middleContent, title, onBack) {
         actionsState.value = newActions;
+        systemNoticeState.value = systemNotice;
         middleContentState.value = middleContent;
         titleState.value = title;
         controller._onBack = onBack;
@@ -235,6 +243,7 @@ class ChatListMenu extends HookWidget {
                     onTap: () {},
                     child: Container(
                       key: const Key('context_menu_card'),
+                      clipBehavior: Clip.antiAlias,
                       decoration: BoxDecoration(
                         color: colors.backgroundSecondary,
                         borderRadius: BorderRadius.circular(16.r),
@@ -253,10 +262,11 @@ class ChatListMenu extends HookWidget {
                           ),
                         ],
                       ),
-                      padding: EdgeInsets.symmetric(vertical: menuPadding),
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          if (currentSystemNotice != null) currentSystemNotice,
+                          SizedBox(height: menuPadding),
                           if (currentTitle != null)
                             WnSlateNavigationHeader(
                               key: const Key('context_menu_navigation_header'),
@@ -301,7 +311,7 @@ class ChatListMenu extends HookWidget {
                                       ? WnButtonType.destructive
                                       : WnButtonType.outline,
                                   size: WnButtonSize.medium,
-                                  onPressed: action.onTap != null
+                                  onPressed: (action.onTap != null && !action.isDisabled)
                                       ? () {
                                           if (action.autoDismiss) onDismiss();
                                           action.onTap!();
@@ -311,6 +321,7 @@ class ChatListMenu extends HookWidget {
                               ),
                             );
                           }),
+                          SizedBox(height: menuPadding),
                         ],
                       ),
                     ),
