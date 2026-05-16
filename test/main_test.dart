@@ -6,8 +6,14 @@ import 'package:flutter_riverpod/flutter_riverpod.dart'
     show AsyncData, ProviderContainer, ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/main.dart'
-    show WnApp, initializeAppContainer, kDataVersion, kDataVersionFile;
+    show
+        WnApp,
+        initializeAppContainer,
+        kDataVersion,
+        kDataVersionFile,
+        resolveWhitenoiseBaseDirectory;
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/chat_list_refresh_provider.dart';
 import 'package:whitenoise/providers/theme_provider.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -60,6 +66,25 @@ void Function() _mockSecureStorage() {
       null,
     );
   };
+}
+
+void _mockAppGroupContainerPath(String? path) {
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+    const MethodChannel('org.parres.whitenoise/app_group'),
+    (call) async {
+      if (call.method == 'getAppGroupContainerPath') {
+        return path;
+      }
+      return null;
+    },
+  );
+}
+
+void _resetAppGroupContainerPath() {
+  TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+    const MethodChannel('org.parres.whitenoise/app_group'),
+    null,
+  );
 }
 
 class _MockAuthNotifier extends AuthNotifier {
@@ -213,6 +238,36 @@ void main() {
 
       expect(mockAuth.ensureExternalSignersRegisteredCount, 1);
     });
+
+    testWidgets('ensures relay subscriptions on app resume', (tester) async {
+      await pumpWnApp(tester);
+      mockApi.ensureAllSubscriptionsCallCount = 0;
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(WnApp)),
+        listen: false,
+      );
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(mockApi.ensureAllSubscriptionsCallCount, 1);
+      expect(container.read(chatListRefreshProvider), 1);
+    });
+
+    testWidgets('logs relay subscription resume failures without throwing', (tester) async {
+      await pumpWnApp(tester);
+      mockApi.shouldFailEnsureAllSubscriptions = true;
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(WnApp)),
+        listen: false,
+      );
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(mockApi.ensureAllSubscriptionsCallCount, 1);
+      expect(container.read(chatListRefreshProvider), 0);
+    });
   });
 
   group('initializeAppContainer', () {
@@ -231,6 +286,7 @@ void main() {
     tearDown(() {
       pathProvider.reset();
       resetSecureStorage();
+      _resetAppGroupContainerPath();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         const MethodChannel('plugins.flutter.io/shared_preferences'),
         null,
@@ -300,7 +356,7 @@ void main() {
       expect(marker.existsSync(), isTrue);
     });
 
-    test('wipes data directory when no version file exists', () async {
+    test('preserves data directory when no version file exists', () async {
       final dataDir = Directory('${pathProvider.tempDir.path}/whitenoise/data');
       await dataDir.create(recursive: true);
       final oldSecrets = File('${dataDir.path}/whitenoise.json');
@@ -313,16 +369,16 @@ void main() {
 
       await initializeAppContainer();
 
-      expect(oldSecrets.existsSync(), isFalse);
-      expect(oldUuid.existsSync(), isFalse);
-      expect(oldDb.existsSync(), isFalse);
+      expect(oldSecrets.existsSync(), isTrue);
+      expect(oldUuid.existsSync(), isTrue);
+      expect(oldDb.existsSync(), isTrue);
       expect(dataDir.existsSync(), isTrue);
       final versionFile = File('${dataDir.path}/$kDataVersionFile');
       expect(versionFile.existsSync(), isTrue);
       expect(versionFile.readAsStringSync().trim(), '$kDataVersion');
     });
 
-    test('wipes data directory when version is outdated', () async {
+    test('preserves data directory when version is outdated', () async {
       final dataDir = Directory('${pathProvider.tempDir.path}/whitenoise/data');
       await dataDir.create(recursive: true);
       final versionFile = File('${dataDir.path}/$kDataVersionFile');
@@ -332,8 +388,96 @@ void main() {
 
       await initializeAppContainer();
 
-      expect(marker.existsSync(), isFalse);
+      expect(marker.existsSync(), isTrue);
       expect(versionFile.readAsStringSync().trim(), '$kDataVersion');
+    });
+
+    test('uses App Group container on iOS when available', () async {
+      final appGroupDir = Directory.systemTemp.createTempSync('whitenoise_app_group_test');
+      _mockAppGroupContainerPath(appGroupDir.path);
+      addTearDown(() {
+        if (appGroupDir.existsSync()) {
+          appGroupDir.deleteSync(recursive: true);
+        }
+      });
+
+      final baseDir = await resolveWhitenoiseBaseDirectory(isIOS: true);
+
+      expect(baseDir.path, '${appGroupDir.path}/whitenoise');
+    });
+
+    test('moves existing Documents data into App Group container on iOS', () async {
+      final appGroupDir = Directory.systemTemp.createTempSync('whitenoise_app_group_test');
+      _mockAppGroupContainerPath(appGroupDir.path);
+      final oldDataDir = Directory('${pathProvider.tempDir.path}/whitenoise/data');
+      await oldDataDir.create(recursive: true);
+      final marker = File('${oldDataDir.path}/marker.txt');
+      await marker.writeAsString('existing');
+      addTearDown(() {
+        if (appGroupDir.existsSync()) {
+          appGroupDir.deleteSync(recursive: true);
+        }
+      });
+
+      final baseDir = await resolveWhitenoiseBaseDirectory(isIOS: true);
+
+      expect(baseDir.path, '${appGroupDir.path}/whitenoise');
+      expect(File('${baseDir.path}/data/marker.txt').readAsStringSync(), 'existing');
+      expect(Directory('${pathProvider.tempDir.path}/whitenoise').existsSync(), isFalse);
+    });
+
+    test('moves Documents data when App Group container only has empty directories', () async {
+      final appGroupDir = Directory.systemTemp.createTempSync('whitenoise_app_group_test');
+      _mockAppGroupContainerPath(appGroupDir.path);
+      final oldDataDir = Directory('${pathProvider.tempDir.path}/whitenoise/data');
+      await oldDataDir.create(recursive: true);
+      await File('${oldDataDir.path}/marker.txt').writeAsString('existing');
+      await Directory('${appGroupDir.path}/whitenoise/data').create(recursive: true);
+      await Directory('${appGroupDir.path}/whitenoise/logs').create(recursive: true);
+      addTearDown(() {
+        if (appGroupDir.existsSync()) {
+          appGroupDir.deleteSync(recursive: true);
+        }
+      });
+
+      final baseDir = await resolveWhitenoiseBaseDirectory(isIOS: true);
+
+      expect(baseDir.path, '${appGroupDir.path}/whitenoise');
+      expect(File('${baseDir.path}/data/marker.txt').readAsStringSync(), 'existing');
+      expect(Directory('${pathProvider.tempDir.path}/whitenoise').existsSync(), isFalse);
+    });
+
+    test('preserves App Group data when both storage locations contain data', () async {
+      final appGroupDir = Directory.systemTemp.createTempSync('whitenoise_app_group_test');
+      _mockAppGroupContainerPath(appGroupDir.path);
+      final oldDataDir = Directory('${pathProvider.tempDir.path}/whitenoise/data');
+      await oldDataDir.create(recursive: true);
+      await File('${oldDataDir.path}/old-marker.txt').writeAsString('old');
+      final appGroupDataDir = Directory('${appGroupDir.path}/whitenoise/data');
+      await appGroupDataDir.create(recursive: true);
+      await File('${appGroupDataDir.path}/new-marker.txt').writeAsString('new');
+      addTearDown(() {
+        if (appGroupDir.existsSync()) {
+          appGroupDir.deleteSync(recursive: true);
+        }
+      });
+
+      final baseDir = await resolveWhitenoiseBaseDirectory(isIOS: true);
+
+      expect(baseDir.path, '${appGroupDir.path}/whitenoise');
+      expect(File('${baseDir.path}/data/new-marker.txt').readAsStringSync(), 'new');
+      expect(
+        File('${pathProvider.tempDir.path}/whitenoise/data/old-marker.txt').existsSync(),
+        isTrue,
+      );
+    });
+
+    test('falls back to Documents on iOS when App Group container is unavailable', () async {
+      _mockAppGroupContainerPath(null);
+
+      final baseDir = await resolveWhitenoiseBaseDirectory(isIOS: true);
+
+      expect(baseDir.path, '${pathProvider.tempDir.path}/whitenoise');
     });
   });
 }

@@ -322,6 +322,30 @@ void main() {
 
         expect(getResult().chats.length, 2);
       });
+
+      testWidgets('re-subscribes when refresh token changes', (tester) async {
+        late ValueNotifier<int> refreshToken;
+        final getResult = await mountHook(tester, () {
+          refreshToken = useState(0);
+          return useChatList(testPubkeyA, refreshToken: refreshToken.value);
+        });
+
+        _api.emitInitialSnapshot([_chatSummary('c1', DateTime(2024))]);
+        await tester.pumpAndSettle();
+
+        expect(getResult().chats.length, 1);
+
+        refreshToken.value++;
+        await tester.pump();
+
+        _api.emitInitialSnapshot([
+          _chatSummary('c1', DateTime(2024)),
+          _chatSummary('c2', DateTime(2024, 1, 2)),
+        ]);
+        await tester.pumpAndSettle();
+
+        expect(getResult().chats.length, 2);
+      });
     });
 
     group('error handling', () {

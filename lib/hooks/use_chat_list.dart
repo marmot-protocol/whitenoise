@@ -14,12 +14,16 @@ typedef ChatListResult = ({
   VoidCallback refresh,
 });
 
-ChatListResult useChatList(String pubkey, {bool archived = false}) {
+ChatListResult useChatList(String pubkey, {bool archived = false, int refreshToken = 0}) {
   final blockedPubkeysRefreshKey = useState(0);
-  final blockedState = useBlockedPubkeys(pubkey, refreshKey: blockedPubkeysRefreshKey.value);
+  final blockedState = useBlockedPubkeys(
+    pubkey,
+    refreshKey: blockedPubkeysRefreshKey.value + refreshToken,
+  );
   return _useChatList(
     pubkey,
     archived: archived,
+    refreshToken: refreshToken,
     blockedState: blockedState,
     refreshBlockedPubkeys: () => blockedPubkeysRefreshKey.value++,
   );
@@ -28,6 +32,7 @@ ChatListResult useChatList(String pubkey, {bool archived = false}) {
 ChatListResult useChatListWithBlockedPubkeys(
   String pubkey, {
   bool archived = false,
+  int refreshToken = 0,
   required BlockedPubkeysState blockedState,
 }) {
   final refreshBlockedPubkeysRef = useRef<VoidCallback>(() {});
@@ -36,6 +41,7 @@ ChatListResult useChatListWithBlockedPubkeys(
   return _useChatList(
     pubkey,
     archived: archived,
+    refreshToken: refreshToken,
     blockedState: blockedState,
     refreshBlockedPubkeys: () => refreshBlockedPubkeysRef.value(),
   );
@@ -44,6 +50,7 @@ ChatListResult useChatListWithBlockedPubkeys(
 ChatListResult _useChatList(
   String pubkey, {
   required bool archived,
+  required int refreshToken,
   required BlockedPubkeysState blockedState,
   required VoidCallback refreshBlockedPubkeys,
 }) {
@@ -119,7 +126,7 @@ ChatListResult _useChatList(
             );
           });
     },
-    [pubkey, refreshKey.value, archived],
+    [pubkey, refreshKey.value, archived, refreshToken],
   );
 
   final snapshot = useStream(stream, initialData: <String, ChatSummary>{});

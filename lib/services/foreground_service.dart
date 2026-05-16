@@ -402,9 +402,39 @@ class PendingNotificationTap {
     required this.receiverPubkey,
   });
 
+  static PendingNotificationTap? fromMap(Map<Object?, Object?> data) {
+    final groupId = data['groupId'] as String?;
+    final isInvite = data['isInvite'] as bool?;
+    final receiverPubkey = data['receiverPubkey'] as String?;
+    if (groupId == null ||
+        groupId.isEmpty ||
+        isInvite == null ||
+        receiverPubkey == null ||
+        receiverPubkey.isEmpty) {
+      return null;
+    }
+    return PendingNotificationTap(
+      groupId: groupId,
+      isInvite: isInvite,
+      receiverPubkey: receiverPubkey,
+    );
+  }
+
   final String groupId;
   final bool isInvite;
   final String receiverPubkey;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PendingNotificationTap &&
+          runtimeType == other.runtimeType &&
+          groupId == other.groupId &&
+          isInvite == other.isInvite &&
+          receiverPubkey == other.receiverPubkey;
+
+  @override
+  int get hashCode => Object.hash(groupId, isInvite, receiverPubkey);
 }
 
 /// Reads and clears any notification-tap payload stashed by the task
@@ -415,23 +445,12 @@ Future<PendingNotificationTap?> consumePendingNotificationTap() async {
     final raw = await FlutterForegroundTask.getData<String>(key: _kPendingNotificationTapKey);
     if (raw == null) return null;
     await FlutterForegroundTask.removeData(key: _kPendingNotificationTapKey);
-    final data = jsonDecode(raw) as Map<String, dynamic>;
-    final groupId = data['groupId'] as String?;
-    final isInvite = data['isInvite'] as bool?;
-    final receiverPubkey = data['receiverPubkey'] as String?;
-    if (groupId == null ||
-        groupId.isEmpty ||
-        isInvite == null ||
-        receiverPubkey == null ||
-        receiverPubkey.isEmpty) {
+    final tap = PendingNotificationTap.fromMap(jsonDecode(raw) as Map<String, dynamic>);
+    if (tap == null) {
       _logger.warning('Malformed pending notification tap payload: $raw');
       return null;
     }
-    return PendingNotificationTap(
-      groupId: groupId,
-      isInvite: isInvite,
-      receiverPubkey: receiverPubkey,
-    );
+    return tap;
   } catch (e, st) {
     _logger.warning('Failed to consume pending notification tap', e, st);
     return null;

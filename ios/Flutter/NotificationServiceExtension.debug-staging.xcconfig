@@ -1,0 +1,2 @@
+#include "Generated.xcconfig"
+#include? "../Pods/Target Support Files/Pods-WhiteNoiseNotificationServiceExtension/Pods-WhiteNoiseNotificationServiceExtension.debug-staging.xcconfig"

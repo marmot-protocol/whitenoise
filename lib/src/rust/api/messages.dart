@@ -461,7 +461,10 @@ class SearchResult {
 
   @override
   int get hashCode =>
-      message.hashCode ^ mlsGroupId.hashCode ^ highlightSpans.hashCode ^ position.hashCode;
+      message.hashCode ^
+      mlsGroupId.hashCode ^
+      highlightSpans.hashCode ^
+      position.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -529,7 +532,8 @@ class UserReaction {
   });
 
   @override
-  int get hashCode => reactionId.hashCode ^ user.hashCode ^ emoji.hashCode ^ createdAt.hashCode;
+  int get hashCode =>
+      reactionId.hashCode ^ user.hashCode ^ emoji.hashCode ^ createdAt.hashCode;
 
   @override
   bool operator ==(Object other) =>

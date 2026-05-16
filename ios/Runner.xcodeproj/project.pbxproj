@@ -7,20 +7,47 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		08350C650CA2D6B8AE42504C /* WhiteNoiseNotificationServiceExtension.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = A4C231FA574E1DF782A652C5 /* WhiteNoiseNotificationServiceExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		0D303335F7DE1BEA053C0480 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F56CA7285F83FC11D2AB21A7 /* Localizable.strings */; };
+		137383FCF6E0E0339EBB7888 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = F8DD819FA664B86E77558A7D /* Localizable.strings */; };
 		1498D2341E8E89220040F4C2 /* GeneratedPluginRegistrant.m in Sources */ = {isa = PBXBuildFile; fileRef = 1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */; };
+		192C772FE10F74F1518B1BAA /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = FDEC47E35D33741EC8B98882 /* Localizable.strings */; };
+		1B5B6681BFED9934FF306704 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 9707781D10677088AF9E337D /* Localizable.strings */; };
 		242625052F24A76628ADD401 /* Pods_Runner.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 0521281B92DA679985F18181 /* Pods_Runner.framework */; };
+		2606A4556DE785A4F46920F4 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 1EBBE2C09DB881B7BD7EE90C /* Localizable.strings */; };
 		331C808B294A63AB00263BE5 /* RunnerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 331C807B294A618700263BE5 /* RunnerTests.swift */; };
 		3B3967161E833CAA004F5970 /* AppFrameworkInfo.plist in Resources */ = {isa = PBXBuildFile; fileRef = 3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */; };
+		5A4D20618176995920214B3F /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E6D4D3C021F1BA6C2D38EAFB /* Localizable.strings */; };
 		74858FAF1ED2DC5600515810 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 74858FAE1ED2DC5600515810 /* AppDelegate.swift */; };
+		7546EECAB2FF32C015F8FBF4 /* Pods_WhiteNoiseNotificationServiceExtension.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FFC324F57A67B1FB61A1218E /* Pods_WhiteNoiseNotificationServiceExtension.framework */; };
+		7A900154A110AB84BE04BD3D /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = FA884B403D2BD932BA5CE8E8 /* Localizable.strings */; };
+		7F7D50A389180BEF60F335BB /* Foundation.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B7551CF507C5912BC15844C6 /* Foundation.framework */; };
+		857A4D762AF5ECA4540006C0 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E20417F4BABC23EBFE160A77 /* Localizable.strings */; };
+		88C9C4DD49C03C8DD5CA4BC7 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 4E7601814B80B2D4FA657FE5 /* Localizable.strings */; };
 		8912F7C0DCC87BC219F13553 /* Pods_RunnerTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 643EEAEBAC9FBA327E5A2A36 /* Pods_RunnerTests.framework */; };
 		97C146FC1CF9000F007C117D /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FA1CF9000F007C117D /* Main.storyboard */; };
 		97C146FE1CF9000F007C117D /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FD1CF9000F007C117D /* Assets.xcassets */; };
 		97C147011CF9000F007C117D /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 97C146FF1CF9000F007C117D /* LaunchScreen.storyboard */; };
+		A10CEBCD878B7EAB7D322963 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 088BD5F605EAC352DE94A7BD /* Localizable.strings */; };
+		AD0AFBA3EABEDFD062A7B013 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 2CD4FD91FC93FA8F98267C35 /* Localizable.strings */; };
+		B53FCAD00B27CBD301F6BC61 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 5D14D0D3039092C329B87942 /* Localizable.strings */; };
+		D02FF64DC6FBE2FC831536E0 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8804A20421D869466829BB19 /* Localizable.strings */; };
+		D0A188941AD5BFE5CECD0882 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AAB62E170EA2C75F99DEE1BC /* Localizable.strings */; };
+		D30F775773B5F3D0030079B0 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8919B16B724AABADFCC076E4 /* Localizable.strings */; };
 		DF000001000000000000AAA1 /* staging.icon in Resources */ = {isa = PBXBuildFile; fileRef = DF000001000000000000AAA0 /* staging.icon */; };
 		DF000001000000000000AAA3 /* production.icon in Resources */ = {isa = PBXBuildFile; fileRef = DF000001000000000000AAA2 /* production.icon */; };
+		E00F081CADF586EB818241E7 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF848715F0FC8DA2D7CA3F5 /* NotificationService.swift */; };
+		F917A238C8ADB2B541E37B77 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 683099767CF9B6E6393D238A /* Localizable.strings */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		174A961E6450FB44A4D75963 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 637BE63819476BBCAF138705;
+			remoteInfo = WhiteNoiseNotificationServiceExtension;
+		};
 		331C8085294A63A400263BE5 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = 97C146E61CF9000F007C117D /* Project object */;
@@ -41,41 +68,85 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		A63D28AFB732BFAAE9B8BEFE /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				08350C650CA2D6B8AE42504C /* WhiteNoiseNotificationServiceExtension.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
 		0521281B92DA679985F18181 /* Pods_Runner.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_Runner.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		088BD5F605EAC352DE94A7BD /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
+		13EF705297DC26B7A7445823 /* NotificationServiceExtension.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = NotificationServiceExtension.profile.xcconfig; path = Flutter/NotificationServiceExtension.profile.xcconfig; sourceTree = "<group>"; };
 		1498D2321E8E86230040F4C2 /* GeneratedPluginRegistrant.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = GeneratedPluginRegistrant.h; sourceTree = "<group>"; };
 		1498D2331E8E89220040F4C2 /* GeneratedPluginRegistrant.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = GeneratedPluginRegistrant.m; sourceTree = "<group>"; };
+		18ED6DD084598ECEBCCDB9D0 /* NotificationServiceExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = NotificationServiceExtension.debug.xcconfig; path = Flutter/NotificationServiceExtension.debug.xcconfig; sourceTree = "<group>"; };
+		1AF848715F0FC8DA2D7CA3F5 /* NotificationService.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		1EBBE2C09DB881B7BD7EE90C /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
 		25530639E95D071E6790DAAB /* Pods-Runner.release-staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release-staging.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release-staging.xcconfig"; sourceTree = "<group>"; };
 		2A45FF8BCBC2086E9008FB3F /* Pods-Runner.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release.xcconfig"; sourceTree = "<group>"; };
+		2CD4FD91FC93FA8F98267C35 /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		331C807B294A618700263BE5 /* RunnerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RunnerTests.swift; sourceTree = "<group>"; };
 		331C8081294A63A400263BE5 /* RunnerTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = RunnerTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		3384CAAF06C6E0F1865460EE /* Pods-WhiteNoiseNotificationServiceExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WhiteNoiseNotificationServiceExtension.release.xcconfig"; path = "Target Support Files/Pods-WhiteNoiseNotificationServiceExtension/Pods-WhiteNoiseNotificationServiceExtension.release.xcconfig"; sourceTree = "<group>"; };
 		3B3967151E833CAA004F5970 /* AppFrameworkInfo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = AppFrameworkInfo.plist; path = Flutter/AppFrameworkInfo.plist; sourceTree = "<group>"; };
+		46D8D18C9FEBF4B97AFD5C8E /* NotificationServiceExtension.release-production.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "NotificationServiceExtension.release-production.xcconfig"; path = "Flutter/NotificationServiceExtension.release-production.xcconfig"; sourceTree = "<group>"; };
+		4D8FE995603818C434213EFC /* NotificationServiceExtension.release-staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "NotificationServiceExtension.release-staging.xcconfig"; path = "Flutter/NotificationServiceExtension.release-staging.xcconfig"; sourceTree = "<group>"; };
+		4E7601814B80B2D4FA657FE5 /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		5D14D0D3039092C329B87942 /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = tr.lproj/Localizable.strings; sourceTree = "<group>"; };
 		638F3DB255EEADA7CB0E6721 /* Pods-RunnerTests.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.profile.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.profile.xcconfig"; sourceTree = "<group>"; };
 		643EEAEBAC9FBA327E5A2A36 /* Pods_RunnerTests.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_RunnerTests.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		64ECF337B128209CECD645EC /* Pods-WhiteNoiseNotificationServiceExtension.release-staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WhiteNoiseNotificationServiceExtension.release-staging.xcconfig"; path = "Target Support Files/Pods-WhiteNoiseNotificationServiceExtension/Pods-WhiteNoiseNotificationServiceExtension.release-staging.xcconfig"; sourceTree = "<group>"; };
+		683099767CF9B6E6393D238A /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
+		70ECDD06A7D9ADE64F07F06E /* Pods-WhiteNoiseNotificationServiceExtension.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WhiteNoiseNotificationServiceExtension.profile.xcconfig"; path = "Target Support Files/Pods-WhiteNoiseNotificationServiceExtension/Pods-WhiteNoiseNotificationServiceExtension.profile.xcconfig"; sourceTree = "<group>"; };
 		74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "Runner-Bridging-Header.h"; sourceTree = "<group>"; };
 		74858FAE1ED2DC5600515810 /* AppDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
-		8D4F9B1E3A6C4D8F9A0B1C2D /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		7AFA3C8E1D35360C0083082E /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; name = Release.xcconfig; path = Flutter/Release.xcconfig; sourceTree = "<group>"; };
+		7BCFEA5585A0058B79DF75D6 /* Info.plist */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8145AD35E91A762FEFF960BB /* Pods-WhiteNoiseNotificationServiceExtension.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WhiteNoiseNotificationServiceExtension.debug.xcconfig"; path = "Target Support Files/Pods-WhiteNoiseNotificationServiceExtension/Pods-WhiteNoiseNotificationServiceExtension.debug.xcconfig"; sourceTree = "<group>"; };
+		8804A20421D869466829BB19 /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
+		8919B16B724AABADFCC076E4 /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = de.lproj/Localizable.strings; sourceTree = "<group>"; };
+		8B41FF10F0805D5923E90C72 /* Pods-WhiteNoiseNotificationServiceExtension.release-production.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WhiteNoiseNotificationServiceExtension.release-production.xcconfig"; path = "Target Support Files/Pods-WhiteNoiseNotificationServiceExtension/Pods-WhiteNoiseNotificationServiceExtension.release-production.xcconfig"; sourceTree = "<group>"; };
+		8D4F9B1E3A6C4D8F9A0B1C2D /* Runner.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Runner.entitlements; sourceTree = "<group>"; };
 		8E1A93A390B04F1200CCA346 /* Pods-RunnerTests.release-staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release-staging.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release-staging.xcconfig"; sourceTree = "<group>"; };
+		9707781D10677088AF9E337D /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = ru.lproj/Localizable.strings; sourceTree = "<group>"; };
 		9740EEB21CF90195004384FC /* Debug.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Debug.xcconfig; path = Flutter/Debug.xcconfig; sourceTree = "<group>"; };
 		9740EEB31CF90195004384FC /* Generated.xcconfig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.xcconfig; name = Generated.xcconfig; path = Flutter/Generated.xcconfig; sourceTree = "<group>"; };
 		97C146EE1CF9000F007C117D /* Runner.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = Runner.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		97C146FB1CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		97C146FD1CF9000F007C117D /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
-		DF000001000000000000AAA0 /* staging.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = staging.icon; sourceTree = "<group>"; };
-		DF000001000000000000AAA2 /* production.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = production.icon; sourceTree = "<group>"; };
 		97C147001CF9000F007C117D /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		97C147021CF9000F007C117D /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A14FEF392D2220132C8FF5AE /* Pods-WhiteNoiseNotificationServiceExtension.debug-staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-WhiteNoiseNotificationServiceExtension.debug-staging.xcconfig"; path = "Target Support Files/Pods-WhiteNoiseNotificationServiceExtension/Pods-WhiteNoiseNotificationServiceExtension.debug-staging.xcconfig"; sourceTree = "<group>"; };
+		A4C231FA574E1DF782A652C5 /* WhiteNoiseNotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = WhiteNoiseNotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4DB9FA0B6A558C6734CD51F /* Pods-Runner.release-production.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release-production.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release-production.xcconfig"; sourceTree = "<group>"; };
+		AAB62E170EA2C75F99DEE1BC /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = pt.lproj/Localizable.strings; sourceTree = "<group>"; };
+		ADA8AC8A947DB1CC57A22348 /* NotificationServiceExtension.debug-staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "NotificationServiceExtension.debug-staging.xcconfig"; path = "Flutter/NotificationServiceExtension.debug-staging.xcconfig"; sourceTree = "<group>"; };
 		B01EB207A2EAA3F31CBCA27A /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
+		B7551CF507C5912BC15844C6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
 		C0A9B6E149B5129F35555BFF /* Pods-RunnerTests.debug-staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug-staging.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug-staging.xcconfig"; sourceTree = "<group>"; };
 		C244D36C110D3005D7E9B057 /* Pods-RunnerTests.release-production.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release-production.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release-production.xcconfig"; sourceTree = "<group>"; };
 		C60ECAE8D16109C291EC2825 /* Pods-RunnerTests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.release.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.release.xcconfig"; sourceTree = "<group>"; };
 		DAA52D5EE50B601DB1CA96E1 /* Pods-Runner.profile.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.profile.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.profile.xcconfig"; sourceTree = "<group>"; };
+		DF000001000000000000AAA0 /* staging.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = staging.icon; sourceTree = "<group>"; };
+		DF000001000000000000AAA2 /* production.icon */ = {isa = PBXFileReference; lastKnownFileType = folder.iconcomposer.icon; path = production.icon; sourceTree = "<group>"; };
+		E20417F4BABC23EBFE160A77 /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		E22ACBE0C5FA51C8A50765EC /* Pods-Runner.debug-staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug-staging.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug-staging.xcconfig"; sourceTree = "<group>"; };
+		E6D4D3C021F1BA6C2D38EAFB /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = pt.lproj/Localizable.strings; sourceTree = "<group>"; };
+		EC207C42F80038C5754DC7AE /* NotificationServiceExtension.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = NotificationServiceExtension.release.xcconfig; path = Flutter/NotificationServiceExtension.release.xcconfig; sourceTree = "<group>"; };
 		F120A6CA24F7A03932590335 /* Pods-Runner.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.debug.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.debug.xcconfig"; sourceTree = "<group>"; };
+		F56CA7285F83FC11D2AB21A7 /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		F8DD819FA664B86E77558A7D /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = fr.lproj/Localizable.strings; sourceTree = "<group>"; };
+		FA884B403D2BD932BA5CE8E8 /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = es.lproj/Localizable.strings; sourceTree = "<group>"; };
+		FDEC47E35D33741EC8B98882 /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = it.lproj/Localizable.strings; sourceTree = "<group>"; };
+		FFC324F57A67B1FB61A1218E /* Pods_WhiteNoiseNotificationServiceExtension.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_WhiteNoiseNotificationServiceExtension.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,6 +155,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				242625052F24A76628ADD401 /* Pods_Runner.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9900BCEBCE13AF0ADEF3381D /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				7F7D50A389180BEF60F335BB /* Foundation.framework in Frameworks */,
+				7546EECAB2FF32C015F8FBF4 /* Pods_WhiteNoiseNotificationServiceExtension.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -98,6 +178,24 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		31A75F23A0780C0EFBFF08E4 /* WhiteNoiseNotificationServiceExtension */ = {
+			isa = PBXGroup;
+			children = (
+				1AF848715F0FC8DA2D7CA3F5 /* NotificationService.swift */,
+				7BCFEA5585A0058B79DF75D6 /* Info.plist */,
+				E20417F4BABC23EBFE160A77 /* Localizable.strings */,
+				1EBBE2C09DB881B7BD7EE90C /* Localizable.strings */,
+				683099767CF9B6E6393D238A /* Localizable.strings */,
+				F8DD819FA664B86E77558A7D /* Localizable.strings */,
+				8804A20421D869466829BB19 /* Localizable.strings */,
+				E6D4D3C021F1BA6C2D38EAFB /* Localizable.strings */,
+				9707781D10677088AF9E337D /* Localizable.strings */,
+				4E7601814B80B2D4FA657FE5 /* Localizable.strings */,
+			);
+			name = WhiteNoiseNotificationServiceExtension;
+			path = WhiteNoiseNotificationServiceExtension;
+			sourceTree = "<group>";
+		};
 		331C8082294A63A400263BE5 /* RunnerTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -121,6 +219,12 @@
 				638F3DB255EEADA7CB0E6721 /* Pods-RunnerTests.profile.xcconfig */,
 				E22ACBE0C5FA51C8A50765EC /* Pods-Runner.debug-staging.xcconfig */,
 				C0A9B6E149B5129F35555BFF /* Pods-RunnerTests.debug-staging.xcconfig */,
+				3384CAAF06C6E0F1865460EE /* Pods-WhiteNoiseNotificationServiceExtension.release.xcconfig */,
+				8145AD35E91A762FEFF960BB /* Pods-WhiteNoiseNotificationServiceExtension.debug.xcconfig */,
+				A14FEF392D2220132C8FF5AE /* Pods-WhiteNoiseNotificationServiceExtension.debug-staging.xcconfig */,
+				64ECF337B128209CECD645EC /* Pods-WhiteNoiseNotificationServiceExtension.release-staging.xcconfig */,
+				8B41FF10F0805D5923E90C72 /* Pods-WhiteNoiseNotificationServiceExtension.release-production.xcconfig */,
+				70ECDD06A7D9ADE64F07F06E /* Pods-WhiteNoiseNotificationServiceExtension.profile.xcconfig */,
 			);
 			path = Pods;
 			sourceTree = "<group>";
@@ -132,6 +236,12 @@
 				9740EEB21CF90195004384FC /* Debug.xcconfig */,
 				7AFA3C8E1D35360C0083082E /* Release.xcconfig */,
 				9740EEB31CF90195004384FC /* Generated.xcconfig */,
+				18ED6DD084598ECEBCCDB9D0 /* NotificationServiceExtension.debug.xcconfig */,
+				ADA8AC8A947DB1CC57A22348 /* NotificationServiceExtension.debug-staging.xcconfig */,
+				13EF705297DC26B7A7445823 /* NotificationServiceExtension.profile.xcconfig */,
+				EC207C42F80038C5754DC7AE /* NotificationServiceExtension.release.xcconfig */,
+				46D8D18C9FEBF4B97AFD5C8E /* NotificationServiceExtension.release-production.xcconfig */,
+				4D8FE995603818C434213EFC /* NotificationServiceExtension.release-staging.xcconfig */,
 			);
 			name = Flutter;
 			sourceTree = "<group>";
@@ -145,6 +255,7 @@
 				331C8082294A63A400263BE5 /* RunnerTests */,
 				6A7DE76DDF5C9542028B2104 /* Pods */,
 				A29B7AE9AAD8573FB4DAA299 /* Frameworks */,
+				31A75F23A0780C0EFBFF08E4 /* WhiteNoiseNotificationServiceExtension */,
 			);
 			sourceTree = "<group>";
 		};
@@ -153,6 +264,7 @@
 			children = (
 				97C146EE1CF9000F007C117D /* Runner.app */,
 				331C8081294A63A400263BE5 /* RunnerTests.xctest */,
+				A4C231FA574E1DF782A652C5 /* WhiteNoiseNotificationServiceExtension.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -171,6 +283,14 @@
 				74858FAD1ED2DC5600515810 /* Runner-Bridging-Header.h */,
 				DF000001000000000000AAA0 /* staging.icon */,
 				DF000001000000000000AAA2 /* production.icon */,
+				F56CA7285F83FC11D2AB21A7 /* Localizable.strings */,
+				8919B16B724AABADFCC076E4 /* Localizable.strings */,
+				FA884B403D2BD932BA5CE8E8 /* Localizable.strings */,
+				2CD4FD91FC93FA8F98267C35 /* Localizable.strings */,
+				FDEC47E35D33741EC8B98882 /* Localizable.strings */,
+				AAB62E170EA2C75F99DEE1BC /* Localizable.strings */,
+				088BD5F605EAC352DE94A7BD /* Localizable.strings */,
+				5D14D0D3039092C329B87942 /* Localizable.strings */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -180,8 +300,18 @@
 			children = (
 				0521281B92DA679985F18181 /* Pods_Runner.framework */,
 				643EEAEBAC9FBA327E5A2A36 /* Pods_RunnerTests.framework */,
+				AAA201EF5D0BC69E4B07CA4B /* iOS */,
+				FFC324F57A67B1FB61A1218E /* Pods_WhiteNoiseNotificationServiceExtension.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		AAA201EF5D0BC69E4B07CA4B /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				B7551CF507C5912BC15844C6 /* Foundation.framework */,
+			);
+			name = iOS;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -206,6 +336,24 @@
 			productReference = 331C8081294A63A400263BE5 /* RunnerTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
+		637BE63819476BBCAF138705 /* WhiteNoiseNotificationServiceExtension */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 3B8564F25AD9132DD5CAFD29 /* Build configuration list for PBXNativeTarget "WhiteNoiseNotificationServiceExtension" */;
+			buildPhases = (
+				6F336AC2B03AD4D6339E3FA6 /* [CP] Check Pods Manifest.lock */,
+				B0F6DD2110F062ECF2104774 /* Sources */,
+				9900BCEBCE13AF0ADEF3381D /* Frameworks */,
+				9E8AB42C4FB3C97B0672809F /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = WhiteNoiseNotificationServiceExtension;
+			productName = WhiteNoiseNotificationServiceExtension;
+			productReference = A4C231FA574E1DF782A652C5 /* WhiteNoiseNotificationServiceExtension.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		97C146ED1CF9000F007C117D /* Runner */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 97C147051CF9000F007C117D /* Build configuration list for PBXNativeTarget "Runner" */;
@@ -216,6 +364,7 @@
 				97C146EB1CF9000F007C117D /* Frameworks */,
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
+				A63D28AFB732BFAAE9B8BEFE /* Embed App Extensions */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				6D06D25909663979E9CE3F29 /* [CP] Embed Pods Frameworks */,
 				5FF030CD96ED344BE9AFF786 /* [CP] Copy Pods Resources */,
@@ -223,6 +372,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				58C342F7AC83D537F7E70D46 /* PBXTargetDependency */,
 			);
 			name = Runner;
 			productName = Runner;
@@ -272,6 +422,7 @@
 			targets = (
 				97C146ED1CF9000F007C117D /* Runner */,
 				331C8080294A63A400263BE5 /* RunnerTests */,
+				637BE63819476BBCAF138705 /* WhiteNoiseNotificationServiceExtension */,
 			);
 		};
 /* End PBXProject section */
@@ -294,6 +445,29 @@
 				97C146FC1CF9000F007C117D /* Main.storyboard in Resources */,
 				DF000001000000000000AAA1 /* staging.icon in Resources */,
 				DF000001000000000000AAA3 /* production.icon in Resources */,
+				0D303335F7DE1BEA053C0480 /* Localizable.strings in Resources */,
+				D30F775773B5F3D0030079B0 /* Localizable.strings in Resources */,
+				7A900154A110AB84BE04BD3D /* Localizable.strings in Resources */,
+				AD0AFBA3EABEDFD062A7B013 /* Localizable.strings in Resources */,
+				192C772FE10F74F1518B1BAA /* Localizable.strings in Resources */,
+				D0A188941AD5BFE5CECD0882 /* Localizable.strings in Resources */,
+				A10CEBCD878B7EAB7D322963 /* Localizable.strings in Resources */,
+				B53FCAD00B27CBD301F6BC61 /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		9E8AB42C4FB3C97B0672809F /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				857A4D762AF5ECA4540006C0 /* Localizable.strings in Resources */,
+				2606A4556DE785A4F46920F4 /* Localizable.strings in Resources */,
+				F917A238C8ADB2B541E37B77 /* Localizable.strings in Resources */,
+				137383FCF6E0E0339EBB7888 /* Localizable.strings in Resources */,
+				D02FF64DC6FBE2FC831536E0 /* Localizable.strings in Resources */,
+				5A4D20618176995920214B3F /* Localizable.strings in Resources */,
+				1B5B6681BFED9934FF306704 /* Localizable.strings in Resources */,
+				88C9C4DD49C03C8DD5CA4BC7 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -372,6 +546,28 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		6F336AC2B03AD4D6339E3FA6 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-WhiteNoiseNotificationServiceExtension-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
 		74B7B9037868A2FE61B2105F /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
@@ -429,6 +625,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B0F6DD2110F062ECF2104774 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E00F081CADF586EB818241E7 /* NotificationService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
@@ -436,6 +640,12 @@
 			isa = PBXTargetDependency;
 			target = 97C146ED1CF9000F007C117D /* Runner */;
 			targetProxy = 331C8085294A63A400263BE5 /* PBXContainerItemProxy */;
+		};
+		58C342F7AC83D537F7E70D46 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = WhiteNoiseNotificationServiceExtension;
+			target = 637BE63819476BBCAF138705 /* WhiteNoiseNotificationServiceExtension */;
+			targetProxy = 174A961E6450FB44A4D75963 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -459,6 +669,38 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		035863BBC834A449992382FC /* Release-production */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 46D8D18C9FEBF4B97AFD5C8E /* NotificationServiceExtension.release-production.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				APP_GROUP_IDENTIFIER = group.org.parres.whitenoise;
+				KEYCHAIN_ACCESS_GROUP_IDENTIFIER = org.parres.whitenoise;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = WhiteNoiseNotificationServiceExtension/WhiteNoiseNotificationServiceExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = QL6TB358UB;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WhiteNoiseNotificationServiceExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = org.parres.whitenoise.NotificationService;
+				PRODUCT_BUNDLE_PACKAGE_TYPE = "XPC!";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = "Release-production";
+		};
 		249021D3217E4FDB00AE95B9 /* Profile */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -518,8 +760,10 @@
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "White Noise";
-				ASSETCATALOG_COMPILER_APPICON_NAME = production;
+				APP_GROUP_IDENTIFIER = group.org.parres.whitenoise;
+				KEYCHAIN_ACCESS_GROUP_IDENTIFIER = org.parres.whitenoise;
 				APS_ENVIRONMENT = development;
+				ASSETCATALOG_COMPILER_APPICON_NAME = production;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
@@ -588,6 +832,135 @@
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Runner.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Runner";
 			};
 			name = Profile;
+		};
+		3BE34608C47955CAACC117B4 /* Release-staging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 4D8FE995603818C434213EFC /* NotificationServiceExtension.release-staging.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				APP_GROUP_IDENTIFIER = group.dev.ipf.whitenoise.staging;
+				KEYCHAIN_ACCESS_GROUP_IDENTIFIER = dev.ipf.whitenoise.staging;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = WhiteNoiseNotificationServiceExtension/WhiteNoiseNotificationServiceExtension.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = QL6TB358UB;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WhiteNoiseNotificationServiceExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.ipf.whitenoise.staging.NotificationService;
+				PRODUCT_BUNDLE_PACKAGE_TYPE = "XPC!";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "WN Staging NotificationService Ad Hoc";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = "Release-staging";
+		};
+		71ED2BD934A419C35B53E412 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = EC207C42F80038C5754DC7AE /* NotificationServiceExtension.release.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				APP_GROUP_IDENTIFIER = group.org.parres.whitenoise;
+				KEYCHAIN_ACCESS_GROUP_IDENTIFIER = org.parres.whitenoise;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = WhiteNoiseNotificationServiceExtension/WhiteNoiseNotificationServiceExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = QL6TB358UB;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WhiteNoiseNotificationServiceExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = org.parres.whitenoise.NotificationService;
+				PRODUCT_BUNDLE_PACKAGE_TYPE = "XPC!";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		854757BEABB3CC72C71984A5 /* Debug-staging */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = ADA8AC8A947DB1CC57A22348 /* NotificationServiceExtension.debug-staging.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				APP_GROUP_IDENTIFIER = group.dev.ipf.whitenoise.staging;
+				KEYCHAIN_ACCESS_GROUP_IDENTIFIER = dev.ipf.whitenoise.staging;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = WhiteNoiseNotificationServiceExtension/WhiteNoiseNotificationServiceExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = QL6TB358UB;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WhiteNoiseNotificationServiceExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = dev.ipf.whitenoise.staging.NotificationService;
+				PRODUCT_BUNDLE_PACKAGE_TYPE = "XPC!";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = "Debug-staging";
+		};
+		938E8E23806B3869B183A6E5 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 18ED6DD084598ECEBCCDB9D0 /* NotificationServiceExtension.debug.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				APP_GROUP_IDENTIFIER = group.org.parres.whitenoise;
+				KEYCHAIN_ACCESS_GROUP_IDENTIFIER = org.parres.whitenoise;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = WhiteNoiseNotificationServiceExtension/WhiteNoiseNotificationServiceExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = QL6TB358UB;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WhiteNoiseNotificationServiceExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = org.parres.whitenoise.NotificationService;
+				PRODUCT_BUNDLE_PACKAGE_TYPE = "XPC!";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
 		};
 		97C147031CF9000F007C117D /* Debug-staging */ = {
 			isa = XCBuildConfiguration;
@@ -709,10 +1082,13 @@
 			baseConfigurationReference = 9740EEB21CF90195004384FC /* Debug.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "WN Staging";
-				ASSETCATALOG_COMPILER_APPICON_NAME = staging;
+				APP_GROUP_IDENTIFIER = group.dev.ipf.whitenoise.staging;
+				KEYCHAIN_ACCESS_GROUP_IDENTIFIER = dev.ipf.whitenoise.staging;
 				APS_ENVIRONMENT = development;
+				ASSETCATALOG_COMPILER_APPICON_NAME = staging;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEEPLINK_SCHEME = "whitenoise-staging";
 				DEVELOPMENT_TEAM = QL6TB358UB;
@@ -736,8 +1112,10 @@
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "White Noise";
-				ASSETCATALOG_COMPILER_APPICON_NAME = production;
+				APP_GROUP_IDENTIFIER = group.org.parres.whitenoise;
+				KEYCHAIN_ACCESS_GROUP_IDENTIFIER = org.parres.whitenoise;
 				APS_ENVIRONMENT = production;
+				ASSETCATALOG_COMPILER_APPICON_NAME = production;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
@@ -820,8 +1198,10 @@
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "White Noise";
-				ASSETCATALOG_COMPILER_APPICON_NAME = production;
+				APP_GROUP_IDENTIFIER = group.org.parres.whitenoise;
+				KEYCHAIN_ACCESS_GROUP_IDENTIFIER = org.parres.whitenoise;
 				APS_ENVIRONMENT = production;
+				ASSETCATALOG_COMPILER_APPICON_NAME = production;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
@@ -920,10 +1300,15 @@
 			baseConfigurationReference = 7AFA3C8E1D35360C0083082E /* Release.xcconfig */;
 			buildSettings = {
 				APP_DISPLAY_NAME = "WN Staging";
-				ASSETCATALOG_COMPILER_APPICON_NAME = staging;
+				APP_GROUP_IDENTIFIER = group.dev.ipf.whitenoise.staging;
+				KEYCHAIN_ACCESS_GROUP_IDENTIFIER = dev.ipf.whitenoise.staging;
 				APS_ENVIRONMENT = production;
+				ASSETCATALOG_COMPILER_APPICON_NAME = staging;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = Runner/Runner.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "Apple Distribution";
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
 				DEEPLINK_SCHEME = "whitenoise-staging";
 				DEVELOPMENT_TEAM = QL6TB358UB;
@@ -935,6 +1320,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = dev.ipf.whitenoise.staging;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "WN Staging App Ad Hoc";
 				SWIFT_OBJC_BRIDGING_HEADER = "Runner/Runner-Bridging-Header.h";
 				SWIFT_VERSION = 5.0;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -957,6 +1343,38 @@
 			};
 			name = "Release-staging";
 		};
+		F08B8EC3D8E623FB0C54B6DA /* Profile */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 13EF705297DC26B7A7445823 /* NotificationServiceExtension.profile.xcconfig */;
+			buildSettings = {
+				APPLICATION_EXTENSION_API_ONLY = YES;
+				APP_GROUP_IDENTIFIER = group.org.parres.whitenoise;
+				KEYCHAIN_ACCESS_GROUP_IDENTIFIER = org.parres.whitenoise;
+				CLANG_ENABLE_OBJC_WEAK = NO;
+				CODE_SIGN_ENTITLEMENTS = WhiteNoiseNotificationServiceExtension/WhiteNoiseNotificationServiceExtension.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = "$(FLUTTER_BUILD_NUMBER)";
+				DEVELOPMENT_TEAM = QL6TB358UB;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = WhiteNoiseNotificationServiceExtension/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = "$(FLUTTER_BUILD_NAME)";
+				PRODUCT_BUNDLE_IDENTIFIER = org.parres.whitenoise.NotificationService;
+				PRODUCT_BUNDLE_PACKAGE_TYPE = "XPC!";
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Profile;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -968,6 +1386,19 @@
 				DF54AA052ED206DF00035D4C /* Release-staging */,
 				DF54AA022ED206A700035D4C /* Release-production */,
 				331C808A294A63A400263BE5 /* Profile */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		3B8564F25AD9132DD5CAFD29 /* Build configuration list for PBXNativeTarget "WhiteNoiseNotificationServiceExtension" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				71ED2BD934A419C35B53E412 /* Release */,
+				938E8E23806B3869B183A6E5 /* Debug */,
+				854757BEABB3CC72C71984A5 /* Debug-staging */,
+				3BE34608C47955CAACC117B4 /* Release-staging */,
+				035863BBC834A449992382FC /* Release-production */,
+				F08B8EC3D8E623FB0C54B6DA /* Profile */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

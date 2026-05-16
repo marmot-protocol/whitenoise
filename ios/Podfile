@@ -38,6 +38,12 @@ target 'Runner' do
   end
 end
 
+target 'WhiteNoiseNotificationServiceExtension' do
+  use_frameworks!
+
+  pod 'rust_lib_whitenoise_nse', :path => '../rust_builder/ios_nse'
+end
+
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
@@ -47,5 +53,13 @@ post_install do |installer|
       defs << 'PERMISSION_CAMERA=1' unless defs.include?('PERMISSION_CAMERA=1')
       config.build_settings['GCC_PREPROCESSOR_DEFINITIONS'] = defs
     end
+  end
+
+  Dir.glob(File.join(__dir__, 'Pods/Target Support Files/Pods-Runner/Pods-Runner.*.xcconfig')).each do |path|
+    contents = File.read(path)
+    contents.gsub!(/ "?\$\{PODS_CONFIGURATION_BUILD_DIR\}\/rust_lib_whitenoise_nse(?:\/rust_lib_whitenoise_nse\.framework\/Headers)?"/, '')
+    contents.gsub!(/ -framework "rust_lib_whitenoise_nse"/, '')
+    contents.gsub!(/ "-F\$\{PODS_CONFIGURATION_BUILD_DIR\}\/rust_lib_whitenoise_nse"/, '')
+    File.write(path, contents)
   end
 end

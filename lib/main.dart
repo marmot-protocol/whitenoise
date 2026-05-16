@@ -1,8 +1,8 @@
 import 'dart:async' show unawaited;
-import 'dart:io' show Directory, File, FileSystemException;
+import 'dart:io' show Directory, File, FileSystemException, Platform;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart' show DeviceOrientation, SystemChrome;
+import 'package:flutter/services.dart' show DeviceOrientation, MethodChannel, SystemChrome;
 import 'package:flutter_foreground_task/flutter_foreground_task.dart' show FlutterForegroundTask;
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart' show ScreenUtilInit;
@@ -15,16 +15,23 @@ import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDi
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/app_log_provider.dart' show appLogStore;
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
+import 'package:whitenoise/providers/chat_list_refresh_provider.dart';
 import 'package:whitenoise/providers/foreground_service_provider.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart'
     show consumePendingNotificationTap, notificationListenerProvider, routePendingTap;
+import 'package:whitenoise/providers/push_registration_provider.dart';
 import 'package:whitenoise/providers/theme_provider.dart' show themeProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/screens/fatal_error_screen.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
+import 'package:whitenoise/src/rust/api/relays.dart' as relays_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/theme.dart';
+
+final _logger = Logger('WnApp');
+const _appGroupChannel = MethodChannel('org.parres.whitenoise/app_group');
+const _getAppGroupContainerPathMethod = 'getAppGroupContainerPath';
 
 // TODO: Remove migration gate and related code in the next release.
 const kDataVersion = 1;
@@ -35,7 +42,9 @@ Future<void> main() async {
   Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((record) {
     appLogStore.add(record);
-    final buf = StringBuffer('${record.level.name}: ${record.loggerName}: ${record.message}');
+    final buf = StringBuffer(
+      '${record.level.name}: ${record.loggerName}: ${record.message}',
+    );
     if (record.error != null) {
       buf.writeln();
       buf.write('  error: ${record.error}');
@@ -53,7 +62,9 @@ Future<void> main() async {
   try {
     await RustLib.init();
     final container = await initializeAppContainer();
-    runApp(UncontrolledProviderScope(container: container, child: const WnApp()));
+    runApp(
+      UncontrolledProviderScope(container: container, child: const WnApp()),
+    );
   } catch (e, stackTrace) {
     runApp(
       FatalErrorScreen(errorMessage: e.toString(), stackTrace: stackTrace),
@@ -62,20 +73,95 @@ Future<void> main() async {
 }
 
 Future<ProviderContainer> initializeAppContainer() async {
-  final dir = await getApplicationDocumentsDirectory();
-  final dataDir = '${dir.path}/whitenoise/data';
-  final logsDir = '${dir.path}/whitenoise/logs';
+  final baseDir = await resolveWhitenoiseBaseDirectory();
+  final dataDir = '${baseDir.path}/data';
+  final logsDir = '${baseDir.path}/logs';
   await Directory(dataDir).create(recursive: true);
   await Directory(logsDir).create(recursive: true);
 
   await _migrateDataIfNeeded(dataDir);
 
-  final config = await rust_api.createWhitenoiseConfig(dataDir: dataDir, logsDir: logsDir);
+  final config = await rust_api.createWhitenoiseConfig(
+    dataDir: dataDir,
+    logsDir: logsDir,
+  );
   await rust_api.initializeWhitenoise(config: config);
 
   final container = ProviderContainer();
   await container.read(authProvider.future);
   return container;
+}
+
+@visibleForTesting
+Future<Directory> resolveWhitenoiseBaseDirectory({
+  bool? isIOS,
+  MethodChannel appGroupChannel = _appGroupChannel,
+}) async {
+  final documentsDir = await getApplicationDocumentsDirectory();
+  final documentsBaseDir = Directory('${documentsDir.path}/whitenoise');
+  if (!(isIOS ?? Platform.isIOS)) return documentsBaseDir;
+
+  try {
+    final appGroupContainerPath = await appGroupChannel.invokeMethod<String>(
+      _getAppGroupContainerPathMethod,
+    );
+    if (appGroupContainerPath == null || appGroupContainerPath.isEmpty) {
+      return documentsBaseDir;
+    }
+
+    final appGroupBaseDir = Directory('$appGroupContainerPath/whitenoise');
+    await _moveWhitenoiseDirectoryIfNeeded(
+      from: documentsBaseDir,
+      to: appGroupBaseDir,
+    );
+    return appGroupBaseDir;
+  } catch (error, stackTrace) {
+    _logger.warning(
+      'Failed to resolve App Group container; falling back to Documents',
+      error,
+      stackTrace,
+    );
+    return documentsBaseDir;
+  }
+}
+
+Future<void> _moveWhitenoiseDirectoryIfNeeded({
+  required Directory from,
+  required Directory to,
+}) async {
+  if (!from.existsSync()) return;
+
+  if (to.existsSync()) {
+    if (await _directoryHasFiles(Directory('${to.path}/data'))) return;
+    await to.delete(recursive: true);
+  }
+  await to.parent.create(recursive: true);
+  try {
+    await from.rename(to.path);
+  } on FileSystemException {
+    await _copyDirectory(from, to);
+    await from.delete(recursive: true);
+  }
+}
+
+Future<void> _copyDirectory(Directory from, Directory to) async {
+  await to.create(recursive: true);
+  await for (final entity in from.list(recursive: false)) {
+    final targetPath = '${to.path}/${entity.uri.pathSegments.last}';
+    if (entity is Directory) {
+      await _copyDirectory(entity, Directory(targetPath));
+    } else if (entity is File) {
+      await entity.copy(targetPath);
+    }
+  }
+}
+
+Future<bool> _directoryHasFiles(Directory directory) async {
+  if (!directory.existsSync()) return false;
+  await for (final entity in directory.list(recursive: true)) {
+    if (entity is File) return true;
+  }
+  return false;
 }
 
 Future<void> _migrateDataIfNeeded(String dataDir) async {
@@ -91,15 +177,9 @@ Future<void> _migrateDataIfNeeded(String dataDir) async {
 
   if (currentVersion == kDataVersion) return;
 
-  final dataDirObj = Directory(dataDir);
-  if (dataDirObj.existsSync()) {
-    await dataDirObj.delete(recursive: true);
-    await dataDirObj.create(recursive: true);
-  }
-
   // Read triggers the internal migration from EncryptedSharedPreferences to
-  // the new cipher storage. Then deleteAll clears everything including any
-  // keys the migration re-introduced from the old app.
+  // the new cipher storage. Then deleteAll clears legacy Flutter-side storage
+  // without touching the Rust-owned database in dataDir.
   const secureStorage = FlutterSecureStorage();
   await secureStorage.readAll();
   await secureStorage.deleteAll();
@@ -123,17 +203,20 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
     _router = Routes.build(ref);
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_consumePendingNotificationTap());
+      unawaited(_consumePendingNotificationTap(refreshBeforeRoute: true));
     });
   }
 
-  Future<void> _consumePendingNotificationTap() async {
+  Future<bool> _consumePendingNotificationTap({
+    bool refreshBeforeRoute = false,
+  }) async {
     final pending = await consumePendingNotificationTap();
-    await routePendingTap(
+    return routePendingTap(
       pending: pending,
       isMounted: mounted,
       currentActivePubkey: ref.read(authProvider).value,
       switchToProfile: ref.read(authProvider.notifier).switchProfile,
+      beforeNavigate: refreshBeforeRoute ? _ensureRelaySubscriptionsAfterResume : null,
     );
   }
 
@@ -145,10 +228,28 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    unawaited(ref.read(foregroundServiceProvider).handleAppLifecycleChange(state));
+    unawaited(
+      ref.read(foregroundServiceProvider).handleAppLifecycleChange(state),
+    );
     if (state == AppLifecycleState.resumed) {
-      unawaited(ref.read(authProvider.notifier).ensureExternalSignersRegistered());
-      unawaited(_consumePendingNotificationTap());
+      unawaited(_handleAppResumed());
+    }
+  }
+
+  Future<void> _handleAppResumed() async {
+    await ref.read(authProvider.notifier).ensureExternalSignersRegistered();
+    final routed = await _consumePendingNotificationTap(refreshBeforeRoute: true);
+    if (!routed) {
+      await _ensureRelaySubscriptionsAfterResume();
+    }
+  }
+
+  Future<void> _ensureRelaySubscriptionsAfterResume() async {
+    try {
+      await relays_api.ensureAllSubscriptions();
+      ref.read(chatListRefreshProvider.notifier).requestRefresh();
+    } catch (error, stackTrace) {
+      _logger.warning('Failed to ensure relay subscriptions on resume', error, stackTrace);
     }
   }
 
@@ -157,6 +258,7 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
     final themeMode = ref.watch(themeProvider).value ?? ThemeMode.system;
     ref.watch(localeProvider);
     ref.watch(notificationListenerProvider);
+    ref.watch(pushRegistrationControllerProvider);
     final locale = ref.read(localeProvider.notifier).resolveLocale();
 
     return ScreenUtilInit(

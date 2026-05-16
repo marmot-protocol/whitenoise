@@ -7,6 +7,16 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+val hasGoogleServicesConfig =
+    file("google-services.json").exists() ||
+        file("src/main/google-services.json").exists() ||
+        file("src/staging/google-services.json").exists() ||
+        file("src/production/google-services.json").exists()
+
+if (hasGoogleServicesConfig) {
+    apply(plugin = "com.google.gms.google-services")
+}
+
 fun loadKeystoreProperties(fileName: String): Properties? {
     val propertiesFile = rootProject.file(fileName)
     if (!propertiesFile.exists()) {
@@ -169,6 +179,8 @@ android {
 dependencies {
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
     implementation("com.google.android.gms:play-services-base:18.10.0")
+    implementation(platform("com.google.firebase:firebase-bom:34.13.0"))
+    implementation("com.google.firebase:firebase-messaging")
 }
 
 flutter {

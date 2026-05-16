@@ -14,6 +14,23 @@ class _MockAndroidPlugin extends AndroidFlutterLocalNotificationsPlugin {
   Future<bool?> requestNotificationsPermission() async => permissionResult;
 }
 
+class _MockIosPlugin extends IOSFlutterLocalNotificationsPlugin {
+  bool? permissionResult = true;
+
+  @override
+  Future<bool?> requestPermissions({
+    bool sound = false,
+    bool alert = false,
+    bool badge = false,
+    bool provisional = false,
+    bool critical = false,
+    bool carPlay = false,
+    bool providesAppNotificationSettings = false,
+  }) async {
+    return permissionResult;
+  }
+}
+
 class _MockNotificationsPlugin implements FlutterLocalNotificationsPlugin {
   final List<String> calls = [];
   void Function(NotificationResponse)? tapCallback;
@@ -21,13 +38,18 @@ class _MockNotificationsPlugin implements FlutterLocalNotificationsPlugin {
   String? lastShownTitle;
   String? lastShownBody;
   String? lastPayload;
+  NotificationDetails? lastNotificationDetails;
   int? lastCancelledId;
   AndroidFlutterLocalNotificationsPlugin? androidPlugin;
+  IOSFlutterLocalNotificationsPlugin? iosPlugin;
 
   @override
   T? resolvePlatformSpecificImplementation<T extends FlutterLocalNotificationsPlatform>() {
     if (T == AndroidFlutterLocalNotificationsPlugin) {
       return androidPlugin as T?;
+    }
+    if (T == IOSFlutterLocalNotificationsPlugin) {
+      return iosPlugin as T?;
     }
     return null;
   }
@@ -59,6 +81,7 @@ class _MockNotificationsPlugin implements FlutterLocalNotificationsPlugin {
     lastShownTitle = title;
     lastShownBody = body;
     lastPayload = payload;
+    lastNotificationDetails = notificationDetails;
   }
 
   @override
@@ -77,6 +100,20 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   group('NotificationService', () {
+    group('notificationsSupported', () {
+      test('supports Android', () {
+        expect(notificationsSupported(isAndroid: true, isIOS: false), isTrue);
+      });
+
+      test('supports iOS', () {
+        expect(notificationsSupported(isAndroid: false, isIOS: true), isTrue);
+      });
+
+      test('does not support other platforms', () {
+        expect(notificationsSupported(isAndroid: false, isIOS: false), isFalse);
+      });
+    });
+
     group('when disabled', () {
       late NotificationService service;
 
@@ -121,6 +158,13 @@ void main() {
         expect(mockPlugin.lastInitSettings?.android?.defaultIcon, '@mipmap/ic_notification');
       });
 
+      test('initializes iOS without implicit permission prompt', () async {
+        await service.initialize();
+        expect(mockPlugin.lastInitSettings?.iOS?.requestAlertPermission, isFalse);
+        expect(mockPlugin.lastInitSettings?.iOS?.requestSoundPermission, isFalse);
+        expect(mockPlugin.lastInitSettings?.iOS?.requestBadgePermission, isFalse);
+      });
+
       test('second call is idempotent', () async {
         await service.initialize();
         await service.initialize();
@@ -141,6 +185,15 @@ void main() {
       test('calls plugin show', () async {
         await service.show(groupId: 'g1', title: 'Title', body: 'Body', receiverPubkey: _pubkey1);
         expect(mockPlugin.calls, contains('show'));
+      });
+
+      test('uses iOS foreground presentation details', () async {
+        await service.show(groupId: 'g1', title: 'Title', body: 'Body', receiverPubkey: _pubkey1);
+        final details = mockPlugin.lastNotificationDetails;
+        expect(details?.iOS?.presentAlert, isTrue);
+        expect(details?.iOS?.presentBanner, isTrue);
+        expect(details?.iOS?.presentList, isTrue);
+        expect(details?.iOS?.presentSound, isTrue);
       });
 
       test('passes title and body', () async {
@@ -251,6 +304,18 @@ void main() {
         androidPlugin.permissionResult = true;
         final mockPlugin = _MockNotificationsPlugin();
         mockPlugin.androidPlugin = androidPlugin;
+        final service = NotificationService(plugin: mockPlugin, enabled: true);
+        await service.initialize();
+
+        final result = await service.requestPermission();
+        expect(result, isTrue);
+      });
+
+      test('returns true when iOS permission is granted', () async {
+        final iosPlugin = _MockIosPlugin();
+        iosPlugin.permissionResult = true;
+        final mockPlugin = _MockNotificationsPlugin();
+        mockPlugin.iosPlugin = iosPlugin;
         final service = NotificationService(plugin: mockPlugin, enabled: true);
         await service.initialize();
 

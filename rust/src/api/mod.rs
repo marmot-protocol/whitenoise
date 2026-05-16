@@ -127,6 +127,8 @@ pub use zapstore::*;
 
 #[frb]
 pub async fn initialize_whitenoise(config: WhitenoiseConfig) -> Result<(), ApiError> {
+    crate::ios_keyring::install_ios_keyring_store_if_needed()
+        .map_err(|message| ApiError::Whitenoise { message })?;
     let core_config = whitenoise::WhitenoiseConfig::new(
         Path::new(&config.data_dir),
         Path::new(&config.logs_dir),

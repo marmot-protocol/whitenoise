@@ -13,11 +13,12 @@ import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/mute_list.dart';
+import 'package:whitenoise/src/rust/api/notifications.dart';
 import 'package:whitenoise/src/rust/api/user_search.dart';
 import 'package:whitenoise/src/rust/api/users.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
-import '../test_helpers.dart' show testHexToNpub, testNpubToHex, testPubkeyA;
+import '../test_helpers.dart' show testHexToNpub, testNpubToHex, testPubkeyA, testPubkeyB;
 
 class MockThemeMode implements rust_api.ThemeMode {
   final String mode;
@@ -83,6 +84,8 @@ class MockWnApi implements RustLibApi {
   String relayControlStateResult = '{}';
   bool shouldFailRelayControlState = false;
   int relayControlStateCallCount = 0;
+  int ensureAllSubscriptionsCallCount = 0;
+  bool shouldFailEnsureAllSubscriptions = false;
   List<String> relayDefaultUrls = List.of(_defaultRelayUrls);
   bool shouldFailDefaultRelayUrls = false;
 
@@ -105,6 +108,42 @@ class MockWnApi implements RustLibApi {
   bool mockNotificationsEnabled = true;
   bool shouldFailAccountSettings = false;
   bool shouldFailUpdateNotificationsEnabled = false;
+  int upsertPushRegistrationCallCount = 0;
+  int clearPushRegistrationCallCount = 0;
+  PushRegistration? mockPushRegistration;
+  GroupPushDebugInfo mockGroupPushDebugInfo = GroupPushDebugInfo(
+    totalTokenCount: 1,
+    activeTokenCount: 1,
+    staleTokenCount: 0,
+    missingRelayHintCount: 0,
+    lastTokenListUpdatedAt: DateTime(2024),
+    localRegistration: const LocalPushRegistrationDebugInfo(
+      registered: true,
+      shareable: true,
+      notificationsEnabled: true,
+      localLeafIndex: 0,
+      localTokenCached: true,
+    ),
+    tokens: [
+      GroupPushTokenDebugEntry(
+        memberPubkey: testPubkeyA,
+        leafIndex: 0,
+        serverPubkey: testPubkeyB,
+        hasRelayHint: true,
+        activeLeaf: true,
+        memberMatchesActiveLeaf: true,
+        isLocalMember: true,
+        updatedAt: DateTime(2024),
+      ),
+    ],
+  );
+  bool shouldFailGroupPushDebugInfo = false;
+  bool shouldFailUpsertPushRegistration = false;
+  String? lastPushRegistrationPubkey;
+  PushPlatform? lastPushRegistrationPlatform;
+  String? lastPushRegistrationRawToken;
+  String? lastPushRegistrationServerPubkey;
+  String? lastPushRegistrationRelayHint;
 
   @override
   Future<KeyPackageStatus> crateApiUsersUserHasKeyPackage({
@@ -162,10 +201,7 @@ class MockWnApi implements RustLibApi {
     userStreamUsers[pubkey] = nextUser;
     userStreamControllers[pubkey]?.add(
       UserStreamItem.update(
-        update: UserUpdate(
-          trigger: trigger,
-          user: nextUser,
-        ),
+        update: UserUpdate(trigger: trigger, user: nextUser),
       ),
     );
   }
@@ -205,7 +241,9 @@ class MockWnApi implements RustLibApi {
   }
 
   @override
-  Future<List<User>> crateApiAccountsAccountFollows({required String pubkey}) async {
+  Future<List<User>> crateApiAccountsAccountFollows({
+    required String pubkey,
+  }) async {
     return follows;
   }
 
@@ -291,10 +329,7 @@ class MockWnApi implements RustLibApi {
     );
     final initialUser =
         userStreamUsers[pubkey] ??
-        await crateApiUsersGetUser(
-          pubkey: pubkey,
-          blockingDataSync: false,
-        );
+        await crateApiUsersGetUser(pubkey: pubkey, blockingDataSync: false);
     yield UserStreamItem.initialSnapshot(user: initialUser);
     yield* controller.stream;
   }
@@ -326,6 +361,14 @@ class MockWnApi implements RustLibApi {
       throw Exception('relay control dump failed');
     }
     return relayControlStateResult;
+  }
+
+  @override
+  Future<void> crateApiRelaysEnsureAllSubscriptions() async {
+    ensureAllSubscriptionsCallCount++;
+    if (shouldFailEnsureAllSubscriptions) {
+      throw Exception('ensure subscriptions failed');
+    }
   }
 
   @override
@@ -618,7 +661,9 @@ class MockWnApi implements RustLibApi {
   rust_api.ThemeMode crateApiUtilsThemeModeSystem() => const MockThemeMode('system');
 
   @override
-  String crateApiUtilsThemeModeToString({required rust_api.ThemeMode themeMode}) {
+  String crateApiUtilsThemeModeToString({
+    required rust_api.ThemeMode themeMode,
+  }) {
     if (themeMode is MockThemeMode) {
       return themeMode.mode;
     }
@@ -779,7 +824,9 @@ class MockWnApi implements RustLibApi {
     required FutureOr<String> Function(String, String) nip44Encrypt,
     required FutureOr<String> Function(String, String) nip44Decrypt,
   }) async {
-    if (loginExternalSignerStartResult != null) return loginExternalSignerStartResult!;
+    if (loginExternalSignerStartResult != null) {
+      return loginExternalSignerStartResult!;
+    }
     return LoginResult(
       account: Account(
         pubkey: pubkey,
@@ -903,7 +950,9 @@ class MockWnApi implements RustLibApi {
   Future<AccountSettings> crateApiAccountsAccountSettings({
     required String pubkey,
   }) async {
-    if (shouldFailAccountSettings) throw Exception('Failed to get account settings');
+    if (shouldFailAccountSettings) {
+      throw Exception('Failed to get account settings');
+    }
     return AccountSettings(notificationsEnabled: mockNotificationsEnabled);
   }
 
@@ -917,6 +966,66 @@ class MockWnApi implements RustLibApi {
     }
     mockNotificationsEnabled = enabled;
     return AccountSettings(notificationsEnabled: mockNotificationsEnabled);
+  }
+
+  @override
+  Stream<NotificationUpdate> crateApiNotificationsSubscribeToNotifications() {
+    return const Stream.empty();
+  }
+
+  @override
+  Future<PushRegistration?> crateApiNotificationsGetPushRegistration({
+    required String pubkey,
+  }) async {
+    return mockPushRegistration;
+  }
+
+  @override
+  Future<GroupPushDebugInfo> crateApiNotificationsGetGroupPushDebugInfo({
+    required String pubkey,
+    required String groupId,
+  }) async {
+    if (shouldFailGroupPushDebugInfo) {
+      throw Exception('Failed to get group push debug info');
+    }
+    return mockGroupPushDebugInfo;
+  }
+
+  @override
+  Future<PushRegistration> crateApiNotificationsUpsertPushRegistration({
+    required String pubkey,
+    required PushPlatform platform,
+    required String rawToken,
+    required String serverPubkey,
+    String? relayHint,
+  }) async {
+    upsertPushRegistrationCallCount++;
+    lastPushRegistrationPubkey = pubkey;
+    lastPushRegistrationPlatform = platform;
+    lastPushRegistrationRawToken = rawToken;
+    lastPushRegistrationServerPubkey = serverPubkey;
+    lastPushRegistrationRelayHint = relayHint;
+    if (shouldFailUpsertPushRegistration) {
+      throw Exception('Failed to upsert push registration');
+    }
+    return mockPushRegistration ??
+        PushRegistration(
+          accountPubkey: pubkey,
+          platform: platform,
+          rawToken: rawToken,
+          serverPubkey: serverPubkey,
+          relayHint: relayHint,
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        );
+  }
+
+  @override
+  Future<void> crateApiNotificationsClearPushRegistration({
+    required String pubkey,
+  }) async {
+    clearPushRegistrationCallCount++;
+    mockPushRegistration = null;
   }
 
   void reset() {
@@ -956,6 +1065,8 @@ class MockWnApi implements RustLibApi {
     relayControlStateResult = '{}';
     shouldFailRelayControlState = false;
     relayControlStateCallCount = 0;
+    ensureAllSubscriptionsCallCount = 0;
+    shouldFailEnsureAllSubscriptions = false;
     relayDefaultUrls = List.of(_defaultRelayUrls);
     shouldFailDefaultRelayUrls = false;
     lastReadMessageId = null;
@@ -975,6 +1086,42 @@ class MockWnApi implements RustLibApi {
     mockNotificationsEnabled = true;
     shouldFailAccountSettings = false;
     shouldFailUpdateNotificationsEnabled = false;
+    upsertPushRegistrationCallCount = 0;
+    clearPushRegistrationCallCount = 0;
+    mockPushRegistration = null;
+    mockGroupPushDebugInfo = GroupPushDebugInfo(
+      totalTokenCount: 1,
+      activeTokenCount: 1,
+      staleTokenCount: 0,
+      missingRelayHintCount: 0,
+      lastTokenListUpdatedAt: DateTime(2024),
+      localRegistration: const LocalPushRegistrationDebugInfo(
+        registered: true,
+        shareable: true,
+        notificationsEnabled: true,
+        localLeafIndex: 0,
+        localTokenCached: true,
+      ),
+      tokens: [
+        GroupPushTokenDebugEntry(
+          memberPubkey: testPubkeyA,
+          leafIndex: 0,
+          serverPubkey: testPubkeyB,
+          hasRelayHint: true,
+          activeLeaf: true,
+          memberMatchesActiveLeaf: true,
+          isLocalMember: true,
+          updatedAt: DateTime(2024),
+        ),
+      ],
+    );
+    shouldFailGroupPushDebugInfo = false;
+    shouldFailUpsertPushRegistration = false;
+    lastPushRegistrationPubkey = null;
+    lastPushRegistrationPlatform = null;
+    lastPushRegistrationRawToken = null;
+    lastPushRegistrationServerPubkey = null;
+    lastPushRegistrationRelayHint = null;
     zapstoreVersion = null;
     zapstoreShouldThrow = false;
     shouldFailArchiveChat = false;

@@ -8,7 +8,7 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import '../frb_generated.dart';
 import 'error.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
 
 Stream<NotificationUpdate> subscribeToNotifications() =>
     RustLib.instance.api.crateApiNotificationsSubscribeToNotifications();
@@ -17,6 +17,14 @@ Future<PushRegistration?> getPushRegistration({required String pubkey}) =>
     RustLib.instance.api.crateApiNotificationsGetPushRegistration(
       pubkey: pubkey,
     );
+
+Future<GroupPushDebugInfo> getGroupPushDebugInfo({
+  required String pubkey,
+  required String groupId,
+}) => RustLib.instance.api.crateApiNotificationsGetGroupPushDebugInfo(
+  pubkey: pubkey,
+  groupId: groupId,
+);
 
 Future<PushRegistration> upsertPushRegistration({
   required String pubkey,
@@ -32,8 +40,135 @@ Future<PushRegistration> upsertPushRegistration({
   relayHint: relayHint,
 );
 
-Future<void> clearPushRegistration({required String pubkey}) =>
-    RustLib.instance.api.crateApiNotificationsClearPushRegistration(pubkey: pubkey);
+Future<void> clearPushRegistration({required String pubkey}) => RustLib
+    .instance
+    .api
+    .crateApiNotificationsClearPushRegistration(pubkey: pubkey);
+
+class GroupPushDebugInfo {
+  final int totalTokenCount;
+  final int activeTokenCount;
+  final int staleTokenCount;
+  final int missingRelayHintCount;
+  final DateTime? lastTokenListUpdatedAt;
+  final LocalPushRegistrationDebugInfo localRegistration;
+  final List<GroupPushTokenDebugEntry> tokens;
+
+  const GroupPushDebugInfo({
+    required this.totalTokenCount,
+    required this.activeTokenCount,
+    required this.staleTokenCount,
+    required this.missingRelayHintCount,
+    this.lastTokenListUpdatedAt,
+    required this.localRegistration,
+    required this.tokens,
+  });
+
+  @override
+  int get hashCode =>
+      totalTokenCount.hashCode ^
+      activeTokenCount.hashCode ^
+      staleTokenCount.hashCode ^
+      missingRelayHintCount.hashCode ^
+      lastTokenListUpdatedAt.hashCode ^
+      localRegistration.hashCode ^
+      tokens.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GroupPushDebugInfo &&
+          runtimeType == other.runtimeType &&
+          totalTokenCount == other.totalTokenCount &&
+          activeTokenCount == other.activeTokenCount &&
+          staleTokenCount == other.staleTokenCount &&
+          missingRelayHintCount == other.missingRelayHintCount &&
+          lastTokenListUpdatedAt == other.lastTokenListUpdatedAt &&
+          localRegistration == other.localRegistration &&
+          tokens == other.tokens;
+}
+
+class GroupPushTokenDebugEntry {
+  final String memberPubkey;
+  final int leafIndex;
+  final String serverPubkey;
+  final bool hasRelayHint;
+  final bool activeLeaf;
+  final bool memberMatchesActiveLeaf;
+  final bool isLocalMember;
+  final DateTime updatedAt;
+
+  const GroupPushTokenDebugEntry({
+    required this.memberPubkey,
+    required this.leafIndex,
+    required this.serverPubkey,
+    required this.hasRelayHint,
+    required this.activeLeaf,
+    required this.memberMatchesActiveLeaf,
+    required this.isLocalMember,
+    required this.updatedAt,
+  });
+
+  @override
+  int get hashCode =>
+      memberPubkey.hashCode ^
+      leafIndex.hashCode ^
+      serverPubkey.hashCode ^
+      hasRelayHint.hashCode ^
+      activeLeaf.hashCode ^
+      memberMatchesActiveLeaf.hashCode ^
+      isLocalMember.hashCode ^
+      updatedAt.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is GroupPushTokenDebugEntry &&
+          runtimeType == other.runtimeType &&
+          memberPubkey == other.memberPubkey &&
+          leafIndex == other.leafIndex &&
+          serverPubkey == other.serverPubkey &&
+          hasRelayHint == other.hasRelayHint &&
+          activeLeaf == other.activeLeaf &&
+          memberMatchesActiveLeaf == other.memberMatchesActiveLeaf &&
+          isLocalMember == other.isLocalMember &&
+          updatedAt == other.updatedAt;
+}
+
+class LocalPushRegistrationDebugInfo {
+  final bool registered;
+  final bool shareable;
+  final bool notificationsEnabled;
+  final int? localLeafIndex;
+  final bool localTokenCached;
+
+  const LocalPushRegistrationDebugInfo({
+    required this.registered,
+    required this.shareable,
+    required this.notificationsEnabled,
+    this.localLeafIndex,
+    required this.localTokenCached,
+  });
+
+  @override
+  int get hashCode =>
+      registered.hashCode ^
+      shareable.hashCode ^
+      notificationsEnabled.hashCode ^
+      localLeafIndex.hashCode ^
+      localTokenCached.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is LocalPushRegistrationDebugInfo &&
+          runtimeType == other.runtimeType &&
+          registered == other.registered &&
+          shareable == other.shareable &&
+          notificationsEnabled == other.notificationsEnabled &&
+          localLeafIndex == other.localLeafIndex &&
+          localTokenCached == other.localTokenCached;
+}
 
 enum NotificationTrigger {
   newMessage,
@@ -99,7 +234,8 @@ class NotificationUser {
   });
 
   @override
-  int get hashCode => pubkey.hashCode ^ displayName.hashCode ^ pictureUrl.hashCode;
+  int get hashCode =>
+      pubkey.hashCode ^ displayName.hashCode ^ pictureUrl.hashCode;
 
   @override
   bool operator ==(Object other) =>

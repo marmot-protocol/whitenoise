@@ -2651,7 +2651,7 @@ dependencies = [
 [[package]]
 name = "mdk-core"
 version = "0.8.0"
-source = "git+https://github.com/marmot-protocol/mdk?rev=7f809f8549458a0d7f7d885bcdd694023abf299c#7f809f8549458a0d7f7d885bcdd694023abf299c"
+source = "git+https://github.com/marmot-protocol/mdk?rev=28ee7badf24195343f452246ce5f4dad4a99ddf2#28ee7badf24195343f452246ce5f4dad4a99ddf2"
 dependencies = [
  "base64",
  "blurhash",
@@ -2679,12 +2679,12 @@ dependencies = [
 [[package]]
 name = "mdk-macros"
 version = "0.8.0"
-source = "git+https://github.com/marmot-protocol/mdk?rev=7f809f8549458a0d7f7d885bcdd694023abf299c#7f809f8549458a0d7f7d885bcdd694023abf299c"
+source = "git+https://github.com/marmot-protocol/mdk?rev=28ee7badf24195343f452246ce5f4dad4a99ddf2#28ee7badf24195343f452246ce5f4dad4a99ddf2"
 
 [[package]]
 name = "mdk-sqlite-storage"
 version = "0.8.0"
-source = "git+https://github.com/marmot-protocol/mdk?rev=7f809f8549458a0d7f7d885bcdd694023abf299c#7f809f8549458a0d7f7d885bcdd694023abf299c"
+source = "git+https://github.com/marmot-protocol/mdk?rev=28ee7badf24195343f452246ce5f4dad4a99ddf2#28ee7badf24195343f452246ce5f4dad4a99ddf2"
 dependencies = [
  "base64",
  "getrandom 0.4.2",
@@ -2706,7 +2706,7 @@ dependencies = [
 [[package]]
 name = "mdk-storage-traits"
 version = "0.8.0"
-source = "git+https://github.com/marmot-protocol/mdk?rev=7f809f8549458a0d7f7d885bcdd694023abf299c#7f809f8549458a0d7f7d885bcdd694023abf299c"
+source = "git+https://github.com/marmot-protocol/mdk?rev=28ee7badf24195343f452246ce5f4dad4a99ddf2#28ee7badf24195343f452246ce5f4dad4a99ddf2"
 dependencies = [
  "nostr",
  "openmls 0.8.1 (git+https://github.com/openmls/openmls?rev=04c50d7fb12d52f4f9aee26de5f5234f3df29fa8)",
@@ -3997,9 +3997,11 @@ name = "rust_lib_whitenoise"
 version = "0.2.1"
 dependencies = [
  "anyhow",
+ "apple-native-keyring-store",
  "chrono",
  "flutter_rust_bridge",
  "hex",
+ "keyring-core",
  "nostr-sdk",
  "serde_json",
  "thiserror 2.0.18",
@@ -5521,7 +5523,7 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "whitenoise"
 version = "0.2.1"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=b66230d65891572d4d70cc90cdab3fe8ce654202#b66230d65891572d4d70cc90cdab3fe8ce654202"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=30a1c0924ac5ea7001f7182346b2d5ef47e1f031#30a1c0924ac5ea7001f7182346b2d5ef47e1f031"
 dependencies = [
  "android-native-keyring-store",
  "apple-native-keyring-store",
@@ -5566,7 +5568,7 @@ dependencies = [
 [[package]]
 name = "whitenoise-macros"
 version = "0.1.0"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=b66230d65891572d4d70cc90cdab3fe8ce654202#b66230d65891572d4d70cc90cdab3fe8ce654202"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=30a1c0924ac5ea7001f7182346b2d5ef47e1f031#30a1c0924ac5ea7001f7182346b2d5ef47e1f031"
 dependencies = [
  "proc-macro2",
  "quote",

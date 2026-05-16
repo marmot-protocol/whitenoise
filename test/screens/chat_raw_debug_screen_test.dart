@@ -10,6 +10,7 @@ import 'package:whitenoise/screens/chat_raw_debug_screen.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
+import 'package:whitenoise/src/rust/api/notifications.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/utils/deep_links.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
@@ -442,6 +443,77 @@ void main() {
       expect(find.textContaining('Raw snapshot'), findsOneWidget);
     });
 
+    testWidgets('shows push diagnostics with local registration details', (tester) async {
+      _api.mockGroupPushDebugInfo = GroupPushDebugInfo(
+        totalTokenCount: 2,
+        activeTokenCount: 1,
+        staleTokenCount: 1,
+        missingRelayHintCount: 0,
+        lastTokenListUpdatedAt: DateTime(2026, 5, 14, 8),
+        localRegistration: const LocalPushRegistrationDebugInfo(
+          registered: true,
+          shareable: true,
+          notificationsEnabled: true,
+          localLeafIndex: 3,
+          localTokenCached: true,
+        ),
+        tokens: [
+          GroupPushTokenDebugEntry(
+            memberPubkey: testPubkeyA,
+            leafIndex: 3,
+            serverPubkey: testPubkeyB,
+            hasRelayHint: true,
+            activeLeaf: true,
+            memberMatchesActiveLeaf: true,
+            isLocalMember: true,
+            updatedAt: DateTime(2026, 5, 14, 8),
+          ),
+        ],
+      );
+
+      await pumpDebugScreen(tester);
+      await tester.scrollUntilVisible(
+        find.text('Push Diagnostics'),
+        220,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(find.text('Push Diagnostics'), findsOneWidget);
+      expect(find.text('1/2 active tokens'), findsOneWidget);
+      expect(
+        tester.widget<SelectableText>(find.byKey(const Key('push_debug_registered'))).data,
+        'true',
+      );
+      expect(
+        tester.widget<SelectableText>(find.byKey(const Key('push_debug_shareable'))).data,
+        'true',
+      );
+      expect(
+        tester
+            .widget<SelectableText>(find.byKey(const Key('push_debug_notifications_enabled')))
+            .data,
+        'true',
+      );
+      expect(
+        tester.widget<SelectableText>(find.byKey(const Key('push_debug_local_token_cached'))).data,
+        'true',
+      );
+    });
+
+    testWidgets('shows push diagnostics load error', (tester) async {
+      _api.shouldFailGroupPushDebugInfo = true;
+
+      await pumpDebugScreen(tester);
+      await tester.scrollUntilVisible(
+        find.text('Push Diagnostics'),
+        220,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(find.text('Unable to load push-token cache'), findsOneWidget);
+      expect(find.textContaining('push_debug:'), findsOneWidget);
+    });
+
     testWidgets('shows ratchet tree load error', (tester) async {
       _api.shouldFailRatchetTree = true;
 
@@ -834,8 +906,11 @@ void main() {
       expect(_api.fetchOlderCallCount, 0);
 
       final scrollable = find.byType(Scrollable).first;
-      await tester.drag(scrollable, const Offset(0, -5000));
-      await tester.pumpAndSettle();
+      await tester.scrollUntilVisible(
+        find.byKey(const Key('raw_message_card_msg0')),
+        500,
+        scrollable: scrollable,
+      );
 
       expect(_api.fetchOlderCallCount, greaterThan(0));
     });

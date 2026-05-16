@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/chat_list_refresh_provider.dart';
 import 'package:whitenoise/providers/debug_view_provider.dart';
 import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
@@ -1008,9 +1010,29 @@ void main() {
         expect(find.textContaining('Message new_msg'), findsOneWidget);
       });
 
-      testWidgets('does not show initial messages from blocked authors', (
-        tester,
-      ) async {
+      testWidgets('reloads messages when chat list refresh is requested', (tester) async {
+        _api.initialMessages = [_message('m1', DateTime(2024, 1))];
+
+        await pumpChatScreen(tester);
+
+        expect(find.textContaining('Message m1'), findsOneWidget);
+        expect(find.textContaining('Message m2'), findsNothing);
+
+        final container = ProviderScope.containerOf(
+          tester.element(find.byType(ChatScreen)),
+          listen: false,
+        );
+        _api.initialMessages = [
+          _message('m1', DateTime(2024, 1)),
+          _message('m2', DateTime(2024, 2)),
+        ];
+        container.read(chatListRefreshProvider.notifier).requestRefresh();
+        await tester.pumpAndSettle();
+
+        expect(find.textContaining('Message m2'), findsOneWidget);
+      });
+
+      testWidgets('does not show initial messages from blocked authors', (tester) async {
         _api.blockedPubkeys.add(testPubkeyB);
         _api.initialMessages = [
           _message('blocked', DateTime(2024)),

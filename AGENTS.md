@@ -235,6 +235,14 @@ Screen (watches providers)
         └── Chat list, messages, form inputs, etc.
 ```
 
+## Push Notifications
+
+- Remote push is MIP-05/provider-token based. Flutter collects the APNS or FCM token, then passes it through `rust/src/api/notifications.rs` so `whitenoise-rs` can own encrypted registration, gossip, and notification collection.
+- Do not use Firebase Messaging in Dart. Android uses native Firebase Messaging only to obtain the FCM token and wake the existing background task from blank pushes.
+- iOS remote notification content is handled by `ios/WhiteNoiseNotificationServiceExtension`. The extension must share the same App Group and keychain access group as `Runner`; APNS pushes should still target the main app bundle ID, not the extension bundle ID.
+- iOS app data lives in the App Group container so the notification service extension can read the same encrypted database. Any migration touching `whitenoise/data` must be non-destructive and covered by tests.
+- After changing Rust API structs or functions, run `just generate` and keep `lib/src/rust/` as generated output only.
+
 ## Rust API Guidelines
 
 - Modules in `rust/src/api/` are exposed to Flutter

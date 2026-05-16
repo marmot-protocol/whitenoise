@@ -31,6 +31,7 @@ class MainActivity : FlutterActivity() {
         // not just Activity launch.
         flutterEngine.plugins.add(AndroidSignerPlugin())
         flutterEngine.plugins.add(AndroidPlayServicesPlugin())
+        flutterEngine.plugins.add(AndroidPushNotificationsPlugin())
     }
 
     private fun cleanForegroundTaskPrefs() {

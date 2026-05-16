@@ -1119,9 +1119,9 @@ void main() {
       expect(sub.isRunning, isFalse);
     });
 
-    test('default enabled uses Platform.isAndroid', () async {
-      // On non-Android test platforms, constructing without `enabled` defaults
-      // to Platform.isAndroid (false here), so start() should be a no-op.
+    test('default enabled is false on unsupported host platforms', () async {
+      // On non-mobile test platforms, constructing without `enabled` defaults
+      // to false, so start() should be a no-op.
       final sub = NotificationSubscription(
         notificationService: mockNotificationService,
         getActiveChatId: () => null,

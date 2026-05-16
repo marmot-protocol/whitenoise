@@ -48,6 +48,7 @@ ChatMessagesResult useChatMessages(
   required String pubkey,
   MessageDebugLogNotifier? debugLog,
   Set<String> hiddenPubkeys = const {},
+  int refreshToken = 0,
 }) {
   final allMessageIds = useRef<List<String>>([]);
   final allMessageIdsSet = useRef<Set<String>>({});
@@ -107,7 +108,7 @@ ChatMessagesResult useChatMessages(
     paginationVersion.value = 0;
     requestTokenRef.value++;
     return null;
-  }, [groupId, pubkey, hiddenPubkeysKey]);
+  }, [groupId, pubkey, hiddenPubkeysKey, refreshToken]);
 
   final stream = useMemoized(
     () {
@@ -212,7 +213,7 @@ ChatMessagesResult useChatMessages(
             );
           });
     },
-    [groupId, pubkey, hiddenPubkeysKey],
+    [groupId, pubkey, hiddenPubkeysKey, refreshToken],
   );
 
   final initialData = (

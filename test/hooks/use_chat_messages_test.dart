@@ -1,5 +1,7 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderContainer;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart'
@@ -213,6 +215,7 @@ Future<ChatMessagesResult Function()> _pump(
   WidgetTester tester,
   String groupId, {
   Set<String> hiddenPubkeys = const {},
+  int refreshToken = 0,
 }) async {
   return await mountHook(
     tester,
@@ -220,6 +223,7 @@ Future<ChatMessagesResult Function()> _pump(
       groupId,
       pubkey: testPubkeyA,
       hiddenPubkeys: hiddenPubkeys,
+      refreshToken: refreshToken,
     ),
   );
 }
@@ -295,6 +299,46 @@ void main() {
       final result = getResult();
       expect(result.getMessage(0).id, 'm2');
       expect(result.getMessage(1).id, 'm1');
+    });
+
+    testWidgets('reloads initial snapshot when refresh token changes', (tester) async {
+      var refreshToken = 0;
+      ChatMessagesResult? result;
+
+      Widget buildHook() {
+        return HookBuilder(
+          builder: (_) {
+            result = useChatMessages(
+              'group1',
+              pubkey: testPubkeyA,
+              refreshToken: refreshToken,
+            );
+            return const SizedBox();
+          },
+        );
+      }
+
+      await mountWidget(buildHook(), tester);
+
+      _api.emitInitialSnapshot([
+        _message('m1', DateTime(2024, 1), content: 'First'),
+      ]);
+      await tester.pumpAndSettle();
+
+      expect(result!.messageCount, 1);
+      expect(result!.getMessage(0).content, 'First');
+
+      refreshToken++;
+      await mountWidget(buildHook(), tester);
+
+      _api.emitInitialSnapshot([
+        _message('m1', DateTime(2024, 1), content: 'First'),
+        _message('m2', DateTime(2024, 2), content: 'Second'),
+      ]);
+      await tester.pumpAndSettle();
+
+      expect(result!.messageCount, 2);
+      expect(result!.getMessage(0).content, 'Second');
     });
 
     testWidgets('prepends new message at start (newest first)', (tester) async {

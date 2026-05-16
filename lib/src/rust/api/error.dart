@@ -41,11 +41,13 @@ sealed class ApiError with _$ApiError implements FrbException {
   const factory ApiError.loginInvalidKeyFormat({
     required String message,
   }) = ApiError_LoginInvalidKeyFormat;
-  const factory ApiError.loginNoRelayConnections() = ApiError_LoginNoRelayConnections;
+  const factory ApiError.loginNoRelayConnections() =
+      ApiError_LoginNoRelayConnections;
   const factory ApiError.loginTimeout({
     required String message,
   }) = ApiError_LoginTimeout;
-  const factory ApiError.loginNoLoginInProgress() = ApiError_LoginNoLoginInProgress;
+  const factory ApiError.loginNoLoginInProgress() =
+      ApiError_LoginNoLoginInProgress;
   const factory ApiError.loginInternal({
     required String message,
   }) = ApiError_LoginInternal;
@@ -57,12 +59,14 @@ sealed class ApiError with _$ApiError implements FrbException {
   }) = ApiError_Other;
 
   /// Get a user-friendly error type name
-  Future<String> errorType() => RustLib.instance.api.crateApiErrorApiErrorErrorType(
-    that: this,
-  );
+  Future<String> errorType() =>
+      RustLib.instance.api.crateApiErrorApiErrorErrorType(
+        that: this,
+      );
 
   /// Get the error message as a string
-  Future<String> messageText() => RustLib.instance.api.crateApiErrorApiErrorMessageText(
-    that: this,
-  );
+  Future<String> messageText() =>
+      RustLib.instance.api.crateApiErrorApiErrorMessageText(
+        that: this,
+      );
 }

@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:io' show Platform;
 import 'dart:ui' show Locale;
 
 import 'package:flutter/foundation.dart' show visibleForTesting;
@@ -33,7 +32,7 @@ class NotificationSubscription {
        _getActiveChatId = getActiveChatId,
        _getLocale = getLocale,
        _requestPermissionOnStart = requestPermissionOnStart,
-       _enabled = enabled ?? Platform.isAndroid;
+       _enabled = enabled ?? notificationsSupported();
 
   final NotificationService _notificationService;
   final ActiveChatGetter _getActiveChatId;

@@ -51,7 +51,7 @@ pub async fn debug_relay_control_state() -> Result<String, ApiError> {
 pub async fn ensure_all_subscriptions() -> Result<(), ApiError> {
     let whitenoise = wn()?;
     whitenoise
-        .ensure_all_subscriptions()
+        .setup_all_subscriptions()
         .await
         .map_err(ApiError::from)
 }
