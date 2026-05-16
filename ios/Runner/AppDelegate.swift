@@ -46,9 +46,6 @@ private func wn_install_ios_background_keyring_store_with_access_group(
     latestApnsToken = token
     pushChannel?.invokeMethod("providerPushTokenUpdated", arguments: providerPushTokenMap(token))
     NSLog("White Noise APNS token available: %d bytes", deviceToken.count)
-#if DEBUG
-    NSLog("APNs registration succeeded with token: %@", token)
-#endif
   }
 
   override func application(

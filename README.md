@@ -89,6 +89,14 @@ just build-ios         # Build Rust libs for iOS
 
 Run `just` with no arguments to see all available commands.
 
+## iOS Device Testing
+
+For APNS, notification service extension, or release-signing validation on a
+physical iOS device, build the flavor with `flutter build ios` and install the
+built app bundle with `xcrun devicectl`. Avoid `flutter install` for these
+checks because it may uninstall the existing app and delete the local database.
+See [AGENTS.md](AGENTS.md#ios-device-installs) for the exact staging flow.
+
 ## Development Philosophy
 
 - Keep complexity low. Keep the app thin.

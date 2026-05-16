@@ -19,7 +19,12 @@ import 'package:whitenoise/providers/chat_list_refresh_provider.dart';
 import 'package:whitenoise/providers/foreground_service_provider.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart'
-    show consumePendingNotificationTap, notificationListenerProvider, routePendingTap;
+    show
+        consumePendingNotificationTap,
+        localNotificationResumeSuppressionDuration,
+        localNotificationSuppressedUntilProvider,
+        notificationListenerProvider,
+        routePendingTap;
 import 'package:whitenoise/providers/push_registration_provider.dart';
 import 'package:whitenoise/providers/theme_provider.dart' show themeProvider;
 import 'package:whitenoise/routes.dart' show Routes;
@@ -146,7 +151,7 @@ Future<void> _moveWhitenoiseDirectoryIfNeeded({
 
 Future<void> _copyDirectory(Directory from, Directory to) async {
   await to.create(recursive: true);
-  await for (final entity in from.list(recursive: false)) {
+  await for (final entity in from.list()) {
     final targetPath = '${to.path}/${entity.uri.pathSegments.last}';
     if (entity is Directory) {
       await _copyDirectory(entity, Directory(targetPath));
@@ -177,14 +182,21 @@ Future<void> _migrateDataIfNeeded(String dataDir) async {
 
   if (currentVersion == kDataVersion) return;
 
-  // Read triggers the internal migration from EncryptedSharedPreferences to
-  // the new cipher storage. Then deleteAll clears legacy Flutter-side storage
-  // without touching the Rust-owned database in dataDir.
+  // Read triggers any flutter_secure_storage platform migration while keeping
+  // Flutter-owned keys such as the active account selection intact.
   const secureStorage = FlutterSecureStorage();
   await secureStorage.readAll();
-  await secureStorage.deleteAll();
   await FlutterForegroundTask.clearAllData();
   versionFile.writeAsStringSync('$kDataVersion');
+}
+
+@visibleForTesting
+Future<void> refreshAfterNotificationRoute({
+  required void Function() requestRefresh,
+  required Future<void> Function() ensureRelaySubscriptions,
+}) async {
+  requestRefresh();
+  await ensureRelaySubscriptions();
 }
 
 class WnApp extends ConsumerStatefulWidget {
@@ -196,6 +208,7 @@ class WnApp extends ConsumerStatefulWidget {
 
 class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
   late final GoRouter _router;
+  AppLifecycleState? _lastLifecycleState;
 
   @override
   void initState() {
@@ -203,12 +216,15 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
     _router = Routes.build(ref);
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      unawaited(_consumePendingNotificationTap(refreshBeforeRoute: true));
+      _suppressLocalNotificationsDuringResume();
+      unawaited(
+        _consumePendingNotificationTap(afterNavigate: _refreshAfterNotificationRoute),
+      );
     });
   }
 
   Future<bool> _consumePendingNotificationTap({
-    bool refreshBeforeRoute = false,
+    Future<void> Function()? afterNavigate,
   }) async {
     final pending = await consumePendingNotificationTap();
     return routePendingTap(
@@ -216,7 +232,7 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
       isMounted: mounted,
       currentActivePubkey: ref.read(authProvider).value,
       switchToProfile: ref.read(authProvider.notifier).switchProfile,
-      beforeNavigate: refreshBeforeRoute ? _ensureRelaySubscriptionsAfterResume : null,
+      afterNavigate: afterNavigate,
     );
   }
 
@@ -228,17 +244,30 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
+    final previousState = _lastLifecycleState;
+    _lastLifecycleState = state;
     unawaited(
       ref.read(foregroundServiceProvider).handleAppLifecycleChange(state),
     );
-    if (state == AppLifecycleState.resumed) {
+    if (state == AppLifecycleState.resumed &&
+        previousState != null &&
+        previousState != AppLifecycleState.resumed) {
+      _suppressLocalNotificationsDuringResume();
       unawaited(_handleAppResumed());
     }
   }
 
+  void _suppressLocalNotificationsDuringResume() {
+    ref
+        .read(localNotificationSuppressedUntilProvider.notifier)
+        .suppressFor(localNotificationResumeSuppressionDuration);
+  }
+
   Future<void> _handleAppResumed() async {
     await ref.read(authProvider.notifier).ensureExternalSignersRegistered();
-    final routed = await _consumePendingNotificationTap(refreshBeforeRoute: true);
+    final routed = await _consumePendingNotificationTap(
+      afterNavigate: _refreshAfterNotificationRoute,
+    );
     if (!routed) {
       await _ensureRelaySubscriptionsAfterResume();
     }
@@ -251,6 +280,13 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
     } catch (error, stackTrace) {
       _logger.warning('Failed to ensure relay subscriptions on resume', error, stackTrace);
     }
+  }
+
+  Future<void> _refreshAfterNotificationRoute() {
+    return refreshAfterNotificationRoute(
+      requestRefresh: ref.read(chatListRefreshProvider.notifier).requestRefresh,
+      ensureRelaySubscriptions: _ensureRelaySubscriptionsAfterResume,
+    );
   }
 
   @override

@@ -120,6 +120,28 @@ void main() {
       expect(routed, isTrue);
       expect(events, ['switch:${tap.receiverPubkey}', 'refresh']);
     });
+
+    test('runs afterNavigate after routing the tap', () async {
+      final events = <String>[];
+
+      final routed = await routePendingTap(
+        pending: tap,
+        isMounted: true,
+        currentActivePubkey: 'someone-else',
+        switchToProfile: (pk) async {
+          events.add('switch:$pk');
+        },
+        navigateToTarget: ({required String groupId, required bool isInvite}) {
+          events.add('route:$groupId:$isInvite');
+        },
+        afterNavigate: () async {
+          events.add('refresh');
+        },
+      );
+
+      expect(routed, isTrue);
+      expect(events, ['switch:${tap.receiverPubkey}', 'route:${tap.groupId}:false', 'refresh']);
+    });
   });
 
   group('consumePendingNotificationTap', () {

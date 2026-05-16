@@ -21,6 +21,31 @@ export 'package:whitenoise/services/foreground_service.dart' show PendingNotific
 final _logger = Logger('NotificationProvider');
 const _pushChannel = MethodChannel('org.parres.whitenoise/push_notifications');
 const _consumePendingNotificationTapMethod = 'consumePendingNotificationTap';
+const localNotificationResumeSuppressionDuration = Duration(seconds: 5);
+
+typedef NotificationTapNavigator =
+    void Function({
+      required String groupId,
+      required bool isInvite,
+    });
+
+class LocalNotificationSuppressionNotifier extends Notifier<DateTime?> {
+  @override
+  DateTime? build() => null;
+
+  void suppressFor(Duration duration) {
+    state = DateTime.now().toUtc().add(duration);
+  }
+
+  void clear() {
+    state = null;
+  }
+}
+
+final localNotificationSuppressedUntilProvider =
+    NotifierProvider<LocalNotificationSuppressionNotifier, DateTime?>(
+      LocalNotificationSuppressionNotifier.new,
+    );
 
 // coverage:ignore-start
 final notificationServiceProvider = Provider<NotificationService>((ref) {
@@ -49,6 +74,7 @@ final notificationListenerProvider = Provider.autoDispose<void>((ref) {
     notificationService: notificationService,
     getActiveChatId: () => ref.read(activeChatProvider),
     getLocale: () => ref.read(localeProvider.notifier).resolveLocale(),
+    shouldShowNotification: (_) => _canShowLocalNotification(ref),
   );
 
   ref.onDispose(() {
@@ -156,6 +182,8 @@ Future<void> handleNotificationTap({
   required bool isInvite,
   required String receiverPubkey,
   Future<void> Function()? beforeNavigate,
+  Future<void> Function()? afterNavigate,
+  NotificationTapNavigator? navigateToTarget,
 }) async {
   if (currentActivePubkey != receiverPubkey) {
     await switchToProfile(receiverPubkey);
@@ -164,7 +192,11 @@ Future<void> handleNotificationTap({
 
   await beforeNavigate?.call();
 
-  _navigateToNotificationTarget(groupId: groupId, isInvite: isInvite);
+  (navigateToTarget ?? _navigateToNotificationTarget)(
+    groupId: groupId,
+    isInvite: isInvite,
+  );
+  await afterNavigate?.call();
 }
 
 /// Routes a previously-stashed notification tap if one exists. Intended to be
@@ -180,6 +212,8 @@ Future<bool> routePendingTap({
   required String? currentActivePubkey,
   required Future<void> Function(String pubkey) switchToProfile,
   Future<void> Function()? beforeNavigate,
+  Future<void> Function()? afterNavigate,
+  NotificationTapNavigator? navigateToTarget,
 }) async {
   if (pending == null) return false;
   if (!isMounted) return false;
@@ -190,6 +224,8 @@ Future<bool> routePendingTap({
     isInvite: pending.isInvite,
     receiverPubkey: pending.receiverPubkey,
     beforeNavigate: beforeNavigate,
+    afterNavigate: afterNavigate,
+    navigateToTarget: navigateToTarget,
   );
   return true;
 }
@@ -232,6 +268,12 @@ void _navigateToNotificationTarget({
   } else {
     Routes.goToChat(context, groupId);
   }
+}
+
+bool _canShowLocalNotification(Ref ref) {
+  final suppressedUntil = ref.read(localNotificationSuppressedUntilProvider);
+  if (suppressedUntil == null) return true;
+  return !DateTime.now().toUtc().isBefore(suppressedUntil);
 }
 
 // coverage:ignore-end

@@ -11,11 +11,15 @@ import 'package:whitenoise/main.dart'
         initializeAppContainer,
         kDataVersion,
         kDataVersionFile,
+        refreshAfterNotificationRoute,
         resolveWhitenoiseBaseDirectory;
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/chat_list_refresh_provider.dart';
+import 'package:whitenoise/providers/notification_provider.dart'
+    show localNotificationSuppressedUntilProvider;
 import 'package:whitenoise/providers/theme_provider.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
+import 'package:whitenoise/src/rust/api/accounts.dart' as accounts_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import 'mocks/mock_secure_storage.dart';
@@ -49,23 +53,48 @@ import 'test_helpers.dart';
   );
 }
 
-void Function() _mockSecureStorage() {
+({Map<String, String> values, void Function() reset}) _mockSecureStorage([
+  Map<String, String> initialValues = const {},
+]) {
+  final values = Map<String, String>.from(initialValues);
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
     const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
     (call) async {
-      if (call.method == 'read') {
-        return null;
+      final args = Map<Object?, Object?>.from(call.arguments as Map? ?? const {});
+      final key = args['key'] as String?;
+      switch (call.method) {
+        case 'read':
+          return key == null ? null : values[key];
+        case 'readAll':
+          return Map<String, String>.from(values);
+        case 'write':
+          if (key != null) {
+            values[key] = args['value'] as String;
+          }
+          return null;
+        case 'delete':
+          if (key != null) {
+            values.remove(key);
+          }
+          return null;
+        case 'deleteAll':
+          values.clear();
+          return null;
+        default:
+          return null;
       }
-      return null;
     },
   );
 
-  return () {
-    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
-      const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
-      null,
-    );
-  };
+  return (
+    values: values,
+    reset: () {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('plugins.it_nomads.com/flutter_secure_storage'),
+        null,
+      );
+    },
+  );
 }
 
 void _mockAppGroupContainerPath(String? path) {
@@ -229,17 +258,31 @@ void main() {
       await tester.pumpAndSettle();
     });
 
-    testWidgets('reconciles external signer callbacks on app resume', (tester) async {
+    testWidgets('does not run resume refresh for the initial resumed event', (tester) async {
+      await pumpWnApp(tester);
+      mockAuth.ensureExternalSignersRegisteredCount = 0;
+      mockApi.ensureAllSubscriptionsCallCount = 0;
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(mockAuth.ensureExternalSignersRegisteredCount, 0);
+      expect(mockApi.ensureAllSubscriptionsCallCount, 0);
+    });
+
+    testWidgets('reconciles external signer callbacks on foreground resume', (tester) async {
       await pumpWnApp(tester);
       mockAuth.ensureExternalSignersRegisteredCount = 0;
 
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pumpAndSettle();
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
 
       expect(mockAuth.ensureExternalSignersRegisteredCount, 1);
     });
 
-    testWidgets('ensures relay subscriptions on app resume', (tester) async {
+    testWidgets('ensures relay subscriptions on foreground resume', (tester) async {
       await pumpWnApp(tester);
       mockApi.ensureAllSubscriptionsCallCount = 0;
       final container = ProviderScope.containerOf(
@@ -247,11 +290,31 @@ void main() {
         listen: false,
       );
 
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pumpAndSettle();
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
 
       expect(mockApi.ensureAllSubscriptionsCallCount, 1);
       expect(container.read(chatListRefreshProvider), 1);
+    });
+
+    testWidgets('temporarily suppresses local notifications on app resume', (tester) async {
+      await pumpWnApp(tester);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(WnApp)),
+        listen: false,
+      );
+      container.read(localNotificationSuppressedUntilProvider.notifier).clear();
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pumpAndSettle();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      final suppressedUntil = container.read(localNotificationSuppressedUntilProvider);
+      expect(suppressedUntil, isNotNull);
+      expect(suppressedUntil!.isAfter(DateTime.now().toUtc()), isTrue);
     });
 
     testWidgets('logs relay subscription resume failures without throwing', (tester) async {
@@ -262,21 +325,38 @@ void main() {
         listen: false,
       );
 
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pumpAndSettle();
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
 
       expect(mockApi.ensureAllSubscriptionsCallCount, 1);
       expect(container.read(chatListRefreshProvider), 0);
     });
+
+    test('refreshAfterNotificationRoute requests local refresh before relay refresh', () async {
+      final events = <String>[];
+
+      await refreshAfterNotificationRoute(
+        requestRefresh: () {
+          events.add('local-refresh');
+        },
+        ensureRelaySubscriptions: () async {
+          events.add('relay-refresh');
+        },
+      );
+
+      expect(events, ['local-refresh', 'relay-refresh']);
+    });
   });
 
   group('initializeAppContainer', () {
     late ({Directory tempDir, void Function() reset}) pathProvider;
-    late void Function() resetSecureStorage;
+    late ({Map<String, String> values, void Function() reset}) secureStorage;
 
     setUp(() {
       pathProvider = _mockPathProvider();
-      resetSecureStorage = _mockSecureStorage();
+      secureStorage = _mockSecureStorage();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         const MethodChannel('plugins.flutter.io/shared_preferences'),
         (call) async => <String, Object>{},
@@ -285,7 +365,7 @@ void main() {
 
     tearDown(() {
       pathProvider.reset();
-      resetSecureStorage();
+      secureStorage.reset();
       _resetAppGroupContainerPath();
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         const MethodChannel('plugins.flutter.io/shared_preferences'),
@@ -376,6 +456,23 @@ void main() {
       final versionFile = File('${dataDir.path}/$kDataVersionFile');
       expect(versionFile.existsSync(), isTrue);
       expect(versionFile.readAsStringSync().trim(), '$kDataVersion');
+    });
+
+    test('preserves Flutter secure storage when no version file exists', () async {
+      secureStorage.reset();
+      secureStorage = _mockSecureStorage({'active_account_pubkey': testPubkeyA});
+      mockApi.accounts = [
+        accounts_api.Account(
+          pubkey: testPubkeyA,
+          accountType: accounts_api.AccountType.local,
+          createdAt: DateTime(2024),
+          updatedAt: DateTime(2024),
+        ),
+      ];
+
+      await initializeAppContainer();
+
+      expect(secureStorage.values['active_account_pubkey'], testPubkeyA);
     });
 
     test('preserves data directory when version is outdated', () async {

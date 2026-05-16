@@ -34,6 +34,10 @@
 		D02FF64DC6FBE2FC831536E0 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8804A20421D869466829BB19 /* Localizable.strings */; };
 		D0A188941AD5BFE5CECD0882 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = AAB62E170EA2C75F99DEE1BC /* Localizable.strings */; };
 		D30F775773B5F3D0030079B0 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8919B16B724AABADFCC076E4 /* Localizable.strings */; };
+		DFAAA0010000000000000001 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFAAA0020000000000000002 /* Localizable.strings */; };
+		DFAAA0030000000000000003 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFAAA0040000000000000004 /* Localizable.strings */; };
+		DFAAA0050000000000000005 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFAAA0060000000000000006 /* Localizable.strings */; };
+		DFAAA0070000000000000007 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = DFAAA0080000000000000008 /* Localizable.strings */; };
 		DF000001000000000000AAA1 /* staging.icon in Resources */ = {isa = PBXBuildFile; fileRef = DF000001000000000000AAA0 /* staging.icon */; };
 		DF000001000000000000AAA3 /* production.icon in Resources */ = {isa = PBXBuildFile; fileRef = DF000001000000000000AAA2 /* production.icon */; };
 		E00F081CADF586EB818241E7 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1AF848715F0FC8DA2D7CA3F5 /* NotificationService.swift */; };
@@ -128,6 +132,10 @@
 		A4C231FA574E1DF782A652C5 /* WhiteNoiseNotificationServiceExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = WhiteNoiseNotificationServiceExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		A4DB9FA0B6A558C6734CD51F /* Pods-Runner.release-production.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-Runner.release-production.xcconfig"; path = "Target Support Files/Pods-Runner/Pods-Runner.release-production.xcconfig"; sourceTree = "<group>"; };
 		AAB62E170EA2C75F99DEE1BC /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = pt.lproj/Localizable.strings; sourceTree = "<group>"; };
+		DFAAA0020000000000000002 /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		DFAAA0040000000000000004 /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		DFAAA0060000000000000006 /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = "zh-Hans.lproj/Localizable.strings"; sourceTree = "<group>"; };
+		DFAAA0080000000000000008 /* Localizable.strings */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.plist.strings; name = Localizable.strings; path = "zh-Hant.lproj/Localizable.strings"; sourceTree = "<group>"; };
 		ADA8AC8A947DB1CC57A22348 /* NotificationServiceExtension.debug-staging.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "NotificationServiceExtension.debug-staging.xcconfig"; path = "Flutter/NotificationServiceExtension.debug-staging.xcconfig"; sourceTree = "<group>"; };
 		B01EB207A2EAA3F31CBCA27A /* Pods-RunnerTests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-RunnerTests.debug.xcconfig"; path = "Target Support Files/Pods-RunnerTests/Pods-RunnerTests.debug.xcconfig"; sourceTree = "<group>"; };
 		B7551CF507C5912BC15844C6 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.0.sdk/System/Library/Frameworks/Foundation.framework; sourceTree = DEVELOPER_DIR; };
@@ -191,6 +199,8 @@
 				E6D4D3C021F1BA6C2D38EAFB /* Localizable.strings */,
 				9707781D10677088AF9E337D /* Localizable.strings */,
 				4E7601814B80B2D4FA657FE5 /* Localizable.strings */,
+				DFAAA0020000000000000002 /* Localizable.strings */,
+				DFAAA0040000000000000004 /* Localizable.strings */,
 			);
 			name = WhiteNoiseNotificationServiceExtension;
 			path = WhiteNoiseNotificationServiceExtension;
@@ -291,6 +301,8 @@
 				AAB62E170EA2C75F99DEE1BC /* Localizable.strings */,
 				088BD5F605EAC352DE94A7BD /* Localizable.strings */,
 				5D14D0D3039092C329B87942 /* Localizable.strings */,
+				DFAAA0060000000000000006 /* Localizable.strings */,
+				DFAAA0080000000000000008 /* Localizable.strings */,
 			);
 			path = Runner;
 			sourceTree = "<group>";
@@ -453,6 +465,8 @@
 				D0A188941AD5BFE5CECD0882 /* Localizable.strings in Resources */,
 				A10CEBCD878B7EAB7D322963 /* Localizable.strings in Resources */,
 				B53FCAD00B27CBD301F6BC61 /* Localizable.strings in Resources */,
+				DFAAA0050000000000000005 /* Localizable.strings in Resources */,
+				DFAAA0070000000000000007 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -468,6 +482,8 @@
 				5A4D20618176995920214B3F /* Localizable.strings in Resources */,
 				1B5B6681BFED9934FF306704 /* Localizable.strings in Resources */,
 				88C9C4DD49C03C8DD5CA4BC7 /* Localizable.strings in Resources */,
+				DFAAA0010000000000000001 /* Localizable.strings in Resources */,
+				DFAAA0030000000000000003 /* Localizable.strings in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

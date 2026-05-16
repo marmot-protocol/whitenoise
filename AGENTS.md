@@ -104,6 +104,50 @@ just generate
 just build-android-quiet
 ```
 
+## iOS Device Installs
+
+iOS installs are data-sensitive. A normal iOS app uninstall deletes the app
+sandbox, including the local White Noise database. Treat every iOS reinstall
+command as potentially destructive until you have checked its behavior.
+
+For iOS staging or production device testing, use this flow:
+
+```bash
+# 1. Find the connected physical iOS device.
+flutter devices
+xcrun devicectl list devices
+
+# 2. Build a signed app for the flavor you intend to test.
+flutter build ios --flavor staging --release
+
+# 3. Install the built app bundle with devicectl.
+xcrun devicectl device install app --device <coredevice-id> build/ios/iphoneos/Runner.app
+
+# 4. Verify the installed bundle.
+xcrun devicectl device info apps --device <coredevice-id> | rg 'dev\.ipf\.whitenoise\.staging|org\.parres\.whitenoise'
+```
+
+Never use `flutter install` for iOS staging or production-style testing. It may
+print `Uninstalling old version...` before installing. If that happens, iOS
+removes the app container and the local database is gone. Stop immediately if
+any command says it is uninstalling an iOS app unless the user explicitly asked
+to wipe the app.
+
+Use `flutter run --flavor staging -d <flutter-device-id>` only for an active
+debug session where a debug build launched from Flutter is expected. Do not use
+debug installs for APNS/NSE/release-signing validation.
+
+Before notification testing on iOS, verify the signed artifact:
+
+```bash
+codesign -d --entitlements :- build/ios/iphoneos/Runner.app 2>/dev/null
+codesign -d --entitlements :- build/ios/iphoneos/Runner.app/PlugIns/WhiteNoiseNotificationServiceExtension.appex 2>/dev/null
+```
+
+The staging app should be `dev.ipf.whitenoise.staging`, APNS should usually be
+`aps-environment = production` for ad-hoc/release staging tests, and the app plus
+NSE must share `group.dev.ipf.whitenoise.staging`.
+
 ## Quiet Commands for Agents
 
 **IMPORTANT:** When verifying that code works, agents should ALWAYS use the quiet variants. These produce minimal output that is easy to parse while still showing errors on failure.

@@ -1011,7 +1011,7 @@ void main() {
       });
 
       testWidgets('reloads messages when chat list refresh is requested', (tester) async {
-        _api.initialMessages = [_message('m1', DateTime(2024, 1))];
+        _api.initialMessages = [_message('m1', DateTime(2024))];
 
         await pumpChatScreen(tester);
 
@@ -1023,7 +1023,7 @@ void main() {
           listen: false,
         );
         _api.initialMessages = [
-          _message('m1', DateTime(2024, 1)),
+          _message('m1', DateTime(2024)),
           _message('m2', DateTime(2024, 2)),
         ];
         container.read(chatListRefreshProvider.notifier).requestRefresh();

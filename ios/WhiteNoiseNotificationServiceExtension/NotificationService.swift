@@ -30,6 +30,26 @@ private final class BackgroundPushResultBox {
   var json: String?
 }
 
+private final class NotificationDelivery {
+  private let lock = NSLock()
+  private var contentHandler: ((UNNotificationContent) -> Void)?
+
+  init(_ contentHandler: @escaping (UNNotificationContent) -> Void) {
+    self.contentHandler = contentHandler
+  }
+
+  func deliver(_ content: UNNotificationContent) {
+    lock.lock()
+    guard let contentHandler else {
+      lock.unlock()
+      return
+    }
+    self.contentHandler = nil
+    lock.unlock()
+    contentHandler(content)
+  }
+}
+
 private func backgroundPushJsonCallback(
   jsonPtr: UnsafePointer<UInt8>?,
   jsonLen: Int,
@@ -45,53 +65,43 @@ private func backgroundPushJsonCallback(
 }
 
 final class NotificationService: UNNotificationServiceExtension {
+  private static let collectionQueue = DispatchQueue(
+    label: "org.parres.whitenoise.notification-service.collection",
+    qos: .userInitiated
+  )
   private let keyringServiceId = "com.whitenoise.app"
-  private let maxNotificationServiceWaitMs: UInt32 = 20_000
-  private let deliveryLock = NSLock()
-  private var contentHandler: ((UNNotificationContent) -> Void)?
-  private var bestAttemptContent: UNMutableNotificationContent?
+  private let maxNotificationServiceWaitMs: UInt32 = 8_000
+  private var bestAttemptDelivery: NotificationDelivery?
 
   override func didReceive(
     _ request: UNNotificationRequest,
     withContentHandler contentHandler: @escaping (UNNotificationContent) -> Void
   ) {
-    self.contentHandler = contentHandler
+    let delivery = NotificationDelivery(contentHandler)
+    bestAttemptDelivery = delivery
     NSLog("White Noise NSE received mutable notification")
 
     guard let content = request.content.mutableCopy() as? UNMutableNotificationContent else {
       NSLog("White Noise NSE failed to copy notification content")
-      contentHandler(request.content)
+      delivery.deliver(request.content)
       return
     }
 
-    bestAttemptContent = content
-    applyFallbackNotificationText(content)
-
-    DispatchQueue.global(qos: .userInitiated).async {
-      self.collectAndApplyNotificationText(content)
-      self.deliver(content)
+    Self.collectionQueue.async {
+      let shouldDisplayNotification = self.collectAndApplyNotificationText(content)
+      delivery.deliver(shouldDisplayNotification ? content : UNMutableNotificationContent())
     }
   }
 
   override func serviceExtensionTimeWillExpire() {
-    if let bestAttemptContent {
-      markExtensionTimeout(bestAttemptContent)
-      deliver(bestAttemptContent)
-    }
-  }
-
-  private func deliver(_ content: UNNotificationContent) {
-    deliveryLock.lock()
-    guard let contentHandler else {
-      deliveryLock.unlock()
+    guard let bestAttemptDelivery else {
       return
     }
-    self.contentHandler = nil
-    deliveryLock.unlock()
-    contentHandler(content)
+    NSLog("White Noise NSE timed out before rendering notification")
+    bestAttemptDelivery.deliver(UNMutableNotificationContent())
   }
 
-  private func collectAndApplyNotificationText(_ content: UNMutableNotificationContent) {
+  private func collectAndApplyNotificationText(_ content: UNMutableNotificationContent) -> Bool {
     let collectionResult = collectNotificationsAfterPush()
     let result: BackgroundPushResult
     switch collectionResult {
@@ -100,7 +110,7 @@ final class NotificationService: UNNotificationServiceExtension {
     case .failure(let reason):
       NSLog("White Noise NSE collection failed: %@", reason)
       applyFallbackNotificationText(content)
-      return
+      return true
     }
 
     NSLog(
@@ -111,19 +121,18 @@ final class NotificationService: UNNotificationServiceExtension {
     )
 
     guard result.status == "new_data" else {
-      applyFallbackNotificationText(content)
-      return
+      return false
     }
 
     guard let notification = result.notifications.last else {
-      applyFallbackNotificationText(content)
-      return
+      return false
     }
 
     content.title = notification.title
     content.subtitle = ""
     content.body = notification.body
     content.userInfo = content.userInfo.merging(notification.tapUserInfo) { _, new in new }
+    return true
   }
 
   private func applyFallbackNotificationText(_ content: UNMutableNotificationContent) {
@@ -132,10 +141,6 @@ final class NotificationService: UNNotificationServiceExtension {
     }
     content.subtitle = ""
     content.body = localized("notification_new_encrypted_message", fallback: "New encrypted message")
-  }
-
-  private func markExtensionTimeout(_ content: UNMutableNotificationContent) {
-    applyFallbackNotificationText(content)
   }
 
   private func localized(_ key: String, fallback: String) -> String {

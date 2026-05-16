@@ -15,6 +15,7 @@ final _logger = Logger('NotificationSubscription');
 
 typedef ActiveChatGetter = String? Function();
 typedef LocaleGetter = Locale Function();
+typedef NotificationDisplayGate = bool Function(notifications_api.NotificationUpdate update);
 
 /// Subscribes to the Rust-side notification stream and dispatches each update
 /// to [NotificationService.show]. Designed to be usable from both the main UI
@@ -26,17 +27,20 @@ class NotificationSubscription {
     required NotificationService notificationService,
     required ActiveChatGetter getActiveChatId,
     required LocaleGetter getLocale,
+    NotificationDisplayGate? shouldShowNotification,
     bool? enabled,
     bool requestPermissionOnStart = true,
   }) : _notificationService = notificationService,
        _getActiveChatId = getActiveChatId,
        _getLocale = getLocale,
+       _shouldShowNotification = shouldShowNotification ?? _alwaysShowNotification,
        _requestPermissionOnStart = requestPermissionOnStart,
        _enabled = enabled ?? notificationsSupported();
 
   final NotificationService _notificationService;
   final ActiveChatGetter _getActiveChatId;
   final LocaleGetter _getLocale;
+  final NotificationDisplayGate _shouldShowNotification;
   final bool _requestPermissionOnStart;
   final bool _enabled;
 
@@ -113,6 +117,10 @@ class NotificationSubscription {
       _logger.fine('Skipping notification for active chat ${update.mlsGroupId}');
       return;
     }
+    if (!_shouldShowNotification(update)) {
+      _logger.fine('Skipping notification because local display gate is closed');
+      return;
+    }
     if (await mute_list_api.isUserBlocked(
       accountPubkey: update.receiver.pubkey,
       targetPubkey: update.sender.pubkey,
@@ -159,6 +167,8 @@ class NotificationSubscription {
     }
   }
 }
+
+bool _alwaysShowNotification(notifications_api.NotificationUpdate _) => true;
 
 @visibleForTesting
 (String title, String body, bool isInvite) formatNotification(

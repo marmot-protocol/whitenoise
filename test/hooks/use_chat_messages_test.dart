@@ -321,7 +321,7 @@ void main() {
       await mountWidget(buildHook(), tester);
 
       _api.emitInitialSnapshot([
-        _message('m1', DateTime(2024, 1), content: 'First'),
+        _message('m1', DateTime(2024), content: 'First'),
       ]);
       await tester.pumpAndSettle();
 
@@ -332,7 +332,7 @@ void main() {
       await mountWidget(buildHook(), tester);
 
       _api.emitInitialSnapshot([
-        _message('m1', DateTime(2024, 1), content: 'First'),
+        _message('m1', DateTime(2024), content: 'First'),
         _message('m2', DateTime(2024, 2), content: 'Second'),
       ]);
       await tester.pumpAndSettle();

@@ -1,13 +1,16 @@
-use std::any::Any;
-use std::collections::HashMap;
-use std::fmt;
-use std::sync::Arc;
+#[cfg(any(target_os = "ios", test))]
+use std::{any::Any, collections::HashMap, fmt, sync::Arc};
 
+#[cfg(any(target_os = "ios", test))]
 use apple_native_keyring_store::protected::{AccessPolicy, Cred, Store as ProtectedStore};
+#[cfg(any(target_os = "ios", test))]
 use keyring_core::api::{CredentialApi, CredentialStoreApi};
+#[cfg(any(target_os = "ios", test))]
 use keyring_core::{Credential, CredentialPersistence, CredentialStore, Entry, Error, Result};
 
+#[cfg(any(target_os = "ios", test))]
 const WHITENOISE_KEYRING_SERVICE_ID: &str = "com.whitenoise.app";
+#[cfg(any(target_os = "ios", test))]
 const AFTER_FIRST_UNLOCK_SERVICE_SUFFIX: &str = ".after-first-unlock";
 
 pub(crate) fn install_ios_keyring_store_if_needed() -> std::result::Result<(), String> {
@@ -52,11 +55,13 @@ fn install_after_first_unlock_keyring_store(access_group: Option<String>) -> Res
     Ok(())
 }
 
+#[cfg(any(target_os = "ios", test))]
 struct AfterFirstUnlockMigratingStore {
     fallback: Arc<CredentialStore>,
     access_group: Option<String>,
 }
 
+#[cfg(any(target_os = "ios", test))]
 impl AfterFirstUnlockMigratingStore {
     fn new(access_group: Option<String>) -> Result<Arc<Self>> {
         let fallback = match access_group.as_deref() {
@@ -84,12 +89,14 @@ impl AfterFirstUnlockMigratingStore {
     }
 }
 
+#[cfg(any(target_os = "ios", test))]
 impl fmt::Debug for AfterFirstUnlockMigratingStore {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("AfterFirstUnlockMigratingStore").finish()
     }
 }
 
+#[cfg(any(target_os = "ios", test))]
 impl CredentialStoreApi for AfterFirstUnlockMigratingStore {
     fn vendor(&self) -> String {
         "White Noise iOS protected store".to_string()
@@ -136,6 +143,7 @@ impl CredentialStoreApi for AfterFirstUnlockMigratingStore {
     }
 }
 
+#[cfg(any(target_os = "ios", test))]
 #[derive(Debug)]
 struct AfterFirstUnlockMigratingCredential {
     service: String,
@@ -144,6 +152,7 @@ struct AfterFirstUnlockMigratingCredential {
     legacy: Entry,
 }
 
+#[cfg(any(target_os = "ios", test))]
 impl AfterFirstUnlockMigratingCredential {
     fn delete_legacy_best_effort(&self) {
         match self.legacy.delete_credential() {
@@ -176,6 +185,7 @@ impl AfterFirstUnlockMigratingCredential {
     }
 }
 
+#[cfg(any(target_os = "ios", test))]
 impl CredentialApi for AfterFirstUnlockMigratingCredential {
     fn set_secret(&self, secret: &[u8]) -> Result<()> {
         self.primary.set_secret(secret)?;
@@ -224,6 +234,7 @@ impl CredentialApi for AfterFirstUnlockMigratingCredential {
     }
 }
 
+#[cfg(any(target_os = "ios", test))]
 fn primary_service_id(service: &str) -> String {
     format!("{service}{AFTER_FIRST_UNLOCK_SERVICE_SUFFIX}")
 }

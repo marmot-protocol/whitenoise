@@ -97,6 +97,7 @@ NotificationSubscription _newSubscription(
   Locale locale = const Locale('en'),
   bool enabled = true,
   bool requestPermissionOnStart = true,
+  bool Function(NotificationUpdate update)? shouldShowNotification,
 }) {
   return NotificationSubscription(
     notificationService: notificationService,
@@ -104,6 +105,7 @@ NotificationSubscription _newSubscription(
     getLocale: () => locale,
     enabled: enabled,
     requestPermissionOnStart: requestPermissionOnStart,
+    shouldShowNotification: shouldShowNotification,
   );
 }
 
@@ -548,6 +550,25 @@ void main() {
       await _newSubscription(
         mockNotificationService,
         activeChatId: testGroupId,
+      ).handleUpdate(update);
+
+      expect(mockNotificationService.showCalls, isEmpty);
+    });
+
+    test('skips notification when local notification gate is closed', () async {
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+        content: 'Hello',
+        timestamp: DateTime.now(),
+      );
+
+      await _newSubscription(
+        mockNotificationService,
+        shouldShowNotification: (_) => false,
       ).handleUpdate(update);
 
       expect(mockNotificationService.showCalls, isEmpty);
