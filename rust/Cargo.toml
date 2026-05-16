@@ -9,7 +9,7 @@ crate-type = ["cdylib", "staticlib"]
 [dependencies]
 anyhow = "1.0.99"
 chrono = { version = "0.4.40", features = ["serde"] }
-flutter_rust_bridge = { version = "=2.11.1", features = ["chrono"] }
+flutter_rust_bridge = { version = "=2.12.0", features = ["chrono"] }
 hex = "0.4"
 nostr-sdk = { version = "0.44", features = [
     "nip04",
