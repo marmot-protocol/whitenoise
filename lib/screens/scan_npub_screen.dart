@@ -21,7 +21,7 @@ class ScanNpubScreen extends HookWidget {
     final l10n = context.l10n;
     final showInvalidNpubError = useState(false);
 
-    void onBarcodeDetected(String value) {
+    void onQrCodeDetected(String value) {
       final deepLinkTarget = DeepLinks.parseString(value);
       if (deepLinkTarget != null) {
         Routes.goBack(context);
@@ -51,11 +51,7 @@ class ScanNpubScreen extends HookWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: QrScanner(
-                    onBarcodeDetected: onBarcodeDetected,
-                  ),
-                ),
+                Expanded(child: QrScanner(onQrCodeDetected: onQrCodeDetected)),
                 Gap(12.h),
                 Text(
                   showInvalidNpubError.value ? l10n.invalidNpub : l10n.scanNpubHint,

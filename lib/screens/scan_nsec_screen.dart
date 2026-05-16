@@ -42,7 +42,7 @@ class ScanNsecScreen extends StatelessWidget {
                   children: [
                     Expanded(
                       child: QrScanner(
-                        onBarcodeDetected: (value) => GoRouter.of(context).pop(value),
+                        onQrCodeDetected: (value) => GoRouter.of(context).pop(value),
                       ),
                     ),
                     Gap(12.h),

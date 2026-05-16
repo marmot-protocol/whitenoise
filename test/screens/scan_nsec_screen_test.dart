@@ -117,11 +117,11 @@ void main() {
     });
 
     group('barcode detection', () {
-      testWidgets('calling onBarcodeDetected pops with scanned value', (tester) async {
+      testWidgets('calling onQrCodeDetected pops with scanned value', (tester) async {
         await pumpScanNsecScreen(tester);
 
         final scanBox = tester.widget<QrScanner>(find.byType(QrScanner));
-        scanBox.onBarcodeDetected('nsec1scannedvalue');
+        scanBox.onQrCodeDetected('nsec1scannedvalue');
         await tester.pumpAndSettle();
 
         expect(find.byType(LoginScreen), findsOneWidget);
