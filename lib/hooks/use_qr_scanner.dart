@@ -43,6 +43,58 @@ void resetPermissionStatusChecker() => _permissionStatusChecker.reset();
 
 enum ScannerState { loading, ready, permissionDenied, initError, error }
 
+void _useCameraPermission({
+  required UniqueKey retryKey,
+  required ObjectRef<bool> isMounted,
+  required VoidCallback onGranted,
+  required VoidCallback onDenied,
+  required VoidCallback retryScanner,
+}) {
+  final isDenied = useRef(false);
+  final permissionStatusAtDenial = useRef<PermissionStatus?>(null);
+
+  useEffect(() {
+    Future<void> checkPermission() async {
+      final status = await requestCameraPermission();
+      if (!isMounted.value) return;
+
+      if (status.isGranted || status.isLimited) {
+        isDenied.value = false;
+        permissionStatusAtDenial.value = null;
+        onGranted();
+      } else {
+        final currentStatus = await checkCameraPermissionStatus();
+        if (!isMounted.value) return;
+        isDenied.value = true;
+        permissionStatusAtDenial.value = currentStatus;
+        onDenied();
+      }
+    }
+
+    unawaited(checkPermission());
+    return null;
+  }, [retryKey]);
+
+  useOnAppLifecycleStateChange((previous, current) {
+    if (current != AppLifecycleState.resumed || !isMounted.value) return;
+    if (!isDenied.value) return;
+
+    Future<void> checkAndRetry() async {
+      final cameraPermissionStatus = await checkCameraPermissionStatus();
+      if (!isMounted.value) return;
+      final snapshotWasDenied =
+          permissionStatusAtDenial.value != null &&
+          !(permissionStatusAtDenial.value!.isGranted || permissionStatusAtDenial.value!.isLimited);
+      if (snapshotWasDenied &&
+          (cameraPermissionStatus.isGranted || cameraPermissionStatus.isLimited)) {
+        retryScanner();
+      }
+    }
+
+    unawaited(checkAndRetry());
+  });
+}
+
 ({
   ScannerState scannerState,
   MobileScannerController controller,
@@ -54,32 +106,24 @@ useQrScanner({required void Function(String) onQrCodeDetected}) {
   final scannerRetryKey = useState(UniqueKey());
   final isMounted = useRef(true);
   final scannerState = useState(ScannerState.loading);
-  final permissionStatusAtDenial = useRef<PermissionStatus?>(null);
 
   useEffect(() {
     isMounted.value = true;
     return () => isMounted.value = false;
   }, const []);
 
-  useEffect(() {
-    Future<void> checkPermission() async {
-      final status = await requestCameraPermission();
-      if (!isMounted.value) return;
+  void retryScanner() {
+    scannerState.value = ScannerState.loading;
+    scannerRetryKey.value = UniqueKey();
+  }
 
-      if (status.isGranted || status.isLimited) {
-        permissionStatusAtDenial.value = null;
-        scannerState.value = ScannerState.ready;
-      } else {
-        final currentStatus = await checkCameraPermissionStatus();
-        if (!isMounted.value) return;
-        permissionStatusAtDenial.value = currentStatus;
-        scannerState.value = ScannerState.permissionDenied;
-      }
-    }
-
-    unawaited(checkPermission());
-    return null;
-  }, [scannerRetryKey.value]);
+  _useCameraPermission(
+    retryKey: scannerRetryKey.value,
+    isMounted: isMounted,
+    onGranted: () => scannerState.value = ScannerState.ready,
+    onDenied: () => scannerState.value = ScannerState.permissionDenied,
+    retryScanner: retryScanner,
+  );
 
   final controller = useMemoized(createScannerController, [
     scannerRetryKey.value,
@@ -122,37 +166,26 @@ useQrScanner({required void Function(String) onQrCodeDetected}) {
     };
   }, [controller, scannerState.value]);
 
-  void retryScanner() {
-    scannerState.value = ScannerState.loading;
-    scannerRetryKey.value = UniqueKey();
-  }
-
   useOnAppLifecycleStateChange((previous, current) {
     if (current != AppLifecycleState.resumed || !isMounted.value) return;
-    if (scannerState.value == ScannerState.permissionDenied) {
-      Future<void> checkAndMaybeRetry() async {
-        final cameraPermissionStatus = await checkCameraPermissionStatus();
+    if (scannerState.value == ScannerState.permissionDenied) return;
+
+    if (scannerState.value == ScannerState.loading) {
+      unawaited(() async {
+        final status = await checkCameraPermissionStatus();
         if (!isMounted.value) return;
-        final snapshotWasDenied =
-            permissionStatusAtDenial.value != null &&
-            !(permissionStatusAtDenial.value!.isGranted ||
-                permissionStatusAtDenial.value!.isLimited);
-        if (snapshotWasDenied &&
-            (cameraPermissionStatus.isGranted || cameraPermissionStatus.isLimited)) {
+        if (status.isGranted || status.isLimited) {
           retryScanner();
         }
-      }
-
-      unawaited(checkAndMaybeRetry());
-    } else {
-      retryScanner();
+      }());
+      return;
     }
+
+    retryScanner();
   });
 
   void setErrorState(ScannerState state) {
-    if (isMounted.value) {
-      scannerState.value = state;
-    }
+    if (isMounted.value) scannerState.value = state;
   }
 
   return (

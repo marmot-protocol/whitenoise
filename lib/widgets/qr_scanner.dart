@@ -1,177 +1,48 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart' show Gap;
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:whitenoise/hooks/use_qr_scanner.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 
-MobileScannerController Function() _controllerFactory = _defaultControllerFactory;
-
-MobileScannerController _defaultControllerFactory() =>
-    MobileScannerController(formats: [BarcodeFormat.qrCode], autoStart: false);
-
-MobileScannerController createScannerController() => _controllerFactory();
-
-void setScannerControllerFactory(MobileScannerController Function() factory) {
-  _controllerFactory = factory;
-}
-
-void resetScannerControllerFactory() {
-  _controllerFactory = _defaultControllerFactory;
-}
-
-Future<PermissionStatus> Function() _permissionRequester = _defaultPermissionRequester;
-
-Future<PermissionStatus> _defaultPermissionRequester() => Permission.camera.request();
-
-Future<PermissionStatus> requestCameraPermission() => _permissionRequester();
-
-void setPermissionRequester(Future<PermissionStatus> Function() requester) {
-  _permissionRequester = requester;
-}
-
-void resetPermissionRequester() {
-  _permissionRequester = _defaultPermissionRequester;
-}
-
-Future<PermissionStatus> Function() _permissionStatusChecker = _defaultPermissionStatusChecker;
-
-Future<PermissionStatus> _defaultPermissionStatusChecker() => Permission.camera.status;
-
-Future<PermissionStatus> checkCameraPermissionStatus() => _permissionStatusChecker();
-
-void setPermissionStatusChecker(Future<PermissionStatus> Function() checker) {
-  _permissionStatusChecker = checker;
-}
-
-void resetPermissionStatusChecker() {
-  _permissionStatusChecker = _defaultPermissionStatusChecker;
-}
-
-enum ScannerState {
-  loading,
-  ready,
-  permissionDenied,
-  initError,
-  error,
-}
+export 'package:whitenoise/hooks/use_qr_scanner.dart'
+    show
+        ScannerState,
+        createScannerController,
+        setScannerControllerFactory,
+        resetScannerControllerFactory,
+        requestCameraPermission,
+        setPermissionRequester,
+        resetPermissionRequester,
+        checkCameraPermissionStatus,
+        setPermissionStatusChecker,
+        resetPermissionStatusChecker;
 
 class QrScanner extends HookWidget {
   const QrScanner({
     super.key,
-    required this.onBarcodeDetected,
+    required this.onQrCodeDetected,
     this.width,
     this.height,
   });
 
-  final void Function(String value) onBarcodeDetected;
+  final void Function(String value) onQrCodeDetected;
   final double? width;
   final double? height;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    final isProcessing = useState(false);
-    final scannerRetryKey = useState(UniqueKey());
-    final isMounted = useRef(true);
-    final scannerState = useState(ScannerState.loading);
-    final lastDeniedStatus = useRef<PermissionStatus?>(null);
-
-    useEffect(() {
-      isMounted.value = true;
-      return () => isMounted.value = false;
-    }, const []);
-
-    useEffect(() {
-      Future<void> checkPermission() async {
-        final status = await requestCameraPermission();
-        if (!isMounted.value) return;
-
-        if (status.isGranted || status.isLimited) {
-          lastDeniedStatus.value = null;
-          scannerState.value = ScannerState.ready;
-        } else {
-          final currentStatus = await checkCameraPermissionStatus();
-          if (!isMounted.value) return;
-          lastDeniedStatus.value = currentStatus;
-          scannerState.value = ScannerState.permissionDenied;
-        }
-      }
-
-      unawaited(checkPermission());
-      return null;
-    }, [scannerRetryKey.value]);
-
-    final controller = useMemoized(
-      createScannerController,
-      [scannerRetryKey.value],
+    final (:scannerState, :controller, :retryScanner, :setErrorState) = useQrScanner(
+      onQrCodeDetected: onQrCodeDetected,
     );
-
-    useEffect(() {
-      if (scannerState.value != ScannerState.ready) return null;
-
-      var started = false;
-
-      void handleBarcode(BarcodeCapture capture) {
-        if (capture.barcodes.isEmpty) return;
-        if (isProcessing.value) return;
-        final barcode = capture.barcodes.first;
-        final rawValue = barcode.rawValue ?? '';
-        if (rawValue.isEmpty) return;
-        isProcessing.value = true;
-        onBarcodeDetected(rawValue.trim());
-        Future.delayed(const Duration(milliseconds: 500), () {
-          if (isMounted.value) isProcessing.value = false;
-        });
-      }
-
-      Future<void> startController() async {
-        if (started) return;
-        started = true;
-        await controller.start();
-      }
-
-      final subscription = controller.barcodes.listen(handleBarcode);
-      unawaited(startController());
-
-      return () {
-        unawaited(subscription.cancel());
-        controller.dispose();
-      };
-    }, [controller, scannerState.value]);
-
-    void retryScanner() {
-      scannerState.value = ScannerState.loading;
-      scannerRetryKey.value = UniqueKey();
-    }
-
-    useOnAppLifecycleStateChange((previous, current) {
-      if (current != AppLifecycleState.resumed || !isMounted.value) return;
-      if (scannerState.value == ScannerState.permissionDenied) {
-        unawaited(() async {
-          final cameraPermissionStatus = await checkCameraPermissionStatus();
-          if (!isMounted.value) return;
-          final snapshotWasDenied =
-              lastDeniedStatus.value != null &&
-              !(lastDeniedStatus.value!.isGranted || lastDeniedStatus.value!.isLimited);
-          if (snapshotWasDenied &&
-              (cameraPermissionStatus.isGranted || cameraPermissionStatus.isLimited)) {
-            retryScanner();
-          }
-        }());
-      } else {
-        retryScanner();
-      }
-    });
-
-    final showScanner = scannerState.value == ScannerState.ready;
-    final isError = scannerState.value != ScannerState.loading && !showScanner;
+    final showScanner = scannerState == ScannerState.ready;
+    final isError = scannerState != ScannerState.loading && !showScanner;
 
     return Container(
       key: const Key('qr_scanner'),
@@ -185,7 +56,7 @@ class QrScanner extends HookWidget {
         borderRadius: BorderRadius.circular(7.r),
         child: showScanner
             ? MobileScanner(
-                key: ValueKey(scannerRetryKey.value),
+                key: ValueKey(controller),
                 controller: controller,
                 errorBuilder: (context, error) {
                   final newState = switch (error.errorCode) {
@@ -194,9 +65,7 @@ class QrScanner extends HookWidget {
                     _ => ScannerState.error,
                   };
                   Future.microtask(() {
-                    if (isMounted.value) {
-                      scannerState.value = newState;
-                    }
+                    setErrorState(newState);
                   });
                   return _ScannerNotice(
                     scannerState: newState,
@@ -206,7 +75,7 @@ class QrScanner extends HookWidget {
               )
             : isError
             ? _ScannerNotice(
-                scannerState: scannerState.value,
+                scannerState: scannerState,
                 onRetry: retryScanner,
               )
             : _ScannerPlaceholder(colors: colors),

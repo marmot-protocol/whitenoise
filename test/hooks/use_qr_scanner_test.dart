@@ -288,6 +288,72 @@ void main() {
           expect(find.byKey(const Key('open_settings_button')), findsOneWidget);
         },
       );
+
+      testWidgets(
+        'does not re-request permission when lifecycle resume fires after user dismissed dialog with back',
+        (tester) async {
+          var requestCount = 0;
+          final completer = Completer<PermissionStatus>();
+          setPermissionRequester(() async {
+            requestCount++;
+            return completer.future;
+          });
+          setPermissionStatusChecker(() async => PermissionStatus.denied);
+
+          await mountWidget(QrScanner(onQrCodeDetected: (_) {}), tester);
+
+          tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+          await tester.pump();
+          await tester.pump();
+
+          completer.complete(PermissionStatus.denied);
+          await tester.pump();
+          await tester.pump();
+
+          expect(
+            requestCount,
+            1,
+            reason:
+                'must not re-request permission when lifecycle resumes during '
+                'loading state and permission is still denied (user dismissed)',
+          );
+        },
+      );
+
+      testWidgets(
+        'recreates scanner controller when lifecycle resume fires before permission grant resolves',
+        (tester) async {
+          var factoryCallCount = 0;
+          setScannerControllerFactory(() {
+            factoryCallCount++;
+            return mockController;
+          });
+          final completer = Completer<PermissionStatus>();
+          setPermissionRequester(() => completer.future);
+          setPermissionStatusChecker(() async => PermissionStatus.granted);
+
+          await mountWidget(QrScanner(onQrCodeDetected: (_) {}), tester);
+          expect(factoryCallCount, 1);
+
+          tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+          await tester.pump();
+          await tester.pump();
+
+          completer.complete(PermissionStatus.granted);
+          await tester.pump();
+          await tester.pump();
+          await tester.pump();
+
+          expect(find.byType(MobileScanner), findsOneWidget);
+          expect(
+            factoryCallCount,
+            greaterThanOrEqualTo(2),
+            reason:
+                'controller must be recreated when lifecycle resume fires '
+                'during loading and permission was actually granted',
+          );
+        },
+      );
     });
 
     group('permission handling', () {
