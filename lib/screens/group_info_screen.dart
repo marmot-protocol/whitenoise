@@ -81,18 +81,14 @@ class GroupInfoScreen extends HookConsumerWidget {
     Future<void> handleArchiveAction() async {
       final currentIsArchived = archiveState.isArchived;
       try {
-        if (currentIsArchived) {
-          await archiveState.unarchive();
-        } else {
-          await archiveState.archive();
-        }
+        await archiveState.toggle();
       } catch (_) {
         if (context.mounted) {
-          if (currentIsArchived) {
-            showErrorNotice(context.l10n.failedToUnarchiveChat);
-          } else {
-            showErrorNotice(context.l10n.failedToArchiveChat);
-          }
+          showErrorNotice(
+            currentIsArchived
+                ? context.l10n.failedToUnarchiveChat
+                : context.l10n.failedToArchiveChat,
+          );
         }
       }
     }

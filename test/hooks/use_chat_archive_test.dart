@@ -12,6 +12,7 @@ import '../test_helpers.dart';
 
 class _MockApi extends MockWnApi {
   bool archivedAtResult = false;
+  Completer<void>? getAccountGroupCompleter;
   Completer<void>? archiveCompleter;
   Completer<void>? unarchiveCompleter;
 
@@ -21,6 +22,7 @@ class _MockApi extends MockWnApi {
     required String mlsGroupId,
   }) async {
     getAccountGroupCallCount++;
+    if (getAccountGroupCompleter != null) await getAccountGroupCompleter!.future;
     if (shouldFailGetAccountGroup) throw Exception('AccountGroup not found');
     return AccountGroup(
       accountPubkey: accountPubkey,
@@ -59,6 +61,7 @@ class _MockApi extends MockWnApi {
   void reset() {
     super.reset();
     archivedAtResult = false;
+    getAccountGroupCompleter = null;
     archiveCompleter = null;
     unarchiveCompleter = null;
   }
@@ -235,6 +238,72 @@ void main() {
         await tester.pumpWidget(const SizedBox());
         _api.unarchiveCompleter!.complete();
         await expectLater(unarchiveFuture, completes);
+      });
+    });
+
+    group('toggle', () {
+      testWidgets('calls archive when not archived', (tester) async {
+        _api.archivedAtResult = false;
+        await pump(tester);
+        await tester.pumpAndSettle();
+
+        await getState().toggle();
+        await tester.pumpAndSettle();
+
+        expect(_api.archiveChatCallCount, 1);
+        expect(_api.unarchiveChatCallCount, 0);
+        expect(getState().isArchived, isTrue);
+      });
+
+      testWidgets('calls unarchive when already archived', (tester) async {
+        _api.archivedAtResult = true;
+        await pump(tester);
+        await tester.pumpAndSettle();
+
+        await getState().toggle();
+        await tester.pumpAndSettle();
+
+        expect(_api.unarchiveChatCallCount, 1);
+        expect(_api.archiveChatCallCount, 0);
+        expect(getState().isArchived, isFalse);
+      });
+
+      testWidgets('is a no-op while isLoading is true', (tester) async {
+        _api.archivedAtResult = false;
+        _api.getAccountGroupCompleter = Completer<void>();
+        await pump(tester);
+        await tester.pump();
+        expect(getState().isLoading, isTrue);
+
+        await getState().toggle();
+        await tester.pump();
+
+        expect(_api.archiveChatCallCount, 0);
+        expect(_api.unarchiveChatCallCount, 0);
+
+        _api.getAccountGroupCompleter!.complete();
+        await tester.pumpAndSettle();
+      });
+
+      testWidgets('is a no-op while isActionLoading is true', (tester) async {
+        _api.archivedAtResult = false;
+        _api.archiveCompleter = Completer<void>();
+        await pump(tester);
+        await tester.pumpAndSettle();
+
+        final firstToggle = getState().toggle();
+        await tester.pump();
+        expect(getState().isActionLoading, isTrue);
+
+        await getState().toggle();
+        await tester.pump();
+
+        _api.archiveCompleter!.complete();
+        await firstToggle;
+        await tester.pumpAndSettle();
+
+        expect(_api.archiveChatCallCount, 1);
+        expect(_api.unarchiveChatCallCount, 0);
       });
     });
   });

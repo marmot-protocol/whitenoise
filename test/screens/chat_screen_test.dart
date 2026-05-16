@@ -15,6 +15,7 @@ import 'package:whitenoise/screens/chat_raw_debug_screen.dart';
 import 'package:whitenoise/screens/chat_screen.dart';
 import 'package:whitenoise/screens/group_info_screen.dart';
 import 'package:whitenoise/screens/message_actions_screen.dart';
+import 'package:whitenoise/src/rust/api/account_groups.dart';
 import 'package:whitenoise/src/rust/api/chat_list.dart';
 import 'package:whitenoise/src/rust/api/chat_summary.dart';
 import 'package:whitenoise/src/rust/api/drafts.dart';
@@ -73,7 +74,10 @@ ChatMessage _message(
   bool isDeleted = false,
   bool isReply = false,
   String? replyToId,
-  ReactionSummary reactions = const ReactionSummary(byEmoji: [], userReactions: []),
+  ReactionSummary reactions = const ReactionSummary(
+    byEmoji: [],
+    userReactions: [],
+  ),
   DeliveryStatus? deliveryStatus,
 }) => ChatMessage(
   id: id,
@@ -116,9 +120,11 @@ class _MockApi extends MockWnApi {
   List<Completer<List<MuteListEntry>>> blockedUsersCompleters = [];
   int getBlockedUsersCallCount = 0;
   DateTime? removedAt;
+  bool selfRemoved = false;
   bool shouldFailUnblockUser = false;
   Completer<void>? unblockUserCompleter;
   List<SearchResult> Function(String query)? searchOverride;
+  Completer<void>? getAccountGroupCompleter;
 
   @override
   void reset() {
@@ -151,9 +157,11 @@ class _MockApi extends MockWnApi {
     blockedUsersCompleters = [];
     getBlockedUsersCallCount = 0;
     removedAt = null;
+    selfRemoved = false;
     shouldFailUnblockUser = false;
     unblockUserCompleter = null;
     searchOverride = null;
+    getAccountGroupCompleter = null;
   }
 
   @override
@@ -197,7 +205,9 @@ class _MockApi extends MockWnApi {
     chatListControllers.add(controller);
     Future.microtask(() {
       if (!controller.isClosed) {
-        controller.add(ChatListStreamItem.initialSnapshot(items: [_chatSummary()]));
+        controller.add(
+          ChatListStreamItem.initialSnapshot(items: [_chatSummary()]),
+        );
       }
     });
     controller.onCancel = () {
@@ -217,7 +227,7 @@ class _MockApi extends MockWnApi {
       name: name,
       createdAt: DateTime(2024),
       pendingConfirmation: false,
-      selfRemoved: false,
+      selfRemoved: selfRemoved,
       unreadCount: BigInt.zero,
       removedAt: removedAt,
       dmPeerPubkey: dmPeerPubkey,
@@ -235,10 +245,7 @@ class _MockApi extends MockWnApi {
 
   void emitChatListUpdate(ChatListUpdateTrigger trigger) {
     final item = ChatListStreamItem.update(
-      update: ChatListUpdate(
-        item: _chatSummary(),
-        trigger: trigger,
-      ),
+      update: ChatListUpdate(item: _chatSummary(), trigger: trigger),
     );
     for (final controller in [...chatListControllers]) {
       if (!controller.isClosed) controller.add(item);
@@ -253,6 +260,20 @@ class _MockApi extends MockWnApi {
   }) async {
     retryAttempts.add((pubkey: pubkey, groupId: groupId, eventId: eventId));
     if (retryError != null) throw retryError!;
+  }
+
+  @override
+  Future<AccountGroup> crateApiAccountGroupsGetAccountGroup({
+    required String accountPubkey,
+    required String mlsGroupId,
+  }) async {
+    if (getAccountGroupCompleter != null) {
+      await getAccountGroupCompleter!.future;
+    }
+    return super.crateApiAccountGroupsGetAccountGroup(
+      accountPubkey: accountPubkey,
+      mlsGroupId: mlsGroupId,
+    );
   }
 
   @override
@@ -271,7 +292,10 @@ class _MockApi extends MockWnApi {
   void emitMessage(ChatMessage message) {
     controller?.add(
       MessageStreamItem.update(
-        update: MessageUpdate(trigger: UpdateTrigger.newMessage, message: message),
+        update: MessageUpdate(
+          trigger: UpdateTrigger.newMessage,
+          message: message,
+        ),
       ),
     );
   }
@@ -291,12 +315,19 @@ class _MockApi extends MockWnApi {
       deletionCalls.add((groupId: groupId, kind: kind, tags: tags));
     } else if (kind == 7) {
       if (reactionError != null) throw reactionError!;
-      reactionCalls.add((groupId: groupId, message: message, kind: kind, tags: tags));
+      reactionCalls.add((
+        groupId: groupId,
+        message: message,
+        kind: kind,
+        tags: tags,
+      ));
     } else {
       if (sendError != null) throw sendError!;
       sentMessages.add(message);
       if (tags != null) {
-        sentTextMessageTagVecs.add(tags.cast<_MockTag>().map((t) => t.vec).toList());
+        sentTextMessageTagVecs.add(
+          tags.cast<_MockTag>().map((t) => t.vec).toList(),
+        );
       }
     }
     return MessageWithTokens(
@@ -408,8 +439,14 @@ class _MockApi extends MockWnApi {
             mlsGroupId: groupId,
             highlightSpans: [
               HighlightSpan(
-                start: entry.value.content.toLowerCase().indexOf(query.toLowerCase()),
-                end: entry.value.content.toLowerCase().indexOf(query.toLowerCase()) + query.length,
+                start: entry.value.content.toLowerCase().indexOf(
+                  query.toLowerCase(),
+                ),
+                end:
+                    entry.value.content.toLowerCase().indexOf(
+                      query.toLowerCase(),
+                    ) +
+                    query.length,
               ),
             ],
             position: BigInt.from(entry.key),
@@ -486,6 +523,7 @@ void main() {
     WidgetTester tester, {
     List overrides = const [],
     bool isOffline = false,
+    bool settle = true,
   }) async {
     await mountTestApp(
       tester,
@@ -496,11 +534,12 @@ void main() {
       ],
     );
     await tester.pumpAndSettle();
-    Routes.goToChat(
-      tester.element(find.byType(Scaffold)),
-      _testGroupId,
-    );
-    await tester.pumpAndSettle();
+    Routes.goToChat(tester.element(find.byType(Scaffold)), _testGroupId);
+    if (settle) {
+      await tester.pumpAndSettle();
+    } else {
+      await tester.pump();
+    }
   }
 
   group('ChatScreen', () {
@@ -511,7 +550,9 @@ void main() {
       expect(find.text('My Chat Group'), findsOneWidget);
     });
 
-    testWidgets('displays Unknown group when group name is empty', (tester) async {
+    testWidgets('displays Unknown group when group name is empty', (
+      tester,
+    ) async {
       _api.groupName = '';
       await pumpChatScreen(tester);
 
@@ -559,7 +600,9 @@ void main() {
           expect(avatar.color, AvatarColor.blue);
         });
 
-        testWidgets('displays Unknown user when display name is null', (tester) async {
+        testWidgets('displays Unknown user when display name is null', (
+          tester,
+        ) async {
           _api.metadataByPubkey = {
             testPubkeyC: const FlutterMetadata(custom: {}),
           };
@@ -583,10 +626,15 @@ void main() {
         _api.initialMessages = [_message('m1', DateTime(2024))];
         await pumpChatScreen(tester);
 
-        expect(find.byKey(const Key('loading_older_messages_indicator')), findsNothing);
+        expect(
+          find.byKey(const Key('loading_older_messages_indicator')),
+          findsNothing,
+        );
       });
 
-      testWidgets('visible while older messages are being fetched', (tester) async {
+      testWidgets('visible while older messages are being fetched', (
+        tester,
+      ) async {
         // Use enough messages to create a scrollable list with sufficient height so
         // the top-threshold scroll listener fires when scrolled to the oldest end.
         _api.initialMessages = List.generate(
@@ -601,18 +649,26 @@ void main() {
 
         // The list is reversed (newest at pixels=0). Scroll to maxScrollExtent
         // (oldest end) to cross the top-threshold and trigger loadOlderMessages.
-        final position = Scrollable.of(tester.element(find.byType(WnMessageBubble).first)).position;
+        final position = Scrollable.of(
+          tester.element(find.byType(WnMessageBubble).first),
+        ).position;
         position.jumpTo(position.maxScrollExtent);
         // Notify listeners manually since jumpTo in tests does not always fire them.
         await tester.pump();
         await tester.pump();
 
-        expect(find.byKey(const Key('loading_older_messages_indicator')), findsOneWidget);
+        expect(
+          find.byKey(const Key('loading_older_messages_indicator')),
+          findsOneWidget,
+        );
 
         completer.complete([]);
         await tester.pumpAndSettle();
 
-        expect(find.byKey(const Key('loading_older_messages_indicator')), findsNothing);
+        expect(
+          find.byKey(const Key('loading_older_messages_indicator')),
+          findsNothing,
+        );
       });
     });
 
@@ -628,9 +684,7 @@ void main() {
       });
 
       testWidgets('displays message content', (tester) async {
-        _api.initialMessages = [
-          _message('m1', DateTime(2024, 1, 4)),
-        ];
+        _api.initialMessages = [_message('m1', DateTime(2024, 1, 4))];
         await pumpChatScreen(tester);
 
         expect(find.textContaining('Message m1'), findsOneWidget);
@@ -653,7 +707,9 @@ void main() {
         matching: find.byType(WnAvatar),
       );
 
-      testWidgets('same sender <5 min apart: only older message shows avatar', (tester) async {
+      testWidgets('same sender <5 min apart: only older message shows avatar', (
+        tester,
+      ) async {
         final base = DateTime(2024, 1, 1, 12);
         _api.initialMessages = [
           _message('m1', base),
@@ -664,7 +720,9 @@ void main() {
         expect(avatarsInBubbles(), findsOneWidget);
       });
 
-      testWidgets('same sender >=5 min apart: both messages show avatar', (tester) async {
+      testWidgets('same sender >=5 min apart: both messages show avatar', (
+        tester,
+      ) async {
         final base = DateTime(2024, 1, 1, 12);
         _api.initialMessages = [
           _message('m1', base),
@@ -675,11 +733,17 @@ void main() {
         expect(avatarsInBubbles(), findsNWidgets(2));
       });
 
-      testWidgets('different senders: both messages show avatar', (tester) async {
+      testWidgets('different senders: both messages show avatar', (
+        tester,
+      ) async {
         final base = DateTime(2024, 1, 1, 12);
         _api.initialMessages = [
           _message('m1', base),
-          _message('m2', base.add(const Duration(minutes: 1)), pubkey: testPubkeyC),
+          _message(
+            'm2',
+            base.add(const Duration(minutes: 1)),
+            pubkey: testPubkeyC,
+          ),
         ];
         await pumpChatScreen(tester);
 
@@ -690,7 +754,11 @@ void main() {
         final base = DateTime(2024, 1, 1, 12);
         _api.initialMessages = [
           _message('m1', base, pubkey: _testPubkey),
-          _message('m2', base.add(const Duration(minutes: 10)), pubkey: _testPubkey),
+          _message(
+            'm2',
+            base.add(const Duration(minutes: 10)),
+            pubkey: _testPubkey,
+          ),
         ];
         await pumpChatScreen(tester);
 
@@ -698,54 +766,57 @@ void main() {
       });
 
       testWidgets('single incoming message shows avatar', (tester) async {
-        _api.initialMessages = [
-          _message('m1', DateTime(2024)),
-        ];
+        _api.initialMessages = [_message('m1', DateTime(2024))];
         await pumpChatScreen(tester);
 
         expect(avatarsInBubbles(), findsOneWidget);
       });
 
-      testWidgets('DM never shows bubble avatar while chat profile is loading', (tester) async {
-        _api.initialMessages = [
-          _message('m1', DateTime(2024)),
-        ];
-        _api.isDm = true;
-        _api.chatSummaryCompleter = Completer<ChatSummary>();
-        _api.groupMembers = [_testPubkey, testPubkeyC];
+      testWidgets(
+        'DM never shows bubble avatar while chat profile is loading',
+        (tester) async {
+          _api.initialMessages = [_message('m1', DateTime(2024))];
+          _api.isDm = true;
+          _api.chatSummaryCompleter = Completer<ChatSummary>();
+          _api.groupMembers = [_testPubkey, testPubkeyC];
 
-        await mountWidget(
-          const ChatScreen(groupId: _testGroupId),
-          tester,
-          overrides: [
-            accountPubkeyProvider.overrideWith(_MockAccountPubkeyNotifier.new),
-            authProvider.overrideWith(() => _MockAuthNotifier()),
-            offlineProvider.overrideWith((ref) => Stream.value(false)),
-          ],
-        );
-        await tester.pump();
-        await tester.pump();
+          await mountWidget(
+            const ChatScreen(groupId: _testGroupId),
+            tester,
+            overrides: [
+              accountPubkeyProvider.overrideWith(
+                _MockAccountPubkeyNotifier.new,
+              ),
+              authProvider.overrideWith(() => _MockAuthNotifier()),
+              offlineProvider.overrideWith((ref) => Stream.value(false)),
+            ],
+          );
+          await tester.pump();
+          await tester.pump();
 
-        expect(find.byType(WnMessageBubble), findsOneWidget);
-        expect(avatarsInBubbles(), findsNothing);
+          expect(find.byType(WnMessageBubble), findsOneWidget);
+          expect(avatarsInBubbles(), findsNothing);
 
-        _api.chatSummaryCompleter!.complete(
-          ChatSummary(
-            mlsGroupId: _testGroupId,
-            groupType: GroupType.directMessage,
-            createdAt: DateTime(2024),
-            pendingConfirmation: false,
-            selfRemoved: false,
-            unreadCount: BigInt.zero,
-            dmPeerPubkey: testPubkeyC,
-          ),
-        );
-        await tester.pumpAndSettle();
+          _api.chatSummaryCompleter!.complete(
+            ChatSummary(
+              mlsGroupId: _testGroupId,
+              groupType: GroupType.directMessage,
+              createdAt: DateTime(2024),
+              pendingConfirmation: false,
+              selfRemoved: false,
+              unreadCount: BigInt.zero,
+              dmPeerPubkey: testPubkeyC,
+            ),
+          );
+          await tester.pumpAndSettle();
 
-        expect(avatarsInBubbles(), findsNothing);
-      });
+          expect(avatarsInBubbles(), findsNothing);
+        },
+      );
 
-      testWidgets('same sender <5 min apart: only older message has tail', (tester) async {
+      testWidgets('same sender <5 min apart: only older message has tail', (
+        tester,
+      ) async {
         final base = DateTime(2024, 1, 1, 12);
         _api.initialMessages = [
           _message('m1', base),
@@ -760,7 +831,9 @@ void main() {
         expect(tails, findsOneWidget);
       });
 
-      testWidgets('same sender >=5 min apart: both messages have tail', (tester) async {
+      testWidgets('same sender >=5 min apart: both messages have tail', (
+        tester,
+      ) async {
         final base = DateTime(2024, 1, 1, 12);
         _api.initialMessages = [
           _message('m1', base),
@@ -791,14 +864,18 @@ void main() {
         expect(find.byType(ChatListScreen), findsOneWidget);
       });
 
-      testWidgets('avatar navigates to group info screen for group chat', (tester) async {
+      testWidgets('avatar navigates to group info screen for group chat', (
+        tester,
+      ) async {
         await pumpChatScreen(tester);
         await tester.tap(find.byKey(const Key('header_avatar_tap_area')));
         await tester.pumpAndSettle();
         expect(find.byType(GroupInfoScreen), findsOneWidget);
       });
 
-      testWidgets('avatar navigates to chat info screen for DM', (tester) async {
+      testWidgets('avatar navigates to chat info screen for DM', (
+        tester,
+      ) async {
         _api.isDm = true;
         _api.groupMembers = [_testPubkey, testPubkeyC];
         await pumpChatScreen(tester);
@@ -816,7 +893,9 @@ void main() {
         expect(find.byType(ChatInfoScreen), findsOneWidget);
       });
 
-      testWidgets('returning from chat info reloads blocked pubkeys', (tester) async {
+      testWidgets('returning from chat info reloads blocked pubkeys', (
+        tester,
+      ) async {
         _api.isDm = true;
         _api.groupMembers = [_testPubkey, testPubkeyC];
         await pumpChatScreen(tester);
@@ -829,7 +908,10 @@ void main() {
         await tester.tap(find.byKey(const Key('slate_back_button')));
         await tester.pumpAndSettle();
 
-        expect(_api.getBlockedUsersCallCount, greaterThanOrEqualTo(callCountBefore + 1));
+        expect(
+          _api.getBlockedUsersCallCount,
+          greaterThanOrEqualTo(callCountBefore + 1),
+        );
       });
     });
 
@@ -884,10 +966,15 @@ void main() {
           await attemptSend(tester);
 
           expect(find.byType(WnSystemNotice), findsOneWidget);
-          expect(find.text('Failed to send message. Please try again.'), findsOneWidget);
+          expect(
+            find.text('Failed to send message. Please try again.'),
+            findsOneWidget,
+          );
         });
 
-        testWidgets('dismisses notice after auto-hide duration', (tester) async {
+        testWidgets('dismisses notice after auto-hide duration', (
+          tester,
+        ) async {
           await attemptSend(tester);
           expect(find.byType(WnSystemNotice), findsOneWidget);
 
@@ -903,10 +990,7 @@ void main() {
           final noticeFinder = find.byType(WnSystemNotice);
           expect(noticeFinder, findsOneWidget);
           expect(
-            find.ancestor(
-              of: noticeFinder,
-              matching: find.byType(WnSlate),
-            ),
+            find.ancestor(of: noticeFinder, matching: find.byType(WnSlate)),
             findsOneWidget,
           );
         });
@@ -914,7 +998,9 @@ void main() {
     });
 
     group('message reception', () {
-      testWidgets('message bubble appears when stream emits update', (tester) async {
+      testWidgets('message bubble appears when stream emits update', (
+        tester,
+      ) async {
         await pumpChatScreen(tester);
         _api.emitMessage(_message('new_msg', DateTime.now()));
         await tester.pumpAndSettle();
@@ -922,7 +1008,9 @@ void main() {
         expect(find.textContaining('Message new_msg'), findsOneWidget);
       });
 
-      testWidgets('does not show initial messages from blocked authors', (tester) async {
+      testWidgets('does not show initial messages from blocked authors', (
+        tester,
+      ) async {
         _api.blockedPubkeys.add(testPubkeyB);
         _api.initialMessages = [
           _message('blocked', DateTime(2024)),
@@ -935,23 +1023,13 @@ void main() {
         expect(find.textContaining('Message visible'), findsOneWidget);
       });
 
-      testWidgets('does not show new messages from blocked authors', (tester) async {
-        _api.blockedPubkeys.add(testPubkeyB);
-        _api.initialMessages = [_message('visible', DateTime(2024), pubkey: testPubkeyC)];
-
-        await pumpChatScreen(tester);
-        _api.emitMessage(_message('blocked', DateTime.now()));
-        await tester.pumpAndSettle();
-
-        expect(find.textContaining('Message blocked'), findsNothing);
-        expect(find.textContaining('Message visible'), findsOneWidget);
-      });
-
-      testWidgets('does not show new messages from users blocked before screen loaded', (
+      testWidgets('does not show new messages from blocked authors', (
         tester,
       ) async {
         _api.blockedPubkeys.add(testPubkeyB);
-        _api.initialMessages = [_message('visible', DateTime(2024), pubkey: testPubkeyC)];
+        _api.initialMessages = [
+          _message('visible', DateTime(2024), pubkey: testPubkeyC),
+        ];
 
         await pumpChatScreen(tester);
         _api.emitMessage(_message('blocked', DateTime.now()));
@@ -961,7 +1039,26 @@ void main() {
         expect(find.textContaining('Message visible'), findsOneWidget);
       });
 
-      testWidgets('does not show messages while blocked users are loading', (tester) async {
+      testWidgets(
+        'does not show new messages from users blocked before screen loaded',
+        (tester) async {
+          _api.blockedPubkeys.add(testPubkeyB);
+          _api.initialMessages = [
+            _message('visible', DateTime(2024), pubkey: testPubkeyC),
+          ];
+
+          await pumpChatScreen(tester);
+          _api.emitMessage(_message('blocked', DateTime.now()));
+          await tester.pumpAndSettle();
+
+          expect(find.textContaining('Message blocked'), findsNothing);
+          expect(find.textContaining('Message visible'), findsOneWidget);
+        },
+      );
+
+      testWidgets('does not show messages while blocked users are loading', (
+        tester,
+      ) async {
         _api.blockedUsersCompleter = Completer<List<MuteListEntry>>();
         _api.initialMessages = [
           _message('blocked', DateTime(2024)),
@@ -1026,7 +1123,10 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(WnSystemNotice), findsOneWidget);
-        expect(find.text('Failed to send message. Please try again.'), findsOneWidget);
+        expect(
+          find.text('Failed to send message. Please try again.'),
+          findsOneWidget,
+        );
       });
 
       testWidgets('does not show retry for non-own messages', (tester) async {
@@ -1067,7 +1167,9 @@ void main() {
       });
 
       ScrollPosition getScrollPosition(WidgetTester tester) {
-        return Scrollable.of(tester.element(find.byType(WnMessageBubble).first)).position;
+        return Scrollable.of(
+          tester.element(find.byType(WnMessageBubble).first),
+        ).position;
       }
 
       testWidgets('scrolls to bottom on initial load', (tester) async {
@@ -1087,7 +1189,9 @@ void main() {
         expect(position.pixels, 0);
       });
 
-      testWidgets('scrolls when at bottom and other message arrives', (tester) async {
+      testWidgets('scrolls when at bottom and other message arrives', (
+        tester,
+      ) async {
         await pumpChatScreen(tester);
         await tester.pumpAndSettle();
 
@@ -1100,21 +1204,24 @@ void main() {
         expect(position.pixels, 0);
       });
 
-      testWidgets('does not scroll when not at bottom and other message arrives', (tester) async {
-        await pumpChatScreen(tester);
-        await tester.pumpAndSettle();
+      testWidgets(
+        'does not scroll when not at bottom and other message arrives',
+        (tester) async {
+          await pumpChatScreen(tester);
+          await tester.pumpAndSettle();
 
-        final position = getScrollPosition(tester);
-        position.jumpTo(position.maxScrollExtent);
-        await tester.pumpAndSettle();
+          final position = getScrollPosition(tester);
+          position.jumpTo(position.maxScrollExtent);
+          await tester.pumpAndSettle();
 
-        final positionBeforeMessage = position.pixels;
+          final positionBeforeMessage = position.pixels;
 
-        _api.emitMessage(_message('other', DateTime.now()));
-        await tester.pumpAndSettle();
+          _api.emitMessage(_message('other', DateTime.now()));
+          await tester.pumpAndSettle();
 
-        expect(position.pixels, positionBeforeMessage);
-      });
+          expect(position.pixels, positionBeforeMessage);
+        },
+      );
 
       testWidgets('scrolls to bottom when input is focused', (tester) async {
         await pumpChatScreen(tester);
@@ -1134,16 +1241,17 @@ void main() {
     });
 
     group('message actions', () {
-      Future<void> longPressMessage(WidgetTester tester, String messageId) async {
+      Future<void> longPressMessage(
+        WidgetTester tester,
+        String messageId,
+      ) async {
         final messageFinder = find.textContaining('Message $messageId');
         await tester.longPress(messageFinder);
         await tester.pumpAndSettle();
       }
 
       testWidgets('opens on long press', (tester) async {
-        _api.initialMessages = [
-          _message('m1', DateTime(2024)),
-        ];
+        _api.initialMessages = [_message('m1', DateTime(2024))];
         await pumpChatScreen(tester);
 
         await longPressMessage(tester, 'm1');
@@ -1174,9 +1282,7 @@ void main() {
       });
 
       testWidgets('closes when tapping outside', (tester) async {
-        _api.initialMessages = [
-          _message('m1', DateTime(2024)),
-        ];
+        _api.initialMessages = [_message('m1', DateTime(2024))];
         await pumpChatScreen(tester);
 
         await longPressMessage(tester, 'm1');
@@ -1188,9 +1294,7 @@ void main() {
       });
 
       testWidgets('unfocuses text field when opening', (tester) async {
-        _api.initialMessages = [
-          _message('m1', DateTime(2024)),
-        ];
+        _api.initialMessages = [_message('m1', DateTime(2024))];
         await pumpChatScreen(tester);
 
         await tester.tap(find.byType(TextField));
@@ -1203,10 +1307,10 @@ void main() {
         expect(textField.focusNode!.hasFocus, isFalse);
       });
 
-      testWidgets('unfocuses text field when closing message actions', (tester) async {
-        _api.initialMessages = [
-          _message('m1', DateTime(2024)),
-        ];
+      testWidgets('unfocuses text field when closing message actions', (
+        tester,
+      ) async {
+        _api.initialMessages = [_message('m1', DateTime(2024))];
         await pumpChatScreen(tester);
 
         await tester.tap(find.byType(TextField));
@@ -1224,10 +1328,10 @@ void main() {
         expect(textField.focusNode!.hasFocus, isFalse);
       });
 
-      testWidgets('unfocuses text field after selecting reaction', (tester) async {
-        _api.initialMessages = [
-          _message('m1', DateTime(2024)),
-        ];
+      testWidgets('unfocuses text field after selecting reaction', (
+        tester,
+      ) async {
+        _api.initialMessages = [_message('m1', DateTime(2024))];
         await pumpChatScreen(tester);
 
         await tester.tap(find.byType(TextField));
@@ -1317,16 +1421,17 @@ void main() {
 
           expect(_api.deletionCalls.length, 0);
           expect(find.byType(WnSystemNotice), findsOneWidget);
-          expect(find.text('Failed to delete message. Please try again.'), findsOneWidget);
+          expect(
+            find.text('Failed to delete message. Please try again.'),
+            findsOneWidget,
+          );
           expect(find.byType(MessageActionsScreen), findsOneWidget);
         });
       });
 
       group('message reactions', () {
         testWidgets('calls API when reaction is tapped', (tester) async {
-          _api.initialMessages = [
-            _message('m1', DateTime(2024)),
-          ];
+          _api.initialMessages = [_message('m1', DateTime(2024))];
           await pumpChatScreen(tester);
 
           await longPressMessage(tester, 'm1');
@@ -1338,9 +1443,7 @@ void main() {
         });
 
         testWidgets('sends correct emoji as reaction', (tester) async {
-          _api.initialMessages = [
-            _message('m1', DateTime(2024)),
-          ];
+          _api.initialMessages = [_message('m1', DateTime(2024))];
           await pumpChatScreen(tester);
 
           await longPressMessage(tester, 'm1');
@@ -1352,9 +1455,7 @@ void main() {
         });
 
         testWidgets('sends reaction to correct group', (tester) async {
-          _api.initialMessages = [
-            _message('m1', DateTime(2024)),
-          ];
+          _api.initialMessages = [_message('m1', DateTime(2024))];
           await pumpChatScreen(tester);
 
           await longPressMessage(tester, 'm1');
@@ -1365,10 +1466,10 @@ void main() {
           expect(_api.reactionCalls.first.groupId, _testGroupId);
         });
 
-        testWidgets('includes message reference in reaction tags', (tester) async {
-          _api.initialMessages = [
-            _message('msg_to_react', DateTime(2024)),
-          ];
+        testWidgets('includes message reference in reaction tags', (
+          tester,
+        ) async {
+          _api.initialMessages = [_message('msg_to_react', DateTime(2024))];
           await pumpChatScreen(tester);
 
           await longPressMessage(tester, 'msg_to_react');
@@ -1380,10 +1481,10 @@ void main() {
           expect(tags[0].vec, ['e', 'msg_to_react']);
         });
 
-        testWidgets('closes message actions after sending reaction', (tester) async {
-          _api.initialMessages = [
-            _message('m1', DateTime(2024)),
-          ];
+        testWidgets('closes message actions after sending reaction', (
+          tester,
+        ) async {
+          _api.initialMessages = [_message('m1', DateTime(2024))];
           await pumpChatScreen(tester);
 
           await longPressMessage(tester, 'm1');
@@ -1396,9 +1497,7 @@ void main() {
 
         testWidgets('shows system notice when reaction fails', (tester) async {
           _api.reactionError = Exception('Network error');
-          _api.initialMessages = [
-            _message('m1', DateTime(2024)),
-          ];
+          _api.initialMessages = [_message('m1', DateTime(2024))];
           await pumpChatScreen(tester);
 
           await longPressMessage(tester, 'm1');
@@ -1408,7 +1507,10 @@ void main() {
 
           expect(_api.reactionCalls.length, 0);
           expect(find.byType(WnSystemNotice), findsOneWidget);
-          expect(find.text('Failed to send reaction. Please try again.'), findsOneWidget);
+          expect(
+            find.text('Failed to send reaction. Please try again.'),
+            findsOneWidget,
+          );
           expect(find.byType(MessageActionsScreen), findsOneWidget);
         });
       });
@@ -1416,7 +1518,11 @@ void main() {
       group('reaction deletion from message actions', () {
         ReactionSummary ownReaction(String emoji, String reactionId) => ReactionSummary(
           byEmoji: [
-            EmojiReaction(emoji: emoji, count: BigInt.one, users: const [_testPubkey]),
+            EmojiReaction(
+              emoji: emoji,
+              count: BigInt.one,
+              users: const [_testPubkey],
+            ),
           ],
           userReactions: [
             UserReaction(
@@ -1428,9 +1534,15 @@ void main() {
           ],
         );
 
-        testWidgets('calls delete API when tapping selected emoji', (tester) async {
+        testWidgets('calls delete API when tapping selected emoji', (
+          tester,
+        ) async {
           _api.initialMessages = [
-            _message('m1', DateTime(2024), reactions: ownReaction('❤', 'reaction_1')),
+            _message(
+              'm1',
+              DateTime(2024),
+              reactions: ownReaction('❤', 'reaction_1'),
+            ),
           ];
           await pumpChatScreen(tester);
 
@@ -1441,9 +1553,15 @@ void main() {
           expect(_api.deletionCalls.length, 1);
         });
 
-        testWidgets('sends correct reaction ID in deletion tags', (tester) async {
+        testWidgets('sends correct reaction ID in deletion tags', (
+          tester,
+        ) async {
           _api.initialMessages = [
-            _message('m1', DateTime(2024), reactions: ownReaction('❤', 'reaction_to_remove')),
+            _message(
+              'm1',
+              DateTime(2024),
+              reactions: ownReaction('❤', 'reaction_to_remove'),
+            ),
           ];
           await pumpChatScreen(tester);
 
@@ -1455,9 +1573,15 @@ void main() {
           expect(tags[0].vec, ['e', 'reaction_to_remove']);
         });
 
-        testWidgets('closes message actions after removing reaction', (tester) async {
+        testWidgets('closes message actions after removing reaction', (
+          tester,
+        ) async {
           _api.initialMessages = [
-            _message('m1', DateTime(2024), reactions: ownReaction('❤', 'reaction_1')),
+            _message(
+              'm1',
+              DateTime(2024),
+              reactions: ownReaction('❤', 'reaction_1'),
+            ),
           ];
           await pumpChatScreen(tester);
 
@@ -1468,10 +1592,16 @@ void main() {
           expect(find.byType(MessageActionsScreen), findsNothing);
         });
 
-        testWidgets('shows system notice when reaction removal fails', (tester) async {
+        testWidgets('shows system notice when reaction removal fails', (
+          tester,
+        ) async {
           _api.deleteError = Exception('Network error');
           _api.initialMessages = [
-            _message('m1', DateTime(2024), reactions: ownReaction('❤', 'reaction_1')),
+            _message(
+              'm1',
+              DateTime(2024),
+              reactions: ownReaction('❤', 'reaction_1'),
+            ),
           ];
           await pumpChatScreen(tester);
 
@@ -1481,7 +1611,10 @@ void main() {
 
           expect(_api.deletionCalls.length, 0);
           expect(find.byType(WnSystemNotice), findsOneWidget);
-          expect(find.text('Failed to remove reaction. Please try again.'), findsOneWidget);
+          expect(
+            find.text('Failed to remove reaction. Please try again.'),
+            findsOneWidget,
+          );
           expect(find.byType(MessageActionsScreen), findsOneWidget);
         });
       });
@@ -1512,9 +1645,7 @@ void main() {
             custom: {},
           ),
         };
-        _api.initialMessages = [
-          _message('m1', DateTime(2024)),
-        ];
+        _api.initialMessages = [_message('m1', DateTime(2024))];
         await pumpChatScreen(tester);
         await longPressMessage(tester, 'm1');
 
@@ -1529,10 +1660,18 @@ void main() {
     });
 
     group('replies', () {
-      testWidgets('displays reply preview in bubble when message is a reply', (tester) async {
+      testWidgets('displays reply preview in bubble when message is a reply', (
+        tester,
+      ) async {
         _api.initialMessages = [
           _message('m1', DateTime(2024)),
-          _message('m2', DateTime(2024, 1, 2), isReply: true, replyToId: 'm1', pubkey: _testPubkey),
+          _message(
+            'm2',
+            DateTime(2024, 1, 2),
+            isReply: true,
+            replyToId: 'm1',
+            pubkey: _testPubkey,
+          ),
         ];
         await pumpChatScreen(tester);
 
@@ -1541,40 +1680,45 @@ void main() {
         expect(find.byType(ChatMessageQuote), findsOneWidget);
       });
 
-      testWidgets('swiping message bubble shows reply preview in input', (tester) async {
-        _api.initialMessages = [
-          _message('m1', DateTime(2024)),
-        ];
+      testWidgets('swiping message bubble shows reply preview in input', (
+        tester,
+      ) async {
+        _api.initialMessages = [_message('m1', DateTime(2024))];
         await pumpChatScreen(tester);
         expect(find.byType(ChatMessageQuote), findsNothing);
 
-        await tester.fling(find.textContaining('Message m1'), const Offset(500, 0), 1000);
+        await tester.fling(
+          find.textContaining('Message m1'),
+          const Offset(500, 0),
+          1000,
+        );
         await tester.pumpAndSettle();
 
         expect(find.byType(ChatMessageQuote), findsOneWidget);
         expect(find.textContaining('Message m1'), findsWidgets);
       });
 
-      testWidgets('tapping Reply in message actions shows reply preview in input', (tester) async {
-        _api.initialMessages = [
-          _message('m1', DateTime(2024)),
-        ];
-        await pumpChatScreen(tester);
-        expect(find.byType(ChatMessageQuote), findsNothing);
+      testWidgets(
+        'tapping Reply in message actions shows reply preview in input',
+        (tester) async {
+          _api.initialMessages = [_message('m1', DateTime(2024))];
+          await pumpChatScreen(tester);
+          expect(find.byType(ChatMessageQuote), findsNothing);
 
-        await tester.longPress(find.textContaining('Message m1'));
-        await tester.pumpAndSettle();
-        await tester.tap(find.byKey(const Key('reply_button')));
-        await tester.pumpAndSettle();
+          await tester.longPress(find.textContaining('Message m1'));
+          await tester.pumpAndSettle();
+          await tester.tap(find.byKey(const Key('reply_button')));
+          await tester.pumpAndSettle();
 
-        expect(find.byType(ChatMessageQuote), findsOneWidget);
-        expect(find.textContaining('Message m1'), findsWidgets);
-      });
+          expect(find.byType(ChatMessageQuote), findsOneWidget);
+          expect(find.textContaining('Message m1'), findsWidgets);
+        },
+      );
 
-      testWidgets('sending while replying includes reply reference in send', (tester) async {
-        _api.initialMessages = [
-          _message('m1', DateTime(2024)),
-        ];
+      testWidgets('sending while replying includes reply reference in send', (
+        tester,
+      ) async {
+        _api.initialMessages = [_message('m1', DateTime(2024))];
         await pumpChatScreen(tester);
         await tester.longPress(find.textContaining('Message m1'));
         await tester.pumpAndSettle();
@@ -1593,9 +1737,7 @@ void main() {
       });
 
       testWidgets('cancel reply hides reply preview in input', (tester) async {
-        _api.initialMessages = [
-          _message('m1', DateTime(2024)),
-        ];
+        _api.initialMessages = [_message('m1', DateTime(2024))];
         await pumpChatScreen(tester);
         await tester.longPress(find.textContaining('Message m1'));
         await tester.pumpAndSettle();
@@ -1609,10 +1751,10 @@ void main() {
         expect(find.byType(ChatMessageQuote), findsNothing);
       });
 
-      testWidgets('hides reply preview when replied message is deleted', (tester) async {
-        _api.initialMessages = [
-          _message('m1', DateTime(2024)),
-        ];
+      testWidgets('hides reply preview when replied message is deleted', (
+        tester,
+      ) async {
+        _api.initialMessages = [_message('m1', DateTime(2024))];
         await pumpChatScreen(tester);
 
         await tester.longPress(find.textContaining('Message m1'));
@@ -1628,7 +1770,9 @@ void main() {
         expect(find.byType(ChatMessageQuote), findsNothing);
       });
 
-      testWidgets('tapping reply preview scrolls to original message', (tester) async {
+      testWidgets('tapping reply preview scrolls to original message', (
+        tester,
+      ) async {
         _api.initialMessages = [
           ...List.generate(
             20,
@@ -1647,7 +1791,9 @@ void main() {
         await pumpChatScreen(tester);
         await tester.pumpAndSettle();
 
-        final position = Scrollable.of(tester.element(find.byType(WnMessageBubble).first)).position;
+        final position = Scrollable.of(
+          tester.element(find.byType(WnMessageBubble).first),
+        ).position;
         expect(position.pixels, 0);
 
         await tester.tap(find.byKey(const Key('message_quote_tap_area')));
@@ -1660,9 +1806,13 @@ void main() {
     group('draft restoration', () {
       Future<void> pumpChatScreenWithDraftSettle(WidgetTester tester) async {
         await pumpChatScreen(tester);
-        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 100)));
+        await tester.runAsync(
+          () => Future.delayed(const Duration(milliseconds: 100)),
+        );
         await tester.pumpAndSettle();
-        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 100)));
+        await tester.runAsync(
+          () => Future.delayed(const Duration(milliseconds: 100)),
+        );
         await tester.pumpAndSettle();
       }
 
@@ -1685,7 +1835,9 @@ void main() {
           expect(textField.controller!.text, 'unsent message');
         });
 
-        testWidgets('shows send button after restoring content', (tester) async {
+        testWidgets('shows send button after restoring content', (
+          tester,
+        ) async {
           await pumpChatScreenWithDraftSettle(tester);
 
           expect(find.byKey(const Key('send_button')), findsOneWidget);
@@ -1722,7 +1874,11 @@ void main() {
 
         final reactions = ReactionSummary(
           byEmoji: [
-            EmojiReaction(emoji: '🎉', count: BigInt.one, users: const ['other']),
+            EmojiReaction(
+              emoji: '🎉',
+              count: BigInt.one,
+              users: const ['other'],
+            ),
           ],
           userReactions: const [],
         );
@@ -1735,7 +1891,11 @@ void main() {
       group('when user has no reaction to the message', () {
         ReactionSummary reactionFromOther(String emoji) => ReactionSummary(
           byEmoji: [
-            EmojiReaction(emoji: emoji, count: BigInt.one, users: const ['other']),
+            EmojiReaction(
+              emoji: emoji,
+              count: BigInt.one,
+              users: const ['other'],
+            ),
           ],
           userReactions: const [],
         );
@@ -1764,9 +1924,15 @@ void main() {
           expect(_api.reactionCalls.first.message, '🔥');
         });
 
-        testWidgets('includes message reference in reaction tags', (tester) async {
+        testWidgets('includes message reference in reaction tags', (
+          tester,
+        ) async {
           _api.initialMessages = [
-            _message('msg_with_reaction', DateTime(2024), reactions: reactionFromOther('👍')),
+            _message(
+              'msg_with_reaction',
+              DateTime(2024),
+              reactions: reactionFromOther('👍'),
+            ),
           ];
           await pumpChatScreen(tester);
 
@@ -1779,10 +1945,16 @@ void main() {
       });
 
       group('when user has a reaction to the message', () {
-        testWidgets('calls delete API when tapping own reaction', (tester) async {
+        testWidgets('calls delete API when tapping own reaction', (
+          tester,
+        ) async {
           final ownReaction = ReactionSummary(
             byEmoji: [
-              EmojiReaction(emoji: '👍', count: BigInt.one, users: const [_testPubkey]),
+              EmojiReaction(
+                emoji: '👍',
+                count: BigInt.one,
+                users: const [_testPubkey],
+              ),
             ],
             userReactions: [
               UserReaction(
@@ -1793,7 +1965,9 @@ void main() {
               ),
             ],
           );
-          _api.initialMessages = [_message('m1', DateTime(2024), reactions: ownReaction)];
+          _api.initialMessages = [
+            _message('m1', DateTime(2024), reactions: ownReaction),
+          ];
           await pumpChatScreen(tester);
 
           await tester.tap(find.text('👍'));
@@ -1815,17 +1989,25 @@ void main() {
         _api.lastReadMessageId = 'm19';
       });
 
-      Future<ScrollPosition> scrollUpAndReceiveMessage(WidgetTester tester) async {
+      Future<ScrollPosition> scrollUpAndReceiveMessage(
+        WidgetTester tester,
+      ) async {
         await pumpChatScreen(tester);
-        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.runAsync(
+          () => Future.delayed(const Duration(milliseconds: 50)),
+        );
         await tester.pumpAndSettle();
 
-        final position = Scrollable.of(tester.element(find.byType(WnMessageBubble).first)).position;
+        final position = Scrollable.of(
+          tester.element(find.byType(WnMessageBubble).first),
+        ).position;
         position.jumpTo(position.maxScrollExtent);
         await tester.pumpAndSettle();
 
         _api.emitMessage(_message('m_new', DateTime(2024, 2)));
-        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.runAsync(
+          () => Future.delayed(const Duration(milliseconds: 50)),
+        );
         await tester.pumpAndSettle();
         return position;
       }
@@ -1839,18 +2021,26 @@ void main() {
         expect(find.byKey(const Key('scroll_down_button')), findsNothing);
       });
 
-      testWidgets('shows when scrolled up with unread messages', (tester) async {
+      testWidgets('shows when scrolled up with unread messages', (
+        tester,
+      ) async {
         await scrollUpAndReceiveMessage(tester);
 
         expect(find.byKey(const Key('scroll_down_button')), findsOneWidget);
       });
 
-      testWidgets('hidden when scrolled up with all messages already read', (tester) async {
+      testWidgets('hidden when scrolled up with all messages already read', (
+        tester,
+      ) async {
         await pumpChatScreen(tester);
-        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.runAsync(
+          () => Future.delayed(const Duration(milliseconds: 50)),
+        );
         await tester.pumpAndSettle();
 
-        final position = Scrollable.of(tester.element(find.byType(WnMessageBubble).first)).position;
+        final position = Scrollable.of(
+          tester.element(find.byType(WnMessageBubble).first),
+        ).position;
         position.jumpTo(position.maxScrollExtent);
         await tester.pumpAndSettle();
 
@@ -1877,29 +2067,43 @@ void main() {
         _api.lastReadMessageId = 'm19';
       });
 
-      testWidgets('marks incoming message as read when at bottom', (tester) async {
+      testWidgets('marks incoming message as read when at bottom', (
+        tester,
+      ) async {
         await pumpChatScreen(tester);
-        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.runAsync(
+          () => Future.delayed(const Duration(milliseconds: 50)),
+        );
         await tester.pumpAndSettle();
 
         _api.emitMessage(_message('m_new', DateTime(2024, 2)));
-        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.runAsync(
+          () => Future.delayed(const Duration(milliseconds: 50)),
+        );
         await tester.pumpAndSettle();
 
         expect(_api.markedAsReadMessages, contains('m_new'));
       });
 
-      testWidgets('does not mark message as read when scrolled up', (tester) async {
+      testWidgets('does not mark message as read when scrolled up', (
+        tester,
+      ) async {
         await pumpChatScreen(tester);
-        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.runAsync(
+          () => Future.delayed(const Duration(milliseconds: 50)),
+        );
         await tester.pumpAndSettle();
 
-        final position = Scrollable.of(tester.element(find.byType(WnMessageBubble).first)).position;
+        final position = Scrollable.of(
+          tester.element(find.byType(WnMessageBubble).first),
+        ).position;
         position.jumpTo(position.maxScrollExtent);
         await tester.pumpAndSettle();
 
         _api.emitMessage(_message('m_new', DateTime(2024, 2)));
-        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.runAsync(
+          () => Future.delayed(const Duration(milliseconds: 50)),
+        );
         await tester.pumpAndSettle();
 
         expect(_api.markedAsReadMessages, isEmpty);
@@ -1907,28 +2111,40 @@ void main() {
 
       testWidgets('marks own message as read', (tester) async {
         await pumpChatScreen(tester);
-        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        await tester.runAsync(
+          () => Future.delayed(const Duration(milliseconds: 50)),
+        );
         await tester.pumpAndSettle();
 
-        final position = Scrollable.of(tester.element(find.byType(WnMessageBubble).first)).position;
+        final position = Scrollable.of(
+          tester.element(find.byType(WnMessageBubble).first),
+        ).position;
         position.jumpTo(position.maxScrollExtent);
         await tester.pumpAndSettle();
 
-        _api.emitMessage(_message('m_own', DateTime(2024, 2), pubkey: _testPubkey));
-        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 50)));
+        _api.emitMessage(
+          _message('m_own', DateTime(2024, 2), pubkey: _testPubkey),
+        );
+        await tester.runAsync(
+          () => Future.delayed(const Duration(milliseconds: 50)),
+        );
         await tester.pumpAndSettle();
 
         expect(_api.markedAsReadMessages, contains('m_own'));
       });
     });
     group('media attachment', () {
-      testWidgets('displays attach button always when no media attached', (tester) async {
+      testWidgets('displays attach button always when no media attached', (
+        tester,
+      ) async {
         await pumpChatScreen(tester);
 
         expect(find.byKey(const Key('add_button')), findsOneWidget);
       });
 
-      testWidgets('unfocuses input when attach button is tapped', (tester) async {
+      testWidgets('unfocuses input when attach button is tapped', (
+        tester,
+      ) async {
         await pumpChatScreen(tester);
         await tester.tap(find.byType(TextField));
         await tester.pumpAndSettle();
@@ -1963,26 +2179,38 @@ void main() {
       }
 
       group('opened from group info', () {
-        testWidgets('search bar appears after tapping search in group info', (tester) async {
+        testWidgets('search bar appears after tapping search in group info', (
+          tester,
+        ) async {
           await openGroupSearch(tester);
           expect(find.byKey(const Key('chat_search_bar')), findsOneWidget);
           expect(find.byKey(const Key('chat_search_field')), findsOneWidget);
         });
 
-        testWidgets('search bar is not shown before tapping search', (tester) async {
+        testWidgets('search bar is not shown before tapping search', (
+          tester,
+        ) async {
           await pumpChatScreen(tester);
           expect(find.byKey(const Key('chat_search_bar')), findsNothing);
         });
 
-        testWidgets('navigation bar appears when query is entered', (tester) async {
+        testWidgets('navigation bar appears when query is entered', (
+          tester,
+        ) async {
           _api.initialMessages = [
             _message('m1', DateTime(2024)),
             _message('m2', DateTime(2024, 2)),
           ];
           await openGroupSearch(tester);
-          await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
+          await tester.enterText(
+            find.byKey(const Key('chat_search_field')),
+            'Message',
+          );
           await tester.pumpAndSettle();
-          expect(find.byKey(const Key('chat_search_navigation')), findsOneWidget);
+          expect(
+            find.byKey(const Key('chat_search_navigation')),
+            findsOneWidget,
+          );
         });
 
         testWidgets('closing search hides search bar', (tester) async {
@@ -2001,24 +2229,33 @@ void main() {
         expect(find.byKey(const Key('chat_search_field')), findsNothing);
       });
 
-      testWidgets('search bar appears after tapping search in chat info', (tester) async {
+      testWidgets('search bar appears after tapping search in chat info', (
+        tester,
+      ) async {
         await openSearch(tester);
         expect(find.byKey(const Key('chat_search_bar')), findsOneWidget);
         expect(find.byKey(const Key('chat_search_field')), findsOneWidget);
       });
 
-      testWidgets('navigation bar is hidden when search query is empty', (tester) async {
+      testWidgets('navigation bar is hidden when search query is empty', (
+        tester,
+      ) async {
         await openSearch(tester);
         expect(find.byKey(const Key('chat_search_navigation')), findsNothing);
       });
 
-      testWidgets('navigation bar appears when search query is not empty', (tester) async {
+      testWidgets('navigation bar appears when search query is not empty', (
+        tester,
+      ) async {
         _api.initialMessages = [
           _message('m1', DateTime(2024)),
           _message('m2', DateTime(2024, 2)),
         ];
         await openSearch(tester);
-        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
+        await tester.enterText(
+          find.byKey(const Key('chat_search_field')),
+          'Message',
+        );
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('chat_search_navigation')), findsOneWidget);
       });
@@ -2026,39 +2263,59 @@ void main() {
       testWidgets('shows no results when query has no matches', (tester) async {
         _api.initialMessages = [_message('m1', DateTime(2024))];
         await openSearch(tester);
-        await tester.enterText(find.byKey(const Key('chat_search_field')), 'zzznomatch');
+        await tester.enterText(
+          find.byKey(const Key('chat_search_field')),
+          'zzznomatch',
+        );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pump();
         await tester.pump();
-        expect(find.byKey(const Key('chat_search_match_count')), findsOneWidget);
+        expect(
+          find.byKey(const Key('chat_search_match_count')),
+          findsOneWidget,
+        );
         expect(find.text('No results'), findsOneWidget);
       });
 
       testWidgets('shows singular match count for one result', (tester) async {
         _api.initialMessages = [_message('m1', DateTime(2024))];
         await openSearch(tester);
-        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message m1');
+        await tester.enterText(
+          find.byKey(const Key('chat_search_field')),
+          'Message m1',
+        );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pump();
         await tester.pump();
-        expect(find.byKey(const Key('chat_search_match_count')), findsOneWidget);
+        expect(
+          find.byKey(const Key('chat_search_match_count')),
+          findsOneWidget,
+        );
         expect(find.text('1 of 1 match'), findsOneWidget);
       });
 
-      testWidgets('shows plural match count for multiple results', (tester) async {
+      testWidgets('shows plural match count for multiple results', (
+        tester,
+      ) async {
         _api.initialMessages = [
           _message('m1', DateTime(2024)),
           _message('m2', DateTime(2024, 2)),
         ];
         await openSearch(tester);
-        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
+        await tester.enterText(
+          find.byKey(const Key('chat_search_field')),
+          'Message',
+        );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pump();
         await tester.pump();
-        expect(find.byKey(const Key('chat_search_match_count')), findsOneWidget);
+        expect(
+          find.byKey(const Key('chat_search_match_count')),
+          findsOneWidget,
+        );
         expect(find.text('1 of 2 matches'), findsOneWidget);
       });
 
@@ -2068,13 +2325,22 @@ void main() {
           _message('m2', DateTime(2024, 2)),
         ];
         await openSearch(tester);
-        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
+        await tester.enterText(
+          find.byKey(const Key('chat_search_field')),
+          'Message',
+        );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pump();
         await tester.pump();
-        expect(find.byKey(const Key('chat_search_prev_button')), findsOneWidget);
-        expect(find.byKey(const Key('chat_search_next_button')), findsOneWidget);
+        expect(
+          find.byKey(const Key('chat_search_prev_button')),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const Key('chat_search_next_button')),
+          findsOneWidget,
+        );
       });
 
       testWidgets('tapping next button advances match index', (tester) async {
@@ -2083,7 +2349,10 @@ void main() {
           _message('m2', DateTime(2024, 2)),
         ];
         await openSearch(tester);
-        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
+        await tester.enterText(
+          find.byKey(const Key('chat_search_field')),
+          'Message',
+        );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pump();
@@ -2101,7 +2370,10 @@ void main() {
           _message('m2', DateTime(2024, 2)),
         ];
         await openSearch(tester);
-        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
+        await tester.enterText(
+          find.byKey(const Key('chat_search_field')),
+          'Message',
+        );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pump();
@@ -2115,17 +2387,21 @@ void main() {
         expect(find.text('1 of 2 matches'), findsOneWidget);
       });
 
-      testWidgets('does not show no messages text when search is active with no results', (
-        tester,
-      ) async {
-        await openSearch(tester);
-        await tester.enterText(find.byKey(const Key('chat_search_field')), 'zzznomatch');
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 300));
-        await tester.pump();
-        await tester.pump();
-        expect(find.text('No messages yet'), findsNothing);
-      });
+      testWidgets(
+        'does not show no messages text when search is active with no results',
+        (tester) async {
+          await openSearch(tester);
+          await tester.enterText(
+            find.byKey(const Key('chat_search_field')),
+            'zzznomatch',
+          );
+          await tester.pump();
+          await tester.pump(const Duration(milliseconds: 300));
+          await tester.pump();
+          await tester.pump();
+          expect(find.text('No messages yet'), findsNothing);
+        },
+      );
 
       testWidgets('closing search hides search bar', (tester) async {
         await openSearch(tester);
@@ -2142,7 +2418,10 @@ void main() {
           _message('m2', DateTime(2024, 2)),
         ];
         await openSearch(tester);
-        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message');
+        await tester.enterText(
+          find.byKey(const Key('chat_search_field')),
+          'Message',
+        );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pump();
@@ -2151,7 +2430,10 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.text('2 of 2 matches'), findsOneWidget);
 
-        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message m1');
+        await tester.enterText(
+          find.byKey(const Key('chat_search_field')),
+          'Message m1',
+        );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pump();
@@ -2173,7 +2455,9 @@ void main() {
         expect(find.byType(WnChatMessageInput), findsOneWidget);
       });
 
-      testWidgets('renders separator between distant match groups', (tester) async {
+      testWidgets('renders separator between distant match groups', (
+        tester,
+      ) async {
         // m1 matches "alpha", gap of 5 non-matching messages, m7 matches "alpha".
         // Context windows: [m1] and [m5, m6, m7] — no overlap, so a separator is expected.
         _api.initialMessages = [
@@ -2201,7 +2485,10 @@ void main() {
           ),
         ];
         await openSearch(tester);
-        await tester.enterText(find.byKey(const Key('chat_search_field')), 'alpha');
+        await tester.enterText(
+          find.byKey(const Key('chat_search_field')),
+          'alpha',
+        );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pump();
@@ -2222,7 +2509,10 @@ void main() {
       testWidgets('tapping search result exits search mode', (tester) async {
         _api.initialMessages = [_message('m1', DateTime(2024))];
         await openSearch(tester);
-        await tester.enterText(find.byKey(const Key('chat_search_field')), 'Message m1');
+        await tester.enterText(
+          find.byKey(const Key('chat_search_field')),
+          'Message m1',
+        );
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 300));
         await tester.pump();
@@ -2245,19 +2535,25 @@ void main() {
         ImagePickerPlatform.instance = mockImagePicker;
       });
 
-      testWidgets('shows media upload preview when media is picked', (tester) async {
+      testWidgets('shows media upload preview when media is picked', (
+        tester,
+      ) async {
         mockImagePicker.filesToReturn = [XFile('/tmp/test_image.jpg')];
         _api.initialMessages = [_message('m1', DateTime(2024))];
         await pumpChatScreen(tester);
 
         await tester.tap(find.byKey(const Key('add_button')));
-        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 100)));
+        await tester.runAsync(
+          () => Future.delayed(const Duration(milliseconds: 100)),
+        );
         await tester.pumpAndSettle();
 
         expect(find.byType(ChatMediaUploadPreview), findsOneWidget);
       });
 
-      testWidgets('shows both reply preview and media preview with spacer', (tester) async {
+      testWidgets('shows both reply preview and media preview with spacer', (
+        tester,
+      ) async {
         mockImagePicker.filesToReturn = [XFile('/tmp/test_image.jpg')];
         _api.initialMessages = [_message('m1', DateTime(2024))];
         await pumpChatScreen(tester);
@@ -2270,7 +2566,9 @@ void main() {
         expect(find.byType(ChatMessageQuote), findsOneWidget);
 
         await tester.tap(find.byKey(const Key('add_button')));
-        await tester.runAsync(() => Future.delayed(const Duration(milliseconds: 100)));
+        await tester.runAsync(
+          () => Future.delayed(const Duration(milliseconds: 100)),
+        );
         await tester.pumpAndSettle();
 
         expect(find.byType(ChatMessageQuote), findsOneWidget);
@@ -2288,14 +2586,13 @@ void main() {
           ],
         );
         await tester.pumpAndSettle();
-        Routes.goToChat(
-          tester.element(find.byType(Scaffold)),
-          _testGroupId,
-        );
+        Routes.goToChat(tester.element(find.byType(Scaffold)), _testGroupId);
         await tester.pumpAndSettle();
       }
 
-      testWidgets('shows debug button when debug view is enabled', (tester) async {
+      testWidgets('shows debug button when debug view is enabled', (
+        tester,
+      ) async {
         await pumpChatScreenWithDebug(tester);
         expect(find.byKey(const Key('chat_raw_debug_button')), findsOneWidget);
       });
@@ -2307,7 +2604,9 @@ void main() {
         expect(find.byType(ChatRawDebugScreen), findsOneWidget);
       });
 
-      testWidgets('back button in raw debug screen returns to chat', (tester) async {
+      testWidgets('back button in raw debug screen returns to chat', (
+        tester,
+      ) async {
         await pumpChatScreenWithDebug(tester);
         await tester.tap(find.byKey(const Key('chat_raw_debug_button')));
         await tester.pumpAndSettle();
@@ -2325,14 +2624,20 @@ void main() {
       testWidgets('shows WnSystemNotice with removed title', (tester) async {
         await pumpChatScreen(tester);
 
-        expect(find.byKey(const Key('removed_from_group_notice')), findsOneWidget);
+        expect(
+          find.byKey(const Key('removed_from_group_notice')),
+          findsOneWidget,
+        );
         expect(find.text('You were removed from this group'), findsOneWidget);
       });
 
       testWidgets('shows description text', (tester) async {
         await pumpChatScreen(tester);
 
-        expect(find.textContaining('You can still view saved messages'), findsOneWidget);
+        expect(
+          find.textContaining('You can still view saved messages'),
+          findsOneWidget,
+        );
       });
 
       testWidgets('notice is expanded by default', (tester) async {
@@ -2356,7 +2661,9 @@ void main() {
         expect(notice.variant, WnSystemNoticeVariant.collapsed);
       });
 
-      testWidgets('notice expands again after second chevron tap', (tester) async {
+      testWidgets('notice expands again after second chevron tap', (
+        tester,
+      ) async {
         await pumpChatScreen(tester);
 
         await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
@@ -2382,19 +2689,132 @@ void main() {
 
         expect(find.byType(WnMessageBubble), findsOneWidget);
       });
+
+      testWidgets(
+        'archive button shows Archive when not archived in removed notice',
+        (tester) async {
+          await pumpChatScreen(tester);
+
+          final button = tester.widget<WnButton>(
+            find.byKey(const Key('removed_notice_archive_button')),
+          );
+          expect(button.text, 'Archive');
+        },
+      );
+
+      testWidgets(
+        'archive button updates to Unarchive after archiving in removed notice',
+        (tester) async {
+          await pumpChatScreen(tester);
+
+          await tester.tap(
+            find.byKey(const Key('removed_notice_archive_button')),
+          );
+          await tester.pumpAndSettle();
+
+          final button = tester.widget<WnButton>(
+            find.byKey(const Key('removed_notice_archive_button')),
+          );
+          expect(button.text, 'Unarchive');
+        },
+      );
+
+      testWidgets(
+        'shows error notice when archive action fails from removed notice',
+        (tester) async {
+          _api.shouldFailArchiveChat = true;
+          await pumpChatScreen(tester);
+
+          await tester.tap(
+            find.byKey(const Key('removed_notice_archive_button')),
+          );
+          await tester.pumpAndSettle();
+
+          expect(
+            find.text('Failed to archive chat. Please try again.'),
+            findsOneWidget,
+          );
+        },
+      );
+
+      testWidgets(
+        'archive button is disabledwhile archive state is initializing',
+        (tester) async {
+          _api.getAccountGroupCompleter = Completer<void>();
+          await pumpChatScreen(tester, settle: false);
+          await tester.pump(const Duration(milliseconds: 500));
+          await tester.pump();
+
+          expect(
+            find.byKey(const Key('removed_notice_archive_button')),
+            findsOneWidget,
+          );
+          final button = tester.widget<WnButton>(
+            find.byKey(const Key('removed_notice_archive_button')),
+          );
+          expect(button.disabled, isTrue);
+          expect(button.loading, isFalse);
+
+          _api.getAccountGroupCompleter!.complete();
+          await tester.pumpAndSettle();
+        },
+      );
+    });
+
+    group('left group voluntarily', () {
+      setUp(() {
+        _api.removedAt = DateTime(2024, 6);
+        _api.selfRemoved = true;
+      });
+
+      testWidgets('shows WnSystemNotice with left title', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(
+          find.byKey(const Key('removed_from_group_notice')),
+          findsOneWidget,
+        );
+        expect(find.text('You left this group'), findsOneWidget);
+      });
+
+      testWidgets('does not show removed title', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.text('You were removed from this group'), findsNothing);
+      });
+
+      testWidgets('hides the message input', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.byType(TextField), findsNothing);
+      });
     });
 
     group('not removed from group', () {
       testWidgets('does not show removed notice', (tester) async {
         await pumpChatScreen(tester);
 
-        expect(find.byKey(const Key('removed_from_group_notice')), findsNothing);
+        expect(
+          find.byKey(const Key('removed_from_group_notice')),
+          findsNothing,
+        );
       });
 
       testWidgets('shows the message input', (tester) async {
         await pumpChatScreen(tester);
 
         expect(find.byType(TextField), findsOneWidget);
+      });
+
+      testWidgets('archive button not shown when not removed from group', (
+        tester,
+      ) async {
+        await pumpChatScreen(tester);
+
+        expect(
+          find.byKey(const Key('removed_notice_archive_button')),
+          findsNothing,
+        );
       });
     });
 
@@ -2439,7 +2859,9 @@ void main() {
         );
       });
 
-      testWidgets('blocked notice collapses when chevron is tapped', (tester) async {
+      testWidgets('blocked notice collapses when chevron is tapped', (
+        tester,
+      ) async {
         await pumpChatScreen(tester);
 
         await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
@@ -2451,33 +2873,45 @@ void main() {
         expect(notice.variant, WnSystemNoticeVariant.collapsed);
       });
 
-      testWidgets('shows error notice when unblock action fails', (tester) async {
+      testWidgets('shows error notice when unblock action fails', (
+        tester,
+      ) async {
         _api.shouldFailUnblockUser = true;
         await pumpChatScreen(tester);
 
-        await tester.tap(find.byKey(const Key('blocked_notice_unblock_button')));
+        await tester.tap(
+          find.byKey(const Key('blocked_notice_unblock_button')),
+        );
         await tester.pumpAndSettle();
 
-        expect(find.text('Failed to unblock user. Please try again.'), findsOneWidget);
+        expect(
+          find.text('Failed to unblock user. Please try again.'),
+          findsOneWidget,
+        );
       });
 
-      testWidgets('does not update state after unblock completes on disposed screen', (
+      testWidgets(
+        'does not update state after unblock completes on disposed screen',
+        (tester) async {
+          _api.unblockUserCompleter = Completer<void>();
+          await pumpChatScreen(tester);
+
+          await tester.tap(
+            find.byKey(const Key('blocked_notice_unblock_button')),
+          );
+          await tester.pump();
+          await tester.pumpWidget(const SizedBox());
+
+          _api.unblockUserCompleter!.complete();
+          await tester.pump();
+
+          expect(tester.takeException(), isNull);
+        },
+      );
+
+      testWidgets('archive button shows Archive when not archived', (
         tester,
       ) async {
-        _api.unblockUserCompleter = Completer<void>();
-        await pumpChatScreen(tester);
-
-        await tester.tap(find.byKey(const Key('blocked_notice_unblock_button')));
-        await tester.pump();
-        await tester.pumpWidget(const SizedBox());
-
-        _api.unblockUserCompleter!.complete();
-        await tester.pump();
-
-        expect(tester.takeException(), isNull);
-      });
-
-      testWidgets('archive button shows Archive when not archived', (tester) async {
         await pumpChatScreen(tester);
 
         final button = tester.widget<WnButton>(
@@ -2486,10 +2920,14 @@ void main() {
         expect(button.text, 'Archive');
       });
 
-      testWidgets('archive button updates to Unarchive after archiving', (tester) async {
+      testWidgets('archive button updates to Unarchive after archiving', (
+        tester,
+      ) async {
         await pumpChatScreen(tester);
 
-        await tester.tap(find.byKey(const Key('blocked_notice_archive_button')));
+        await tester.tap(
+          find.byKey(const Key('blocked_notice_archive_button')),
+        );
         await tester.pumpAndSettle();
 
         final button = tester.widget<WnButton>(
@@ -2498,29 +2936,42 @@ void main() {
         expect(button.text, 'Unarchive');
       });
 
-      testWidgets('shows error notice when archive action fails from blocked notice', (
-        tester,
-      ) async {
-        _api.shouldFailArchiveChat = true;
-        await pumpChatScreen(tester);
+      testWidgets(
+        'shows error notice when archive action fails from blocked notice',
+        (tester) async {
+          _api.shouldFailArchiveChat = true;
+          await pumpChatScreen(tester);
 
-        await tester.tap(find.byKey(const Key('blocked_notice_archive_button')));
-        await tester.pumpAndSettle();
+          await tester.tap(
+            find.byKey(const Key('blocked_notice_archive_button')),
+          );
+          await tester.pumpAndSettle();
 
-        expect(find.text('Failed to archive chat. Please try again.'), findsOneWidget);
-      });
+          expect(
+            find.text('Failed to archive chat. Please try again.'),
+            findsOneWidget,
+          );
+        },
+      );
 
       testWidgets('unblocking reloads blocked pubkeys', (tester) async {
         await pumpChatScreen(tester);
 
         final callCountBefore = _api.getBlockedUsersCallCount;
-        await tester.tap(find.byKey(const Key('blocked_notice_unblock_button')));
+        await tester.tap(
+          find.byKey(const Key('blocked_notice_unblock_button')),
+        );
         await tester.pumpAndSettle();
 
-        expect(_api.getBlockedUsersCallCount, greaterThanOrEqualTo(callCountBefore + 1));
+        expect(
+          _api.getBlockedUsersCallCount,
+          greaterThanOrEqualTo(callCountBefore + 1),
+        );
       });
 
-      testWidgets('messages from unblocked peer become visible after unblock', (tester) async {
+      testWidgets('messages from unblocked peer become visible after unblock', (
+        tester,
+      ) async {
         final firstCompleter = Completer<List<MuteListEntry>>();
         final secondCompleter = Completer<List<MuteListEntry>>();
         _api.blockedPubkeys.add(testPubkeyC);
@@ -2553,7 +3004,9 @@ void main() {
 
         expect(find.textContaining('Message peer_msg'), findsNothing);
 
-        await tester.tap(find.byKey(const Key('blocked_notice_unblock_button')));
+        await tester.tap(
+          find.byKey(const Key('blocked_notice_unblock_button')),
+        );
         await tester.pump();
 
         secondCompleter.complete([]);
@@ -2579,10 +3032,15 @@ void main() {
         _api.blockedPubkeys.add(testPubkeyC);
       });
 
-      testWidgets('shows removed notice and not blocked notice', (tester) async {
+      testWidgets('shows removed notice and not blocked notice', (
+        tester,
+      ) async {
         await pumpChatScreen(tester);
 
-        expect(find.byKey(const Key('removed_from_group_notice')), findsOneWidget);
+        expect(
+          find.byKey(const Key('removed_from_group_notice')),
+          findsOneWidget,
+        );
         expect(find.byKey(const Key('user_blocked_notice')), findsNothing);
       });
     });
@@ -2601,9 +3059,7 @@ void main() {
         expect(textField.enabled, isNot(false));
       });
 
-      testWidgets('send button is not present when offline', (
-        tester,
-      ) async {
+      testWidgets('send button is not present when offline', (tester) async {
         await pumpChatScreen(tester, isOffline: true);
 
         await tester.enterText(find.byType(TextField), 'Hello');
@@ -2612,20 +3068,23 @@ void main() {
         expect(find.byKey(const Key('send_button')), findsNothing);
       });
 
-      testWidgets('Online does not show offline_notice and enables send button', (tester) async {
-        await pumpChatScreen(tester);
+      testWidgets(
+        'Online does not show offline_notice and enables send button',
+        (tester) async {
+          await pumpChatScreen(tester);
 
-        expect(find.byKey(const Key('offline_notice')), findsNothing);
+          expect(find.byKey(const Key('offline_notice')), findsNothing);
 
-        await tester.enterText(find.byType(TextField), 'Hello');
-        await tester.pumpAndSettle();
+          await tester.enterText(find.byType(TextField), 'Hello');
+          await tester.pumpAndSettle();
 
-        final sendButton = find.byKey(const Key('send_button'));
-        expect(sendButton, findsOneWidget);
-        await tester.tap(sendButton);
-        await tester.pumpAndSettle();
-        expect(_api.sentMessages, isNotEmpty);
-      });
+          final sendButton = find.byKey(const Key('send_button'));
+          expect(sendButton, findsOneWidget);
+          await tester.tap(sendButton);
+          await tester.pumpAndSettle();
+          expect(_api.sentMessages, isNotEmpty);
+        },
+      );
 
       group('message actions when offline', () {
         setUp(() {

@@ -140,6 +140,7 @@ class ChatScreen extends HookConsumerWidget {
     final debugViewEnabled = ref.watch(debugViewProvider).value ?? false;
 
     final isRemovedFromGroup = chatSummary.data?.removedAt != null;
+    final selfRemoved = chatSummary.data?.selfRemoved ?? false;
     final isRemovedNoticeCollapsed = useState(false);
 
     final peerPubkey = chatSummary.data?.dmPeerPubkey;
@@ -193,18 +194,14 @@ class ChatScreen extends HookConsumerWidget {
     Future<void> handleArchive() async {
       final currentIsArchived = archiveState.isArchived;
       try {
-        if (currentIsArchived) {
-          await archiveState.unarchive();
-        } else {
-          await archiveState.archive();
-        }
+        await archiveState.toggle();
       } catch (_) {
         if (context.mounted) {
-          if (currentIsArchived) {
-            showNotice(context.l10n.failedToUnarchiveChat);
-          } else {
-            showNotice(context.l10n.failedToArchiveChat);
-          }
+          showNotice(
+            currentIsArchived
+                ? context.l10n.failedToUnarchiveChat
+                : context.l10n.failedToArchiveChat,
+          );
         }
       }
     }
@@ -327,13 +324,17 @@ class ChatScreen extends HookConsumerWidget {
     Widget messageListContent;
     if (isLoading || blockedPubkeysState.isLoading) {
       messageListContent = Center(
-        child: CircularProgressIndicator(color: colors.backgroundContentPrimary),
+        child: CircularProgressIndicator(
+          color: colors.backgroundContentPrimary,
+        ),
       );
     } else if (displayCount == 0 && !isSearchActive.value) {
       messageListContent = Center(
         child: Text(
           context.l10n.noMessagesYet,
-          style: typography.medium14.copyWith(color: colors.backgroundContentTertiary),
+          style: typography.medium14.copyWith(
+            color: colors.backgroundContentTertiary,
+          ),
         ),
       );
     } else {
@@ -342,7 +343,12 @@ class ChatScreen extends HookConsumerWidget {
         child: ListView.builder(
           controller: scrollController,
           reverse: !isSearchMode,
-          padding: EdgeInsets.fromLTRB(10.w, slateTopPadding + 8.h, 10.w, listBottomPadding),
+          padding: EdgeInsets.fromLTRB(
+            10.w,
+            slateTopPadding + 8.h,
+            10.w,
+            listBottomPadding,
+          ),
           itemCount: displayCount,
           findChildIndexCallback: !isSearchMode
               ? (key) {
@@ -423,7 +429,9 @@ class ChatScreen extends HookConsumerWidget {
               onLongPress: isSearchMode ? null : () => showMessageMenu(message),
               onReaction: isSearchMode ? null : (emoji) => toggleReaction(message, emoji),
               onReplyTap: !isSearchMode && replyPreview != null && !replyPreview.isNotFound
-                  ? () => scrollToMessageResult.scrollToMessage(replyPreview.messageId)
+                  ? () => scrollToMessageResult.scrollToMessage(
+                      replyPreview.messageId,
+                    )
                   : null,
               onHorizontalDragEnd: isSearchMode ? null : () => input.setReplyingTo(message),
               onRetry:
@@ -510,11 +518,17 @@ class ChatScreen extends HookConsumerWidget {
                             : () => Routes.goToChatList(context),
                         onAvatarTap: () async {
                           if (isGroupChat) {
-                            final result = await Routes.pushToGroupInfo(context, groupId);
+                            final result = await Routes.pushToGroupInfo(
+                              context,
+                              groupId,
+                            );
                             if (!context.mounted) return;
                             if (result == true) openSearch();
                           } else {
-                            final result = await Routes.pushToChatInfo(context, groupId);
+                            final result = await Routes.pushToChatInfo(
+                              context,
+                              groupId,
+                            );
                             if (!context.mounted) return;
                             blockActionsRefreshKey.value++;
                             blockedPubkeysState.refresh();
@@ -542,7 +556,9 @@ class ChatScreen extends HookConsumerWidget {
                       footer: isRemovedFromGroup
                           ? WnSystemNotice(
                               key: const Key('removed_from_group_notice'),
-                              title: context.l10n.removedFromGroup,
+                              title: selfRemoved
+                                  ? context.l10n.youLeftThisGroup
+                                  : context.l10n.removedFromGroup,
                               description: Text(
                                 context.l10n.removedFromGroupDescription,
                                 style: typography.medium14.copyWith(
@@ -556,6 +572,20 @@ class ChatScreen extends HookConsumerWidget {
                               animateEntrance: false,
                               onToggle: () =>
                                   isRemovedNoticeCollapsed.value = !isRemovedNoticeCollapsed.value,
+                              primaryAction: WnButton(
+                                key: const Key('removed_notice_archive_button'),
+                                text: archiveState.isArchived
+                                    ? context.l10n.unarchive
+                                    : context.l10n.archive,
+                                type: WnButtonType.outline,
+                                size: WnButtonSize.medium,
+                                loading: archiveState.isActionLoading,
+                                disabled: archiveState.isLoading,
+                                trailingIcon: archiveState.isArchived
+                                    ? WnIcons.unarchive
+                                    : WnIcons.archive,
+                                onPressed: handleArchive,
+                              ),
                             )
                           : isBlocked
                           ? WnSystemNotice(
@@ -591,6 +621,7 @@ class ChatScreen extends HookConsumerWidget {
                                 type: WnButtonType.overlay,
                                 size: WnButtonSize.medium,
                                 loading: archiveState.isActionLoading,
+                                disabled: archiveState.isLoading,
                                 trailingIcon: archiveState.isArchived
                                     ? WnIcons.unarchive
                                     : WnIcons.archive,
@@ -627,7 +658,11 @@ class ChatScreen extends HookConsumerWidget {
                                         final next =
                                             (currentMatchIndex.value - 1 + matchCount) % matchCount;
                                         currentMatchIndex.value = next;
-                                        _scrollToMatch(scrollController, searchDisplayItems, next);
+                                        _scrollToMatch(
+                                          scrollController,
+                                          searchDisplayItems,
+                                          next,
+                                        );
                                       },
                                 icon: WnIcons.chevronUp,
                               ),
@@ -652,7 +687,11 @@ class ChatScreen extends HookConsumerWidget {
                                     : () {
                                         final next = (currentMatchIndex.value + 1) % matchCount;
                                         currentMatchIndex.value = next;
-                                        _scrollToMatch(scrollController, searchDisplayItems, next);
+                                        _scrollToMatch(
+                                          scrollController,
+                                          searchDisplayItems,
+                                          next,
+                                        );
                                       },
                                 icon: WnIcons.chevronDown,
                               ),
@@ -698,7 +737,10 @@ class ChatScreen extends HookConsumerWidget {
                   right: 0,
                   child: Center(
                     child: Container(
-                      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 8.h),
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16.w,
+                        vertical: 8.h,
+                      ),
                       decoration: BoxDecoration(
                         color: colors.backgroundSecondary,
                         borderRadius: BorderRadius.circular(999.r),
@@ -774,7 +816,9 @@ class _ChatInput extends StatelessWidget {
         'handleSend textLen=${text.length} hasMedia=$hasMedia replyTo=${input.replyingTo?.id}',
       );
       if (text.isEmpty && !hasMedia) {
-        _logger.info('handleSend early return: empty text and no sendable media');
+        _logger.info(
+          'handleSend early return: empty text and no sendable media',
+        );
         return;
       }
       try {
@@ -796,7 +840,9 @@ class _ChatInput extends StatelessWidget {
       final quoteData = hasQuote ? getChatMessageQuote(input.replyingTo!.id) : null;
       final shouldRenderQuote = hasQuote && quoteData != null && !quoteData.isNotFound;
       final replyAuthorColor = isGroupChat && shouldRenderQuote
-          ? AvatarColor.fromPubkey(quoteData.authorPubkey).toColorSet(context.colors).content
+          ? AvatarColor.fromPubkey(
+              quoteData.authorPubkey,
+            ).toColorSet(context.colors).content
           : null;
 
       return Column(
@@ -820,7 +866,9 @@ class _ChatInput extends StatelessWidget {
       );
     }
 
-    final inputStyle = typography.medium14.copyWith(color: colors.backgroundContentPrimary);
+    final inputStyle = typography.medium14.copyWith(
+      color: colors.backgroundContentPrimary,
+    );
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
@@ -875,7 +923,10 @@ class _SizeReporter extends SingleChildRenderObjectWidget {
   }
 
   @override
-  void updateRenderObject(BuildContext context, _SizeReporterRenderObject renderObject) {
+  void updateRenderObject(
+    BuildContext context,
+    _SizeReporterRenderObject renderObject,
+  ) {
     renderObject.onSizeChanged = onSizeChanged;
   }
 }
