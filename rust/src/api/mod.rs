@@ -7,7 +7,7 @@ use tokio::sync::{Mutex, OwnedRwLockReadGuard, RwLock as TokioRwLock};
 pub use whitenoise::{AppSettings, Language, RelayType, ThemeMode, Whitenoise};
 
 static GLOBAL_WN: StdRwLock<Option<Arc<Whitenoise>>> = StdRwLock::new(None);
-static GLOBAL_WN_INIT_LOCK: Mutex<()> = Mutex::const_new(());
+static GLOBAL_WN_REPLACE_LOCK: Mutex<()> = Mutex::const_new(());
 static WN_LIFECYCLE_LOCK: LazyLock<Arc<TokioRwLock<()>>> =
     LazyLock::new(|| Arc::new(TokioRwLock::new(())));
 
@@ -197,7 +197,8 @@ pub async fn initialize_whitenoise(config: WhitenoiseConfig) -> Result<(), ApiEr
         return Ok(());
     }
 
-    let _init_guard = GLOBAL_WN_INIT_LOCK.lock().await;
+    let _replace_guard = GLOBAL_WN_REPLACE_LOCK.lock().await;
+    let _lifecycle_guard = WN_LIFECYCLE_LOCK.write().await;
     if GLOBAL_WN
         .read()
         .map_err(|_| ApiError::Whitenoise {
@@ -229,7 +230,7 @@ pub async fn initialize_whitenoise(config: WhitenoiseConfig) -> Result<(), ApiEr
 /// issuing more bridge calls.
 #[frb]
 pub async fn delete_all_data() -> Result<(), ApiError> {
-    let _init_guard = GLOBAL_WN_INIT_LOCK.lock().await;
+    let _replace_guard = GLOBAL_WN_REPLACE_LOCK.lock().await;
     let _lifecycle_guard = WN_LIFECYCLE_LOCK.write().await;
     let whitenoise = GLOBAL_WN
         .read()
