@@ -1,13 +1,104 @@
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/deep_links.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_reaction.dart';
 export 'package:whitenoise/src/rust/api/messages.dart' show EmojiReaction;
+
+final _whiteNoiseDeepLinkPattern = RegExp(
+  r'whitenoise(?:-staging)?://[A-Za-z0-9._~:/?#\[\]@!$&()*+,;=%-]+',
+);
+
+void _openDeepLink(BuildContext context, String value) {
+  final target = DeepLinks.parseString(value);
+  if (target == null) return;
+  GoRouter.of(context).go(target.location);
+}
+
+void _disposeRecognizers(List<TapGestureRecognizer> recognizers) {
+  for (final recognizer in recognizers) {
+    recognizer.dispose();
+  }
+  recognizers.clear();
+}
+
+List<TapGestureRecognizer> _useLinkRecognizers() {
+  final recognizers = useMemoized(() => <TapGestureRecognizer>[]);
+  useEffect(() {
+    return () => _disposeRecognizers(recognizers);
+  }, [recognizers]);
+  _disposeRecognizers(recognizers);
+  return recognizers;
+}
+
+List<InlineSpan> _buildMessageSpans(
+  BuildContext context,
+  String text,
+  TextStyle baseStyle,
+  List<HighlightSpan>? highlightSpans,
+  Color? highlightColor,
+  List<TapGestureRecognizer> recognizers,
+) {
+  if (highlightSpans != null && highlightSpans.isNotEmpty) {
+    return _buildHighlightedSpans(text, baseStyle, highlightSpans, highlightColor!);
+  }
+  return _buildDeepLinkSpans(context, text, baseStyle, recognizers);
+}
+
+List<InlineSpan> _buildDeepLinkSpans(
+  BuildContext context,
+  String text,
+  TextStyle baseStyle,
+  List<TapGestureRecognizer> recognizers,
+) {
+  final spans = <InlineSpan>[];
+  var cursor = 0;
+
+  for (final match in _whiteNoiseDeepLinkPattern.allMatches(text)) {
+    final rawLink = match.group(0)!;
+    final (:link, :suffix) = _splitTrailingPunctuation(rawLink);
+    if (DeepLinks.parseString(link) == null) continue;
+
+    if (match.start > cursor) {
+      spans.add(TextSpan(text: text.substring(cursor, match.start), style: baseStyle));
+    }
+
+    final recognizer = TapGestureRecognizer()..onTap = () => _openDeepLink(context, link);
+    recognizers.add(recognizer);
+    final linkStyle = baseStyle.copyWith(
+      color: context.colors.accent.sky.contentSecondary,
+      decoration: TextDecoration.underline,
+      decorationColor: context.colors.accent.sky.contentSecondary,
+    );
+    spans.add(TextSpan(text: link, style: linkStyle, recognizer: recognizer));
+    if (suffix.isNotEmpty) {
+      spans.add(TextSpan(text: suffix, style: baseStyle));
+    }
+    cursor = match.end;
+  }
+
+  if (cursor < text.length) {
+    spans.add(TextSpan(text: text.substring(cursor), style: baseStyle));
+  }
+  return spans.isEmpty ? [TextSpan(text: text, style: baseStyle)] : spans;
+}
+
+({String link, String suffix}) _splitTrailingPunctuation(String value) {
+  var end = value.length;
+  while (end > 0 && _isTrailingLinkPunctuation(value[end - 1])) {
+    end--;
+  }
+  return (link: value.substring(0, end), suffix: value.substring(end));
+}
+
+bool _isTrailingLinkPunctuation(String value) => '.,;!?)'.contains(value);
 
 int _codePointToCodeUnit(String text, int codePointIndex) {
   var codeUnits = 0;
@@ -63,7 +154,7 @@ const _tailW = 16.0;
 const _tailH = 10.0;
 const _tailOverhang = 8.0;
 
-class _TextWithTimestamp extends StatelessWidget {
+class _TextWithTimestamp extends HookWidget {
   const _TextWithTimestamp({
     required this.content,
     required this.timestamp,
@@ -92,6 +183,7 @@ class _TextWithTimestamp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final linkRecognizers = _useLinkRecognizers();
     final reservedWidth = _timestampReservedWidth(
       timestamp,
       tsStyle,
@@ -120,9 +212,14 @@ class _TextWithTimestamp extends StatelessWidget {
       );
     }
 
-    final textChildren = highlightSpans != null && highlightSpans!.isNotEmpty
-        ? _buildHighlightedSpans(content, textStyle, highlightSpans!, highlightColor!)
-        : [TextSpan(text: content, style: textStyle)];
+    final textChildren = _buildMessageSpans(
+      context,
+      content,
+      textStyle,
+      highlightSpans,
+      highlightColor,
+      linkRecognizers,
+    );
 
     if (maxLines != null) {
       return LayoutBuilder(
@@ -170,7 +267,10 @@ class _TextWithTimestamp extends StatelessWidget {
                   final linesByHeight = availableTextHeight.isFinite
                       ? (availableTextHeight / lineHeight).floor()
                       : maxLines!;
-                  final effectiveMaxLines = math.max(1, math.min(maxLines!, linesByHeight) - 1);
+                  final effectiveMaxLines = math.max(
+                    1,
+                    math.min(maxLines!, linesByHeight) - 1,
+                  );
                   return (
                     lineHeight: lineHeight,
                     statusHeight: statusHeight,
@@ -252,6 +352,41 @@ class _TextWithTimestamp extends StatelessWidget {
         ),
         Positioned(bottom: 0, right: 0, child: statusRow),
       ],
+    );
+  }
+}
+
+class _MessageText extends HookWidget {
+  const _MessageText({
+    required this.content,
+    required this.textStyle,
+    this.highlightSpans,
+    this.highlightColor,
+    this.maxLines,
+  });
+
+  final String content;
+  final TextStyle textStyle;
+  final List<HighlightSpan>? highlightSpans;
+  final Color? highlightColor;
+  final int? maxLines;
+
+  @override
+  Widget build(BuildContext context) {
+    final linkRecognizers = _useLinkRecognizers();
+    return Text.rich(
+      TextSpan(
+        children: _buildMessageSpans(
+          context,
+          content,
+          textStyle,
+          highlightSpans,
+          highlightColor,
+          linkRecognizers,
+        ),
+      ),
+      maxLines: maxLines,
+      overflow: maxLines != null ? TextOverflow.ellipsis : TextOverflow.clip,
     );
   }
 }
@@ -488,25 +623,13 @@ class _BubbleContent extends StatelessWidget {
               maxLines: contentMaxLines,
             )
           else if (hasText)
-            highlightSpans != null && highlightSpans!.isNotEmpty
-                ? Text.rich(
-                    TextSpan(
-                      children: _buildHighlightedSpans(
-                        content!,
-                        textStyle,
-                        highlightSpans!,
-                        highlightColor!,
-                      ),
-                    ),
-                    maxLines: contentMaxLines,
-                    overflow: contentMaxLines != null ? TextOverflow.ellipsis : TextOverflow.clip,
-                  )
-                : Text(
-                    content!,
-                    style: textStyle,
-                    maxLines: contentMaxLines,
-                    overflow: contentMaxLines != null ? TextOverflow.ellipsis : TextOverflow.clip,
-                  )
+            _MessageText(
+              content: content!,
+              textStyle: textStyle,
+              highlightSpans: highlightSpans,
+              highlightColor: highlightColor,
+              maxLines: contentMaxLines,
+            )
           else if (hasTimestamp) ...[
             SizedBox(height: 2.h),
             _buildTimestampRow(),
