@@ -431,7 +431,7 @@ Future<void> _expectLocalRelayAvailable(int port) async {
   } catch (error) {
     fail(
       'Expected a local Nostr relay on 127.0.0.1:$port before running this integration test. '
-      'Start the whitenoise-rs Docker relay services, then run the test again. '
+      'Run `docker compose up -d`, then run the test again. '
       'Connection error: $error',
     );
   }
