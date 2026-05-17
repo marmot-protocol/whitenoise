@@ -3,15 +3,13 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
-
 import '../frb_generated.dart';
 import 'chat_summary.dart';
 import 'error.dart';
 import 'groups.dart';
 import 'messages.dart';
-
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
+import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'chat_list.freezed.dart';
 
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`
@@ -50,13 +48,10 @@ Future<void> muteChat({
 /// Unmutes a previously muted chat.
 ///
 /// Notifications for this chat will resume immediately.
-Future<void> unmuteChat({
-  required String accountPubkey,
-  required String mlsGroupId,
-}) => RustLib.instance.api.crateApiChatListUnmuteChat(
-  accountPubkey: accountPubkey,
-  mlsGroupId: mlsGroupId,
-);
+Future<void> unmuteChat({required String accountPubkey, required String mlsGroupId}) => RustLib
+    .instance
+    .api
+    .crateApiChatListUnmuteChat(accountPubkey: accountPubkey, mlsGroupId: mlsGroupId);
 
 /// Retrieves the chat list for an account.
 ///
@@ -65,9 +60,7 @@ Future<void> unmuteChat({
 /// 2. Unpinned chats sorted by last activity (most recent first)
 /// 3. Groups without messages are sorted by creation date
 Future<List<ChatSummary>> getChatList({required String accountPubkey}) =>
-    RustLib.instance.api.crateApiChatListGetChatList(
-      accountPubkey: accountPubkey,
-    );
+    RustLib.instance.api.crateApiChatListGetChatList(accountPubkey: accountPubkey);
 
 /// Subscribe to real-time chat list updates for an account.
 ///
@@ -76,17 +69,11 @@ Future<List<ChatSummary>> getChatList({required String accountPubkey}) =>
 ///
 /// The initial snapshot is race-condition free: any updates that arrive between
 /// subscribing and fetching are merged into the snapshot.
-Stream<ChatListStreamItem> subscribeToChatList({
-  required String accountPubkey,
-}) => RustLib.instance.api.crateApiChatListSubscribeToChatList(
-  accountPubkey: accountPubkey,
-);
+Stream<ChatListStreamItem> subscribeToChatList({required String accountPubkey}) =>
+    RustLib.instance.api.crateApiChatListSubscribeToChatList(accountPubkey: accountPubkey);
 
-Stream<ChatListStreamItem> subscribeToArchivedChatList({
-  required String accountPubkey,
-}) => RustLib.instance.api.crateApiChatListSubscribeToArchivedChatList(
-  accountPubkey: accountPubkey,
-);
+Stream<ChatListStreamItem> subscribeToArchivedChatList({required String accountPubkey}) =>
+    RustLib.instance.api.crateApiChatListSubscribeToArchivedChatList(accountPubkey: accountPubkey);
 
 @freezed
 sealed class ChatListStreamItem with _$ChatListStreamItem {

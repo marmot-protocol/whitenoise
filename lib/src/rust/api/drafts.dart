@@ -3,11 +3,10 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-
 import '../frb_generated.dart';
 import 'error.dart';
 import 'media_files.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`, `from`
 
@@ -31,19 +30,13 @@ Future<Draft> saveDraft({
 
 /// Loads the draft for the given account and group, if one exists.
 Future<Draft?> loadDraft({required String pubkey, required String groupId}) =>
-    RustLib.instance.api.crateApiDraftsLoadDraft(
-      pubkey: pubkey,
-      groupId: groupId,
-    );
+    RustLib.instance.api.crateApiDraftsLoadDraft(pubkey: pubkey, groupId: groupId);
 
 /// Deletes the draft for the given account and group.
 ///
 /// No-op if no draft exists.
 Future<void> deleteDraft({required String pubkey, required String groupId}) =>
-    RustLib.instance.api.crateApiDraftsDeleteDraft(
-      pubkey: pubkey,
-      groupId: groupId,
-    );
+    RustLib.instance.api.crateApiDraftsDeleteDraft(pubkey: pubkey, groupId: groupId);
 
 /// Flutter-compatible draft message for a specific group.
 ///

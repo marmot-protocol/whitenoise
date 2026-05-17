@@ -3,13 +3,11 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
-
 import '../frb_generated.dart';
 import 'error.dart';
 import 'media_files.dart';
-
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
+import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 part 'messages.freezed.dart';
 
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
@@ -71,11 +69,8 @@ Future<List<SearchResult>> searchMessages({
   required String pubkey,
   required String query,
   int? limit,
-}) => RustLib.instance.api.crateApiMessagesSearchMessages(
-  pubkey: pubkey,
-  query: query,
-  limit: limit,
-);
+}) =>
+    RustLib.instance.api.crateApiMessagesSearchMessages(pubkey: pubkey, query: query, limit: limit);
 
 /// Fetch a paginated page of messages for a group.
 ///
@@ -146,13 +141,8 @@ Future<List<ChatMessage>> fetchMessagesUnreadWithMinimum({
 ///
 /// The initial snapshot is race-condition free: any updates that arrive between
 /// subscribing and fetching are merged into the snapshot.
-Stream<MessageStreamItem> subscribeToGroupMessages({
-  String? pubkey,
-  required String groupId,
-}) => RustLib.instance.api.crateApiMessagesSubscribeToGroupMessages(
-  pubkey: pubkey,
-  groupId: groupId,
-);
+Stream<MessageStreamItem> subscribeToGroupMessages({String? pubkey, required String groupId}) =>
+    RustLib.instance.api.crateApiMessagesSubscribeToGroupMessages(pubkey: pubkey, groupId: groupId);
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<Tag>>
 abstract class Tag implements RustOpaqueInterface {}

@@ -3,12 +3,11 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-
 import '../frb_generated.dart';
 import '../lib.dart';
 import 'accounts.dart';
 import 'error.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `backend`, `clone`, `fmt`, `get_public_key`, `nip04_decrypt`, `nip04_encrypt`, `nip44_decrypt`, `nip44_encrypt`, `sign_event`
 
@@ -62,9 +61,8 @@ Future<LoginResult> loginExternalSignerStart({
 /// Step 2a for external signer: publish default relay lists and complete login.
 ///
 /// Called after `login_external_signer_start` returned `NeedsRelayLists`.
-Future<LoginResult> loginExternalSignerPublishDefaultRelays({
-  required String pubkey,
-}) => RustLib.instance.api.crateApiSignerLoginExternalSignerPublishDefaultRelays(pubkey: pubkey);
+Future<LoginResult> loginExternalSignerPublishDefaultRelays({required String pubkey}) =>
+    RustLib.instance.api.crateApiSignerLoginExternalSignerPublishDefaultRelays(pubkey: pubkey);
 
 /// Step 2b for external signer: search a user-provided relay for existing lists.
 ///

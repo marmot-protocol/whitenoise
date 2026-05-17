@@ -3,12 +3,11 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-
 import 'api/error.dart';
 import 'frb_generated.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `to_core_config`, `wn_session`, `wn`
+// These functions are ignored because they are not marked as `pub`: `release_lifecycle`, `to_core_config`, `wn_session`, `wn`
 // These types are ignored because they are neither used by any `pub` functions nor (for structs and enums) marked `#[frb(unignore)]`: `WnHandle`, `WnSessionHandle`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `deref`, `deref`, `fmt`, `from`
 
@@ -34,18 +33,18 @@ import 'frb_generated.dart';
 Future<WhitenoiseConfig> createWhitenoiseConfig({
   required String dataDir,
   required String logsDir,
-}) => RustLib.instance.api.crateApiCreateWhitenoiseConfig(
-  dataDir: dataDir,
-  logsDir: logsDir,
-);
+}) => RustLib.instance.api.crateApiCreateWhitenoiseConfig(dataDir: dataDir, logsDir: logsDir);
 
 Future<void> initializeWhitenoise({required WhitenoiseConfig config}) =>
     RustLib.instance.api.crateApiInitializeWhitenoise(config: config);
 
-/// Wipes all on-disk data and installs a fresh Whitenoise instance before
-/// returning. The lifecycle write lock waits for in-flight bridge calls before
-/// the old database pool is closed, then blocks new bridge calls until the fresh
-/// instance is ready.
+Future<void> reinitializeWhitenoise() => RustLib.instance.api.crateApiReinitializeWhitenoise();
+
+/// Wipes all on-disk data and clears the process-global Whitenoise instance.
+/// The lifecycle write lock waits for in-flight bridge calls before the old
+/// database pool is closed, then blocks new bridge calls until the global
+/// instance has been cleared. Call `initialize_whitenoise` to install a fresh
+/// instance after the reset.
 Future<void> deleteAllData() => RustLib.instance.api.crateApiDeleteAllData();
 
 Future<AppSettings> getAppSettings() => RustLib.instance.api.crateApiGetAppSettings();

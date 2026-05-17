@@ -25,6 +25,7 @@ import 'package:whitenoise/screens/fatal_error_screen.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/reset_marker.dart';
 
 // TODO: Remove migration gate and related code in the next release.
 const kDataVersion = 1;
@@ -65,6 +66,7 @@ Future<ProviderContainer> initializeAppContainer() async {
   final dir = await getApplicationDocumentsDirectory();
   final dataDir = '${dir.path}/whitenoise/data';
   final logsDir = '${dir.path}/whitenoise/logs';
+  await recoverPendingReset(dataDir: dataDir, logsDir: logsDir);
   await Directory(dataDir).create(recursive: true);
   await Directory(logsDir).create(recursive: true);
 

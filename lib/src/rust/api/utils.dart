@@ -3,12 +3,11 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-
 import '../api.dart';
 import '../frb_generated.dart';
 import 'error.dart';
 import 'messages.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'relay_defaults.dart';
 
 String npubFromHexPubkey({required String hexPubkey}) =>
@@ -72,13 +71,10 @@ String languageToString({required Language language}) =>
     RustLib.instance.api.crateApiUtilsLanguageToString(language: language);
 
 /// Build a `nostr:nevent1...` URI from a hex event ID and author pubkey (NIP-C7).
-String eventIdToNeventUri({
-  required String eventIdHex,
-  required String pubkeyHex,
-}) => RustLib.instance.api.crateApiUtilsEventIdToNeventUri(
-  eventIdHex: eventIdHex,
-  pubkeyHex: pubkeyHex,
-);
+String eventIdToNeventUri({required String eventIdHex, required String pubkeyHex}) => RustLib
+    .instance
+    .api
+    .crateApiUtilsEventIdToNeventUri(eventIdHex: eventIdHex, pubkeyHex: pubkeyHex);
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<GroupId>>
 abstract class GroupId implements RustOpaqueInterface {}

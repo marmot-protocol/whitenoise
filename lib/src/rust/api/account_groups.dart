@@ -3,10 +3,9 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
-
 import '../frb_generated.dart';
 import 'error.dart';
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`, `from`, `from`
 
@@ -30,49 +29,37 @@ Future<AccountGroup> declineAccountGroup({
   mlsGroupId: mlsGroupId,
 );
 
-Future<AccountGroup> getAccountGroup({
-  required String accountPubkey,
-  required String mlsGroupId,
-}) => RustLib.instance.api.crateApiAccountGroupsGetAccountGroup(
-  accountPubkey: accountPubkey,
-  mlsGroupId: mlsGroupId,
-);
+Future<AccountGroup> getAccountGroup({required String accountPubkey, required String mlsGroupId}) =>
+    RustLib.instance.api.crateApiAccountGroupsGetAccountGroup(
+      accountPubkey: accountPubkey,
+      mlsGroupId: mlsGroupId,
+    );
 
-Future<String?> getDmGroupWithPeer({
-  required String accountPubkey,
-  required String peerPubkey,
-}) => RustLib.instance.api.crateApiAccountGroupsGetDmGroupWithPeer(
-  accountPubkey: accountPubkey,
-  peerPubkey: peerPubkey,
-);
+Future<String?> getDmGroupWithPeer({required String accountPubkey, required String peerPubkey}) =>
+    RustLib.instance.api.crateApiAccountGroupsGetDmGroupWithPeer(
+      accountPubkey: accountPubkey,
+      peerPubkey: peerPubkey,
+    );
 
-Future<void> archiveChat({
-  required String accountPubkey,
-  required String mlsGroupId,
-}) => RustLib.instance.api.crateApiAccountGroupsArchiveChat(
-  accountPubkey: accountPubkey,
-  mlsGroupId: mlsGroupId,
-);
+Future<void> archiveChat({required String accountPubkey, required String mlsGroupId}) => RustLib
+    .instance
+    .api
+    .crateApiAccountGroupsArchiveChat(accountPubkey: accountPubkey, mlsGroupId: mlsGroupId);
 
-Future<void> unarchiveChat({
-  required String accountPubkey,
-  required String mlsGroupId,
-}) => RustLib.instance.api.crateApiAccountGroupsUnarchiveChat(
-  accountPubkey: accountPubkey,
-  mlsGroupId: mlsGroupId,
-);
+Future<void> unarchiveChat({required String accountPubkey, required String mlsGroupId}) => RustLib
+    .instance
+    .api
+    .crateApiAccountGroupsUnarchiveChat(accountPubkey: accountPubkey, mlsGroupId: mlsGroupId);
 
 /// Marks a message as read for the given account.
 ///
 /// Updates the `last_read_message_id` for the account-group pair containing
 /// the specified message. This is used to compute unread counts in the chat list.
-Future<AccountGroup> markMessageRead({
-  required String accountPubkey,
-  required String messageId,
-}) => RustLib.instance.api.crateApiAccountGroupsMarkMessageRead(
-  accountPubkey: accountPubkey,
-  messageId: messageId,
-);
+Future<AccountGroup> markMessageRead({required String accountPubkey, required String messageId}) =>
+    RustLib.instance.api.crateApiAccountGroupsMarkMessageRead(
+      accountPubkey: accountPubkey,
+      messageId: messageId,
+    );
 
 /// Represents the relationship between an account and an MLS group.
 ///

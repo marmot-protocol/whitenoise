@@ -84,6 +84,7 @@ impl From<FlutterGroupDataUpdate> for NostrGroupDataUpdate {
                     .filter_map(|a| PublicKey::parse(&a).ok())
                     .collect()
             }),
+            disappearing_message_secs: None,
         }
     }
 }
@@ -271,6 +272,7 @@ pub async fn create_group(
         image_nonce: None,
         relays: default_relay_urls_parsed()?,
         admins: admin_pubkeys,
+        disappearing_message_secs: None,
     };
 
     let member_pubkeys = member_pubkeys
