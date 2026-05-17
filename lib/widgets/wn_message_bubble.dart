@@ -1,13 +1,95 @@
 import 'dart:math' as math;
 
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:go_router/go_router.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/deep_links.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_reaction.dart';
 export 'package:whitenoise/src/rust/api/messages.dart' show EmojiReaction;
+
+final _whiteNoiseDeepLinkPattern = RegExp(
+  r'whitenoise(?:-staging)?://[A-Za-z0-9._~:/?#\[\]@!$&()*+,;=%-]+',
+);
+
+void _openDeepLink(BuildContext context, String value) {
+  final target = DeepLinks.parseString(value);
+  if (target == null) return;
+  GoRouter.of(context).go(target.location);
+}
+
+void _disposeRecognizers(List<TapGestureRecognizer> recognizers) {
+  for (final recognizer in recognizers) {
+    recognizer.dispose();
+  }
+  recognizers.clear();
+}
+
+List<InlineSpan> _buildMessageSpans(
+  BuildContext context,
+  String text,
+  TextStyle baseStyle,
+  List<HighlightSpan>? highlightSpans,
+  Color? highlightColor,
+  List<TapGestureRecognizer> recognizers,
+) {
+  if (highlightSpans != null && highlightSpans.isNotEmpty) {
+    return _buildHighlightedSpans(text, baseStyle, highlightSpans, highlightColor!);
+  }
+  return _buildDeepLinkSpans(context, text, baseStyle, recognizers);
+}
+
+List<InlineSpan> _buildDeepLinkSpans(
+  BuildContext context,
+  String text,
+  TextStyle baseStyle,
+  List<TapGestureRecognizer> recognizers,
+) {
+  final spans = <InlineSpan>[];
+  var cursor = 0;
+
+  for (final match in _whiteNoiseDeepLinkPattern.allMatches(text)) {
+    final rawLink = match.group(0)!;
+    final (:link, :suffix) = _splitTrailingPunctuation(rawLink);
+    if (DeepLinks.parseString(link) == null) continue;
+
+    if (match.start > cursor) {
+      spans.add(TextSpan(text: text.substring(cursor, match.start), style: baseStyle));
+    }
+
+    final recognizer = TapGestureRecognizer()..onTap = () => _openDeepLink(context, link);
+    recognizers.add(recognizer);
+    final linkStyle = baseStyle.copyWith(
+      color: context.colors.accent.sky.contentSecondary,
+      decoration: TextDecoration.underline,
+      decorationColor: context.colors.accent.sky.contentSecondary,
+    );
+    spans.add(TextSpan(text: link, style: linkStyle, recognizer: recognizer));
+    if (suffix.isNotEmpty) {
+      spans.add(TextSpan(text: suffix, style: baseStyle));
+    }
+    cursor = match.end;
+  }
+
+  if (cursor < text.length) {
+    spans.add(TextSpan(text: text.substring(cursor), style: baseStyle));
+  }
+  return spans.isEmpty ? [TextSpan(text: text, style: baseStyle)] : spans;
+}
+
+({String link, String suffix}) _splitTrailingPunctuation(String value) {
+  var end = value.length;
+  while (end > 0 && _isTrailingLinkPunctuation(value[end - 1])) {
+    end--;
+  }
+  return (link: value.substring(0, end), suffix: value.substring(end));
+}
+
+bool _isTrailingLinkPunctuation(String value) => '.,;!?)'.contains(value);
 
 int _codePointToCodeUnit(String text, int codePointIndex) {
   var codeUnits = 0;
@@ -63,7 +145,7 @@ const _tailW = 16.0;
 const _tailH = 10.0;
 const _tailOverhang = 8.0;
 
-class _TextWithTimestamp extends StatelessWidget {
+class _TextWithTimestamp extends StatefulWidget {
   const _TextWithTimestamp({
     required this.content,
     required this.timestamp,
@@ -91,47 +173,66 @@ class _TextWithTimestamp extends StatelessWidget {
   final int? maxLines;
 
   @override
+  State<_TextWithTimestamp> createState() => _TextWithTimestampState();
+}
+
+class _TextWithTimestampState extends State<_TextWithTimestamp> {
+  final _linkRecognizers = <TapGestureRecognizer>[];
+
+  @override
+  void dispose() {
+    _disposeRecognizers(_linkRecognizers);
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    _disposeRecognizers(_linkRecognizers);
     final reservedWidth = _timestampReservedWidth(
-      timestamp,
-      tsStyle,
-      isOutgoing,
-      showDeliveryStatus,
+      widget.timestamp,
+      widget.tsStyle,
+      widget.isOutgoing,
+      widget.showDeliveryStatus,
     );
 
     Widget statusRow = Row(
       key: const Key('message_status_row'),
       mainAxisSize: MainAxisSize.min,
       children: [
-        Text(timestamp, style: tsStyle),
-        if (showDeliveryStatus && isOutgoing) ...[
+        Text(widget.timestamp, style: widget.tsStyle),
+        if (widget.showDeliveryStatus && widget.isOutgoing) ...[
           SizedBox(width: _chatStatusGap.w),
-          WnChatStatus(status: deliveryStatus ?? ChatStatusType.sending),
+          WnChatStatus(status: widget.deliveryStatus ?? ChatStatusType.sending),
         ],
       ],
     );
 
-    if (onStatusTap != null) {
+    if (widget.onStatusTap != null) {
       statusRow = GestureDetector(
         key: const Key('status_tap_area'),
         behavior: HitTestBehavior.opaque,
-        onTap: onStatusTap,
+        onTap: widget.onStatusTap,
         child: statusRow,
       );
     }
 
-    final textChildren = highlightSpans != null && highlightSpans!.isNotEmpty
-        ? _buildHighlightedSpans(content, textStyle, highlightSpans!, highlightColor!)
-        : [TextSpan(text: content, style: textStyle)];
+    final textChildren = _buildMessageSpans(
+      context,
+      widget.content,
+      widget.textStyle,
+      widget.highlightSpans,
+      widget.highlightColor,
+      _linkRecognizers,
+    );
 
-    if (maxLines != null) {
+    if (widget.maxLines != null) {
       return LayoutBuilder(
         builder: (context, constraints) {
           final textMaxWidth = (constraints.maxWidth - reservedWidth).clamp(0.0, double.infinity);
           final painter = TextPainter(
-            text: TextSpan(text: content, style: textStyle),
+            text: TextSpan(text: widget.content, style: widget.textStyle),
             textDirection: Directionality.of(context),
-            maxLines: maxLines,
+            maxLines: widget.maxLines,
             ellipsis: '\u2026',
             textScaler: MediaQuery.textScalerOf(context),
           );
@@ -140,12 +241,12 @@ class _TextWithTimestamp extends StatelessWidget {
             final isTruncated = painter.didExceedMaxLines;
             if (isTruncated) {
               final textLinePainter = TextPainter(
-                text: TextSpan(text: ' ', style: textStyle),
+                text: TextSpan(text: ' ', style: widget.textStyle),
                 textDirection: Directionality.of(context),
                 textScaler: MediaQuery.textScalerOf(context),
               );
               final statusLinePainter = TextPainter(
-                text: TextSpan(text: timestamp, style: tsStyle),
+                text: TextSpan(text: widget.timestamp, style: widget.tsStyle),
                 textDirection: Directionality.of(context),
                 textScaler: MediaQuery.textScalerOf(context),
               );
@@ -156,7 +257,7 @@ class _TextWithTimestamp extends StatelessWidget {
                   final lineHeight = math.max(textLinePainter.preferredLineHeight, 1.0);
                   final statusHeight = math.max(
                     statusLinePainter.preferredLineHeight,
-                    (showDeliveryStatus && isOutgoing) ? _chatStatusW.h : 0.0,
+                    (widget.showDeliveryStatus && widget.isOutgoing) ? _chatStatusW.h : 0.0,
                   );
                   final availableTextHeight = constraints.maxHeight.isFinite
                       ? math.max(
@@ -169,8 +270,11 @@ class _TextWithTimestamp extends StatelessWidget {
                       : double.infinity;
                   final linesByHeight = availableTextHeight.isFinite
                       ? (availableTextHeight / lineHeight).floor()
-                      : maxLines!;
-                  final effectiveMaxLines = math.max(1, math.min(maxLines!, linesByHeight) - 1);
+                      : widget.maxLines!;
+                  final effectiveMaxLines = math.max(
+                    1,
+                    math.min(widget.maxLines!, linesByHeight) - 1,
+                  );
                   return (
                     lineHeight: lineHeight,
                     statusHeight: statusHeight,
@@ -189,8 +293,8 @@ class _TextWithTimestamp extends StatelessWidget {
                     children: [
                       Expanded(
                         child: Text(
-                          content,
-                          style: textStyle,
+                          widget.content,
+                          style: widget.textStyle,
                           maxLines: effectiveMaxLines,
                           overflow: TextOverflow.ellipsis,
                         ),
@@ -206,8 +310,8 @@ class _TextWithTimestamp extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    content,
-                    style: textStyle,
+                    widget.content,
+                    style: widget.textStyle,
                     maxLines: effectiveMaxLines,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -218,7 +322,9 @@ class _TextWithTimestamp extends StatelessWidget {
             }
             final isSingleLine = painter.computeLineMetrics().length <= 1;
             return Stack(
-              alignment: isOutgoing && isSingleLine ? Alignment.topRight : Alignment.topLeft,
+              alignment: widget.isOutgoing && isSingleLine
+                  ? Alignment.topRight
+                  : Alignment.topLeft,
               children: [
                 Text.rich(
                   TextSpan(
@@ -227,7 +333,7 @@ class _TextWithTimestamp extends StatelessWidget {
                       WidgetSpan(child: SizedBox(width: reservedWidth)),
                     ],
                   ),
-                  maxLines: maxLines,
+                  maxLines: widget.maxLines,
                   overflow: TextOverflow.ellipsis,
                 ),
                 Positioned(bottom: 0, right: 0, child: statusRow),
@@ -252,6 +358,54 @@ class _TextWithTimestamp extends StatelessWidget {
         ),
         Positioned(bottom: 0, right: 0, child: statusRow),
       ],
+    );
+  }
+}
+
+class _MessageText extends StatefulWidget {
+  const _MessageText({
+    required this.content,
+    required this.textStyle,
+    this.highlightSpans,
+    this.highlightColor,
+    this.maxLines,
+  });
+
+  final String content;
+  final TextStyle textStyle;
+  final List<HighlightSpan>? highlightSpans;
+  final Color? highlightColor;
+  final int? maxLines;
+
+  @override
+  State<_MessageText> createState() => _MessageTextState();
+}
+
+class _MessageTextState extends State<_MessageText> {
+  final _linkRecognizers = <TapGestureRecognizer>[];
+
+  @override
+  void dispose() {
+    _disposeRecognizers(_linkRecognizers);
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    _disposeRecognizers(_linkRecognizers);
+    return Text.rich(
+      TextSpan(
+        children: _buildMessageSpans(
+          context,
+          widget.content,
+          widget.textStyle,
+          widget.highlightSpans,
+          widget.highlightColor,
+          _linkRecognizers,
+        ),
+      ),
+      maxLines: widget.maxLines,
+      overflow: widget.maxLines != null ? TextOverflow.ellipsis : TextOverflow.clip,
     );
   }
 }
@@ -488,25 +642,13 @@ class _BubbleContent extends StatelessWidget {
               maxLines: contentMaxLines,
             )
           else if (hasText)
-            highlightSpans != null && highlightSpans!.isNotEmpty
-                ? Text.rich(
-                    TextSpan(
-                      children: _buildHighlightedSpans(
-                        content!,
-                        textStyle,
-                        highlightSpans!,
-                        highlightColor!,
-                      ),
-                    ),
-                    maxLines: contentMaxLines,
-                    overflow: contentMaxLines != null ? TextOverflow.ellipsis : TextOverflow.clip,
-                  )
-                : Text(
-                    content!,
-                    style: textStyle,
-                    maxLines: contentMaxLines,
-                    overflow: contentMaxLines != null ? TextOverflow.ellipsis : TextOverflow.clip,
-                  )
+            _MessageText(
+              content: content!,
+              textStyle: textStyle,
+              highlightSpans: highlightSpans,
+              highlightColor: highlightColor,
+              maxLines: contentMaxLines,
+            )
           else if (hasTimestamp) ...[
             SizedBox(height: 2.h),
             _buildTimestampRow(),

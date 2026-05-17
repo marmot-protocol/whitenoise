@@ -1,3 +1,4 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show HighlightSpan;
@@ -16,6 +17,17 @@ Finder _findTail() => find.descendant(
   matching: find.byType(CustomPaint),
 );
 
+bool _spanHasTapRecognizer(InlineSpan span, String text) {
+  if (span is TextSpan) {
+    if (span.text == text && span.recognizer is TapGestureRecognizer) {
+      return true;
+    }
+    return span.children?.any((child) => _spanHasTapRecognizer(child, text)) ??
+        false;
+  }
+  return false;
+}
+
 void main() {
   setUpAll(() => RustLib.initMock(api: MockWnApi()));
 
@@ -31,6 +43,28 @@ void main() {
       );
 
       expect(find.text('Test message'), findsOneWidget);
+    });
+
+    testWidgets('renders White Noise chat deep links as tappable text spans', (tester) async {
+      const link = 'whitenoise://chat/$testGroupId';
+      await mountWidget(
+        const WnMessageBubble(
+          direction: MessageDirection.incoming,
+          isDeleted: false,
+          content: 'Open $link',
+        ),
+        tester,
+      );
+
+      final richText = tester.widget<RichText>(
+        find
+            .byWidgetPredicate(
+              (widget) => widget is RichText && widget.text.toPlainText().contains(link),
+            )
+            .first,
+      );
+
+      expect(_spanHasTapRecognizer(richText.text, link), isTrue);
     });
 
     testWidgets('does not display text when content is null', (tester) async {
