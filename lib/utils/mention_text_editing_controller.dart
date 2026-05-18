@@ -64,6 +64,19 @@ class MentionTextEditingController extends TextEditingController {
   /// the draft body.
   String get messageText => _expandMentions(text, _validMentions(text, _mentions));
 
+  /// True if the cursor sits inside (or at the trailing edge of) any tracked
+  /// mention span. Callers use this to suppress mention-picker UI while the
+  /// user is just navigating through an existing mention rather than typing
+  /// a new one.
+  bool get isCursorInsideMention {
+    final offset = selection.baseOffset;
+    if (offset < 0) return false;
+    for (final m in _validMentions(text, _mentions)) {
+      if (offset > m.start && offset <= m.end) return true;
+    }
+    return false;
+  }
+
   void insertMention({
     required int start,
     required int end,

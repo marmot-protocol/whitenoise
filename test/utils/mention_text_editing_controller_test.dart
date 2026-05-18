@@ -141,6 +141,52 @@ void main() {
       expect(controller.messageText, '@npub1bare ');
     });
 
+    group('isCursorInsideMention', () {
+      MentionTextEditingController makeWithMention() {
+        final c = MentionTextEditingController(text: '')
+          ..selection = const TextSelection.collapsed(offset: 0);
+        c.insertMention(
+          start: 0,
+          end: 0,
+          displayName: 'Alice',
+          uri: '@npub1alice',
+        );
+        // text is now '@Alice ' with cursor after the trailing space.
+        return c;
+      }
+
+      test('returns false when there are no mentions', () {
+        final c = MentionTextEditingController(text: 'hello @world');
+        c.selection = const TextSelection.collapsed(offset: 7);
+        expect(c.isCursorInsideMention, isFalse);
+      });
+
+      test('returns true when cursor is inside the mention range', () {
+        final c = makeWithMention();
+        c.selection = const TextSelection.collapsed(offset: 3);
+        expect(c.isCursorInsideMention, isTrue);
+      });
+
+      test('returns true at the trailing edge of the mention', () {
+        final c = makeWithMention();
+        // '@Alice' ends at offset 6.
+        c.selection = const TextSelection.collapsed(offset: 6);
+        expect(c.isCursorInsideMention, isTrue);
+      });
+
+      test('returns false at the leading edge of the mention', () {
+        final c = makeWithMention();
+        c.selection = const TextSelection.collapsed(offset: 0);
+        expect(c.isCursorInsideMention, isFalse);
+      });
+
+      test('returns false past the trailing space of the mention', () {
+        final c = makeWithMention();
+        c.selection = const TextSelection.collapsed(offset: 7);
+        expect(c.isCursorInsideMention, isFalse);
+      });
+    });
+
     test('out-of-range insertMention is a no-op', () {
       final controller = MentionTextEditingController(text: 'hi');
       controller.insertMention(
@@ -228,6 +274,21 @@ void main() {
         expect(controller.text, '@Satoshi');
         controller.displayNameForNpub = null;
         expect(controller.text, truncated);
+      });
+
+      test('re-assigning the same resolver is a no-op (cursor stays put)', () {
+        final controller = MentionTextEditingController();
+        controller.value = const TextEditingValue(
+          text: 'hello $fullNpub world',
+          selection: TextSelection.collapsed(offset: 3),
+        );
+        String? sameResolver(String _) => 'Satoshi';
+        controller.displayNameForNpub = sameResolver;
+        final cursorAfterFirstAssign = controller.selection.baseOffset;
+        // Assigning the exact same closure again must not re-run the cascade
+        // that would otherwise move the cursor.
+        controller.displayNameForNpub = sameResolver;
+        expect(controller.selection.baseOffset, cursorAfterFirstAssign);
       });
 
       test('editing inside the truncated display invalidates the mention', () {

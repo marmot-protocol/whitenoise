@@ -3172,6 +3172,46 @@ void main() {
         await tester.pumpAndSettle();
         expect(find.byKey(const Key('mention_suggestions_menu')), findsNothing);
       });
+
+      testWidgets('does not re-open the picker when the cursor sits inside an existing mention', (
+        tester,
+      ) async {
+        await pumpChatScreen(tester);
+
+        // Insert a mention via the picker.
+        await tester.enterText(find.byType(TextField), '@');
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('mention_suggestion_$testPubkeyC')));
+        await tester.pumpAndSettle();
+
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        final controller = textField.controller! as MentionTextEditingController;
+        expect(controller.text, '@Trent ');
+
+        // Move cursor into the middle of '@Trent'.
+        controller.selection = const TextSelection.collapsed(offset: 3);
+        await tester.pumpAndSettle();
+
+        // The picker must not pop back open.
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsNothing);
+      });
+
+      testWidgets('keeps the input element stable when the picker appears', (tester) async {
+        await pumpChatScreen(tester);
+
+        final inputFinder = find.byKey(const ValueKey('chat_message_input'));
+        final beforeElement = tester.elementList(inputFinder).last;
+
+        await tester.enterText(find.byType(TextField), 'hello @');
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsOneWidget);
+        final afterElement = tester.elementList(inputFinder).last;
+        expect(identical(beforeElement, afterElement), isTrue);
+
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.controller!.selection.baseOffset, 7);
+      });
     });
   });
 }

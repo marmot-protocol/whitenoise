@@ -252,14 +252,18 @@ class ChatScreen extends HookConsumerWidget {
       return null;
     }, [isRemovedFromGroup]);
 
-    useEffect(() {
-      input.controller.displayNameForNpub = (npub) {
+    final displayNameResolver = useMemoized<String? Function(String)>(
+      () => (npub) {
         final hex = hexFromNpub(npub);
         if (hex == null) return null;
         return presentName(getAuthorMetadata(hex));
-      };
+      },
+      const [],
+    );
+    useEffect(() {
+      input.controller.displayNameForNpub = displayNameResolver;
       return null;
-    }, [input.controller, getAuthorMetadata]);
+    }, [input.controller, displayNameResolver]);
 
     final search = useMessageSearch(
       pubkey: pubkey,
@@ -911,7 +915,9 @@ class _ChatInput extends HookWidget {
     final hasMedia = mediaUpload.items.isNotEmpty;
     final showSend = input.hasContent || hasMedia;
     final textValue = useListenableSelector(input.controller, () => input.controller.value);
-    final mentionQuery = activeMentionQuery(textValue);
+    final mentionQuery = input.controller.isCursorInsideMention
+        ? null
+        : activeMentionQuery(textValue);
     final mentionSuggestions = mentionQuery != null && actionsEnabled
         ? _filterMentionMembers(mentionMembers, mentionQuery.query)
         : const <_MentionMember>[];
@@ -1006,14 +1012,16 @@ class _ChatInput extends HookWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (mentionSuggestions.isNotEmpty) ...[
-            _MentionSuggestionsMenu(
-              members: mentionSuggestions,
-              onSelected: insertMention,
+          if (mentionSuggestions.isNotEmpty)
+            Padding(
+              padding: EdgeInsets.only(bottom: 6.h),
+              child: _MentionSuggestionsMenu(
+                members: mentionSuggestions,
+                onSelected: insertMention,
+              ),
             ),
-            SizedBox(height: 6.h),
-          ],
           WnChatMessageInput(
+            key: const ValueKey('chat_message_input'),
             isFocused: input.hasFocus,
             attachmentArea: buildAttachmentArea(),
             controller: input.controller,
