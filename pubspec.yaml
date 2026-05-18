@@ -77,6 +77,8 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  integration_test:
+    sdk: flutter
   flutter_native_splash: ^2.4.7
   image_picker_platform_interface: ^2.11.1
   video_player_platform_interface: ^6.7.0

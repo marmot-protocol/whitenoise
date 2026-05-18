@@ -203,8 +203,8 @@ void main() {
       expect(emitted, equals([false, true, false, true]));
     });
 
-    test('reachAnyRelayHost is called with relay hosts loaded for offline checks', () async {
-      List<String> capturedHosts = [];
+    test('reachAnyRelayHost is called with relay URLs loaded for offline checks', () async {
+      List<Uri> capturedUrls = [];
       mockApi.relayDefaultUrls = [
         'wss://nos.lol',
         'wss://relay.primal.net',
@@ -212,8 +212,8 @@ void main() {
       ];
 
       final container = createContainer(
-        reachAnyRelayHostFunction: (hosts) async {
-          capturedHosts = hosts;
+        reachAnyRelayHostFunction: (urls) async {
+          capturedUrls = urls;
           return true;
         },
         initialConnectivity: [ConnectivityResult.wifi],
@@ -222,8 +222,35 @@ void main() {
       listenToProvider(container);
       await Future.delayed(const Duration(milliseconds: 10));
 
-      expect(capturedHosts, containsAll(['nos.lol', 'relay.primal.net', 'relay.damus.io']));
-      expect(capturedHosts.length, equals(3));
+      expect(
+        capturedUrls.map((url) => url.host),
+        containsAll(['nos.lol', 'relay.primal.net', 'relay.damus.io']),
+      );
+      expect(capturedUrls.length, equals(3));
+    });
+
+    test('keeps configured relay ports for offline reachability checks', () async {
+      List<Uri> capturedUrls = [];
+      mockApi.relayDefaultUrls = [
+        'ws://localhost:8080',
+        'ws://localhost:7777',
+      ];
+
+      final container = createContainer(
+        reachAnyRelayHostFunction: (urls) async {
+          capturedUrls = urls;
+          return true;
+        },
+        initialConnectivity: [ConnectivityResult.wifi],
+      );
+
+      listenToProvider(container);
+      await Future.delayed(const Duration(milliseconds: 10));
+
+      expect(capturedUrls.map((url) => '${url.host}:${url.port}'), [
+        'localhost:8080',
+        'localhost:7777',
+      ]);
     });
   });
 }

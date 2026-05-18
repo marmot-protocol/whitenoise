@@ -247,6 +247,7 @@ class ChatInviteScreen extends HookConsumerWidget {
                   spacing: 12.h,
                   children: [
                     WnButton(
+                      key: const Key('chat_invite_decline_button'),
                       text: context.l10n.decline,
                       type: WnButtonType.outline,
                       loading: isDeclining.value,
@@ -254,6 +255,7 @@ class ChatInviteScreen extends HookConsumerWidget {
                       onPressed: handleDecline,
                     ),
                     WnButton(
+                      key: const Key('chat_invite_accept_button'),
                       text: context.l10n.accept,
                       loading: isAccepting.value,
                       disabled: isOffline || isProcessing,
@@ -314,7 +316,10 @@ class _InviteMessageList extends HookWidget {
         if (messageId == lastMarkedId.value) return;
         lastMarkedId.value = messageId;
         unawaited(
-          account_groups_api.markMessageRead(accountPubkey: pubkey, messageId: messageId),
+          account_groups_api.markMessageRead(
+            accountPubkey: pubkey,
+            messageId: messageId,
+          ),
         );
       }
 
@@ -379,8 +384,13 @@ class _InviteMessageList extends HookWidget {
               isOwnMessage: isOwnMessage,
               isGroupChat: isGroupChat,
             );
-            final showTail = shouldShowTail(current: message, next: nextMessage);
-            final authorMetadata = chatMessages.getAuthorMetadata(message.pubkey);
+            final showTail = shouldShowTail(
+              current: message,
+              next: nextMessage,
+            );
+            final authorMetadata = chatMessages.getAuthorMetadata(
+              message.pubkey,
+            );
             final senderName = isOwnMessage
                 ? context.l10n.you
                 : presentName(authorMetadata) ?? context.l10n.unknownUser;
@@ -404,10 +414,7 @@ class _InviteMessageList extends HookWidget {
             left: 0,
             right: 0,
             child: Center(
-              child: ChatScrollDownButton(
-                show: true,
-                onTap: scrollToBottom,
-              ),
+              child: ChatScrollDownButton(show: true, onTap: scrollToBottom),
             ),
           ),
       ],

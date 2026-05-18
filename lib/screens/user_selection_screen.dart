@@ -55,6 +55,7 @@ class UserSelectionScreen extends HookConsumerWidget {
             child: SizedBox(
               width: double.infinity,
               child: WnButton(
+                key: const Key('user_selection_continue_button'),
                 onPressed: selectionHook.state.selectedCount > 0
                     ? () => Routes.pushToSetUpGroup(
                         context,
@@ -73,6 +74,7 @@ class UserSelectionScreen extends HookConsumerWidget {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 14.w),
                 child: WnSearchField(
+                  key: const Key('user_selection_search_field'),
                   placeholder: context.l10n.searchByNameOrNpub,
                   controller: searchController,
                   onChanged: (value) => searchQuery.value = value,
@@ -140,13 +142,17 @@ class UserSelectionScreen extends HookConsumerWidget {
                               final formattedPubKey = formatPublicKey(
                                 npubFromHex(user.pubkey) ?? user.pubkey,
                               );
-                              final isSelected = selectionHook.state.isSelected(user);
+                              final isSelected = selectionHook.state.isSelected(
+                                user,
+                              );
                               return WnUserItem(
                                 key: Key(user.pubkey),
                                 displayName: displayName ?? formattedPubKey,
                                 npub: formattedPubKey,
                                 pictureUrl: user.metadata.picture,
-                                avatarColor: AvatarColor.fromPubkey(user.pubkey),
+                                avatarColor: AvatarColor.fromPubkey(
+                                  user.pubkey,
+                                ),
                                 size: WnUserItemSize.medium,
                                 showCheckbox: true,
                                 isSelected: isSelected,
@@ -155,7 +161,9 @@ class UserSelectionScreen extends HookConsumerWidget {
                             },
                           ),
                           WnFadeOverlay.top(color: colors.backgroundSecondary),
-                          WnFadeOverlay.bottom(color: colors.backgroundSecondary),
+                          WnFadeOverlay.bottom(
+                            color: colors.backgroundSecondary,
+                          ),
                         ],
                       ),
               ),

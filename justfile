@@ -52,8 +52,8 @@ precommit-check:
 
 # Generate Rust bridge code
 generate:
-	@echo "🔄 Generating flutter_rust_bridge code..."
-	@flutter_rust_bridge_codegen generate > /dev/null 2>&1 || flutter_rust_bridge_codegen generate
+    @echo "🔄 Generating flutter_rust_bridge code..."
+    @flutter_rust_bridge_codegen generate > /dev/null 2>&1 || flutter_rust_bridge_codegen generate
 
 # Clean and regenerate Rust bridge code
 regenerate: clean-bridge generate
@@ -73,7 +73,6 @@ l10n-check:
         exit 1; \
     fi
     @echo "✅ L10n files are up-to-date"
-
 
 # ==============================================================================
 # DEPENDENCIES
@@ -145,12 +144,12 @@ analyze:
 # Format Dart code
 format-dart:
     @echo "💅 Formatting Dart code..."
-    dart format lib/ test/ widgetbook/lib/
+    dart format lib/ test/ integration_test/ widgetbook/lib/
 
 # Check Dart code formatting (CI-style check)
 check-dart-format:
     @echo "🔍 Checking Dart code formatting..."
-    dart format --set-exit-if-changed lib/ test/ widgetbook/lib/
+    dart format --set-exit-if-changed lib/ test/ integration_test/ widgetbook/lib/
 
 # Test Flutter code
 test-flutter:
@@ -169,18 +168,54 @@ test-flutter-quiet:
         echo "No test directory found."; \
     fi
 
+# Run Flutter integration tests. Requires local Nostr relays on ports 8080 and 7777.
+
+# Pass an iOS/Android device id, or set WHITENOISE_INTEGRATION_DEVICE.
+test-flutter-integration device=env("WHITENOISE_INTEGRATION_DEVICE", "") flavor="staging":
+    @echo "🧪 Testing Flutter integration flows..."
+    @device="{{ device }}"; \
+    if [ -z "$device" ]; then \
+        echo "Pass a device id or set WHITENOISE_INTEGRATION_DEVICE."; \
+        flutter devices; \
+        exit 1; \
+    fi; \
+    if [ -n "{{ flavor }}" ]; then \
+        flutter test -d "$device" --flavor {{ flavor }} integration_test; \
+    else \
+        flutter test -d "$device" integration_test; \
+    fi
+
+# Run Flutter integration tests with minimal output. Requires local Nostr relays on ports 8080 and 7777.
+
+# Pass an iOS/Android device id, or set WHITENOISE_INTEGRATION_DEVICE.
+test-flutter-integration-quiet device=env("WHITENOISE_INTEGRATION_DEVICE", "") flavor="staging":
+    @if [ -d "integration_test" ]; then \
+        device="{{ device }}"; \
+        if [ -z "$device" ]; then \
+            echo "Pass a device id or set WHITENOISE_INTEGRATION_DEVICE."; \
+            flutter devices; \
+            exit 1; \
+        fi; \
+        if [ -n "{{ flavor }}" ]; then \
+            flutter test -d "$device" --flavor {{ flavor }} --no-pub --reporter=failures-only integration_test; \
+        else \
+            flutter test -d "$device" --no-pub --reporter=failures-only integration_test; \
+        fi; \
+    else \
+        echo "No integration_test directory found."; \
+    fi
 
 coverage min="99":
     @echo "🧪 Running Flutter tests with coverage..."
     flutter test --coverage && \
-        ./scripts/check-coverage.sh --min {{min}}
+        ./scripts/check-coverage.sh --min {{ min }}
 
 coverage-report:
-  @echo "🧪 Generating coverage report..."
-  flutter test --coverage && \
-  ./scripts/check-coverage.sh && \
-  genhtml coverage/lcov.info -o coverage/html
-  @echo "📊 Coverage report generated at coverage/html/index.html"
+    @echo "🧪 Generating coverage report..."
+    flutter test --coverage && \
+    ./scripts/check-coverage.sh && \
+    genhtml coverage/lcov.info -o coverage/html
+    @echo "📊 Coverage report generated at coverage/html/index.html"
 
 validate-locales-keys:
     @echo "🔍 Validating l10n keys..."
@@ -252,6 +287,7 @@ fix:
 
 # ==============================================================================
 # BUILDING - ANDROID
+
 # ==============================================================================
 build-android:
     ./scripts/build_android.sh
@@ -261,15 +297,16 @@ build-android-quiet:
 
 # Build per-ABI split APKs (separate .apk per architecture)
 build-split-apk flavor="production":
-    ./scripts/build_android.sh && flutter build apk --flavor {{flavor}} --split-per-abi
+    ./scripts/build_android.sh && flutter build apk --flavor {{ flavor }} --split-per-abi
 
 # Build an Android App Bundle (per-ABI splitting handled by Play Store)
 build-aab flavor="production":
-    ./scripts/build_android.sh && flutter build appbundle --flavor {{flavor}}
+    ./scripts/build_android.sh && flutter build appbundle --flavor {{ flavor }}
 
 when-apk: (build-split-apk "staging")
 
 # Build versioned release artifacts for all platforms (APKs + IPA) into build/releases/
+
 # Produces split APKs with .sha256 sidecar files, an IPA (macOS only), and build_info.txt
 build-release:
     ./scripts/build_release.sh
@@ -288,64 +325,64 @@ build-release-ios:
 
 # Validate release version metadata, optionally against a git tag
 release-doctor tag="":
-    @if [ -n "{{tag}}" ]; then \
-        bundle exec fastlane release_doctor tag:"{{tag}}"; \
+    @if [ -n "{{ tag }}" ]; then \
+        bundle exec fastlane release_doctor tag:"{{ tag }}"; \
     else \
         bundle exec fastlane release_doctor; \
     fi
 
 # Build staging Android release artifacts with Fastlane
 release-build-android-staging tag="":
-    @if [ -n "{{tag}}" ]; then \
-        bundle exec fastlane build_android_staging tag:"{{tag}}"; \
+    @if [ -n "{{ tag }}" ]; then \
+        bundle exec fastlane build_android_staging tag:"{{ tag }}"; \
     else \
         bundle exec fastlane build_android_staging; \
     fi
 
 # Build production Android release artifacts with Fastlane
 release-build-android-production tag="":
-    @if [ -n "{{tag}}" ]; then \
-        bundle exec fastlane build_android_production tag:"{{tag}}"; \
+    @if [ -n "{{ tag }}" ]; then \
+        bundle exec fastlane build_android_production tag:"{{ tag }}"; \
     else \
         bundle exec fastlane build_android_production; \
     fi
 
 # Build staging iOS IPA for App Store Connect/TestFlight with Fastlane
 release-build-ios-staging tag="":
-    @if [ -n "{{tag}}" ]; then \
-        bundle exec fastlane build_ios_staging tag:"{{tag}}"; \
+    @if [ -n "{{ tag }}" ]; then \
+        bundle exec fastlane build_ios_staging tag:"{{ tag }}"; \
     else \
         bundle exec fastlane build_ios_staging; \
     fi
 
 # Build production iOS IPA for App Store Connect/TestFlight with Fastlane
 release-build-ios-production tag="":
-    @if [ -n "{{tag}}" ]; then \
-        bundle exec fastlane build_ios_production tag:"{{tag}}"; \
+    @if [ -n "{{ tag }}" ]; then \
+        bundle exec fastlane build_ios_production tag:"{{ tag }}"; \
     else \
         bundle exec fastlane build_ios_production; \
     fi
 
 # Build staging app release artifacts with Fastlane
 release-build-staging tag="":
-    @if [ -n "{{tag}}" ]; then \
-        bundle exec fastlane build_staging_release tag:"{{tag}}"; \
+    @if [ -n "{{ tag }}" ]; then \
+        bundle exec fastlane build_staging_release tag:"{{ tag }}"; \
     else \
         bundle exec fastlane build_staging_release; \
     fi
 
 # Build production app release artifacts with Fastlane
 release-build-production tag="":
-    @if [ -n "{{tag}}" ]; then \
-        bundle exec fastlane build_production_release tag:"{{tag}}"; \
+    @if [ -n "{{ tag }}" ]; then \
+        bundle exec fastlane build_production_release tag:"{{ tag }}"; \
     else \
         bundle exec fastlane build_production_release; \
     fi
 
 # Build staging and production release artifacts with Fastlane
 release-build-all tag="":
-    @if [ -n "{{tag}}" ]; then \
-        bundle exec fastlane build_all_release_artifacts tag:"{{tag}}"; \
+    @if [ -n "{{ tag }}" ]; then \
+        bundle exec fastlane build_all_release_artifacts tag:"{{ tag }}"; \
     else \
         bundle exec fastlane build_all_release_artifacts; \
     fi
@@ -380,7 +417,7 @@ build-staging-ipa-dev:
 
 # Run the app on a connected device (staging flavor by default)
 run flavor="staging":
-    flutter run --flavor {{flavor}}
+    flutter run --flavor {{ flavor }}
 
 # Run the app on a connected device (production flavor)
 run-production:
@@ -389,9 +426,11 @@ run-production:
 # Build Rust libs and install on connected iOS device
 # Usage: just install-ios <device> [flavor] [extra flags]
 # Example: just install-ios "JG 16e Test"
+
 # Example: just install-ios "JG 16e Test" production --release
 install-ios device flavor="staging" *FLAGS="":
-    ./scripts/build_ios.sh && flutter run --flavor {{flavor}} -d "{{device}}" {{FLAGS}}
+    ./scripts/build_ios.sh && flutter run --flavor {{ flavor }} -d "{{ device }}" {{ FLAGS }}
+
 # ==============================================================================
 # HELPER RECIPES
 # ==============================================================================
@@ -402,8 +441,8 @@ _run-quiet recipe label:
     #!/usr/bin/env bash
     TMPFILE=$(mktemp)
     trap 'rm -f "$TMPFILE"' EXIT
-    printf "%-20s" "{{label}}..."
-    if just {{recipe}} > "$TMPFILE" 2>&1; then
+    printf "%-20s" "{{ label }}..."
+    if just {{ recipe }} > "$TMPFILE" 2>&1; then
         echo "✓"
     else
         echo "✗"
