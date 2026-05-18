@@ -9,6 +9,11 @@ use chrono::{DateTime, TimeZone, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
 use tracing::{info, warn};
+use whitenoise::markdown::{
+    AutolinkKind as WhitenoiseAutolinkKind, Block as WhitenoiseMarkdownBlock,
+    Document as WhitenoiseMarkdownDocument, Inline as WhitenoiseMarkdownInline,
+    NostrEntity as WhitenoiseNostrEntity,
+};
 use whitenoise::whitenoise::message_aggregator::ChatMessageSummary as WhitenoiseChatMessageSummary;
 use whitenoise::whitenoise::message_aggregator::SearchResult as WhitenoiseSearchResult;
 use whitenoise::whitenoise::messages::PaginationOptions;
@@ -16,8 +21,8 @@ pub use whitenoise::{
     ChatMessage as WhitenoiseChatMessage, DeliveryStatus as WhitenoiseDeliveryStatus,
     EmojiReaction as WhitenoiseEmojiReaction, MediaFile as WhitenoiseMediaFile,
     MessageUpdate as WhitenoiseMessageUpdate, MessageWithTokens as WhitenoiseMessageWithTokens,
-    ReactionSummary as WhitenoiseReactionSummary, SerializableToken as WhitenoiseSerializableToken,
-    UpdateTrigger as WhitenoiseUpdateTrigger, UserReaction as WhitenoiseUserReaction, Whitenoise,
+    ReactionSummary as WhitenoiseReactionSummary, UpdateTrigger as WhitenoiseUpdateTrigger,
+    UserReaction as WhitenoiseUserReaction, Whitenoise,
 };
 
 /// Flutter-compatible message with tokens
@@ -202,12 +207,7 @@ impl From<WhitenoiseSearchResult> for SearchResult {
 
 impl From<&WhitenoiseMessageWithTokens> for MessageWithTokens {
     fn from(message_with_tokens: &WhitenoiseMessageWithTokens) -> Self {
-        // Convert tokens to Flutter-compatible representation
-        let tokens = message_with_tokens
-            .tokens
-            .iter()
-            .map(|token| token.into())
-            .collect();
+        let tokens = serializable_tokens_from_document(&message_with_tokens.tokens);
 
         Self {
             id: message_with_tokens.message.id.to_hex(),
@@ -232,41 +232,122 @@ impl From<WhitenoiseMessageWithTokens> for MessageWithTokens {
     }
 }
 
-impl From<&WhitenoiseSerializableToken> for SerializableToken {
-    fn from(token: &WhitenoiseSerializableToken) -> Self {
-        match token {
-            WhitenoiseSerializableToken::Nostr(s) => Self {
-                token_type: "Nostr".to_string(),
-                content: Some(s.clone()),
-            },
-            WhitenoiseSerializableToken::Url(s) => Self {
-                token_type: "Url".to_string(),
-                content: Some(s.clone()),
-            },
-            WhitenoiseSerializableToken::Hashtag(s) => Self {
-                token_type: "Hashtag".to_string(),
-                content: Some(s.clone()),
-            },
-            WhitenoiseSerializableToken::Text(s) => Self {
-                token_type: "Text".to_string(),
-                content: Some(s.clone()),
-            },
-            WhitenoiseSerializableToken::LineBreak => Self {
-                token_type: "LineBreak".to_string(),
-                content: None,
-            },
-            WhitenoiseSerializableToken::Whitespace => Self {
-                token_type: "Whitespace".to_string(),
-                content: None,
-            },
+fn serializable_tokens_from_document(
+    document: &WhitenoiseMarkdownDocument,
+) -> Vec<SerializableToken> {
+    let mut tokens = Vec::new();
+    append_blocks(&document.blocks, &mut tokens);
+    tokens
+}
+
+fn append_blocks(blocks: &[WhitenoiseMarkdownBlock], tokens: &mut Vec<SerializableToken>) {
+    for (index, block) in blocks.iter().enumerate() {
+        if index > 0 {
+            push_line_break(tokens);
+        }
+        append_block(block, tokens);
+    }
+}
+
+fn append_block(block: &WhitenoiseMarkdownBlock, tokens: &mut Vec<SerializableToken>) {
+    match block {
+        WhitenoiseMarkdownBlock::Paragraph { inlines }
+        | WhitenoiseMarkdownBlock::Heading { inlines, .. } => append_inlines(inlines, tokens),
+        WhitenoiseMarkdownBlock::ThematicBreak => push_text(tokens, "---"),
+        WhitenoiseMarkdownBlock::CodeBlock { content, .. }
+        | WhitenoiseMarkdownBlock::MathBlock { content } => push_text(tokens, content),
+        WhitenoiseMarkdownBlock::BlockQuote { blocks } => append_blocks(blocks, tokens),
+        WhitenoiseMarkdownBlock::List { items, .. } => {
+            for (index, item) in items.iter().enumerate() {
+                if index > 0 {
+                    push_line_break(tokens);
+                }
+                append_blocks(&item.blocks, tokens);
+            }
+        }
+        WhitenoiseMarkdownBlock::Table { header, rows, .. } => {
+            for (index, cell) in header.iter().enumerate() {
+                if index > 0 {
+                    push_whitespace(tokens);
+                }
+                append_inlines(&cell.inlines, tokens);
+            }
+            for row in rows {
+                push_line_break(tokens);
+                for (index, cell) in row.iter().enumerate() {
+                    if index > 0 {
+                        push_whitespace(tokens);
+                    }
+                    append_inlines(&cell.inlines, tokens);
+                }
+            }
         }
     }
 }
 
-impl From<WhitenoiseSerializableToken> for SerializableToken {
-    fn from(token: WhitenoiseSerializableToken) -> Self {
-        (&token).into()
+fn append_inlines(inlines: &[WhitenoiseMarkdownInline], tokens: &mut Vec<SerializableToken>) {
+    for inline in inlines {
+        append_inline(inline, tokens);
     }
+}
+
+fn append_inline(inline: &WhitenoiseMarkdownInline, tokens: &mut Vec<SerializableToken>) {
+    match inline {
+        WhitenoiseMarkdownInline::Text(content)
+        | WhitenoiseMarkdownInline::Code(content)
+        | WhitenoiseMarkdownInline::Math(content) => push_text(tokens, content),
+        WhitenoiseMarkdownInline::SoftBreak | WhitenoiseMarkdownInline::HardBreak => {
+            push_line_break(tokens);
+        }
+        WhitenoiseMarkdownInline::Emph(children)
+        | WhitenoiseMarkdownInline::Strong(children)
+        | WhitenoiseMarkdownInline::Strikethrough(children) => append_inlines(children, tokens),
+        WhitenoiseMarkdownInline::Link { children, .. } => append_inlines(children, tokens),
+        WhitenoiseMarkdownInline::Image { alt, .. } => append_inlines(alt, tokens),
+        WhitenoiseMarkdownInline::Autolink { url, kind } => {
+            let content = match kind {
+                WhitenoiseAutolinkKind::Uri => url.clone(),
+                WhitenoiseAutolinkKind::Email => format!("mailto:{url}"),
+            };
+            tokens.push(SerializableToken {
+                token_type: "Url".to_string(),
+                content: Some(content),
+            });
+        }
+        WhitenoiseMarkdownInline::NostrMention(entity)
+        | WhitenoiseMarkdownInline::NostrUri(entity) => push_nostr_entity(tokens, entity),
+    }
+}
+
+fn push_text(tokens: &mut Vec<SerializableToken>, content: &str) {
+    if content.is_empty() {
+        return;
+    }
+    tokens.push(SerializableToken {
+        token_type: "Text".to_string(),
+        content: Some(content.to_string()),
+    });
+}
+
+fn push_line_break(tokens: &mut Vec<SerializableToken>) {
+    tokens.push(SerializableToken {
+        token_type: "LineBreak".to_string(),
+        content: None,
+    });
+}
+
+fn push_whitespace(tokens: &mut Vec<SerializableToken>) {
+    tokens.push(SerializableToken {
+        token_type: "Whitespace".to_string(),
+        content: None,
+    });
+}
+
+fn push_nostr_entity(tokens: &mut Vec<SerializableToken>, entity: &WhitenoiseNostrEntity) {
+    tokens.push(SerializableToken {
+        token_type: "Nostr".to_string(),
+        content: Some(format!("nostr:{}", entity.bech32)),
+    });
 }
 
 impl From<WhitenoiseChatMessageSummary> for ChatMessageSummary {
@@ -352,12 +433,7 @@ impl From<&WhitenoiseChatMessage> for ChatMessage {
             .map(|tag| tag.as_slice().to_vec())
             .collect();
 
-        // Convert content tokens to proper Flutter-compatible structs
-        let content_tokens = chat_message
-            .content_tokens
-            .iter()
-            .map(|token| token.into())
-            .collect();
+        let content_tokens = serializable_tokens_from_document(&chat_message.content_tokens);
 
         // Convert reactions to proper Flutter-compatible struct
         let reactions = (&chat_message.reactions).into();
@@ -711,6 +787,27 @@ pub async fn subscribe_to_group_messages(
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn markdown_document_flattens_to_legacy_serializable_tokens() {
+        let document = whitenoise::markdown::parse(
+            "hello https://example.com @npub1udnxw6gt4mhefdg0emat9jeh8trszd5dcz3xzft022afhkjsz3dq9y8yfj",
+        );
+
+        let tokens = serializable_tokens_from_document(&document);
+
+        assert!(tokens.iter().any(|token| {
+            token.token_type == "Text" && token.content.as_deref() == Some("hello ")
+        }));
+        assert!(tokens.iter().any(|token| {
+            token.token_type == "Url" && token.content.as_deref() == Some("https://example.com")
+        }));
+        assert!(tokens.iter().any(|token| {
+            token.token_type == "Nostr"
+                && token.content.as_deref()
+                    == Some("nostr:npub1udnxw6gt4mhefdg0emat9jeh8trszd5dcz3xzft022afhkjsz3dq9y8yfj")
+        }));
+    }
 
     #[test]
     fn test_update_trigger_conversion_new_message() {

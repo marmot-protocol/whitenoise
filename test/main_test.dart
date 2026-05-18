@@ -20,6 +20,7 @@ import 'package:whitenoise/providers/notification_provider.dart'
 import 'package:whitenoise/providers/theme_provider.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/api/accounts.dart' as accounts_api;
+import 'package:whitenoise/src/rust/api/error.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import 'mocks/mock_secure_storage.dart';
@@ -151,6 +152,7 @@ class _MockInitApi extends MockWnApi {
   String? createdConfigLogsDir;
   rust_api.WhitenoiseConfig? initializedConfig;
   int initCallCount = 0;
+  final initializeWhitenoiseErrors = <Object>[];
 
   @override
   Future<rust_api.WhitenoiseConfig> crateApiCreateWhitenoiseConfig({
@@ -168,6 +170,9 @@ class _MockInitApi extends MockWnApi {
   }) async {
     initCallCount++;
     initializedConfig = config;
+    if (initializeWhitenoiseErrors.isNotEmpty) {
+      throw initializeWhitenoiseErrors.removeAt(0);
+    }
   }
 
   @override
@@ -177,6 +182,7 @@ class _MockInitApi extends MockWnApi {
     createdConfigLogsDir = null;
     initializedConfig = null;
     initCallCount = 0;
+    initializeWhitenoiseErrors.clear();
   }
 }
 
@@ -401,6 +407,31 @@ void main() {
       await initializeAppContainer();
 
       expect(mockApi.initializedConfig, isNotNull);
+    });
+
+    test('retries initializeWhitenoise when the database pool is temporarily exhausted', () async {
+      mockApi.initializeWhitenoiseErrors.add(
+        const ApiError.whitenoise(
+          message:
+              'Database error: SQLx error: pool timed out while waiting for an open connection',
+        ),
+      );
+
+      await initializeAppContainer(initializeRetryDelay: (_) async {});
+
+      expect(mockApi.initCallCount, 2);
+    });
+
+    test('does not retry initializeWhitenoise for non-transient startup errors', () async {
+      mockApi.initializeWhitenoiseErrors.add(
+        const ApiError.whitenoise(message: 'Database error: migration failed'),
+      );
+
+      await expectLater(
+        initializeAppContainer(initializeRetryDelay: (_) async {}),
+        throwsA(isA<ApiError>()),
+      );
+      expect(mockApi.initCallCount, 1);
     });
 
     test('returns a ProviderContainer', () async {

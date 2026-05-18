@@ -11,6 +11,8 @@ use keyring_core::{Credential, CredentialPersistence, CredentialStore, Entry, Er
 #[cfg(any(target_os = "ios", test))]
 const WHITENOISE_KEYRING_SERVICE_ID: &str = "com.whitenoise.app";
 #[cfg(any(target_os = "ios", test))]
+const WHITENOISE_DB_KEY_ID: &str = "whitenoise.db.key.v1";
+#[cfg(any(target_os = "ios", test))]
 const AFTER_FIRST_UNLOCK_SERVICE_SUFFIX: &str = ".after-first-unlock";
 
 pub(crate) fn install_ios_keyring_store_if_needed() -> std::result::Result<(), String> {
@@ -154,6 +156,10 @@ struct AfterFirstUnlockMigratingCredential {
 
 #[cfg(any(target_os = "ios", test))]
 impl AfterFirstUnlockMigratingCredential {
+    fn should_prefer_legacy_secret(&self) -> bool {
+        self.service == WHITENOISE_KEYRING_SERVICE_ID && self.user == WHITENOISE_DB_KEY_ID
+    }
+
     fn delete_legacy_best_effort(&self) {
         match self.legacy.delete_credential() {
             Ok(()) | Err(Error::NoEntry) => {}
@@ -194,6 +200,25 @@ impl CredentialApi for AfterFirstUnlockMigratingCredential {
     }
 
     fn get_secret(&self) -> Result<Vec<u8>> {
+        if self.should_prefer_legacy_secret() {
+            match self.legacy.get_secret() {
+                Ok(secret) => {
+                    self.migrate_legacy_secret(&secret);
+                    return Ok(secret);
+                }
+                Err(Error::NoEntry) => {}
+                Err(err) => {
+                    tracing::warn!(
+                        target: "whitenoise::ios_keyring",
+                        service = %self.service,
+                        user = %self.user,
+                        error = %err,
+                        "Failed to read legacy database keychain entry during migration"
+                    );
+                }
+            }
+        }
+
         match self.primary.get_secret() {
             Ok(secret) => Ok(secret),
             Err(Error::NoEntry) => {
@@ -334,6 +359,24 @@ mod tests {
 
         assert_eq!(credential.get_secret().unwrap(), b"primary");
         assert!(!legacy.was_deleted());
+    }
+
+    #[test]
+    fn database_legacy_secret_repairs_stale_primary_secret() {
+        let primary = Arc::new(RecordingCredential::with_secret(b"stale-primary".to_vec()));
+        let legacy = Arc::new(RecordingCredential::with_secret(
+            b"legacy-database-key".to_vec(),
+        ));
+        let credential = AfterFirstUnlockMigratingCredential {
+            service: WHITENOISE_KEYRING_SERVICE_ID.to_string(),
+            user: WHITENOISE_DB_KEY_ID.to_string(),
+            primary: Entry::new_with_credential(primary.clone()),
+            legacy: Entry::new_with_credential(legacy.clone()),
+        };
+
+        assert_eq!(credential.get_secret().unwrap(), b"legacy-database-key");
+        assert_eq!(primary.secret(), Some(b"legacy-database-key".to_vec()));
+        assert!(legacy.was_deleted());
     }
 
     #[derive(Debug, Default)]

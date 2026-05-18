@@ -37,6 +37,8 @@ import 'package:whitenoise/theme.dart';
 final _logger = Logger('WnApp');
 const _appGroupChannel = MethodChannel('org.parres.whitenoise/app_group');
 const _getAppGroupContainerPathMethod = 'getAppGroupContainerPath';
+const _initializeWhitenoiseMaxAttempts = 3;
+const _initializeWhitenoiseRetryDelay = Duration(milliseconds: 500);
 
 // TODO: Remove migration gate and related code in the next release.
 const kDataVersion = 1;
@@ -77,7 +79,9 @@ Future<void> main() async {
   }
 }
 
-Future<ProviderContainer> initializeAppContainer() async {
+Future<ProviderContainer> initializeAppContainer({
+  Future<void> Function(Duration delay) initializeRetryDelay = _defaultInitializeRetryDelay,
+}) async {
   final baseDir = await resolveWhitenoiseBaseDirectory();
   final dataDir = '${baseDir.path}/data';
   final logsDir = '${baseDir.path}/logs';
@@ -90,11 +94,44 @@ Future<ProviderContainer> initializeAppContainer() async {
     dataDir: dataDir,
     logsDir: logsDir,
   );
-  await rust_api.initializeWhitenoise(config: config);
+  await initializeWhitenoiseWithRetry(
+    config,
+    retryDelay: initializeRetryDelay,
+  );
 
   final container = ProviderContainer();
   await container.read(authProvider.future);
   return container;
+}
+
+Future<void> _defaultInitializeRetryDelay(Duration delay) => Future<void>.delayed(delay);
+
+@visibleForTesting
+Future<void> initializeWhitenoiseWithRetry(
+  rust_api.WhitenoiseConfig config, {
+  Future<void> Function(Duration delay) retryDelay = _defaultInitializeRetryDelay,
+}) async {
+  for (var attempt = 1; attempt <= _initializeWhitenoiseMaxAttempts; attempt++) {
+    try {
+      await rust_api.initializeWhitenoise(config: config);
+      return;
+    } catch (error, stackTrace) {
+      if (!_isDatabasePoolTimeout(error) || attempt == _initializeWhitenoiseMaxAttempts) {
+        rethrow;
+      }
+      _logger.warning(
+        'Whitenoise database pool was temporarily exhausted during startup; retrying',
+        error,
+        stackTrace,
+      );
+      await retryDelay(_initializeWhitenoiseRetryDelay);
+    }
+  }
+}
+
+bool _isDatabasePoolTimeout(Object error) {
+  final message = error.toString().toLowerCase();
+  return message.contains('pool timed out while waiting for an open connection');
 }
 
 @visibleForTesting
