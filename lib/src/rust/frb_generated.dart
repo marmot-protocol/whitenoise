@@ -1518,7 +1518,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiCreateWhitenoiseConfigConstMeta => const TaskConstMeta(
     debugName: 'create_whitenoise_config',
-    argNames: ['dataDir', 'logsDir'],
+    argNames: ['dataDir', 'logsDir', 'defaultRelayUrls'],
   );
 
   @override
@@ -7512,7 +7512,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   WhitenoiseConfig dco_decode_whitenoise_config(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 2) throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    if (arr.length != 3) throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
     return WhitenoiseConfig(
       dataDir: dco_decode_String(arr[0]),
       logsDir: dco_decode_String(arr[1]),
