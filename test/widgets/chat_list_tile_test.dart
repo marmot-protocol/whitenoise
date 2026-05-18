@@ -408,6 +408,37 @@ void main() {
             expect(item.subtitle, 'Look at this');
             expect(item.subtitleIcon, isNull);
           });
+
+          testWidgets('shows "You: " prefix for own message in pending group', (tester) async {
+            await pumpTile(
+              tester,
+              _chatSummary(
+                pendingConfirmation: true,
+                lastMessageContent: 'My message',
+                lastMessageAuthor: testPubkeyA,
+              ),
+            );
+            final item = tester.widget<WnChatListItem>(find.byType(WnChatListItem));
+            expect(item.prefixSubtitle, 'You: ');
+            expect(item.subtitle, 'My message');
+          });
+
+          testWidgets("shows author name prefix for other's message in pending group", (
+            tester,
+          ) async {
+            await pumpTile(
+              tester,
+              _chatSummary(
+                pendingConfirmation: true,
+                lastMessageContent: 'Hello group',
+                lastMessageAuthor: testPubkeyB,
+                lastMessageAuthorDisplayName: 'Alice',
+              ),
+            );
+            final item = tester.widget<WnChatListItem>(find.byType(WnChatListItem));
+            expect(item.prefixSubtitle, 'Alice: ');
+            expect(item.subtitle, 'Hello group');
+          });
         });
       });
 
