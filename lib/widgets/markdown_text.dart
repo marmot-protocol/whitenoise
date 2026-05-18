@@ -400,7 +400,11 @@ class _MarkdownRenderer {
       case MarkdownInline_Strikethrough(:final children):
         return buildInlineSpan(
           children,
-          style.copyWith(decoration: TextDecoration.lineThrough),
+          style.copyWith(
+            decoration: TextDecoration.lineThrough,
+            decorationColor: style.color,
+            decorationThickness: 2.0,
+          ),
         );
       case MarkdownInline_Link(:final dest, :final children):
         return TextSpan(

@@ -777,6 +777,42 @@ void main() {
 
       ChatMessage withDoc(MarkdownDocument doc) => _message(content: 'x').copyWithDocument(doc);
 
+      testWidgets('strikethrough in the AST renders with lineThrough decoration', (tester) async {
+        // Mirror the production shape: raw content is '~~hello~~' but the
+        // contentTokens AST contains Strikethrough[Text('hello')]. The bubble
+        // must render the document (visible 'hello' with lineThrough), not
+        // the raw markdown source.
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(content: '~~hello~~').copyWithDocument(
+              const MarkdownDocument(
+                blocks: [
+                  MarkdownBlock.paragraph(
+                    inlines: [
+                      MarkdownInline.strikethrough(
+                        children: [MarkdownInline.text(content: 'hello')],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
+        final struck = _findTextSpan(span, (s) => s.text == 'hello');
+        expect(
+          struck,
+          isNotNull,
+          reason: 'expected document text to be rendered, not raw markdown',
+        );
+        expect(struck!.style?.decoration, TextDecoration.lineThrough);
+        // The raw markdown source must NOT appear as visible text.
+        expect(_findTextSpan(span, (s) => s.text == '~~hello~~'), isNull);
+      });
+
       testWidgets('safe link tap calls launchUrl externally', (tester) async {
         await mountWidget(
           ChatMessageBubble(

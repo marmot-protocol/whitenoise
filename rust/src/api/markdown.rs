@@ -603,6 +603,32 @@ mod tests {
     }
 
     #[test]
+    fn standalone_strikethrough() {
+        let doc = whitenoise::markdown::parse("~~hello~~");
+        let bridged: MarkdownDocument = (&doc).into();
+        let MarkdownBlock::Paragraph { inlines } = &bridged.blocks[0] else {
+            panic!("expected paragraph, got {:?}", bridged.blocks);
+        };
+        let strikes: Vec<&Vec<MarkdownInline>> = inlines
+            .iter()
+            .filter_map(|i| match i {
+                MarkdownInline::Strikethrough { children } => Some(children),
+                _ => None,
+            })
+            .collect();
+        assert_eq!(
+            strikes.len(),
+            1,
+            "expected exactly one strikethrough, inlines: {inlines:?}"
+        );
+        let text_inside = match &strikes[0][0] {
+            MarkdownInline::Text { content } => content.as_str(),
+            other => panic!("expected text inside strikethrough, got {other:?}"),
+        };
+        assert_eq!(text_inside, "hello");
+    }
+
+    #[test]
     fn soft_and_hard_breaks() {
         let doc = whitenoise::markdown::parse("a\nb  \nc");
         let bridged: MarkdownDocument = (&doc).into();

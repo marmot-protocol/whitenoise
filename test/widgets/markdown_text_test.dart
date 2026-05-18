@@ -226,7 +226,9 @@ void main() {
       expect(inner.style?.fontStyle, FontStyle.italic);
     });
 
-    testWidgets('strikethrough applies lineThrough', (tester) async {
+    testWidgets('strikethrough applies lineThrough with visible decoration color/thickness', (
+      tester,
+    ) async {
       await _pump(
         tester,
         MarkdownText(
@@ -241,6 +243,12 @@ void main() {
       final span = tester.widget<Text>(find.byType(Text).first).textSpan! as TextSpan;
       final inner = (span.children!.first as TextSpan).children!.first as TextSpan;
       expect(inner.style?.decoration, TextDecoration.lineThrough);
+      // decorationColor must be explicitly set so the line is visible — relying
+      // on the default (which sometimes renders transparent depending on
+      // platform / parent style merging) caused the line to disappear on real
+      // devices even though the decoration was set.
+      expect(inner.style?.decorationColor, isNotNull);
+      expect(inner.style?.decorationThickness, isNotNull);
     });
 
     testWidgets('code inline uses monospace', (tester) async {
