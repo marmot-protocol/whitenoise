@@ -148,7 +148,7 @@ class BlockedUserScreen extends HookConsumerWidget {
                                   type: WnButtonType.overlay,
                                   size: WnButtonSize.medium,
                                   loading: blockState.isActionLoading,
-                                  disabled: blockState.isLoading,
+                                  disabled: blockState.isLoading || blockState.isActionLoading,
                                   trailingIcon: WnIcons.userCheck,
                                   onPressed: handleUnblock,
                                 ),
