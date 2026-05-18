@@ -2,6 +2,7 @@
 
 import 'dart:io';
 
+import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/utils/reset_marker.dart';
 
@@ -99,6 +100,41 @@ void main() {
     expect(await dataDir.exists(), false);
     expect(await logsDir.exists(), false);
     expect(clearedSecureStorage, true);
+    expect(clearedForegroundTaskData, true);
+    expect(await (await resetPendingMarkerFile()).exists(), false);
+  });
+
+  test('recoverPendingReset uses FlutterSecureStorage.deleteAll by default', () async {
+    final secureStorageCalls = <String>[];
+    const secureStorageChannel = MethodChannel(
+      'plugins.it_nomads.com/flutter_secure_storage',
+    );
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      secureStorageChannel,
+      (call) async {
+        secureStorageCalls.add(call.method);
+        return null;
+      },
+    );
+    addTearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        secureStorageChannel,
+        null,
+      );
+    });
+
+    var clearedForegroundTaskData = false;
+    final dataDir = await Directory.systemTemp.createTemp('wn_data_');
+    final logsDir = await Directory.systemTemp.createTemp('wn_logs_');
+    await markResetPending();
+
+    await recoverPendingReset(
+      dataDir: dataDir.path,
+      logsDir: logsDir.path,
+      clearForegroundTaskData: () async => clearedForegroundTaskData = true,
+    );
+
+    expect(secureStorageCalls, contains('deleteAll'));
     expect(clearedForegroundTaskData, true);
     expect(await (await resetPendingMarkerFile()).exists(), false);
   });
