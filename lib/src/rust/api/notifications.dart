@@ -32,10 +32,8 @@ Future<PushRegistration> upsertPushRegistration({
   relayHint: relayHint,
 );
 
-Future<void> clearPushRegistration({required String pubkey}) => RustLib
-    .instance
-    .api
-    .crateApiNotificationsClearPushRegistration(pubkey: pubkey);
+Future<void> clearPushRegistration({required String pubkey}) =>
+    RustLib.instance.api.crateApiNotificationsClearPushRegistration(pubkey: pubkey);
 
 enum NotificationTrigger {
   newMessage,
@@ -101,8 +99,7 @@ class NotificationUser {
   });
 
   @override
-  int get hashCode =>
-      pubkey.hashCode ^ displayName.hashCode ^ pictureUrl.hashCode;
+  int get hashCode => pubkey.hashCode ^ displayName.hashCode ^ pictureUrl.hashCode;
 
   @override
   bool operator ==(Object other) =>

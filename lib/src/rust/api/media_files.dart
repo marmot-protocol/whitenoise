@@ -45,10 +45,7 @@ class FileMetadata {
 
   @override
   int get hashCode =>
-      originalFilename.hashCode ^
-      dimensions.hashCode ^
-      blurhash.hashCode ^
-      thumbhash.hashCode;
+      originalFilename.hashCode ^ dimensions.hashCode ^ blurhash.hashCode ^ thumbhash.hashCode;
 
   @override
   bool operator ==(Object other) =>

@@ -13,8 +13,7 @@ import 'error.dart';
 Future<List<RelayUrl>> defaultRelayUrlsParsed() =>
     RustLib.instance.api.crateApiRelayDefaultsDefaultRelayUrlsParsed();
 
-List<String> defaultRelayUrls() =>
-    RustLib.instance.api.crateApiRelayDefaultsDefaultRelayUrls();
+List<String> defaultRelayUrls() => RustLib.instance.api.crateApiRelayDefaultsDefaultRelayUrls();
 
 // Rust type: RustOpaqueMoi<flutter_rust_bridge::for_generated::RustAutoOpaqueInner<RelayUrl>>
 abstract class RelayUrl implements RustOpaqueInterface {}
