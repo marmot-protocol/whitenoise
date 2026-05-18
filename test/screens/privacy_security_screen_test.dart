@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/screens/blocked_users_screen.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/home_screen.dart';
 import 'package:whitenoise/screens/privacy_security_screen.dart';
@@ -140,6 +141,24 @@ void main() {
       expect(mockApi.deleteAllDataCalled, true);
       expect(find.text('Failed to delete all data. Please try again.'), findsOneWidget);
       expect(find.byType(PrivacySecurityScreen), findsOneWidget);
+    });
+
+    testWidgets('displays blocked users section', (tester) async {
+      await pumpPrivacySecurityScreen(tester);
+
+      expect(find.text('Blocked users'), findsOneWidget);
+      expect(find.byKey(const Key('view_blocked_users_button')), findsOneWidget);
+      expect(find.text('View blocked users'), findsOneWidget);
+      expect(find.text("View and manage people you've blocked."), findsOneWidget);
+    });
+
+    testWidgets('tapping view blocked users navigates to BlockedUsersScreen', (tester) async {
+      await pumpPrivacySecurityScreen(tester);
+
+      await tester.tap(find.byKey(const Key('view_blocked_users_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BlockedUsersScreen), findsOneWidget);
     });
   });
 }

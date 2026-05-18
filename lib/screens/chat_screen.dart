@@ -160,9 +160,9 @@ class ChatScreen extends HookConsumerWidget {
     final inputAreaHeight = useState(0.0);
 
     useEffect(() {
-      if (isRemovedFromGroup) inputAreaHeight.value = 0;
+      if (isRemovedFromGroup || isBlocked) inputAreaHeight.value = 0;
       return null;
-    }, [isRemovedFromGroup]);
+    }, [isRemovedFromGroup, isBlocked]);
 
     final search = useMessageSearch(
       pubkey: pubkey,
@@ -702,7 +702,7 @@ class ChatScreen extends HookConsumerWidget {
                   ],
                 ),
               ),
-              if (!isRemovedFromGroup && !isSearchActive.value)
+              if (!isRemovedFromGroup && !isBlocked && !isSearchActive.value)
                 Positioned(
                   bottom: 0,
                   left: 0,

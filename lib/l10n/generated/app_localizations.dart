@@ -1905,6 +1905,48 @@ abstract class AppLocalizations {
   /// **'You won\'t receive new messages until you unblock them.'**
   String get userIsBlockedDescription;
 
+  /// Section label and screen title for the list of users the account has blocked
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked users'**
+  String get blockedUsers;
+
+  /// Button label that opens the blocked users management screen
+  ///
+  /// In en, this message translates to:
+  /// **'View blocked users'**
+  String get viewBlockedUsers;
+
+  /// Helper text under the View blocked users button on the privacy & security screen
+  ///
+  /// In en, this message translates to:
+  /// **'View and manage people you\'ve blocked.'**
+  String get blockedUsersDescription;
+
+  /// Empty state message shown when the blocked users list is empty
+  ///
+  /// In en, this message translates to:
+  /// **'You haven\'t blocked anyone yet.'**
+  String get blockedUsersEmpty;
+
+  /// Error message shown when the blocked users list cannot be loaded
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to load blocked users. Please try again.'**
+  String get failedToFetchBlockedUsers;
+
+  /// Title for the blocked user profile detail screen
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get blockedUserProfileTitle;
+
+  /// Description shown in the blocked user profile screen banner
+  ///
+  /// In en, this message translates to:
+  /// **'You\'ve blocked this user. You won\'t be able to send messages until you unblock them.'**
+  String get blockedUserDetailDescription;
+
   /// Action label to add this user to another group
   ///
   /// In en, this message translates to:

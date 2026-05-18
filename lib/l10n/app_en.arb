@@ -1308,6 +1308,34 @@
   "@userIsBlockedDescription": {
     "description": "Notice description shown in chat header when the peer is blocked"
   },
+  "blockedUsers": "Blocked users",
+  "@blockedUsers": {
+    "description": "Section label and screen title for the list of users the account has blocked"
+  },
+  "viewBlockedUsers": "View blocked users",
+  "@viewBlockedUsers": {
+    "description": "Button label that opens the blocked users management screen"
+  },
+  "blockedUsersDescription": "View and manage people you've blocked.",
+  "@blockedUsersDescription": {
+    "description": "Helper text under the View blocked users button on the privacy & security screen"
+  },
+  "blockedUsersEmpty": "You haven't blocked anyone yet.",
+  "@blockedUsersEmpty": {
+    "description": "Empty state message shown when the blocked users list is empty"
+  },
+  "failedToFetchBlockedUsers": "Failed to load blocked users. Please try again.",
+  "@failedToFetchBlockedUsers": {
+    "description": "Error message shown when the blocked users list cannot be loaded"
+  },
+  "blockedUserProfileTitle": "Profile",
+  "@blockedUserProfileTitle": {
+    "description": "Title for the blocked user profile detail screen"
+  },
+  "blockedUserDetailDescription": "You've blocked this user. You won't be able to send messages until you unblock them.",
+  "@blockedUserDetailDescription": {
+    "description": "Description shown in the blocked user profile screen banner"
+  },
   "addToAnotherGroup": "Add to another group",
   "@addToAnotherGroup": {
     "description": "Action label to add this user to another group"

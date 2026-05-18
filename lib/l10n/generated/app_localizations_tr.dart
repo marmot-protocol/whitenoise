@@ -1033,6 +1033,29 @@ class AppLocalizationsTr extends AppLocalizations {
   String get userIsBlockedDescription => 'Engeli kaldırana kadar yeni mesaj almayacaksınız.';
 
   @override
+  String get blockedUsers => 'Engellenen kullanıcılar';
+
+  @override
+  String get viewBlockedUsers => 'Engellenen kullanıcıları görüntüle';
+
+  @override
+  String get blockedUsersDescription => 'Engellediğiniz kişileri görüntüleyin ve yönetin.';
+
+  @override
+  String get blockedUsersEmpty => 'Henüz kimseyi engellemediniz.';
+
+  @override
+  String get failedToFetchBlockedUsers =>
+      'Engellenen kullanıcılar yüklenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get blockedUserProfileTitle => 'Profil';
+
+  @override
+  String get blockedUserDetailDescription =>
+      'Bu kullanıcıyı engellediniz. Engeli kaldırana kadar mesaj gönderemezsiniz.';
+
+  @override
   String get addToAnotherGroup => 'Başka bir gruba ekle';
 
   @override

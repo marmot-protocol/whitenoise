@@ -1061,6 +1061,30 @@ class AppLocalizationsRu extends AppLocalizations {
       'Вы не будете получать новые сообщения, пока не разблокируете пользователя.';
 
   @override
+  String get blockedUsers => 'Заблокированные пользователи';
+
+  @override
+  String get viewBlockedUsers => 'Просмотреть заблокированных пользователей';
+
+  @override
+  String get blockedUsersDescription =>
+      'Просматривайте и управляйте людьми, которых вы заблокировали.';
+
+  @override
+  String get blockedUsersEmpty => 'Вы пока никого не заблокировали.';
+
+  @override
+  String get failedToFetchBlockedUsers =>
+      'Не удалось загрузить заблокированных пользователей. Попробуйте снова.';
+
+  @override
+  String get blockedUserProfileTitle => 'Профиль';
+
+  @override
+  String get blockedUserDetailDescription =>
+      'Вы заблокировали этого пользователя. Вы не сможете отправлять сообщения, пока не разблокируете его.';
+
+  @override
   String get addToAnotherGroup => 'Добавить в другую группу';
 
   @override

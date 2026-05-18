@@ -1046,6 +1046,29 @@ class AppLocalizationsEs extends AppLocalizations {
   String get userIsBlockedDescription => 'No recibirás nuevos mensajes hasta que lo desbloquees.';
 
   @override
+  String get blockedUsers => 'Usuarios bloqueados';
+
+  @override
+  String get viewBlockedUsers => 'Ver usuarios bloqueados';
+
+  @override
+  String get blockedUsersDescription => 'Ver y gestionar las personas que has bloqueado.';
+
+  @override
+  String get blockedUsersEmpty => 'Aún no has bloqueado a nadie.';
+
+  @override
+  String get failedToFetchBlockedUsers =>
+      'No se pudieron cargar los usuarios bloqueados. Inténtalo de nuevo.';
+
+  @override
+  String get blockedUserProfileTitle => 'Perfil';
+
+  @override
+  String get blockedUserDetailDescription =>
+      'Has bloqueado a este usuario. No podrás enviar mensajes hasta que lo desbloquees.';
+
+  @override
   String get addToAnotherGroup => 'Añadir a otro grupo';
 
   @override

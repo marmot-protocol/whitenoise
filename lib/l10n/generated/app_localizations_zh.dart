@@ -1003,6 +1003,27 @@ class AppLocalizationsZh extends AppLocalizations {
   String get userIsBlockedDescription => '在您取消屏蔽之前，您将不会收到新消息。';
 
   @override
+  String get blockedUsers => '已屏蔽的用户';
+
+  @override
+  String get viewBlockedUsers => '查看已屏蔽的用户';
+
+  @override
+  String get blockedUsersDescription => '查看并管理您屏蔽的用户。';
+
+  @override
+  String get blockedUsersEmpty => '您还没有屏蔽任何人。';
+
+  @override
+  String get failedToFetchBlockedUsers => '无法加载已屏蔽的用户。请重试。';
+
+  @override
+  String get blockedUserProfileTitle => '个人资料';
+
+  @override
+  String get blockedUserDetailDescription => '您已屏蔽此用户。在取消屏蔽之前，您无法发送消息。';
+
+  @override
   String get addToAnotherGroup => '添加到另一个群组';
 
   @override
@@ -2428,6 +2449,27 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get userIsBlockedDescription => '解除封鎖前，您不會收到對方的新訊息。';
+
+  @override
+  String get blockedUsers => '已封鎖的使用者';
+
+  @override
+  String get viewBlockedUsers => '查看已封鎖的使用者';
+
+  @override
+  String get blockedUsersDescription => '查看並管理您封鎖的對象。';
+
+  @override
+  String get blockedUsersEmpty => '您尚未封鎖任何人。';
+
+  @override
+  String get failedToFetchBlockedUsers => '無法載入已封鎖的使用者。請再試一次。';
+
+  @override
+  String get blockedUserProfileTitle => '個人資料';
+
+  @override
+  String get blockedUserDetailDescription => '您已封鎖此使用者。在解除封鎖之前，您將無法傳送訊息。';
 
   @override
   String get addToAnotherGroup => '加入另一個群組';

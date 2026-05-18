@@ -99,6 +99,32 @@ class PrivacySecurityScreen extends HookConsumerWidget {
                     color: colors.backgroundContentSecondary,
                   ),
                 ),
+                SizedBox(height: 24.h),
+                Text(
+                  context.l10n.blockedUsers,
+                  style: typography.semiBold16.copyWith(
+                    color: colors.backgroundContentSecondary,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                SizedBox(
+                  width: double.infinity,
+                  child: WnButton(
+                    key: const Key('view_blocked_users_button'),
+                    text: context.l10n.viewBlockedUsers,
+                    onPressed: () => Routes.pushToBlockedUsers(context),
+                    type: WnButtonType.outline,
+                    size: WnButtonSize.medium,
+                    trailingIcon: WnIcons.user,
+                  ),
+                ),
+                SizedBox(height: 8.h),
+                Text(
+                  context.l10n.blockedUsersDescription,
+                  style: typography.medium12.copyWith(
+                    color: colors.backgroundContentSecondary,
+                  ),
+                ),
               ],
             ),
           ),

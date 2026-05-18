@@ -2832,6 +2832,25 @@ void main() {
         expect(find.text('You blocked this user'), findsOneWidget);
       });
 
+      testWidgets('hides chat message input when peer is blocked', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.byType(WnChatMessageInput), findsNothing);
+      });
+
+      testWidgets('chat input reappears after unblocking the peer', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.byType(WnChatMessageInput), findsNothing);
+
+        await tester.tap(
+          find.byKey(const Key('blocked_notice_unblock_button')),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(WnChatMessageInput), findsOneWidget);
+      });
+
       testWidgets('blocked notice is expanded by default', (tester) async {
         await pumpChatScreen(tester);
 

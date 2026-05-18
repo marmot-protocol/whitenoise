@@ -14,6 +14,8 @@ import 'package:whitenoise/screens/add_relay_screen.dart' show AddRelayScreen;
 import 'package:whitenoise/screens/add_to_group_screen.dart' show AddToGroupScreen;
 import 'package:whitenoise/screens/app_logs_screen.dart' show AppLogsScreen;
 import 'package:whitenoise/screens/appearance_screen.dart' show AppearanceScreen;
+import 'package:whitenoise/screens/blocked_user_screen.dart' show BlockedUserScreen;
+import 'package:whitenoise/screens/blocked_users_screen.dart' show BlockedUsersScreen;
 import 'package:whitenoise/screens/chat_info_screen.dart' show ChatInfoScreen;
 import 'package:whitenoise/screens/chat_invite_screen.dart' show ChatInviteScreen;
 import 'package:whitenoise/screens/chat_list_screen.dart' show ChatListScreen;
@@ -79,6 +81,8 @@ abstract final class Routes {
   static const _appearance = '/appearance';
   static const _notificationSettings = '/notification-settings';
   static const _privacySecurity = '/privacy-security';
+  static const _blockedUsers = '/blocked-users';
+  static const _blockedUser = '/blocked-users/:userPubkey';
   static const _wip = '/wip';
   static const _developerSettings = '/developer-settings';
   static const _keyPackageManagement = '/key-package-management';
@@ -207,6 +211,23 @@ abstract final class Routes {
           pageBuilder: (context, state) => _navigationTransition(
             state: state,
             child: const PrivacySecurityScreen(),
+          ),
+        ),
+        GoRoute(
+          name: 'blockedUsers',
+          path: _blockedUsers,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: const BlockedUsersScreen(),
+          ),
+        ),
+        GoRoute(
+          name: 'blockedUser',
+          path: _blockedUser,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: BlockedUserScreen(userPubkey: state.pathParameters['userPubkey']!),
+            opaque: false,
           ),
         ),
 
@@ -564,6 +585,16 @@ abstract final class Routes {
 
   static void pushToPrivacySecurity(BuildContext context) {
     GoRouter.of(context).push(_privacySecurity);
+  }
+
+  static Future<void> pushToBlockedUsers(BuildContext context) {
+    return GoRouter.of(context).pushNamed('blockedUsers');
+  }
+
+  static Future<void> pushToBlockedUser(BuildContext context, String userPubkey) {
+    return GoRouter.of(
+      context,
+    ).pushNamed('blockedUser', pathParameters: {'userPubkey': userPubkey});
   }
 
   static void pushToDeveloperSettings(BuildContext context) {
