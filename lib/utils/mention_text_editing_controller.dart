@@ -199,6 +199,7 @@ class MentionTextEditingController extends TextEditingController {
 
     for (final match in matches) {
       if (match.start < cursor) continue;
+      if (!_hasMentionBoundaries(text, match.start, match.end)) continue;
       final coveredByExisting = existing.any(
         (m) => _rangesOverlap(m.start, m.end, match.start, match.end),
       );
@@ -259,18 +260,16 @@ class MentionTextEditingController extends TextEditingController {
   void _replaceKnownUris() {
     if (_targets.isEmpty || text.isEmpty) return;
 
+    final existing = _validMentions(text, _mentions);
     final matches = <_MentionUriMatch>[];
     for (final target in _targets) {
       var start = text.indexOf(target.uri);
       while (start >= 0) {
-        matches.add(
-          _MentionUriMatch(
-            start: start,
-            end: start + target.uri.length,
-            target: target,
-          ),
-        );
-        start = text.indexOf(target.uri, start + target.uri.length);
+        final end = start + target.uri.length;
+        if (_hasMentionBoundaries(text, start, end)) {
+          matches.add(_MentionUriMatch(start: start, end: end, target: target));
+        }
+        start = text.indexOf(target.uri, end);
       }
     }
 
@@ -315,15 +314,29 @@ class MentionTextEditingController extends TextEditingController {
     }
     buffer.write(text.substring(cursor));
 
+    final newText = buffer.toString();
+    final shiftedExisting = <_TrackedMention>[];
+    for (final mention in existing) {
+      final shifted = _shiftPastReplacements(mention, restoredMentions, text, newText);
+      if (shifted == null) continue;
+      final overlapsReplacement = restoredMentions.any(
+        (r) => _rangesOverlap(shifted.start, shifted.end, r.start, r.end),
+      );
+      if (overlapsReplacement) continue;
+      shiftedExisting.add(shifted);
+    }
+
     _mentions
       ..clear()
-      ..addAll(restoredMentions);
+      ..addAll(
+        [...shiftedExisting, ...restoredMentions]..sort(
+          (a, b) => a.start.compareTo(b.start),
+        ),
+      );
     _isApplyingInternalChange = true;
     value = TextEditingValue(
-      text: buffer.toString(),
-      selection: TextSelection.collapsed(
-        offset: selectionOffset.clamp(0, buffer.length),
-      ),
+      text: newText,
+      selection: TextSelection.collapsed(offset: selectionOffset.clamp(0, newText.length)),
     );
     _isApplyingInternalChange = false;
   }
@@ -478,6 +491,12 @@ bool _isValidMention(String text, _TrackedMention mention) {
 }
 
 bool _rangesOverlap(int startA, int endA, int startB, int endB) => startA < endB && startB < endA;
+
+bool _hasMentionBoundaries(String text, int start, int end) {
+  final leadingOk = start == 0 || _isMentionBoundary(text.codeUnitAt(start - 1));
+  final trailingOk = end == text.length || _isMentionBoundary(text.codeUnitAt(end));
+  return leadingOk && trailingOk;
+}
 
 bool _isMentionBoundary(int codeUnit) =>
     codeUnit == 0x20 || codeUnit == 0x09 || codeUnit == 0x0A || codeUnit == 0x0D;

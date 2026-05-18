@@ -276,6 +276,46 @@ void main() {
         expect(controller.text, truncated);
       });
 
+      test('does NOT auto-convert when the npub is mid-token (no leading boundary)', () {
+        final controller = MentionTextEditingController();
+        controller.value = const TextEditingValue(
+          text: 'foo$fullNpub bar',
+          selection: TextSelection.collapsed(offset: 0),
+        );
+        // Mid-token: no boundary before @ → left as-is.
+        expect(controller.text, 'foo$fullNpub bar');
+        expect(controller.messageText, 'foo$fullNpub bar');
+      });
+
+      test('preserves prior display mentions when hydrating a raw URI elsewhere', () {
+        const otherNpub = '@npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s';
+        final controller = MentionTextEditingController();
+        // First insert a display mention via the picker.
+        controller.insertMention(
+          start: 0,
+          end: 0,
+          displayName: 'Alice',
+          uri: '@npub1alice',
+        );
+        expect(controller.text, '@Alice ');
+        // Register Bob as a known target.
+        controller.setMentionTargets(const [
+          MentionTextTarget(uri: '@npub1alice', displayText: '@Alice'),
+          MentionTextTarget(uri: otherNpub, displayText: '@Bob'),
+        ]);
+        // Now paste a raw Bob URI after Alice.
+        controller.value = const TextEditingValue(
+          text: '@Alice $otherNpub',
+          selection: TextSelection.collapsed(offset: '@Alice $otherNpub'.length),
+        );
+        // Both mentions should now be tracked.
+        expect(controller.text, '@Alice @Bob');
+        expect(
+          controller.messageText,
+          '@npub1alice @npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s',
+        );
+      });
+
       test('re-assigning the same resolver is a no-op (cursor stays put)', () {
         final controller = MentionTextEditingController();
         controller.value = const TextEditingValue(

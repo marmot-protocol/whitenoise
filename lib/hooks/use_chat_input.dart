@@ -25,7 +25,7 @@ ChatInputState useChatInput({
   required String groupId,
   required ChatMessage? Function(String messageId) findMessage,
 }) {
-  final controller = useMemoized(MentionTextEditingController.new, const []);
+  final controller = useMemoized(MentionTextEditingController.new, [pubkey, groupId]);
   useEffect(() => controller.dispose, [controller]);
   final focusNode = useFocusNode();
   final hasContent = useListenableSelector(controller, () => controller.text.isNotEmpty);

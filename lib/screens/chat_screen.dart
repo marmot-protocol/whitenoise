@@ -201,6 +201,16 @@ class ChatScreen extends HookConsumerWidget {
     final mentionMembers = isGroupChat
         ? mentionMembersSnapshot.data ?? const <_MentionMember>[]
         : const <_MentionMember>[];
+    final mentionNamesByPubkey = useMemoized(
+      () => {
+        for (final member in mentionMembers) member.pubkey: member.displayName,
+      },
+      [mentionMembers],
+    );
+    String? resolveMentionDisplayName(String hexPubkey) =>
+        mentionNamesByPubkey[hexPubkey] ?? presentName(getAuthorMetadata(hexPubkey));
+    final resolveMentionDisplayNameRef = useRef(resolveMentionDisplayName);
+    resolveMentionDisplayNameRef.value = resolveMentionDisplayName;
     final scrollToMessageResult = useScrollToMessage(
       getReversedMessageIndex: getReversedMessageIndex,
       loadOlderMessages: loadOlderMessages,
@@ -256,7 +266,7 @@ class ChatScreen extends HookConsumerWidget {
       () => (npub) {
         final hex = hexFromNpub(npub);
         if (hex == null) return null;
-        return presentName(getAuthorMetadata(hex));
+        return resolveMentionDisplayNameRef.value(hex);
       },
       const [],
     );
@@ -398,7 +408,7 @@ class ChatScreen extends HookConsumerWidget {
         getChatMessageQuote: getChatMessageQuote,
         senderPictureUrl: senderPictureUrl,
         isGroupChat: isGroupChat,
-        mentionDisplayName: (hexPubkey) => presentName(getAuthorMetadata(hexPubkey)),
+        mentionDisplayName: resolveMentionDisplayName,
       );
       if (context.mounted) FocusManager.instance.primaryFocus?.unfocus();
     }
@@ -536,7 +546,7 @@ class ChatScreen extends HookConsumerWidget {
                     )
                   : null,
               onHorizontalDragEnd: isSearchMode ? null : () => input.setReplyingTo(message),
-              mentionDisplayName: (hexPubkey) => presentName(getAuthorMetadata(hexPubkey)),
+              mentionDisplayName: resolveMentionDisplayName,
               onRetry:
                   !isSearchMode && isOwnMessage && message.deliveryStatus is DeliveryStatus_Failed
                   ? () async {
