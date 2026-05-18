@@ -636,6 +636,33 @@ void main() {
         expect(find.byKey(const Key('message_status_row')), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
+
+      testWidgets('truncated maxLines path renders inside a tight finite height', (tester) async {
+        // A tight SizedBox here drives the finite maxHeight all the way to
+        // the inner LayoutBuilder so the truncation branch that ellipsises
+        // around a SizedBox(height: constraints.maxHeight, ...) runs.
+        final veryLongText = List.filled(400, 'tokenword').join(' ');
+        await mountWidget(
+          Align(
+            alignment: Alignment.topLeft,
+            child: SizedBox(
+              width: 220,
+              height: 80,
+              child: WnMessageBubble(
+                direction: MessageDirection.outgoing,
+                isDeleted: false,
+                content: veryLongText,
+                timestamp: '12:00',
+                contentMaxLines: 2,
+                forceTightHeight: true,
+              ),
+            ),
+          ),
+          tester,
+        );
+        expect(tester.takeException(), isNull);
+        expect(find.byKey(const Key('message_status_row')), findsOneWidget);
+      });
     });
 
     group('highlight spans', () {

@@ -169,6 +169,127 @@ void main() {
       expect(span.text, 'plain text');
     });
 
+    test('insertMention shifts later mentions and preserves earlier ones', () {
+      final controller = MentionTextEditingController(text: 'hello world');
+      controller.insertMention(
+        start: 6,
+        end: 11,
+        displayName: 'Bob',
+        uri: '@npub1bob',
+      );
+      expect(controller.text, 'hello @Bob ');
+      // Insert another mention at the very start; the existing Bob mention
+      // must shift right by the length of the new prefix.
+      controller.insertMention(
+        start: 0,
+        end: 0,
+        displayName: 'Alice',
+        uri: '@npub1alice',
+      );
+      expect(controller.text, '@Alice hello @Bob ');
+      expect(controller.messageText, '@npub1alice hello @npub1bob ');
+    });
+
+    testWidgets('buildTextSpan emits leading text before a mention', (tester) async {
+      final controller = MentionTextEditingController(text: 'hi there');
+      controller.insertMention(
+        start: 3,
+        end: 8,
+        displayName: 'Bob',
+        uri: '@npub1bob',
+      );
+      expect(controller.text, 'hi @Bob ');
+
+      late BuildContext capturedContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) {
+              capturedContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      final span = controller.buildTextSpan(
+        context: capturedContext,
+        style: const TextStyle(color: Color(0xFF000000)),
+        withComposing: false,
+      );
+      final children = span.children!.cast<TextSpan>();
+      // Leading text 'hi ' should appear before the mention span.
+      expect(children.first.text, 'hi ');
+      expect(children.any((s) => s.text == '@Bob'), isTrue);
+    });
+
+    test('setMentionTargets replaces a known uri that sits after existing text', () {
+      // Covers the _replaceKnownUris selection-shift branch where the cursor
+      // sits past the replacement range.
+      final controller = MentionTextEditingController(text: 'hi @npub1alice okay')
+        ..selection = const TextSelection.collapsed(offset: 19);
+      controller.setMentionTargets(const [
+        MentionTextTarget(uri: '@npub1alice', displayText: '@Alice'),
+      ]);
+      expect(controller.text, 'hi @Alice okay');
+      expect(controller.messageText, 'hi @npub1alice okay');
+      // Cursor should have shifted back by the length delta (-5).
+      expect(controller.selection.baseOffset, 14);
+    });
+
+    test('setMentionTargets snaps cursor to end of display when it was mid-URI', () {
+      final controller = MentionTextEditingController(text: 'hi @npub1alice okay')
+        ..selection = const TextSelection.collapsed(offset: 8); // mid-URI
+      controller.setMentionTargets(const [
+        MentionTextTarget(uri: '@npub1alice', displayText: '@Alice'),
+      ]);
+      expect(controller.text, 'hi @Alice okay');
+      // newStart=3, displayText.length=6 -> 9.
+      expect(controller.selection.baseOffset, 9);
+    });
+
+    test('insertion before an existing mention shifts the mention via _shiftMentions', () {
+      final controller = MentionTextEditingController(text: 'hello world');
+      controller.insertMention(
+        start: 6,
+        end: 11,
+        displayName: 'Bob',
+        uri: '@npub1bob',
+      );
+      // text = 'hello @Bob ', mention Bob at (6, 10).
+      controller.value = const TextEditingValue(
+        text: 'Xhello @Bob ',
+        selection: TextSelection.collapsed(offset: 1),
+      );
+      // _shiftMentions should shift Bob's tracked position by +1 since the
+      // insertion is fully before it.
+      expect(controller.messageText, 'Xhello @npub1bob ');
+    });
+
+    test('bare npub replacement preserves a mention that sits after it', () {
+      final controller = MentionTextEditingController(text: 'Hello ');
+      controller.insertMention(
+        start: 6,
+        end: 6,
+        displayName: 'Alice',
+        uri: '@npub1alice',
+      );
+      // text = 'Hello @Alice ', mention at (6, 12).
+      // 58 base32 chars after '@npub1' as required by _bareNpubRegex.
+      final bareNpub = '@npub1${'q' * 58}';
+      controller.value = TextEditingValue(
+        text: '$bareNpub Hello @Alice ',
+        selection: TextSelection.collapsed(offset: bareNpub.length + 1),
+      );
+      // The bare npub becomes a truncated display string, but the @Alice
+      // mention that sits AFTER the replacement must shift in lockstep so
+      // messageText still expands it back to the URI.
+      expect(controller.text.contains('@Alice'), isTrue);
+      expect(controller.text.contains('…'), isTrue);
+      expect(controller.messageText.endsWith('@npub1alice '), isTrue);
+      expect(controller.messageText.startsWith(bareNpub), isTrue);
+    });
+
     test('insertMention with empty displayName falls back to the uri', () {
       final controller = MentionTextEditingController(text: '@')
         ..selection = const TextSelection.collapsed(offset: 1);
