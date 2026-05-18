@@ -33,6 +33,7 @@ ChatMessageQuoteData _replyPreview({
   String authorPubkey = testPubkeyB,
   FlutterMetadata? authorMetadata,
   String content = 'Original message content',
+  MarkdownDocument? contentTokens,
   MediaFile? mediaFile,
   bool isNotFound = false,
 }) => (
@@ -42,6 +43,7 @@ ChatMessageQuoteData _replyPreview({
       authorMetadata ??
       const FlutterMetadata(displayName: 'Original Author', name: 'author', custom: {}),
   content: content,
+  contentTokens: contentTokens,
   mediaFile: mediaFile,
   isNotFound: isNotFound,
 );

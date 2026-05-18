@@ -120,6 +120,118 @@ void main() {
     });
   });
 
+  group('firstParagraphInlines', () {
+    test('returns null for empty document', () {
+      expect(firstParagraphInlines(_doc([])), isNull);
+    });
+
+    test('returns paragraph inlines verbatim', () {
+      final inlines = [
+        _t('hello '),
+        MarkdownInline.strong(children: [_t('world')]),
+      ];
+      expect(firstParagraphInlines(_doc([_paragraph(inlines)])), inlines);
+    });
+
+    test('returns heading inlines when no paragraph is present', () {
+      final inlines = [_t('Title')];
+      expect(
+        firstParagraphInlines(_doc([MarkdownBlock.heading(level: 1, inlines: inlines)])),
+        inlines,
+      );
+    });
+
+    test('descends into the first list item', () {
+      final inlines = [_t('first item')];
+      expect(
+        firstParagraphInlines(
+          _doc([
+            MarkdownBlock.list(
+              kind: const MarkdownListKind.bullet(marker: '-'),
+              tight: true,
+              items: [
+                MarkdownListItem(blocks: [_paragraph(inlines)]),
+                MarkdownListItem(
+                  blocks: [
+                    _paragraph([_t('second item')]),
+                  ],
+                ),
+              ],
+            ),
+          ]),
+        ),
+        inlines,
+      );
+    });
+
+    test('descends into block quotes', () {
+      final inlines = [_t('quoted text')];
+      expect(
+        firstParagraphInlines(
+          _doc([
+            MarkdownBlock.blockQuote(blocks: [_paragraph(inlines)]),
+          ]),
+        ),
+        inlines,
+      );
+    });
+
+    test('flattens table headers with separators', () {
+      final result = firstParagraphInlines(
+        _doc([
+          MarkdownBlock.table(
+            alignments: const [MarkdownAlignment.none, MarkdownAlignment.none],
+            header: [
+              MarkdownTableCell(inlines: [_t('A')]),
+              MarkdownTableCell(inlines: [_t('B')]),
+            ],
+            rows: const [],
+          ),
+        ]),
+      );
+      expect(result, isNotNull);
+      final concatenated = result!.whereType<MarkdownInline_Text>().map((t) => t.content).join();
+      expect(concatenated, contains('A'));
+      expect(concatenated, contains('B'));
+      expect(concatenated, isNot(contains('|')));
+    });
+
+    test('synthesises inline code for code blocks', () {
+      final result = firstParagraphInlines(
+        _doc([
+          const MarkdownBlock.codeBlock(
+            kind: MarkdownCodeBlockKind.fenced,
+            info: 'rust',
+            content: '\n  fn main() {}\n',
+          ),
+        ]),
+      );
+      expect(result, isNotNull);
+      expect(result!.length, 1);
+      final inline = result.first;
+      expect(inline, isA<MarkdownInline_Code>());
+      expect((inline as MarkdownInline_Code).content, 'fn main() {}');
+    });
+
+    test('synthesises inline math for math blocks', () {
+      final result = firstParagraphInlines(
+        _doc([const MarkdownBlock.mathBlock(content: 'x^2')]),
+      );
+      expect(result, isNotNull);
+      expect(result!.first, isA<MarkdownInline_Math>());
+    });
+
+    test('skips thematic breaks and finds the next paragraph', () {
+      final inlines = [_t('after rule')];
+      expect(
+        firstParagraphInlines(
+          _doc([const MarkdownBlock.thematicBreak(), _paragraph(inlines)]),
+        ),
+        inlines,
+      );
+    });
+  });
+
   group('MarkdownText — empty/edge cases', () {
     testWidgets('empty document renders SizedBox.shrink', (tester) async {
       await _pump(

@@ -833,6 +833,7 @@ class ChatScreen extends HookConsumerWidget {
                         onSend: sendMessage,
                         onError: showNotice,
                         getChatMessageQuote: getChatMessageQuote,
+                        mentionDisplayName: resolveMentionDisplayName,
                         actionsEnabled: !isOffline,
                         isOffline: isOffline,
                       ),
@@ -898,6 +899,7 @@ class _ChatInput extends HookWidget {
     required this.onSend,
     required this.onError,
     required this.getChatMessageQuote,
+    required this.mentionDisplayName,
     this.actionsEnabled = true,
     this.isOffline = false,
   });
@@ -917,6 +919,7 @@ class _ChatInput extends HookWidget {
   onSend;
   final void Function(String message) onError;
   final ChatMessageQuoteData? Function(String? replyId) getChatMessageQuote;
+  final String? Function(String hexPubkey) mentionDisplayName;
 
   @override
   Widget build(BuildContext context) {
@@ -999,6 +1002,7 @@ class _ChatInput extends HookWidget {
             ChatMessageQuote(
               data: quoteData,
               currentUserPubkey: currentUserPubkey,
+              mentionDisplayName: mentionDisplayName,
               onCancel: input.cancelReply,
               authorColor: replyAuthorColor,
             ),

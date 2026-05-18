@@ -182,6 +182,7 @@ class ChatMessageBubble extends StatelessWidget {
           ? ChatMessageQuote(
               data: replyPreview!,
               currentUserPubkey: currentUserPubkey,
+              mentionDisplayName: mentionDisplayName,
               onTap: onReplyTap,
               authorColor: replyAuthorColor,
             )

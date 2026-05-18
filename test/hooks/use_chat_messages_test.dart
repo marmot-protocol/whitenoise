@@ -1466,6 +1466,7 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: null,
         content: 'hi',
+        contentTokens: null,
         isNotFound: false,
         mediaFile: null,
       );
@@ -1478,6 +1479,7 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: null,
         content: 'hi',
+        contentTokens: null,
         isNotFound: false,
         mediaFile: null,
       );
@@ -1491,6 +1493,7 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: meta,
         content: 'hi',
+        contentTokens: null,
         isNotFound: false,
         mediaFile: null,
       );
@@ -1503,6 +1506,7 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: null,
         content: 'hi',
+        contentTokens: null,
         isNotFound: false,
         mediaFile: null,
       );
@@ -1515,10 +1519,31 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: null,
         content: 'Reply text',
+        contentTokens: null,
         isNotFound: false,
         mediaFile: null,
       );
       expect(chatMessageQuote.content, 'Reply text');
+    });
+
+    test('exposes parsed markdown contentTokens', () {
+      const doc = MarkdownDocument(
+        blocks: [
+          MarkdownBlock.paragraph(
+            inlines: [MarkdownInline.text(content: 'hi')],
+          ),
+        ],
+      );
+      const chatMessageQuote = (
+        messageId: 'msg-123',
+        authorPubkey: testPubkeyA,
+        authorMetadata: null,
+        content: 'hi',
+        contentTokens: doc,
+        isNotFound: false,
+        mediaFile: null,
+      );
+      expect(chatMessageQuote.contentTokens, doc);
     });
 
     test('has isNotFound boolean', () {
@@ -1527,6 +1552,7 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: null,
         content: 'hi',
+        contentTokens: null,
         isNotFound: true,
         mediaFile: null,
       );
@@ -1540,6 +1566,7 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: null,
         content: 'hi',
+        contentTokens: null,
         isNotFound: false,
         mediaFile: mediaFile,
       );
@@ -1552,6 +1579,7 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: null,
         content: 'hi',
+        contentTokens: null,
         isNotFound: false,
         mediaFile: null,
       );

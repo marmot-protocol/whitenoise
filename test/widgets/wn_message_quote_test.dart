@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/markdown_text.dart';
 import 'package:whitenoise/widgets/wn_message_quote.dart';
 import '../test_helpers.dart';
 
@@ -216,6 +218,120 @@ void main() {
         await tester.pumpAndSettle();
         expect(cancelCalled, isTrue);
         expect(tapCalled, isFalse);
+      });
+    });
+
+    group('markdown document', () {
+      testWidgets('renders MarkdownText when document is non-empty', (tester) async {
+        const doc = MarkdownDocument(
+          blocks: [
+            MarkdownBlock.paragraph(
+              inlines: [
+                MarkdownInline.strong(
+                  children: [MarkdownInline.text(content: 'bold')],
+                ),
+                MarkdownInline.text(content: ' tail'),
+              ],
+            ),
+          ],
+        );
+
+        await mountWidget(
+          const WnMessageQuote(
+            author: 'Alice',
+            text: '**bold** tail',
+            document: doc,
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('quote_markdown_preview')), findsOneWidget);
+        expect(find.byType(MarkdownText), findsOneWidget);
+        // Raw asterisks must not leak when rendering markdown.
+        expect(find.text('**bold** tail'), findsNothing);
+      });
+
+      testWidgets('falls back to plain text when document is null', (tester) async {
+        await mountWidget(
+          const WnMessageQuote(author: 'Alice', text: 'plain content'),
+          tester,
+        );
+
+        expect(find.byKey(const Key('quote_markdown_preview')), findsNothing);
+        expect(find.text('plain content'), findsOneWidget);
+      });
+
+      testWidgets('falls back to plain text when document is empty', (tester) async {
+        await mountWidget(
+          const WnMessageQuote(
+            author: 'Alice',
+            text: 'fallback',
+            document: MarkdownDocument(blocks: []),
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('quote_markdown_preview')), findsNothing);
+        expect(find.text('fallback'), findsOneWidget);
+      });
+
+      testWidgets('renders code blocks as inline code (no raw fences)', (tester) async {
+        const doc = MarkdownDocument(
+          blocks: [
+            MarkdownBlock.codeBlock(
+              kind: MarkdownCodeBlockKind.fenced,
+              info: '',
+              content: 'fn main() {}',
+            ),
+          ],
+        );
+
+        await mountWidget(
+          const WnMessageQuote(
+            author: 'Alice',
+            text: '```\nfn main() {}\n```',
+            document: doc,
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('quote_markdown_preview')), findsOneWidget);
+        expect(find.byType(MarkdownText), findsOneWidget);
+        // Raw fences must not appear in the preview.
+        expect(find.textContaining('```'), findsNothing);
+      });
+
+      testWidgets('renders table header inline (no raw pipes)', (tester) async {
+        const doc = MarkdownDocument(
+          blocks: [
+            MarkdownBlock.table(
+              alignments: [MarkdownAlignment.none, MarkdownAlignment.none],
+              header: [
+                MarkdownTableCell(inlines: [MarkdownInline.text(content: 'hello')]),
+                MarkdownTableCell(inlines: [MarkdownInline.text(content: 'vlad')]),
+              ],
+              rows: [
+                [
+                  MarkdownTableCell(inlines: [MarkdownInline.text(content: 'this')]),
+                  MarkdownTableCell(inlines: [MarkdownInline.text(content: 'testing')]),
+                ],
+              ],
+            ),
+          ],
+        );
+
+        await mountWidget(
+          const WnMessageQuote(
+            author: 'Alice',
+            text: '| hello | vlad |\n|---|---|\n| this | testing |',
+            document: doc,
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('quote_markdown_preview')), findsOneWidget);
+        // No raw pipes leaking through.
+        expect(find.textContaining('|'), findsNothing);
       });
     });
 

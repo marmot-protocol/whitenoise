@@ -23,11 +23,13 @@ ChatMessageQuoteData _replyPreview({
   String messageId = 'original-msg',
   String authorPubkey = testPubkeyB,
   String content = 'Original message content',
+  MarkdownDocument? contentTokens,
 }) => (
   messageId: messageId,
   authorPubkey: authorPubkey,
   authorMetadata: const FlutterMetadata(displayName: 'Original Author', name: 'author', custom: {}),
   content: content,
+  contentTokens: contentTokens,
   mediaFile: null,
   isNotFound: false,
 );

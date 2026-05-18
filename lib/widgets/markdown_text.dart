@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -35,6 +37,57 @@ bool isPlainTextDocument(MarkdownDocument document) {
         inline is MarkdownInline_SoftBreak ||
         inline is MarkdownInline_HardBreak,
   );
+}
+
+/// Returns an inline run summarising [document] for use in compact previews
+/// (reply quotes, notification snippets). Never returns a block widget, so the
+/// caller can render the result inside a single `Text.rich` line.
+///
+/// Walks the first paragraph-like block: paragraph, heading, list item,
+/// block quote. For tables, joins the header row cells with " ". For code,
+/// math, and thematic-break blocks, synthesises a single inline so raw
+/// markdown syntax never leaks into the preview. Returns `null` only when
+/// the document is empty.
+List<MarkdownInline>? firstParagraphInlines(MarkdownDocument document) =>
+    _firstInlinesInBlocks(document.blocks);
+
+List<MarkdownInline>? _firstInlinesInBlocks(List<MarkdownBlock> blocks) {
+  for (final block in blocks) {
+    final inlines = switch (block) {
+      MarkdownBlock_Paragraph(:final inlines) => inlines,
+      MarkdownBlock_Heading(:final inlines) => inlines,
+      MarkdownBlock_BlockQuote(:final blocks) => _firstInlinesInBlocks(blocks),
+      MarkdownBlock_List(:final items) =>
+        items.isEmpty ? null : _firstInlinesInBlocks(items.first.blocks),
+      MarkdownBlock_Table(:final header) => _joinCellInlines(header),
+      MarkdownBlock_CodeBlock(:final content) => [
+        MarkdownInline.code(content: _firstNonEmptyLine(content)),
+      ],
+      MarkdownBlock_MathBlock(:final content) => [
+        MarkdownInline.math(content: _firstNonEmptyLine(content)),
+      ],
+      MarkdownBlock_ThematicBreak() => null,
+    };
+    if (inlines != null && inlines.isNotEmpty) return inlines;
+  }
+  return null;
+}
+
+List<MarkdownInline> _joinCellInlines(List<MarkdownTableCell> cells) {
+  final out = <MarkdownInline>[];
+  for (var i = 0; i < cells.length; i++) {
+    if (i > 0) out.add(const MarkdownInline.text(content: '  '));
+    out.addAll(cells[i].inlines);
+  }
+  return out;
+}
+
+String _firstNonEmptyLine(String content) {
+  for (final line in const LineSplitter().convert(content)) {
+    final trimmed = line.trim();
+    if (trimmed.isNotEmpty) return trimmed;
+  }
+  return content;
 }
 
 class MarkdownText extends HookWidget {
