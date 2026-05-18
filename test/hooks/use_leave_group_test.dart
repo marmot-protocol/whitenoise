@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_leave_group.dart';
 import 'package:whitenoise/src/rust/api/error.dart';
@@ -114,31 +113,12 @@ void main() {
   }) => useLeaveGroup(
     accountPubkey: testPubkeyA,
     groupId: testGroupId,
-    featureEnabled: true,
     groupType: groupType,
     pendingConfirmation: pendingConfirmation,
     selfRemoved: selfRemoved,
   );
 
   group('visibility == hidden', () {
-    testWidgets('is hidden when featureEnabled is false', (tester) async {
-      final hook = await mountHook(
-        tester,
-        () => useLeaveGroup(
-          accountPubkey: testPubkeyA,
-          groupId: testGroupId,
-          featureEnabled: false,
-          groupType: GroupType.group,
-          pendingConfirmation: false,
-          selfRemoved: false,
-        ),
-      );
-
-      await tester.pump();
-      expect(hook().visibility, LeaveGroupVisibility.hidden);
-      expect(hook().message, isNull);
-    });
-
     testWidgets('is hidden when group is a DM', (tester) async {
       final hook = await mountHook(
         tester,
@@ -272,23 +252,6 @@ void main() {
   });
 
   group('fetch skipped for hidden cases', () {
-    testWidgets('skips fetch when featureEnabled is false', (tester) async {
-      await mountHook(
-        tester,
-        () => useLeaveGroup(
-          accountPubkey: testPubkeyA,
-          groupId: testGroupId,
-          featureEnabled: false,
-          groupType: GroupType.group,
-          pendingConfirmation: false,
-          selfRemoved: false,
-        ),
-      );
-
-      await tester.pumpAndSettle();
-      expect(mockApi.proposalsCallCount, 0);
-    });
-
     testWidgets('skips fetch when group is a DM', (tester) async {
       await mountHook(tester, () => useLeaveGroupEnabled(groupType: GroupType.directMessage));
 
@@ -308,51 +271,6 @@ void main() {
 
       await tester.pumpAndSettle();
       expect(mockApi.proposalsCallCount, 0);
-    });
-
-    testWidgets('resets immediately when featureEnabled changes to false', (tester) async {
-      LeaveGroupState? hookState;
-
-      setUpTestView(tester);
-      await tester.pumpWidget(
-        MaterialApp(
-          home: HookBuilder(
-            builder: (_) {
-              hookState = useLeaveGroup(
-                accountPubkey: testPubkeyA,
-                groupId: testGroupId,
-                featureEnabled: true,
-                groupType: GroupType.group,
-                pendingConfirmation: false,
-                selfRemoved: false,
-              );
-              return const SizedBox();
-            },
-          ),
-        ),
-      );
-      await tester.pumpAndSettle();
-      expect(hookState!.visibility, isNot(LeaveGroupVisibility.hidden));
-
-      await tester.pumpWidget(
-        MaterialApp(
-          home: HookBuilder(
-            builder: (_) {
-              hookState = useLeaveGroup(
-                accountPubkey: testPubkeyA,
-                groupId: testGroupId,
-                featureEnabled: false,
-                groupType: GroupType.group,
-                pendingConfirmation: false,
-                selfRemoved: false,
-              );
-              return const SizedBox();
-            },
-          ),
-        ),
-      );
-      await tester.pump();
-      expect(hookState!.visibility, LeaveGroupVisibility.hidden);
     });
   });
 
@@ -447,9 +365,8 @@ void main() {
       () => useLeaveGroup(
         accountPubkey: testPubkeyA,
         groupId: testGroupId,
-        featureEnabled: false,
         groupType: GroupType.group,
-        pendingConfirmation: false,
+        pendingConfirmation: true,
         selfRemoved: false,
       ),
     );
