@@ -6,9 +6,10 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/markdown_text.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
-import 'package:whitenoise/widgets/wn_markdown_text.dart';
 import 'package:whitenoise/widgets/wn_reaction.dart';
+
 export 'package:whitenoise/src/rust/api/messages.dart' show EmojiReaction;
 
 int _codePointToCodeUnit(String text, int codePointIndex) {
@@ -509,7 +510,7 @@ class _BubbleContent extends StatelessWidget {
             if (hasText || hasTimestamp) SizedBox(height: 8.h),
           ],
           if (hasText && _shouldRenderAsMarkdown) ...[
-            WnMarkdownText(
+            MarkdownText(
               document: document!,
               baseStyle: textStyle,
               onLinkTap: onLinkTap,

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
-import 'package:whitenoise/widgets/wn_markdown_text.dart';
+import 'package:whitenoise/widgets/markdown_text.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
@@ -115,11 +115,11 @@ void main() {
     });
   });
 
-  group('WnMarkdownText — empty/edge cases', () {
+  group('MarkdownText — empty/edge cases', () {
     testWidgets('empty document renders SizedBox.shrink', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(document: _doc(const []), baseStyle: _baseStyle),
+        MarkdownText(document: _doc(const []), baseStyle: _baseStyle),
       );
       expect(find.byType(SizedBox), findsWidgets);
       expect(find.byType(Text), findsNothing);
@@ -128,7 +128,7 @@ void main() {
     testWidgets('single-paragraph plain text uses Text.rich', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([_t('hello')]),
           ]),
@@ -142,7 +142,7 @@ void main() {
     testWidgets('maxLines truncation in single-paragraph mode', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([_t('line1\nline2\nline3\nline4')]),
           ]),
@@ -156,11 +156,11 @@ void main() {
     });
   });
 
-  group('WnMarkdownText — inlines', () {
+  group('MarkdownText — inlines', () {
     testWidgets('soft break renders as newline (chat UX, not CommonMark default)', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([_t('a'), const MarkdownInline.softBreak(), _t('b')]),
           ]),
@@ -175,7 +175,7 @@ void main() {
     testWidgets('hard break renders as newline', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([_t('a'), const MarkdownInline.hardBreak(), _t('b')]),
           ]),
@@ -189,7 +189,7 @@ void main() {
     testWidgets('strong applies bold', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               MarkdownInline.strong(children: [_t('bold')]),
@@ -207,7 +207,7 @@ void main() {
     testWidgets('emph applies italic', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               MarkdownInline.emph(children: [_t('it')]),
@@ -224,7 +224,7 @@ void main() {
     testWidgets('strikethrough applies lineThrough', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               MarkdownInline.strikethrough(children: [_t('s')]),
@@ -241,7 +241,7 @@ void main() {
     testWidgets('code inline uses monospace', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([const MarkdownInline.code(content: 'x')]),
           ]),
@@ -257,7 +257,7 @@ void main() {
       var tapped = '';
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               MarkdownInline.link(
@@ -281,7 +281,7 @@ void main() {
       var tapped = '';
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               MarkdownInline.link(
@@ -303,7 +303,7 @@ void main() {
     testWidgets('link without onLinkTap has no recognizer', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               MarkdownInline.link(
@@ -323,7 +323,7 @@ void main() {
     testWidgets('image renders as [image: alt] label', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               MarkdownInline.image(
@@ -344,7 +344,7 @@ void main() {
     testWidgets('image with empty alt renders [image: image]', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               const MarkdownInline.image(
@@ -365,7 +365,7 @@ void main() {
       var tapped = '';
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               const MarkdownInline.autolink(
@@ -388,7 +388,7 @@ void main() {
       var tapped = '';
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               const MarkdownInline.autolink(
@@ -410,7 +410,7 @@ void main() {
     testWidgets('math inline renders content text', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([const MarkdownInline.math(content: 'E=mc^2')]),
           ]),
@@ -425,7 +425,7 @@ void main() {
       String? receivedHex;
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               const MarkdownInline.nostrMention(
@@ -458,7 +458,7 @@ void main() {
     testWidgets('npub mention with empty resolved name falls back to truncation', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               const MarkdownInline.nostrMention(
@@ -483,7 +483,7 @@ void main() {
     testWidgets('npub mention without callback uses truncated fallback', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               const MarkdownInline.nostrMention(
@@ -509,7 +509,7 @@ void main() {
       String? gotB32;
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               const MarkdownInline.nostrMention(
@@ -538,7 +538,7 @@ void main() {
     testWidgets('nostr uri with non-npub hrp shows raw bech32 truncated', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               const MarkdownInline.nostrUri(
@@ -562,7 +562,7 @@ void main() {
     testWidgets('short nostr bech32 is not truncated', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               const MarkdownInline.nostrUri(
@@ -585,7 +585,7 @@ void main() {
     testWidgets('nostr without onNostrTap has no recognizer', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               const MarkdownInline.nostrUri(
@@ -605,11 +605,11 @@ void main() {
     });
   });
 
-  group('WnMarkdownText — blocks', () {
+  group('MarkdownText — blocks', () {
     testWidgets('heading renders with larger font', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             MarkdownBlock.heading(level: 1, inlines: [_t('H1')]),
           ]),
@@ -625,7 +625,7 @@ void main() {
     testWidgets('heading level 5 falls back to base size', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             MarkdownBlock.heading(level: 5, inlines: [_t('H5')]),
           ]),
@@ -639,7 +639,7 @@ void main() {
     testWidgets('thematic break renders a divider', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             const MarkdownBlock.thematicBreak(),
             _paragraph([_t('after')]),
@@ -654,7 +654,7 @@ void main() {
     testWidgets('code block renders content in monospace', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             const MarkdownBlock.codeBlock(
               kind: MarkdownCodeBlockKind.fenced,
@@ -674,7 +674,7 @@ void main() {
     testWidgets('math block renders content italic monospace', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             const MarkdownBlock.mathBlock(content: 'E=mc^2'),
             _paragraph([_t('after')]),
@@ -690,7 +690,7 @@ void main() {
     testWidgets('blockquote draws a left border', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             MarkdownBlock.blockQuote(
               blocks: [
@@ -709,7 +709,7 @@ void main() {
     testWidgets('bullet list renders • markers', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             MarkdownBlock.list(
               kind: const MarkdownListKind.bullet(marker: '-'),
@@ -740,7 +740,7 @@ void main() {
     testWidgets('ordered list renders numbers with delimiter', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             MarkdownBlock.list(
               kind: const MarkdownListKind.ordered(start: 3, delimiter: ')'),
@@ -770,7 +770,7 @@ void main() {
     testWidgets('task list renders check boxes', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             const MarkdownBlock.list(
               kind: MarkdownListKind.bullet(marker: '-'),
@@ -795,14 +795,14 @@ void main() {
           baseStyle: _baseStyle,
         ),
       );
-      expect(find.byIcon(Icons.check_box_outline_blank), findsOneWidget);
-      expect(find.byIcon(Icons.check_box), findsOneWidget);
+      expect(find.byKey(const Key('check_box_outline_blank')), findsOneWidget);
+      expect(find.byKey(const Key('check_box')), findsOneWidget);
     });
 
     testWidgets('list item with empty blocks renders without crash', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             const MarkdownBlock.list(
               kind: MarkdownListKind.bullet(marker: '-'),
@@ -820,7 +820,7 @@ void main() {
     testWidgets('table renders header and rows with alignment', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             MarkdownBlock.table(
               alignments: const [
@@ -857,7 +857,7 @@ void main() {
     testWidgets('empty table renders SizedBox.shrink', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             const MarkdownBlock.table(alignments: [], header: [], rows: []),
             _paragraph([_t('after')]),
@@ -872,7 +872,7 @@ void main() {
     testWidgets('table pads short rows with empty cells', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             MarkdownBlock.table(
               alignments: const [MarkdownAlignment.left, MarkdownAlignment.left],
@@ -894,11 +894,11 @@ void main() {
     });
   });
 
-  group('WnMarkdownText — highlights', () {
+  group('MarkdownText — highlights', () {
     testWidgets('matched substring gets background color', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([_t('hello world')]),
           ]),
@@ -921,7 +921,7 @@ void main() {
     testWidgets('case-insensitive match', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([_t('Hello World')]),
           ]),
@@ -943,7 +943,7 @@ void main() {
     testWidgets('multiple matches all highlighted', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([_t('foo foo foo')]),
           ]),
@@ -963,7 +963,7 @@ void main() {
     testWidgets('overlapping queries are merged', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([_t('abcdef')]),
           ]),
@@ -984,7 +984,7 @@ void main() {
     testWidgets('empty query string is ignored', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([_t('hello')]),
           ]),
@@ -1001,7 +1001,7 @@ void main() {
     testWidgets('no match leaves text plain', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([_t('hello')]),
           ]),
@@ -1018,7 +1018,7 @@ void main() {
     testWidgets('empty text inline is not highlighted', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([_t('')]),
           ]),
@@ -1031,11 +1031,11 @@ void main() {
     });
   });
 
-  group('WnMarkdownText — flatten helper via image alt', () {
+  group('MarkdownText — flatten helper via image alt', () {
     testWidgets('flatten covers every inline variant', (tester) async {
       await _pump(
         tester,
-        WnMarkdownText(
+        MarkdownText(
           document: _doc([
             _paragraph([
               MarkdownInline.image(

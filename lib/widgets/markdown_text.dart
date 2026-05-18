@@ -29,8 +29,8 @@ bool isPlainTextDocument(MarkdownDocument document) {
   );
 }
 
-class WnMarkdownText extends HookWidget {
-  const WnMarkdownText({
+class MarkdownText extends HookWidget {
+  const MarkdownText({
     super.key,
     required this.document,
     required this.baseStyle,
@@ -174,8 +174,8 @@ class _MarkdownRenderer {
         return _buildCodeBlock(content);
       case MarkdownBlock_BlockQuote(:final blocks):
         return _buildBlockQuote(blocks);
-      case MarkdownBlock_List(:final kind, :final items):
-        return _buildList(kind, items);
+      case MarkdownBlock_List(:final kind, :final items, :final tight):
+        return _buildList(kind, items, tight: tight);
       case MarkdownBlock_Table(:final alignments, :final header, :final rows):
         return _buildTable(alignments, header, rows);
       case MarkdownBlock_MathBlock(:final content):
@@ -236,13 +236,18 @@ class _MarkdownRenderer {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
-        children: WnMarkdownText._withBlockGaps(blocks.map(buildBlock).toList()),
+        children: MarkdownText._withBlockGaps(blocks.map(buildBlock).toList()),
       ),
     );
   }
 
-  Widget _buildList(MarkdownListKind kind, List<MarkdownListItem> items) {
+  Widget _buildList(
+    MarkdownListKind kind,
+    List<MarkdownListItem> items, {
+    required bool tight,
+  }) {
     final rows = <Widget>[];
+    final itemGap = tight ? 2.h : 8.h;
     for (var i = 0; i < items.length; i++) {
       final item = items[i];
       final markerWidget = _listMarker(kind, i, item.checked);
@@ -251,7 +256,7 @@ class _MarkdownRenderer {
           : item.blocks.map(buildBlock).toList();
       rows.add(
         Padding(
-          padding: EdgeInsets.only(top: i == 0 ? 0 : 4.h),
+          padding: EdgeInsets.only(top: i == 0 ? 0 : itemGap),
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -260,7 +265,7 @@ class _MarkdownRenderer {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   mainAxisSize: MainAxisSize.min,
-                  children: WnMarkdownText._withBlockGaps(itemBlocks),
+                  children: MarkdownText._withBlockGaps(itemBlocks),
                 ),
               ),
             ],
@@ -281,6 +286,7 @@ class _MarkdownRenderer {
         padding: EdgeInsets.only(top: 2.h),
         child: Icon(
           checked ? Icons.check_box : Icons.check_box_outline_blank,
+          key: Key(checked ? 'check_box' : 'check_box_outline_blank'),
           size: (baseStyle.fontSize ?? 14.sp) + 2.sp,
           color: baseStyle.color,
         ),

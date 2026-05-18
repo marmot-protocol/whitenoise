@@ -10,10 +10,10 @@ import 'package:whitenoise/utils/bubble_grouping.dart' show leadingVariant;
 import 'package:whitenoise/utils/encoding.dart' show hexFromNpub;
 import 'package:whitenoise/widgets/chat_message_media.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
+import 'package:whitenoise/widgets/markdown_text.dart';
 import 'package:whitenoise/widgets/media_modal.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
-import 'package:whitenoise/widgets/wn_markdown_text.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 
 class ChatMessageBubble extends StatelessWidget {

@@ -3,8 +3,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show HighlightSpan;
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/widgets/markdown_text.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
-import 'package:whitenoise/widgets/wn_markdown_text.dart';
 import 'package:whitenoise/widgets/wn_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_reaction.dart';
 
@@ -1644,7 +1644,7 @@ void main() {
           ),
           tester,
         );
-        expect(find.byType(WnMarkdownText), findsNothing);
+        expect(find.byType(MarkdownText), findsNothing);
         expect(find.text('plain'), findsOneWidget);
       });
 
@@ -1658,7 +1658,7 @@ void main() {
           ),
           tester,
         );
-        expect(find.byType(WnMarkdownText), findsNothing);
+        expect(find.byType(MarkdownText), findsNothing);
         expect(find.text('hello'), findsOneWidget);
       });
 
@@ -1672,11 +1672,11 @@ void main() {
           ),
           tester,
         );
-        expect(find.byType(WnMarkdownText), findsNothing);
+        expect(find.byType(MarkdownText), findsNothing);
         expect(find.text('hi'), findsOneWidget);
       });
 
-      testWidgets('formatted single-paragraph document renders WnMarkdownText', (tester) async {
+      testWidgets('formatted single-paragraph document renders MarkdownText', (tester) async {
         await mountWidget(
           WnMessageBubble(
             direction: MessageDirection.incoming,
@@ -1686,7 +1686,7 @@ void main() {
           ),
           tester,
         );
-        expect(find.byType(WnMarkdownText), findsOneWidget);
+        expect(find.byType(MarkdownText), findsOneWidget);
       });
 
       testWidgets(
@@ -1703,7 +1703,7 @@ void main() {
             ),
             tester,
           );
-          expect(find.byType(WnMarkdownText), findsOneWidget);
+          expect(find.byType(MarkdownText), findsOneWidget);
           expect(find.text('12:34'), findsOneWidget);
         },
       );
@@ -1719,11 +1719,11 @@ void main() {
           ),
           tester,
         );
-        expect(find.byType(WnMarkdownText), findsNothing);
+        expect(find.byType(MarkdownText), findsNothing);
         expect(find.text('gone'), findsOneWidget);
       });
 
-      testWidgets('multi-block document renders WnMarkdownText', (tester) async {
+      testWidgets('multi-block document renders MarkdownText', (tester) async {
         await mountWidget(
           WnMessageBubble(
             direction: MessageDirection.incoming,
@@ -1733,7 +1733,7 @@ void main() {
           ),
           tester,
         );
-        expect(find.byType(WnMarkdownText), findsOneWidget);
+        expect(find.byType(MarkdownText), findsOneWidget);
         expect(find.text('Title'), findsOneWidget);
         expect(find.text('body'), findsOneWidget);
       });
@@ -1751,7 +1751,7 @@ void main() {
             ),
             tester,
           );
-          final widget = tester.widget<WnMarkdownText>(find.byType(WnMarkdownText));
+          final widget = tester.widget<MarkdownText>(find.byType(MarkdownText));
           expect(widget.highlightQueries, contains('bar'));
         },
       );
@@ -1780,7 +1780,7 @@ void main() {
           ),
           tester,
         );
-        final widget = tester.widget<WnMarkdownText>(find.byType(WnMarkdownText));
+        final widget = tester.widget<MarkdownText>(find.byType(MarkdownText));
         widget.onLinkTap!('https://example.com');
         expect(tapped, 'https://example.com');
       });
