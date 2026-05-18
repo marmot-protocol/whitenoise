@@ -1326,9 +1326,9 @@ dependencies = [
 
 [[package]]
 name = "flutter_rust_bridge"
-version = "2.12.0"
+version = "2.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a0884853aae8a6517b5b58cf36f55da487f2fe110e1686938eb29b6640aae4a5"
+checksum = "dde126295b2acc5f0a712e265e91b6fdc0ed38767496483e592ae7134db83725"
 dependencies = [
  "allo-isolate",
  "android_logger",
@@ -1356,9 +1356,9 @@ dependencies = [
 
 [[package]]
 name = "flutter_rust_bridge_macros"
-version = "2.12.0"
+version = "2.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b5ce32f35f710ced8c5aa557f023f1a624e737b5460cee2b70fcd3a8df09e1b"
+checksum = "d5f0420326b13675321b194928bb7830043b68cf8b810e1c651285c747abb080"
 dependencies = [
  "hex",
  "md-5",
@@ -5521,7 +5521,7 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "whitenoise"
 version = "0.2.1"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=f421a8ad525ee3992baf65a11ef3f453d5daaa20#f421a8ad525ee3992baf65a11ef3f453d5daaa20"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=935683afd2e73d14fdaffeb5c933cb0500656521#935683afd2e73d14fdaffeb5c933cb0500656521"
 dependencies = [
  "android-native-keyring-store",
  "apple-native-keyring-store",
@@ -5567,7 +5567,7 @@ dependencies = [
 [[package]]
 name = "whitenoise-macros"
 version = "0.1.0"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=f421a8ad525ee3992baf65a11ef3f453d5daaa20#f421a8ad525ee3992baf65a11ef3f453d5daaa20"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=935683afd2e73d14fdaffeb5c933cb0500656521#935683afd2e73d14fdaffeb5c933cb0500656521"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5577,7 +5577,7 @@ dependencies = [
 [[package]]
 name = "whitenoise-markdown"
 version = "0.1.0"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=f421a8ad525ee3992baf65a11ef3f453d5daaa20#f421a8ad525ee3992baf65a11ef3f453d5daaa20"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=935683afd2e73d14fdaffeb5c933cb0500656521#935683afd2e73d14fdaffeb5c933cb0500656521"
 dependencies = [
  "serde",
 ]

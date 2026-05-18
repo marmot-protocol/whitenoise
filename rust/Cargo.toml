@@ -9,7 +9,7 @@ crate-type = ["cdylib", "staticlib"]
 [dependencies]
 anyhow = "1.0.99"
 chrono = { version = "0.4.40", features = ["serde"] }
-flutter_rust_bridge = { version = "=2.12.0", features = ["chrono"] }
+flutter_rust_bridge = { version = "=2.11.1", features = ["chrono"] }
 hex = "0.4"
 nostr-sdk = { version = "0.44", features = [
     "nip04",
@@ -22,7 +22,7 @@ thiserror = "2.0.12"
 tokio = { version = "1.44", features = ["rt", "rt-multi-thread"] }
 tracing = "0.1"
 url = "2.5.1"
-whitenoise = { git = "https://github.com/marmot-protocol/whitenoise-rs", rev = "f421a8ad525ee3992baf65a11ef3f453d5daaa20" }
+whitenoise = { git = "https://github.com/marmot-protocol/whitenoise-rs", rev = "935683afd2e73d14fdaffeb5c933cb0500656521" }
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }
