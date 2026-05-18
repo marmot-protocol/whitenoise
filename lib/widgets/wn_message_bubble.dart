@@ -96,6 +96,7 @@ class _TextWithTimestamp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final reservedWidth = _timestampReservedWidth(
+      context,
       timestamp,
       tsStyle,
       isOutgoing,
@@ -302,6 +303,7 @@ BorderRadius _bubbleBorderRadius({
 }
 
 double _timestampReservedWidth(
+  BuildContext context,
   String timestamp,
   TextStyle tsStyle,
   bool isOutgoing,
@@ -309,7 +311,8 @@ double _timestampReservedWidth(
 ) {
   final painter = TextPainter(
     text: TextSpan(text: timestamp, style: tsStyle),
-    textDirection: TextDirection.ltr,
+    textDirection: Directionality.of(context),
+    textScaler: MediaQuery.textScalerOf(context),
   );
   try {
     painter.layout();

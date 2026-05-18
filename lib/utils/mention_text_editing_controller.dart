@@ -131,7 +131,14 @@ class MentionTextEditingController extends TextEditingController {
       final previousMentions = List<_TrackedMention>.of(_mentions);
       _mentions
         ..clear()
-        ..addAll(_shiftMentions(value.text, newValue.text, previousMentions));
+        ..addAll(
+          _shiftMentions(
+            value.text,
+            newValue.text,
+            previousMentions,
+            composing: newValue.composing,
+          ),
+        );
     }
     super.value = newValue;
     if (!_isApplyingInternalChange) {
@@ -446,8 +453,9 @@ String _expandMentions(String text, List<_TrackedMention> mentions) {
 List<_TrackedMention> _shiftMentions(
   String oldText,
   String newText,
-  List<_TrackedMention> mentions,
-) {
+  List<_TrackedMention> mentions, {
+  TextRange composing = TextRange.empty,
+}) {
   if (mentions.isEmpty) return const [];
 
   final prefix = _commonPrefixLength(oldText, newText);
@@ -455,10 +463,21 @@ List<_TrackedMention> _shiftMentions(
   final oldChangeEnd = oldText.length - suffix;
   final newChangeEnd = newText.length - suffix;
   final delta = (newChangeEnd - prefix) - (oldChangeEnd - prefix);
+
+  // While IME composition is active, the inserted chars are transient — they
+  // will be replaced when the user commits. Don't let them tear down a mention
+  // they happen to sit next to.
+  final insertionIsComposing =
+      composing.isValid &&
+      !composing.isCollapsed &&
+      composing.start <= prefix &&
+      composing.end >= newChangeEnd;
+
   final shifted = <_TrackedMention>[];
 
   for (final mention in mentions) {
     final insertedInsideMentionBoundary =
+        !insertionIsComposing &&
         mention.end == prefix &&
         newChangeEnd > prefix &&
         (prefix >= newText.length || !_isMentionBoundary(newText.codeUnitAt(prefix)));

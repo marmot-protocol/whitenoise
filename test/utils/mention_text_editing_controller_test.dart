@@ -48,6 +48,47 @@ void main() {
       expect(controller.messageText, '@Alic ');
     });
 
+    test('IME composing chars at a mention boundary do not drop the mention', () {
+      final controller = MentionTextEditingController(text: '')
+        ..selection = const TextSelection.collapsed(offset: 0);
+      controller.insertMention(
+        start: 0,
+        end: 0,
+        displayName: 'Alice',
+        uri: '@npub1alice',
+      );
+      expect(controller.text, '@Alice ');
+      // Transient pinyin char inserted immediately after the mention; the
+      // composing range marks it as not-yet-committed.
+      controller.value = const TextEditingValue(
+        text: '@Alicen ',
+        selection: TextSelection.collapsed(offset: 7),
+        composing: TextRange(start: 6, end: 7),
+      );
+      // The mention must survive the transient composition; messageText
+      // expands it back to the URI.
+      expect(controller.messageText, '@npub1alicen ');
+    });
+
+    test('non-composing edit at a mention boundary still drops the mention', () {
+      final controller = MentionTextEditingController(text: '')
+        ..selection = const TextSelection.collapsed(offset: 0);
+      controller.insertMention(
+        start: 0,
+        end: 0,
+        displayName: 'Alice',
+        uri: '@npub1alice',
+      );
+      expect(controller.text, '@Alice ');
+      // Same shape of edit, but no composing range — a fully committed
+      // keystroke that extends the name should drop the mention.
+      controller.value = const TextEditingValue(
+        text: '@Alicen ',
+        selection: TextSelection.collapsed(offset: 7),
+      );
+      expect(controller.messageText, '@Alicen ');
+    });
+
     test('setMentionTargets restores display form for known uris in drafts', () {
       final controller = MentionTextEditingController(text: 'hello @npub1alice :)')
         ..selection = const TextSelection.collapsed(offset: 'hello '.length);

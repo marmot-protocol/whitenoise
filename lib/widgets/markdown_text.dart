@@ -119,19 +119,26 @@ class MarkdownText extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final recognizers = useRef<List<TapGestureRecognizer>>([]);
+    final activeRecognizers = useRef<List<TapGestureRecognizer>>([]);
     useEffect(() {
       return () {
-        for (final r in recognizers.value) {
+        for (final r in activeRecognizers.value) {
           r.dispose();
         }
+        activeRecognizers.value = const [];
       };
     }, const []);
 
-    for (final r in recognizers.value) {
-      r.dispose();
+    final newRecognizers = <TapGestureRecognizer>[];
+    final stale = activeRecognizers.value;
+    activeRecognizers.value = newRecognizers;
+    if (stale.isNotEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        for (final r in stale) {
+          r.dispose();
+        }
+      });
     }
-    recognizers.value = [];
 
     final renderer = _MarkdownRenderer(
       context: context,
@@ -141,7 +148,7 @@ class MarkdownText extends HookWidget {
       mentionDisplayName: mentionDisplayName,
       highlightQueries: highlightQueries,
       highlightColor: highlightColor ?? Colors.yellow,
-      registerRecognizer: (r) => recognizers.value.add(r),
+      registerRecognizer: newRecognizers.add,
     );
 
     final blocks = document.blocks;
@@ -227,8 +234,8 @@ class _MarkdownRenderer {
           padding: EdgeInsets.symmetric(vertical: 4.h),
           child: Divider(
             color: context.colors.borderTertiary,
-            thickness: 1,
-            height: 1,
+            thickness: 1.h,
+            height: 1.h,
           ),
         );
       case MarkdownBlock_CodeBlock(:final content):
@@ -321,7 +328,10 @@ class _MarkdownRenderer {
           child: Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              SizedBox(width: 20.w, child: markerWidget),
+              ConstrainedBox(
+                constraints: BoxConstraints(minWidth: 20.w),
+                child: markerWidget,
+              ),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,

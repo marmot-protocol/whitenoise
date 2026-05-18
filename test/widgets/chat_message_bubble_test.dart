@@ -771,10 +771,16 @@ void main() {
 
     group('markdown link tap handling', () {
       late _MockUrlLauncher launcher;
+      late UrlLauncherPlatform originalLauncher;
 
       setUp(() {
+        originalLauncher = UrlLauncherPlatform.instance;
         launcher = _MockUrlLauncher();
         UrlLauncherPlatform.instance = launcher;
+      });
+
+      tearDown(() {
+        UrlLauncherPlatform.instance = originalLauncher;
       });
 
       ChatMessage withDoc(MarkdownDocument doc) => _message(content: 'x').copyWithDocument(doc);
