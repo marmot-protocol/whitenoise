@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_slow_async_io
+
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -23,6 +25,35 @@ void main() {
 
   tearDown(() async {
     await clearResetPending();
+    debugMarkResetPending = null;
+    debugClearResetPending = null;
+  });
+
+  test('markResetPending creates marker and clearResetPending removes it', () async {
+    final marker = await resetPendingMarkerFile();
+
+    await markResetPending();
+
+    expect(await marker.exists(), true);
+    expect(await marker.parent.exists(), true);
+    expect(await marker.readAsString(), isNotEmpty);
+
+    await clearResetPending();
+
+    expect(await marker.exists(), false);
+  });
+
+  test('markResetPending and clearResetPending use debug overrides when provided', () async {
+    var markCalled = false;
+    var clearCalled = false;
+    debugMarkResetPending = () async => markCalled = true;
+    debugClearResetPending = () async => clearCalled = true;
+
+    await markResetPending();
+    await clearResetPending();
+
+    expect(markCalled, true);
+    expect(clearCalled, true);
   });
 
   test('recoverPendingReset does nothing when no marker exists', () async {

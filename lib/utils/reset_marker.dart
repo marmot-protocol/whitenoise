@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_slow_async_io
+
 import 'dart:io' show Directory, File;
 
 import 'package:flutter/foundation.dart' show visibleForTesting;

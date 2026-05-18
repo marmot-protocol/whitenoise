@@ -3,11 +3,12 @@
 
 // ignore_for_file: invalid_use_of_internal_member, unused_import, unnecessary_import
 
+import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
+
 import '../api.dart';
 import '../frb_generated.dart';
 import 'error.dart';
 import 'messages.dart';
-import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 import 'relay_defaults.dart';
 
 String npubFromHexPubkey({required String hexPubkey}) =>
