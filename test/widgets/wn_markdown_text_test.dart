@@ -445,9 +445,14 @@ void main() {
       );
       final span = tester.widget<Text>(find.byType(Text).first).textSpan! as TextSpan;
       final mention = span.children!.first as TextSpan;
-      expect(mention.text, '@Alice');
+      expect(mention.text, 'Alice');
       expect(receivedHex, testPubkeyA);
-      expect(mention.style?.decoration, TextDecoration.underline);
+      expect(mention.style?.fontWeight, FontWeight.w700);
+      expect(mention.style?.decoration, isNot(TextDecoration.underline));
+      // Color seeded from the pubkey; only assert it differs from the
+      // base style colour so we know the user-color path fired.
+      expect(mention.style?.color, isNotNull);
+      expect(mention.style?.color, isNot(_baseStyle.color));
     });
 
     testWidgets('npub mention with empty resolved name falls back to truncation', (tester) async {
@@ -470,8 +475,9 @@ void main() {
       );
       final span = tester.widget<Text>(find.byType(Text).first).textSpan! as TextSpan;
       final mention = span.children!.first as TextSpan;
-      expect(mention.text!.startsWith('@'), isTrue);
+      expect(mention.text!.startsWith('@'), isFalse);
       expect(mention.text!.contains('…'), isTrue);
+      expect(mention.text!.startsWith('npub1'), isTrue);
     });
 
     testWidgets('npub mention without callback uses truncated fallback', (tester) async {
@@ -493,9 +499,9 @@ void main() {
       );
       final span = tester.widget<Text>(find.byType(Text).first).textSpan! as TextSpan;
       final mention = span.children!.first as TextSpan;
-      expect(mention.text!.startsWith('@'), isTrue);
+      expect(mention.text!.startsWith('@'), isFalse);
       expect(mention.text!.contains('…'), isTrue);
-      expect(mention.style?.decoration, TextDecoration.underline);
+      expect(mention.style?.fontWeight, FontWeight.w700);
     });
 
     testWidgets('nostr mention is tappable and gets npub hrp', (tester) async {
@@ -523,7 +529,7 @@ void main() {
       );
       final span = tester.widget<Text>(find.byType(Text).first).textSpan! as TextSpan;
       final mention = span.children!.first as TextSpan;
-      expect(mention.text!.startsWith('@'), isTrue);
+      expect(mention.text!.startsWith('@'), isFalse);
       (mention.recognizer as TapGestureRecognizer).onTap!();
       expect(gotHrp, MarkdownNostrHrp.npub);
       expect(gotB32, 'npub1xyz1234567890abcdef');

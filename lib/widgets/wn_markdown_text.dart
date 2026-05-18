@@ -4,6 +4,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/encoding.dart' show hexFromNpub;
 
 const Set<String> _safeUrlSchemes = {'http', 'https', 'mailto', 'nostr', 'tel'};
@@ -415,9 +416,10 @@ class _MarkdownRenderer {
       case MarkdownInline_NostrMention(:final entity):
       case MarkdownInline_NostrUri(:final entity):
         if (entity.hrp == MarkdownNostrHrp.npub) {
+          final hex = hexFromNpub(entity.bech32);
           return TextSpan(
-            text: _resolveMentionLabel(entity.bech32),
-            style: _mentionStyle(style),
+            text: _resolveMentionLabel(entity.bech32, hex),
+            style: _mentionStyle(style, hex),
             recognizer: _nostrRecognizer(entity.hrp, entity.bech32),
           );
         }
@@ -484,32 +486,33 @@ class _MarkdownRenderer {
     return b32;
   }
 
-  /// Renders an `@`-prefixed display name for an npub mention.
+  /// Renders the display name for an npub mention.
   /// Looks up via [mentionDisplayName]; if unresolved, falls back to a
-  /// truncated bech32 ('@npub1abcdefgh…wxyz').
-  String _resolveMentionLabel(String bech32) {
+  /// truncated bech32 ('npub1abcdefgh…wxyz'). No '@' prefix per design.
+  String _resolveMentionLabel(String bech32, String? hex) {
     final lookup = mentionDisplayName;
-    if (lookup != null) {
-      final hex = hexFromNpub(bech32);
-      if (hex != null) {
-        final name = lookup(hex);
-        if (name != null && name.isNotEmpty) {
-          return '@$name';
-        }
+    if (lookup != null && hex != null) {
+      final name = lookup(hex);
+      if (name != null && name.isNotEmpty) {
+        return name;
       }
     }
-    final truncated = bech32.length > 16
-        ? '${bech32.substring(0, 12)}…${bech32.substring(bech32.length - 4)}'
-        : bech32;
-    return '@$truncated';
+    if (bech32.length > 16) {
+      return '${bech32.substring(0, 12)}…${bech32.substring(bech32.length - 4)}';
+    }
+    return bech32;
   }
 
-  /// Style for resolved/unresolved @mention: underline only, color follows
-  /// the surrounding text. Per design — mentions are not styled like links.
-  TextStyle _mentionStyle(TextStyle style) => style.copyWith(
-    decoration: TextDecoration.underline,
-    decorationColor: style.color,
-  );
+  /// Style for an npub mention: bold, in the user's per-pubkey color.
+  /// Same palette as the bubble's sender-name color. When the hex pubkey
+  /// can't be derived, falls back to the surrounding text color so the
+  /// mention is still bold but doesn't pretend to identify someone.
+  TextStyle _mentionStyle(TextStyle style, String? hex) {
+    final color = hex != null
+        ? AvatarColor.fromPubkey(hex).toColorSet(context.colors).content
+        : style.color;
+    return style.copyWith(color: color, fontWeight: FontWeight.w700);
+  }
 
   String _flattenInlines(List<MarkdownInline> inlines) {
     final buffer = StringBuffer();
