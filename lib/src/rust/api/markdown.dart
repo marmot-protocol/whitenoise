@@ -77,7 +77,9 @@ class MarkdownDocument {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MarkdownDocument && runtimeType == other.runtimeType && blocks == other.blocks;
+      other is MarkdownDocument &&
+          runtimeType == other.runtimeType &&
+          blocks == other.blocks;
 }
 
 @freezed
@@ -208,5 +210,7 @@ class MarkdownTableCell {
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
-      other is MarkdownTableCell && runtimeType == other.runtimeType && inlines == other.inlines;
+      other is MarkdownTableCell &&
+          runtimeType == other.runtimeType &&
+          inlines == other.inlines;
 }

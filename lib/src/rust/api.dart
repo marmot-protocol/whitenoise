@@ -46,7 +46,8 @@ Future<void> initializeWhitenoise({required WhitenoiseConfig config}) =>
 
 Future<void> deleteAllData() => RustLib.instance.api.crateApiDeleteAllData();
 
-Future<AppSettings> getAppSettings() => RustLib.instance.api.crateApiGetAppSettings();
+Future<AppSettings> getAppSettings() =>
+    RustLib.instance.api.crateApiGetAppSettings();
 
 Future<void> updateThemeMode({required ThemeMode themeMode}) =>
     RustLib.instance.api.crateApiUpdateThemeMode(themeMode: themeMode);
