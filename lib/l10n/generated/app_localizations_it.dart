@@ -1050,9 +1050,6 @@ class AppLocalizationsIt extends AppLocalizations {
   String get failedToFetchBlockedUsers => 'Impossibile caricare gli utenti bloccati. Riprova.';
 
   @override
-  String get blockedUserProfileTitle => 'Profilo';
-
-  @override
   String get blockedUserDetailDescription =>
       'Hai bloccato questo utente. Non potrai inviare messaggi finché non lo sblocchi.';
 

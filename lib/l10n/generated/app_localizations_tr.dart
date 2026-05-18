@@ -1049,9 +1049,6 @@ class AppLocalizationsTr extends AppLocalizations {
       'Engellenen kullanıcılar yüklenemedi. Lütfen tekrar deneyin.';
 
   @override
-  String get blockedUserProfileTitle => 'Profil';
-
-  @override
   String get blockedUserDetailDescription =>
       'Bu kullanıcıyı engellediniz. Engeli kaldırana kadar mesaj gönderemezsiniz.';
 

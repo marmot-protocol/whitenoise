@@ -1078,9 +1078,6 @@ class AppLocalizationsDe extends AppLocalizations {
       'Blockierte Nutzer konnten nicht geladen werden. Bitte erneut versuchen.';
 
   @override
-  String get blockedUserProfileTitle => 'Profil';
-
-  @override
   String get blockedUserDetailDescription =>
       'Du hast diesen Nutzer blockiert. Du kannst keine Nachrichten senden, bis die Blockierung aufgehoben ist.';
 

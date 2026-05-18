@@ -304,7 +304,6 @@
   "blockedUsersDescription": "查看並管理您封鎖的對象。",
   "blockedUsersEmpty": "您尚未封鎖任何人。",
   "failedToFetchBlockedUsers": "無法載入已封鎖的使用者。請再試一次。",
-  "blockedUserProfileTitle": "個人資料",
   "blockedUserDetailDescription": "您已封鎖此使用者。在解除封鎖之前，您將無法傳送訊息。",
   "addToAnotherGroup": "加入另一個群組",
   "relayResolutionTitle": "中繼站設定",

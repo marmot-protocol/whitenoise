@@ -63,7 +63,7 @@ class BlockedUserScreen extends HookConsumerWidget {
               child: WnSlate(
                 shrinkWrapContent: true,
                 header: WnSlateNavigationHeader(
-                  title: context.l10n.blockedUserProfileTitle,
+                  title: context.l10n.profile,
                   onNavigate: () => Routes.goBack(context),
                 ),
                 systemNotice: systemNotice.noticeMessage != null

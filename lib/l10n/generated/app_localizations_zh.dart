@@ -1018,9 +1018,6 @@ class AppLocalizationsZh extends AppLocalizations {
   String get failedToFetchBlockedUsers => '无法加载已屏蔽的用户。请重试。';
 
   @override
-  String get blockedUserProfileTitle => '个人资料';
-
-  @override
   String get blockedUserDetailDescription => '您已屏蔽此用户。在取消屏蔽之前，您无法发送消息。';
 
   @override
@@ -2464,9 +2461,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get failedToFetchBlockedUsers => '無法載入已封鎖的使用者。請再試一次。';
-
-  @override
-  String get blockedUserProfileTitle => '個人資料';
 
   @override
   String get blockedUserDetailDescription => '您已封鎖此使用者。在解除封鎖之前，您將無法傳送訊息。';

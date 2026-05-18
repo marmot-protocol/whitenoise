@@ -1046,9 +1046,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String get failedToFetchBlockedUsers => 'Failed to load blocked users. Please try again.';
 
   @override
-  String get blockedUserProfileTitle => 'Profile';
-
-  @override
   String get blockedUserDetailDescription =>
       'You\'ve blocked this user. You won\'t be able to send messages until you unblock them.';
 

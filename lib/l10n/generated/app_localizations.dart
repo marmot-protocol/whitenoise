@@ -1935,12 +1935,6 @@ abstract class AppLocalizations {
   /// **'Failed to load blocked users. Please try again.'**
   String get failedToFetchBlockedUsers;
 
-  /// Title for the blocked user profile detail screen
-  ///
-  /// In en, this message translates to:
-  /// **'Profile'**
-  String get blockedUserProfileTitle;
-
   /// Description shown in the blocked user profile screen banner
   ///
   /// In en, this message translates to:

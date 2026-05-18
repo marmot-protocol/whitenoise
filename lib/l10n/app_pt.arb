@@ -300,7 +300,6 @@
   "blockedUsersDescription": "Veja e gerencie as pessoas que você bloqueou.",
   "blockedUsersEmpty": "Você ainda não bloqueou ninguém.",
   "failedToFetchBlockedUsers": "Não foi possível carregar os usuários bloqueados. Tente novamente.",
-  "blockedUserProfileTitle": "Perfil",
   "blockedUserDetailDescription": "Você bloqueou este usuário. Você não poderá enviar mensagens até desbloqueá-lo.",
   "relayResolutionTitle": "Configuração de relay",
   "relayResolutionDescription": "Não conseguimos encontrar as suas listas de relays na rede. Pode fornecer um relay onde as suas listas estejam publicadas ou utilizar os nossos relays predefinidos para começar.",

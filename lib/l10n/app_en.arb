@@ -1328,10 +1328,6 @@
   "@failedToFetchBlockedUsers": {
     "description": "Error message shown when the blocked users list cannot be loaded"
   },
-  "blockedUserProfileTitle": "Profile",
-  "@blockedUserProfileTitle": {
-    "description": "Title for the blocked user profile detail screen"
-  },
   "blockedUserDetailDescription": "You've blocked this user. You won't be able to send messages until you unblock them.",
   "@blockedUserDetailDescription": {
     "description": "Description shown in the blocked user profile screen banner"

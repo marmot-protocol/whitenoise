@@ -1078,9 +1078,6 @@ class AppLocalizationsRu extends AppLocalizations {
       'Не удалось загрузить заблокированных пользователей. Попробуйте снова.';
 
   @override
-  String get blockedUserProfileTitle => 'Профиль';
-
-  @override
   String get blockedUserDetailDescription =>
       'Вы заблокировали этого пользователя. Вы не сможете отправлять сообщения, пока не разблокируете его.';
 

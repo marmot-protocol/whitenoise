@@ -1062,9 +1062,6 @@ class AppLocalizationsEs extends AppLocalizations {
       'No se pudieron cargar los usuarios bloqueados. Inténtalo de nuevo.';
 
   @override
-  String get blockedUserProfileTitle => 'Perfil';
-
-  @override
   String get blockedUserDetailDescription =>
       'Has bloqueado a este usuario. No podrás enviar mensajes hasta que lo desbloquees.';
 
