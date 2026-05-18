@@ -1477,4 +1477,11 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get youLeftTheGroup => 'Gruptan ayrıldınız';
+
+  @override
+  String get unsupportedDeepLinkTitle => 'Bağlantı desteklenmiyor';
+
+  @override
+  String get unsupportedDeepLinkMessage =>
+      'Bu White Noise bağlantısı açılamıyor. Uygulamayı güncellemeniz gerekebilir.';
 }

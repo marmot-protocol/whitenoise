@@ -7,7 +7,15 @@ import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/encoding.dart' show hexFromNpub;
 
-const Set<String> _safeUrlSchemes = {'http', 'https', 'mailto', 'nostr', 'tel'};
+const Set<String> _safeUrlSchemes = {
+  'http',
+  'https',
+  'mailto',
+  'nostr',
+  'tel',
+  'whitenoise',
+  'whitenoise-staging',
+};
 
 bool isSafeMarkdownUrl(String url) {
   final uri = Uri.tryParse(url.trim());

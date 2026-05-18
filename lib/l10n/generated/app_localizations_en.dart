@@ -1475,4 +1475,11 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get youLeftTheGroup => 'You left the group';
+
+  @override
+  String get unsupportedDeepLinkTitle => 'Link not supported';
+
+  @override
+  String get unsupportedDeepLinkMessage =>
+      'This White Noise link can\'t be opened. You may need to update the app.';
 }

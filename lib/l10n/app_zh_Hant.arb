@@ -431,5 +431,7 @@
   "failedToLeaveGroup": "離開群組失敗。請再試一次。",
   "youLeftTheGroup": "您已離開群組",
   "leaveGroupLastAdminWarning": "您是本群組中唯一的管理員。請先將至少一名成員提升為管理員，才能離開群組。",
-  "leaveGroupNoCapabilitiesWarning": "此群組是使用舊版建立的，因此不支援退出功能。待所有成員皆升級至支援退出功能的版本後，管理員即可升級群組功能。"
+  "leaveGroupNoCapabilitiesWarning": "此群組是使用舊版建立的，因此不支援退出功能。待所有成員皆升級至支援退出功能的版本後，管理員即可升級群組功能。",
+  "unsupportedDeepLinkTitle": "不支援的連結",
+  "unsupportedDeepLinkMessage": "無法開啟此 White Noise 連結。您可能需要更新應用程式。"
 }

@@ -36,6 +36,11 @@ void main() {
       expect(isSafeMarkdownUrl('tel:+15555550100'), isTrue);
     });
 
+    test('accepts whitenoise and whitenoise-staging', () {
+      expect(isSafeMarkdownUrl('whitenoise://chat/abc'), isTrue);
+      expect(isSafeMarkdownUrl('whitenoise-staging://user/npub1xyz'), isTrue);
+    });
+
     test('rejects javascript, data, file, vbscript', () {
       expect(isSafeMarkdownUrl('javascript:alert(1)'), isFalse);
       expect(isSafeMarkdownUrl('data:text/html,<script>'), isFalse);

@@ -1429,6 +1429,12 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get youLeftTheGroup => '您已退出群组';
+
+  @override
+  String get unsupportedDeepLinkTitle => '不支持的链接';
+
+  @override
+  String get unsupportedDeepLinkMessage => '无法打开此 White Noise 链接。您可能需要更新应用。';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2856,4 +2862,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get youLeftTheGroup => '您已離開群組';
+
+  @override
+  String get unsupportedDeepLinkTitle => '不支援的連結';
+
+  @override
+  String get unsupportedDeepLinkMessage => '無法開啟此 White Noise 連結。您可能需要更新應用程式。';
 }

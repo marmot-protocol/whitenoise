@@ -1511,4 +1511,11 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get youLeftTheGroup => 'Вы покинули группу';
+
+  @override
+  String get unsupportedDeepLinkTitle => 'Ссылка не поддерживается';
+
+  @override
+  String get unsupportedDeepLinkMessage =>
+      'Эту ссылку White Noise невозможно открыть. Возможно, необходимо обновить приложение.';
 }
