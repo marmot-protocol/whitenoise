@@ -14,6 +14,7 @@ import 'package:whitenoise/hooks/use_chat_input.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData, useChatMessages;
 import 'package:whitenoise/hooks/use_chat_scroll.dart';
 import 'package:whitenoise/hooks/use_chat_summary.dart';
+import 'package:whitenoise/hooks/use_group_members.dart';
 import 'package:whitenoise/hooks/use_media_upload.dart';
 import 'package:whitenoise/hooks/use_message_search.dart';
 import 'package:whitenoise/hooks/use_scroll_to_message.dart';
@@ -30,10 +31,15 @@ import 'package:whitenoise/services/message_service.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage, DeliveryStatus_Failed;
+import 'package:whitenoise/src/rust/api/metadata.dart' show FlutterMetadata;
+import 'package:whitenoise/src/rust/api/users.dart' as users_api;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart';
 import 'package:whitenoise/utils/chat_summary_display.dart';
+import 'package:whitenoise/utils/encoding.dart' show hexFromNpub, npubFromHex;
+import 'package:whitenoise/utils/mention_query.dart';
+import 'package:whitenoise/utils/mention_text_editing_controller.dart';
 import 'package:whitenoise/utils/metadata.dart';
 import 'package:whitenoise/utils/scroll_duration.dart';
 import 'package:whitenoise/utils/search_context.dart';
@@ -51,12 +57,74 @@ import 'package:whitenoise/widgets/wn_search_field.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_chat_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
+import 'package:whitenoise/widgets/wn_user_item.dart';
 
 final _logger = Logger('ChatScreen');
 
 const _slateHeight = 80.0;
 const _searchBarHeight = 80.0;
 const _searchNavigationHeight = 60.0;
+const _mentionSuggestionLimit = 5;
+
+class _MentionMember {
+  const _MentionMember({
+    required this.pubkey,
+    required this.npub,
+    required this.displayName,
+    this.pictureUrl,
+  });
+
+  final String pubkey;
+  final String npub;
+  final String displayName;
+  final String? pictureUrl;
+}
+
+Future<List<_MentionMember>> _loadMentionMembers({
+  required List<String> pubkeys,
+  required String currentUserPubkey,
+}) async {
+  final mentionablePubkeys = {
+    ...pubkeys,
+  }.where((pubkey) => pubkey != currentUserPubkey).toList();
+  final members = await Future.wait(mentionablePubkeys.map(_loadMentionMember));
+  return members.nonNulls.toList();
+}
+
+Future<_MentionMember?> _loadMentionMember(String pubkey) async {
+  final npub = npubFromHex(pubkey);
+  if (npub == null) return null;
+  FlutterMetadata? metadata;
+  try {
+    metadata = await users_api.userMetadata(pubkey: pubkey, blockingDataSync: false);
+  } catch (_) {
+    metadata = null;
+  }
+  return _MentionMember(
+    pubkey: pubkey,
+    npub: npub,
+    displayName: presentName(metadata) ?? pubkey.substring(0, 8),
+    pictureUrl: metadata?.picture,
+  );
+}
+
+List<_MentionMember> _filterMentionMembers(List<_MentionMember> members, String query) {
+  final normalizedQuery = query.toLowerCase();
+  return members
+      .where((member) {
+        if (normalizedQuery.isEmpty) return true;
+        return member.displayName.toLowerCase().contains(normalizedQuery) ||
+            member.npub.toLowerCase().contains(normalizedQuery) ||
+            member.pubkey.toLowerCase().contains(normalizedQuery);
+      })
+      .take(_mentionSuggestionLimit)
+      .toList();
+}
+
+String _mentionMemberPubkeyKey(List<String> pubkeys) {
+  if (pubkeys.isEmpty) return '';
+  return (pubkeys.toSet().toList()..sort()).join('');
+}
 
 void _scrollToMatch(
   AutoScrollController controller,
@@ -113,6 +181,26 @@ class ChatScreen extends HookConsumerWidget {
     final chatSummary = useChatSummary(context, pubkey, groupId);
     final header = chatSummaryDisplay(chatSummary.data, groupId);
     final isGroupChat = chatSummary.data?.groupType == GroupType.group;
+    final groupMembers = useGroupMembers(
+      accountPubkey: pubkey,
+      groupId: groupId,
+    );
+    final mentionMemberPubkeys = isGroupChat ? groupMembers.members : const <String>[];
+    final mentionMemberPubkeyKey = _mentionMemberPubkeyKey(mentionMemberPubkeys);
+    final mentionMembersFuture = useMemoized(
+      () => _loadMentionMembers(
+        pubkeys: mentionMemberPubkeys,
+        currentUserPubkey: pubkey,
+      ),
+      [mentionMemberPubkeyKey, pubkey],
+    );
+    final mentionMembersSnapshot = useFuture(
+      mentionMembersFuture,
+      initialData: const <_MentionMember>[],
+    );
+    final mentionMembers = isGroupChat
+        ? mentionMembersSnapshot.data ?? const <_MentionMember>[]
+        : const <_MentionMember>[];
     final scrollToMessageResult = useScrollToMessage(
       getReversedMessageIndex: getReversedMessageIndex,
       loadOlderMessages: loadOlderMessages,
@@ -163,6 +251,15 @@ class ChatScreen extends HookConsumerWidget {
       if (isRemovedFromGroup) inputAreaHeight.value = 0;
       return null;
     }, [isRemovedFromGroup]);
+
+    useEffect(() {
+      input.controller.displayNameForNpub = (npub) {
+        final hex = hexFromNpub(npub);
+        if (hex == null) return null;
+        return presentName(getAuthorMetadata(hex));
+      };
+      return null;
+    }, [input.controller, getAuthorMetadata]);
 
     final search = useMessageSearch(
       pubkey: pubkey,
@@ -718,6 +815,7 @@ class ChatScreen extends HookConsumerWidget {
                         mediaUpload: mediaUpload,
                         currentUserPubkey: pubkey,
                         isGroupChat: isGroupChat,
+                        mentionMembers: mentionMembers,
                         onSend: sendMessage,
                         onError: showNotice,
                         getChatMessageQuote: getChatMessageQuote,
@@ -776,12 +874,13 @@ class ChatScreen extends HookConsumerWidget {
   }
 }
 
-class _ChatInput extends StatelessWidget {
+class _ChatInput extends HookWidget {
   const _ChatInput({
     required this.input,
     required this.mediaUpload,
     required this.currentUserPubkey,
     required this.isGroupChat,
+    required this.mentionMembers,
     required this.onSend,
     required this.onError,
     required this.getChatMessageQuote,
@@ -793,6 +892,7 @@ class _ChatInput extends StatelessWidget {
   final MediaUploadState mediaUpload;
   final String currentUserPubkey;
   final bool isGroupChat;
+  final List<_MentionMember> mentionMembers;
   final bool actionsEnabled;
   final bool isOffline;
   final Future<void> Function(
@@ -810,9 +910,37 @@ class _ChatInput extends StatelessWidget {
     final typography = context.typographyScaled;
     final hasMedia = mediaUpload.items.isNotEmpty;
     final showSend = input.hasContent || hasMedia;
+    final textValue = useListenableSelector(input.controller, () => input.controller.value);
+    final mentionQuery = activeMentionQuery(textValue);
+    final mentionSuggestions = mentionQuery != null && actionsEnabled
+        ? _filterMentionMembers(mentionMembers, mentionQuery.query)
+        : const <_MentionMember>[];
+
+    useEffect(() {
+      input.controller.setMentionTargets([
+        for (final member in mentionMembers)
+          MentionTextTarget(
+            uri: '@${member.npub}',
+            displayText: '@${member.displayName}',
+          ),
+      ]);
+      return null;
+    }, [input.controller, mentionMembers]);
+
+    void insertMention(_MentionMember member) {
+      final query = mentionQuery;
+      if (query == null) return;
+      input.controller.insertMention(
+        start: query.start,
+        end: query.end,
+        displayName: member.displayName,
+        uri: '@${member.npub}',
+      );
+      input.focusNode.requestFocus();
+    }
 
     Future<void> handleSend() async {
-      final text = input.controller.text.trim();
+      final text = input.controller.messageText.trim();
       final hasMedia = mediaUpload.canSend;
       _logger.info(
         'handleSend textLen=${text.length} hasMedia=$hasMedia replyTo=${input.replyingTo?.id}',
@@ -874,41 +1002,101 @@ class _ChatInput extends StatelessWidget {
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 10.h),
-      child: WnChatMessageInput(
-        isFocused: input.hasFocus,
-        attachmentArea: buildAttachmentArea(),
-        controller: input.controller,
-        inputStyle: inputStyle,
-        actionsEnabled: actionsEnabled,
-        onAddTap: () {
-          input.focusNode.unfocus();
-          mediaUpload.pickMedia();
-        },
-        inputField: TextField(
-          controller: input.controller,
-          focusNode: input.focusNode,
-          maxLines: 4,
-          minLines: 1,
-          textCapitalization: TextCapitalization.sentences,
-          cursorColor: colors.backgroundContentPrimary,
-          style: inputStyle,
-          decoration: InputDecoration(
-            hintText: context.l10n.messagePlaceholder,
-            hintStyle: typography.medium14.copyWith(
-              color: colors.backgroundContentSecondary,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          if (mentionSuggestions.isNotEmpty) ...[
+            _MentionSuggestionsMenu(
+              members: mentionSuggestions,
+              onSelected: insertMention,
             ),
-            filled: true,
-            fillColor: Colors.transparent,
-            contentPadding: EdgeInsets.symmetric(
-              horizontal: 8.w,
-              vertical: 8.h,
+            SizedBox(height: 6.h),
+          ],
+          WnChatMessageInput(
+            isFocused: input.hasFocus,
+            attachmentArea: buildAttachmentArea(),
+            controller: input.controller,
+            inputStyle: inputStyle,
+            actionsEnabled: actionsEnabled,
+            onAddTap: () {
+              input.focusNode.unfocus();
+              mediaUpload.pickMedia();
+            },
+            inputField: TextField(
+              controller: input.controller,
+              focusNode: input.focusNode,
+              maxLines: 4,
+              minLines: 1,
+              textCapitalization: TextCapitalization.sentences,
+              cursorColor: colors.backgroundContentPrimary,
+              style: inputStyle,
+              decoration: InputDecoration(
+                hintText: context.l10n.messagePlaceholder,
+                hintStyle: typography.medium14.copyWith(
+                  color: colors.backgroundContentSecondary,
+                ),
+                filled: true,
+                fillColor: Colors.transparent,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 8.w,
+                  vertical: 8.h,
+                ),
+                border: InputBorder.none,
+                enabledBorder: InputBorder.none,
+                focusedBorder: InputBorder.none,
+              ),
             ),
-            border: InputBorder.none,
-            enabledBorder: InputBorder.none,
-            focusedBorder: InputBorder.none,
+            onSend: showSend && !isOffline ? handleSend : null,
           ),
-        ),
-        onSend: showSend && !isOffline ? handleSend : null,
+        ],
+      ),
+    );
+  }
+}
+
+class _MentionSuggestionsMenu extends StatelessWidget {
+  const _MentionSuggestionsMenu({
+    required this.members,
+    required this.onSelected,
+  });
+
+  final List<_MentionMember> members;
+  final void Function(_MentionMember member) onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      key: const Key('mention_suggestions_menu'),
+      constraints: BoxConstraints(maxHeight: 220.h),
+      decoration: BoxDecoration(
+        color: colors.backgroundPrimary,
+        borderRadius: BorderRadius.circular(8.r),
+        border: Border.all(color: colors.borderSecondary),
+      ),
+      child: ListView.separated(
+        shrinkWrap: true,
+        padding: EdgeInsets.symmetric(vertical: 6.h),
+        itemCount: members.length,
+        separatorBuilder: (_, _) => SizedBox(height: 2.h),
+        itemBuilder: (context, index) {
+          final member = members[index];
+          return GestureDetector(
+            key: Key('mention_suggestion_${member.pubkey}'),
+            behavior: HitTestBehavior.opaque,
+            onTap: () => onSelected(member),
+            child: Padding(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
+              child: WnUserItem(
+                displayName: member.displayName,
+                label: member.npub,
+                pictureUrl: member.pictureUrl,
+                avatarColor: AvatarColor.fromPubkey(member.pubkey),
+              ),
+            ),
+          );
+        },
       ),
     );
   }

@@ -26,6 +26,7 @@ import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/mute_list.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/utils/mention_text_editing_controller.dart';
 import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
@@ -3113,6 +3114,63 @@ void main() {
           expect(find.byKey(const Key('reaction_❤')), findsNothing);
           expect(find.byKey(const Key('emoji_picker_button')), findsNothing);
         });
+      });
+    });
+
+    group('mention picker', () {
+      setUp(() {
+        _api.groupMembers = [_testPubkey, testPubkeyC];
+        _api.metadataByPubkey = {
+          testPubkeyC: const FlutterMetadata(displayName: 'Trent', custom: {}),
+        };
+      });
+
+      testWidgets('shows picker when @ is typed and inserts raw npub on tap', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsNothing);
+
+        await tester.enterText(find.byType(TextField), '@');
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsOneWidget);
+        const suggestionKey = Key('mention_suggestion_$testPubkeyC');
+        expect(find.byKey(suggestionKey), findsOneWidget);
+
+        await tester.tap(find.byKey(suggestionKey));
+        await tester.pumpAndSettle();
+
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        final controller = textField.controller! as MentionTextEditingController;
+        expect(controller.text, '@Trent ');
+        expect(controller.messageText, '@$testNpubC ');
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsNothing);
+      });
+
+      testWidgets('filters picker by typed query', (tester) async {
+        _api.metadataByPubkey = {
+          testPubkeyC: const FlutterMetadata(displayName: 'Trent', custom: {}),
+        };
+        await pumpChatScreen(tester);
+        await tester.enterText(find.byType(TextField), '@zz');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsNothing);
+      });
+
+      testWidgets('does not show picker in a DM', (tester) async {
+        _api.isDm = true;
+        await pumpChatScreen(tester);
+        await tester.enterText(find.byType(TextField), '@');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsNothing);
+      });
+
+      testWidgets('excludes self from the picker', (tester) async {
+        _api.groupMembers = [_testPubkey];
+        await pumpChatScreen(tester);
+        await tester.enterText(find.byType(TextField), '@');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsNothing);
       });
     });
   });

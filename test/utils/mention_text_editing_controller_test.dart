@@ -1,0 +1,251 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/utils/mention_text_editing_controller.dart';
+
+void main() {
+  group('MentionTextEditingController', () {
+    test('insertMention replaces the @query range with display text + space', () {
+      final controller = MentionTextEditingController(text: 'hi @al')
+        ..selection = const TextSelection.collapsed(offset: 6);
+      controller.insertMention(
+        start: 3,
+        end: 6,
+        displayName: 'Alice',
+        uri: '@npub1alice',
+      );
+      expect(controller.text, 'hi @Alice ');
+      expect(controller.selection.baseOffset, 'hi @Alice '.length);
+    });
+
+    test('messageText expands the tracked display back to the underlying uri', () {
+      final controller = MentionTextEditingController(text: 'hi @al')
+        ..selection = const TextSelection.collapsed(offset: 6);
+      controller.insertMention(
+        start: 3,
+        end: 6,
+        displayName: 'Alice',
+        uri: '@npub1alice',
+      );
+      expect(controller.messageText, 'hi @npub1alice ');
+    });
+
+    test('editing into the mention text invalidates it', () {
+      final controller = MentionTextEditingController(text: '')
+        ..selection = const TextSelection.collapsed(offset: 0);
+      controller.insertMention(
+        start: 0,
+        end: 0,
+        displayName: 'Alice',
+        uri: '@npub1alice',
+      );
+      expect(controller.text, '@Alice ');
+      // User backspaces the 'e' in '@Alice'.
+      controller.value = const TextEditingValue(
+        text: '@Alic ',
+        selection: TextSelection.collapsed(offset: 5),
+      );
+      // No tracked mention should remain — messageText equals plain text.
+      expect(controller.messageText, '@Alic ');
+    });
+
+    test('setMentionTargets restores display form for known uris in drafts', () {
+      final controller = MentionTextEditingController(text: 'hello @npub1alice :)')
+        ..selection = const TextSelection.collapsed(offset: 'hello '.length);
+      controller.setMentionTargets(const [
+        MentionTextTarget(uri: '@npub1alice', displayText: '@Alice'),
+      ]);
+      expect(controller.text, 'hello @Alice :)');
+      expect(controller.messageText, 'hello @npub1alice :)');
+    });
+
+    test('setMentionTargets is a no-op when the target set is unchanged', () {
+      final controller = MentionTextEditingController(text: '@npub1alice')
+        ..selection = const TextSelection.collapsed(offset: 0);
+      const targets = [
+        MentionTextTarget(uri: '@npub1alice', displayText: '@Alice'),
+      ];
+      controller.setMentionTargets(targets);
+      expect(controller.text, '@Alice');
+      // Calling again with the same targets does not double-process.
+      controller.setMentionTargets(targets);
+      expect(controller.text, '@Alice');
+    });
+
+    testWidgets('buildTextSpan styles mentions with the theme primary color', (tester) async {
+      final controller = MentionTextEditingController(text: '')
+        ..selection = const TextSelection.collapsed(offset: 0);
+      controller.insertMention(
+        start: 0,
+        end: 0,
+        displayName: 'Alice',
+        uri: '@npub1alice',
+      );
+
+      late BuildContext capturedContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: ThemeData(
+            colorScheme: const ColorScheme.light(primary: Color(0xFF112233)),
+          ),
+          home: Builder(
+            builder: (context) {
+              capturedContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+
+      final span = controller.buildTextSpan(
+        context: capturedContext,
+        style: const TextStyle(color: Color(0xFF000000)),
+        withComposing: false,
+      );
+      final children = span.children!.cast<TextSpan>();
+      final mentionSpan = children.firstWhere((s) => s.text == '@Alice');
+      expect(mentionSpan.style!.color, const Color(0xFF112233));
+      expect(mentionSpan.style!.fontWeight, FontWeight.w700);
+    });
+
+    testWidgets('buildTextSpan falls back to super when no valid mentions', (tester) async {
+      final controller = MentionTextEditingController(text: 'plain text');
+      late BuildContext capturedContext;
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Builder(
+            builder: (context) {
+              capturedContext = context;
+              return const SizedBox.shrink();
+            },
+          ),
+        ),
+      );
+      final span = controller.buildTextSpan(
+        context: capturedContext,
+        style: const TextStyle(color: Color(0xFF000000)),
+        withComposing: false,
+      );
+      expect(span.text, 'plain text');
+    });
+
+    test('insertMention with empty displayName falls back to the uri', () {
+      final controller = MentionTextEditingController(text: '@')
+        ..selection = const TextSelection.collapsed(offset: 1);
+      controller.insertMention(
+        start: 0,
+        end: 1,
+        displayName: '   ',
+        uri: '@npub1bare',
+      );
+      expect(controller.text, '@npub1bare ');
+      expect(controller.messageText, '@npub1bare ');
+    });
+
+    test('out-of-range insertMention is a no-op', () {
+      final controller = MentionTextEditingController(text: 'hi');
+      controller.insertMention(
+        start: -1,
+        end: 5,
+        displayName: 'Alice',
+        uri: '@npub1alice',
+      );
+      expect(controller.text, 'hi');
+    });
+
+    group('bare @npub auto-detection', () {
+      const fullNpub = '@npub1xtscya34g58tk0z605fvr788k263gsu6cy9x0mhnm87echrgufzsevkk5s';
+      const truncated = '@npub1xtscya3…kk5s';
+
+      test('typing a full bare @npub auto-truncates to styled display', () {
+        final controller = MentionTextEditingController();
+        controller.value = const TextEditingValue(
+          text: 'hi $fullNpub there',
+          selection: TextSelection.collapsed(offset: 3 + fullNpub.length),
+        );
+        expect(controller.text, 'hi $truncated there');
+        expect(controller.messageText, 'hi $fullNpub there');
+      });
+
+      test('a partial npub (too short) is left untouched', () {
+        final controller = MentionTextEditingController(text: '@npub1abc');
+        controller.value = const TextEditingValue(text: '@npub1abc');
+        expect(controller.text, '@npub1abc');
+        expect(controller.messageText, '@npub1abc');
+      });
+
+      test('known target wins over bare auto-detection', () {
+        final controller = MentionTextEditingController();
+        controller.setMentionTargets(const [
+          MentionTextTarget(uri: fullNpub, displayText: '@Trent'),
+        ]);
+        controller.value = const TextEditingValue(
+          text: 'hi $fullNpub',
+          selection: TextSelection.collapsed(offset: 3 + fullNpub.length),
+        );
+        expect(controller.text, 'hi @Trent');
+        expect(controller.messageText, 'hi $fullNpub');
+      });
+
+      test('resolver returns display name → mention shows @Name instead of truncating', () {
+        final controller = MentionTextEditingController()
+          ..displayNameForNpub = (npub) => npub == fullNpub.substring(1) ? 'Satoshi' : null;
+        controller.value = const TextEditingValue(
+          text: fullNpub,
+          selection: TextSelection.collapsed(offset: fullNpub.length),
+        );
+        expect(controller.text, '@Satoshi');
+        expect(controller.messageText, fullNpub);
+      });
+
+      test('resolver returns null → falls back to truncation', () {
+        final controller = MentionTextEditingController()..displayNameForNpub = (_) => null;
+        controller.value = const TextEditingValue(
+          text: fullNpub,
+          selection: TextSelection.collapsed(offset: fullNpub.length),
+        );
+        expect(controller.text, truncated);
+        expect(controller.messageText, fullNpub);
+      });
+
+      test('setting a resolver after the fact upgrades existing truncated mentions', () {
+        final controller = MentionTextEditingController();
+        controller.value = const TextEditingValue(
+          text: fullNpub,
+          selection: TextSelection.collapsed(offset: fullNpub.length),
+        );
+        expect(controller.text, truncated);
+        controller.displayNameForNpub = (_) => 'Satoshi';
+        expect(controller.text, '@Satoshi');
+        expect(controller.messageText, fullNpub);
+      });
+
+      test('clearing the resolver downgrades known mentions back to truncated', () {
+        final controller = MentionTextEditingController()..displayNameForNpub = (_) => 'Satoshi';
+        controller.value = const TextEditingValue(
+          text: fullNpub,
+          selection: TextSelection.collapsed(offset: fullNpub.length),
+        );
+        expect(controller.text, '@Satoshi');
+        controller.displayNameForNpub = null;
+        expect(controller.text, truncated);
+      });
+
+      test('editing inside the truncated display invalidates the mention', () {
+        final controller = MentionTextEditingController();
+        controller.value = const TextEditingValue(
+          text: fullNpub,
+          selection: TextSelection.collapsed(offset: fullNpub.length),
+        );
+        expect(controller.text, truncated);
+        // Backspace inside the truncated display.
+        final shorter = truncated.substring(0, truncated.length - 1);
+        controller.value = TextEditingValue(
+          text: shorter,
+          selection: TextSelection.collapsed(offset: shorter.length),
+        );
+        expect(controller.text, shorter);
+        expect(controller.messageText, shorter);
+      });
+    });
+  });
+}
