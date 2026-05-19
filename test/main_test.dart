@@ -819,16 +819,21 @@ void main() {
       expect(File('${baseDir.path}/data/new-marker.txt').readAsStringSync(), 'new');
       expect(
         File('${pathProvider.tempDir.path}/whitenoise/data/old-marker.txt').existsSync(),
-        isTrue,
+        isFalse,
       );
     });
 
-    test('falls back to Documents on iOS when App Group container is unavailable', () async {
+    test('throws on iOS when App Group container is unavailable', () async {
       _mockAppGroupContainerPath(null);
 
-      final baseDir = await resolveWhitenoiseBaseDirectory(isIOS: true);
-
-      expect(baseDir.path, '${pathProvider.tempDir.path}/whitenoise');
+      await expectLater(
+        resolveWhitenoiseBaseDirectory(isIOS: true),
+        throwsA(
+          predicate<Object>(
+            (error) => error.toString().contains('App Group container unavailable'),
+          ),
+        ),
+      );
     });
   });
 }

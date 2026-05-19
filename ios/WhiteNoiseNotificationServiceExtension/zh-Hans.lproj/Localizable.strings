@@ -1,2 +1,9 @@
 "notification_title" = "White Noise";
 "notification_new_encrypted_message" = "新的加密消息";
+"notification_unknown_sender" = "有人";
+"notification_secure_chat_invite_title" = "安全聊天邀请";
+"notification_secure_group_invite_title" = "安全群组邀请";
+"notification_secure_group" = "安全群组";
+"notification_dm_invite_body" = "%@ 邀请你加入安全聊天";
+"notification_group_invite_body" = "%@ 邀请你加入%@";
+"notification_group_message_body" = "%@: %@";

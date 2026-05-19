@@ -18,7 +18,7 @@ class WhitenoiseApplication : Application(), FlutterForegroundTaskLifecycleListe
         // by RebootReceiver / MY_PACKAGE_REPLACED.
         try {
             Keyring.initializeNdkContext(applicationContext)
-        } catch (t: Exception) {
+        } catch (t: Throwable) {
             Log.e(TAG, "onCreate: Keyring.initializeNdkContext failed", t)
         }
     }

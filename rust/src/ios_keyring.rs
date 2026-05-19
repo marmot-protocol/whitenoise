@@ -23,7 +23,10 @@ const AFTER_FIRST_UNLOCK_SERVICE_SUFFIX: &str = ".after-first-unlock";
 pub(crate) fn install_ios_keyring_store_if_needed() -> std::result::Result<(), String> {
     #[cfg(target_os = "ios")]
     {
-        install_after_first_unlock_keyring_store(None).map_err(|e| e.to_string())
+        // AppDelegate and the NSE install this store with the signed keychain
+        // access group before Rust initialization. Reinstalling here with
+        // `None` would drop that access group and break shared DB access.
+        Ok(())
     }
 
     #[cfg(not(target_os = "ios"))]
@@ -102,6 +105,28 @@ impl AfterFirstUnlockMigratingStore {
             false,
         )
     }
+
+    fn append_migrating_search_entries(
+        &self,
+        found: Vec<Entry>,
+        entries: &mut Vec<Entry>,
+        seen_users: &mut HashSet<String>,
+    ) -> Result<()> {
+        let primary_service = primary_service_id(WHITENOISE_KEYRING_SERVICE_ID);
+        for entry in found {
+            match entry.get_specifiers() {
+                Some((service, user))
+                    if service == WHITENOISE_KEYRING_SERVICE_ID || service == primary_service =>
+                {
+                    if seen_users.insert(user.clone()) {
+                        entries.push(self.build(WHITENOISE_KEYRING_SERVICE_ID, &user, None)?);
+                    }
+                }
+                _ => entries.push(entry),
+            }
+        }
+        Ok(())
+    }
 }
 
 #[cfg(any(target_os = "ios", test))]
@@ -142,15 +167,24 @@ impl CredentialStoreApi for AfterFirstUnlockMigratingStore {
     }
 
     fn search(&self, spec: &HashMap<&str, &str>) -> Result<Vec<Entry>> {
-        let mut entries = self.fallback.search(spec)?;
+        if spec.get("service").copied() != Some(WHITENOISE_KEYRING_SERVICE_ID) {
+            return self.fallback.search(spec);
+        }
+
+        let mut entries = Vec::new();
+        let mut seen_users = HashSet::new();
         let primary_service = primary_service_id(WHITENOISE_KEYRING_SERVICE_ID);
+        self.append_migrating_search_entries(
+            self.fallback.search(spec)?,
+            &mut entries,
+            &mut seen_users,
+        )?;
         if let Some(primary_spec) = remapped_primary_search_spec(spec, &primary_service) {
-            entries.extend(normalize_service_specifiers(
+            self.append_migrating_search_entries(
                 self.fallback.search(&primary_spec)?,
-                &primary_service,
-                WHITENOISE_KEYRING_SERVICE_ID,
-            ));
-            dedupe_entries_by_specifiers(&mut entries);
+                &mut entries,
+                &mut seen_users,
+            )?;
         }
         Ok(entries)
     }
@@ -301,86 +335,6 @@ fn remapped_primary_search_spec<'a>(
     Some(primary_spec)
 }
 
-#[cfg(any(target_os = "ios", test))]
-fn normalize_service_specifiers(
-    entries: Vec<Entry>,
-    physical_service: &str,
-    logical_service: &str,
-) -> Vec<Entry> {
-    entries
-        .into_iter()
-        .map(|entry| normalize_service_specifier(entry, physical_service, logical_service))
-        .collect()
-}
-
-#[cfg(any(target_os = "ios", test))]
-fn normalize_service_specifier(
-    entry: Entry,
-    physical_service: &str,
-    logical_service: &str,
-) -> Entry {
-    match entry.get_specifiers() {
-        Some((service, _)) if service == physical_service => {
-            Entry::new_with_credential(Arc::new(LogicalServiceCredential {
-                inner: entry,
-                physical_service: physical_service.to_string(),
-                logical_service: logical_service.to_string(),
-            }))
-        }
-        _ => entry,
-    }
-}
-
-#[cfg(any(target_os = "ios", test))]
-fn dedupe_entries_by_specifiers(entries: &mut Vec<Entry>) {
-    let mut seen = HashSet::new();
-    entries.retain(|entry| match entry.get_specifiers() {
-        Some(specifiers) => seen.insert(specifiers),
-        None => true,
-    });
-}
-
-#[cfg(any(target_os = "ios", test))]
-#[derive(Debug)]
-struct LogicalServiceCredential {
-    inner: Entry,
-    physical_service: String,
-    logical_service: String,
-}
-
-#[cfg(any(target_os = "ios", test))]
-impl CredentialApi for LogicalServiceCredential {
-    fn set_secret(&self, secret: &[u8]) -> Result<()> {
-        self.inner.set_secret(secret)
-    }
-
-    fn get_secret(&self) -> Result<Vec<u8>> {
-        self.inner.get_secret()
-    }
-
-    fn delete_credential(&self) -> Result<()> {
-        self.inner.delete_credential()
-    }
-
-    fn get_credential(&self) -> Result<Option<Arc<Credential>>> {
-        Ok(None)
-    }
-
-    fn get_specifiers(&self) -> Option<(String, String)> {
-        self.inner.get_specifiers().map(|(service, user)| {
-            if service == self.physical_service {
-                (self.logical_service.clone(), user)
-            } else {
-                (service, user)
-            }
-        })
-    }
-
-    fn as_any(&self) -> &dyn Any {
-        self
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use std::sync::Mutex;
@@ -486,6 +440,12 @@ mod tests {
         let entries = store.search(&spec).unwrap();
 
         assert_eq!(entries.len(), 1);
+        assert!(
+            entries[0]
+                .as_any()
+                .downcast_ref::<AfterFirstUnlockMigratingCredential>()
+                .is_some()
+        );
         assert_eq!(
             entries[0].get_specifiers(),
             Some((
@@ -511,6 +471,12 @@ mod tests {
         let entries = store.search(&spec).unwrap();
 
         assert_eq!(entries.len(), 1);
+        assert!(
+            entries[0]
+                .as_any()
+                .downcast_ref::<AfterFirstUnlockMigratingCredential>()
+                .is_some()
+        );
         assert_eq!(
             entries[0].get_specifiers(),
             Some((
@@ -650,11 +616,23 @@ mod tests {
 
         fn build(
             &self,
-            _service: &str,
-            _user: &str,
+            service: &str,
+            user: &str,
             _modifiers: Option<&HashMap<&str, &str>>,
         ) -> Result<Entry> {
-            Err(Error::NoEntry)
+            let primary_service = primary_service_id(WHITENOISE_KEYRING_SERVICE_ID);
+            if service == WHITENOISE_KEYRING_SERVICE_ID {
+                if let Some(credential) = self.matching_credential(self.legacy.as_ref(), user) {
+                    return Ok(Entry::new_with_credential(credential));
+                }
+            } else if service == primary_service {
+                if let Some(credential) = self.matching_credential(self.primary.as_ref(), user) {
+                    return Ok(Entry::new_with_credential(credential));
+                }
+            }
+            Ok(Entry::new_with_credential(Arc::new(
+                RecordingCredential::with_specifiers(service, user),
+            )))
         }
 
         fn search(&self, spec: &HashMap<&str, &str>) -> Result<Vec<Entry>> {
@@ -677,6 +655,19 @@ mod tests {
 
         fn as_any(&self) -> &dyn Any {
             self
+        }
+    }
+
+    impl RecordingSearchStore {
+        fn matching_credential(
+            &self,
+            credential: Option<&Arc<RecordingCredential>>,
+            user: &str,
+        ) -> Option<Arc<RecordingCredential>> {
+            credential.and_then(|credential| match credential.get_specifiers() {
+                Some((_, credential_user)) if credential_user == user => Some(credential.clone()),
+                _ => None,
+            })
         }
     }
 }

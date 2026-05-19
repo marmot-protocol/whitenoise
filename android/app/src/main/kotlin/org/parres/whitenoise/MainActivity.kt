@@ -29,9 +29,6 @@ class MainActivity : FlutterActivity() {
         // Keyring.initializeNdkContext moved to WhitenoiseApplication.onCreate
         // so the Android Context is available from every process entry point,
         // not just Activity launch.
-        flutterEngine.plugins.add(AndroidSignerPlugin())
-        flutterEngine.plugins.add(AndroidPlayServicesPlugin())
-        flutterEngine.plugins.add(AndroidPushNotificationsPlugin())
     }
 
     private fun cleanForegroundTaskPrefs() {

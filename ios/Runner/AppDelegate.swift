@@ -54,9 +54,6 @@ private func wn_install_ios_background_keyring_store_with_access_group(
   ) {
     super.application(application, didFailToRegisterForRemoteNotificationsWithError: error)
     NSLog("White Noise APNS registration failed: %@", error.localizedDescription)
-#if DEBUG
-    NSLog("APNs registration failed: %@", error.localizedDescription)
-#endif
   }
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {

@@ -35,6 +35,7 @@ void _startCallback() {
 
   Logger.root.level = kDebugMode ? Level.INFO : Level.WARNING;
   Logger.root.onRecord.listen((record) {
+    // To debug other background-isolate logs, temporarily remove this loggerName filter.
     if (record.loggerName != 'ForegroundService' &&
         record.loggerName != 'ExternalSignerCallbackRegistry' &&
         record.loggerName != 'NotificationSubscription') {
@@ -220,7 +221,6 @@ class NotificationTaskHandler extends TaskHandler {
     return service.ensureRegistered(
       registeredExternalSignerPubkeys: _registeredExternalSignerPubkeys,
       externalSignerRegistrationFutures: _externalSignerRegistrationFutures,
-      requireAll: true,
     );
   }
 
@@ -444,12 +444,12 @@ Future<PendingNotificationTap?> consumePendingNotificationTap() async {
   try {
     final raw = await FlutterForegroundTask.getData<String>(key: _kPendingNotificationTapKey);
     if (raw == null) return null;
-    await FlutterForegroundTask.removeData(key: _kPendingNotificationTapKey);
     final tap = PendingNotificationTap.fromMap(jsonDecode(raw) as Map<String, dynamic>);
     if (tap == null) {
       _logger.warning('Malformed pending notification tap payload: $raw');
       return null;
     }
+    await FlutterForegroundTask.removeData(key: _kPendingNotificationTapKey);
     return tap;
   } catch (e, st) {
     _logger.warning('Failed to consume pending notification tap', e, st);

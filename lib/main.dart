@@ -46,6 +46,13 @@ const _initializeWhitenoiseRetryDelay = Duration(milliseconds: 500);
 const kDataVersion = 1;
 const kDataVersionFile = 'data_version';
 
+class _AppGroupContainerUnavailableException implements Exception {
+  const _AppGroupContainerUnavailableException();
+
+  @override
+  String toString() => 'App Group container unavailable for iOS White Noise data';
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   Logger.root.level = Level.WARNING;
@@ -180,11 +187,9 @@ Future<Directory> resolveWhitenoiseBaseDirectory({
   if (!(isIOS ?? Platform.isIOS)) return documentsBaseDir;
 
   try {
-    final appGroupContainerPath = await appGroupChannel.invokeMethod<String>(
-      _getAppGroupContainerPathMethod,
-    );
+    final appGroupContainerPath = await _getAppGroupContainerPath(appGroupChannel);
     if (appGroupContainerPath == null || appGroupContainerPath.isEmpty) {
-      return documentsBaseDir;
+      throw const _AppGroupContainerUnavailableException();
     }
 
     final appGroupBaseDir = Directory('$appGroupContainerPath/whitenoise');
@@ -198,6 +203,9 @@ Future<Directory> resolveWhitenoiseBaseDirectory({
       );
     }
     return appGroupBaseDir;
+  } on _AppGroupContainerUnavailableException catch (error, stackTrace) {
+    _logger.severe('Failed to resolve App Group container', error, stackTrace);
+    Error.throwWithStackTrace(error, stackTrace);
   } catch (error, stackTrace) {
     _logger.warning(
       'Failed to resolve App Group container; falling back to Documents',
@@ -205,6 +213,16 @@ Future<Directory> resolveWhitenoiseBaseDirectory({
       stackTrace,
     );
     return documentsBaseDir;
+  }
+}
+
+Future<String?> _getAppGroupContainerPath(MethodChannel appGroupChannel) async {
+  try {
+    return await appGroupChannel.invokeMethod<String>(
+      _getAppGroupContainerPathMethod,
+    );
+  } catch (_, stackTrace) {
+    Error.throwWithStackTrace(const _AppGroupContainerUnavailableException(), stackTrace);
   }
 }
 
@@ -218,7 +236,11 @@ Future<void> _moveWhitenoiseDirectoryIfNeeded({
   if (!from.existsSync()) return;
 
   if (to.existsSync()) {
-    if (_hasMainAppDataMarker(to)) return;
+    if (_hasMainAppDataMarker(to)) {
+      await _deleteLegacyDocumentsDataBestEffort(from);
+      return;
+    }
+    _logger.info('Replacing unversioned App Group data during Documents migration');
     await to.delete(recursive: true);
   }
   await to.parent.create(recursive: true);
@@ -242,6 +264,18 @@ Future<void> _moveWhitenoiseDirectoryIfNeeded({
         stackTrace,
       );
     }
+  }
+}
+
+Future<void> _deleteLegacyDocumentsDataBestEffort(Directory from) async {
+  try {
+    await _deleteDirectory(from);
+  } catch (error, stackTrace) {
+    _logger.warning(
+      'Failed to remove old Documents data after App Group data was already accepted',
+      error,
+      stackTrace,
+    );
   }
 }
 

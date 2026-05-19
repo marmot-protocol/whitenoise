@@ -9,6 +9,7 @@ class PushRegistrationConfig {
   const PushRegistrationConfig({required this.serverPubkey, this.relayHint});
 
   static const defaultRelayHint = 'wss://relay.primal.net';
+  // Public Nostr pubkey of the MIP-05 push server. Not secret; rotating requires an app update.
   static const stagingServerPubkey =
       'e36667690baeef94b50fcefab2cb373ac701368dc0a261256f52ba9bda50145a';
   static const productionServerPubkey =

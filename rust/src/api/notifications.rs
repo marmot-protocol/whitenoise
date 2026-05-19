@@ -242,6 +242,7 @@ impl From<WhitenoiseGroupPushDebugInfo> for GroupPushDebugInfo {
 }
 
 #[frb]
+// Reserved for settings/sign-out flows that need to inspect or clear the local push registration.
 pub async fn get_push_registration(pubkey: String) -> Result<Option<PushRegistration>, ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
     let session = wn_session(&pubkey).await?;
@@ -285,6 +286,7 @@ pub async fn upsert_push_registration(
 }
 
 #[frb]
+// Reserved for settings/sign-out flows that need to inspect or clear the local push registration.
 pub async fn clear_push_registration(pubkey: String) -> Result<(), ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
     let session = wn_session(&pubkey).await?;

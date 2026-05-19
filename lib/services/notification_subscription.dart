@@ -84,17 +84,6 @@ class NotificationSubscription {
         },
       );
 
-      // coverage:ignore-start
-      // Defensive: there's no await between the earlier _stopped check
-      // (after requestPermission) and here, so in practice _stopped cannot
-      // flip to true in this window. Keep the guard for safety if future
-      // edits introduce an await above.
-      if (_stopped) {
-        await _subscription?.cancel();
-        _subscription = null;
-        return;
-      }
-      // coverage:ignore-end
       _logger.info('NotificationSubscription started');
     } catch (error, stackTrace) {
       _logger.severe('Failed to start notification subscription', error, stackTrace);

@@ -166,6 +166,7 @@ Future<void> _startForegroundAndSubscribe(
     _logger.severe('Failed to initialize notification listener', error, stackTrace);
   }
 }
+// coverage:ignore-end
 
 /// Routes a notification tap — whether fired synchronously from the
 /// NotificationService's tap callback (in-app) or consumed from persisted
@@ -253,6 +254,7 @@ Future<PendingNotificationTap?> consumePendingNotificationTap({
   }
 }
 
+// coverage:ignore-start
 void _navigateToNotificationTarget({
   required String groupId,
   required bool isInvite,

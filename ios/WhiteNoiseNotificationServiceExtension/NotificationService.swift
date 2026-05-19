@@ -64,12 +64,21 @@ private func backgroundPushJsonCallback(
   box.json = String(data: Data(bytes: jsonPtr, count: jsonLen), encoding: .utf8)
 }
 
+private func localized(_ key: String, fallback: String) -> String {
+  NSLocalizedString(key, tableName: nil, bundle: .main, value: fallback, comment: "")
+}
+
+private func localizedFormat(_ key: String, fallback: String, _ arguments: CVarArg...) -> String {
+  String(format: localized(key, fallback: fallback), locale: Locale.current, arguments: arguments)
+}
+
 final class NotificationService: UNNotificationServiceExtension {
   private static let collectionQueue = DispatchQueue(
     label: "org.parres.whitenoise.notification-service.collection",
     qos: .userInitiated
   )
   private let keyringServiceId = "com.whitenoise.app"
+  // Keep fallback delivery quick; slow relay collection should not hold the system UI for 30 seconds.
   private let maxNotificationServiceWaitMs: UInt32 = 8_000
   private var bestAttemptDelivery: NotificationDelivery?
 
@@ -141,10 +150,6 @@ final class NotificationService: UNNotificationServiceExtension {
     }
     content.subtitle = ""
     content.body = localized("notification_new_encrypted_message", fallback: "New encrypted message")
-  }
-
-  private func localized(_ key: String, fallback: String) -> String {
-    NSLocalizedString(key, tableName: nil, bundle: .main, value: fallback, comment: "")
   }
 
   private func collectNotificationsAfterPush() -> BackgroundPushCollectionResult {
@@ -262,9 +267,11 @@ private struct BackgroundNotification: Decodable {
   var title: String {
     if trigger == "invite" {
       if isDm {
-        return sender.displayName ?? "Secure chat invite"
+        return sender.displayName
+          ?? localized("notification_secure_chat_invite_title", fallback: "Secure chat invite")
       }
-      return groupName ?? "Secure group invite"
+      return groupName
+        ?? localized("notification_secure_group_invite_title", fallback: "Secure group invite")
     }
     if isDm {
       return sender.displayName ?? "White Noise"
@@ -273,17 +280,31 @@ private struct BackgroundNotification: Decodable {
   }
 
   var body: String {
-    let senderName = sender.displayName ?? "Someone"
+    let senderName = sender.displayName ?? localized("notification_unknown_sender", fallback: "Someone")
     if trigger == "invite" {
       if isDm {
-        return "\(senderName) invited you to a secure chat"
+        return localizedFormat(
+          "notification_dm_invite_body",
+          fallback: "%@ invited you to a secure chat",
+          senderName
+        )
       }
-      return "\(senderName) invited you to \(groupName ?? "a secure group")"
+      return localizedFormat(
+        "notification_group_invite_body",
+        fallback: "%@ invited you to %@",
+        senderName,
+        groupName ?? localized("notification_secure_group", fallback: "a secure group")
+      )
     }
     if isDm {
       return content
     }
-    return "\(senderName): \(content)"
+    return localizedFormat(
+      "notification_group_message_body",
+      fallback: "%@: %@",
+      senderName,
+      content
+    )
   }
 
   var tapUserInfo: [AnyHashable: Any] {
