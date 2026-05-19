@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
     show AsyncData, ProviderContainer, ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:logging/logging.dart';
 import 'package:whitenoise/main.dart'
     show
         WnApp,
@@ -119,6 +120,7 @@ void _resetAppGroupContainerPath() {
 
 class _MockAuthNotifier extends AuthNotifier {
   int ensureExternalSignersRegisteredCount = 0;
+  Object? ensureExternalSignersRegisteredError;
 
   @override
   Future<String?> build() async {
@@ -129,6 +131,10 @@ class _MockAuthNotifier extends AuthNotifier {
   @override
   Future<void> ensureExternalSignersRegistered() async {
     ensureExternalSignersRegisteredCount++;
+    final error = ensureExternalSignersRegisteredError;
+    if (error != null) {
+      throw error;
+    }
   }
 }
 
@@ -291,6 +297,25 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(mockAuth.ensureExternalSignersRegisteredCount, 1);
+    });
+
+    testWidgets('continues resume work when external signer reconciliation fails', (tester) async {
+      await pumpWnApp(tester);
+      mockAuth.ensureExternalSignersRegisteredError = Exception('signer failed');
+      mockApi.ensureAllSubscriptionsCallCount = 0;
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(WnApp)),
+        listen: false,
+      );
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
+      await tester.pumpAndSettle();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(mockAuth.ensureExternalSignersRegisteredCount, 1);
+      expect(mockApi.ensureAllSubscriptionsCallCount, 1);
+      expect(container.read(chatListRefreshProvider), 1);
     });
 
     testWidgets('ensures relay subscriptions on foreground resume', (tester) async {
@@ -604,6 +629,57 @@ void main() {
       expect(baseDir.path, '${pathProvider.tempDir.path}/whitenoise');
       expect(File('${oldDataDir.path}/marker.txt').readAsStringSync(), 'existing');
       expect(Directory('${appGroupDir.path}/whitenoise').existsSync(), isFalse);
+    });
+
+    test('returns App Group path when copied Documents data cannot be deleted', () async {
+      final previousLogLevel = Logger.root.level;
+      Logger.root.level = Level.ALL;
+      final records = <LogRecord>[];
+      final logSubscription = Logger('WnApp').onRecord.listen(records.add);
+      addTearDown(() async {
+        await logSubscription.cancel();
+        Logger.root.level = previousLogLevel;
+      });
+
+      final appGroupDir = Directory.systemTemp.createTempSync('whitenoise_app_group_test');
+      _mockAppGroupContainerPath(appGroupDir.path);
+      final oldDataDir = Directory('${pathProvider.tempDir.path}/whitenoise/data');
+      await oldDataDir.create(recursive: true);
+      await File('${oldDataDir.path}/marker.txt').writeAsString('existing');
+      addTearDown(() {
+        if (appGroupDir.existsSync()) {
+          appGroupDir.deleteSync(recursive: true);
+        }
+      });
+
+      final baseDir = await resolveWhitenoiseBaseDirectory(
+        isIOS: true,
+        renameDirectory: (_, _) async {
+          throw const FileSystemException('rename failed');
+        },
+        copyDirectory: (from, to) async {
+          await Directory('${to.path}/data').create(recursive: true);
+          await File('${to.path}/data/marker.txt').writeAsString(
+            File('${from.path}/data/marker.txt').readAsStringSync(),
+          );
+        },
+        deleteSourceDirectory: (_) async {
+          throw const FileSystemException('delete failed');
+        },
+      );
+
+      expect(baseDir.path, '${appGroupDir.path}/whitenoise');
+      expect(File('${baseDir.path}/data/marker.txt').readAsStringSync(), 'existing');
+      expect(File('${oldDataDir.path}/marker.txt').readAsStringSync(), 'existing');
+      expect(
+        records.any(
+          (record) =>
+              record.message == 'Failed to remove old Documents data after App Group migration' &&
+              record.error is FileSystemException &&
+              record.stackTrace != null,
+        ),
+        isTrue,
+      );
     });
 
     test('preserves App Group data when both storage locations contain data', () async {

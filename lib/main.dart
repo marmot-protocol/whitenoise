@@ -141,6 +141,7 @@ Future<Directory> resolveWhitenoiseBaseDirectory({
   MethodChannel appGroupChannel = _appGroupChannel,
   Future<Directory> Function(Directory from, String newPath)? renameDirectory,
   Future<void> Function(Directory from, Directory to)? copyDirectory,
+  Future<void> Function(Directory directory)? deleteSourceDirectory,
 }) async {
   final documentsDir = await getApplicationDocumentsDirectory();
   final documentsBaseDir = Directory('${documentsDir.path}/whitenoise');
@@ -160,6 +161,7 @@ Future<Directory> resolveWhitenoiseBaseDirectory({
       to: appGroupBaseDir,
       renameDirectory: renameDirectory ?? _renameDirectory,
       copyDirectory: copyDirectory ?? _copyDirectory,
+      deleteSourceDirectory: deleteSourceDirectory ?? _deleteDirectory,
     );
     return appGroupBaseDir;
   } catch (error, stackTrace) {
@@ -177,6 +179,7 @@ Future<void> _moveWhitenoiseDirectoryIfNeeded({
   required Directory to,
   required Future<Directory> Function(Directory from, String newPath) renameDirectory,
   required Future<void> Function(Directory from, Directory to) copyDirectory,
+  required Future<void> Function(Directory directory) deleteSourceDirectory,
 }) async {
   if (!from.existsSync()) return;
 
@@ -196,11 +199,21 @@ Future<void> _moveWhitenoiseDirectoryIfNeeded({
       }
       Error.throwWithStackTrace(error, stackTrace);
     }
-    await from.delete(recursive: true);
+    try {
+      await deleteSourceDirectory(from);
+    } catch (error, stackTrace) {
+      _logger.warning(
+        'Failed to remove old Documents data after App Group migration',
+        error,
+        stackTrace,
+      );
+    }
   }
 }
 
 Future<Directory> _renameDirectory(Directory from, String newPath) => from.rename(newPath);
+
+Future<void> _deleteDirectory(Directory directory) => directory.delete(recursive: true);
 
 Future<void> _copyDirectory(Directory from, Directory to) async {
   await to.create(recursive: true);
@@ -315,10 +328,21 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
   }
 
   Future<void> _handleAppResumed() async {
-    await ref.read(authProvider.notifier).ensureExternalSignersRegistered();
-    final routed = await _consumePendingNotificationTap(
-      afterNavigate: _refreshAfterNotificationRoute,
-    );
+    try {
+      await ref.read(authProvider.notifier).ensureExternalSignersRegistered();
+    } catch (error, stackTrace) {
+      _logger.warning('Failed to reconcile external signers on resume', error, stackTrace);
+    }
+
+    var routed = false;
+    try {
+      routed = await _consumePendingNotificationTap(
+        afterNavigate: _refreshAfterNotificationRoute,
+      );
+    } catch (error, stackTrace) {
+      _logger.warning('Failed to route pending notification tap on resume', error, stackTrace);
+    }
+
     if (!routed) {
       await _ensureRelaySubscriptionsAfterResume();
     }
