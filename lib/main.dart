@@ -189,7 +189,7 @@ Future<void> _moveWhitenoiseDirectoryIfNeeded({
   if (!from.existsSync()) return;
 
   if (to.existsSync()) {
-    if (await _directoryHasFiles(Directory('${to.path}/data'))) return;
+    if (_hasMainAppDataMarker(to)) return;
     await to.delete(recursive: true);
   }
   await to.parent.create(recursive: true);
@@ -220,6 +220,9 @@ Future<Directory> _renameDirectory(Directory from, String newPath) => from.renam
 
 Future<void> _deleteDirectory(Directory directory) => directory.delete(recursive: true);
 
+bool _hasMainAppDataMarker(Directory baseDir) =>
+    File(p.join(baseDir.path, 'data', kDataVersionFile)).existsSync();
+
 Future<void> _copyDirectory(Directory from, Directory to) async {
   await to.create(recursive: true);
   await for (final entity in from.list()) {
@@ -230,14 +233,6 @@ Future<void> _copyDirectory(Directory from, Directory to) async {
       await entity.copy(targetPath);
     }
   }
-}
-
-Future<bool> _directoryHasFiles(Directory directory) async {
-  if (!directory.existsSync()) return false;
-  await for (final entity in directory.list(recursive: true)) {
-    if (entity is File) return true;
-  }
-  return false;
 }
 
 Future<void> _migrateDataIfNeeded(String dataDir) async {

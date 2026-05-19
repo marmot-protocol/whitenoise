@@ -742,6 +742,32 @@ void main() {
       );
     });
 
+    test(
+      'moves Documents data over unversioned App Group data created before app launch',
+      () async {
+        final appGroupDir = Directory.systemTemp.createTempSync('whitenoise_app_group_test');
+        _mockAppGroupContainerPath(appGroupDir.path);
+        final oldDataDir = Directory('${pathProvider.tempDir.path}/whitenoise/data');
+        await oldDataDir.create(recursive: true);
+        await File('${oldDataDir.path}/old-marker.txt').writeAsString('old');
+        final appGroupDataDir = Directory('${appGroupDir.path}/whitenoise/data');
+        await appGroupDataDir.create(recursive: true);
+        await File('${appGroupDataDir.path}/nse-scratch.sqlite').writeAsString('scratch');
+        addTearDown(() {
+          if (appGroupDir.existsSync()) {
+            appGroupDir.deleteSync(recursive: true);
+          }
+        });
+
+        final baseDir = await resolveWhitenoiseBaseDirectory(isIOS: true);
+
+        expect(baseDir.path, '${appGroupDir.path}/whitenoise');
+        expect(File('${baseDir.path}/data/old-marker.txt').readAsStringSync(), 'old');
+        expect(File('${baseDir.path}/data/nse-scratch.sqlite').existsSync(), isFalse);
+        expect(Directory('${pathProvider.tempDir.path}/whitenoise').existsSync(), isFalse);
+      },
+    );
+
     test('preserves App Group data when both storage locations contain data', () async {
       final appGroupDir = Directory.systemTemp.createTempSync('whitenoise_app_group_test');
       _mockAppGroupContainerPath(appGroupDir.path);
@@ -751,6 +777,7 @@ void main() {
       final appGroupDataDir = Directory('${appGroupDir.path}/whitenoise/data');
       await appGroupDataDir.create(recursive: true);
       await File('${appGroupDataDir.path}/new-marker.txt').writeAsString('new');
+      await File('${appGroupDataDir.path}/$kDataVersionFile').writeAsString('$kDataVersion');
       addTearDown(() {
         if (appGroupDir.existsSync()) {
           appGroupDir.deleteSync(recursive: true);
