@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/users.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -22,12 +23,49 @@ User _userFactory(String pubkey, {String? displayName}) => User(
 
 class _MockApi extends MockWnApi {
   List<User> followsList = [];
+  List<String> membersList = [];
+  List<String> adminsList = [];
+  bool shouldFailLoadMembers = false;
   Exception? addMembersError;
   final addMembersCalls = <({String pubkey, String groupId, List<String> memberPubkeys})>[];
 
   @override
   Future<List<User>> crateApiAccountsAccountFollows({required String pubkey}) async {
     return followsList;
+  }
+
+  @override
+  Future<List<String>> crateApiGroupsGroupMembers({
+    required String pubkey,
+    required String groupId,
+  }) async {
+    if (shouldFailLoadMembers) throw Exception('Failed to load members');
+    return membersList;
+  }
+
+  @override
+  Future<List<String>> crateApiGroupsGroupAdmins({
+    required String pubkey,
+    required String groupId,
+  }) async {
+    if (shouldFailLoadMembers) throw Exception('Failed to load admins');
+    return adminsList;
+  }
+
+  @override
+  Future<Group> crateApiGroupsGetGroup({
+    required String accountPubkey,
+    required String groupId,
+  }) async {
+    return Group(
+      mlsGroupId: groupId,
+      nostrGroupId: 'nostr_$groupId',
+      name: 'Test Group',
+      description: '',
+      adminPubkeys: adminsList,
+      epoch: BigInt.zero,
+      state: GroupState.active,
+    );
   }
 
   @override
@@ -44,6 +82,9 @@ class _MockApi extends MockWnApi {
   void reset() {
     super.reset();
     followsList = [];
+    membersList = [];
+    adminsList = [];
+    shouldFailLoadMembers = false;
     addMembersError = null;
     addMembersCalls.clear();
   }
@@ -68,6 +109,8 @@ void main() {
     List<String> existingMembers = const [testPubkeyA],
   }) async {
     setUpTestView(tester);
+    _api.membersList = existingMembers;
+    _api.adminsList = [testPubkeyA];
     await mountTestApp(
       tester,
       overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
@@ -76,7 +119,6 @@ void main() {
     Routes.pushToAddGroupMembers(
       tester.element(find.byType(Scaffold)),
       testGroupId,
-      existingMemberPubkeys: existingMembers,
     );
     await tester.pumpAndSettle();
   }
@@ -187,6 +229,14 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byKey(const Key('add_members_submit_button')), findsNothing);
+    });
+
+    testWidgets('shows error notice when fetching group members fails', (tester) async {
+      _api.shouldFailLoadMembers = true;
+      await pumpAddGroupMembersScreen(tester);
+
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(find.text('Failed to load group members. Please try again.'), findsOneWidget);
     });
   });
 }

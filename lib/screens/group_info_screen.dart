@@ -162,11 +162,7 @@ class GroupInfoScreen extends HookConsumerWidget {
                           type: WnButtonType.outline,
                           trailingIcon: WnIcons.userFollow,
                           size: WnButtonSize.medium,
-                          onPressed: () => Routes.pushToAddGroupMembers(
-                            context,
-                            groupId,
-                            existingMemberPubkeys: membersState.members,
-                          ),
+                          onPressed: () => Routes.pushToAddGroupMembers(context, groupId),
                         ),
                       ),
                       Gap(16.h),

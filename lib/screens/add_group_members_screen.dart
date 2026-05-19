@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
+import 'package:whitenoise/hooks/use_group_members.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_user_search.dart';
 import 'package:whitenoise/hooks/use_user_selection.dart';
@@ -11,6 +12,7 @@ import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' as groups_api;
+import 'package:whitenoise/src/rust/api/users.dart' show User;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/formatting.dart' show formatPublicKey, npubFromHex;
@@ -28,14 +30,9 @@ import 'package:whitenoise/widgets/wn_user_item.dart';
 final _logger = Logger('AddGroupMembersScreen');
 
 class AddGroupMembersScreen extends HookConsumerWidget {
-  const AddGroupMembersScreen({
-    super.key,
-    required this.groupId,
-    required this.existingMemberPubkeys,
-  });
+  const AddGroupMembersScreen({super.key, required this.groupId});
 
   final String groupId;
-  final List<String> existingMemberPubkeys;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -52,18 +49,35 @@ class AddGroupMembersScreen extends HookConsumerWidget {
     );
 
     final selectionHook = useUserSelection();
+    final membersState = useGroupMembers(
+      accountPubkey: accountPubkey,
+      groupId: groupId,
+    );
 
     final (:noticeMessage, :noticeType, :showErrorNotice, :showSuccessNotice, :dismissNotice) =
         useSystemNotice();
 
+    useEffect(() {
+      if (membersState.error != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (context.mounted) {
+            showErrorNotice(context.l10n.failedToFetchGroupMembers);
+          }
+        });
+        membersState.clearError();
+      }
+      return null;
+    }, [membersState.error]);
+
     final existingMembersSet = useMemoized(
-      () => existingMemberPubkeys.toSet(),
-      [existingMemberPubkeys],
+      () => membersState.members.toSet(),
+      [membersState.members],
     );
 
-    final candidates = searchState.users
-        .where((user) => !existingMembersSet.contains(user.pubkey))
-        .toList();
+    final candidates = membersState.isLoading
+        ? const <User>[]
+        : searchState.users.where((user) => !existingMembersSet.contains(user.pubkey)).toList();
+    final isLoadingList = searchState.isLoading || membersState.isLoading;
 
     Future<void> handleSubmit() async {
       if (isSubmitting.value) return;
@@ -167,7 +181,7 @@ class AddGroupMembersScreen extends HookConsumerWidget {
                 Gap(12.h),
               ],
               Expanded(
-                child: searchState.isLoading
+                child: isLoadingList
                     ? Center(
                         child: CircularProgressIndicator(
                           color: colors.backgroundContentPrimary,

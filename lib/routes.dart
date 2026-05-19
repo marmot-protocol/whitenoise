@@ -444,16 +444,10 @@ abstract final class Routes {
         GoRoute(
           name: 'addGroupMembers',
           path: _addGroupMembers,
-          pageBuilder: (context, state) {
-            final existingMembers = state.extra as List<String>? ?? const [];
-            return _navigationTransition(
-              state: state,
-              child: AddGroupMembersScreen(
-                groupId: state.pathParameters['groupId']!,
-                existingMemberPubkeys: existingMembers,
-              ),
-            );
-          },
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: AddGroupMembersScreen(groupId: state.pathParameters['groupId']!),
+          ),
         ),
         GoRoute(
           name: 'invite',
@@ -695,15 +689,10 @@ abstract final class Routes {
     );
   }
 
-  static void pushToAddGroupMembers(
-    BuildContext context,
-    String groupId, {
-    List<String> existingMemberPubkeys = const [],
-  }) {
+  static void pushToAddGroupMembers(BuildContext context, String groupId) {
     GoRouter.of(context).pushNamed(
       'addGroupMembers',
       pathParameters: {'groupId': groupId},
-      extra: existingMemberPubkeys,
     );
   }
 
