@@ -122,7 +122,7 @@ pub async fn upload_chat_media(
     file_path: String,
 ) -> Result<MediaFile, ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let group_id = group_id_from_string(&group_id)?;
 
     let media_file = session
@@ -141,7 +141,7 @@ pub async fn download_chat_media(
     original_file_hash: String,
 ) -> Result<MediaFile, ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let group_id = group_id_from_string(&group_id)?;
     let original_file_hash_bytes = ::hex::decode(&original_file_hash)?;
     let hash_array: [u8; 32] =

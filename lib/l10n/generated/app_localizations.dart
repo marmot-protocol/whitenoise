@@ -2738,6 +2738,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'You left the group'**
   String get youLeftTheGroup;
+
+  /// Title of the dialog shown when a whitenoise:// link cannot be parsed
+  ///
+  /// In en, this message translates to:
+  /// **'Link not supported'**
+  String get unsupportedDeepLinkTitle;
+
+  /// Body of the dialog shown when a whitenoise:// link cannot be parsed
+  ///
+  /// In en, this message translates to:
+  /// **'This White Noise link can\'t be opened. You may need to update the app.'**
+  String get unsupportedDeepLinkMessage;
 }
 
 class _AppLocalizationsDelegate extends LocalizationsDelegate<AppLocalizations> {

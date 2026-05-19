@@ -72,6 +72,7 @@ impl From<FlutterGroupDataUpdate> for NostrGroupDataUpdate {
             image_nonce: group_data.image_nonce.map(Some),
             image_upload_key: None,
             nostr_group_id: None,
+            disappearing_message_secs: None,
             relays: group_data.relays.map(|relays| {
                 relays
                     .into_iter()
@@ -91,7 +92,7 @@ impl From<FlutterGroupDataUpdate> for NostrGroupDataUpdate {
 impl Group {
     #[frb]
     pub async fn group_type(&self, account_pubkey: String) -> Result<GroupType, ApiError> {
-        let whitenoise = wn()?;
+        let whitenoise = wn().await?;
         let mls_group_id = group_id_from_string(&self.mls_group_id)?;
         let parsed_pubkey = PublicKey::parse(&account_pubkey)?;
         let group_information = whitenoise
@@ -102,7 +103,7 @@ impl Group {
 
     #[frb]
     pub async fn is_direct_message_type(&self, account_pubkey: String) -> Result<bool, ApiError> {
-        let whitenoise = wn()?;
+        let whitenoise = wn().await?;
         let mls_group_id = group_id_from_string(&self.mls_group_id)?;
         let parsed_pubkey = PublicKey::parse(&account_pubkey)?;
         let group_information = whitenoise
@@ -113,7 +114,7 @@ impl Group {
 
     #[frb]
     pub async fn is_group_type(&self, account_pubkey: String) -> Result<bool, ApiError> {
-        let whitenoise = wn()?;
+        let whitenoise = wn().await?;
         let mls_group_id = group_id_from_string(&self.mls_group_id)?;
         let parsed_pubkey = PublicKey::parse(&account_pubkey)?;
         let group_information = whitenoise
@@ -130,7 +131,7 @@ impl Group {
     ) -> Result<(), ApiError> {
         let mls_group_id = group_id_from_string(&self.mls_group_id)?;
         let parsed_pubkey = PublicKey::parse(&account_pubkey)?;
-        let session = wn_session(&parsed_pubkey)?;
+        let session = wn_session(&parsed_pubkey).await?;
         session
             .groups()
             .update_group_data(&mls_group_id, group_data.into())
@@ -218,7 +219,7 @@ impl From<WhitenoiseGroupInformation> for GroupInformation {
 #[frb]
 pub async fn active_groups(pubkey: String) -> Result<Vec<Group>, ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let groups = session.groups().all(true)?;
     Ok(groups.into_iter().map(|g| g.into()).collect())
 }
@@ -227,7 +228,7 @@ pub async fn active_groups(pubkey: String) -> Result<Vec<Group>, ApiError> {
 pub async fn group_members(pubkey: String, group_id: String) -> Result<Vec<String>, ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let members = session.groups().members(&group_id)?;
     Ok(members.into_iter().map(|m| m.to_hex()).collect())
 }
@@ -236,7 +237,7 @@ pub async fn group_members(pubkey: String, group_id: String) -> Result<Vec<Strin
 pub async fn group_admins(pubkey: String, group_id: String) -> Result<Vec<String>, ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let admins = session.groups().admins(&group_id)?;
     Ok(admins.into_iter().map(|a| a.to_hex()).collect())
 }
@@ -256,7 +257,7 @@ pub async fn create_group(
     };
 
     let creator_pubkey = PublicKey::parse(&creator_pubkey)?;
-    let session = wn_session(&creator_pubkey)?;
+    let session = wn_session(&creator_pubkey).await?;
 
     let admin_pubkeys = admin_pubkeys
         .into_iter()
@@ -271,6 +272,7 @@ pub async fn create_group(
         image_nonce: None,
         relays: default_relay_urls_parsed()?,
         admins: admin_pubkeys,
+        disappearing_message_secs: None,
     };
 
     let member_pubkeys = member_pubkeys
@@ -297,7 +299,7 @@ pub async fn add_members_to_group(
 ) -> Result<(), ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let member_pubkeys = member_pubkeys
         .into_iter()
         .map(|pk| PublicKey::parse(&pk))
@@ -317,7 +319,7 @@ pub async fn remove_members_from_group(
 ) -> Result<(), ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let member_pubkeys = member_pubkeys
         .into_iter()
         .map(|pk| PublicKey::parse(&pk))
@@ -337,7 +339,7 @@ pub async fn remove_members_from_group(
 pub async fn clear_chat(account_pubkey: String, group_id: String) -> Result<(), ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     session
         .membership()
         .for_group(&group_id)
@@ -353,7 +355,7 @@ pub async fn clear_chat(account_pubkey: String, group_id: String) -> Result<(), 
 /// to exit the group entirely.
 #[frb]
 pub async fn delete_chat(account_pubkey: String, group_id: String) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
@@ -370,11 +372,11 @@ pub async fn leave_and_delete_group(
     account_pubkey: String,
     group_id: String,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     session.groups().leave(&group_id).await?;
     whitenoise.delete_chat(&account, &group_id).await?;
     Ok(())
@@ -384,7 +386,7 @@ pub async fn leave_and_delete_group(
 pub async fn leave_group(pubkey: String, group_id: String) -> Result<(), ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     session
         .groups()
         .leave(&group_id)
@@ -396,7 +398,7 @@ pub async fn leave_group(pubkey: String, group_id: String) -> Result<(), ApiErro
 pub async fn self_demote(pubkey: String, group_id: String) -> Result<(), ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     session
         .groups()
         .self_demote(&group_id)
@@ -407,7 +409,7 @@ pub async fn self_demote(pubkey: String, group_id: String) -> Result<(), ApiErro
 #[frb]
 pub async fn get_group(account_pubkey: String, group_id: String) -> Result<Group, ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let group_id = group_id_from_string(&group_id)?;
     let group = session.groups().get(&group_id)?;
     Ok(group.into())
@@ -418,7 +420,7 @@ pub async fn group_required_proposals(
     account_pubkey: String,
     group_id: String,
 ) -> Result<Vec<RequiredProposal>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let group_id = group_id_from_string(&group_id)?;
@@ -436,7 +438,7 @@ pub async fn get_group_information(
     account_pubkey: String,
     group_id: String,
 ) -> Result<GroupInformation, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let group_id = group_id_from_string(&group_id)?;
     let parsed_pubkey = PublicKey::parse(&account_pubkey)?;
     Ok(whitenoise
@@ -450,7 +452,7 @@ pub async fn get_groups_informations(
     account_pubkey: String,
     group_ids: Vec<String>,
 ) -> Result<Vec<GroupInformation>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let group_ids = group_ids
         .into_iter()
         .map(|id| group_id_from_string(&id))
@@ -489,7 +491,7 @@ pub async fn visible_groups_with_info(
     account_pubkey: String,
 ) -> Result<Vec<GroupWithInfoAndMembership>, ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let groups = session.groups().visible_with_info().await?;
     Ok(groups.into_iter().map(|g| g.into()).collect())
 }
@@ -512,7 +514,7 @@ pub async fn upload_group_image(
 ) -> Result<UploadGroupImageResult, ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let server = Url::parse(&server_url)?;
 
     let (encrypted_hash, image_key, image_nonce) = session
@@ -552,7 +554,7 @@ pub async fn get_group_image_path(
 ) -> Result<Option<String>, ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let path = session
         .groups()
         .media()
@@ -592,7 +594,7 @@ pub async fn get_ratchet_tree_info(
     account_pubkey: String,
     group_id: String,
 ) -> Result<RatchetTreeInfo, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;

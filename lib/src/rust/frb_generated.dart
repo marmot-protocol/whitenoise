@@ -19,6 +19,7 @@ import 'api/error.dart';
 import 'api/group_state.dart';
 import 'api/groups.dart';
 import 'api/logs.dart';
+import 'api/markdown.dart';
 import 'api/media_files.dart';
 import 'api/messages.dart';
 import 'api/metadata.dart';
@@ -90,7 +91,7 @@ class RustLib extends BaseEntrypoint<RustLibApi, RustLibApiImpl, RustLibWire> {
   String get codegenVersion => '2.12.0';
 
   @override
-  int get rustContentHash => -1064693455;
+  int get rustContentHash => -1547864171;
 
   static const kDefaultExternalLibraryLoaderConfig = ExternalLibraryLoaderConfig(
     stem: 'rust_lib_whitenoise',
@@ -192,6 +193,7 @@ abstract class RustLibApi extends BaseApi {
   Future<WhitenoiseConfig> crateApiCreateWhitenoiseConfig({
     required String dataDir,
     required String logsDir,
+    List<String>? defaultRelayUrls,
   });
 
   Future<String> crateApiRelaysDebugRelayControlState();
@@ -486,6 +488,8 @@ abstract class RustLibApi extends BaseApi {
     required FutureOr<String> Function(String, String) nip44Encrypt,
     required FutureOr<String> Function(String, String) nip44Decrypt,
   });
+
+  Future<void> crateApiReinitializeWhitenoise();
 
   Future<RelayType> crateApiRelaysRelayTypeInbox();
 
@@ -1487,6 +1491,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Future<WhitenoiseConfig> crateApiCreateWhitenoiseConfig({
     required String dataDir,
     required String logsDir,
+    List<String>? defaultRelayUrls,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -1494,6 +1499,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(dataDir, serializer);
           sse_encode_String(logsDir, serializer);
+          sse_encode_opt_list_String(defaultRelayUrls, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -1506,7 +1512,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: null,
         ),
         constMeta: kCrateApiCreateWhitenoiseConfigConstMeta,
-        argValues: [dataDir, logsDir],
+        argValues: [dataDir, logsDir, defaultRelayUrls],
         apiImpl: this,
       ),
     );
@@ -1514,7 +1520,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiCreateWhitenoiseConfigConstMeta => const TaskConstMeta(
     debugName: 'create_whitenoise_config',
-    argNames: ['dataDir', 'logsDir'],
+    argNames: ['dataDir', 'logsDir', 'defaultRelayUrls'],
   );
 
   @override
@@ -3950,7 +3956,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   );
 
   @override
-  Future<RelayType> crateApiRelaysRelayTypeInbox() {
+  Future<void> crateApiReinitializeWhitenoise() {
     return handler.executeNormal(
       NormalTask(
         callFfi: (port_) {
@@ -3959,6 +3965,35 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             generalizedFrbRustBinding,
             serializer,
             funcId: 97,
+            port: port_,
+          );
+        },
+        codec: SseCodec(
+          decodeSuccessData: sse_decode_unit,
+          decodeErrorData: sse_decode_api_error,
+        ),
+        constMeta: kCrateApiReinitializeWhitenoiseConstMeta,
+        argValues: [],
+        apiImpl: this,
+      ),
+    );
+  }
+
+  TaskConstMeta get kCrateApiReinitializeWhitenoiseConstMeta => const TaskConstMeta(
+    debugName: 'reinitialize_whitenoise',
+    argNames: [],
+  );
+
+  @override
+  Future<RelayType> crateApiRelaysRelayTypeInbox() {
+    return handler.executeNormal(
+      NormalTask(
+        callFfi: (port_) {
+          final serializer = SseSerializer(generalizedFrbRustBinding);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 98,
             port: port_,
           );
         },
@@ -3988,7 +4023,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 98,
+            funcId: 99,
             port: port_,
           );
         },
@@ -4018,7 +4053,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 99,
+            funcId: 100,
             port: port_,
           );
         },
@@ -4049,7 +4084,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 100,
+            funcId: 101,
             port: port_,
           );
         },
@@ -4089,7 +4124,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 101,
+            funcId: 102,
             port: port_,
           );
         },
@@ -4125,7 +4160,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 102,
+            funcId: 103,
             port: port_,
           );
         },
@@ -4155,7 +4190,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 103,
+            funcId: 104,
             port: port_,
           );
         },
@@ -4191,7 +4226,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 104,
+            funcId: 105,
             port: port_,
           );
         },
@@ -4231,7 +4266,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 105,
+            funcId: 106,
             port: port_,
           );
         },
@@ -4267,7 +4302,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 106,
+            funcId: 107,
             port: port_,
           );
         },
@@ -4305,7 +4340,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 107,
+            funcId: 108,
             port: port_,
           );
         },
@@ -4346,7 +4381,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 108,
+              funcId: 109,
               port: port_,
             );
           },
@@ -4388,7 +4423,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 109,
+            funcId: 110,
             port: port_,
           );
         },
@@ -4436,7 +4471,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 110,
+            funcId: 111,
             port: port_,
           );
         },
@@ -4499,7 +4534,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 111,
+            funcId: 112,
             port: port_,
           );
         },
@@ -4535,7 +4570,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 112,
+            funcId: 113,
             port: port_,
           );
         },
@@ -4568,7 +4603,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 113,
+            funcId: 114,
             port: port_,
           );
         },
@@ -4603,7 +4638,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 114,
+              funcId: 115,
               port: port_,
             );
           },
@@ -4640,7 +4675,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 115,
+              funcId: 116,
               port: port_,
             );
           },
@@ -4679,7 +4714,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 116,
+              funcId: 117,
               port: port_,
             );
           },
@@ -4718,7 +4753,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 117,
+              funcId: 118,
               port: port_,
             );
           },
@@ -4752,7 +4787,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 118,
+              funcId: 119,
               port: port_,
             );
           },
@@ -4789,7 +4824,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 119,
+              funcId: 120,
               port: port_,
             );
           },
@@ -4826,7 +4861,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
             pdeCallFfi(
               generalizedFrbRustBinding,
               serializer,
-              funcId: 120,
+              funcId: 121,
               port: port_,
             );
           },
@@ -4858,7 +4893,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 121,
+            funcId: 122,
             port: port_,
           );
         },
@@ -4888,7 +4923,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           return pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 122,
+            funcId: 123,
           )!;
         },
         codec: SseCodec(
@@ -4917,7 +4952,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           return pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 123,
+            funcId: 124,
           )!;
         },
         codec: SseCodec(
@@ -4946,7 +4981,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           return pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 124,
+            funcId: 125,
           )!;
         },
         codec: SseCodec(
@@ -4979,7 +5014,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           return pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 125,
+            funcId: 126,
           )!;
         },
         codec: SseCodec(
@@ -5012,7 +5047,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 126,
+            funcId: 127,
             port: port_,
           );
         },
@@ -5046,7 +5081,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 127,
+            funcId: 128,
             port: port_,
           );
         },
@@ -5080,7 +5115,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 128,
+            funcId: 129,
             port: port_,
           );
         },
@@ -5114,7 +5149,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 129,
+            funcId: 130,
             port: port_,
           );
         },
@@ -5148,7 +5183,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 130,
+            funcId: 131,
             port: port_,
           );
         },
@@ -5181,7 +5216,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 131,
+            funcId: 132,
             port: port_,
           );
         },
@@ -5215,7 +5250,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 132,
+            funcId: 133,
             port: port_,
           );
         },
@@ -5248,7 +5283,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 133,
+            funcId: 134,
             port: port_,
           );
         },
@@ -5286,7 +5321,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 134,
+            funcId: 135,
             port: port_,
           );
         },
@@ -5322,7 +5357,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 135,
+            funcId: 136,
             port: port_,
           );
         },
@@ -5360,7 +5395,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 136,
+            funcId: 137,
             port: port_,
           );
         },
@@ -5400,7 +5435,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 137,
+            funcId: 138,
             port: port_,
           );
         },
@@ -5440,7 +5475,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 138,
+            funcId: 139,
             port: port_,
           );
         },
@@ -5474,7 +5509,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 139,
+            funcId: 140,
             port: port_,
           );
         },
@@ -5513,7 +5548,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 140,
+            funcId: 141,
             port: port_,
           );
         },
@@ -5545,7 +5580,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
-            funcId: 141,
+            funcId: 142,
             port: port_,
           );
         },
@@ -6193,6 +6228,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  MarkdownListKind dco_decode_box_autoadd_markdown_list_kind(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_markdown_list_kind(raw);
+  }
+
+  @protected
+  MarkdownNostrEntity dco_decode_box_autoadd_markdown_nostr_entity(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return dco_decode_markdown_nostr_entity(raw);
+  }
+
+  @protected
   MessageUpdate dco_decode_box_autoadd_message_update(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return dco_decode_message_update(raw);
@@ -6276,7 +6325,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       isReply: dco_decode_bool(arr[5]),
       replyToId: dco_decode_opt_String(arr[6]),
       isDeleted: dco_decode_bool(arr[7]),
-      contentTokens: dco_decode_list_serializable_token(arr[8]),
+      contentTokens: dco_decode_markdown_document(arr[8]),
       reactions: dco_decode_reaction_summary(arr[9]),
       mediaAttachments: dco_decode_list_media_file(arr[10]),
       kind: dco_decode_u_16(arr[11]),
@@ -6671,6 +6720,44 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<List<MarkdownTableCell>> dco_decode_list_list_markdown_table_cell(
+    dynamic raw,
+  ) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_list_markdown_table_cell).toList();
+  }
+
+  @protected
+  List<MarkdownAlignment> dco_decode_list_markdown_alignment(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_markdown_alignment).toList();
+  }
+
+  @protected
+  List<MarkdownBlock> dco_decode_list_markdown_block(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_markdown_block).toList();
+  }
+
+  @protected
+  List<MarkdownInline> dco_decode_list_markdown_inline(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_markdown_inline).toList();
+  }
+
+  @protected
+  List<MarkdownListItem> dco_decode_list_markdown_list_item(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_markdown_list_item).toList();
+  }
+
+  @protected
+  List<MarkdownTableCell> dco_decode_list_markdown_table_cell(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return (raw as List<dynamic>).map(dco_decode_markdown_table_cell).toList();
+  }
+
+  @protected
   List<MatchedField> dco_decode_list_matched_field(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_matched_field).toList();
@@ -6719,12 +6806,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  List<SerializableToken> dco_decode_list_serializable_token(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    return (raw as List<dynamic>).map(dco_decode_serializable_token).toList();
-  }
-
-  @protected
   List<User> dco_decode_list_user(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return (raw as List<dynamic>).map(dco_decode_user).toList();
@@ -6757,6 +6838,198 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   LoginStatus dco_decode_login_status(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return LoginStatus.values[raw as int];
+  }
+
+  @protected
+  MarkdownAlignment dco_decode_markdown_alignment(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return MarkdownAlignment.values[raw as int];
+  }
+
+  @protected
+  MarkdownAutolinkKind dco_decode_markdown_autolink_kind(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return MarkdownAutolinkKind.values[raw as int];
+  }
+
+  @protected
+  MarkdownBlock dco_decode_markdown_block(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    switch (raw[0]) {
+      case 0:
+        return MarkdownBlock_Paragraph(
+          inlines: dco_decode_list_markdown_inline(raw[1]),
+        );
+      case 1:
+        return MarkdownBlock_Heading(
+          level: dco_decode_u_8(raw[1]),
+          inlines: dco_decode_list_markdown_inline(raw[2]),
+        );
+      case 2:
+        return const MarkdownBlock_ThematicBreak();
+      case 3:
+        return MarkdownBlock_CodeBlock(
+          kind: dco_decode_markdown_code_block_kind(raw[1]),
+          info: dco_decode_String(raw[2]),
+          content: dco_decode_String(raw[3]),
+        );
+      case 4:
+        return MarkdownBlock_BlockQuote(
+          blocks: dco_decode_list_markdown_block(raw[1]),
+        );
+      case 5:
+        return MarkdownBlock_List(
+          kind: dco_decode_box_autoadd_markdown_list_kind(raw[1]),
+          tight: dco_decode_bool(raw[2]),
+          items: dco_decode_list_markdown_list_item(raw[3]),
+        );
+      case 6:
+        return MarkdownBlock_Table(
+          alignments: dco_decode_list_markdown_alignment(raw[1]),
+          header: dco_decode_list_markdown_table_cell(raw[2]),
+          rows: dco_decode_list_list_markdown_table_cell(raw[3]),
+        );
+      case 7:
+        return MarkdownBlock_MathBlock(
+          content: dco_decode_String(raw[1]),
+        );
+      default:
+        throw Exception('unreachable');
+    }
+  }
+
+  @protected
+  MarkdownCodeBlockKind dco_decode_markdown_code_block_kind(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return MarkdownCodeBlockKind.values[raw as int];
+  }
+
+  @protected
+  MarkdownDocument dco_decode_markdown_document(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 1) throw Exception('unexpected arr length: expect 1 but see ${arr.length}');
+    return MarkdownDocument(
+      blocks: dco_decode_list_markdown_block(arr[0]),
+    );
+  }
+
+  @protected
+  MarkdownInline dco_decode_markdown_inline(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    switch (raw[0]) {
+      case 0:
+        return MarkdownInline_Text(
+          content: dco_decode_String(raw[1]),
+        );
+      case 1:
+        return const MarkdownInline_SoftBreak();
+      case 2:
+        return const MarkdownInline_HardBreak();
+      case 3:
+        return MarkdownInline_Code(
+          content: dco_decode_String(raw[1]),
+        );
+      case 4:
+        return MarkdownInline_Emph(
+          children: dco_decode_list_markdown_inline(raw[1]),
+        );
+      case 5:
+        return MarkdownInline_Strong(
+          children: dco_decode_list_markdown_inline(raw[1]),
+        );
+      case 6:
+        return MarkdownInline_Strikethrough(
+          children: dco_decode_list_markdown_inline(raw[1]),
+        );
+      case 7:
+        return MarkdownInline_Link(
+          dest: dco_decode_String(raw[1]),
+          title: dco_decode_opt_String(raw[2]),
+          children: dco_decode_list_markdown_inline(raw[3]),
+        );
+      case 8:
+        return MarkdownInline_Image(
+          dest: dco_decode_String(raw[1]),
+          title: dco_decode_opt_String(raw[2]),
+          alt: dco_decode_list_markdown_inline(raw[3]),
+        );
+      case 9:
+        return MarkdownInline_Autolink(
+          url: dco_decode_String(raw[1]),
+          kind: dco_decode_markdown_autolink_kind(raw[2]),
+        );
+      case 10:
+        return MarkdownInline_Math(
+          content: dco_decode_String(raw[1]),
+        );
+      case 11:
+        return MarkdownInline_NostrMention(
+          entity: dco_decode_box_autoadd_markdown_nostr_entity(raw[1]),
+        );
+      case 12:
+        return MarkdownInline_NostrUri(
+          entity: dco_decode_box_autoadd_markdown_nostr_entity(raw[1]),
+        );
+      default:
+        throw Exception('unreachable');
+    }
+  }
+
+  @protected
+  MarkdownListItem dco_decode_markdown_list_item(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2) throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return MarkdownListItem(
+      blocks: dco_decode_list_markdown_block(arr[0]),
+      checked: dco_decode_opt_box_autoadd_bool(arr[1]),
+    );
+  }
+
+  @protected
+  MarkdownListKind dco_decode_markdown_list_kind(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    switch (raw[0]) {
+      case 0:
+        return MarkdownListKind_Bullet(
+          marker: dco_decode_String(raw[1]),
+        );
+      case 1:
+        return MarkdownListKind_Ordered(
+          start: dco_decode_u_32(raw[1]),
+          delimiter: dco_decode_String(raw[2]),
+        );
+      default:
+        throw Exception('unreachable');
+    }
+  }
+
+  @protected
+  MarkdownNostrEntity dco_decode_markdown_nostr_entity(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 2) throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    return MarkdownNostrEntity(
+      hrp: dco_decode_markdown_nostr_hrp(arr[0]),
+      bech32: dco_decode_String(arr[1]),
+    );
+  }
+
+  @protected
+  MarkdownNostrHrp dco_decode_markdown_nostr_hrp(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return MarkdownNostrHrp.values[raw as int];
+  }
+
+  @protected
+  MarkdownTableCell dco_decode_markdown_table_cell(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    final arr = raw as List<dynamic>;
+    if (arr.length != 1) throw Exception('unexpected arr length: expect 1 but see ${arr.length}');
+    return MarkdownTableCell(
+      inlines: dco_decode_list_markdown_inline(arr[0]),
+    );
   }
 
   @protected
@@ -6833,7 +7106,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       kind: dco_decode_u_16(arr[2]),
       createdAt: dco_decode_Chrono_Utc(arr[3]),
       content: dco_decode_opt_String(arr[4]),
-      tokens: dco_decode_list_serializable_token(arr[5]),
+      tokens: dco_decode_markdown_document(arr[5]),
     );
   }
 
@@ -7114,17 +7387,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  SerializableToken dco_decode_serializable_token(dynamic raw) {
-    // Codec=Dco (DartCObject based), see doc to use other codecs
-    final arr = raw as List<dynamic>;
-    if (arr.length != 2) throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
-    return SerializableToken(
-      tokenType: dco_decode_String(arr[0]),
-      content: dco_decode_opt_String(arr[1]),
-    );
-  }
-
-  @protected
   int dco_decode_u_16(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     return raw as int;
@@ -7281,10 +7543,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   WhitenoiseConfig dco_decode_whitenoise_config(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 2) throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    if (arr.length != 3) throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
     return WhitenoiseConfig(
       dataDir: dco_decode_String(arr[0]),
       logsDir: dco_decode_String(arr[1]),
+      defaultRelayUrls: dco_decode_opt_list_String(arr[2]),
     );
   }
 
@@ -7872,6 +8135,22 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  MarkdownListKind sse_decode_box_autoadd_markdown_list_kind(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_markdown_list_kind(deserializer));
+  }
+
+  @protected
+  MarkdownNostrEntity sse_decode_box_autoadd_markdown_nostr_entity(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    return (sse_decode_markdown_nostr_entity(deserializer));
+  }
+
+  @protected
   MessageUpdate sse_decode_box_autoadd_message_update(
     SseDeserializer deserializer,
   ) {
@@ -7962,7 +8241,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     final var_isReply = sse_decode_bool(deserializer);
     final var_replyToId = sse_decode_opt_String(deserializer);
     final var_isDeleted = sse_decode_bool(deserializer);
-    final var_contentTokens = sse_decode_list_serializable_token(deserializer);
+    final var_contentTokens = sse_decode_markdown_document(deserializer);
     final var_reactions = sse_decode_reaction_summary(deserializer);
     final var_mediaAttachments = sse_decode_list_media_file(deserializer);
     final var_kind = sse_decode_u_16(deserializer);
@@ -8532,6 +8811,90 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  List<List<MarkdownTableCell>> sse_decode_list_list_markdown_table_cell(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    final len_ = sse_decode_i_32(deserializer);
+    final ans_ = <List<MarkdownTableCell>>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_list_markdown_table_cell(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
+  List<MarkdownAlignment> sse_decode_list_markdown_alignment(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    final len_ = sse_decode_i_32(deserializer);
+    final ans_ = <MarkdownAlignment>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_markdown_alignment(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
+  List<MarkdownBlock> sse_decode_list_markdown_block(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    final len_ = sse_decode_i_32(deserializer);
+    final ans_ = <MarkdownBlock>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_markdown_block(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
+  List<MarkdownInline> sse_decode_list_markdown_inline(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    final len_ = sse_decode_i_32(deserializer);
+    final ans_ = <MarkdownInline>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_markdown_inline(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
+  List<MarkdownListItem> sse_decode_list_markdown_list_item(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    final len_ = sse_decode_i_32(deserializer);
+    final ans_ = <MarkdownListItem>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_markdown_list_item(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
+  List<MarkdownTableCell> sse_decode_list_markdown_table_cell(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    final len_ = sse_decode_i_32(deserializer);
+    final ans_ = <MarkdownTableCell>[];
+    for (var idx_ = 0; idx_ < len_; ++idx_) {
+      ans_.add(sse_decode_markdown_table_cell(deserializer));
+    }
+    return ans_;
+  }
+
+  @protected
   List<MatchedField> sse_decode_list_matched_field(
     SseDeserializer deserializer,
   ) {
@@ -8633,20 +8996,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  List<SerializableToken> sse_decode_list_serializable_token(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-
-    final len_ = sse_decode_i_32(deserializer);
-    final ans_ = <SerializableToken>[];
-    for (var idx_ = 0; idx_ < len_; ++idx_) {
-      ans_.add(sse_decode_serializable_token(deserializer));
-    }
-    return ans_;
-  }
-
-  @protected
   List<User> sse_decode_list_user(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
 
@@ -8699,6 +9048,215 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     final inner = sse_decode_i_32(deserializer);
     return LoginStatus.values[inner];
+  }
+
+  @protected
+  MarkdownAlignment sse_decode_markdown_alignment(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    final inner = sse_decode_i_32(deserializer);
+    return MarkdownAlignment.values[inner];
+  }
+
+  @protected
+  MarkdownAutolinkKind sse_decode_markdown_autolink_kind(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    final inner = sse_decode_i_32(deserializer);
+    return MarkdownAutolinkKind.values[inner];
+  }
+
+  @protected
+  MarkdownBlock sse_decode_markdown_block(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    final tag_ = sse_decode_i_32(deserializer);
+    switch (tag_) {
+      case 0:
+        final var_inlines = sse_decode_list_markdown_inline(deserializer);
+        return MarkdownBlock_Paragraph(inlines: var_inlines);
+      case 1:
+        final var_level = sse_decode_u_8(deserializer);
+        final var_inlines = sse_decode_list_markdown_inline(deserializer);
+        return MarkdownBlock_Heading(level: var_level, inlines: var_inlines);
+      case 2:
+        return const MarkdownBlock_ThematicBreak();
+      case 3:
+        final var_kind = sse_decode_markdown_code_block_kind(deserializer);
+        final var_info = sse_decode_String(deserializer);
+        final var_content = sse_decode_String(deserializer);
+        return MarkdownBlock_CodeBlock(
+          kind: var_kind,
+          info: var_info,
+          content: var_content,
+        );
+      case 4:
+        final var_blocks = sse_decode_list_markdown_block(deserializer);
+        return MarkdownBlock_BlockQuote(blocks: var_blocks);
+      case 5:
+        final var_kind = sse_decode_box_autoadd_markdown_list_kind(
+          deserializer,
+        );
+        final var_tight = sse_decode_bool(deserializer);
+        final var_items = sse_decode_list_markdown_list_item(deserializer);
+        return MarkdownBlock_List(
+          kind: var_kind,
+          tight: var_tight,
+          items: var_items,
+        );
+      case 6:
+        final var_alignments = sse_decode_list_markdown_alignment(deserializer);
+        final var_header = sse_decode_list_markdown_table_cell(deserializer);
+        final var_rows = sse_decode_list_list_markdown_table_cell(deserializer);
+        return MarkdownBlock_Table(
+          alignments: var_alignments,
+          header: var_header,
+          rows: var_rows,
+        );
+      case 7:
+        final var_content = sse_decode_String(deserializer);
+        return MarkdownBlock_MathBlock(content: var_content);
+      default:
+        throw UnimplementedError('');
+    }
+  }
+
+  @protected
+  MarkdownCodeBlockKind sse_decode_markdown_code_block_kind(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    final inner = sse_decode_i_32(deserializer);
+    return MarkdownCodeBlockKind.values[inner];
+  }
+
+  @protected
+  MarkdownDocument sse_decode_markdown_document(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    final var_blocks = sse_decode_list_markdown_block(deserializer);
+    return MarkdownDocument(blocks: var_blocks);
+  }
+
+  @protected
+  MarkdownInline sse_decode_markdown_inline(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    final tag_ = sse_decode_i_32(deserializer);
+    switch (tag_) {
+      case 0:
+        final var_content = sse_decode_String(deserializer);
+        return MarkdownInline_Text(content: var_content);
+      case 1:
+        return const MarkdownInline_SoftBreak();
+      case 2:
+        return const MarkdownInline_HardBreak();
+      case 3:
+        final var_content = sse_decode_String(deserializer);
+        return MarkdownInline_Code(content: var_content);
+      case 4:
+        final var_children = sse_decode_list_markdown_inline(deserializer);
+        return MarkdownInline_Emph(children: var_children);
+      case 5:
+        final var_children = sse_decode_list_markdown_inline(deserializer);
+        return MarkdownInline_Strong(children: var_children);
+      case 6:
+        final var_children = sse_decode_list_markdown_inline(deserializer);
+        return MarkdownInline_Strikethrough(children: var_children);
+      case 7:
+        final var_dest = sse_decode_String(deserializer);
+        final var_title = sse_decode_opt_String(deserializer);
+        final var_children = sse_decode_list_markdown_inline(deserializer);
+        return MarkdownInline_Link(
+          dest: var_dest,
+          title: var_title,
+          children: var_children,
+        );
+      case 8:
+        final var_dest = sse_decode_String(deserializer);
+        final var_title = sse_decode_opt_String(deserializer);
+        final var_alt = sse_decode_list_markdown_inline(deserializer);
+        return MarkdownInline_Image(
+          dest: var_dest,
+          title: var_title,
+          alt: var_alt,
+        );
+      case 9:
+        final var_url = sse_decode_String(deserializer);
+        final var_kind = sse_decode_markdown_autolink_kind(deserializer);
+        return MarkdownInline_Autolink(url: var_url, kind: var_kind);
+      case 10:
+        final var_content = sse_decode_String(deserializer);
+        return MarkdownInline_Math(content: var_content);
+      case 11:
+        final var_entity = sse_decode_box_autoadd_markdown_nostr_entity(
+          deserializer,
+        );
+        return MarkdownInline_NostrMention(entity: var_entity);
+      case 12:
+        final var_entity = sse_decode_box_autoadd_markdown_nostr_entity(
+          deserializer,
+        );
+        return MarkdownInline_NostrUri(entity: var_entity);
+      default:
+        throw UnimplementedError('');
+    }
+  }
+
+  @protected
+  MarkdownListItem sse_decode_markdown_list_item(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    final var_blocks = sse_decode_list_markdown_block(deserializer);
+    final var_checked = sse_decode_opt_box_autoadd_bool(deserializer);
+    return MarkdownListItem(blocks: var_blocks, checked: var_checked);
+  }
+
+  @protected
+  MarkdownListKind sse_decode_markdown_list_kind(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    final tag_ = sse_decode_i_32(deserializer);
+    switch (tag_) {
+      case 0:
+        final var_marker = sse_decode_String(deserializer);
+        return MarkdownListKind_Bullet(marker: var_marker);
+      case 1:
+        final var_start = sse_decode_u_32(deserializer);
+        final var_delimiter = sse_decode_String(deserializer);
+        return MarkdownListKind_Ordered(
+          start: var_start,
+          delimiter: var_delimiter,
+        );
+      default:
+        throw UnimplementedError('');
+    }
+  }
+
+  @protected
+  MarkdownNostrEntity sse_decode_markdown_nostr_entity(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    final var_hrp = sse_decode_markdown_nostr_hrp(deserializer);
+    final var_bech32 = sse_decode_String(deserializer);
+    return MarkdownNostrEntity(hrp: var_hrp, bech32: var_bech32);
+  }
+
+  @protected
+  MarkdownNostrHrp sse_decode_markdown_nostr_hrp(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    final inner = sse_decode_i_32(deserializer);
+    return MarkdownNostrHrp.values[inner];
+  }
+
+  @protected
+  MarkdownTableCell sse_decode_markdown_table_cell(
+    SseDeserializer deserializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    final var_inlines = sse_decode_list_markdown_inline(deserializer);
+    return MarkdownTableCell(inlines: var_inlines);
   }
 
   @protected
@@ -8789,7 +9347,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     final var_kind = sse_decode_u_16(deserializer);
     final var_createdAt = sse_decode_Chrono_Utc(deserializer);
     final var_content = sse_decode_opt_String(deserializer);
-    final var_tokens = sse_decode_list_serializable_token(deserializer);
+    final var_tokens = sse_decode_markdown_document(deserializer);
     return MessageWithTokens(
       id: var_id,
       pubkey: var_pubkey,
@@ -9197,16 +9755,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  SerializableToken sse_decode_serializable_token(
-    SseDeserializer deserializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    final var_tokenType = sse_decode_String(deserializer);
-    final var_content = sse_decode_opt_String(deserializer);
-    return SerializableToken(tokenType: var_tokenType, content: var_content);
-  }
-
-  @protected
   int sse_decode_u_16(SseDeserializer deserializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     return deserializer.buffer.getUint16();
@@ -9378,7 +9926,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     final var_dataDir = sse_decode_String(deserializer);
     final var_logsDir = sse_decode_String(deserializer);
-    return WhitenoiseConfig(dataDir: var_dataDir, logsDir: var_logsDir);
+    final var_defaultRelayUrls = sse_decode_opt_list_String(deserializer);
+    return WhitenoiseConfig(
+      dataDir: var_dataDir,
+      logsDir: var_logsDir,
+      defaultRelayUrls: var_defaultRelayUrls,
+    );
   }
 
   @protected
@@ -10065,6 +10618,24 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_box_autoadd_markdown_list_kind(
+    MarkdownListKind self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_markdown_list_kind(self, serializer);
+  }
+
+  @protected
+  void sse_encode_box_autoadd_markdown_nostr_entity(
+    MarkdownNostrEntity self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_markdown_nostr_entity(self, serializer);
+  }
+
+  @protected
   void sse_encode_box_autoadd_message_update(
     MessageUpdate self,
     SseSerializer serializer,
@@ -10158,7 +10729,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_bool(self.isReply, serializer);
     sse_encode_opt_String(self.replyToId, serializer);
     sse_encode_bool(self.isDeleted, serializer);
-    sse_encode_list_serializable_token(self.contentTokens, serializer);
+    sse_encode_markdown_document(self.contentTokens, serializer);
     sse_encode_reaction_summary(self.reactions, serializer);
     sse_encode_list_media_file(self.mediaAttachments, serializer);
     sse_encode_u_16(self.kind, serializer);
@@ -10589,6 +11160,78 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  void sse_encode_list_list_markdown_table_cell(
+    List<List<MarkdownTableCell>> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_list_markdown_table_cell(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_list_markdown_alignment(
+    List<MarkdownAlignment> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_markdown_alignment(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_list_markdown_block(
+    List<MarkdownBlock> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_markdown_block(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_list_markdown_inline(
+    List<MarkdownInline> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_markdown_inline(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_list_markdown_list_item(
+    List<MarkdownListItem> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_markdown_list_item(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_list_markdown_table_cell(
+    List<MarkdownTableCell> self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.length, serializer);
+    for (final item in self) {
+      sse_encode_markdown_table_cell(item, serializer);
+    }
+  }
+
+  @protected
   void sse_encode_list_matched_field(
     List<MatchedField> self,
     SseSerializer serializer,
@@ -10680,18 +11323,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_list_serializable_token(
-    List<SerializableToken> self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_i_32(self.length, serializer);
-    for (final item in self) {
-      sse_encode_serializable_token(item, serializer);
-    }
-  }
-
-  @protected
   void sse_encode_list_user(List<User> self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.length, serializer);
@@ -10735,6 +11366,209 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   void sse_encode_login_status(LoginStatus self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
+  void sse_encode_markdown_alignment(
+    MarkdownAlignment self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
+  void sse_encode_markdown_autolink_kind(
+    MarkdownAutolinkKind self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
+  void sse_encode_markdown_block(MarkdownBlock self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    switch (self) {
+      case MarkdownBlock_Paragraph(inlines: final inlines):
+        sse_encode_i_32(0, serializer);
+        sse_encode_list_markdown_inline(inlines, serializer);
+      case MarkdownBlock_Heading(level: final level, inlines: final inlines):
+        sse_encode_i_32(1, serializer);
+        sse_encode_u_8(level, serializer);
+        sse_encode_list_markdown_inline(inlines, serializer);
+      case MarkdownBlock_ThematicBreak():
+        sse_encode_i_32(2, serializer);
+      case MarkdownBlock_CodeBlock(
+        kind: final kind,
+        info: final info,
+        content: final content,
+      ):
+        sse_encode_i_32(3, serializer);
+        sse_encode_markdown_code_block_kind(kind, serializer);
+        sse_encode_String(info, serializer);
+        sse_encode_String(content, serializer);
+      case MarkdownBlock_BlockQuote(blocks: final blocks):
+        sse_encode_i_32(4, serializer);
+        sse_encode_list_markdown_block(blocks, serializer);
+      case MarkdownBlock_List(
+        kind: final kind,
+        tight: final tight,
+        items: final items,
+      ):
+        sse_encode_i_32(5, serializer);
+        sse_encode_box_autoadd_markdown_list_kind(kind, serializer);
+        sse_encode_bool(tight, serializer);
+        sse_encode_list_markdown_list_item(items, serializer);
+      case MarkdownBlock_Table(
+        alignments: final alignments,
+        header: final header,
+        rows: final rows,
+      ):
+        sse_encode_i_32(6, serializer);
+        sse_encode_list_markdown_alignment(alignments, serializer);
+        sse_encode_list_markdown_table_cell(header, serializer);
+        sse_encode_list_list_markdown_table_cell(rows, serializer);
+      case MarkdownBlock_MathBlock(content: final content):
+        sse_encode_i_32(7, serializer);
+        sse_encode_String(content, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_markdown_code_block_kind(
+    MarkdownCodeBlockKind self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
+  void sse_encode_markdown_document(
+    MarkdownDocument self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_list_markdown_block(self.blocks, serializer);
+  }
+
+  @protected
+  void sse_encode_markdown_inline(
+    MarkdownInline self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    switch (self) {
+      case MarkdownInline_Text(content: final content):
+        sse_encode_i_32(0, serializer);
+        sse_encode_String(content, serializer);
+      case MarkdownInline_SoftBreak():
+        sse_encode_i_32(1, serializer);
+      case MarkdownInline_HardBreak():
+        sse_encode_i_32(2, serializer);
+      case MarkdownInline_Code(content: final content):
+        sse_encode_i_32(3, serializer);
+        sse_encode_String(content, serializer);
+      case MarkdownInline_Emph(children: final children):
+        sse_encode_i_32(4, serializer);
+        sse_encode_list_markdown_inline(children, serializer);
+      case MarkdownInline_Strong(children: final children):
+        sse_encode_i_32(5, serializer);
+        sse_encode_list_markdown_inline(children, serializer);
+      case MarkdownInline_Strikethrough(children: final children):
+        sse_encode_i_32(6, serializer);
+        sse_encode_list_markdown_inline(children, serializer);
+      case MarkdownInline_Link(
+        dest: final dest,
+        title: final title,
+        children: final children,
+      ):
+        sse_encode_i_32(7, serializer);
+        sse_encode_String(dest, serializer);
+        sse_encode_opt_String(title, serializer);
+        sse_encode_list_markdown_inline(children, serializer);
+      case MarkdownInline_Image(
+        dest: final dest,
+        title: final title,
+        alt: final alt,
+      ):
+        sse_encode_i_32(8, serializer);
+        sse_encode_String(dest, serializer);
+        sse_encode_opt_String(title, serializer);
+        sse_encode_list_markdown_inline(alt, serializer);
+      case MarkdownInline_Autolink(url: final url, kind: final kind):
+        sse_encode_i_32(9, serializer);
+        sse_encode_String(url, serializer);
+        sse_encode_markdown_autolink_kind(kind, serializer);
+      case MarkdownInline_Math(content: final content):
+        sse_encode_i_32(10, serializer);
+        sse_encode_String(content, serializer);
+      case MarkdownInline_NostrMention(entity: final entity):
+        sse_encode_i_32(11, serializer);
+        sse_encode_box_autoadd_markdown_nostr_entity(entity, serializer);
+      case MarkdownInline_NostrUri(entity: final entity):
+        sse_encode_i_32(12, serializer);
+        sse_encode_box_autoadd_markdown_nostr_entity(entity, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_markdown_list_item(
+    MarkdownListItem self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_list_markdown_block(self.blocks, serializer);
+    sse_encode_opt_box_autoadd_bool(self.checked, serializer);
+  }
+
+  @protected
+  void sse_encode_markdown_list_kind(
+    MarkdownListKind self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    switch (self) {
+      case MarkdownListKind_Bullet(marker: final marker):
+        sse_encode_i_32(0, serializer);
+        sse_encode_String(marker, serializer);
+      case MarkdownListKind_Ordered(
+        start: final start,
+        delimiter: final delimiter,
+      ):
+        sse_encode_i_32(1, serializer);
+        sse_encode_u_32(start, serializer);
+        sse_encode_String(delimiter, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_markdown_nostr_entity(
+    MarkdownNostrEntity self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_markdown_nostr_hrp(self.hrp, serializer);
+    sse_encode_String(self.bech32, serializer);
+  }
+
+  @protected
+  void sse_encode_markdown_nostr_hrp(
+    MarkdownNostrHrp self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_i_32(self.index, serializer);
+  }
+
+  @protected
+  void sse_encode_markdown_table_cell(
+    MarkdownTableCell self,
+    SseSerializer serializer,
+  ) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    sse_encode_list_markdown_inline(self.inlines, serializer);
   }
 
   @protected
@@ -10802,7 +11636,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_u_16(self.kind, serializer);
     sse_encode_Chrono_Utc(self.createdAt, serializer);
     sse_encode_opt_String(self.content, serializer);
-    sse_encode_list_serializable_token(self.tokens, serializer);
+    sse_encode_markdown_document(self.tokens, serializer);
   }
 
   @protected
@@ -11162,16 +11996,6 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
-  void sse_encode_serializable_token(
-    SerializableToken self,
-    SseSerializer serializer,
-  ) {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    sse_encode_String(self.tokenType, serializer);
-    sse_encode_opt_String(self.content, serializer);
-  }
-
-  @protected
   void sse_encode_u_16(int self, SseSerializer serializer) {
     // Codec=Sse (Serialization based), see doc to use other codecs
     serializer.buffer.putUint16(self);
@@ -11318,6 +12142,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.dataDir, serializer);
     sse_encode_String(self.logsDir, serializer);
+    sse_encode_opt_list_String(self.defaultRelayUrls, serializer);
   }
 }
 

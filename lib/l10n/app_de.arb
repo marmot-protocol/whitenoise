@@ -437,5 +437,7 @@
   "saveToGalleryNotSupportedFormat": "Medienformat nicht unterstützt",
   "saveToGalleryError": "Medium konnte nicht gespeichert werden",
   "leaveGroupLastAdminWarning": "Du bist der einzige Admin in dieser Gruppe. Befördere mindestens ein Mitglied zum Admin, bevor du die Gruppe verlassen kannst.",
-  "leaveGroupNoCapabilitiesWarning": "Diese Gruppe wurde mit einer älteren Version erstellt und unterstützt das Verlassen nicht. Admins können die Gruppenkapazitäten upgraden, sobald alle Mitglieder eine Version verwenden, die das Verlassen unterstützt."
+  "leaveGroupNoCapabilitiesWarning": "Diese Gruppe wurde mit einer älteren Version erstellt und unterstützt das Verlassen nicht. Admins können die Gruppenkapazitäten upgraden, sobald alle Mitglieder eine Version verwenden, die das Verlassen unterstützt.",
+  "unsupportedDeepLinkTitle": "Link nicht unterstützt",
+  "unsupportedDeepLinkMessage": "Dieser White-Noise-Link kann nicht geöffnet werden. Möglicherweise musst du die App aktualisieren."
 }

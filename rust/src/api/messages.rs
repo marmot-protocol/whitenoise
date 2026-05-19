@@ -1,3 +1,4 @@
+use crate::api::markdown::MarkdownDocument;
 use crate::api::wn;
 use crate::api::{
     error::ApiError,
@@ -16,11 +17,14 @@ pub use whitenoise::{
     ChatMessage as WhitenoiseChatMessage, DeliveryStatus as WhitenoiseDeliveryStatus,
     EmojiReaction as WhitenoiseEmojiReaction, MediaFile as WhitenoiseMediaFile,
     MessageUpdate as WhitenoiseMessageUpdate, MessageWithTokens as WhitenoiseMessageWithTokens,
-    ReactionSummary as WhitenoiseReactionSummary, SerializableToken as WhitenoiseSerializableToken,
-    UpdateTrigger as WhitenoiseUpdateTrigger, UserReaction as WhitenoiseUserReaction, Whitenoise,
+    ReactionSummary as WhitenoiseReactionSummary, UpdateTrigger as WhitenoiseUpdateTrigger,
+    UserReaction as WhitenoiseUserReaction, Whitenoise,
 };
 
-/// Flutter-compatible message with tokens
+/// Flutter-compatible message with parsed markdown.
+///
+/// Field name `tokens` is retained from the pre-markdown `Vec<SerializableToken>`
+/// representation; its type is now the parsed CommonMark+GFM+nostr AST.
 #[frb(non_opaque)]
 #[derive(Debug, Clone)]
 pub struct MessageWithTokens {
@@ -29,7 +33,7 @@ pub struct MessageWithTokens {
     pub kind: u16,
     pub created_at: DateTime<Utc>,
     pub content: Option<String>,
-    pub tokens: Vec<SerializableToken>,
+    pub tokens: MarkdownDocument,
 }
 
 /// Flutter-compatible chat message
@@ -44,7 +48,8 @@ pub struct ChatMessage {
     pub is_reply: bool,
     pub reply_to_id: Option<String>,
     pub is_deleted: bool,
-    pub content_tokens: Vec<SerializableToken>,
+    /// Parsed markdown AST of `content`. Empty document when content is empty.
+    pub content_tokens: MarkdownDocument,
     pub reactions: ReactionSummary,
     pub media_attachments: Vec<MediaFile>,
     pub kind: u16,
@@ -77,14 +82,6 @@ pub struct UserReaction {
     pub user: String,
     pub emoji: String,
     pub created_at: DateTime<Utc>,
-}
-
-/// Flutter-compatible serializable token
-#[frb(non_opaque)]
-#[derive(Debug, Clone)]
-pub struct SerializableToken {
-    pub token_type: String, // "Nostr", "Url", "Hashtag", "Text", "LineBreak", "Whitespace"
-    pub content: Option<String>, // None for LineBreak and Whitespace
 }
 
 /// Tracks the delivery state of an outgoing message.
@@ -202,13 +199,6 @@ impl From<WhitenoiseSearchResult> for SearchResult {
 
 impl From<&WhitenoiseMessageWithTokens> for MessageWithTokens {
     fn from(message_with_tokens: &WhitenoiseMessageWithTokens) -> Self {
-        // Convert tokens to Flutter-compatible representation
-        let tokens = message_with_tokens
-            .tokens
-            .iter()
-            .map(|token| token.into())
-            .collect();
-
         Self {
             id: message_with_tokens.message.id.to_hex(),
             pubkey: message_with_tokens.message.pubkey.to_hex(),
@@ -221,7 +211,7 @@ impl From<&WhitenoiseMessageWithTokens> for MessageWithTokens {
                     .unwrap_or_else(|| Utc.timestamp_opt(0, 0).single().unwrap())
             },
             content: Some(message_with_tokens.message.content.clone()),
-            tokens,
+            tokens: (&message_with_tokens.tokens).into(),
         }
     }
 }
@@ -229,43 +219,6 @@ impl From<&WhitenoiseMessageWithTokens> for MessageWithTokens {
 impl From<WhitenoiseMessageWithTokens> for MessageWithTokens {
     fn from(message_with_tokens: WhitenoiseMessageWithTokens) -> Self {
         (&message_with_tokens).into()
-    }
-}
-
-impl From<&WhitenoiseSerializableToken> for SerializableToken {
-    fn from(token: &WhitenoiseSerializableToken) -> Self {
-        match token {
-            WhitenoiseSerializableToken::Nostr(s) => Self {
-                token_type: "Nostr".to_string(),
-                content: Some(s.clone()),
-            },
-            WhitenoiseSerializableToken::Url(s) => Self {
-                token_type: "Url".to_string(),
-                content: Some(s.clone()),
-            },
-            WhitenoiseSerializableToken::Hashtag(s) => Self {
-                token_type: "Hashtag".to_string(),
-                content: Some(s.clone()),
-            },
-            WhitenoiseSerializableToken::Text(s) => Self {
-                token_type: "Text".to_string(),
-                content: Some(s.clone()),
-            },
-            WhitenoiseSerializableToken::LineBreak => Self {
-                token_type: "LineBreak".to_string(),
-                content: None,
-            },
-            WhitenoiseSerializableToken::Whitespace => Self {
-                token_type: "Whitespace".to_string(),
-                content: None,
-            },
-        }
-    }
-}
-
-impl From<WhitenoiseSerializableToken> for SerializableToken {
-    fn from(token: WhitenoiseSerializableToken) -> Self {
-        (&token).into()
     }
 }
 
@@ -352,14 +305,7 @@ impl From<&WhitenoiseChatMessage> for ChatMessage {
             .map(|tag| tag.as_slice().to_vec())
             .collect();
 
-        // Convert content tokens to proper Flutter-compatible structs
-        let content_tokens = chat_message
-            .content_tokens
-            .iter()
-            .map(|token| token.into())
-            .collect();
-
-        // Convert reactions to proper Flutter-compatible struct
+        let content_tokens: MarkdownDocument = (&chat_message.content_tokens).into();
         let reactions = (&chat_message.reactions).into();
 
         Self {
@@ -431,7 +377,7 @@ pub async fn send_message_to_group(
     kind: u16,
     tags: Option<Vec<Tag>>,
 ) -> Result<MessageWithTokens, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let group_id = group_id_from_string(&group_id)?;
@@ -450,7 +396,7 @@ pub async fn retry_message_publish(
     group_id: String,
     event_id: String,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let group_id = group_id_from_string(&group_id)?;
@@ -476,7 +422,7 @@ pub async fn search_messages_in_group(
     query: String,
     limit: Option<u32>,
 ) -> Result<Vec<SearchResult>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let results = whitenoise
@@ -497,7 +443,7 @@ pub async fn search_messages(
     query: String,
     limit: Option<u32>,
 ) -> Result<Vec<SearchResult>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let results = whitenoise.search_messages(&pubkey, &query, limit).await?;
     Ok(results.into_iter().map(|r| r.into()).collect())
@@ -516,7 +462,7 @@ pub async fn fetch_aggregated_messages_for_group(
     before_message_id: Option<String>,
     limit: Option<u32>,
 ) -> Result<Vec<ChatMessage>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let before_ts = before
@@ -550,7 +496,7 @@ pub async fn fetch_message_by_id(
     group_id: String,
     message_id: String,
 ) -> Result<Option<ChatMessage>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let message = whitenoise
@@ -573,7 +519,7 @@ pub async fn fetch_messages_unread_with_minimum(
     group_id: String,
     minimum: Option<u32>,
 ) -> Result<Vec<ChatMessage>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let messages = whitenoise
@@ -607,7 +553,7 @@ pub async fn subscribe_to_group_messages(
     group_id: String,
     sink: StreamSink<MessageStreamItem>,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let group_id_str = group_id.clone();
     let group_id = group_id_from_string(&group_id)?;
 
@@ -669,6 +615,7 @@ pub async fn subscribe_to_group_messages(
     // Stream real-time updates
     let mut rx = subscription.updates;
     let mut lagged_total: u64 = 0;
+    whitenoise.release_lifecycle();
     loop {
         match rx.recv().await {
             Ok(update) => {

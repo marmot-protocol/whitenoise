@@ -13,6 +13,7 @@ import 'package:whitenoise/screens/group_info_screen.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart';
 import 'package:whitenoise/src/rust/api/chat_summary.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' show GroupType;
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/mute_list.dart';
@@ -48,7 +49,7 @@ ChatMessage _message(
   isReply: isReply,
   replyToId: replyToId,
   isDeleted: isDeleted,
-  contentTokens: const [],
+  contentTokens: const MarkdownDocument(blocks: []),
   reactions: const ReactionSummary(byEmoji: [], userReactions: []),
   mediaAttachments: const [],
   kind: 9,

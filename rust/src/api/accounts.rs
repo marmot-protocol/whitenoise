@@ -1,5 +1,6 @@
 use crate::api::{
-    DEFAULT_RELAY_URLS, error::ApiError, metadata::FlutterMetadata, relays::Relay, users::User,
+    default_relay_urls_parsed, error::ApiError, metadata::FlutterMetadata, relays::Relay,
+    users::User,
 };
 use crate::api::{wn, wn_session};
 use chrono::{DateTime, TimeZone, Utc};
@@ -125,14 +126,14 @@ impl From<Event> for FlutterEvent {
 
 #[frb]
 pub async fn get_accounts() -> Result<Vec<Account>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let accounts = whitenoise.all_accounts().await?;
     Ok(accounts.into_iter().map(|a| a.into()).collect())
 }
 
 #[frb]
 pub async fn get_account(pubkey: String) -> Result<Account, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     Ok(account.into())
@@ -140,7 +141,7 @@ pub async fn get_account(pubkey: String) -> Result<Account, ApiError> {
 
 #[frb]
 pub async fn create_identity() -> Result<Account, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let account = whitenoise.create_identity().await?;
     Ok(account.into())
 }
@@ -151,14 +152,14 @@ pub async fn create_identity() -> Result<Account, ApiError> {
 
 #[frb]
 pub async fn login_start(nsec_or_hex_privkey: String) -> Result<LoginResult, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let result = whitenoise.login_start(nsec_or_hex_privkey).await?;
     Ok(result.into())
 }
 
 #[frb]
 pub async fn login_publish_default_relays(pubkey: String) -> Result<LoginResult, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let result = whitenoise.login_publish_default_relays(&pubkey).await?;
     Ok(result.into())
@@ -169,7 +170,7 @@ pub async fn login_with_custom_relay(
     pubkey: String,
     relay_url: String,
 ) -> Result<LoginResult, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let relay_url = RelayUrl::parse(&relay_url)?;
     let result = whitenoise
@@ -180,7 +181,7 @@ pub async fn login_with_custom_relay(
 
 #[frb]
 pub async fn login_cancel(pubkey: String) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     whitenoise.login_cancel(&pubkey).await?;
     Ok(())
@@ -188,14 +189,14 @@ pub async fn login_cancel(pubkey: String) -> Result<(), ApiError> {
 
 #[frb]
 pub async fn logout(pubkey: String) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     whitenoise.logout(&pubkey).await.map_err(ApiError::from)
 }
 
 #[frb]
 pub async fn export_account_nsec(pubkey: String) -> Result<String, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     whitenoise
@@ -209,11 +210,11 @@ pub async fn update_account_metadata(
     pubkey: String,
     metadata: &FlutterMetadata,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     account
-        .update_metadata(&metadata.into(), whitenoise)
+        .update_metadata(&metadata.into(), &whitenoise)
         .await
         .map_err(ApiError::from)
 }
@@ -225,7 +226,7 @@ pub async fn upload_account_profile_picture(
     file_path: String,
     image_type: String,
 ) -> Result<String, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let image_type = ImageType::try_from(image_type).map_err(|error| ApiError::Other {
         message: error.to_string(),
@@ -242,7 +243,7 @@ pub async fn upload_account_profile_picture(
 
 #[frb]
 pub async fn account_relays(pubkey: String, relay_type: RelayType) -> Result<Vec<Relay>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let relays = account.relays(relay_type, &whitenoise.shared).await?;
@@ -251,7 +252,7 @@ pub async fn account_relays(pubkey: String, relay_type: RelayType) -> Result<Vec
 
 #[frb]
 pub async fn restore_default_relays(pubkey: String) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
 
@@ -261,14 +262,13 @@ pub async fn restore_default_relays(pubkey: String) -> Result<(), ApiError> {
             .await?;
         for relay in &current_relays {
             account
-                .remove_relay(relay, relay_type.clone(), whitenoise)
+                .remove_relay(relay, relay_type.clone(), &whitenoise)
                 .await?;
         }
-        for url in DEFAULT_RELAY_URLS {
-            let relay_url = RelayUrl::parse(url)?;
+        for relay_url in default_relay_urls_parsed()? {
             let relay = whitenoise.find_or_create_relay_by_url(&relay_url).await?;
             account
-                .add_relay(&relay, relay_type.clone(), whitenoise)
+                .add_relay(&relay, relay_type.clone(), &whitenoise)
                 .await?;
         }
     }
@@ -282,13 +282,13 @@ pub async fn add_account_relay(
     url: String,
     relay_type: RelayType,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let relay_url = RelayUrl::parse(&url)?;
     let relay = whitenoise.find_or_create_relay_by_url(&relay_url).await?;
     account
-        .add_relay(&relay, relay_type, whitenoise)
+        .add_relay(&relay, relay_type, &whitenoise)
         .await
         .map_err(ApiError::from)
 }
@@ -299,20 +299,20 @@ pub async fn remove_account_relay(
     url: String,
     relay_type: RelayType,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let relay_url = RelayUrl::parse(&url)?;
     let relay = whitenoise.find_or_create_relay_by_url(&relay_url).await?;
     account
-        .remove_relay(&relay, relay_type, whitenoise)
+        .remove_relay(&relay, relay_type, &whitenoise)
         .await
         .map_err(ApiError::from)
 }
 
 #[frb]
 pub async fn account_key_package(pubkey: String) -> Result<Option<FlutterEvent>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let user = whitenoise.find_user_by_pubkey(&pubkey).await?;
     let event = user.key_package_event(&whitenoise.shared).await?;
@@ -322,7 +322,7 @@ pub async fn account_key_package(pubkey: String) -> Result<Option<FlutterEvent>,
 #[frb]
 pub async fn account_key_packages(account_pubkey: String) -> Result<Vec<FlutterEvent>, ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let key_packages = session.key_packages().fetch_all().await?;
     Ok(key_packages.into_iter().map(|e| e.into()).collect())
 }
@@ -330,7 +330,7 @@ pub async fn account_key_packages(account_pubkey: String) -> Result<Vec<FlutterE
 #[frb]
 pub async fn publish_account_key_package(account_pubkey: String) -> Result<(), ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     session
         .key_packages()
         .publish()
@@ -344,7 +344,7 @@ pub async fn delete_account_key_package(
     key_package_id: String,
 ) -> Result<bool, ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let key_package_id = EventId::parse(&key_package_id)?;
     session
         .key_packages()
@@ -356,7 +356,7 @@ pub async fn delete_account_key_package(
 #[frb]
 pub async fn delete_account_key_packages(account_pubkey: String) -> Result<usize, ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let deleted_count = session.key_packages().delete_legacy().await?;
     Ok(deleted_count)
 }
@@ -364,7 +364,7 @@ pub async fn delete_account_key_packages(account_pubkey: String) -> Result<usize
 #[frb]
 pub async fn account_follows(pubkey: String) -> Result<Vec<User>, ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let follows = session.social().follows().await?;
     Ok(follows.into_iter().map(|u| u.into()).collect())
 }
@@ -375,7 +375,7 @@ pub async fn follow_user(
     user_to_follow_pubkey: String,
 ) -> Result<(), ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let user_to_follow_pubkey = PublicKey::parse(&user_to_follow_pubkey)?;
     session
         .social()
@@ -390,7 +390,7 @@ pub async fn unfollow_user(
     user_to_unfollow_pubkey: String,
 ) -> Result<(), ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let user_to_unfollow_pubkey = PublicKey::parse(&user_to_unfollow_pubkey)?;
     session
         .social()
@@ -405,7 +405,7 @@ pub async fn is_following_user(
     user_pubkey: String,
 ) -> Result<bool, ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let user_pubkey = PublicKey::parse(&user_pubkey)?;
     session
         .social()
@@ -430,7 +430,7 @@ impl From<WhitenoiseAccountSettings> for AccountSettings {
 
 #[frb]
 pub async fn account_settings(pubkey: String) -> Result<AccountSettings, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let session = whitenoise
         .session(&pubkey)
@@ -446,7 +446,7 @@ pub async fn update_notifications_enabled(
     pubkey: String,
     enabled: bool,
 ) -> Result<AccountSettings, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let session = whitenoise
         .session(&pubkey)

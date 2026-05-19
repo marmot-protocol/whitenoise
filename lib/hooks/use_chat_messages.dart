@@ -5,6 +5,7 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
 import 'package:whitenoise/providers/message_debug_log_provider.dart';
 import 'package:whitenoise/services/user_service.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
@@ -24,6 +25,7 @@ typedef ChatMessageQuoteData = ({
   String authorPubkey,
   FlutterMetadata? authorMetadata,
   String content,
+  MarkdownDocument? contentTokens,
   MediaFile? mediaFile,
   bool isNotFound,
 });
@@ -335,6 +337,7 @@ ChatMessagesResult useChatMessages(
         authorPubkey: '',
         authorMetadata: null,
         content: '',
+        contentTokens: null,
         mediaFile: null,
         isNotFound: true,
       );
@@ -344,6 +347,7 @@ ChatMessagesResult useChatMessages(
       authorPubkey: message.pubkey,
       authorMetadata: getAuthorMetadata(message.pubkey),
       content: message.content,
+      contentTokens: message.contentTokens,
       mediaFile: message.mediaAttachments.isNotEmpty ? message.mediaAttachments.first : null,
       isNotFound: false,
     );

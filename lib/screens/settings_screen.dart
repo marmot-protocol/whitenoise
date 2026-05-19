@@ -80,9 +80,7 @@ class SettingsScreen extends HookConsumerWidget {
                             ),
                           ),
                           Text(
-                            formatPublicKey(
-                              npubFromHex(pubkey) ?? pubkey,
-                            ),
+                            formatPublicKey(npubFromHex(pubkey) ?? pubkey),
                             maxLines: 2,
                             style: typography.medium12.copyWith(
                               color: colors.backgroundContentSecondary,
@@ -110,6 +108,7 @@ class SettingsScreen extends HookConsumerWidget {
                     SizedBox(
                       width: double.infinity,
                       child: WnButton(
+                        key: const Key('settings_switch_profile_button'),
                         text: context.l10n.switchProfile,
                         type: WnButtonType.outline,
                         trailingIcon: WnIcons.change,
@@ -127,6 +126,7 @@ class SettingsScreen extends HookConsumerWidget {
                       onTap: () => Routes.pushToEditProfile(context),
                     ),
                     WnMenuItem(
+                      key: const Key('settings_profile_keys_menu_item'),
                       icon: WnIcons.key,
                       label: context.l10n.profileKeys,
                       onTap: () => Routes.pushToProfileKeys(context),

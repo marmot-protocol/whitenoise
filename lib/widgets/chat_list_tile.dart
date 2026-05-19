@@ -3,11 +3,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:logging/logging.dart';
-import 'package:whitenoise/constants/feature_flags.dart';
 import 'package:whitenoise/hooks/use_leave_group.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
-import 'package:whitenoise/providers/feature_flags_provider.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/services/user_service.dart';
@@ -139,7 +137,7 @@ _TileDisplay _buildTileDisplay({
   }
 
   String? prefixSubtitle;
-  if (!isPending && !chatSummary.selfRemoved && chatSummary.lastMessage != null) {
+  if (!chatSummary.selfRemoved && chatSummary.lastMessage != null) {
     if (chatSummary.lastMessage!.author == myPubkey) {
       prefixSubtitle = '${context.l10n.you}: ';
     } else if (!isDm) {
@@ -272,13 +270,9 @@ class ChatListTile extends HookConsumerWidget {
     final isPending = chatSummary.pendingConfirmation;
     final hasWelcomer = chatSummary.welcomerPubkey != null;
 
-    final leaveGroupEnabled = ref.watch(
-      featureFlagProvider(FeatureFlag.leaveGroup),
-    );
     final leaveGroupState = useLeaveGroup(
       accountPubkey: myPubkey,
       groupId: chatSummary.mlsGroupId,
-      featureEnabled: leaveGroupEnabled,
       groupType: chatSummary.groupType,
       pendingConfirmation: chatSummary.pendingConfirmation,
       selfRemoved: chatSummary.selfRemoved,

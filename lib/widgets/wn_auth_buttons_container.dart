@@ -23,6 +23,7 @@ class WnAuthButtonsContainer extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         WnButton(
+          key: const Key('auth_login_button'),
           text: context.l10n.login,
           type: WnButtonType.outline,
           onPressed: disabled ? null : (onLogin ?? () => Routes.pushToLogin(context)),
@@ -30,6 +31,7 @@ class WnAuthButtonsContainer extends StatelessWidget {
         ),
         Gap(12.h),
         WnButton(
+          key: const Key('auth_signup_button'),
           text: context.l10n.signUp,
           onPressed: disabled ? null : (onSignup ?? () => Routes.pushToSignup(context)),
           disabled: disabled,

@@ -6,6 +6,7 @@ import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/screens/fatal_error_screen.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_confirmation_slate.dart';
@@ -21,7 +22,8 @@ class PrivacySecurityScreen extends HookConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
     final typography = context.typographyScaled;
-    final (:state, :deleteAllData) = useDeleteAllData();
+    final (:state, :deleteAllData, :latestFailure, :latestError, :latestStackTrace) =
+        useDeleteAllData();
     final systemNotice = useSystemNotice();
 
     Future<void> handleDeleteAllData() async {
@@ -46,6 +48,19 @@ class PrivacySecurityScreen extends HookConsumerWidget {
           }
         });
       } else {
+        if (latestFailure() == DeleteAllDataFailure.reinitializeFailed) {
+          final error = latestError();
+          await Navigator.of(context, rootNavigator: true).pushAndRemoveUntil(
+            MaterialPageRoute<void>(
+              builder: (_) => FatalErrorScreen(
+                errorMessage: error?.toString() ?? 'Whitenoise reinitialization failed',
+                stackTrace: latestStackTrace(),
+              ),
+            ),
+            (_) => false,
+          );
+          return;
+        }
         systemNotice.showErrorNotice(context.l10n.deleteAllDataError);
       }
     }

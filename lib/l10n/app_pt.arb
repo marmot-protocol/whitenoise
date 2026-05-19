@@ -437,5 +437,7 @@
   "saveToGalleryNotSupportedFormat": "Formato de imagem não suportado",
   "saveToGalleryError": "Falha ao salvar imagem na galeria",
   "leaveGroupLastAdminWarning": "Você é o único administrador deste grupo. Promova pelo menos um membro a administrador antes de poder sair.",
-  "leaveGroupNoCapabilitiesWarning": "Este grupo foi criado com uma versão mais antiga e não suporta a saída. Os administradores podem atualizar as capacidades do grupo assim que todos os membros estiverem numa versão que suporte sair."
+  "leaveGroupNoCapabilitiesWarning": "Este grupo foi criado com uma versão mais antiga e não suporta a saída. Os administradores podem atualizar as capacidades do grupo assim que todos os membros estiverem numa versão que suporte sair.",
+  "unsupportedDeepLinkTitle": "Link não suportado",
+  "unsupportedDeepLinkMessage": "Este link do White Noise não pode ser aberto. Talvez seja necessário atualizar o aplicativo."
 }

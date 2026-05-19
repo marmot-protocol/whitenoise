@@ -3,10 +3,10 @@ import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:whitenoise/src/rust/api/relay_defaults.dart' as relay_defaults;
 
-typedef ReachAnyRelayFunction = Future<bool> Function(List<String> hosts);
+typedef ReachAnyRelayFunction = Future<bool> Function(List<Uri> relayUrls);
 typedef CheckConnectivityFunction = Future<List<ConnectivityResult>> Function();
 
-List<String>? _relayHosts() {
+List<Uri>? _relayUrls() {
   final List<String> relayUrls;
   try {
     relayUrls = relay_defaults.defaultRelayUrls();
@@ -14,18 +14,27 @@ List<String>? _relayHosts() {
     return null;
   }
   return relayUrls
-      .map((url) => Uri.tryParse(url)?.host ?? '')
-      .where((host) => host.isNotEmpty)
-      .toSet()
+      .map(Uri.tryParse)
+      .whereType<Uri>()
+      .where((url) => url.host.isNotEmpty)
       .toList(growable: false);
 }
 
-Future<bool> _reachAnyRelayHost(List<String> hosts) async {
-  if (hosts.isEmpty) return false;
+int _relayPort(Uri url) {
+  if (url.port != 0) return url.port;
+  return url.scheme == 'ws' ? 80 : 443;
+}
 
-  final checks = hosts.map((host) async {
+Future<bool> _reachAnyRelayHost(List<Uri> relayUrls) async {
+  if (relayUrls.isEmpty) return false;
+
+  final checks = relayUrls.map((url) async {
     try {
-      final socket = await Socket.connect(host, 443, timeout: const Duration(seconds: 3));
+      final socket = await Socket.connect(
+        url.host,
+        _relayPort(url),
+        timeout: const Duration(seconds: 3),
+      );
       socket.destroy();
       return true;
     } catch (_) {
@@ -57,12 +66,12 @@ bool _isOffline(List<ConnectivityResult> results) {
   return !results.any((result) => result != ConnectivityResult.none);
 }
 
-Future<bool> _tryReachAnyRelay(ReachAnyRelayFunction fn, List<String>? hosts) async {
-  if (hosts == null) {
+Future<bool> _tryReachAnyRelay(ReachAnyRelayFunction fn, List<Uri>? relayUrls) async {
+  if (relayUrls == null) {
     return true;
   }
   try {
-    return await fn(hosts);
+    return await fn(relayUrls);
   } catch (_) {
     return true;
   }
@@ -72,20 +81,20 @@ final offlineProvider = StreamProvider<bool>((ref) async* {
   final reachAnyRelayHostFunction = ref.watch(reachAnyRelayHostFunctionProvider);
   final checkConnectivity = ref.watch(checkConnectivityFunctionProvider);
   final connectionStream = ref.watch(connectivityStreamProvider);
-  final hosts = _relayHosts();
+  final relayUrls = _relayUrls();
 
   final initialResults = await checkConnectivity();
   if (_isOffline(initialResults)) {
     yield true;
   } else {
-    yield !await _tryReachAnyRelay(reachAnyRelayHostFunction, hosts);
+    yield !await _tryReachAnyRelay(reachAnyRelayHostFunction, relayUrls);
   }
 
   await for (final results in connectionStream) {
     if (_isOffline(results)) {
       yield true;
     } else {
-      yield !await _tryReachAnyRelay(reachAnyRelayHostFunction, hosts);
+      yield !await _tryReachAnyRelay(reachAnyRelayHostFunction, relayUrls);
     }
   }
 });

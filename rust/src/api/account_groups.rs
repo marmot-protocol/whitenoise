@@ -79,7 +79,7 @@ pub async fn accept_account_group(
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = ::hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let updated = session.membership().for_group(&group_id).accept().await?;
     Ok(updated.into())
 }
@@ -94,7 +94,7 @@ pub async fn decline_account_group(
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = ::hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let updated = session.membership().for_group(&group_id).decline().await?;
     Ok(updated.into())
 }
@@ -107,7 +107,7 @@ pub async fn get_account_group(
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = ::hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let (ag, _) = session
         .membership()
         .for_group(&group_id)
@@ -123,7 +123,7 @@ pub async fn get_dm_group_with_peer(
 ) -> Result<Option<String>, ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let peer = PublicKey::parse(&peer_pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let group_id = session.membership().dm_group_with_peer(&peer).await?;
     Ok(group_id.map(|id| group_id_to_string(&id)))
 }
@@ -133,7 +133,7 @@ pub async fn archive_chat(account_pubkey: String, mls_group_id: String) -> Resul
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = ::hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     session.membership().for_group(&group_id).archive().await?;
     Ok(())
 }
@@ -143,7 +143,7 @@ pub async fn unarchive_chat(account_pubkey: String, mls_group_id: String) -> Res
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let group_id_bytes = ::hex::decode(&mls_group_id)?;
     let group_id = GroupId::from_slice(&group_id_bytes);
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     session
         .membership()
         .for_group(&group_id)
@@ -163,7 +163,7 @@ pub async fn mark_message_read(
 ) -> Result<AccountGroup, ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let event_id = EventId::from_hex(&message_id)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let updated = session.membership().mark_message_read(&event_id).await?;
     Ok(updated.into())
 }

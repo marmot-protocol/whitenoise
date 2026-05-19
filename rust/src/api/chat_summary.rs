@@ -85,7 +85,7 @@ pub async fn get_chat_summary(
     mls_group_id: String,
 ) -> Result<ChatSummary, ApiError> {
     let pubkey = PublicKey::parse(&account_pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let active = session.chat_list().active().await?;
     let archived = session.chat_list().archived().await?;
     let item = active

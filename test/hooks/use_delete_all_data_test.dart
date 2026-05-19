@@ -1,8 +1,8 @@
 import 'dart:async';
-
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_delete_all_data.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/utils/reset_marker.dart';
 
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
@@ -11,12 +11,23 @@ void main() {
   late MockWnApi mockApi;
 
   setUpAll(() {
+    mockPathProvider();
     mockApi = MockWnApi();
     RustLib.initMock(api: mockApi);
   });
 
   setUp(() {
     mockApi.reset();
+    debugMarkResetPending = () async {};
+    debugClearResetPending = () async {};
+    addTearDown(() async {
+      debugMarkResetPending = null;
+      debugClearResetPending = null;
+    });
+  });
+
+  tearDown(() async {
+    await clearResetPending();
   });
 
   group('DeleteAllDataState', () {
@@ -52,43 +63,34 @@ void main() {
     });
 
     testWidgets('deleteAllData sets isDeleting to true during operation', (tester) async {
-      late DeleteAllDataState initialState;
-      late DeleteAllDataState duringState;
-      late Future<void> Function() deleteAllData;
+      late Future<bool> Function() deleteAllData;
 
-      mockApi.deleteAllDataDelay = const Duration(milliseconds: 100);
+      mockApi.deleteAllDataCompleter = Completer<void>();
 
-      await mountHook(
+      final getState = await mountHook(
         tester,
         () {
           final hook = useDeleteAllData();
-          initialState = hook.state;
           deleteAllData = hook.deleteAllData;
-          return null;
+          return hook.state;
         },
       );
 
-      expect(initialState.isDeleting, false);
+      expect(getState().isDeleting, false);
 
-      deleteAllData();
+      final resultFuture = deleteAllData();
       await tester.pump();
 
-      await mountHook(
-        tester,
-        () {
-          final hook = useDeleteAllData();
-          duringState = hook.state;
-          return null;
-        },
-      );
+      expect(getState().isDeleting, true);
 
-      expect(duringState.isDeleting, true);
-
-      await tester.pumpAndSettle();
+      mockApi.deleteAllDataCompleter!.complete();
+      await tester.pump();
+      await resultFuture;
+      await tester.pump();
     });
 
     testWidgets('deleteAllData calls API successfully', (tester) async {
-      late Future<void> Function() deleteAllData;
+      late Future<bool> Function() deleteAllData;
 
       await mountHook(
         tester,
@@ -100,39 +102,54 @@ void main() {
       );
 
       await deleteAllData();
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(mockApi.deleteAllDataCalled, true);
+      expect(mockApi.reinitializeWhitenoiseCalled, true);
     });
 
-    testWidgets('deleteAllData sets isDeleting to false after success', (tester) async {
-      late DeleteAllDataState state;
+    testWidgets('deleteAllData returns false when reinitialization fails', (tester) async {
       late Future<bool> Function() deleteAllData;
+      late DeleteAllDataFailure? Function() latestFailure;
+
+      mockApi.reinitializeWhitenoiseShouldFail = true;
 
       await mountHook(
         tester,
         () {
           final hook = useDeleteAllData();
-          state = hook.state;
           deleteAllData = hook.deleteAllData;
+          latestFailure = hook.latestFailure;
           return null;
         },
       );
 
       final result = await deleteAllData();
-      await tester.pumpAndSettle();
+      await tester.pump();
 
-      await mountHook(
+      expect(result, false);
+      expect(mockApi.deleteAllDataCalled, true);
+      expect(mockApi.reinitializeWhitenoiseCalled, true);
+      expect(latestFailure(), DeleteAllDataFailure.reinitializeFailed);
+    });
+
+    testWidgets('deleteAllData sets isDeleting to false after success', (tester) async {
+      late Future<bool> Function() deleteAllData;
+
+      final getState = await mountHook(
         tester,
         () {
           final hook = useDeleteAllData();
-          state = hook.state;
-          return null;
+          deleteAllData = hook.deleteAllData;
+          return hook.state;
         },
       );
 
+      final result = await deleteAllData();
+      await tester.pump();
+
       expect(result, true);
-      expect(state.isDeleting, false);
+      expect(getState().isDeleting, false);
     });
 
     testWidgets('deleteAllData returns false on failure', (tester) async {
@@ -150,12 +167,13 @@ void main() {
       );
 
       final result = await deleteAllData();
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(result, false);
+      expect(mockApi.reinitializeWhitenoiseCalled, false);
     });
 
-    testWidgets('deleteAllData returns false on timeout', (tester) async {
+    testWidgets('deleteAllData waits for long-running API calls', (tester) async {
       late Future<bool> Function() deleteAllData;
 
       mockApi.deleteAllDataCompleter = Completer<void>();
@@ -163,23 +181,29 @@ void main() {
       await mountHook(
         tester,
         () {
-          final hook = useDeleteAllData(timeout: const Duration(seconds: 1));
+          final hook = useDeleteAllData();
           deleteAllData = hook.deleteAllData;
           return null;
         },
       );
 
       final resultFuture = deleteAllData();
+      var completed = false;
+      unawaited(resultFuture.then((_) => completed = true));
+
       await tester.pump(const Duration(seconds: 2));
 
-      final result = await resultFuture;
-      await tester.pumpAndSettle();
+      expect(completed, isFalse);
+      mockApi.deleteAllDataCompleter!.complete();
 
-      expect(result, false);
+      final result = await resultFuture;
+      await tester.pump();
+
+      expect(result, true);
       expect(mockApi.deleteAllDataCalled, true);
     });
 
-    testWidgets('deleteAllData sets isDeleting to false after timeout', (tester) async {
+    testWidgets('deleteAllData keeps isDeleting true while API call is pending', (tester) async {
       late Future<bool> Function() deleteAllData;
 
       mockApi.deleteAllDataCompleter = Completer<void>();
@@ -187,7 +211,7 @@ void main() {
       final getState = await mountHook(
         tester,
         () {
-          final hook = useDeleteAllData(timeout: const Duration(seconds: 1));
+          final hook = useDeleteAllData();
           deleteAllData = hook.deleteAllData;
           return hook.state;
         },
@@ -196,8 +220,11 @@ void main() {
       final resultFuture = deleteAllData();
       await tester.pump(const Duration(seconds: 2));
 
+      expect(getState().isDeleting, true);
+      mockApi.deleteAllDataCompleter!.complete();
+
       await resultFuture;
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(getState().isDeleting, false);
     });
@@ -216,14 +243,14 @@ void main() {
       mockApi.deleteAllDataShouldFail = true;
 
       final failResult = await deleteAllData();
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(failResult, false);
 
       mockApi.deleteAllDataShouldFail = false;
 
       final successResult = await deleteAllData();
-      await tester.pumpAndSettle();
+      await tester.pump();
 
       expect(successResult, true);
       expect(getState().isDeleting, false);

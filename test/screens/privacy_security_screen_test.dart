@@ -7,6 +7,7 @@ import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/home_screen.dart';
 import 'package:whitenoise/screens/privacy_security_screen.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/utils/reset_marker.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 
 import '../mocks/mock_auth_notifier.dart';
@@ -18,12 +19,23 @@ void main() {
   late MockWnApi mockApi;
 
   setUpAll(() {
+    mockPathProvider();
     mockApi = MockWnApi();
     RustLib.initMock(api: mockApi);
   });
 
   setUp(() {
     mockApi.reset();
+    debugMarkResetPending = () async {};
+    debugClearResetPending = () async {};
+    addTearDown(() async {
+      debugMarkResetPending = null;
+      debugClearResetPending = null;
+    });
+  });
+
+  tearDown(() async {
+    await clearResetPending();
   });
 
   Future<void> pumpPrivacySecurityScreen(WidgetTester tester) async {
@@ -93,17 +105,37 @@ void main() {
       expect(mockApi.deleteAllDataCalled, false);
     });
 
-    testWidgets('confirming delete all data calls API and navigates to home', (tester) async {
+    testWidgets('confirming delete all data calls API and navigates to home', (
+      tester,
+    ) async {
       await pumpPrivacySecurityScreen(tester);
 
       await tester.tap(find.byKey(const Key('delete_all_data_button')));
       await tester.pumpAndSettle();
 
       await tester.tap(find.byKey(const Key('confirm_button')));
-      await tester.pumpAndSettle();
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
 
       expect(mockApi.deleteAllDataCalled, true);
       expect(find.byType(HomeScreen), findsOneWidget);
+    });
+
+    testWidgets('delete all data shows fatal error when reinitialization fails', (tester) async {
+      mockApi.reinitializeWhitenoiseShouldFail = true;
+
+      await pumpPrivacySecurityScreen(tester);
+
+      await tester.tap(find.byKey(const Key('delete_all_data_button')));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const Key('confirm_button')));
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(mockApi.deleteAllDataCalled, true);
+      expect(find.byKey(const Key('fatal_error_callout')), findsOneWidget);
+      expect(find.byType(PrivacySecurityScreen), findsNothing);
     });
 
     testWidgets('confirm button shows loading during delete operation', (tester) async {
@@ -121,7 +153,7 @@ void main() {
       final confirmButton = tester.widget<WnButton>(find.byKey(const Key('confirm_button')));
       expect(confirmButton.loading, true);
 
-      await tester.pumpAndSettle();
+      await tester.pump(const Duration(seconds: 3));
     });
 
     testWidgets('delete all data shows error when API fails', (tester) async {
@@ -135,7 +167,6 @@ void main() {
       await tester.tap(find.byKey(const Key('confirm_button')));
       await tester.pump();
       await tester.pump(const Duration(milliseconds: 500));
-      await tester.pumpAndSettle();
       await tester.pump(const Duration(seconds: 1));
 
       expect(mockApi.deleteAllDataCalled, true);

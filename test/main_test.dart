@@ -102,10 +102,15 @@ class _MockInitApi extends MockWnApi {
   Future<rust_api.WhitenoiseConfig> crateApiCreateWhitenoiseConfig({
     required String dataDir,
     required String logsDir,
+    List<String>? defaultRelayUrls,
   }) async {
     createdConfigDataDir = dataDir;
     createdConfigLogsDir = logsDir;
-    return rust_api.WhitenoiseConfig(dataDir: dataDir, logsDir: logsDir);
+    return rust_api.WhitenoiseConfig(
+      dataDir: dataDir,
+      logsDir: logsDir,
+      defaultRelayUrls: defaultRelayUrls,
+    );
   }
 
   @override

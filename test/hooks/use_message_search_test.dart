@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_message_search.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
@@ -20,7 +21,7 @@ ChatMessage _messageFactory(
   tags: const [],
   isReply: false,
   isDeleted: false,
-  contentTokens: const [],
+  contentTokens: const MarkdownDocument(blocks: []),
   reactions: const ReactionSummary(byEmoji: [], userReactions: []),
   mediaAttachments: const [],
   kind: 1,

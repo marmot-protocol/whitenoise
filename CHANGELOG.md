@@ -23,6 +23,7 @@ and this project adheres to Calendar Versioning (CalVer).
 ### Added
 - Leave group from chat list for non-last admins [PR #638](https://github.com/marmot-protocol/whitenoise/pull/638)
 - Add archive option in chat removed warning and change wording for leave case [PR #657](https://github.com/marmot-protocol/whitenoise/pull/657)
+- Enable leave group [PR #675](https://github.com/marmot-protocol/whitenoise/pull/675)
 - Hide chat composer when peer is blocked and add Blocked users management under Settings → Privacy & Security [PR #676](https://github.com/marmot-protocol/whitenoise/pull/676)
 
 ### Changed
@@ -32,7 +33,9 @@ and this project adheres to Calendar Versioning (CalVer).
 ### Removed
 
 ### Fixed
+- Fix deleting all app data reusing a closed Whitenoise database instance [PR #662](https://github.com/marmot-protocol/whitenoise/pull/662)
 - Fixed QR scanner not showing camera on first attempt after giving permission [PR #654](https://github.com/marmot-protocol/whitenoise/pull/654)
+- Fix show author name in last message of pending invites in chat list [PR #668](https://github.com/marmot-protocol/whitenoise/pull/668)
 
 ### Security
 

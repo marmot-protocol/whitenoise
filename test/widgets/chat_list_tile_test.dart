@@ -5,10 +5,8 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart' show
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
-import 'package:whitenoise/constants/feature_flags.dart' show FeatureFlag;
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
-import 'package:whitenoise/providers/feature_flags_provider.dart';
 import 'package:whitenoise/src/rust/api/chat_summary.dart';
 import 'package:whitenoise/src/rust/api/groups.dart' show GroupType, RequiredProposal;
 import 'package:whitenoise/src/rust/api/messages.dart';
@@ -407,6 +405,37 @@ void main() {
             final item = tester.widget<WnChatListItem>(finder);
             expect(item.subtitle, 'Look at this');
             expect(item.subtitleIcon, isNull);
+          });
+
+          testWidgets('shows "You: " prefix for own message in pending group', (tester) async {
+            await pumpTile(
+              tester,
+              _chatSummary(
+                pendingConfirmation: true,
+                lastMessageContent: 'My message',
+                lastMessageAuthor: testPubkeyA,
+              ),
+            );
+            final item = tester.widget<WnChatListItem>(find.byType(WnChatListItem));
+            expect(item.prefixSubtitle, 'You: ');
+            expect(item.subtitle, 'My message');
+          });
+
+          testWidgets("shows author name prefix for other's message in pending group", (
+            tester,
+          ) async {
+            await pumpTile(
+              tester,
+              _chatSummary(
+                pendingConfirmation: true,
+                lastMessageContent: 'Hello group',
+                lastMessageAuthor: testPubkeyB,
+                lastMessageAuthorDisplayName: 'Alice',
+              ),
+            );
+            final item = tester.widget<WnChatListItem>(find.byType(WnChatListItem));
+            expect(item.prefixSubtitle, 'Alice: ');
+            expect(item.subtitle, 'Hello group');
           });
         });
       });
@@ -1167,27 +1196,8 @@ void main() {
     });
 
     group('leave group context menu', () {
-      testWidgets('does not show Leave group while kLeaveGroupEnabled is false', (
-        tester,
-      ) async {
-        await pumpTile(
-          tester,
-          _chatSummary(name: 'My Group'),
-          extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(false)],
-        );
-
-        await tester.longPress(find.byType(WnChatListItem));
-        await tester.pumpAndSettle();
-
-        expect(find.byKey(const Key('context_menu_action_leave_group')), findsNothing);
-      });
-
       testWidgets('does not show Leave group for DMs', (tester) async {
-        await pumpTile(
-          tester,
-          _chatSummary(name: 'Alice', groupType: GroupType.directMessage),
-          extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-        );
+        await pumpTile(tester, _chatSummary(name: 'Alice', groupType: GroupType.directMessage));
 
         await tester.longPress(find.byType(WnChatListItem));
         await tester.pumpAndSettle();
@@ -1198,11 +1208,7 @@ void main() {
       testWidgets(
         'tapping Leave group transitions overlay to confirmation',
         (tester) async {
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1221,11 +1227,7 @@ void main() {
       testWidgets(
         'confirmation shows leave warning text',
         (tester) async {
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1247,11 +1249,7 @@ void main() {
       testWidgets(
         'confirmation title is "Leave group"',
         (tester) async {
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1273,11 +1271,7 @@ void main() {
       testWidgets(
         'Cancel on confirmation returns to initial menu',
         (tester) async {
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1296,11 +1290,7 @@ void main() {
       testWidgets(
         'back arrow on confirmation returns to initial menu',
         (tester) async {
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1323,7 +1313,6 @@ void main() {
           await pumpTile(
             tester,
             _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
           );
 
           await tester.longPress(find.byType(WnChatListItem));
@@ -1354,7 +1343,6 @@ void main() {
             tester,
             overrides: [
               accountPubkeyProvider.overrideWith(MockAccountPubkeyNotifier.new),
-              featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true),
             ],
           );
           await tester.pumpAndSettle();
@@ -1376,7 +1364,6 @@ void main() {
         await pumpTile(
           tester,
           _chatSummary(name: 'My Group', selfRemoved: true),
-          extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
         );
 
         await tester.longPress(find.byType(WnChatListItem));
@@ -1393,7 +1380,6 @@ void main() {
           tester,
           _chatSummary(name: 'My Group'),
           onError: (msg) => errorMessage = msg,
-          extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
         );
 
         await tester.longPress(find.byType(WnChatListItem));
@@ -1413,11 +1399,7 @@ void main() {
         _api.mockRequiredProposals = [RequiredProposal.selfRemove];
         _api.mockAdminPubkeys = [testPubkeyA];
 
-        await pumpTile(
-          tester,
-          _chatSummary(name: 'My Group'),
-          extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-        );
+        await pumpTile(tester, _chatSummary(name: 'My Group'));
 
         await tester.longPress(find.byType(WnChatListItem));
         await tester.pumpAndSettle();
@@ -1431,11 +1413,7 @@ void main() {
           _api.mockRequiredProposals = [RequiredProposal.selfRemove];
           _api.mockAdminPubkeys = [testPubkeyA];
 
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1458,11 +1436,7 @@ void main() {
       testWidgets('shows Leave group item (disabled) when no capabilities', (tester) async {
         _api.mockRequiredProposals = [];
 
-        await pumpTile(
-          tester,
-          _chatSummary(name: 'My Group'),
-          extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-        );
+        await pumpTile(tester, _chatSummary(name: 'My Group'));
 
         await tester.longPress(find.byType(WnChatListItem));
         await tester.pumpAndSettle();
@@ -1475,11 +1449,7 @@ void main() {
         (tester) async {
           _api.mockRequiredProposals = [];
 
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1505,11 +1475,7 @@ void main() {
           _api.mockRequiredProposals = [RequiredProposal.selfRemove];
           _api.mockAdminPubkeys = [testPubkeyA];
 
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1538,11 +1504,7 @@ void main() {
         (tester) async {
           _api.mockRequiredProposals = [];
 
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1573,11 +1535,7 @@ void main() {
         (tester) async {
           _api.shouldThrowOnProposals = true;
 
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1601,11 +1559,7 @@ void main() {
           _api.mockRequiredProposals = [RequiredProposal.selfRemove];
           _api.mockAdminPubkeys = [testPubkeyA];
 
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1629,11 +1583,7 @@ void main() {
           _api.mockRequiredProposals = [RequiredProposal.selfRemove];
           _api.mockAdminPubkeys = [testPubkeyA];
 
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1654,11 +1604,7 @@ void main() {
           _api.mockRequiredProposals = [RequiredProposal.selfRemove];
           _api.mockAdminPubkeys = [testPubkeyA];
 
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1678,11 +1624,7 @@ void main() {
         (tester) async {
           _api.shouldThrowOnProposals = true;
 
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1702,11 +1644,7 @@ void main() {
         (tester) async {
           _api.mockRequiredProposals = [];
 
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1726,11 +1664,7 @@ void main() {
         (tester) async {
           _api.mockRequiredProposals = [];
 
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1750,11 +1684,7 @@ void main() {
         (tester) async {
           _api.shouldThrowOnProposals = true;
 
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();
@@ -1775,11 +1705,7 @@ void main() {
           _api.mockRequiredProposals = [RequiredProposal.selfRemove];
           _api.mockAdminPubkeys = [testPubkeyA];
 
-          await pumpTile(
-            tester,
-            _chatSummary(name: 'My Group'),
-            extraOverrides: [featureFlagProvider(FeatureFlag.leaveGroup).overrideWithValue(true)],
-          );
+          await pumpTile(tester, _chatSummary(name: 'My Group'));
 
           await tester.longPress(find.byType(WnChatListItem));
           await tester.pumpAndSettle();

@@ -1900,5 +1900,13 @@
   "failedToLeaveGroup": "Failed to leave group. Please try again.",
   "@failedToLeaveGroup": { "description": "Error shown when leaving a group fails" },
   "youLeftTheGroup": "You left the group",
-  "@youLeftTheGroup": { "description": "Subtitle shown for groups the user has left" }
+  "@youLeftTheGroup": { "description": "Subtitle shown for groups the user has left" },
+  "unsupportedDeepLinkTitle": "Link not supported",
+  "@unsupportedDeepLinkTitle": {
+    "description": "Title of the dialog shown when a whitenoise:// link cannot be parsed"
+  },
+  "unsupportedDeepLinkMessage": "This White Noise link can't be opened. You may need to update the app.",
+  "@unsupportedDeepLinkMessage": {
+    "description": "Body of the dialog shown when a whitenoise:// link cannot be parsed"
+  }
 }
