@@ -97,6 +97,7 @@ class MessageActionsScreen extends HookWidget {
     this.isGroupChat = false,
     this.isOffline = false,
     this.getChatMessageQuote,
+    this.mentionDisplayName,
   });
 
   final ChatMessage message;
@@ -110,6 +111,7 @@ class MessageActionsScreen extends HookWidget {
   final bool isGroupChat;
   final bool isOffline;
   final ChatMessageQuoteData? Function(String? replyId)? getChatMessageQuote;
+  final String? Function(String hexPubkey)? mentionDisplayName;
 
   static Future<void> show(
     BuildContext context, {
@@ -124,6 +126,7 @@ class MessageActionsScreen extends HookWidget {
     bool isGroupChat = false,
     bool isOffline = false,
     ChatMessageQuoteData? Function(String? replyId)? getChatMessageQuote,
+    String? Function(String hexPubkey)? mentionDisplayName,
   }) {
     final colors = context.colors;
 
@@ -145,6 +148,7 @@ class MessageActionsScreen extends HookWidget {
             isGroupChat: isGroupChat,
             isOffline: isOffline,
             getChatMessageQuote: getChatMessageQuote,
+            mentionDisplayName: mentionDisplayName,
           );
         },
         transitionsBuilder: (_, animation, _, child) {
@@ -251,6 +255,7 @@ class MessageActionsScreen extends HookWidget {
                     senderPictureUrl: senderPictureUrl,
                     isGroupChat: isGroupChat,
                     getChatMessageQuote: getChatMessageQuote,
+                    mentionDisplayName: mentionDisplayName,
                     bottomInset: showEmojiPicker.value
                         ? _emojiPickerReservedHeight.h + _modalToPickerGap.h
                         : 0,
@@ -286,6 +291,7 @@ class MessageActionsModal extends StatelessWidget {
     this.isGroupChat = false,
     this.getChatMessageQuote,
     this.bottomInset = 0,
+    this.mentionDisplayName,
   });
 
   final ChatMessage message;
@@ -301,6 +307,7 @@ class MessageActionsModal extends StatelessWidget {
   final bool isGroupChat;
   final ChatMessageQuoteData? Function(String? replyId)? getChatMessageQuote;
   final double bottomInset;
+  final String? Function(String hexPubkey)? mentionDisplayName;
 
   static const List<String> reactions = [
     '❤',
@@ -405,6 +412,7 @@ class MessageActionsModal extends StatelessWidget {
                                     contentMaxLines: shouldConstrainPreviewLines ? maxLines : null,
                                     bubbleWidthFactor: 0.865,
                                     forceTightHeight: true,
+                                    mentionDisplayName: mentionDisplayName,
                                   ),
                                 );
                               },

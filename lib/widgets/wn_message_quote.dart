@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/widgets/markdown_text.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 
 class WnMessageQuote extends StatelessWidget {
@@ -9,6 +11,8 @@ class WnMessageQuote extends StatelessWidget {
     super.key,
     required this.author,
     required this.text,
+    this.document,
+    this.mentionDisplayName,
     this.onCancel,
     this.onTap,
     this.image,
@@ -18,6 +22,16 @@ class WnMessageQuote extends StatelessWidget {
 
   final String author;
   final String text;
+
+  /// Parsed markdown of the quoted message. When present, the preview renders
+  /// formatted (bold, links, mentions, …) instead of leaking raw markdown
+  /// characters. Falls back to [text] for "message not found", empty content,
+  /// or callers that don't have access to the document.
+  final MarkdownDocument? document;
+
+  /// Resolves a hex pubkey to a display name for npub mentions inside
+  /// [document]. Without this, mentions render as truncated `npub1…` strings.
+  final String? Function(String hexPubkey)? mentionDisplayName;
   final VoidCallback? onCancel;
   final VoidCallback? onTap;
   final ImageProvider? image;
@@ -69,17 +83,7 @@ class WnMessageQuote extends StatelessWidget {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          if (text.isNotEmpty)
-                            Flexible(
-                              child: Text(
-                                text,
-                                style: typography.medium14Compact.copyWith(
-                                  color: colors.backgroundContentSecondary,
-                                ),
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
+                          if (_buildPreview(context) case final preview?) Flexible(child: preview),
                         ],
                       ),
                     ],
@@ -119,6 +123,36 @@ class WnMessageQuote extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  Widget? _buildPreview(BuildContext context) {
+    final colors = context.colors;
+    final baseStyle = context.typographyScaled.medium14Compact.copyWith(
+      color: colors.backgroundContentSecondary,
+    );
+
+    if (document != null) {
+      final inlines = firstParagraphInlines(document!);
+      if (inlines != null) {
+        return MarkdownText(
+          key: const Key('quote_markdown_preview'),
+          document: MarkdownDocument(
+            blocks: [MarkdownBlock.paragraph(inlines: inlines)],
+          ),
+          baseStyle: baseStyle,
+          mentionDisplayName: mentionDisplayName,
+          maxLines: 2,
+        );
+      }
+    }
+
+    if (text.isEmpty) return null;
+    return Text(
+      text,
+      style: baseStyle,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }

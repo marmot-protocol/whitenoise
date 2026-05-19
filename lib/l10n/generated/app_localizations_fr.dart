@@ -1495,4 +1495,11 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get youLeftTheGroup => 'Vous avez quitté le groupe';
+
+  @override
+  String get unsupportedDeepLinkTitle => 'Lien non pris en charge';
+
+  @override
+  String get unsupportedDeepLinkMessage =>
+      'Ce lien White Noise ne peut pas être ouvert. Vous devrez peut-être mettre à jour l\'application.';
 }

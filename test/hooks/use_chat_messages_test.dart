@@ -6,6 +6,7 @@ import 'package:whitenoise/hooks/use_chat_messages.dart'
     show ChatMessageQuoteData, ChatMessagesResult, useChatMessages;
 import 'package:whitenoise/providers/message_debug_log_provider.dart'
     show MessageStreamEventEntry, MessageStreamEventType, messageDebugLogProvider;
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
@@ -31,7 +32,7 @@ ChatMessage _message(
   tags: const [],
   isReply: false,
   isDeleted: isDeleted,
-  contentTokens: const [],
+  contentTokens: const MarkdownDocument(blocks: []),
   reactions: reactions,
   mediaAttachments: mediaAttachments,
   kind: 9,
@@ -1465,6 +1466,7 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: null,
         content: 'hi',
+        contentTokens: null,
         isNotFound: false,
         mediaFile: null,
       );
@@ -1477,6 +1479,7 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: null,
         content: 'hi',
+        contentTokens: null,
         isNotFound: false,
         mediaFile: null,
       );
@@ -1490,6 +1493,7 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: meta,
         content: 'hi',
+        contentTokens: null,
         isNotFound: false,
         mediaFile: null,
       );
@@ -1502,6 +1506,7 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: null,
         content: 'hi',
+        contentTokens: null,
         isNotFound: false,
         mediaFile: null,
       );
@@ -1514,10 +1519,31 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: null,
         content: 'Reply text',
+        contentTokens: null,
         isNotFound: false,
         mediaFile: null,
       );
       expect(chatMessageQuote.content, 'Reply text');
+    });
+
+    test('exposes parsed markdown contentTokens', () {
+      const doc = MarkdownDocument(
+        blocks: [
+          MarkdownBlock.paragraph(
+            inlines: [MarkdownInline.text(content: 'hi')],
+          ),
+        ],
+      );
+      const chatMessageQuote = (
+        messageId: 'msg-123',
+        authorPubkey: testPubkeyA,
+        authorMetadata: null,
+        content: 'hi',
+        contentTokens: doc,
+        isNotFound: false,
+        mediaFile: null,
+      );
+      expect(chatMessageQuote.contentTokens, doc);
     });
 
     test('has isNotFound boolean', () {
@@ -1526,6 +1552,7 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: null,
         content: 'hi',
+        contentTokens: null,
         isNotFound: true,
         mediaFile: null,
       );
@@ -1539,6 +1566,7 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: null,
         content: 'hi',
+        contentTokens: null,
         isNotFound: false,
         mediaFile: mediaFile,
       );
@@ -1551,6 +1579,7 @@ void main() {
         authorPubkey: testPubkeyA,
         authorMetadata: null,
         content: 'hi',
+        contentTokens: null,
         isNotFound: false,
         mediaFile: null,
       );

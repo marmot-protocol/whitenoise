@@ -1,6 +1,17 @@
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_screenutil/flutter_screenutil.dart' show ScreenUtilInit;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
+import 'package:plugin_platform_interface/plugin_platform_interface.dart';
+import 'package:url_launcher_platform_interface/link.dart';
+import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
+import 'package:whitenoise/l10n/generated/app_localizations.dart';
+import 'package:whitenoise/screens/start_chat_screen.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
@@ -22,6 +33,7 @@ ChatMessageQuoteData _replyPreview({
   String authorPubkey = testPubkeyB,
   FlutterMetadata? authorMetadata,
   String content = 'Original message content',
+  MarkdownDocument? contentTokens,
   MediaFile? mediaFile,
   bool isNotFound = false,
 }) => (
@@ -31,6 +43,7 @@ ChatMessageQuoteData _replyPreview({
       authorMetadata ??
       const FlutterMetadata(displayName: 'Original Author', name: 'author', custom: {}),
   content: content,
+  contentTokens: contentTokens,
   mediaFile: mediaFile,
   isNotFound: isNotFound,
 );
@@ -67,7 +80,7 @@ ChatMessage _message({
   isReply: isReply,
   replyToId: replyToId,
   isDeleted: isDeleted,
-  contentTokens: const [],
+  contentTokens: const MarkdownDocument(blocks: []),
   reactions: reactions,
   mediaAttachments: mediaAttachments,
   kind: 9,
@@ -755,5 +768,396 @@ void main() {
         expect(find.text('Trent Reznor'), findsNothing);
       });
     });
+
+    group('markdown link tap handling', () {
+      late _MockUrlLauncher launcher;
+      late UrlLauncherPlatform originalLauncher;
+
+      setUp(() {
+        originalLauncher = UrlLauncherPlatform.instance;
+        launcher = _MockUrlLauncher();
+        UrlLauncherPlatform.instance = launcher;
+      });
+
+      tearDown(() {
+        UrlLauncherPlatform.instance = originalLauncher;
+      });
+
+      ChatMessage withDoc(MarkdownDocument doc) => _message(content: 'x').copyWithDocument(doc);
+
+      testWidgets('strikethrough in the AST renders with lineThrough decoration', (tester) async {
+        // Mirror the production shape: raw content is '~~hello~~' but the
+        // contentTokens AST contains Strikethrough[Text('hello')]. The bubble
+        // must render the document (visible 'hello' with lineThrough), not
+        // the raw markdown source.
+        await mountWidget(
+          ChatMessageBubble(
+            message: _message(content: '~~hello~~').copyWithDocument(
+              const MarkdownDocument(
+                blocks: [
+                  MarkdownBlock.paragraph(
+                    inlines: [
+                      MarkdownInline.strikethrough(
+                        children: [MarkdownInline.text(content: 'hello')],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
+        final struck = _findTextSpan(span, (s) => s.text == 'hello');
+        expect(
+          struck,
+          isNotNull,
+          reason: 'expected document text to be rendered, not raw markdown',
+        );
+        expect(struck!.style?.decoration, TextDecoration.lineThrough);
+        // The raw markdown source must NOT appear as visible text.
+        expect(_findTextSpan(span, (s) => s.text == '~~hello~~'), isNull);
+      });
+
+      testWidgets('safe link tap calls launchUrl externally', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: withDoc(
+              const MarkdownDocument(
+                blocks: [
+                  MarkdownBlock.paragraph(
+                    inlines: [
+                      MarkdownInline.link(
+                        dest: 'https://example.com',
+                        children: [MarkdownInline.text(content: 'here')],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
+        final link = _firstTextSpanWithRecognizer(span);
+        (link.recognizer as TapGestureRecognizer).onTap!();
+        await tester.pump();
+        expect(launcher.calls, hasLength(1));
+        expect(launcher.calls.first.url, 'https://example.com');
+        expect(launcher.calls.first.options.mode, PreferredLaunchMode.externalApplication);
+      });
+
+      testWidgets('javascript: link tap is silently ignored at the renderer layer', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: withDoc(
+              const MarkdownDocument(
+                blocks: [
+                  MarkdownBlock.paragraph(
+                    inlines: [
+                      MarkdownInline.link(
+                        dest: 'javascript:alert(1)',
+                        children: [MarkdownInline.text(content: 'bad')],
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
+        final link = _findTextSpan(
+          span,
+          (s) =>
+              s.text == 'bad' || (s.children?.any((c) => (c as TextSpan).text == 'bad') ?? false),
+        );
+        expect(link?.recognizer, isNull);
+        expect(launcher.calls, isEmpty);
+      });
+
+      testWidgets('npub mention tap opens StartChatScreen as shade', (tester) async {
+        await _mountBubbleWithRouter(
+          tester,
+          ChatMessageBubble(
+            message: withDoc(
+              const MarkdownDocument(
+                blocks: [
+                  MarkdownBlock.paragraph(
+                    inlines: [
+                      MarkdownInline.nostrMention(
+                        entity: MarkdownNostrEntity(
+                          hrp: MarkdownNostrHrp.npub,
+                          bech32: testNpubA,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isOwnMessage: false,
+          ),
+        );
+        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
+        final entity = _firstTextSpanWithRecognizer(span);
+        (entity.recognizer as TapGestureRecognizer).onTap!();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        tester.takeException();
+        expect(launcher.calls, isEmpty);
+        expect(find.byType(StartChatScreen), findsOneWidget);
+        expect(
+          tester.widget<StartChatScreen>(find.byType(StartChatScreen)).asShade,
+          isTrue,
+        );
+      });
+
+      testWidgets('whitenoise://chat/<id> tap navigates via GoRouter', (tester) async {
+        await _mountBubbleWithRouter(
+          tester,
+          ChatMessageBubble(
+            message: withDoc(
+              const MarkdownDocument(
+                blocks: [
+                  MarkdownBlock.paragraph(
+                    inlines: [
+                      MarkdownInline.autolink(
+                        url: 'whitenoise://chat/$testGroupId',
+                        kind: MarkdownAutolinkKind.uri,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isOwnMessage: false,
+          ),
+        );
+        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
+        final link = _firstTextSpanWithRecognizer(span);
+        (link.recognizer as TapGestureRecognizer).onTap!();
+        await tester.pumpAndSettle();
+        expect(launcher.calls, isEmpty);
+        expect(find.byKey(const ValueKey('chat_route_$testGroupId')), findsOneWidget);
+      });
+
+      testWidgets('whitenoise://user/<npub> tap opens StartChatScreen as shade', (tester) async {
+        await _mountBubbleWithRouter(
+          tester,
+          ChatMessageBubble(
+            message: withDoc(
+              const MarkdownDocument(
+                blocks: [
+                  MarkdownBlock.paragraph(
+                    inlines: [
+                      MarkdownInline.autolink(
+                        url: 'whitenoise://user/$testNpubA',
+                        kind: MarkdownAutolinkKind.uri,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isOwnMessage: false,
+          ),
+        );
+        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
+        final link = _firstTextSpanWithRecognizer(span);
+        (link.recognizer as TapGestureRecognizer).onTap!();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        // StartChatScreen reads accountPubkeyProvider which throws without auth in tests.
+        // The shade still pushes onto the navigator — drain the expected build error
+        // so the framework doesn't flag it.
+        tester.takeException();
+        expect(launcher.calls, isEmpty);
+        expect(find.byKey(const ValueKey('user_route_$testPubkeyA')), findsNothing);
+        expect(find.byType(StartChatScreen), findsOneWidget);
+        expect(
+          tester.widget<StartChatScreen>(find.byType(StartChatScreen)).asShade,
+          isTrue,
+        );
+      });
+
+      testWidgets('unparseable whitenoise:// tap shows dismissable error dialog', (tester) async {
+        await _mountBubbleWithRouter(
+          tester,
+          ChatMessageBubble(
+            message: withDoc(
+              const MarkdownDocument(
+                blocks: [
+                  MarkdownBlock.paragraph(
+                    inlines: [
+                      MarkdownInline.autolink(
+                        url: 'whitenoise://garbage',
+                        kind: MarkdownAutolinkKind.uri,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isOwnMessage: false,
+          ),
+        );
+        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
+        final link = _firstTextSpanWithRecognizer(span);
+        (link.recognizer as TapGestureRecognizer).onTap!();
+        await tester.pumpAndSettle();
+        expect(launcher.calls, isEmpty);
+        expect(find.byKey(const Key('unsupported_deep_link_dialog')), findsOneWidget);
+        await tester.tap(find.byType(TextButton));
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('unsupported_deep_link_dialog')), findsNothing);
+      });
+
+      testWidgets('non-npub Nostr URI tap still launches nostr: URL externally', (tester) async {
+        await mountWidget(
+          ChatMessageBubble(
+            message: withDoc(
+              const MarkdownDocument(
+                blocks: [
+                  MarkdownBlock.paragraph(
+                    inlines: [
+                      MarkdownInline.nostrUri(
+                        entity: MarkdownNostrEntity(
+                          hrp: MarkdownNostrHrp.nevent,
+                          bech32: 'nevent1xyz',
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isOwnMessage: false,
+          ),
+          tester,
+        );
+        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
+        final entity = _firstTextSpanWithRecognizer(span);
+        (entity.recognizer as TapGestureRecognizer).onTap!();
+        await tester.pump();
+        expect(launcher.calls, hasLength(1));
+        expect(launcher.calls.first.url, 'nostr:nevent1xyz');
+      });
+    });
   });
+}
+
+Future<void> _mountBubbleWithRouter(WidgetTester tester, Widget bubble) async {
+  setUpTestView(tester);
+  final router = GoRouter(
+    routes: [
+      GoRoute(
+        path: '/',
+        builder: (_, _) => Scaffold(body: bubble),
+      ),
+      GoRoute(
+        path: '/chats/:groupId',
+        builder: (_, state) => Scaffold(
+          key: ValueKey('chat_route_${state.pathParameters['groupId']}'),
+          body: const SizedBox(),
+        ),
+      ),
+      GoRoute(
+        path: '/start-chat/:pubkey',
+        builder: (_, state) => Scaffold(
+          key: ValueKey('user_route_${state.pathParameters['pubkey']}'),
+          body: const SizedBox(),
+        ),
+      ),
+    ],
+  );
+  await tester.pumpWidget(
+    ProviderScope(
+      child: ScreenUtilInit(
+        designSize: testDesignSize,
+        builder: (_, _) => MaterialApp.router(
+          locale: const Locale('en'),
+          theme: testMaterialAppTheme,
+          localizationsDelegates: const [
+            AppLocalizations.delegate,
+            GlobalMaterialLocalizations.delegate,
+            GlobalWidgetsLocalizations.delegate,
+            GlobalCupertinoLocalizations.delegate,
+          ],
+          supportedLocales: AppLocalizations.supportedLocales,
+          routerConfig: router,
+        ),
+      ),
+    ),
+  );
+}
+
+class _MockUrlLauncher extends UrlLauncherPlatform with MockPlatformInterfaceMixin {
+  final List<({String url, LaunchOptions options})> calls = [];
+
+  @override
+  LinkDelegate? get linkDelegate => null;
+
+  @override
+  Future<bool> launchUrl(String url, LaunchOptions options) async {
+    calls.add((url: url, options: options));
+    return true;
+  }
+}
+
+extension on ChatMessage {
+  ChatMessage copyWithDocument(MarkdownDocument doc) => ChatMessage(
+    id: id,
+    pubkey: pubkey,
+    content: content,
+    createdAt: createdAt,
+    tags: tags,
+    isReply: isReply,
+    replyToId: replyToId,
+    isDeleted: isDeleted,
+    contentTokens: doc,
+    reactions: reactions,
+    mediaAttachments: mediaAttachments,
+    kind: kind,
+    deliveryStatus: deliveryStatus,
+  );
+}
+
+TextSpan _firstTextSpanWithRecognizer(InlineSpan span) {
+  if (span is TextSpan) {
+    if (span.recognizer != null) return span;
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      final found = _findTextSpanWithRecognizer(child);
+      if (found != null) return found;
+    }
+  }
+  throw StateError('no TextSpan with recognizer');
+}
+
+TextSpan? _findTextSpanWithRecognizer(InlineSpan span) {
+  if (span is TextSpan) {
+    if (span.recognizer != null) return span;
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      final found = _findTextSpanWithRecognizer(child);
+      if (found != null) return found;
+    }
+  }
+  return null;
+}
+
+TextSpan? _findTextSpan(InlineSpan span, bool Function(TextSpan) predicate) {
+  if (span is TextSpan) {
+    if (predicate(span)) return span;
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      final found = _findTextSpan(child, predicate);
+      if (found != null) return found;
+    }
+  }
+  return null;
 }

@@ -20,11 +20,13 @@ import 'package:whitenoise/src/rust/api/chat_list.dart';
 import 'package:whitenoise/src/rust/api/chat_summary.dart';
 import 'package:whitenoise/src/rust/api/drafts.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/mute_list.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/utils/mention_text_editing_controller.dart';
 import 'package:whitenoise/widgets/chat_media_upload_preview.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
@@ -88,7 +90,7 @@ ChatMessage _message(
   isReply: isReply,
   replyToId: replyToId,
   isDeleted: isDeleted,
-  contentTokens: const [],
+  contentTokens: const MarkdownDocument(blocks: []),
   reactions: reactions,
   mediaAttachments: const [],
   kind: 9,
@@ -336,7 +338,7 @@ class _MockApi extends MockWnApi {
       kind: kind,
       createdAt: DateTime.now(),
       content: message,
-      tokens: const [],
+      tokens: const MarkdownDocument(blocks: []),
     );
   }
 
@@ -3113,6 +3115,158 @@ void main() {
           expect(find.byKey(const Key('emoji_picker_button')), findsNothing);
         });
       });
+    });
+
+    group('mention picker', () {
+      setUp(() {
+        _api.groupMembers = [_testPubkey, testPubkeyC];
+        _api.metadataByPubkey = {
+          testPubkeyC: const FlutterMetadata(displayName: 'Trent', custom: {}),
+        };
+      });
+
+      testWidgets('shows picker when @ is typed and inserts raw npub on tap', (tester) async {
+        await pumpChatScreen(tester);
+
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsNothing);
+
+        await tester.enterText(find.byType(TextField), '@');
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsOneWidget);
+        const suggestionKey = Key('mention_suggestion_$testPubkeyC');
+        expect(find.byKey(suggestionKey), findsOneWidget);
+
+        await tester.tap(find.byKey(suggestionKey));
+        await tester.pumpAndSettle();
+
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        final controller = textField.controller! as MentionTextEditingController;
+        expect(controller.text, '@Trent ');
+        expect(controller.messageText, '@$testNpubC ');
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsNothing);
+      });
+
+      testWidgets('filters picker by typed query', (tester) async {
+        _api.metadataByPubkey = {
+          testPubkeyC: const FlutterMetadata(displayName: 'Trent', custom: {}),
+        };
+        await pumpChatScreen(tester);
+        await tester.enterText(find.byType(TextField), '@zz');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsNothing);
+      });
+
+      testWidgets('does not show picker in a DM', (tester) async {
+        _api.isDm = true;
+        await pumpChatScreen(tester);
+        await tester.enterText(find.byType(TextField), '@');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsNothing);
+      });
+
+      testWidgets('excludes self from the picker', (tester) async {
+        _api.groupMembers = [_testPubkey];
+        await pumpChatScreen(tester);
+        await tester.enterText(find.byType(TextField), '@');
+        await tester.pumpAndSettle();
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsNothing);
+      });
+
+      testWidgets('does not re-open the picker when the cursor sits inside an existing mention', (
+        tester,
+      ) async {
+        await pumpChatScreen(tester);
+
+        // Insert a mention via the picker.
+        await tester.enterText(find.byType(TextField), '@');
+        await tester.pumpAndSettle();
+        await tester.tap(find.byKey(const Key('mention_suggestion_$testPubkeyC')));
+        await tester.pumpAndSettle();
+
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        final controller = textField.controller! as MentionTextEditingController;
+        expect(controller.text, '@Trent ');
+
+        // Move cursor into the middle of '@Trent'.
+        controller.selection = const TextSelection.collapsed(offset: 3);
+        await tester.pumpAndSettle();
+
+        // The picker must not pop back open.
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsNothing);
+      });
+
+      testWidgets('keeps the input element stable when the picker appears', (tester) async {
+        await pumpChatScreen(tester);
+
+        final inputFinder = find.byKey(const ValueKey('chat_message_input'));
+        final beforeElement = tester.elementList(inputFinder).last;
+
+        await tester.enterText(find.byType(TextField), 'hello @');
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('mention_suggestions_menu')), findsOneWidget);
+        final afterElement = tester.elementList(inputFinder).last;
+        expect(identical(beforeElement, afterElement), isTrue);
+
+        final textField = tester.widget<TextField>(find.byType(TextField));
+        expect(textField.controller!.selection.baseOffset, 7);
+      });
+
+      testWidgets(
+        'renders mention picker BELOW images when media is attached',
+        (tester) async {
+          final mockImagePicker = _MockImagePickerPlatform()
+            ..filesToReturn = [XFile('/tmp/test_image.jpg')];
+          ImagePickerPlatform.instance = mockImagePicker;
+
+          await pumpChatScreen(tester);
+
+          await tester.tap(find.byKey(const Key('add_button')));
+          await tester.runAsync(
+            () => Future.delayed(const Duration(milliseconds: 100)),
+          );
+          await tester.pumpAndSettle();
+
+          await tester.enterText(find.byType(TextField), '@');
+          await tester.pumpAndSettle();
+
+          expect(find.byType(ChatMediaUploadPreview), findsOneWidget);
+          expect(find.byKey(const Key('mention_suggestions_menu')), findsOneWidget);
+
+          // Picker should live inside the attachment area, not above the
+          // input. That guarantees the visual order is image -> picker.
+          expect(
+            find.descendant(
+              of: find.byKey(const Key('attachment_area')),
+              matching: find.byKey(const Key('mention_suggestions_menu')),
+            ),
+            findsOneWidget,
+          );
+
+          final mediaBottom = tester.getBottomLeft(find.byType(ChatMediaUploadPreview)).dy;
+          final menuTop = tester.getTopLeft(find.byKey(const Key('mention_suggestions_menu'))).dy;
+          expect(menuTop, greaterThanOrEqualTo(mediaBottom));
+        },
+      );
+
+      testWidgets(
+        'mention picker sits ABOVE the input when no media is attached',
+        (tester) async {
+          await pumpChatScreen(tester);
+          await tester.enterText(find.byType(TextField), '@');
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('mention_suggestions_menu')), findsOneWidget);
+          // The picker is NOT inside the attachment area when there is no
+          // media (the attachment area itself isn't rendered).
+          expect(find.byKey(const Key('attachment_area')), findsNothing);
+
+          final inputTop = tester.getTopLeft(find.byType(WnChatMessageInput)).dy;
+          final menuTop = tester.getTopLeft(find.byKey(const Key('mention_suggestions_menu'))).dy;
+          expect(menuTop, lessThan(inputTop));
+        },
+      );
     });
   });
 }
