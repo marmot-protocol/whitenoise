@@ -79,6 +79,7 @@ dev_dependencies:
     sdk: flutter
   integration_test:
     sdk: flutter
+  leak_tracker_flutter_testing: ^3.0.10
   flutter_native_splash: ^2.4.7
   image_picker_platform_interface: ^2.11.1
   video_player_platform_interface: ^6.7.0

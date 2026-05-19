@@ -11,23 +11,34 @@ import 'error.dart';
 // These functions are ignored because they are not marked as `pub`: `from_entry`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`
 
-Future<void> blockUser({required String accountPubkey, required String targetPubkey}) => RustLib
-    .instance
-    .api
-    .crateApiMuteListBlockUser(accountPubkey: accountPubkey, targetPubkey: targetPubkey);
+Future<void> blockUser({
+  required String accountPubkey,
+  required String targetPubkey,
+}) => RustLib.instance.api.crateApiMuteListBlockUser(
+  accountPubkey: accountPubkey,
+  targetPubkey: targetPubkey,
+);
 
-Future<void> unblockUser({required String accountPubkey, required String targetPubkey}) => RustLib
-    .instance
-    .api
-    .crateApiMuteListUnblockUser(accountPubkey: accountPubkey, targetPubkey: targetPubkey);
+Future<void> unblockUser({
+  required String accountPubkey,
+  required String targetPubkey,
+}) => RustLib.instance.api.crateApiMuteListUnblockUser(
+  accountPubkey: accountPubkey,
+  targetPubkey: targetPubkey,
+);
 
 Future<List<MuteListEntry>> getBlockedUsers({required String accountPubkey}) =>
-    RustLib.instance.api.crateApiMuteListGetBlockedUsers(accountPubkey: accountPubkey);
+    RustLib.instance.api.crateApiMuteListGetBlockedUsers(
+      accountPubkey: accountPubkey,
+    );
 
-Future<bool> isUserBlocked({required String accountPubkey, required String targetPubkey}) => RustLib
-    .instance
-    .api
-    .crateApiMuteListIsUserBlocked(accountPubkey: accountPubkey, targetPubkey: targetPubkey);
+Future<bool> isUserBlocked({
+  required String accountPubkey,
+  required String targetPubkey,
+}) => RustLib.instance.api.crateApiMuteListIsUserBlocked(
+  accountPubkey: accountPubkey,
+  targetPubkey: targetPubkey,
+);
 
 class MuteListEntry {
   final String accountPubkey;

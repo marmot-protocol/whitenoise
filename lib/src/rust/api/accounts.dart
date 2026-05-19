@@ -11,7 +11,7 @@ import 'metadata.dart';
 import 'relays.dart';
 import 'users.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`
 
 Future<List<Account>> getAccounts() => RustLib.instance.api.crateApiAccountsGetAccounts();
 
@@ -24,10 +24,17 @@ Future<LoginResult> loginStart({required String nsecOrHexPrivkey}) =>
     RustLib.instance.api.crateApiAccountsLoginStart(nsecOrHexPrivkey: nsecOrHexPrivkey);
 
 Future<LoginResult> loginPublishDefaultRelays({required String pubkey}) =>
-    RustLib.instance.api.crateApiAccountsLoginPublishDefaultRelays(pubkey: pubkey);
+    RustLib.instance.api.crateApiAccountsLoginPublishDefaultRelays(
+      pubkey: pubkey,
+    );
 
-Future<LoginResult> loginWithCustomRelay({required String pubkey, required String relayUrl}) =>
-    RustLib.instance.api.crateApiAccountsLoginWithCustomRelay(pubkey: pubkey, relayUrl: relayUrl);
+Future<LoginResult> loginWithCustomRelay({
+  required String pubkey,
+  required String relayUrl,
+}) => RustLib.instance.api.crateApiAccountsLoginWithCustomRelay(
+  pubkey: pubkey,
+  relayUrl: relayUrl,
+);
 
 Future<void> loginCancel({required String pubkey}) =>
     RustLib.instance.api.crateApiAccountsLoginCancel(pubkey: pubkey);
@@ -38,8 +45,13 @@ Future<void> logout({required String pubkey}) =>
 Future<String> exportAccountNsec({required String pubkey}) =>
     RustLib.instance.api.crateApiAccountsExportAccountNsec(pubkey: pubkey);
 
-Future<void> updateAccountMetadata({required String pubkey, required FlutterMetadata metadata}) =>
-    RustLib.instance.api.crateApiAccountsUpdateAccountMetadata(pubkey: pubkey, metadata: metadata);
+Future<void> updateAccountMetadata({
+  required String pubkey,
+  required FlutterMetadata metadata,
+}) => RustLib.instance.api.crateApiAccountsUpdateAccountMetadata(
+  pubkey: pubkey,
+  metadata: metadata,
+);
 
 Future<String> uploadAccountProfilePicture({
   required String pubkey,
@@ -53,8 +65,13 @@ Future<String> uploadAccountProfilePicture({
   imageType: imageType,
 );
 
-Future<List<Relay>> accountRelays({required String pubkey, required RelayType relayType}) =>
-    RustLib.instance.api.crateApiAccountsAccountRelays(pubkey: pubkey, relayType: relayType);
+Future<List<Relay>> accountRelays({
+  required String pubkey,
+  required RelayType relayType,
+}) => RustLib.instance.api.crateApiAccountsAccountRelays(
+  pubkey: pubkey,
+  relayType: relayType,
+);
 
 Future<void> restoreDefaultRelays({required String pubkey}) =>
     RustLib.instance.api.crateApiAccountsRestoreDefaultRelays(pubkey: pubkey);
@@ -82,11 +99,16 @@ Future<void> removeAccountRelay({
 Future<FlutterEvent?> accountKeyPackage({required String pubkey}) =>
     RustLib.instance.api.crateApiAccountsAccountKeyPackage(pubkey: pubkey);
 
-Future<List<FlutterEvent>> accountKeyPackages({required String accountPubkey}) =>
-    RustLib.instance.api.crateApiAccountsAccountKeyPackages(accountPubkey: accountPubkey);
+Future<List<FlutterEvent>> accountKeyPackages({
+  required String accountPubkey,
+}) => RustLib.instance.api.crateApiAccountsAccountKeyPackages(
+  accountPubkey: accountPubkey,
+);
 
 Future<void> publishAccountKeyPackage({required String accountPubkey}) =>
-    RustLib.instance.api.crateApiAccountsPublishAccountKeyPackage(accountPubkey: accountPubkey);
+    RustLib.instance.api.crateApiAccountsPublishAccountKeyPackage(
+      accountPubkey: accountPubkey,
+    );
 
 Future<bool> deleteAccountKeyPackage({
   required String accountPubkey,
@@ -97,27 +119,36 @@ Future<bool> deleteAccountKeyPackage({
 );
 
 Future<BigInt> deleteAccountKeyPackages({required String accountPubkey}) =>
-    RustLib.instance.api.crateApiAccountsDeleteAccountKeyPackages(accountPubkey: accountPubkey);
+    RustLib.instance.api.crateApiAccountsDeleteAccountKeyPackages(
+      accountPubkey: accountPubkey,
+    );
 
 Future<List<User>> accountFollows({required String pubkey}) =>
     RustLib.instance.api.crateApiAccountsAccountFollows(pubkey: pubkey);
 
-Future<void> followUser({required String accountPubkey, required String userToFollowPubkey}) =>
-    RustLib.instance.api.crateApiAccountsFollowUser(
-      accountPubkey: accountPubkey,
-      userToFollowPubkey: userToFollowPubkey,
-    );
+Future<void> followUser({
+  required String accountPubkey,
+  required String userToFollowPubkey,
+}) => RustLib.instance.api.crateApiAccountsFollowUser(
+  accountPubkey: accountPubkey,
+  userToFollowPubkey: userToFollowPubkey,
+);
 
-Future<void> unfollowUser({required String accountPubkey, required String userToUnfollowPubkey}) =>
-    RustLib.instance.api.crateApiAccountsUnfollowUser(
-      accountPubkey: accountPubkey,
-      userToUnfollowPubkey: userToUnfollowPubkey,
-    );
+Future<void> unfollowUser({
+  required String accountPubkey,
+  required String userToUnfollowPubkey,
+}) => RustLib.instance.api.crateApiAccountsUnfollowUser(
+  accountPubkey: accountPubkey,
+  userToUnfollowPubkey: userToUnfollowPubkey,
+);
 
-Future<bool> isFollowingUser({required String accountPubkey, required String userPubkey}) => RustLib
-    .instance
-    .api
-    .crateApiAccountsIsFollowingUser(accountPubkey: accountPubkey, userPubkey: userPubkey);
+Future<bool> isFollowingUser({
+  required String accountPubkey,
+  required String userPubkey,
+}) => RustLib.instance.api.crateApiAccountsIsFollowingUser(
+  accountPubkey: accountPubkey,
+  userPubkey: userPubkey,
+);
 
 Future<AccountSettings> accountSettings({required String pubkey}) =>
     RustLib.instance.api.crateApiAccountsAccountSettings(pubkey: pubkey);

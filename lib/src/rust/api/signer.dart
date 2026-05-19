@@ -62,8 +62,9 @@ Future<LoginResult> loginExternalSignerStart({
 /// Step 2a for external signer: publish default relay lists and complete login.
 ///
 /// Called after `login_external_signer_start` returned `NeedsRelayLists`.
-Future<LoginResult> loginExternalSignerPublishDefaultRelays({required String pubkey}) =>
-    RustLib.instance.api.crateApiSignerLoginExternalSignerPublishDefaultRelays(pubkey: pubkey);
+Future<LoginResult> loginExternalSignerPublishDefaultRelays({
+  required String pubkey,
+}) => RustLib.instance.api.crateApiSignerLoginExternalSignerPublishDefaultRelays(pubkey: pubkey);
 
 /// Step 2b for external signer: search a user-provided relay for existing lists.
 ///

@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/utils/search_context.dart';
 
@@ -12,7 +13,7 @@ ChatMessage _msg(String id, {DateTime? createdAt}) => ChatMessage(
   tags: const [],
   isReply: false,
   isDeleted: false,
-  contentTokens: const [],
+  contentTokens: const MarkdownDocument(blocks: []),
   reactions: const ReactionSummary(byEmoji: [], userReactions: []),
   mediaAttachments: const [],
   kind: 1,

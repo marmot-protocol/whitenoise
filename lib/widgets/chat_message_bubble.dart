@@ -1,11 +1,18 @@
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/l10n/l10n.dart';
+import 'package:whitenoise/screens/start_chat_screen.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart' show leadingVariant;
+import 'package:whitenoise/utils/deep_links.dart';
+import 'package:whitenoise/utils/encoding.dart' show hexFromNpub;
 import 'package:whitenoise/widgets/chat_message_media.dart';
 import 'package:whitenoise/widgets/chat_message_quote.dart';
+import 'package:whitenoise/widgets/markdown_text.dart';
 import 'package:whitenoise/widgets/media_modal.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_chat_status.dart';
@@ -30,6 +37,7 @@ class ChatMessageBubble extends StatelessWidget {
   final VoidCallback? onReplyTap;
   final VoidCallback? onHorizontalDragEnd;
   final VoidCallback? onRetry;
+  final String? Function(String hexPubkey)? mentionDisplayName;
 
   const ChatMessageBubble({
     super.key,
@@ -51,6 +59,7 @@ class ChatMessageBubble extends StatelessWidget {
     this.onReplyTap,
     this.onHorizontalDragEnd,
     this.onRetry,
+    this.mentionDisplayName,
   });
 
   ChatStatusType? get _deliveryStatusType {
@@ -83,6 +92,47 @@ class ChatMessageBubble extends StatelessWidget {
     return '$h:$m';
   }
 
+  Future<void> _handleLinkTap(BuildContext context, String url) async {
+    if (!isSafeMarkdownUrl(url)) return;
+    final uri = Uri.tryParse(url.trim());
+    if (uri == null) return;
+    final scheme = uri.scheme.toLowerCase();
+    if (scheme == DeepLinks.productionScheme || scheme == DeepLinks.stagingScheme) {
+      final target = DeepLinks.parse(uri);
+      if (target == null) {
+        if (context.mounted) await _showUnsupportedDeepLinkDialog(context);
+        return;
+      }
+      if (target.type == DeepLinkTargetType.user) {
+        final hex = hexFromNpub(uri.pathSegments.first);
+        if (hex != null && context.mounted) {
+          await StartChatScreen.show(context, userPubkey: hex);
+        }
+        return;
+      }
+      if (context.mounted) GoRouter.of(context).go(target.location);
+      return;
+    }
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
+
+  Future<void> _showUnsupportedDeepLinkDialog(BuildContext context) {
+    return showDialog<void>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        key: const Key('unsupported_deep_link_dialog'),
+        title: Text(dialogContext.l10n.unsupportedDeepLinkTitle),
+        content: Text(dialogContext.l10n.unsupportedDeepLinkMessage),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(),
+            child: Text(MaterialLocalizations.of(dialogContext).okButtonLabel),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isOwnMessage && message.deliveryStatus is DeliveryStatus_Retried) {
@@ -105,7 +155,22 @@ class ChatMessageBubble extends StatelessWidget {
           : null,
       showTail: showTail,
       content: message.content.isNotEmpty ? message.content : null,
+      document: message.content.isNotEmpty ? message.contentTokens : null,
       highlightSpans: highlightSpans,
+      onLinkTap: (url) => _handleLinkTap(context, url),
+      onNostrTap: (hrp, bech32) async {
+        if (hrp == MarkdownNostrHrp.npub) {
+          final hex = hexFromNpub(bech32);
+          if (hex != null && context.mounted) {
+            await StartChatScreen.show(context, userPubkey: hex);
+          }
+          return;
+        }
+        final uri = Uri.tryParse('nostr:$bech32');
+        if (uri == null) return;
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      },
+      mentionDisplayName: mentionDisplayName,
       mediaContent: message.mediaAttachments.isNotEmpty
           ? ChatMessageMedia(
               key: const Key('message_media'),
@@ -117,6 +182,7 @@ class ChatMessageBubble extends StatelessWidget {
           ? ChatMessageQuote(
               data: replyPreview!,
               currentUserPubkey: currentUserPubkey,
+              mentionDisplayName: mentionDisplayName,
               onTap: onReplyTap,
               authorColor: replyAuthorColor,
             )

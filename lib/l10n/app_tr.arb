@@ -431,5 +431,7 @@
   "saveToGalleryNotSupportedFormat": "Görüntü formatı desteklenmiyor",
   "saveToGalleryError": "Görüntü galeriye kaydedilemedi",
   "leaveGroupLastAdminWarning": "Bu grupta tek yöneticisiniz. Ayrılabilmek için en az bir üyeyi yönetici olarak yükseltin.",
-  "leaveGroupNoCapabilitiesWarning": "Bu grup eski bir sürümle oluşturuldu ve ayrılmayı desteklemiyor. Tüm üyeler ayrılmayı destekleyen bir sürüme geçtiğinde, yöneticiler grup özelliklerini yükseltebilir."
+  "leaveGroupNoCapabilitiesWarning": "Bu grup eski bir sürümle oluşturuldu ve ayrılmayı desteklemiyor. Tüm üyeler ayrılmayı destekleyen bir sürüme geçtiğinde, yöneticiler grup özelliklerini yükseltebilir.",
+  "unsupportedDeepLinkTitle": "Bağlantı desteklenmiyor",
+  "unsupportedDeepLinkMessage": "Bu White Noise bağlantısı açılamıyor. Uygulamayı güncellemeniz gerekebilir."
 }

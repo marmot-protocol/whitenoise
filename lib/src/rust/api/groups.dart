@@ -10,16 +10,26 @@ import '../lib.dart';
 import 'account_groups.dart';
 import 'error.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
 
 Future<List<Group>> activeGroups({required String pubkey}) =>
     RustLib.instance.api.crateApiGroupsActiveGroups(pubkey: pubkey);
 
-Future<List<String>> groupMembers({required String pubkey, required String groupId}) =>
-    RustLib.instance.api.crateApiGroupsGroupMembers(pubkey: pubkey, groupId: groupId);
+Future<List<String>> groupMembers({
+  required String pubkey,
+  required String groupId,
+}) => RustLib.instance.api.crateApiGroupsGroupMembers(
+  pubkey: pubkey,
+  groupId: groupId,
+);
 
-Future<List<String>> groupAdmins({required String pubkey, required String groupId}) =>
-    RustLib.instance.api.crateApiGroupsGroupAdmins(pubkey: pubkey, groupId: groupId);
+Future<List<String>> groupAdmins({
+  required String pubkey,
+  required String groupId,
+}) => RustLib.instance.api.crateApiGroupsGroupAdmins(
+  pubkey: pubkey,
+  groupId: groupId,
+);
 
 Future<Group> createGroup({
   required String creatorPubkey,
@@ -61,35 +71,58 @@ Future<void> removeMembersFromGroup({
 ///
 /// The group stays in the chat list and the account remains an MLS member.
 /// Local-only: nothing is published to relays.
-Future<void> clearChat({required String accountPubkey, required String groupId}) =>
-    RustLib.instance.api.crateApiGroupsClearChat(accountPubkey: accountPubkey, groupId: groupId);
+Future<void> clearChat({
+  required String accountPubkey,
+  required String groupId,
+}) => RustLib.instance.api.crateApiGroupsClearChat(
+  accountPubkey: accountPubkey,
+  groupId: groupId,
+);
 
 /// Removes a group from this account's chat list and deletes its local data.
 ///
 /// Local-only: nothing is published to relays, so the account stays an MLS
 /// member and other members keep encrypting to it. Use [`leave_and_delete_group`]
 /// to exit the group entirely.
-Future<void> deleteChat({required String accountPubkey, required String groupId}) =>
-    RustLib.instance.api.crateApiGroupsDeleteChat(accountPubkey: accountPubkey, groupId: groupId);
+Future<void> deleteChat({
+  required String accountPubkey,
+  required String groupId,
+}) => RustLib.instance.api.crateApiGroupsDeleteChat(
+  accountPubkey: accountPubkey,
+  groupId: groupId,
+);
 
 /// Leaves the MLS group, then deletes all local chat data for this account.
 ///
 /// Publishes a leave proposal to the group's relays so other members stop
 /// encrypting to this account. If the leave fails, local data is untouched.
-Future<void> leaveAndDeleteGroup({required String accountPubkey, required String groupId}) =>
-    RustLib.instance.api.crateApiGroupsLeaveAndDeleteGroup(
-      accountPubkey: accountPubkey,
+Future<void> leaveAndDeleteGroup({
+  required String accountPubkey,
+  required String groupId,
+}) => RustLib.instance.api.crateApiGroupsLeaveAndDeleteGroup(
+  accountPubkey: accountPubkey,
+  groupId: groupId,
+);
+
+Future<void> leaveGroup({required String pubkey, required String groupId}) =>
+    RustLib.instance.api.crateApiGroupsLeaveGroup(
+      pubkey: pubkey,
       groupId: groupId,
     );
 
-Future<void> leaveGroup({required String pubkey, required String groupId}) =>
-    RustLib.instance.api.crateApiGroupsLeaveGroup(pubkey: pubkey, groupId: groupId);
-
 Future<void> selfDemote({required String pubkey, required String groupId}) =>
-    RustLib.instance.api.crateApiGroupsSelfDemote(pubkey: pubkey, groupId: groupId);
+    RustLib.instance.api.crateApiGroupsSelfDemote(
+      pubkey: pubkey,
+      groupId: groupId,
+    );
 
-Future<Group> getGroup({required String accountPubkey, required String groupId}) =>
-    RustLib.instance.api.crateApiGroupsGetGroup(accountPubkey: accountPubkey, groupId: groupId);
+Future<Group> getGroup({
+  required String accountPubkey,
+  required String groupId,
+}) => RustLib.instance.api.crateApiGroupsGetGroup(
+  accountPubkey: accountPubkey,
+  groupId: groupId,
+);
 
 Future<List<RequiredProposal>> groupRequiredProposals({
   required String accountPubkey,
@@ -115,8 +148,11 @@ Future<List<GroupInformation>> getGroupsInformations({
   groupIds: groupIds,
 );
 
-Future<List<GroupWithInfoAndMembership>> visibleGroupsWithInfo({required String accountPubkey}) =>
-    RustLib.instance.api.crateApiGroupsVisibleGroupsWithInfo(accountPubkey: accountPubkey);
+Future<List<GroupWithInfoAndMembership>> visibleGroupsWithInfo({
+  required String accountPubkey,
+}) => RustLib.instance.api.crateApiGroupsVisibleGroupsWithInfo(
+  accountPubkey: accountPubkey,
+);
 
 Future<UploadGroupImageResult> uploadGroupImage({
   required String accountPubkey,
@@ -130,11 +166,13 @@ Future<UploadGroupImageResult> uploadGroupImage({
   serverUrl: serverUrl,
 );
 
-Future<String?> getGroupImagePath({required String accountPubkey, required String groupId}) =>
-    RustLib.instance.api.crateApiGroupsGetGroupImagePath(
-      accountPubkey: accountPubkey,
-      groupId: groupId,
-    );
+Future<String?> getGroupImagePath({
+  required String accountPubkey,
+  required String groupId,
+}) => RustLib.instance.api.crateApiGroupsGetGroupImagePath(
+  accountPubkey: accountPubkey,
+  groupId: groupId,
+);
 
 Future<RatchetTreeInfo> getRatchetTreeInfo({
   required String accountPubkey,
@@ -217,8 +255,11 @@ class Group {
   Future<GroupType> groupType({required String accountPubkey}) =>
       RustLib.instance.api.crateApiGroupsGroupGroupType(that: this, accountPubkey: accountPubkey);
 
-  Future<bool> isDirectMessageType({required String accountPubkey}) => RustLib.instance.api
-      .crateApiGroupsGroupIsDirectMessageType(that: this, accountPubkey: accountPubkey);
+  Future<bool> isDirectMessageType({required String accountPubkey}) =>
+      RustLib.instance.api.crateApiGroupsGroupIsDirectMessageType(
+        that: this,
+        accountPubkey: accountPubkey,
+      );
 
   Future<bool> isGroupType({required String accountPubkey}) =>
       RustLib.instance.api.crateApiGroupsGroupIsGroupType(that: this, accountPubkey: accountPubkey);

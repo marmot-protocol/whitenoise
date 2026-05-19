@@ -31,13 +31,19 @@ Future<Draft> saveDraft({
 
 /// Loads the draft for the given account and group, if one exists.
 Future<Draft?> loadDraft({required String pubkey, required String groupId}) =>
-    RustLib.instance.api.crateApiDraftsLoadDraft(pubkey: pubkey, groupId: groupId);
+    RustLib.instance.api.crateApiDraftsLoadDraft(
+      pubkey: pubkey,
+      groupId: groupId,
+    );
 
 /// Deletes the draft for the given account and group.
 ///
 /// No-op if no draft exists.
 Future<void> deleteDraft({required String pubkey, required String groupId}) =>
-    RustLib.instance.api.crateApiDraftsDeleteDraft(pubkey: pubkey, groupId: groupId);
+    RustLib.instance.api.crateApiDraftsDeleteDraft(
+      pubkey: pubkey,
+      groupId: groupId,
+    );
 
 /// Flutter-compatible draft message for a specific group.
 ///

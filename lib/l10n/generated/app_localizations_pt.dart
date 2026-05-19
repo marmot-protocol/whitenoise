@@ -1489,4 +1489,11 @@ class AppLocalizationsPt extends AppLocalizations {
 
   @override
   String get youLeftTheGroup => 'Você saiu do grupo';
+
+  @override
+  String get unsupportedDeepLinkTitle => 'Link não suportado';
+
+  @override
+  String get unsupportedDeepLinkMessage =>
+      'Este link do White Noise não pode ser aberto. Talvez seja necessário atualizar o aplicativo.';
 }
