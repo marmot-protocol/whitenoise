@@ -3212,6 +3212,61 @@ void main() {
         final textField = tester.widget<TextField>(find.byType(TextField));
         expect(textField.controller!.selection.baseOffset, 7);
       });
+
+      testWidgets(
+        'renders mention picker BELOW images when media is attached',
+        (tester) async {
+          final mockImagePicker = _MockImagePickerPlatform()
+            ..filesToReturn = [XFile('/tmp/test_image.jpg')];
+          ImagePickerPlatform.instance = mockImagePicker;
+
+          await pumpChatScreen(tester);
+
+          await tester.tap(find.byKey(const Key('add_button')));
+          await tester.runAsync(
+            () => Future.delayed(const Duration(milliseconds: 100)),
+          );
+          await tester.pumpAndSettle();
+
+          await tester.enterText(find.byType(TextField), '@');
+          await tester.pumpAndSettle();
+
+          expect(find.byType(ChatMediaUploadPreview), findsOneWidget);
+          expect(find.byKey(const Key('mention_suggestions_menu')), findsOneWidget);
+
+          // Picker should live inside the attachment area, not above the
+          // input. That guarantees the visual order is image -> picker.
+          expect(
+            find.descendant(
+              of: find.byKey(const Key('attachment_area')),
+              matching: find.byKey(const Key('mention_suggestions_menu')),
+            ),
+            findsOneWidget,
+          );
+
+          final mediaBottom = tester.getBottomLeft(find.byType(ChatMediaUploadPreview)).dy;
+          final menuTop = tester.getTopLeft(find.byKey(const Key('mention_suggestions_menu'))).dy;
+          expect(menuTop, greaterThanOrEqualTo(mediaBottom));
+        },
+      );
+
+      testWidgets(
+        'mention picker sits ABOVE the input when no media is attached',
+        (tester) async {
+          await pumpChatScreen(tester);
+          await tester.enterText(find.byType(TextField), '@');
+          await tester.pumpAndSettle();
+
+          expect(find.byKey(const Key('mention_suggestions_menu')), findsOneWidget);
+          // The picker is NOT inside the attachment area when there is no
+          // media (the attachment area itself isn't rendered).
+          expect(find.byKey(const Key('attachment_area')), findsNothing);
+
+          final inputTop = tester.getTopLeft(find.byType(WnChatMessageInput)).dy;
+          final menuTop = tester.getTopLeft(find.byKey(const Key('mention_suggestions_menu'))).dy;
+          expect(menuTop, lessThan(inputTop));
+        },
+      );
     });
   });
 }

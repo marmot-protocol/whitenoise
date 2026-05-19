@@ -982,9 +982,20 @@ class _ChatInput extends HookWidget {
       }
     }
 
+    final mentionMenu = mentionSuggestions.isNotEmpty
+        ? _MentionSuggestionsMenu(
+            members: mentionSuggestions,
+            onSelected: insertMention,
+          )
+        : null;
+
     Widget? buildAttachmentArea() {
       final hasQuote = input.replyingTo != null;
-      if (!hasQuote && !hasMedia) return null;
+      // When media is present and the picker is showing, the picker rides
+      // along inside the attachment area so it appears BELOW the images
+      // instead of pushing them down from above.
+      final menuRidesAlong = hasMedia && mentionMenu != null;
+      if (!hasQuote && !hasMedia && !menuRidesAlong) return null;
 
       final quoteData = hasQuote ? getChatMessageQuote(input.replyingTo!.id) : null;
       final shouldRenderQuote = hasQuote && quoteData != null && !quoteData.isNotFound;
@@ -1012,6 +1023,10 @@ class _ChatInput extends HookWidget {
               items: mediaUpload.items,
               onRemove: mediaUpload.removeItem,
             ),
+          if (menuRidesAlong) ...[
+            SizedBox(height: 8.h),
+            mentionMenu,
+          ],
         ],
       );
     }
@@ -1026,13 +1041,10 @@ class _ChatInput extends HookWidget {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          if (mentionSuggestions.isNotEmpty)
+          if (mentionMenu != null && !hasMedia)
             Padding(
               padding: EdgeInsets.only(bottom: 6.h),
-              child: _MentionSuggestionsMenu(
-                members: mentionSuggestions,
-                onSelected: insertMention,
-              ),
+              child: mentionMenu,
             ),
           WnChatMessageInput(
             key: const ValueKey('chat_message_input'),

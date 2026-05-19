@@ -142,7 +142,7 @@ class MarkdownText extends HookWidget {
       onNostrTap: onNostrTap,
       mentionDisplayName: mentionDisplayName,
       highlightQueries: highlightQueries,
-      highlightColor: highlightColor ?? Colors.yellow,
+      highlightColor: highlightColor ?? context.colors.intentionInfoContent,
       registerRecognizer: newRecognizers.add,
     );
 
