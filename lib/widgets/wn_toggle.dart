@@ -45,7 +45,7 @@ class WnToggle extends StatelessWidget {
             child: Container(
               key: thumbKey,
               width: 20.w,
-              height: 20.w,
+              height: 20.h,
               decoration: BoxDecoration(
                 color: thumbColor,
                 shape: BoxShape.circle,

@@ -4,14 +4,17 @@ import 'package:whitenoise/src/rust/api/product_analytics.dart' as rust_analytic
 
 class ProductAnalyticsSettingsNotifier
     extends AsyncNotifier<rust_analytics.ProductAnalyticsSettings> {
+  int _setEnabledRequestId = 0;
+
   @override
   Future<rust_analytics.ProductAnalyticsSettings> build() {
     return ref.read(productAnalyticsServiceProvider).settings();
   }
 
   Future<void> setEnabled(bool enabled) async {
+    final requestId = ++_setEnabledRequestId;
     final current = state.value;
-    if (current != null) {
+    if (requestId == _setEnabledRequestId && current != null) {
       final now = DateTime.now().toUtc();
       state = AsyncData(
         rust_analytics.ProductAnalyticsSettings(
@@ -23,8 +26,11 @@ class ProductAnalyticsSettingsNotifier
       );
     }
 
-    final settings = await ref.read(productAnalyticsServiceProvider).setAnalyticsEnabled(enabled);
-    state = AsyncData(settings);
+    final analyticsService = ref.read(productAnalyticsServiceProvider);
+    final settings = await analyticsService.setAnalyticsEnabled(enabled);
+    if (requestId == _setEnabledRequestId) {
+      state = AsyncData(settings);
+    }
   }
 }
 

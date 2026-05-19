@@ -67,24 +67,24 @@ class AppLocalizationsRu extends AppLocalizations {
   String get createProfile => 'Создать профиль';
 
   @override
-  String get analyticsConsentTitle => 'Help improve White Noise';
+  String get analyticsConsentTitle => 'Помогите улучшить White Noise';
 
   @override
   String get analyticsConsentDescription =>
-      'Share privacy-preserving usage analytics. We never send message content, contacts, public keys, relay URLs, group ids, message ids, or profile data. You can turn this off anytime.';
+      'Делитесь обезличенной аналитикой использования с сохранением конфиденциальности. Мы никогда не отправляем содержимое сообщений, контакты, публичные ключи, URL реле, идентификаторы групп, идентификаторы сообщений или данные профиля. Вы можете отключить это в любое время.';
 
   @override
   String get analyticsConsentSettingsDescription =>
-      'Share anonymous usage data to help us find bugs and improve the app. Messages, contacts, and keys are never included.';
+      'Делитесь анонимными данными об использовании, чтобы помочь нам находить ошибки и улучшать приложение. Сообщения, контакты и ключи никогда не включаются.';
 
   @override
-  String get analyticsPromptTitle => 'Help improve White Noise?';
+  String get analyticsPromptTitle => 'Помочь улучшить White Noise?';
 
   @override
-  String get analyticsPromptNotNow => 'Not now';
+  String get analyticsPromptNotNow => 'Не сейчас';
 
   @override
-  String get analyticsPromptShare => 'Share analytics';
+  String get analyticsPromptShare => 'Поделиться аналитикой';
 
   @override
   String get chooseName => 'Имя';

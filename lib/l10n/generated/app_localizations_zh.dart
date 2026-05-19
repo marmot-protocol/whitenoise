@@ -67,24 +67,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String get createProfile => '创建个人资料';
 
   @override
-  String get analyticsConsentTitle => 'Help improve White Noise';
+  String get analyticsConsentTitle => '帮助改进 White Noise';
 
   @override
   String get analyticsConsentDescription =>
-      'Share privacy-preserving usage analytics. We never send message content, contacts, public keys, relay URLs, group ids, message ids, or profile data. You can turn this off anytime.';
+      '分享保护隐私的使用分析。我们绝不会发送消息内容、联系人、公钥、中继 URL、群组 ID、消息 ID 或个人资料数据。您可以随时关闭。';
 
   @override
-  String get analyticsConsentSettingsDescription =>
-      'Share anonymous usage data to help us find bugs and improve the app. Messages, contacts, and keys are never included.';
+  String get analyticsConsentSettingsDescription => '分享匿名使用数据，帮助我们发现问题并改进应用。消息、联系人和密钥绝不会包含在内。';
 
   @override
-  String get analyticsPromptTitle => 'Help improve White Noise?';
+  String get analyticsPromptTitle => '帮助改进 White Noise？';
 
   @override
-  String get analyticsPromptNotNow => 'Not now';
+  String get analyticsPromptNotNow => '暂不';
 
   @override
-  String get analyticsPromptShare => 'Share analytics';
+  String get analyticsPromptShare => '分享分析数据';
 
   @override
   String get chooseName => '名称';
@@ -1514,24 +1513,23 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get createProfile => '建立個人檔案';
 
   @override
-  String get analyticsConsentTitle => 'Help improve White Noise';
+  String get analyticsConsentTitle => '協助改進 White Noise';
 
   @override
   String get analyticsConsentDescription =>
-      'Share privacy-preserving usage analytics. We never send message content, contacts, public keys, relay URLs, group ids, message ids, or profile data. You can turn this off anytime.';
+      '分享保護隱私的使用分析。我們絕不會傳送訊息內容、聯絡人、公鑰、中繼站 URL、群組 ID、訊息 ID 或個人檔案資料。您可以隨時關閉。';
 
   @override
-  String get analyticsConsentSettingsDescription =>
-      'Share anonymous usage data to help us find bugs and improve the app. Messages, contacts, and keys are never included.';
+  String get analyticsConsentSettingsDescription => '分享匿名使用資料，協助我們找出問題並改進應用程式。訊息、聯絡人和金鑰絕不會包含在內。';
 
   @override
-  String get analyticsPromptTitle => 'Help improve White Noise?';
+  String get analyticsPromptTitle => '協助改進 White Noise？';
 
   @override
-  String get analyticsPromptNotNow => 'Not now';
+  String get analyticsPromptNotNow => '暫時不要';
 
   @override
-  String get analyticsPromptShare => 'Share analytics';
+  String get analyticsPromptShare => '分享分析資料';
 
   @override
   String get chooseName => '名稱';

@@ -285,11 +285,13 @@ class ChatListScreen extends HookConsumerWidget {
     final isSearchVisible = headerOpen.value || searchQuery.value.isNotEmpty;
 
     Future<void> resolveAnalyticsNotice() async {
-      if (context.mounted) {
-        analyticsStepResolved.value = true;
-      }
-      await ref.read(analyticsOnboardingResolutionServiceProvider).markResolved(pubkey);
-      ref.invalidate(analyticsOnboardingResolvedProvider(pubkey));
+      final resolutionService = ref.read(analyticsOnboardingResolutionServiceProvider);
+      final resolvedProvider = analyticsOnboardingResolvedProvider(pubkey);
+      if (!context.mounted) return;
+      analyticsStepResolved.value = true;
+      await resolutionService.markResolved(pubkey);
+      if (!context.mounted) return;
+      ref.invalidate(resolvedProvider);
     }
 
     void dismissWelcomeNotice() {
@@ -300,18 +302,24 @@ class ChatListScreen extends HookConsumerWidget {
 
     Future<void> shareAnalytics() async {
       if (analyticsNoticeLoading.value) return;
+      final settingsNotifier = ref.read(productAnalyticsSettingsProvider.notifier);
+      final analytics = ref.read(productAnalyticsServiceProvider);
       analyticsNoticeLoading.value = true;
       try {
-        await ref.read(productAnalyticsSettingsProvider.notifier).setEnabled(true);
+        await settingsNotifier.setEnabled(true);
+        if (!context.mounted) return;
         final enabled = ref.read(productAnalyticsSettingsProvider).value?.enabled ?? false;
         if (enabled) {
-          final analytics = ref.read(productAnalyticsServiceProvider);
           await analytics.trackOnboardingStarted();
+          if (!context.mounted) return;
           await analytics.trackOnboardingCompleted();
+          if (!context.mounted) return;
         }
         await resolveAnalyticsNotice();
       } finally {
-        analyticsNoticeLoading.value = false;
+        if (context.mounted) {
+          analyticsNoticeLoading.value = false;
+        }
       }
     }
 

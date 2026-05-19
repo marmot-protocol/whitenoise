@@ -144,8 +144,8 @@ class ProductAnalyticsService {
 
   Future<String> _consentVersionOrFallback() async {
     try {
-      final version = await _consentVersion();
-      return version.trim().isEmpty ? _fallbackConsentVersion : version;
+      final version = (await _consentVersion()).trim();
+      return version.isEmpty ? _fallbackConsentVersion : version;
     } catch (e, st) {
       _logger.warning('Failed to read product analytics consent version', e, st);
       return _fallbackConsentVersion;

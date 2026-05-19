@@ -1004,7 +1004,7 @@ void main() {
         await tester.tap(find.byKey(const Key('filter_chip_archive')));
         await tester.pumpAndSettle();
 
-        expect(find.byKey(const Key('welcome_notice')), findsNothing);
+        expect(find.byKey(const Key('analytics_onboarding_notice')), findsNothing);
       });
 
       testWidgets('neither chip visible with no chats before pull-down', (tester) async {

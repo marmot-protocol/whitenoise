@@ -47,6 +47,16 @@ void main() {
       expect(api.trackedEvents, isEmpty);
     });
 
+    test('trims the Rust consent version before updating consent', () async {
+      api.nextConsentVersion = '  product-analytics-v2  ';
+
+      await service.setAnalyticsEnabled(true);
+
+      expect(api.setEnabledCalls, [
+        (enabled: true, consentVersion: 'product-analytics-v2'),
+      ]);
+    });
+
     test(
       'tracks only Flutter-owned typed Rust events and never talks to Aptabase directly',
       () async {

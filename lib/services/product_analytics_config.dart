@@ -1,10 +1,12 @@
 import 'package:flutter/foundation.dart' show TargetPlatform, defaultTargetPlatform, kDebugMode;
 import 'package:flutter/widgets.dart' show Locale, Size, WidgetsBinding;
+import 'package:logging/logging.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:whitenoise/src/rust/api/product_analytics.dart';
 
 const _aptabaseHost = String.fromEnvironment('APTABASE_HOST');
 const _aptabaseAppKey = String.fromEnvironment('APTABASE_APP_KEY');
+final _logger = Logger('ProductAnalyticsConfig');
 
 class ProductAnalyticsConfigInput {
   const ProductAnalyticsConfigInput({
@@ -29,23 +31,39 @@ class ProductAnalyticsConfigInput {
 }
 
 Future<ProductAnalyticsConfig> loadProductAnalyticsConfig() async {
-  final packageInfo = await PackageInfo.fromPlatform();
-  final dispatcher = WidgetsBinding.instance.platformDispatcher;
-  final view = dispatcher.views.isEmpty ? null : dispatcher.views.first;
-  final logicalSize = view == null ? null : view.physicalSize / view.devicePixelRatio;
+  try {
+    final packageInfo = await PackageInfo.fromPlatform();
+    final dispatcher = WidgetsBinding.instance.platformDispatcher;
+    final view = dispatcher.views.isEmpty ? null : dispatcher.views.first;
+    final logicalSize = view == null ? null : view.physicalSize / view.devicePixelRatio;
 
-  return buildProductAnalyticsConfig(
-    ProductAnalyticsConfigInput(
-      appVersion: '${packageInfo.version}+${packageInfo.buildNumber}',
-      bundleIdentifier: packageInfo.packageName,
-      locale: localeToAnalyticsTag(dispatcher.locale),
-      platform: defaultTargetPlatform,
-      logicalSize: logicalSize,
-      isDebug: kDebugMode,
-      aptabaseHost: _aptabaseHost,
-      aptabaseAppKey: _aptabaseAppKey,
-    ),
-  );
+    return buildProductAnalyticsConfig(
+      ProductAnalyticsConfigInput(
+        appVersion: '${packageInfo.version}+${packageInfo.buildNumber}',
+        bundleIdentifier: packageInfo.packageName,
+        locale: localeToAnalyticsTag(dispatcher.locale),
+        platform: defaultTargetPlatform,
+        logicalSize: logicalSize,
+        isDebug: kDebugMode,
+        aptabaseHost: _aptabaseHost,
+        aptabaseAppKey: _aptabaseAppKey,
+      ),
+    );
+  } catch (e, st) {
+    _logger.warning('Failed to load product analytics config metadata', e, st);
+    return buildProductAnalyticsConfig(
+      ProductAnalyticsConfigInput(
+        appVersion: 'unknown',
+        bundleIdentifier: 'unknown',
+        locale: 'unknown',
+        platform: defaultTargetPlatform,
+        logicalSize: null,
+        isDebug: kDebugMode,
+        aptabaseHost: '',
+        aptabaseAppKey: '',
+      ),
+    );
+  }
 }
 
 ProductAnalyticsConfig buildProductAnalyticsConfig(ProductAnalyticsConfigInput input) {
