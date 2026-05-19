@@ -23,10 +23,7 @@ import 'package:whitenoise/widgets/wn_system_notice.dart' show WnSystemNotice;
 import 'package:whitenoise/widgets/wn_user_item.dart';
 
 class SetUpGroupScreen extends HookConsumerWidget {
-  const SetUpGroupScreen({
-    required this.selectedUsers,
-    super.key,
-  });
+  const SetUpGroupScreen({required this.selectedUsers, super.key});
 
   final List<User> selectedUsers;
 
@@ -45,8 +42,13 @@ class SetUpGroupScreen extends HookConsumerWidget {
       onImageSelected: createGroupHook.actions.updateSelectedImagePath,
     );
 
-    final (:noticeMessage, :noticeType, :showErrorNotice, :showSuccessNotice, :dismissNotice) =
-        useSystemNotice();
+    final (
+      :noticeMessage,
+      :noticeType,
+      :showErrorNotice,
+      :showSuccessNotice,
+      :dismissNotice,
+    ) = useSystemNotice();
 
     Future<void> handleCreateGroup() async {
       final (:group, :imageUploadFailed) = await createGroupHook.actions.createGroup(accountPubkey);
@@ -94,6 +96,7 @@ class SetUpGroupScreen extends HookConsumerWidget {
             child: SizedBox(
               width: double.infinity,
               child: WnButton(
+                key: const Key('set_up_group_create_button'),
                 onPressed: canCreate ? handleCreateGroup : null,
                 text: context.l10n.createGroup,
                 loading: createGroupHook.state.isCreating || createGroupHook.state.isUploadingImage,
@@ -153,6 +156,7 @@ class SetUpGroupScreen extends HookConsumerWidget {
                       Padding(
                         padding: EdgeInsets.symmetric(horizontal: 14.w),
                         child: WnInput(
+                          key: const Key('set_up_group_name_field'),
                           label: context.l10n.groupName,
                           controller: groupNameController,
                           placeholder: context.l10n.groupNamePlaceholder,
@@ -182,7 +186,9 @@ class SetUpGroupScreen extends HookConsumerWidget {
                           ),
                         ),
                         Gap(16.h),
-                        ...createGroupHook.state.usersWithKeyPackage.expand((user) {
+                        ...createGroupHook.state.usersWithKeyPackage.expand((
+                          user,
+                        ) {
                           final displayName = presentName(user.metadata);
                           final formattedPubKey = formatPublicKey(
                             npubFromHex(user.pubkey) ?? user.pubkey,
@@ -194,7 +200,9 @@ class SetUpGroupScreen extends HookConsumerWidget {
                                 key: Key('member_${user.pubkey}'),
                                 displayName: displayName ?? formattedPubKey,
                                 pictureUrl: user.metadata.picture,
-                                avatarColor: AvatarColor.fromPubkey(user.pubkey),
+                                avatarColor: AvatarColor.fromPubkey(
+                                  user.pubkey,
+                                ),
                               ),
                             ),
                             Gap(12.h),
@@ -206,16 +214,16 @@ class SetUpGroupScreen extends HookConsumerWidget {
                         Padding(
                           padding: EdgeInsets.symmetric(horizontal: 14.w),
                           child: Text(
-                            '${context.l10n.usersNotOnWhiteNoise(
-                              createGroupHook.state.usersWithoutKeyPackage.length,
-                            )}:',
+                            '${context.l10n.usersNotOnWhiteNoise(createGroupHook.state.usersWithoutKeyPackage.length)}:',
                             style: typography.medium16.copyWith(
                               color: colors.backgroundContentSecondary,
                             ),
                           ),
                         ),
                         Gap(16.h),
-                        ...createGroupHook.state.usersWithoutKeyPackage.expand((user) {
+                        ...createGroupHook.state.usersWithoutKeyPackage.expand((
+                          user,
+                        ) {
                           final displayName = presentName(user.metadata);
                           final formattedPubKey = formatPublicKey(
                             npubFromHex(user.pubkey) ?? user.pubkey,
@@ -229,7 +237,9 @@ class SetUpGroupScreen extends HookConsumerWidget {
                                   key: Key('excluded_${user.pubkey}'),
                                   displayName: displayName ?? formattedPubKey,
                                   pictureUrl: user.metadata.picture,
-                                  avatarColor: AvatarColor.fromPubkey(user.pubkey),
+                                  avatarColor: AvatarColor.fromPubkey(
+                                    user.pubkey,
+                                  ),
                                 ),
                               ),
                             ),

@@ -42,6 +42,8 @@ pub struct WhitenoiseConfig {
     pub data_dir: String,
     /// Path to the directory where log files will be written
     pub logs_dir: String,
+    /// Relay URLs used when the app needs to create default relay metadata.
+    pub default_relay_urls: Option<Vec<String>>,
 }
 
 impl From<whitenoise::WhitenoiseConfig> for WhitenoiseConfig {
@@ -49,6 +51,7 @@ impl From<whitenoise::WhitenoiseConfig> for WhitenoiseConfig {
         Self {
             data_dir: config.data_dir.to_string_lossy().to_string(),
             logs_dir: config.logs_dir.to_string_lossy().to_string(),
+            default_relay_urls: None,
         }
     }
 }
@@ -61,6 +64,7 @@ impl From<whitenoise::WhitenoiseConfig> for WhitenoiseConfig {
 /// # Parameters
 /// * `data_dir` - Path string for data directory where app data will be stored
 /// * `logs_dir` - Path string for logs directory where log files will be written
+/// * `default_relay_urls` - Optional relay URLs for test or environment-specific defaults
 ///
 /// # Returns
 /// A WhitenoiseConfig object ready for initialization
@@ -73,8 +77,16 @@ impl From<whitenoise::WhitenoiseConfig> for WhitenoiseConfig {
 /// );
 /// ```
 #[frb]
-pub fn create_whitenoise_config(data_dir: String, logs_dir: String) -> WhitenoiseConfig {
-    WhitenoiseConfig { data_dir, logs_dir }
+pub fn create_whitenoise_config(
+    data_dir: String,
+    logs_dir: String,
+    default_relay_urls: Option<Vec<String>>,
+) -> WhitenoiseConfig {
+    WhitenoiseConfig {
+        data_dir,
+        logs_dir,
+        default_relay_urls,
+    }
 }
 
 // Declare the modules
@@ -129,13 +141,15 @@ pub use zapstore::*;
 pub async fn initialize_whitenoise(config: WhitenoiseConfig) -> Result<(), ApiError> {
     crate::ios_keyring::install_ios_keyring_store_if_needed()
         .map_err(|message| ApiError::Whitenoise { message })?;
+    let default_relay_urls = config.default_relay_urls.clone();
     let core_config = whitenoise::WhitenoiseConfig::new(
         Path::new(&config.data_dir),
         Path::new(&config.logs_dir),
         "com.whitenoise.app",
     );
     GLOBAL_WN
-        .get_or_try_init(|| async {
+        .get_or_try_init(|| async move {
+            configure_default_relay_urls(default_relay_urls)?;
             Whitenoise::ensure_initialized(core_config)
                 .await
                 .map_err(ApiError::from)

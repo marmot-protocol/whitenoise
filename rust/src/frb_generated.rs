@@ -906,12 +906,14 @@ fn wire__crate__api__create_whitenoise_config_impl(
                 flutter_rust_bridge::for_generated::SseDeserializer::new(message);
             let api_data_dir = <String>::sse_decode(&mut deserializer);
             let api_logs_dir = <String>::sse_decode(&mut deserializer);
+            let api_default_relay_urls = <Option<Vec<String>>>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, ()>((move || {
                     let output_ok = Result::<_, ()>::Ok(crate::api::create_whitenoise_config(
                         api_data_dir,
                         api_logs_dir,
+                        api_default_relay_urls,
                     ))?;
                     Ok(output_ok)
                 })())
@@ -7936,9 +7938,11 @@ impl SseDecode for crate::api::WhitenoiseConfig {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_dataDir = <String>::sse_decode(deserializer);
         let mut var_logsDir = <String>::sse_decode(deserializer);
+        let mut var_defaultRelayUrls = <Option<Vec<String>>>::sse_decode(deserializer);
         return crate::api::WhitenoiseConfig {
             data_dir: var_dataDir,
             logs_dir: var_logsDir,
+            default_relay_urls: var_defaultRelayUrls,
         };
     }
 }
@@ -10027,6 +10031,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::WhitenoiseConfig {
         [
             self.data_dir.into_into_dart().into_dart(),
             self.logs_dir.into_into_dart().into_dart(),
+            self.default_relay_urls.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -11787,6 +11792,7 @@ impl SseEncode for crate::api::WhitenoiseConfig {
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.data_dir, serializer);
         <String>::sse_encode(self.logs_dir, serializer);
+        <Option<Vec<String>>>::sse_encode(self.default_relay_urls, serializer);
     }
 }
 

@@ -19,6 +19,7 @@ import 'frb_generated.dart';
 /// # Parameters
 /// * `data_dir` - Path string for data directory where app data will be stored
 /// * `logs_dir` - Path string for logs directory where log files will be written
+/// * `default_relay_urls` - Optional relay URLs for test or environment-specific defaults
 ///
 /// # Returns
 /// A WhitenoiseConfig object ready for initialization
@@ -33,9 +34,11 @@ import 'frb_generated.dart';
 Future<WhitenoiseConfig> createWhitenoiseConfig({
   required String dataDir,
   required String logsDir,
+  List<String>? defaultRelayUrls,
 }) => RustLib.instance.api.crateApiCreateWhitenoiseConfig(
   dataDir: dataDir,
   logsDir: logsDir,
+  defaultRelayUrls: defaultRelayUrls,
 );
 
 Future<void> initializeWhitenoise({required WhitenoiseConfig config}) =>
@@ -78,13 +81,17 @@ class WhitenoiseConfig {
   /// Path to the directory where log files will be written
   final String logsDir;
 
+  /// Relay URLs used when the app needs to create default relay metadata.
+  final List<String>? defaultRelayUrls;
+
   const WhitenoiseConfig({
     required this.dataDir,
     required this.logsDir,
+    this.defaultRelayUrls,
   });
 
   @override
-  int get hashCode => dataDir.hashCode ^ logsDir.hashCode;
+  int get hashCode => dataDir.hashCode ^ logsDir.hashCode ^ defaultRelayUrls.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -92,5 +99,6 @@ class WhitenoiseConfig {
       other is WhitenoiseConfig &&
           runtimeType == other.runtimeType &&
           dataDir == other.dataDir &&
-          logsDir == other.logsDir;
+          logsDir == other.logsDir &&
+          defaultRelayUrls == other.defaultRelayUrls;
 }

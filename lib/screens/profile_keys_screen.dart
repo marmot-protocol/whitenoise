@@ -31,8 +31,13 @@ class ProfileKeysScreen extends HookConsumerWidget {
     final obscurePrivateKey = useState(true);
     final warningCalloutExpanded = useState(false);
     final scheduleClipboardClear = useClipboardGuard();
-    final (:noticeMessage, :noticeType, :showSuccessNotice, :showErrorNotice, :dismissNotice) =
-        useSystemNotice();
+    final (
+      :noticeMessage,
+      :noticeType,
+      :showSuccessNotice,
+      :showErrorNotice,
+      :dismissNotice,
+    ) = useSystemNotice();
 
     useEffect(() {
       if (nsecState.error != null) {
@@ -73,6 +78,7 @@ class ProfileKeysScreen extends HookConsumerWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 WnCopyableField(
+                  key: const Key('profile_keys_public_key_field'),
                   label: context.l10n.publicKey,
                   value: npub ?? '',
                   displayValue: formatPublicKey(npub ?? ''),
@@ -88,6 +94,7 @@ class ProfileKeysScreen extends HookConsumerWidget {
                 if (nsecState.nsecStorage == NsecStorage.local) ...[
                   Gap(12.h),
                   WnCopyableField(
+                    key: const Key('profile_keys_private_key_field'),
                     label: context.l10n.privateKey,
                     value: nsecState.nsec ?? '',
                     obscurable: true,

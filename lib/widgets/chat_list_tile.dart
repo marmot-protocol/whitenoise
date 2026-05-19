@@ -139,7 +139,7 @@ _TileDisplay _buildTileDisplay({
   }
 
   String? prefixSubtitle;
-  if (!isPending && !chatSummary.selfRemoved && chatSummary.lastMessage != null) {
+  if (!chatSummary.selfRemoved && chatSummary.lastMessage != null) {
     if (chatSummary.lastMessage!.author == myPubkey) {
       prefixSubtitle = '${context.l10n.you}: ';
     } else if (!isDm) {

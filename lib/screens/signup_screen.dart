@@ -74,7 +74,9 @@ class SignupScreen extends HookConsumerWidget {
     final privacyNoticeExpanded = useState(false);
     final showCarousel = useState(false);
     final carouselIndex = useState(0);
-    final carouselAccentColor = useState<Color>(context.colors.accent.cyan.contentSecondary);
+    final carouselAccentColor = useState<Color>(
+      context.colors.accent.cyan.contentSecondary,
+    );
 
     final carouselAnimationController = useAnimationController(
       duration: _animationDuration,
@@ -147,16 +149,12 @@ class SignupScreen extends HookConsumerWidget {
       }
     }
 
-    final slideAnimation =
-        Tween<Offset>(
-          begin: Offset.zero,
-          end: const Offset(0, 1),
-        ).animate(
-          CurvedAnimation(
-            parent: carouselAnimationController,
-            curve: Curves.easeInOut,
-          ),
-        );
+    final slideAnimation = Tween<Offset>(begin: Offset.zero, end: const Offset(0, 1)).animate(
+      CurvedAnimation(
+        parent: carouselAnimationController,
+        curve: Curves.easeInOut,
+      ),
+    );
 
     final fadeAnimation = CurvedAnimation(
       parent: carouselAnimationController,
@@ -243,6 +241,9 @@ class SignupScreen extends HookConsumerWidget {
                                       builder: (context, value, child) {
                                         final hasName = value.text.trim().isNotEmpty;
                                         return WnButton(
+                                          key: const Key(
+                                            'signup_create_profile_button',
+                                          ),
                                           text: context.l10n.createProfile,
                                           onPressed: hasName && !isOffline ? onSubmit : null,
                                           loading: state.isLoading,
@@ -294,6 +295,9 @@ class SignupScreen extends HookConsumerWidget {
                                       ),
                                       Gap(16.h),
                                       WnInput(
+                                        key: const Key(
+                                          'signup_display_name_field',
+                                        ),
                                         label: context.l10n.chooseName,
                                         placeholder: context.l10n.enterYourName,
                                         controller: displayNameController,
@@ -316,7 +320,9 @@ class SignupScreen extends HookConsumerWidget {
                             ),
                           ),
                           SizedBox(
-                            height: MediaQuery.of(context).viewInsets.bottom.clamp(0.0, 16.h),
+                            height: MediaQuery.of(
+                              context,
+                            ).viewInsets.bottom.clamp(0.0, 16.h),
                           ),
                         ],
                       ),

@@ -12,7 +12,7 @@ import 'media_files.dart';
 
 part 'messages.freezed.dart';
 
-// These functions are ignored because they are not marked as `pub`: `append_block`, `append_blocks`, `append_inline`, `append_inlines`, `push_line_break`, `push_nostr_entity`, `push_text`, `push_whitespace`, `serializable_tokens_from_document`
+// These functions are ignored because they are not marked as `pub`: `append_block`, `append_blocks`, `append_inline`, `append_inlines`, `push_line_break`, `push_nostr_entity`, `push_text`, `push_url`, `push_whitespace`, `serializable_tokens_from_document`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
 
 Future<MessageWithTokens> sendMessageToGroup({
