@@ -230,10 +230,8 @@ Future<void> _migrateDataIfNeeded(String dataDir) async {
 
 @visibleForTesting
 Future<void> refreshAfterNotificationRoute({
-  required void Function() requestRefresh,
   required Future<void> Function() ensureRelaySubscriptions,
 }) async {
-  requestRefresh();
   await ensureRelaySubscriptions();
 }
 
@@ -322,7 +320,6 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
 
   Future<void> _refreshAfterNotificationRoute() {
     return refreshAfterNotificationRoute(
-      requestRefresh: ref.read(chatListRefreshProvider.notifier).requestRefresh,
       ensureRelaySubscriptions: _ensureRelaySubscriptionsAfterResume,
     );
   }

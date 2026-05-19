@@ -345,19 +345,16 @@ void main() {
       expect(container.read(chatListRefreshProvider), 0);
     });
 
-    test('refreshAfterNotificationRoute requests local refresh before relay refresh', () async {
+    test('refreshAfterNotificationRoute relies on relay refresh only', () async {
       final events = <String>[];
 
       await refreshAfterNotificationRoute(
-        requestRefresh: () {
-          events.add('local-refresh');
-        },
         ensureRelaySubscriptions: () async {
           events.add('relay-refresh');
         },
       );
 
-      expect(events, ['local-refresh', 'relay-refresh']);
+      expect(events, ['relay-refresh']);
     });
   });
 

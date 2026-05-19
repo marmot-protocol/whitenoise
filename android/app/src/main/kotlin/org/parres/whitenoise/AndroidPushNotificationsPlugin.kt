@@ -54,7 +54,7 @@ class AndroidPushNotificationsPlugin :
     }
 
     override fun onDetachedFromActivityForConfigChanges() {
-        detachActivity()
+        detachActivity(completePendingPermission = false)
     }
 
     override fun onReattachedToActivityForConfigChanges(binding: ActivityPluginBinding) {
@@ -165,12 +165,14 @@ class AndroidPushNotificationsPlugin :
         )
     }
 
-    private fun detachActivity() {
+    private fun detachActivity(completePendingPermission: Boolean = true) {
         activityBinding?.removeRequestPermissionsResultListener(this)
         activityBinding = null
         activity = null
-        pendingPermissionResult?.success(false)
-        pendingPermissionResult = null
+        if (completePendingPermission) {
+            pendingPermissionResult?.success(false)
+            pendingPermissionResult = null
+        }
     }
 
     companion object {
