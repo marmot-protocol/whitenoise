@@ -161,7 +161,7 @@ void main() {
       await pumpAddGroupMembersScreen(tester);
 
       final button = tester.widget<WnButton>(
-        find.byKey(const Key('add_members_submit_button')),
+        find.byKey(const Key('user_picker_submit_button')),
       );
       expect(button.onPressed, isNull);
     });
@@ -174,7 +174,7 @@ void main() {
       await tester.pumpAndSettle();
 
       final button = tester.widget<WnButton>(
-        find.byKey(const Key('add_members_submit_button')),
+        find.byKey(const Key('user_picker_submit_button')),
       );
       expect(button.onPressed, isNotNull);
     });
@@ -193,7 +193,7 @@ void main() {
       await tester.tap(find.text('Charlie'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('add_members_submit_button')));
+      await tester.tap(find.byKey(const Key('user_picker_submit_button')));
       await tester.pumpAndSettle();
 
       expect(_api.addMembersCalls.length, 1);
@@ -214,7 +214,7 @@ void main() {
       await tester.tap(find.text('Bob'));
       await tester.pumpAndSettle();
 
-      await tester.tap(find.byKey(const Key('add_members_submit_button')));
+      await tester.tap(find.byKey(const Key('user_picker_submit_button')));
       await tester.pumpAndSettle();
 
       expect(_api.addMembersCalls.length, 1);
@@ -228,7 +228,7 @@ void main() {
       await tester.tap(find.byKey(const Key('slate_back_button')));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('add_members_submit_button')), findsNothing);
+      expect(find.byKey(const Key('user_picker_submit_button')), findsNothing);
     });
 
     testWidgets('shows error notice when fetching group members fails', (tester) async {

@@ -111,7 +111,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(WnUserBubble), findsOneWidget);
-      expect(find.byKey(const Key('selected_users_bubbles')), findsOneWidget);
+      expect(find.byKey(const Key('user_picker_selected_bubbles')), findsOneWidget);
     });
 
     testWidgets('selecting multiple users shows multiple bubbles', (tester) async {
@@ -134,7 +134,7 @@ void main() {
 
       expect(find.byType(WnUserBubble), findsOneWidget);
 
-      await tester.tap(find.byKey(const Key('bubble_$testPubkeyB')));
+      await tester.tap(find.byKey(const Key('user_picker_bubble_$testPubkeyB')));
       await tester.pumpAndSettle();
 
       expect(find.byType(WnUserBubble), findsNothing);
@@ -225,7 +225,7 @@ void main() {
         await pumpUserSelectionScreen(tester, initialUsers: initialUsers);
 
         expect(find.byType(WnUserBubble), findsOneWidget);
-        expect(find.byKey(const Key('selected_users_bubbles')), findsOneWidget);
+        expect(find.byKey(const Key('user_picker_selected_bubbles')), findsOneWidget);
       });
 
       testWidgets('continue button is enabled when initial users provided', (tester) async {
@@ -242,7 +242,7 @@ void main() {
 
         expect(find.byType(WnUserBubble), findsOneWidget);
 
-        await tester.tap(find.byKey(const Key('bubble_$testPubkeyB')));
+        await tester.tap(find.byKey(const Key('user_picker_bubble_$testPubkeyB')));
         await tester.pumpAndSettle();
 
         expect(find.byType(WnUserBubble), findsNothing);
