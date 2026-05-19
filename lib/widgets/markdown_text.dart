@@ -129,16 +129,11 @@ class MarkdownText extends HookWidget {
       };
     }, const []);
 
-    final newRecognizers = <TapGestureRecognizer>[];
-    final stale = activeRecognizers.value;
-    activeRecognizers.value = newRecognizers;
-    if (stale.isNotEmpty) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        for (final r in stale) {
-          r.dispose();
-        }
-      });
+    for (final r in activeRecognizers.value) {
+      r.dispose();
     }
+    final newRecognizers = <TapGestureRecognizer>[];
+    activeRecognizers.value = newRecognizers;
 
     final renderer = _MarkdownRenderer(
       context: context,
@@ -573,7 +568,7 @@ class _MarkdownRenderer {
   String _resolveMentionLabel(String bech32, String? hex) {
     final lookup = mentionDisplayName;
     if (lookup != null && hex != null) {
-      final name = lookup(hex);
+      final name = lookup(hex)?.trim();
       if (name != null && name.isNotEmpty) {
         return name;
       }

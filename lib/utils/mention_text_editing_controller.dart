@@ -517,8 +517,25 @@ bool _hasMentionBoundaries(String text, int start, int end) {
   return leadingOk && trailingOk;
 }
 
-bool _isMentionBoundary(int codeUnit) =>
-    codeUnit == 0x20 || codeUnit == 0x09 || codeUnit == 0x0A || codeUnit == 0x0D;
+bool _isMentionBoundary(int codeUnit) {
+  switch (codeUnit) {
+    case 0x20: // space
+    case 0x09: // tab
+    case 0x0A: // LF
+    case 0x0D: // CR
+    case 0x2E: // .
+    case 0x2C: // ,
+    case 0x3B: // ;
+    case 0x3A: // :
+    case 0x21: // !
+    case 0x3F: // ?
+    case 0x29: // )
+    case 0x5D: // ]
+      return true;
+    default:
+      return false;
+  }
+}
 
 int _commonPrefixLength(String a, String b) {
   final max = a.length < b.length ? a.length : b.length;

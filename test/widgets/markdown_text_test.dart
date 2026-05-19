@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/markdown_text.dart';
@@ -271,6 +272,35 @@ void main() {
       expect(richText.maxLines, 2);
       expect(richText.overflow, TextOverflow.ellipsis);
     });
+
+    testWidgets(
+      'unmounting a MarkdownText with link recognizers leaks nothing',
+      (tester) async {
+        await mountWidget(
+          MarkdownText(
+            document: _doc([
+              _paragraph([
+                const MarkdownInline.link(
+                  dest: 'https://example.com',
+                  children: [MarkdownInline.text(content: 'example')],
+                ),
+              ]),
+            ]),
+            baseStyle: _baseStyle,
+            onLinkTap: (_) {},
+          ),
+          tester,
+        );
+        await tester.pump();
+        // Tear the subtree down. The recognizer registered during the previous
+        // build must be disposed by the useEffect cleanup — not by a deferred
+        // post-frame callback that could fire after unmount.
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pump();
+        expect(tester.takeException(), isNull);
+      },
+      experimentalLeakTesting: LeakTesting.settings.withTrackedAll(),
+    );
   });
 
   group('MarkdownText — inlines', () {
@@ -603,6 +633,56 @@ void main() {
       expect(mention.text!.startsWith('@'), isFalse);
       expect(mention.text!.contains('…'), isTrue);
       expect(mention.text!.startsWith('npub1'), isTrue);
+    });
+
+    testWidgets('npub mention with whitespace-only resolved name falls back', (tester) async {
+      // A resolver that returns "  " is effectively unresolved — must not
+      // render a blank label. Mirrors how MentionTextEditingController
+      // already trims and discards whitespace-only names.
+      await _pump(
+        tester,
+        MarkdownText(
+          document: _doc([
+            _paragraph([
+              const MarkdownInline.nostrMention(
+                entity: MarkdownNostrEntity(
+                  hrp: MarkdownNostrHrp.npub,
+                  bech32: testNpubA,
+                ),
+              ),
+            ]),
+          ]),
+          baseStyle: _baseStyle,
+          mentionDisplayName: (_) => '   ',
+        ),
+      );
+      final span = tester.widget<Text>(find.byType(Text).first).textSpan! as TextSpan;
+      final mention = span.children!.first as TextSpan;
+      expect(mention.text!.trim(), isNot(equals('')));
+      expect(mention.text!.contains('…'), isTrue);
+    });
+
+    testWidgets('npub mention trims surrounding whitespace from resolved name', (tester) async {
+      await _pump(
+        tester,
+        MarkdownText(
+          document: _doc([
+            _paragraph([
+              const MarkdownInline.nostrMention(
+                entity: MarkdownNostrEntity(
+                  hrp: MarkdownNostrHrp.npub,
+                  bech32: testNpubA,
+                ),
+              ),
+            ]),
+          ]),
+          baseStyle: _baseStyle,
+          mentionDisplayName: (_) => '  Alice  ',
+        ),
+      );
+      final span = tester.widget<Text>(find.byType(Text).first).textSpan! as TextSpan;
+      final mention = span.children!.first as TextSpan;
+      expect(mention.text, 'Alice');
     });
 
     testWidgets('npub mention without callback uses truncated fallback', (tester) async {

@@ -266,6 +266,36 @@ void main() {
       expect(controller.messageText, 'Xhello @npub1bob ');
     });
 
+    test('auto-truncates a bare npub followed by sentence punctuation', () {
+      // The Rust parser tolerates trailing punctuation on a nostr URI; the
+      // controller must do the same so users typing '@npub1xxx!' get the
+      // styled truncated display rather than a raw URI in their message.
+      final controller = MentionTextEditingController(text: '');
+      controller.displayNameForNpub = (_) => null;
+      final bareNpub = '@npub1${'q' * 58}';
+      for (final tail in const ['.', ',', ';', ':', '!', '?', ')', ']']) {
+        final next = MentionTextEditingController(text: '');
+        next.displayNameForNpub = (_) => null;
+        next.value = TextEditingValue(
+          text: 'hi $bareNpub$tail',
+          selection: TextSelection.collapsed(offset: ('hi $bareNpub$tail').length),
+        );
+        expect(
+          next.text.contains('…'),
+          isTrue,
+          reason: 'should auto-truncate when followed by "$tail"',
+        );
+        expect(
+          next.messageText,
+          'hi $bareNpub$tail',
+          reason: 'messageText should re-expand to original uri',
+        );
+      }
+      // Keep `controller` non-trivially referenced to mirror the test
+      // pattern used elsewhere in this file.
+      expect(controller.text, '');
+    });
+
     test('bare npub replacement preserves a mention that sits after it', () {
       final controller = MentionTextEditingController(text: 'Hello ');
       controller.insertMention(
