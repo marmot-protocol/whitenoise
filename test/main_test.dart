@@ -9,7 +9,9 @@ import 'package:logging/logging.dart';
 import 'package:whitenoise/main.dart'
     show
         WnApp,
+        formatAppLogRecord,
         initializeAppContainer,
+        initializeWhitenoiseWithRetry,
         kDataVersion,
         kDataVersionFile,
         refreshAfterNotificationRoute,
@@ -207,6 +209,24 @@ void main() {
 
   setUp(() {
     mockApi.reset();
+  });
+
+  test('formatAppLogRecord includes error and stack details', () {
+    final stackTrace = StackTrace.fromString('stack trace');
+    final record = LogRecord(
+      Level.WARNING,
+      'Something happened',
+      'TestLogger',
+      'boom',
+      stackTrace,
+    );
+
+    expect(
+      formatAppLogRecord(record),
+      'WARNING: TestLogger: Something happened\n'
+      '  error: boom\n'
+      '  stackTrace: stack trace',
+    );
   });
 
   group('WnApp', () {
@@ -449,6 +469,22 @@ void main() {
       expect(mockApi.initCallCount, 2);
     });
 
+    test('uses the default retry delay for transient startup errors', () async {
+      mockApi.initializeWhitenoiseErrors.add(
+        const ApiError.whitenoise(
+          message:
+              'Database error: SQLx error: pool timed out while waiting for an open connection',
+        ),
+      );
+      final config = const rust_api.WhitenoiseConfig(dataDir: 'data', logsDir: 'logs');
+      final stopwatch = Stopwatch()..start();
+
+      await initializeWhitenoiseWithRetry(config);
+
+      expect(mockApi.initCallCount, 2);
+      expect(stopwatch.elapsed, greaterThanOrEqualTo(const Duration(milliseconds: 500)));
+    });
+
     test('does not retry initializeWhitenoise for non-transient startup errors', () async {
       mockApi.initializeWhitenoiseErrors.add(
         const ApiError.whitenoise(message: 'Database error: migration failed'),
@@ -599,6 +635,30 @@ void main() {
 
       expect(baseDir.path, '${appGroupDir.path}/whitenoise');
       expect(File('${baseDir.path}/data/marker.txt').readAsStringSync(), 'existing');
+      expect(Directory('${pathProvider.tempDir.path}/whitenoise').existsSync(), isFalse);
+    });
+
+    test('copies Documents data when App Group migration rename fails', () async {
+      final appGroupDir = Directory.systemTemp.createTempSync('whitenoise_app_group_test');
+      _mockAppGroupContainerPath(appGroupDir.path);
+      final oldDataDir = Directory('${pathProvider.tempDir.path}/whitenoise/data/nested');
+      await oldDataDir.create(recursive: true);
+      await File('${oldDataDir.path}/marker.txt').writeAsString('existing');
+      addTearDown(() {
+        if (appGroupDir.existsSync()) {
+          appGroupDir.deleteSync(recursive: true);
+        }
+      });
+
+      final baseDir = await resolveWhitenoiseBaseDirectory(
+        isIOS: true,
+        renameDirectory: (_, _) async {
+          throw const FileSystemException('rename failed');
+        },
+      );
+
+      expect(baseDir.path, '${appGroupDir.path}/whitenoise');
+      expect(File('${baseDir.path}/data/nested/marker.txt').readAsStringSync(), 'existing');
       expect(Directory('${pathProvider.tempDir.path}/whitenoise').existsSync(), isFalse);
     });
 

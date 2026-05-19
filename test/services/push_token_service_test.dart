@@ -49,6 +49,20 @@ void main() {
       );
     });
 
+    test('uses platform and token for equality and hash code', () {
+      const token = ProviderPushToken(
+        platform: PushPlatform.fcm,
+        rawToken: 'token-123',
+      );
+      const matchingToken = ProviderPushToken(
+        platform: PushPlatform.fcm,
+        rawToken: 'token-123',
+      );
+
+      expect(token, matchingToken);
+      expect(token.hashCode, matchingToken.hashCode);
+    });
+
     test('fromMap rejects missing platform or token', () {
       expect(ProviderPushToken.fromMap({'platform': 'fcm'}), isNull);
       expect(ProviderPushToken.fromMap({'rawToken': 'token'}), isNull);

@@ -50,18 +50,7 @@ Future<void> main() async {
   Logger.root.level = Level.WARNING;
   Logger.root.onRecord.listen((record) {
     appLogStore.add(record);
-    final buf = StringBuffer(
-      '${record.level.name}: ${record.loggerName}: ${record.message}',
-    );
-    if (record.error != null) {
-      buf.writeln();
-      buf.write('  error: ${record.error}');
-    }
-    if (record.stackTrace != null) {
-      buf.writeln();
-      buf.write('  stackTrace: ${record.stackTrace}');
-    }
-    debugPrint(buf.toString());
+    debugPrint(formatAppLogRecord(record));
   });
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
@@ -78,6 +67,22 @@ Future<void> main() async {
       FatalErrorScreen(errorMessage: e.toString(), stackTrace: stackTrace),
     );
   }
+}
+
+@visibleForTesting
+String formatAppLogRecord(LogRecord record) {
+  final buf = StringBuffer(
+    '${record.level.name}: ${record.loggerName}: ${record.message}',
+  );
+  if (record.error != null) {
+    buf.writeln();
+    buf.write('  error: ${record.error}');
+  }
+  if (record.stackTrace != null) {
+    buf.writeln();
+    buf.write('  stackTrace: ${record.stackTrace}');
+  }
+  return buf.toString();
 }
 
 Future<ProviderContainer> initializeAppContainer({
@@ -282,7 +287,7 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _suppressLocalNotificationsDuringResume();
       unawaited(
-        _consumePendingNotificationTap(afterNavigate: _refreshAfterNotificationRoute),
+        _consumePendingNotificationTap(afterNavigate: _ensureRelaySubscriptionsAfterResume),
       );
     });
   }
@@ -337,7 +342,7 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
     var routed = false;
     try {
       routed = await _consumePendingNotificationTap(
-        afterNavigate: _refreshAfterNotificationRoute,
+        afterNavigate: _ensureRelaySubscriptionsAfterResume,
       );
     } catch (error, stackTrace) {
       _logger.warning('Failed to route pending notification tap on resume', error, stackTrace);
@@ -355,12 +360,6 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
     } catch (error, stackTrace) {
       _logger.warning('Failed to ensure relay subscriptions on resume', error, stackTrace);
     }
-  }
-
-  Future<void> _refreshAfterNotificationRoute() {
-    return refreshAfterNotificationRoute(
-      ensureRelaySubscriptions: _ensureRelaySubscriptionsAfterResume,
-    );
   }
 
   @override
