@@ -12,6 +12,7 @@ import 'package:whitenoise/providers/deep_link_provider.dart';
 import 'package:whitenoise/providers/message_debug_log_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
@@ -1011,20 +1012,103 @@ class _RawMessageCard extends StatelessWidget {
     }
 
     buffer.writeln();
-    buffer.writeln('── tokens ───────────────────────────────────────');
-    if (msg.contentTokens.isNotEmpty) {
-      for (final t in msg.contentTokens) {
-        if (t.content != null) {
-          buffer.writeln('  [${t.tokenType}] ${t.content}');
-        } else {
-          buffer.writeln('  [${t.tokenType}]');
-        }
-      }
+    buffer.writeln('── markdown AST ─────────────────────────────────');
+    if (msg.contentTokens.blocks.isEmpty) {
+      buffer.writeln('  (empty)');
     } else {
-      buffer.writeln('  (none)');
+      for (final block in msg.contentTokens.blocks) {
+        _appendBlock(buffer, block, depth: 1);
+      }
     }
 
     return buffer.toString().trimRight();
+  }
+
+  void _appendBlock(StringBuffer buffer, MarkdownBlock block, {required int depth}) {
+    final pad = '  ' * depth;
+    switch (block) {
+      case MarkdownBlock_Paragraph(:final inlines):
+        buffer.writeln('${pad}Paragraph');
+        for (final inline in inlines) {
+          _appendInline(buffer, inline, depth: depth + 1);
+        }
+      case MarkdownBlock_Heading(:final level, :final inlines):
+        buffer.writeln('${pad}Heading(level=$level)');
+        for (final inline in inlines) {
+          _appendInline(buffer, inline, depth: depth + 1);
+        }
+      case MarkdownBlock_ThematicBreak():
+        buffer.writeln('${pad}ThematicBreak');
+      case MarkdownBlock_CodeBlock(:final kind, :final info, :final content):
+        final preview = content.replaceAll('\n', '⏎ ');
+        buffer.writeln('${pad}CodeBlock(kind=${kind.name}, info="$info") $preview');
+      case MarkdownBlock_BlockQuote(:final blocks):
+        buffer.writeln('${pad}BlockQuote');
+        for (final inner in blocks) {
+          _appendBlock(buffer, inner, depth: depth + 1);
+        }
+      case MarkdownBlock_List(:final kind, :final tight, :final items):
+        buffer.writeln('${pad}List(kind=$kind, tight=$tight)');
+        for (final item in items) {
+          buffer.writeln('$pad  Item(checked=${item.checked})');
+          for (final inner in item.blocks) {
+            _appendBlock(buffer, inner, depth: depth + 2);
+          }
+        }
+      case MarkdownBlock_Table(:final alignments, :final header, :final rows):
+        buffer.writeln(
+          '${pad}Table(cols=${alignments.length}, header=${header.length}, rows=${rows.length})',
+        );
+      case MarkdownBlock_MathBlock(:final content):
+        buffer.writeln('${pad}MathBlock $content');
+    }
+  }
+
+  void _appendInline(StringBuffer buffer, MarkdownInline inline, {required int depth}) {
+    final pad = '  ' * depth;
+    switch (inline) {
+      case MarkdownInline_Text(:final content):
+        buffer.writeln('${pad}Text "$content"');
+      case MarkdownInline_SoftBreak():
+        buffer.writeln('${pad}SoftBreak');
+      case MarkdownInline_HardBreak():
+        buffer.writeln('${pad}HardBreak');
+      case MarkdownInline_Code(:final content):
+        buffer.writeln('${pad}Code "$content"');
+      case MarkdownInline_Emph(:final children):
+        buffer.writeln('${pad}Emph');
+        for (final child in children) {
+          _appendInline(buffer, child, depth: depth + 1);
+        }
+      case MarkdownInline_Strong(:final children):
+        buffer.writeln('${pad}Strong');
+        for (final child in children) {
+          _appendInline(buffer, child, depth: depth + 1);
+        }
+      case MarkdownInline_Strikethrough(:final children):
+        buffer.writeln('${pad}Strikethrough');
+        for (final child in children) {
+          _appendInline(buffer, child, depth: depth + 1);
+        }
+      case MarkdownInline_Link(:final dest, :final title, :final children):
+        buffer.writeln('${pad}Link(dest="$dest", title=${title ?? '∅'})');
+        for (final child in children) {
+          _appendInline(buffer, child, depth: depth + 1);
+        }
+      case MarkdownInline_Image(:final dest, :final title, :final alt):
+        buffer.writeln('${pad}Image(dest="$dest", title=${title ?? '∅'})');
+        for (final child in alt) {
+          _appendInline(buffer, child, depth: depth + 1);
+        }
+      case MarkdownInline_Autolink(:final url, :final kind):
+        buffer.writeln('${pad}Autolink(kind=${kind.name}) $url');
+      case MarkdownInline_Math(:final content):
+        buffer.writeln('${pad}Math $content');
+      case MarkdownInline_NostrMention(:final entity):
+        buffer.writeln('${pad}NostrMention(hrp=${entity.hrp.name}) ${entity.bech32}');
+      case MarkdownInline_NostrUri(:final entity):
+        buffer.writeln('${pad}NostrUri(hrp=${entity.hrp.name}) ${entity.bech32}');
+    }
   }
 
   void _appendMediaFile(StringBuffer buffer, MediaFile m) {
@@ -1089,7 +1173,7 @@ class _RawMessageCard extends StatelessWidget {
     final tagsCount = message.tags.length;
     final emojiReactionCount = message.reactions.byEmoji.length;
     final mediaCount = message.mediaAttachments.length;
-    final tokenCount = message.contentTokens.length;
+    final blockCount = message.contentTokens.blocks.length;
 
     return InkWell(
       key: Key('raw_message_card_${message.id}'),
@@ -1164,7 +1248,7 @@ class _RawMessageCard extends StatelessWidget {
                 WnPill(label: '$tagsCount tags'),
                 WnPill(label: '$emojiReactionCount reactions'),
                 WnPill(label: '$mediaCount media'),
-                WnPill(label: '$tokenCount tokens'),
+                WnPill(label: '$blockCount blocks'),
               ],
             ),
             SizedBox(height: 10.h),

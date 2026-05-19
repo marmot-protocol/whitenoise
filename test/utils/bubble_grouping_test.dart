@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart';
@@ -15,7 +16,7 @@ ChatMessage _msg(String pubkey, DateTime createdAt, {bool isDeleted = false}) =>
   tags: const [],
   isReply: false,
   isDeleted: isDeleted,
-  contentTokens: const [],
+  contentTokens: const MarkdownDocument(blocks: []),
   reactions: const ReactionSummary(byEmoji: [], userReactions: []),
   mediaAttachments: const [],
   kind: 9,

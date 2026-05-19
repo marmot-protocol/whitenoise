@@ -22,7 +22,7 @@ thiserror = "2.0.12"
 tokio = { version = "1.44", features = ["rt", "rt-multi-thread"] }
 tracing = "0.1"
 url = "2.5.1"
-whitenoise = { git = "https://github.com/marmot-protocol/whitenoise-rs", rev = "a2d71d0a706c882b268e4569771f84574b638ae7" }
+whitenoise = { git = "https://github.com/marmot-protocol/whitenoise-rs", rev = "e8ef8903e745fa64dc5f6779a62696537ea19411" }
 
 [target.'cfg(any(target_os = "ios", target_os = "macos"))'.dependencies]
 apple-native-keyring-store = { version = "1", features = ["protected"] }

@@ -1494,4 +1494,11 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get youLeftTheGroup => 'Saliste del grupo';
+
+  @override
+  String get unsupportedDeepLinkTitle => 'Enlace no compatible';
+
+  @override
+  String get unsupportedDeepLinkMessage =>
+      'Este enlace de White Noise no se puede abrir. Es posible que necesites actualizar la aplicación.';
 }

@@ -158,7 +158,7 @@ pub async fn register_external_signer(
     nip44_encrypt: impl Fn(String, String) -> DartFnFuture<String> + Send + Sync + 'static,
     nip44_decrypt: impl Fn(String, String) -> DartFnFuture<String> + Send + Sync + 'static,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
 
     let signer = DartSigner::new(
@@ -194,7 +194,7 @@ pub async fn login_external_signer_start(
     nip44_encrypt: impl Fn(String, String) -> DartFnFuture<String> + Send + Sync + 'static,
     nip44_decrypt: impl Fn(String, String) -> DartFnFuture<String> + Send + Sync + 'static,
 ) -> Result<LoginResult, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
 
     let signer = DartSigner::new(
@@ -219,7 +219,7 @@ pub async fn login_external_signer_start(
 pub async fn login_external_signer_publish_default_relays(
     pubkey: String,
 ) -> Result<LoginResult, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let result = whitenoise
         .login_external_signer_publish_default_relays(&pubkey)
@@ -235,7 +235,7 @@ pub async fn login_external_signer_with_custom_relay(
     pubkey: String,
     relay_url: String,
 ) -> Result<LoginResult, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let relay_url = nostr_sdk::RelayUrl::parse(&relay_url)?;
     let result = whitenoise

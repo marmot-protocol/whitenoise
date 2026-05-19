@@ -1,3 +1,4 @@
+use crate::api::markdown::MarkdownDocument;
 use crate::api::wn;
 use crate::api::{
     error::ApiError,
@@ -9,11 +10,6 @@ use chrono::{DateTime, TimeZone, Utc};
 use flutter_rust_bridge::frb;
 use nostr_sdk::prelude::*;
 use tracing::{info, warn};
-use whitenoise::markdown::{
-    AutolinkKind as WhitenoiseAutolinkKind, Block as WhitenoiseMarkdownBlock,
-    Document as WhitenoiseMarkdownDocument, Inline as WhitenoiseMarkdownInline,
-    NostrEntity as WhitenoiseNostrEntity,
-};
 use whitenoise::whitenoise::message_aggregator::ChatMessageSummary as WhitenoiseChatMessageSummary;
 use whitenoise::whitenoise::message_aggregator::SearchResult as WhitenoiseSearchResult;
 use whitenoise::whitenoise::messages::PaginationOptions;
@@ -25,7 +21,10 @@ pub use whitenoise::{
     UserReaction as WhitenoiseUserReaction, Whitenoise,
 };
 
-/// Flutter-compatible message with tokens
+/// Flutter-compatible message with parsed markdown.
+///
+/// Field name `tokens` is retained from the pre-markdown `Vec<SerializableToken>`
+/// representation; its type is now the parsed CommonMark+GFM+nostr AST.
 #[frb(non_opaque)]
 #[derive(Debug, Clone)]
 pub struct MessageWithTokens {
@@ -34,7 +33,7 @@ pub struct MessageWithTokens {
     pub kind: u16,
     pub created_at: DateTime<Utc>,
     pub content: Option<String>,
-    pub tokens: Vec<SerializableToken>,
+    pub tokens: MarkdownDocument,
 }
 
 /// Flutter-compatible chat message
@@ -49,7 +48,8 @@ pub struct ChatMessage {
     pub is_reply: bool,
     pub reply_to_id: Option<String>,
     pub is_deleted: bool,
-    pub content_tokens: Vec<SerializableToken>,
+    /// Parsed markdown AST of `content`. Empty document when content is empty.
+    pub content_tokens: MarkdownDocument,
     pub reactions: ReactionSummary,
     pub media_attachments: Vec<MediaFile>,
     pub kind: u16,
@@ -82,14 +82,6 @@ pub struct UserReaction {
     pub user: String,
     pub emoji: String,
     pub created_at: DateTime<Utc>,
-}
-
-/// Flutter-compatible serializable token
-#[frb(non_opaque)]
-#[derive(Debug, Clone)]
-pub struct SerializableToken {
-    pub token_type: String, // "Nostr", "Url", "Hashtag", "Text", "LineBreak", "Whitespace"
-    pub content: Option<String>, // None for LineBreak and Whitespace
 }
 
 /// Tracks the delivery state of an outgoing message.
@@ -207,8 +199,6 @@ impl From<WhitenoiseSearchResult> for SearchResult {
 
 impl From<&WhitenoiseMessageWithTokens> for MessageWithTokens {
     fn from(message_with_tokens: &WhitenoiseMessageWithTokens) -> Self {
-        let tokens = serializable_tokens_from_document(&message_with_tokens.tokens);
-
         Self {
             id: message_with_tokens.message.id.to_hex(),
             pubkey: message_with_tokens.message.pubkey.to_hex(),
@@ -221,7 +211,7 @@ impl From<&WhitenoiseMessageWithTokens> for MessageWithTokens {
                     .unwrap_or_else(|| Utc.timestamp_opt(0, 0).single().unwrap())
             },
             content: Some(message_with_tokens.message.content.clone()),
-            tokens,
+            tokens: (&message_with_tokens.tokens).into(),
         }
     }
 }
@@ -230,131 +220,6 @@ impl From<WhitenoiseMessageWithTokens> for MessageWithTokens {
     fn from(message_with_tokens: WhitenoiseMessageWithTokens) -> Self {
         (&message_with_tokens).into()
     }
-}
-
-fn serializable_tokens_from_document(
-    document: &WhitenoiseMarkdownDocument,
-) -> Vec<SerializableToken> {
-    let mut tokens = Vec::new();
-    append_blocks(&document.blocks, &mut tokens);
-    tokens
-}
-
-fn append_blocks(blocks: &[WhitenoiseMarkdownBlock], tokens: &mut Vec<SerializableToken>) {
-    for (index, block) in blocks.iter().enumerate() {
-        if index > 0 {
-            push_line_break(tokens);
-        }
-        append_block(block, tokens);
-    }
-}
-
-fn append_block(block: &WhitenoiseMarkdownBlock, tokens: &mut Vec<SerializableToken>) {
-    match block {
-        WhitenoiseMarkdownBlock::Paragraph { inlines }
-        | WhitenoiseMarkdownBlock::Heading { inlines, .. } => append_inlines(inlines, tokens),
-        WhitenoiseMarkdownBlock::ThematicBreak => push_text(tokens, "---"),
-        WhitenoiseMarkdownBlock::CodeBlock { content, .. }
-        | WhitenoiseMarkdownBlock::MathBlock { content } => push_text(tokens, content),
-        WhitenoiseMarkdownBlock::BlockQuote { blocks } => append_blocks(blocks, tokens),
-        WhitenoiseMarkdownBlock::List { items, .. } => {
-            for (index, item) in items.iter().enumerate() {
-                if index > 0 {
-                    push_line_break(tokens);
-                }
-                append_blocks(&item.blocks, tokens);
-            }
-        }
-        WhitenoiseMarkdownBlock::Table { header, rows, .. } => {
-            for (index, cell) in header.iter().enumerate() {
-                if index > 0 {
-                    push_whitespace(tokens);
-                }
-                append_inlines(&cell.inlines, tokens);
-            }
-            for row in rows {
-                push_line_break(tokens);
-                for (index, cell) in row.iter().enumerate() {
-                    if index > 0 {
-                        push_whitespace(tokens);
-                    }
-                    append_inlines(&cell.inlines, tokens);
-                }
-            }
-        }
-    }
-}
-
-fn append_inlines(inlines: &[WhitenoiseMarkdownInline], tokens: &mut Vec<SerializableToken>) {
-    for inline in inlines {
-        append_inline(inline, tokens);
-    }
-}
-
-fn append_inline(inline: &WhitenoiseMarkdownInline, tokens: &mut Vec<SerializableToken>) {
-    match inline {
-        WhitenoiseMarkdownInline::Text(content)
-        | WhitenoiseMarkdownInline::Code(content)
-        | WhitenoiseMarkdownInline::Math(content) => push_text(tokens, content),
-        WhitenoiseMarkdownInline::SoftBreak | WhitenoiseMarkdownInline::HardBreak => {
-            push_line_break(tokens);
-        }
-        WhitenoiseMarkdownInline::Emph(children)
-        | WhitenoiseMarkdownInline::Strong(children)
-        | WhitenoiseMarkdownInline::Strikethrough(children) => append_inlines(children, tokens),
-        WhitenoiseMarkdownInline::Link { dest, children, .. } => {
-            append_inlines(children, tokens);
-            push_url(tokens, dest);
-        }
-        WhitenoiseMarkdownInline::Image { alt, .. } => append_inlines(alt, tokens),
-        WhitenoiseMarkdownInline::Autolink { url, kind } => {
-            let content = match kind {
-                WhitenoiseAutolinkKind::Uri => url.clone(),
-                WhitenoiseAutolinkKind::Email => format!("mailto:{url}"),
-            };
-            push_url(tokens, content);
-        }
-        WhitenoiseMarkdownInline::NostrMention(entity)
-        | WhitenoiseMarkdownInline::NostrUri(entity) => push_nostr_entity(tokens, entity),
-    }
-}
-
-fn push_text(tokens: &mut Vec<SerializableToken>, content: &str) {
-    if content.is_empty() {
-        return;
-    }
-    tokens.push(SerializableToken {
-        token_type: "Text".to_string(),
-        content: Some(content.to_string()),
-    });
-}
-
-fn push_line_break(tokens: &mut Vec<SerializableToken>) {
-    tokens.push(SerializableToken {
-        token_type: "LineBreak".to_string(),
-        content: None,
-    });
-}
-
-fn push_whitespace(tokens: &mut Vec<SerializableToken>) {
-    tokens.push(SerializableToken {
-        token_type: "Whitespace".to_string(),
-        content: None,
-    });
-}
-
-fn push_url(tokens: &mut Vec<SerializableToken>, content: impl Into<String>) {
-    tokens.push(SerializableToken {
-        token_type: "Url".to_string(),
-        content: Some(content.into()),
-    });
-}
-
-fn push_nostr_entity(tokens: &mut Vec<SerializableToken>, entity: &WhitenoiseNostrEntity) {
-    tokens.push(SerializableToken {
-        token_type: "Nostr".to_string(),
-        content: Some(format!("nostr:{}", entity.bech32)),
-    });
 }
 
 impl From<WhitenoiseChatMessageSummary> for ChatMessageSummary {
@@ -440,9 +305,7 @@ impl From<&WhitenoiseChatMessage> for ChatMessage {
             .map(|tag| tag.as_slice().to_vec())
             .collect();
 
-        let content_tokens = serializable_tokens_from_document(&chat_message.content_tokens);
-
-        // Convert reactions to proper Flutter-compatible struct
+        let content_tokens: MarkdownDocument = (&chat_message.content_tokens).into();
         let reactions = (&chat_message.reactions).into();
 
         Self {
@@ -514,7 +377,7 @@ pub async fn send_message_to_group(
     kind: u16,
     tags: Option<Vec<Tag>>,
 ) -> Result<MessageWithTokens, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let group_id = group_id_from_string(&group_id)?;
@@ -533,7 +396,7 @@ pub async fn retry_message_publish(
     group_id: String,
     event_id: String,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let group_id = group_id_from_string(&group_id)?;
@@ -559,7 +422,7 @@ pub async fn search_messages_in_group(
     query: String,
     limit: Option<u32>,
 ) -> Result<Vec<SearchResult>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let results = whitenoise
@@ -580,7 +443,7 @@ pub async fn search_messages(
     query: String,
     limit: Option<u32>,
 ) -> Result<Vec<SearchResult>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let results = whitenoise.search_messages(&pubkey, &query, limit).await?;
     Ok(results.into_iter().map(|r| r.into()).collect())
@@ -599,7 +462,7 @@ pub async fn fetch_aggregated_messages_for_group(
     before_message_id: Option<String>,
     limit: Option<u32>,
 ) -> Result<Vec<ChatMessage>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let before_ts = before
@@ -633,7 +496,7 @@ pub async fn fetch_message_by_id(
     group_id: String,
     message_id: String,
 ) -> Result<Option<ChatMessage>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let message = whitenoise
@@ -656,7 +519,7 @@ pub async fn fetch_messages_unread_with_minimum(
     group_id: String,
     minimum: Option<u32>,
 ) -> Result<Vec<ChatMessage>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let messages = whitenoise
@@ -690,7 +553,7 @@ pub async fn subscribe_to_group_messages(
     group_id: String,
     sink: StreamSink<MessageStreamItem>,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let group_id_str = group_id.clone();
     let group_id = group_id_from_string(&group_id)?;
 
@@ -752,6 +615,7 @@ pub async fn subscribe_to_group_messages(
     // Stream real-time updates
     let mut rx = subscription.updates;
     let mut lagged_total: u64 = 0;
+    whitenoise.release_lifecycle();
     loop {
         match rx.recv().await {
             Ok(update) => {
@@ -794,41 +658,6 @@ pub async fn subscribe_to_group_messages(
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    #[test]
-    fn markdown_document_flattens_to_legacy_serializable_tokens() {
-        let document = whitenoise::markdown::parse(
-            "hello https://example.com @npub1udnxw6gt4mhefdg0emat9jeh8trszd5dcz3xzft022afhkjsz3dq9y8yfj",
-        );
-
-        let tokens = serializable_tokens_from_document(&document);
-
-        assert!(tokens.iter().any(|token| {
-            token.token_type == "Text" && token.content.as_deref() == Some("hello ")
-        }));
-        assert!(tokens.iter().any(|token| {
-            token.token_type == "Url" && token.content.as_deref() == Some("https://example.com")
-        }));
-        assert!(tokens.iter().any(|token| {
-            token.token_type == "Nostr"
-                && token.content.as_deref()
-                    == Some("nostr:npub1udnxw6gt4mhefdg0emat9jeh8trszd5dcz3xzft022afhkjsz3dq9y8yfj")
-        }));
-    }
-
-    #[test]
-    fn markdown_link_keeps_label_and_destination_url() {
-        let document = whitenoise::markdown::parse("[label](https://example.com)");
-
-        let tokens = serializable_tokens_from_document(&document);
-
-        assert!(tokens.iter().any(|token| {
-            token.token_type == "Text" && token.content.as_deref() == Some("label")
-        }));
-        assert!(tokens.iter().any(|token| {
-            token.token_type == "Url" && token.content.as_deref() == Some("https://example.com")
-        }));
-    }
 
     #[test]
     fn test_update_trigger_conversion_new_message() {

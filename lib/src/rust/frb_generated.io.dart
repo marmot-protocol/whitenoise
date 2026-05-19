@@ -20,6 +20,7 @@ import 'api/error.dart';
 import 'api/group_state.dart';
 import 'api/groups.dart';
 import 'api/logs.dart';
+import 'api/markdown.dart';
 import 'api/media_files.dart';
 import 'api/messages.dart';
 import 'api/metadata.dart';
@@ -316,6 +317,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64 dco_decode_box_autoadd_i_64(dynamic raw);
 
   @protected
+  MarkdownListKind dco_decode_box_autoadd_markdown_list_kind(dynamic raw);
+
+  @protected
+  MarkdownNostrEntity dco_decode_box_autoadd_markdown_nostr_entity(dynamic raw);
+
+  @protected
   MessageUpdate dco_decode_box_autoadd_message_update(dynamic raw);
 
   @protected
@@ -473,6 +480,26 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<List<String>> dco_decode_list_list_String(dynamic raw);
 
   @protected
+  List<List<MarkdownTableCell>> dco_decode_list_list_markdown_table_cell(
+    dynamic raw,
+  );
+
+  @protected
+  List<MarkdownAlignment> dco_decode_list_markdown_alignment(dynamic raw);
+
+  @protected
+  List<MarkdownBlock> dco_decode_list_markdown_block(dynamic raw);
+
+  @protected
+  List<MarkdownInline> dco_decode_list_markdown_inline(dynamic raw);
+
+  @protected
+  List<MarkdownListItem> dco_decode_list_markdown_list_item(dynamic raw);
+
+  @protected
+  List<MarkdownTableCell> dco_decode_list_markdown_table_cell(dynamic raw);
+
+  @protected
   List<MatchedField> dco_decode_list_matched_field(dynamic raw);
 
   @protected
@@ -497,9 +524,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<SearchResult> dco_decode_list_search_result(dynamic raw);
 
   @protected
-  List<SerializableToken> dco_decode_list_serializable_token(dynamic raw);
-
-  @protected
   List<User> dco_decode_list_user(dynamic raw);
 
   @protected
@@ -518,6 +542,39 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   LoginStatus dco_decode_login_status(dynamic raw);
+
+  @protected
+  MarkdownAlignment dco_decode_markdown_alignment(dynamic raw);
+
+  @protected
+  MarkdownAutolinkKind dco_decode_markdown_autolink_kind(dynamic raw);
+
+  @protected
+  MarkdownBlock dco_decode_markdown_block(dynamic raw);
+
+  @protected
+  MarkdownCodeBlockKind dco_decode_markdown_code_block_kind(dynamic raw);
+
+  @protected
+  MarkdownDocument dco_decode_markdown_document(dynamic raw);
+
+  @protected
+  MarkdownInline dco_decode_markdown_inline(dynamic raw);
+
+  @protected
+  MarkdownListItem dco_decode_markdown_list_item(dynamic raw);
+
+  @protected
+  MarkdownListKind dco_decode_markdown_list_kind(dynamic raw);
+
+  @protected
+  MarkdownNostrEntity dco_decode_markdown_nostr_entity(dynamic raw);
+
+  @protected
+  MarkdownNostrHrp dco_decode_markdown_nostr_hrp(dynamic raw);
+
+  @protected
+  MarkdownTableCell dco_decode_markdown_table_cell(dynamic raw);
 
   @protected
   MatchQuality dco_decode_match_quality(dynamic raw);
@@ -628,9 +685,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   SearchUpdateTrigger dco_decode_search_update_trigger(dynamic raw);
-
-  @protected
-  SerializableToken dco_decode_serializable_token(dynamic raw);
 
   @protected
   int dco_decode_u_16(dynamic raw);
@@ -945,6 +999,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64 sse_decode_box_autoadd_i_64(SseDeserializer deserializer);
 
   @protected
+  MarkdownListKind sse_decode_box_autoadd_markdown_list_kind(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  MarkdownNostrEntity sse_decode_box_autoadd_markdown_nostr_entity(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   MessageUpdate sse_decode_box_autoadd_message_update(
     SseDeserializer deserializer,
   );
@@ -1132,6 +1196,36 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<List<String>> sse_decode_list_list_String(SseDeserializer deserializer);
 
   @protected
+  List<List<MarkdownTableCell>> sse_decode_list_list_markdown_table_cell(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  List<MarkdownAlignment> sse_decode_list_markdown_alignment(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  List<MarkdownBlock> sse_decode_list_markdown_block(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  List<MarkdownInline> sse_decode_list_markdown_inline(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  List<MarkdownListItem> sse_decode_list_markdown_list_item(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  List<MarkdownTableCell> sse_decode_list_markdown_table_cell(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   List<MatchedField> sse_decode_list_matched_field(
     SseDeserializer deserializer,
   );
@@ -1166,11 +1260,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  List<SerializableToken> sse_decode_list_serializable_token(
-    SseDeserializer deserializer,
-  );
-
-  @protected
   List<User> sse_decode_list_user(SseDeserializer deserializer);
 
   @protected
@@ -1193,6 +1282,47 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   LoginStatus sse_decode_login_status(SseDeserializer deserializer);
+
+  @protected
+  MarkdownAlignment sse_decode_markdown_alignment(SseDeserializer deserializer);
+
+  @protected
+  MarkdownAutolinkKind sse_decode_markdown_autolink_kind(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  MarkdownBlock sse_decode_markdown_block(SseDeserializer deserializer);
+
+  @protected
+  MarkdownCodeBlockKind sse_decode_markdown_code_block_kind(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  MarkdownDocument sse_decode_markdown_document(SseDeserializer deserializer);
+
+  @protected
+  MarkdownInline sse_decode_markdown_inline(SseDeserializer deserializer);
+
+  @protected
+  MarkdownListItem sse_decode_markdown_list_item(SseDeserializer deserializer);
+
+  @protected
+  MarkdownListKind sse_decode_markdown_list_kind(SseDeserializer deserializer);
+
+  @protected
+  MarkdownNostrEntity sse_decode_markdown_nostr_entity(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  MarkdownNostrHrp sse_decode_markdown_nostr_hrp(SseDeserializer deserializer);
+
+  @protected
+  MarkdownTableCell sse_decode_markdown_table_cell(
+    SseDeserializer deserializer,
+  );
 
   @protected
   MatchQuality sse_decode_match_quality(SseDeserializer deserializer);
@@ -1325,9 +1455,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   SearchUpdateTrigger sse_decode_search_update_trigger(
     SseDeserializer deserializer,
   );
-
-  @protected
-  SerializableToken sse_decode_serializable_token(SseDeserializer deserializer);
 
   @protected
   int sse_decode_u_16(SseDeserializer deserializer);
@@ -1709,6 +1836,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_markdown_list_kind(
+    MarkdownListKind self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_markdown_nostr_entity(
+    MarkdownNostrEntity self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_message_update(
     MessageUpdate self,
     SseSerializer serializer,
@@ -1947,6 +2086,42 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_list_markdown_table_cell(
+    List<List<MarkdownTableCell>> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_markdown_alignment(
+    List<MarkdownAlignment> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_markdown_block(
+    List<MarkdownBlock> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_markdown_inline(
+    List<MarkdownInline> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_markdown_list_item(
+    List<MarkdownListItem> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_markdown_table_cell(
+    List<MarkdownTableCell> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_matched_field(
     List<MatchedField> self,
     SseSerializer serializer,
@@ -1992,12 +2167,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
-  void sse_encode_list_serializable_token(
-    List<SerializableToken> self,
-    SseSerializer serializer,
-  );
-
-  @protected
   void sse_encode_list_user(List<User> self, SseSerializer serializer);
 
   @protected
@@ -2023,6 +2192,69 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_login_status(LoginStatus self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_markdown_alignment(
+    MarkdownAlignment self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_markdown_autolink_kind(
+    MarkdownAutolinkKind self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_markdown_block(MarkdownBlock self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_markdown_code_block_kind(
+    MarkdownCodeBlockKind self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_markdown_document(
+    MarkdownDocument self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_markdown_inline(
+    MarkdownInline self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_markdown_list_item(
+    MarkdownListItem self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_markdown_list_kind(
+    MarkdownListKind self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_markdown_nostr_entity(
+    MarkdownNostrEntity self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_markdown_nostr_hrp(
+    MarkdownNostrHrp self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_markdown_table_cell(
+    MarkdownTableCell self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_match_quality(MatchQuality self, SseSerializer serializer);
@@ -2187,12 +2419,6 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_search_update_trigger(
     SearchUpdateTrigger self,
-    SseSerializer serializer,
-  );
-
-  @protected
-  void sse_encode_serializable_token(
-    SerializableToken self,
     SseSerializer serializer,
   );
 

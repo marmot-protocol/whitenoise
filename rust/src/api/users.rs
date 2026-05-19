@@ -97,7 +97,7 @@ pub async fn subscribe_to_user(
     pubkey: String,
     sink: StreamSink<UserStreamItem>,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let subscription = whitenoise.subscribe_to_user(&pubkey).await?;
 
@@ -111,6 +111,7 @@ pub async fn subscribe_to_user(
     }
 
     let mut rx = subscription.updates;
+    whitenoise.release_lifecycle();
     loop {
         match rx.recv().await {
             Ok(update) => {
@@ -137,9 +138,9 @@ pub async fn subscribe_to_user(
 
 #[frb]
 pub async fn get_user(pubkey: String, blocking_data_sync: bool) -> Result<User, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let user = resolve_whitenoise_user(whitenoise, &pubkey, blocking_data_sync).await?;
+    let user = resolve_whitenoise_user(&whitenoise, &pubkey, blocking_data_sync).await?;
     Ok(user.into())
 }
 
@@ -148,9 +149,9 @@ pub async fn user_metadata(
     pubkey: String,
     blocking_data_sync: bool,
 ) -> Result<FlutterMetadata, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let user = resolve_whitenoise_user(whitenoise, &pubkey, blocking_data_sync).await?;
+    let user = resolve_whitenoise_user(&whitenoise, &pubkey, blocking_data_sync).await?;
     Ok(user.metadata.into())
 }
 
@@ -160,9 +161,9 @@ pub async fn user_relays(
     relay_type: RelayType,
     blocking_data_sync: bool,
 ) -> Result<Vec<Relay>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let user = resolve_whitenoise_user(whitenoise, &pubkey, blocking_data_sync).await?;
+    let user = resolve_whitenoise_user(&whitenoise, &pubkey, blocking_data_sync).await?;
     let relays = user.relays_by_type(relay_type, &whitenoise).await?;
     Ok(relays.into_iter().map(|r| r.into()).collect())
 }
@@ -172,9 +173,9 @@ pub async fn user_has_key_package(
     pubkey: String,
     blocking_data_sync: bool,
 ) -> Result<KeyPackageStatus, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
-    let user = resolve_whitenoise_user(whitenoise, &pubkey, blocking_data_sync).await?;
+    let user = resolve_whitenoise_user(&whitenoise, &pubkey, blocking_data_sync).await?;
     match user.key_package_status(&whitenoise.shared).await? {
         WhitenoiseKeyPackageStatus::Valid(_) => Ok(KeyPackageStatus::Valid),
         WhitenoiseKeyPackageStatus::NotFound => Ok(KeyPackageStatus::NotFound),

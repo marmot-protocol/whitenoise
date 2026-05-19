@@ -27,9 +27,25 @@ import 'package:whitenoise/widgets/wn_user_profile_card.dart';
 final _logger = Logger('StartChatScreen');
 
 class StartChatScreen extends HookConsumerWidget {
-  const StartChatScreen({super.key, required this.userPubkey});
+  const StartChatScreen({super.key, required this.userPubkey, this.asShade = false});
 
   final String userPubkey;
+  final bool asShade;
+
+  static Future<void> show(BuildContext context, {required String userPubkey}) {
+    FocusScope.of(context).unfocus();
+    final colors = context.colors;
+    return Navigator.of(context).push(
+      PageRouteBuilder(
+        opaque: false,
+        barrierDismissible: true,
+        barrierColor: colors.backgroundPrimary.withValues(alpha: 0.8),
+        pageBuilder: (_, _, _) => StartChatScreen(userPubkey: userPubkey, asShade: true),
+        transitionsBuilder: (_, animation, _, child) =>
+            FadeTransition(opacity: animation, child: child),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -167,7 +183,7 @@ class StartChatScreen extends HookConsumerWidget {
     }
 
     return Scaffold(
-      backgroundColor: colors.backgroundPrimary,
+      backgroundColor: asShade ? Colors.transparent : colors.backgroundPrimary,
       body: GestureDetector(
         key: const Key('start_chat_background'),
         onTap: () => Routes.goBack(context),
@@ -189,7 +205,7 @@ class StartChatScreen extends HookConsumerWidget {
                         onDismiss: dismissNotice,
                       )
                     : null,
-                child: Padding(
+                child: SingleChildScrollView(
                   padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
                   child: Column(
                     mainAxisSize: MainAxisSize.min,

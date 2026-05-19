@@ -124,8 +124,8 @@ final testImageProvider = MemoryImage(
 void mockPathProvider() {
   final binding = TestWidgetsFlutterBinding.ensureInitialized();
   const channel = MethodChannel('plugins.flutter.io/path_provider');
+  final dir = Directory.systemTemp.createTempSync('wn_test_');
   binding.defaultBinaryMessenger.setMockMethodCallHandler(channel, (MethodCall methodCall) async {
-    final dir = await Directory.systemTemp.createTemp('wn_test_');
     return dir.path;
   });
 }

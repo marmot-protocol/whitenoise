@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -130,6 +131,7 @@ ChatMessageQuoteData _quoteData({
   String authorPubkey = testPubkeyA,
   FlutterMetadata? authorMetadata,
   String content = 'Quote content',
+  MarkdownDocument? contentTokens,
   MediaFile? mediaFile,
   bool isNotFound = false,
 }) => (
@@ -137,6 +139,7 @@ ChatMessageQuoteData _quoteData({
   authorPubkey: authorPubkey,
   authorMetadata: authorMetadata,
   content: content,
+  contentTokens: contentTokens,
   mediaFile: mediaFile,
   isNotFound: isNotFound,
 );

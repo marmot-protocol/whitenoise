@@ -83,9 +83,10 @@ impl From<WhitenoiseNotificationUpdate> for NotificationUpdate {
 pub async fn subscribe_to_notifications(
     sink: StreamSink<NotificationUpdate>,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let subscription = whitenoise.subscribe_to_notifications();
     let mut rx = subscription.updates;
+    whitenoise.release_lifecycle();
 
     loop {
         match rx.recv().await {
@@ -243,7 +244,7 @@ impl From<WhitenoiseGroupPushDebugInfo> for GroupPushDebugInfo {
 #[frb]
 pub async fn get_push_registration(pubkey: String) -> Result<Option<PushRegistration>, ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let registration = session.push().registration().await?;
     Ok(registration.map(PushRegistration::from))
 }
@@ -255,7 +256,7 @@ pub async fn get_group_push_debug_info(
 ) -> Result<GroupPushDebugInfo, ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let info = session.push().get_group_debug_info(&group_id).await?;
     Ok(info.into())
 }
@@ -275,7 +276,7 @@ pub async fn upsert_push_registration(
         .map(RelayUrl::parse)
         .transpose()
         .map_err(ApiError::from)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let registration = session
         .push()
         .upsert_registration(platform.into(), &raw_token, &server_pk, relay.as_ref())
@@ -286,7 +287,7 @@ pub async fn upsert_push_registration(
 #[frb]
 pub async fn clear_push_registration(pubkey: String) -> Result<(), ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     session.push().clear_registration().await?;
     Ok(())
 }

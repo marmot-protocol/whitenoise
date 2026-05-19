@@ -8,6 +8,7 @@ import 'package:whitenoise/providers/deep_link_provider.dart';
 import 'package:whitenoise/providers/message_debug_log_provider.dart';
 import 'package:whitenoise/screens/chat_raw_debug_screen.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
+import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/notifications.dart';
@@ -35,7 +36,7 @@ ChatMessage _message(
   String? replyToId,
   String? content,
   List<List<String>> tags = const [],
-  List<SerializableToken> contentTokens = const [],
+  MarkdownDocument contentTokens = const MarkdownDocument(blocks: []),
   ReactionSummary reactions = const ReactionSummary(byEmoji: [], userReactions: []),
   List<MediaFile> mediaAttachments = const [],
 }) => ChatMessage(
@@ -806,16 +807,24 @@ void main() {
       expect(find.textContaining('reaction_001'), findsOneWidget);
     });
 
-    testWidgets('message card renders content tokens with content', (tester) async {
+    testWidgets('message card renders markdown AST', (tester) async {
       final now = DateTime(2024, 1, 15, 12);
       _api.initialMessages = [
         _message(
           'token_msg',
           now,
-          contentTokens: const [
-            SerializableToken(tokenType: 'text', content: 'hello world'),
-            SerializableToken(tokenType: 'mention'),
-          ],
+          contentTokens: const MarkdownDocument(
+            blocks: [
+              MarkdownBlock.paragraph(
+                inlines: [
+                  MarkdownInline.text(content: 'hello world'),
+                  MarkdownInline.strong(
+                    children: [MarkdownInline.text(content: 'bold')],
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ];
 
@@ -826,8 +835,9 @@ void main() {
         scrollable: find.byType(Scrollable).first,
       );
 
-      expect(find.textContaining('[text] hello world'), findsOneWidget);
-      expect(find.textContaining('[mention]'), findsOneWidget);
+      expect(find.textContaining('Paragraph'), findsWidgets);
+      expect(find.textContaining('Text "hello world"'), findsOneWidget);
+      expect(find.textContaining('Strong'), findsOneWidget);
     });
 
     testWidgets('message card renders media with all optional fields', (tester) async {

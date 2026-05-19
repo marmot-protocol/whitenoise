@@ -19,7 +19,6 @@ final _logger = Logger('useLeaveGroup');
 LeaveGroupState useLeaveGroup({
   required String accountPubkey,
   required String groupId,
-  required bool featureEnabled,
   required GroupType groupType,
   required bool pendingConfirmation,
   required bool selfRemoved,
@@ -36,10 +35,7 @@ LeaveGroupState useLeaveGroup({
   );
 
   useEffect(() {
-    if (!featureEnabled ||
-        groupType == GroupType.directMessage ||
-        pendingConfirmation ||
-        selfRemoved) {
+    if (groupType == GroupType.directMessage || pendingConfirmation || selfRemoved) {
       hasNostrCapabilities.value = false;
       proposalsFetchFailed.value = false;
       adminPubkeys.value = [];
@@ -84,7 +80,7 @@ LeaveGroupState useLeaveGroup({
 
     fetch();
     return () => isStale = true;
-  }, [accountPubkey, groupId, featureEnabled, groupType, pendingConfirmation, selfRemoved]);
+  }, [accountPubkey, groupId, groupType, pendingConfirmation, selfRemoved]);
 
   final isAdmin = adminPubkeys.value.contains(accountPubkey);
   final isLastAdmin = isAdmin && adminPubkeys.value.length == 1;
@@ -92,10 +88,7 @@ LeaveGroupState useLeaveGroup({
   final LeaveGroupVisibility visibility;
   final LeaveGroupMessage? message;
 
-  if (!featureEnabled ||
-      groupType == GroupType.directMessage ||
-      pendingConfirmation ||
-      selfRemoved) {
+  if (groupType == GroupType.directMessage || pendingConfirmation || selfRemoved) {
     visibility = LeaveGroupVisibility.hidden;
     message = null;
   } else if (proposalsFetchFailed.value) {

@@ -45,7 +45,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.12.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 391816512;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1641566391;
 
 // Section: executor
 
@@ -3811,6 +3811,41 @@ fn wire__crate__api__signer__register_external_signer_impl(
         },
     )
 }
+fn wire__crate__api__reinitialize_whitenoise_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "reinitialize_whitenoise",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::error::ApiError>(
+                    (move || async move {
+                        let output_ok = crate::api::reinitialize_whitenoise().await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__relays__relay_type_inbox_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -6304,7 +6339,7 @@ impl SseDecode for crate::api::messages::ChatMessage {
         let mut var_replyToId = <Option<String>>::sse_decode(deserializer);
         let mut var_isDeleted = <bool>::sse_decode(deserializer);
         let mut var_contentTokens =
-            <Vec<crate::api::messages::SerializableToken>>::sse_decode(deserializer);
+            <crate::api::markdown::MarkdownDocument>::sse_decode(deserializer);
         let mut var_reactions = <crate::api::messages::ReactionSummary>::sse_decode(deserializer);
         let mut var_mediaAttachments =
             <Vec<crate::api::media_files::MediaFile>>::sse_decode(deserializer);
@@ -6976,6 +7011,90 @@ impl SseDecode for Vec<Vec<String>> {
     }
 }
 
+impl SseDecode for Vec<Vec<crate::api::markdown::MarkdownTableCell>> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(<Vec<crate::api::markdown::MarkdownTableCell>>::sse_decode(
+                deserializer,
+            ));
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for Vec<crate::api::markdown::MarkdownAlignment> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(<crate::api::markdown::MarkdownAlignment>::sse_decode(
+                deserializer,
+            ));
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for Vec<crate::api::markdown::MarkdownBlock> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(<crate::api::markdown::MarkdownBlock>::sse_decode(
+                deserializer,
+            ));
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for Vec<crate::api::markdown::MarkdownInline> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(<crate::api::markdown::MarkdownInline>::sse_decode(
+                deserializer,
+            ));
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for Vec<crate::api::markdown::MarkdownListItem> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(<crate::api::markdown::MarkdownListItem>::sse_decode(
+                deserializer,
+            ));
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for Vec<crate::api::markdown::MarkdownTableCell> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(<crate::api::markdown::MarkdownTableCell>::sse_decode(
+                deserializer,
+            ));
+        }
+        return ans_;
+    }
+}
+
 impl SseDecode for Vec<crate::api::user_search::MatchedField> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -7082,20 +7201,6 @@ impl SseDecode for Vec<crate::api::messages::SearchResult> {
     }
 }
 
-impl SseDecode for Vec<crate::api::messages::SerializableToken> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut len_ = <i32>::sse_decode(deserializer);
-        let mut ans_ = Vec::with_capacity(len_ as usize);
-        for idx_ in 0..len_ {
-            ans_.push(<crate::api::messages::SerializableToken>::sse_decode(
-                deserializer,
-            ));
-        }
-        return ans_;
-    }
-}
-
 impl SseDecode for Vec<crate::api::users::User> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -7174,6 +7279,302 @@ impl SseDecode for crate::api::accounts::LoginStatus {
             0 => crate::api::accounts::LoginStatus::Complete,
             1 => crate::api::accounts::LoginStatus::NeedsRelayLists,
             _ => unreachable!("Invalid variant for LoginStatus: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::markdown::MarkdownAlignment {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::markdown::MarkdownAlignment::None,
+            1 => crate::api::markdown::MarkdownAlignment::Left,
+            2 => crate::api::markdown::MarkdownAlignment::Center,
+            3 => crate::api::markdown::MarkdownAlignment::Right,
+            _ => unreachable!("Invalid variant for MarkdownAlignment: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::markdown::MarkdownAutolinkKind {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::markdown::MarkdownAutolinkKind::Uri,
+            1 => crate::api::markdown::MarkdownAutolinkKind::Email,
+            _ => unreachable!("Invalid variant for MarkdownAutolinkKind: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::markdown::MarkdownBlock {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut tag_ = <i32>::sse_decode(deserializer);
+        match tag_ {
+            0 => {
+                let mut var_inlines =
+                    <Vec<crate::api::markdown::MarkdownInline>>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownBlock::Paragraph {
+                    inlines: var_inlines,
+                };
+            }
+            1 => {
+                let mut var_level = <u8>::sse_decode(deserializer);
+                let mut var_inlines =
+                    <Vec<crate::api::markdown::MarkdownInline>>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownBlock::Heading {
+                    level: var_level,
+                    inlines: var_inlines,
+                };
+            }
+            2 => {
+                return crate::api::markdown::MarkdownBlock::ThematicBreak;
+            }
+            3 => {
+                let mut var_kind =
+                    <crate::api::markdown::MarkdownCodeBlockKind>::sse_decode(deserializer);
+                let mut var_info = <String>::sse_decode(deserializer);
+                let mut var_content = <String>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownBlock::CodeBlock {
+                    kind: var_kind,
+                    info: var_info,
+                    content: var_content,
+                };
+            }
+            4 => {
+                let mut var_blocks =
+                    <Vec<crate::api::markdown::MarkdownBlock>>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownBlock::BlockQuote { blocks: var_blocks };
+            }
+            5 => {
+                let mut var_kind =
+                    <crate::api::markdown::MarkdownListKind>::sse_decode(deserializer);
+                let mut var_tight = <bool>::sse_decode(deserializer);
+                let mut var_items =
+                    <Vec<crate::api::markdown::MarkdownListItem>>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownBlock::List {
+                    kind: var_kind,
+                    tight: var_tight,
+                    items: var_items,
+                };
+            }
+            6 => {
+                let mut var_alignments =
+                    <Vec<crate::api::markdown::MarkdownAlignment>>::sse_decode(deserializer);
+                let mut var_header =
+                    <Vec<crate::api::markdown::MarkdownTableCell>>::sse_decode(deserializer);
+                let mut var_rows =
+                    <Vec<Vec<crate::api::markdown::MarkdownTableCell>>>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownBlock::Table {
+                    alignments: var_alignments,
+                    header: var_header,
+                    rows: var_rows,
+                };
+            }
+            7 => {
+                let mut var_content = <String>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownBlock::MathBlock {
+                    content: var_content,
+                };
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
+impl SseDecode for crate::api::markdown::MarkdownCodeBlockKind {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::markdown::MarkdownCodeBlockKind::Indented,
+            1 => crate::api::markdown::MarkdownCodeBlockKind::Fenced,
+            _ => unreachable!("Invalid variant for MarkdownCodeBlockKind: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::markdown::MarkdownDocument {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_blocks = <Vec<crate::api::markdown::MarkdownBlock>>::sse_decode(deserializer);
+        return crate::api::markdown::MarkdownDocument { blocks: var_blocks };
+    }
+}
+
+impl SseDecode for crate::api::markdown::MarkdownInline {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut tag_ = <i32>::sse_decode(deserializer);
+        match tag_ {
+            0 => {
+                let mut var_content = <String>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownInline::Text {
+                    content: var_content,
+                };
+            }
+            1 => {
+                return crate::api::markdown::MarkdownInline::SoftBreak;
+            }
+            2 => {
+                return crate::api::markdown::MarkdownInline::HardBreak;
+            }
+            3 => {
+                let mut var_content = <String>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownInline::Code {
+                    content: var_content,
+                };
+            }
+            4 => {
+                let mut var_children =
+                    <Vec<crate::api::markdown::MarkdownInline>>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownInline::Emph {
+                    children: var_children,
+                };
+            }
+            5 => {
+                let mut var_children =
+                    <Vec<crate::api::markdown::MarkdownInline>>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownInline::Strong {
+                    children: var_children,
+                };
+            }
+            6 => {
+                let mut var_children =
+                    <Vec<crate::api::markdown::MarkdownInline>>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownInline::Strikethrough {
+                    children: var_children,
+                };
+            }
+            7 => {
+                let mut var_dest = <String>::sse_decode(deserializer);
+                let mut var_title = <Option<String>>::sse_decode(deserializer);
+                let mut var_children =
+                    <Vec<crate::api::markdown::MarkdownInline>>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownInline::Link {
+                    dest: var_dest,
+                    title: var_title,
+                    children: var_children,
+                };
+            }
+            8 => {
+                let mut var_dest = <String>::sse_decode(deserializer);
+                let mut var_title = <Option<String>>::sse_decode(deserializer);
+                let mut var_alt =
+                    <Vec<crate::api::markdown::MarkdownInline>>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownInline::Image {
+                    dest: var_dest,
+                    title: var_title,
+                    alt: var_alt,
+                };
+            }
+            9 => {
+                let mut var_url = <String>::sse_decode(deserializer);
+                let mut var_kind =
+                    <crate::api::markdown::MarkdownAutolinkKind>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownInline::Autolink {
+                    url: var_url,
+                    kind: var_kind,
+                };
+            }
+            10 => {
+                let mut var_content = <String>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownInline::Math {
+                    content: var_content,
+                };
+            }
+            11 => {
+                let mut var_entity =
+                    <crate::api::markdown::MarkdownNostrEntity>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownInline::NostrMention { entity: var_entity };
+            }
+            12 => {
+                let mut var_entity =
+                    <crate::api::markdown::MarkdownNostrEntity>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownInline::NostrUri { entity: var_entity };
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
+impl SseDecode for crate::api::markdown::MarkdownListItem {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_blocks = <Vec<crate::api::markdown::MarkdownBlock>>::sse_decode(deserializer);
+        let mut var_checked = <Option<bool>>::sse_decode(deserializer);
+        return crate::api::markdown::MarkdownListItem {
+            blocks: var_blocks,
+            checked: var_checked,
+        };
+    }
+}
+
+impl SseDecode for crate::api::markdown::MarkdownListKind {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut tag_ = <i32>::sse_decode(deserializer);
+        match tag_ {
+            0 => {
+                let mut var_marker = <String>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownListKind::Bullet { marker: var_marker };
+            }
+            1 => {
+                let mut var_start = <u32>::sse_decode(deserializer);
+                let mut var_delimiter = <String>::sse_decode(deserializer);
+                return crate::api::markdown::MarkdownListKind::Ordered {
+                    start: var_start,
+                    delimiter: var_delimiter,
+                };
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
+impl SseDecode for crate::api::markdown::MarkdownNostrEntity {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_hrp = <crate::api::markdown::MarkdownNostrHrp>::sse_decode(deserializer);
+        let mut var_bech32 = <String>::sse_decode(deserializer);
+        return crate::api::markdown::MarkdownNostrEntity {
+            hrp: var_hrp,
+            bech32: var_bech32,
+        };
+    }
+}
+
+impl SseDecode for crate::api::markdown::MarkdownNostrHrp {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::markdown::MarkdownNostrHrp::Npub,
+            1 => crate::api::markdown::MarkdownNostrHrp::Note,
+            2 => crate::api::markdown::MarkdownNostrHrp::Nevent,
+            3 => crate::api::markdown::MarkdownNostrHrp::Nprofile,
+            4 => crate::api::markdown::MarkdownNostrHrp::Naddr,
+            5 => crate::api::markdown::MarkdownNostrHrp::Nrelay,
+            _ => unreachable!("Invalid variant for MarkdownNostrHrp: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::markdown::MarkdownTableCell {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_inlines = <Vec<crate::api::markdown::MarkdownInline>>::sse_decode(deserializer);
+        return crate::api::markdown::MarkdownTableCell {
+            inlines: var_inlines,
         };
     }
 }
@@ -7286,8 +7687,7 @@ impl SseDecode for crate::api::messages::MessageWithTokens {
         let mut var_kind = <u16>::sse_decode(deserializer);
         let mut var_createdAt = <chrono::DateTime<chrono::Utc>>::sse_decode(deserializer);
         let mut var_content = <Option<String>>::sse_decode(deserializer);
-        let mut var_tokens =
-            <Vec<crate::api::messages::SerializableToken>>::sse_decode(deserializer);
+        let mut var_tokens = <crate::api::markdown::MarkdownDocument>::sse_decode(deserializer);
         return crate::api::messages::MessageWithTokens {
             id: var_id,
             pubkey: var_pubkey,
@@ -7718,18 +8118,6 @@ impl SseDecode for crate::api::user_search::SearchUpdateTrigger {
                 unimplemented!("");
             }
         }
-    }
-}
-
-impl SseDecode for crate::api::messages::SerializableToken {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
-        let mut var_tokenType = <String>::sse_decode(deserializer);
-        let mut var_content = <Option<String>>::sse_decode(deserializer);
-        return crate::api::messages::SerializableToken {
-            token_type: var_tokenType,
-            content: var_content,
-        };
     }
 }
 
@@ -8208,137 +8596,138 @@ fn pde_ffi_dispatcher_primary_impl(
             rust_vec_len,
             data_len,
         ),
-        98 => wire__crate__api__relays__relay_type_inbox_impl(port, ptr, rust_vec_len, data_len),
-        99 => {
+        98 => wire__crate__api__reinitialize_whitenoise_impl(port, ptr, rust_vec_len, data_len),
+        99 => wire__crate__api__relays__relay_type_inbox_impl(port, ptr, rust_vec_len, data_len),
+        100 => {
             wire__crate__api__relays__relay_type_key_package_impl(port, ptr, rust_vec_len, data_len)
         }
-        100 => wire__crate__api__relays__relay_type_nip65_impl(port, ptr, rust_vec_len, data_len),
-        101 => {
+        101 => wire__crate__api__relays__relay_type_nip65_impl(port, ptr, rust_vec_len, data_len),
+        102 => {
             wire__crate__api__utils__relay_url_from_string_impl(port, ptr, rust_vec_len, data_len)
         }
-        102 => {
+        103 => {
             wire__crate__api__accounts__remove_account_relay_impl(port, ptr, rust_vec_len, data_len)
         }
-        103 => wire__crate__api__groups__remove_members_from_group_impl(
+        104 => wire__crate__api__groups__remove_members_from_group_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        104 => wire__crate__api__accounts__restore_default_relays_impl(
+        105 => wire__crate__api__accounts__restore_default_relays_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        105 => wire__crate__api__messages__retry_message_publish_impl(
+        106 => wire__crate__api__messages__retry_message_publish_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        106 => wire__crate__api__drafts__save_draft_impl(port, ptr, rust_vec_len, data_len),
-        107 => wire__crate__api__messages__search_messages_impl(port, ptr, rust_vec_len, data_len),
-        108 => wire__crate__api__messages__search_messages_in_group_impl(
+        107 => wire__crate__api__drafts__save_draft_impl(port, ptr, rust_vec_len, data_len),
+        108 => wire__crate__api__messages__search_messages_impl(port, ptr, rust_vec_len, data_len),
+        109 => wire__crate__api__messages__search_messages_in_group_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        109 => wire__crate__api__user_search__search_users_impl(port, ptr, rust_vec_len, data_len),
-        110 => wire__crate__api__groups__self_demote_impl(port, ptr, rust_vec_len, data_len),
-        111 => {
+        110 => wire__crate__api__user_search__search_users_impl(port, ptr, rust_vec_len, data_len),
+        111 => wire__crate__api__groups__self_demote_impl(port, ptr, rust_vec_len, data_len),
+        112 => {
             wire__crate__api__bug_report__send_bug_report_impl(port, ptr, rust_vec_len, data_len)
         }
-        112 => wire__crate__api__messages__send_message_to_group_impl(
+        113 => wire__crate__api__messages__send_message_to_group_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        113 => {
+        114 => {
             wire__crate__api__chat_list__set_chat_pin_order_impl(port, ptr, rust_vec_len, data_len)
         }
-        114 => {
+        115 => {
             wire__crate__api__utils__string_from_relay_url_impl(port, ptr, rust_vec_len, data_len)
         }
-        115 => wire__crate__api__chat_list__subscribe_to_archived_chat_list_impl(
+        116 => wire__crate__api__chat_list__subscribe_to_archived_chat_list_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        116 => wire__crate__api__chat_list__subscribe_to_chat_list_impl(
+        117 => wire__crate__api__chat_list__subscribe_to_chat_list_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        117 => wire__crate__api__messages__subscribe_to_group_messages_impl(
+        118 => wire__crate__api__messages__subscribe_to_group_messages_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        118 => wire__crate__api__group_state__subscribe_to_group_state_impl(
+        119 => wire__crate__api__group_state__subscribe_to_group_state_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        119 => wire__crate__api__notifications__subscribe_to_notifications_impl(
+        120 => wire__crate__api__notifications__subscribe_to_notifications_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        120 => {
+        121 => {
             wire__crate__api__logs__subscribe_to_rust_logs_impl(port, ptr, rust_vec_len, data_len)
         }
-        121 => wire__crate__api__users__subscribe_to_user_impl(port, ptr, rust_vec_len, data_len),
-        122 => wire__crate__api__utils__tag_from_vec_impl(port, ptr, rust_vec_len, data_len),
-        127 => {
+        122 => wire__crate__api__users__subscribe_to_user_impl(port, ptr, rust_vec_len, data_len),
+        123 => wire__crate__api__utils__tag_from_vec_impl(port, ptr, rust_vec_len, data_len),
+        128 => {
             wire__crate__api__account_groups__unarchive_chat_impl(port, ptr, rust_vec_len, data_len)
         }
-        128 => wire__crate__api__mute_list__unblock_user_impl(port, ptr, rust_vec_len, data_len),
-        129 => wire__crate__api__accounts__unfollow_user_impl(port, ptr, rust_vec_len, data_len),
-        130 => wire__crate__api__chat_list__unmute_chat_impl(port, ptr, rust_vec_len, data_len),
-        131 => wire__crate__api__accounts__update_account_metadata_impl(
+        129 => wire__crate__api__mute_list__unblock_user_impl(port, ptr, rust_vec_len, data_len),
+        130 => wire__crate__api__accounts__unfollow_user_impl(port, ptr, rust_vec_len, data_len),
+        131 => wire__crate__api__chat_list__unmute_chat_impl(port, ptr, rust_vec_len, data_len),
+        132 => wire__crate__api__accounts__update_account_metadata_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        132 => wire__crate__api__update_language_impl(port, ptr, rust_vec_len, data_len),
-        133 => wire__crate__api__accounts__update_notifications_enabled_impl(
+        133 => wire__crate__api__update_language_impl(port, ptr, rust_vec_len, data_len),
+        134 => wire__crate__api__accounts__update_notifications_enabled_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        134 => wire__crate__api__update_theme_mode_impl(port, ptr, rust_vec_len, data_len),
-        135 => wire__crate__api__accounts__upload_account_profile_picture_impl(
+        135 => wire__crate__api__update_theme_mode_impl(port, ptr, rust_vec_len, data_len),
+        136 => wire__crate__api__accounts__upload_account_profile_picture_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        136 => {
+        137 => {
             wire__crate__api__media_files__upload_chat_media_impl(port, ptr, rust_vec_len, data_len)
         }
-        137 => wire__crate__api__groups__upload_group_image_impl(port, ptr, rust_vec_len, data_len),
-        138 => wire__crate__api__notifications__upsert_push_registration_impl(
+        138 => wire__crate__api__groups__upload_group_image_impl(port, ptr, rust_vec_len, data_len),
+        139 => wire__crate__api__notifications__upsert_push_registration_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        139 => {
+        140 => {
             wire__crate__api__users__user_has_key_package_impl(port, ptr, rust_vec_len, data_len)
         }
-        140 => wire__crate__api__users__user_metadata_impl(port, ptr, rust_vec_len, data_len),
-        141 => wire__crate__api__users__user_relays_impl(port, ptr, rust_vec_len, data_len),
-        142 => wire__crate__api__groups__visible_groups_with_info_impl(
+        141 => wire__crate__api__users__user_metadata_impl(port, ptr, rust_vec_len, data_len),
+        142 => wire__crate__api__users__user_relays_impl(port, ptr, rust_vec_len, data_len),
+        143 => wire__crate__api__groups__visible_groups_with_info_impl(
             port,
             ptr,
             rust_vec_len,
@@ -8378,10 +8767,10 @@ fn pde_ffi_dispatcher_sync_impl(
         80 => wire__crate__api__utils__language_to_string_impl(ptr, rust_vec_len, data_len),
         81 => wire__crate__api__utils__language_turkish_impl(ptr, rust_vec_len, data_len),
         95 => wire__crate__api__utils__npub_from_hex_pubkey_impl(ptr, rust_vec_len, data_len),
-        123 => wire__crate__api__utils__theme_mode_dark_impl(ptr, rust_vec_len, data_len),
-        124 => wire__crate__api__utils__theme_mode_light_impl(ptr, rust_vec_len, data_len),
-        125 => wire__crate__api__utils__theme_mode_system_impl(ptr, rust_vec_len, data_len),
-        126 => wire__crate__api__utils__theme_mode_to_string_impl(ptr, rust_vec_len, data_len),
+        124 => wire__crate__api__utils__theme_mode_dark_impl(ptr, rust_vec_len, data_len),
+        125 => wire__crate__api__utils__theme_mode_light_impl(ptr, rust_vec_len, data_len),
+        126 => wire__crate__api__utils__theme_mode_system_impl(ptr, rust_vec_len, data_len),
+        127 => wire__crate__api__utils__theme_mode_to_string_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -9357,6 +9746,339 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::accounts::LoginStatus>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::markdown::MarkdownAlignment {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::None => 0.into_dart(),
+            Self::Left => 1.into_dart(),
+            Self::Center => 2.into_dart(),
+            Self::Right => 3.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::markdown::MarkdownAlignment
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::markdown::MarkdownAlignment>
+    for crate::api::markdown::MarkdownAlignment
+{
+    fn into_into_dart(self) -> crate::api::markdown::MarkdownAlignment {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::markdown::MarkdownAutolinkKind {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Uri => 0.into_dart(),
+            Self::Email => 1.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::markdown::MarkdownAutolinkKind
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::markdown::MarkdownAutolinkKind>
+    for crate::api::markdown::MarkdownAutolinkKind
+{
+    fn into_into_dart(self) -> crate::api::markdown::MarkdownAutolinkKind {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::markdown::MarkdownBlock {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            crate::api::markdown::MarkdownBlock::Paragraph { inlines } => {
+                [0.into_dart(), inlines.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::markdown::MarkdownBlock::Heading { level, inlines } => [
+                1.into_dart(),
+                level.into_into_dart().into_dart(),
+                inlines.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::markdown::MarkdownBlock::ThematicBreak => [2.into_dart()].into_dart(),
+            crate::api::markdown::MarkdownBlock::CodeBlock {
+                kind,
+                info,
+                content,
+            } => [
+                3.into_dart(),
+                kind.into_into_dart().into_dart(),
+                info.into_into_dart().into_dart(),
+                content.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::markdown::MarkdownBlock::BlockQuote { blocks } => {
+                [4.into_dart(), blocks.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::markdown::MarkdownBlock::List { kind, tight, items } => [
+                5.into_dart(),
+                kind.into_into_dart().into_dart(),
+                tight.into_into_dart().into_dart(),
+                items.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::markdown::MarkdownBlock::Table {
+                alignments,
+                header,
+                rows,
+            } => [
+                6.into_dart(),
+                alignments.into_into_dart().into_dart(),
+                header.into_into_dart().into_dart(),
+                rows.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::markdown::MarkdownBlock::MathBlock { content } => {
+                [7.into_dart(), content.into_into_dart().into_dart()].into_dart()
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::markdown::MarkdownBlock
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::markdown::MarkdownBlock>
+    for crate::api::markdown::MarkdownBlock
+{
+    fn into_into_dart(self) -> crate::api::markdown::MarkdownBlock {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::markdown::MarkdownCodeBlockKind {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Indented => 0.into_dart(),
+            Self::Fenced => 1.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::markdown::MarkdownCodeBlockKind
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::markdown::MarkdownCodeBlockKind>
+    for crate::api::markdown::MarkdownCodeBlockKind
+{
+    fn into_into_dart(self) -> crate::api::markdown::MarkdownCodeBlockKind {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::markdown::MarkdownDocument {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [self.blocks.into_into_dart().into_dart()].into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::markdown::MarkdownDocument
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::markdown::MarkdownDocument>
+    for crate::api::markdown::MarkdownDocument
+{
+    fn into_into_dart(self) -> crate::api::markdown::MarkdownDocument {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::markdown::MarkdownInline {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            crate::api::markdown::MarkdownInline::Text { content } => {
+                [0.into_dart(), content.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::markdown::MarkdownInline::SoftBreak => [1.into_dart()].into_dart(),
+            crate::api::markdown::MarkdownInline::HardBreak => [2.into_dart()].into_dart(),
+            crate::api::markdown::MarkdownInline::Code { content } => {
+                [3.into_dart(), content.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::markdown::MarkdownInline::Emph { children } => {
+                [4.into_dart(), children.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::markdown::MarkdownInline::Strong { children } => {
+                [5.into_dart(), children.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::markdown::MarkdownInline::Strikethrough { children } => {
+                [6.into_dart(), children.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::markdown::MarkdownInline::Link {
+                dest,
+                title,
+                children,
+            } => [
+                7.into_dart(),
+                dest.into_into_dart().into_dart(),
+                title.into_into_dart().into_dart(),
+                children.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::markdown::MarkdownInline::Image { dest, title, alt } => [
+                8.into_dart(),
+                dest.into_into_dart().into_dart(),
+                title.into_into_dart().into_dart(),
+                alt.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::markdown::MarkdownInline::Autolink { url, kind } => [
+                9.into_dart(),
+                url.into_into_dart().into_dart(),
+                kind.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            crate::api::markdown::MarkdownInline::Math { content } => {
+                [10.into_dart(), content.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::markdown::MarkdownInline::NostrMention { entity } => {
+                [11.into_dart(), entity.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::markdown::MarkdownInline::NostrUri { entity } => {
+                [12.into_dart(), entity.into_into_dart().into_dart()].into_dart()
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::markdown::MarkdownInline
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::markdown::MarkdownInline>
+    for crate::api::markdown::MarkdownInline
+{
+    fn into_into_dart(self) -> crate::api::markdown::MarkdownInline {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::markdown::MarkdownListItem {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.blocks.into_into_dart().into_dart(),
+            self.checked.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::markdown::MarkdownListItem
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::markdown::MarkdownListItem>
+    for crate::api::markdown::MarkdownListItem
+{
+    fn into_into_dart(self) -> crate::api::markdown::MarkdownListItem {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::markdown::MarkdownListKind {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            crate::api::markdown::MarkdownListKind::Bullet { marker } => {
+                [0.into_dart(), marker.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::markdown::MarkdownListKind::Ordered { start, delimiter } => [
+                1.into_dart(),
+                start.into_into_dart().into_dart(),
+                delimiter.into_into_dart().into_dart(),
+            ]
+            .into_dart(),
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::markdown::MarkdownListKind
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::markdown::MarkdownListKind>
+    for crate::api::markdown::MarkdownListKind
+{
+    fn into_into_dart(self) -> crate::api::markdown::MarkdownListKind {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::markdown::MarkdownNostrEntity {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.hrp.into_into_dart().into_dart(),
+            self.bech32.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::markdown::MarkdownNostrEntity
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::markdown::MarkdownNostrEntity>
+    for crate::api::markdown::MarkdownNostrEntity
+{
+    fn into_into_dart(self) -> crate::api::markdown::MarkdownNostrEntity {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::markdown::MarkdownNostrHrp {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Npub => 0.into_dart(),
+            Self::Note => 1.into_dart(),
+            Self::Nevent => 2.into_dart(),
+            Self::Nprofile => 3.into_dart(),
+            Self::Naddr => 4.into_dart(),
+            Self::Nrelay => 5.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::markdown::MarkdownNostrHrp
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::markdown::MarkdownNostrHrp>
+    for crate::api::markdown::MarkdownNostrHrp
+{
+    fn into_into_dart(self) -> crate::api::markdown::MarkdownNostrHrp {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::markdown::MarkdownTableCell {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [self.inlines.into_into_dart().into_dart()].into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::markdown::MarkdownTableCell
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::markdown::MarkdownTableCell>
+    for crate::api::markdown::MarkdownTableCell
+{
+    fn into_into_dart(self) -> crate::api::markdown::MarkdownTableCell {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::user_search::MatchQuality {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
@@ -9800,27 +10522,6 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::user_search::SearchUpdateTrig
     for crate::api::user_search::SearchUpdateTrigger
 {
     fn into_into_dart(self) -> crate::api::user_search::SearchUpdateTrigger {
-        self
-    }
-}
-// Codec=Dco (DartCObject based), see doc to use other codecs
-impl flutter_rust_bridge::IntoDart for crate::api::messages::SerializableToken {
-    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
-        [
-            self.token_type.into_into_dart().into_dart(),
-            self.content.into_into_dart().into_dart(),
-        ]
-        .into_dart()
-    }
-}
-impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
-    for crate::api::messages::SerializableToken
-{
-}
-impl flutter_rust_bridge::IntoIntoDart<crate::api::messages::SerializableToken>
-    for crate::api::messages::SerializableToken
-{
-    fn into_into_dart(self) -> crate::api::messages::SerializableToken {
         self
     }
 }
@@ -10501,7 +11202,7 @@ impl SseEncode for crate::api::messages::ChatMessage {
         <bool>::sse_encode(self.is_reply, serializer);
         <Option<String>>::sse_encode(self.reply_to_id, serializer);
         <bool>::sse_encode(self.is_deleted, serializer);
-        <Vec<crate::api::messages::SerializableToken>>::sse_encode(self.content_tokens, serializer);
+        <crate::api::markdown::MarkdownDocument>::sse_encode(self.content_tokens, serializer);
         <crate::api::messages::ReactionSummary>::sse_encode(self.reactions, serializer);
         <Vec<crate::api::media_files::MediaFile>>::sse_encode(self.media_attachments, serializer);
         <u16>::sse_encode(self.kind, serializer);
@@ -11007,6 +11708,66 @@ impl SseEncode for Vec<Vec<String>> {
     }
 }
 
+impl SseEncode for Vec<Vec<crate::api::markdown::MarkdownTableCell>> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <Vec<crate::api::markdown::MarkdownTableCell>>::sse_encode(item, serializer);
+        }
+    }
+}
+
+impl SseEncode for Vec<crate::api::markdown::MarkdownAlignment> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::markdown::MarkdownAlignment>::sse_encode(item, serializer);
+        }
+    }
+}
+
+impl SseEncode for Vec<crate::api::markdown::MarkdownBlock> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::markdown::MarkdownBlock>::sse_encode(item, serializer);
+        }
+    }
+}
+
+impl SseEncode for Vec<crate::api::markdown::MarkdownInline> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::markdown::MarkdownInline>::sse_encode(item, serializer);
+        }
+    }
+}
+
+impl SseEncode for Vec<crate::api::markdown::MarkdownListItem> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::markdown::MarkdownListItem>::sse_encode(item, serializer);
+        }
+    }
+}
+
+impl SseEncode for Vec<crate::api::markdown::MarkdownTableCell> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::markdown::MarkdownTableCell>::sse_encode(item, serializer);
+        }
+    }
+}
+
 impl SseEncode for Vec<crate::api::user_search::MatchedField> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -11087,16 +11848,6 @@ impl SseEncode for Vec<crate::api::messages::SearchResult> {
     }
 }
 
-impl SseEncode for Vec<crate::api::messages::SerializableToken> {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <i32>::sse_encode(self.len() as _, serializer);
-        for item in self {
-            <crate::api::messages::SerializableToken>::sse_encode(item, serializer);
-        }
-    }
-}
-
 impl SseEncode for Vec<crate::api::users::User> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -11159,6 +11910,253 @@ impl SseEncode for crate::api::accounts::LoginStatus {
             },
             serializer,
         );
+    }
+}
+
+impl SseEncode for crate::api::markdown::MarkdownAlignment {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::markdown::MarkdownAlignment::None => 0,
+                crate::api::markdown::MarkdownAlignment::Left => 1,
+                crate::api::markdown::MarkdownAlignment::Center => 2,
+                crate::api::markdown::MarkdownAlignment::Right => 3,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::markdown::MarkdownAutolinkKind {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::markdown::MarkdownAutolinkKind::Uri => 0,
+                crate::api::markdown::MarkdownAutolinkKind::Email => 1,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::markdown::MarkdownBlock {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        match self {
+            crate::api::markdown::MarkdownBlock::Paragraph { inlines } => {
+                <i32>::sse_encode(0, serializer);
+                <Vec<crate::api::markdown::MarkdownInline>>::sse_encode(inlines, serializer);
+            }
+            crate::api::markdown::MarkdownBlock::Heading { level, inlines } => {
+                <i32>::sse_encode(1, serializer);
+                <u8>::sse_encode(level, serializer);
+                <Vec<crate::api::markdown::MarkdownInline>>::sse_encode(inlines, serializer);
+            }
+            crate::api::markdown::MarkdownBlock::ThematicBreak => {
+                <i32>::sse_encode(2, serializer);
+            }
+            crate::api::markdown::MarkdownBlock::CodeBlock {
+                kind,
+                info,
+                content,
+            } => {
+                <i32>::sse_encode(3, serializer);
+                <crate::api::markdown::MarkdownCodeBlockKind>::sse_encode(kind, serializer);
+                <String>::sse_encode(info, serializer);
+                <String>::sse_encode(content, serializer);
+            }
+            crate::api::markdown::MarkdownBlock::BlockQuote { blocks } => {
+                <i32>::sse_encode(4, serializer);
+                <Vec<crate::api::markdown::MarkdownBlock>>::sse_encode(blocks, serializer);
+            }
+            crate::api::markdown::MarkdownBlock::List { kind, tight, items } => {
+                <i32>::sse_encode(5, serializer);
+                <crate::api::markdown::MarkdownListKind>::sse_encode(kind, serializer);
+                <bool>::sse_encode(tight, serializer);
+                <Vec<crate::api::markdown::MarkdownListItem>>::sse_encode(items, serializer);
+            }
+            crate::api::markdown::MarkdownBlock::Table {
+                alignments,
+                header,
+                rows,
+            } => {
+                <i32>::sse_encode(6, serializer);
+                <Vec<crate::api::markdown::MarkdownAlignment>>::sse_encode(alignments, serializer);
+                <Vec<crate::api::markdown::MarkdownTableCell>>::sse_encode(header, serializer);
+                <Vec<Vec<crate::api::markdown::MarkdownTableCell>>>::sse_encode(rows, serializer);
+            }
+            crate::api::markdown::MarkdownBlock::MathBlock { content } => {
+                <i32>::sse_encode(7, serializer);
+                <String>::sse_encode(content, serializer);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
+impl SseEncode for crate::api::markdown::MarkdownCodeBlockKind {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::markdown::MarkdownCodeBlockKind::Indented => 0,
+                crate::api::markdown::MarkdownCodeBlockKind::Fenced => 1,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::markdown::MarkdownDocument {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <Vec<crate::api::markdown::MarkdownBlock>>::sse_encode(self.blocks, serializer);
+    }
+}
+
+impl SseEncode for crate::api::markdown::MarkdownInline {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        match self {
+            crate::api::markdown::MarkdownInline::Text { content } => {
+                <i32>::sse_encode(0, serializer);
+                <String>::sse_encode(content, serializer);
+            }
+            crate::api::markdown::MarkdownInline::SoftBreak => {
+                <i32>::sse_encode(1, serializer);
+            }
+            crate::api::markdown::MarkdownInline::HardBreak => {
+                <i32>::sse_encode(2, serializer);
+            }
+            crate::api::markdown::MarkdownInline::Code { content } => {
+                <i32>::sse_encode(3, serializer);
+                <String>::sse_encode(content, serializer);
+            }
+            crate::api::markdown::MarkdownInline::Emph { children } => {
+                <i32>::sse_encode(4, serializer);
+                <Vec<crate::api::markdown::MarkdownInline>>::sse_encode(children, serializer);
+            }
+            crate::api::markdown::MarkdownInline::Strong { children } => {
+                <i32>::sse_encode(5, serializer);
+                <Vec<crate::api::markdown::MarkdownInline>>::sse_encode(children, serializer);
+            }
+            crate::api::markdown::MarkdownInline::Strikethrough { children } => {
+                <i32>::sse_encode(6, serializer);
+                <Vec<crate::api::markdown::MarkdownInline>>::sse_encode(children, serializer);
+            }
+            crate::api::markdown::MarkdownInline::Link {
+                dest,
+                title,
+                children,
+            } => {
+                <i32>::sse_encode(7, serializer);
+                <String>::sse_encode(dest, serializer);
+                <Option<String>>::sse_encode(title, serializer);
+                <Vec<crate::api::markdown::MarkdownInline>>::sse_encode(children, serializer);
+            }
+            crate::api::markdown::MarkdownInline::Image { dest, title, alt } => {
+                <i32>::sse_encode(8, serializer);
+                <String>::sse_encode(dest, serializer);
+                <Option<String>>::sse_encode(title, serializer);
+                <Vec<crate::api::markdown::MarkdownInline>>::sse_encode(alt, serializer);
+            }
+            crate::api::markdown::MarkdownInline::Autolink { url, kind } => {
+                <i32>::sse_encode(9, serializer);
+                <String>::sse_encode(url, serializer);
+                <crate::api::markdown::MarkdownAutolinkKind>::sse_encode(kind, serializer);
+            }
+            crate::api::markdown::MarkdownInline::Math { content } => {
+                <i32>::sse_encode(10, serializer);
+                <String>::sse_encode(content, serializer);
+            }
+            crate::api::markdown::MarkdownInline::NostrMention { entity } => {
+                <i32>::sse_encode(11, serializer);
+                <crate::api::markdown::MarkdownNostrEntity>::sse_encode(entity, serializer);
+            }
+            crate::api::markdown::MarkdownInline::NostrUri { entity } => {
+                <i32>::sse_encode(12, serializer);
+                <crate::api::markdown::MarkdownNostrEntity>::sse_encode(entity, serializer);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
+impl SseEncode for crate::api::markdown::MarkdownListItem {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <Vec<crate::api::markdown::MarkdownBlock>>::sse_encode(self.blocks, serializer);
+        <Option<bool>>::sse_encode(self.checked, serializer);
+    }
+}
+
+impl SseEncode for crate::api::markdown::MarkdownListKind {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        match self {
+            crate::api::markdown::MarkdownListKind::Bullet { marker } => {
+                <i32>::sse_encode(0, serializer);
+                <String>::sse_encode(marker, serializer);
+            }
+            crate::api::markdown::MarkdownListKind::Ordered { start, delimiter } => {
+                <i32>::sse_encode(1, serializer);
+                <u32>::sse_encode(start, serializer);
+                <String>::sse_encode(delimiter, serializer);
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
+impl SseEncode for crate::api::markdown::MarkdownNostrEntity {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::markdown::MarkdownNostrHrp>::sse_encode(self.hrp, serializer);
+        <String>::sse_encode(self.bech32, serializer);
+    }
+}
+
+impl SseEncode for crate::api::markdown::MarkdownNostrHrp {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::markdown::MarkdownNostrHrp::Npub => 0,
+                crate::api::markdown::MarkdownNostrHrp::Note => 1,
+                crate::api::markdown::MarkdownNostrHrp::Nevent => 2,
+                crate::api::markdown::MarkdownNostrHrp::Nprofile => 3,
+                crate::api::markdown::MarkdownNostrHrp::Naddr => 4,
+                crate::api::markdown::MarkdownNostrHrp::Nrelay => 5,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::markdown::MarkdownTableCell {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <Vec<crate::api::markdown::MarkdownInline>>::sse_encode(self.inlines, serializer);
     }
 }
 
@@ -11252,7 +12250,7 @@ impl SseEncode for crate::api::messages::MessageWithTokens {
         <u16>::sse_encode(self.kind, serializer);
         <chrono::DateTime<chrono::Utc>>::sse_encode(self.created_at, serializer);
         <Option<String>>::sse_encode(self.content, serializer);
-        <Vec<crate::api::messages::SerializableToken>>::sse_encode(self.tokens, serializer);
+        <crate::api::markdown::MarkdownDocument>::sse_encode(self.tokens, serializer);
     }
 }
 
@@ -11594,14 +12592,6 @@ impl SseEncode for crate::api::user_search::SearchUpdateTrigger {
                 unimplemented!("");
             }
         }
-    }
-}
-
-impl SseEncode for crate::api::messages::SerializableToken {
-    // Codec=Sse (Serialization based), see doc to use other codecs
-    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
-        <String>::sse_encode(self.token_type, serializer);
-        <Option<String>>::sse_encode(self.content, serializer);
     }
 }
 

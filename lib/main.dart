@@ -34,6 +34,7 @@ import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/api/relays.dart' as relays_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/reset_marker.dart';
 
 final _logger = Logger('WnApp');
 const _appGroupChannel = MethodChannel('org.parres.whitenoise/app_group');
@@ -87,10 +88,19 @@ String formatAppLogRecord(LogRecord record) {
 
 Future<ProviderContainer> initializeAppContainer({
   Future<void> Function(Duration delay) initializeRetryDelay = _defaultInitializeRetryDelay,
+  bool? isIOS,
 }) async {
-  final baseDir = await resolveWhitenoiseBaseDirectory();
+  final hadPendingReset = await _hasPendingReset();
+  final baseDir = await resolveWhitenoiseBaseDirectory(
+    isIOS: isIOS,
+    skipDocumentsMigration: hadPendingReset,
+  );
   final dataDir = '${baseDir.path}/data';
   final logsDir = '${baseDir.path}/logs';
+  await recoverPendingReset(dataDir: dataDir, logsDir: logsDir);
+  if (hadPendingReset) {
+    await _deleteDocumentsDataAfterPendingReset(baseDir);
+  }
   await Directory(dataDir).create(recursive: true);
   await Directory(logsDir).create(recursive: true);
 
@@ -111,6 +121,22 @@ Future<ProviderContainer> initializeAppContainer({
 }
 
 Future<void> _defaultInitializeRetryDelay(Duration delay) => Future<void>.delayed(delay);
+
+Future<bool> _hasPendingReset() async => (await resetPendingMarkerFile()).existsSync();
+
+Future<void> _deleteDocumentsDataAfterPendingReset(Directory activeBaseDir) async {
+  final documentsDir = await getApplicationDocumentsDirectory();
+  final documentsBaseDir = Directory('${documentsDir.path}/whitenoise');
+  if (documentsBaseDir.path == activeBaseDir.path) return;
+  await _deleteDirectoryIfExists(Directory(p.join(documentsBaseDir.path, 'data')));
+  await _deleteDirectoryIfExists(Directory(p.join(documentsBaseDir.path, 'logs')));
+}
+
+Future<void> _deleteDirectoryIfExists(Directory directory) async {
+  if (directory.existsSync()) {
+    await directory.delete(recursive: true);
+  }
+}
 
 @visibleForTesting
 Future<void> initializeWhitenoiseWithRetry(
@@ -147,6 +173,7 @@ Future<Directory> resolveWhitenoiseBaseDirectory({
   Future<Directory> Function(Directory from, String newPath)? renameDirectory,
   Future<void> Function(Directory from, Directory to)? copyDirectory,
   Future<void> Function(Directory directory)? deleteSourceDirectory,
+  bool skipDocumentsMigration = false,
 }) async {
   final documentsDir = await getApplicationDocumentsDirectory();
   final documentsBaseDir = Directory('${documentsDir.path}/whitenoise');
@@ -161,13 +188,15 @@ Future<Directory> resolveWhitenoiseBaseDirectory({
     }
 
     final appGroupBaseDir = Directory('$appGroupContainerPath/whitenoise');
-    await _moveWhitenoiseDirectoryIfNeeded(
-      from: documentsBaseDir,
-      to: appGroupBaseDir,
-      renameDirectory: renameDirectory ?? _renameDirectory,
-      copyDirectory: copyDirectory ?? _copyDirectory,
-      deleteSourceDirectory: deleteSourceDirectory ?? _deleteDirectory,
-    );
+    if (!skipDocumentsMigration) {
+      await _moveWhitenoiseDirectoryIfNeeded(
+        from: documentsBaseDir,
+        to: appGroupBaseDir,
+        renameDirectory: renameDirectory ?? _renameDirectory,
+        copyDirectory: copyDirectory ?? _copyDirectory,
+        deleteSourceDirectory: deleteSourceDirectory ?? _deleteDirectory,
+      );
+    }
     return appGroupBaseDir;
   } catch (error, stackTrace) {
     _logger.warning(

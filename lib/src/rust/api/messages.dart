@@ -8,12 +8,12 @@ import 'package:freezed_annotation/freezed_annotation.dart' hide protected;
 
 import '../frb_generated.dart';
 import 'error.dart';
+import 'markdown.dart';
 import 'media_files.dart';
 
 part 'messages.freezed.dart';
 
-// These functions are ignored because they are not marked as `pub`: `append_block`, `append_blocks`, `append_inline`, `append_inlines`, `push_line_break`, `push_nostr_entity`, `push_text`, `push_url`, `push_whitespace`, `serializable_tokens_from_document`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
 
 Future<MessageWithTokens> sendMessageToGroup({
   required String pubkey,
@@ -168,7 +168,9 @@ class ChatMessage {
   final bool isReply;
   final String? replyToId;
   final bool isDeleted;
-  final List<SerializableToken> contentTokens;
+
+  /// Parsed markdown AST of `content`. Empty document when content is empty.
+  final MarkdownDocument contentTokens;
   final ReactionSummary reactions;
   final List<MediaFile> mediaAttachments;
   final int kind;
@@ -377,14 +379,17 @@ class MessageUpdate {
           message == other.message;
 }
 
-/// Flutter-compatible message with tokens
+/// Flutter-compatible message with parsed markdown.
+///
+/// Field name `tokens` is retained from the pre-markdown `Vec<SerializableToken>`
+/// representation; its type is now the parsed CommonMark+GFM+nostr AST.
 class MessageWithTokens {
   final String id;
   final String pubkey;
   final int kind;
   final DateTime createdAt;
   final String? content;
-  final List<SerializableToken> tokens;
+  final MarkdownDocument tokens;
 
   const MessageWithTokens({
     required this.id,
@@ -473,28 +478,6 @@ class SearchResult {
           mlsGroupId == other.mlsGroupId &&
           highlightSpans == other.highlightSpans &&
           position == other.position;
-}
-
-/// Flutter-compatible serializable token
-class SerializableToken {
-  final String tokenType;
-  final String? content;
-
-  const SerializableToken({
-    required this.tokenType,
-    this.content,
-  });
-
-  @override
-  int get hashCode => tokenType.hashCode ^ content.hashCode;
-
-  @override
-  bool operator ==(Object other) =>
-      identical(this, other) ||
-      other is SerializableToken &&
-          runtimeType == other.runtimeType &&
-          tokenType == other.tokenType &&
-          content == other.content;
 }
 
 /// What triggered a message update in the stream.

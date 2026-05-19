@@ -77,6 +77,8 @@ class MockWnApi implements RustLibApi {
   bool deleteAllDataShouldFail = false;
   Duration deleteAllDataDelay = Duration.zero;
   Completer<void>? deleteAllDataCompleter;
+  bool reinitializeWhitenoiseCalled = false;
+  bool reinitializeWhitenoiseShouldFail = false;
 
   LoginResult? loginStartResult;
   LoginResult? loginExternalSignerStartResult;
@@ -766,6 +768,14 @@ class MockWnApi implements RustLibApi {
   }
 
   @override
+  Future<void> crateApiReinitializeWhitenoise() async {
+    reinitializeWhitenoiseCalled = true;
+    if (reinitializeWhitenoiseShouldFail) {
+      throw Exception('Failed to reinitialize Whitenoise');
+    }
+  }
+
+  @override
   Future<LoginResult> crateApiAccountsLoginStart({
     required String nsecOrHexPrivkey,
   }) async {
@@ -1062,6 +1072,8 @@ class MockWnApi implements RustLibApi {
     deleteAllDataShouldFail = false;
     deleteAllDataDelay = Duration.zero;
     deleteAllDataCompleter = null;
+    reinitializeWhitenoiseCalled = false;
+    reinitializeWhitenoiseShouldFail = false;
     loginStartResult = null;
     loginExternalSignerStartResult = null;
     registerExternalSignerCalled = false;

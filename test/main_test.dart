@@ -768,6 +768,35 @@ void main() {
       },
     );
 
+    test('recovers pending reset before moving Documents data into App Group', () async {
+      secureStorage.reset();
+      secureStorage = _mockSecureStorage({'active_account_pubkey': testPubkeyA});
+      final appGroupDir = Directory.systemTemp.createTempSync('whitenoise_app_group_test');
+      _mockAppGroupContainerPath(appGroupDir.path);
+      final oldDataDir = Directory('${pathProvider.tempDir.path}/whitenoise/data');
+      await oldDataDir.create(recursive: true);
+      await File('${oldDataDir.path}/old-marker.txt').writeAsString('old');
+      await File('${pathProvider.tempDir.path}/whitenoise/reset_pending').writeAsString('pending');
+      addTearDown(() {
+        if (appGroupDir.existsSync()) {
+          appGroupDir.deleteSync(recursive: true);
+        }
+      });
+
+      await initializeAppContainer(isIOS: true);
+
+      final appGroupBase = '${appGroupDir.path}/whitenoise';
+      expect(mockApi.createdConfigDataDir, '$appGroupBase/data');
+      expect(File('$appGroupBase/data/old-marker.txt').existsSync(), isFalse);
+      expect(File('$appGroupBase/data/$kDataVersionFile').readAsStringSync().trim(), '1');
+      expect(
+        File('${pathProvider.tempDir.path}/whitenoise/data/old-marker.txt').existsSync(),
+        isFalse,
+      );
+      expect(File('${pathProvider.tempDir.path}/whitenoise/reset_pending').existsSync(), isFalse);
+      expect(secureStorage.values, isEmpty);
+    });
+
     test('preserves App Group data when both storage locations contain data', () async {
       final appGroupDir = Directory.systemTemp.createTempSync('whitenoise_app_group_test');
       _mockAppGroupContainerPath(appGroupDir.path);
