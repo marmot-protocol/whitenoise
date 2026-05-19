@@ -67,6 +67,26 @@ class AppLocalizationsDe extends AppLocalizations {
   String get createProfile => 'Profil erstellen';
 
   @override
+  String get analyticsConsentTitle => 'Hilf mit, White Noise zu verbessern';
+
+  @override
+  String get analyticsConsentDescription =>
+      'Teile datenschutzfreundliche Nutzungsanalysen. Wir senden niemals Nachrichteninhalte, Kontakte, öffentliche Schlüssel, Relay-URLs, Gruppen-IDs, Nachrichten-IDs oder Profildaten. Du kannst dies jederzeit deaktivieren.';
+
+  @override
+  String get analyticsConsentSettingsDescription =>
+      'Teile anonyme Nutzungsdaten, damit wir Fehler finden und die App verbessern können. Nachrichten, Kontakte und Schlüssel werden nie einbezogen.';
+
+  @override
+  String get analyticsPromptTitle => 'Möchtest du helfen, White Noise zu verbessern?';
+
+  @override
+  String get analyticsPromptNotNow => 'Nicht jetzt';
+
+  @override
+  String get analyticsPromptShare => 'Analysedaten teilen';
+
+  @override
   String get chooseName => 'Name';
 
   @override

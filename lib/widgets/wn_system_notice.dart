@@ -22,6 +22,11 @@ enum WnSystemNoticeVariant {
   expanded,
 }
 
+enum WnSystemNoticeActionLayout {
+  vertical,
+  horizontal,
+}
+
 const _animationDuration = Duration(milliseconds: 200);
 const _defaultAutoHideDuration = Duration(seconds: 3);
 
@@ -38,6 +43,9 @@ class WnSystemNotice extends HookWidget {
     this.onToggle,
     this.autoHideDuration,
     this.animateEntrance = true,
+    this.animateDismiss = true,
+    this.actionLayout = WnSystemNoticeActionLayout.vertical,
+    this.backgroundColor,
   });
 
   final String title;
@@ -50,6 +58,9 @@ class WnSystemNotice extends HookWidget {
   final VoidCallback? onToggle;
   final Duration? autoHideDuration;
   final bool animateEntrance;
+  final bool animateDismiss;
+  final WnSystemNoticeActionLayout actionLayout;
+  final Color? backgroundColor;
 
   bool get _isCollapsed => variant == WnSystemNoticeVariant.collapsed;
   bool get _isExpanded => variant == WnSystemNoticeVariant.expanded;
@@ -61,6 +72,7 @@ class WnSystemNotice extends HookWidget {
     final colors = context.colors;
     final typography = context.typographyScaled;
     final (bgColor, contentColor, icon) = _getStyle(colors);
+    final resolvedBgColor = backgroundColor ?? bgColor;
     final bool shouldShowDetails =
         !_isCollapsed &&
         !_isTemporary &&
@@ -109,6 +121,10 @@ class WnSystemNotice extends HookWidget {
       if (isDismissing.value) return;
       isDismissing.value = true;
       autoHideTimer.value?.cancel();
+      if (!animateDismiss) {
+        onDismiss?.call();
+        return;
+      }
       slideController.reverse().then((_) {
         if (!context.mounted) return;
         onDismiss?.call();
@@ -143,7 +159,7 @@ class WnSystemNotice extends HookWidget {
           child: Container(
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              color: bgColor,
+              color: resolvedBgColor,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -199,15 +215,10 @@ class WnSystemNotice extends HookWidget {
                               ],
                               if (primaryAction != null || secondaryAction != null) ...[
                                 Gap(8.h),
-                                Column(
-                                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                                  children: [
-                                    if (secondaryAction != null) ...[
-                                      secondaryAction!,
-                                      Gap(8.h),
-                                    ],
-                                    if (primaryAction != null) primaryAction!,
-                                  ],
+                                _SystemNoticeActions(
+                                  layout: actionLayout,
+                                  primaryAction: primaryAction,
+                                  secondaryAction: secondaryAction,
                                 ),
                               ],
                             ],
@@ -262,5 +273,48 @@ class WnSystemNotice extends HookWidget {
     if (_isCollapsed) return WnIcons.chevronDown;
     if (_isExpanded) return WnIcons.chevronUp;
     return WnIcons.closeLarge;
+  }
+}
+
+class _SystemNoticeActions extends StatelessWidget {
+  const _SystemNoticeActions({
+    required this.layout,
+    required this.primaryAction,
+    required this.secondaryAction,
+  });
+
+  final WnSystemNoticeActionLayout layout;
+  final Widget? primaryAction;
+  final Widget? secondaryAction;
+
+  @override
+  Widget build(BuildContext context) {
+    if (layout == WnSystemNoticeActionLayout.horizontal) {
+      return Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (secondaryAction != null)
+            Expanded(
+              child: secondaryAction!,
+            ),
+          if (secondaryAction != null && primaryAction != null) Gap(8.w),
+          if (primaryAction != null)
+            Expanded(
+              child: primaryAction!,
+            ),
+        ],
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        if (secondaryAction != null) ...[
+          secondaryAction!,
+          Gap(8.h),
+        ],
+        if (primaryAction != null) primaryAction!,
+      ],
+    );
   }
 }

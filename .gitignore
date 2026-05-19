@@ -48,6 +48,8 @@ app.*.map.json
 /android/app/pkg/sumdb/
 /android/key.properties
 /android/key-staging.properties
+/android/app/google-services.json
+/android/app/src/*/google-services.json
 *.jks
 *.keystore
 
@@ -76,8 +78,11 @@ docs/plans/
 # Local relay data created by `docker compose up`.
 /dev/data/
 
+# Local product analytics dart-defines.
+.env.analytics*
+
 # Reviews
-reviews/
+/reviews/
 
 # AI tools
 opencode.json

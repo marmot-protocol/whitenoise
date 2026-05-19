@@ -67,6 +67,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get createProfile => 'Create profile';
 
   @override
+  String get analyticsConsentTitle => 'Help improve White Noise';
+
+  @override
+  String get analyticsConsentDescription =>
+      'Share privacy-preserving usage analytics. We never send message content, contacts, public keys, relay URLs, group ids, message ids, or profile data. You can turn this off anytime.';
+
+  @override
+  String get analyticsConsentSettingsDescription =>
+      'Share anonymous usage data to help us find bugs and improve the app. Messages, contacts, and keys are never included.';
+
+  @override
+  String get analyticsPromptTitle => 'Help improve White Noise?';
+
+  @override
+  String get analyticsPromptNotNow => 'Not now';
+
+  @override
+  String get analyticsPromptShare => 'Share analytics';
+
+  @override
   String get chooseName => 'Name';
 
   @override

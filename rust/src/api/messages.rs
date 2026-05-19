@@ -16,9 +16,11 @@ pub use whitenoise::{
     ChatMessage as WhitenoiseChatMessage, DeliveryStatus as WhitenoiseDeliveryStatus,
     EmojiReaction as WhitenoiseEmojiReaction, MediaFile as WhitenoiseMediaFile,
     MessageUpdate as WhitenoiseMessageUpdate, MessageWithTokens as WhitenoiseMessageWithTokens,
-    ReactionSummary as WhitenoiseReactionSummary, SerializableToken as WhitenoiseSerializableToken,
-    UpdateTrigger as WhitenoiseUpdateTrigger, UserReaction as WhitenoiseUserReaction, Whitenoise,
+    ReactionSummary as WhitenoiseReactionSummary, UpdateTrigger as WhitenoiseUpdateTrigger,
+    UserReaction as WhitenoiseUserReaction, Whitenoise,
 };
+use whitenoise_markdown::{Block as MarkdownBlock, Document as MarkdownDocument};
+use whitenoise_markdown::{Inline as MarkdownInline, NostrEntity as MarkdownNostrEntity};
 
 /// Flutter-compatible message with tokens
 #[frb(non_opaque)]
@@ -85,6 +87,127 @@ pub struct UserReaction {
 pub struct SerializableToken {
     pub token_type: String, // "Nostr", "Url", "Hashtag", "Text", "LineBreak", "Whitespace"
     pub content: Option<String>, // None for LineBreak and Whitespace
+}
+
+fn tokens_from_document(document: &MarkdownDocument) -> Vec<SerializableToken> {
+    let mut tokens = Vec::new();
+    for (index, block) in document.blocks.iter().enumerate() {
+        if index > 0 {
+            tokens.push(line_break_token());
+        }
+        push_block_tokens(block, &mut tokens);
+    }
+    tokens
+}
+
+fn push_block_tokens(block: &MarkdownBlock, tokens: &mut Vec<SerializableToken>) {
+    match block {
+        MarkdownBlock::Paragraph { inlines } | MarkdownBlock::Heading { inlines, .. } => {
+            push_inline_tokens(inlines, tokens);
+        }
+        MarkdownBlock::ThematicBreak => tokens.push(line_break_token()),
+        MarkdownBlock::CodeBlock { content, .. } | MarkdownBlock::MathBlock { content } => {
+            tokens.push(text_token(content));
+        }
+        MarkdownBlock::BlockQuote { blocks } => {
+            for (index, block) in blocks.iter().enumerate() {
+                if index > 0 {
+                    tokens.push(line_break_token());
+                }
+                push_block_tokens(block, tokens);
+            }
+        }
+        MarkdownBlock::List { items, .. } => {
+            for (index, item) in items.iter().enumerate() {
+                if index > 0 {
+                    tokens.push(line_break_token());
+                }
+                for block in &item.blocks {
+                    push_block_tokens(block, tokens);
+                }
+            }
+        }
+        MarkdownBlock::Table { header, rows, .. } => {
+            for (index, cell) in header.iter().enumerate() {
+                if index > 0 {
+                    tokens.push(whitespace_token());
+                }
+                push_inline_tokens(&cell.inlines, tokens);
+            }
+            for row in rows {
+                tokens.push(line_break_token());
+                for (index, cell) in row.iter().enumerate() {
+                    if index > 0 {
+                        tokens.push(whitespace_token());
+                    }
+                    push_inline_tokens(&cell.inlines, tokens);
+                }
+            }
+        }
+    }
+}
+
+fn push_inline_tokens(inlines: &[MarkdownInline], tokens: &mut Vec<SerializableToken>) {
+    for inline in inlines {
+        match inline {
+            MarkdownInline::Text(text)
+            | MarkdownInline::Code(text)
+            | MarkdownInline::Math(text) => tokens.push(text_token(text)),
+            MarkdownInline::SoftBreak | MarkdownInline::HardBreak => {
+                tokens.push(line_break_token())
+            }
+            MarkdownInline::Emph(children)
+            | MarkdownInline::Strong(children)
+            | MarkdownInline::Strikethrough(children) => push_inline_tokens(children, tokens),
+            MarkdownInline::Link { dest, children, .. } => {
+                if children.is_empty() {
+                    tokens.push(url_token(dest));
+                } else {
+                    push_inline_tokens(children, tokens);
+                }
+            }
+            MarkdownInline::Image { alt, .. } => push_inline_tokens(alt, tokens),
+            MarkdownInline::Autolink { url, .. } => tokens.push(url_token(url)),
+            MarkdownInline::NostrMention(entity) | MarkdownInline::NostrUri(entity) => {
+                tokens.push(nostr_token(entity));
+            }
+        }
+    }
+}
+
+fn text_token(content: &str) -> SerializableToken {
+    SerializableToken {
+        token_type: "Text".to_string(),
+        content: Some(content.to_string()),
+    }
+}
+
+fn url_token(content: &str) -> SerializableToken {
+    SerializableToken {
+        token_type: "Url".to_string(),
+        content: Some(content.to_string()),
+    }
+}
+
+fn nostr_token(entity: &MarkdownNostrEntity) -> SerializableToken {
+    SerializableToken {
+        token_type: "Nostr".to_string(),
+        content: Some(format!("nostr:{}", entity.bech32)),
+    }
+}
+
+fn line_break_token() -> SerializableToken {
+    SerializableToken {
+        token_type: "LineBreak".to_string(),
+        content: None,
+    }
+}
+
+fn whitespace_token() -> SerializableToken {
+    SerializableToken {
+        token_type: "Whitespace".to_string(),
+        content: None,
+    }
 }
 
 /// Tracks the delivery state of an outgoing message.
@@ -202,12 +325,7 @@ impl From<WhitenoiseSearchResult> for SearchResult {
 
 impl From<&WhitenoiseMessageWithTokens> for MessageWithTokens {
     fn from(message_with_tokens: &WhitenoiseMessageWithTokens) -> Self {
-        // Convert tokens to Flutter-compatible representation
-        let tokens = message_with_tokens
-            .tokens
-            .iter()
-            .map(|token| token.into())
-            .collect();
+        let tokens = tokens_from_document(&message_with_tokens.tokens);
 
         Self {
             id: message_with_tokens.message.id.to_hex(),
@@ -229,43 +347,6 @@ impl From<&WhitenoiseMessageWithTokens> for MessageWithTokens {
 impl From<WhitenoiseMessageWithTokens> for MessageWithTokens {
     fn from(message_with_tokens: WhitenoiseMessageWithTokens) -> Self {
         (&message_with_tokens).into()
-    }
-}
-
-impl From<&WhitenoiseSerializableToken> for SerializableToken {
-    fn from(token: &WhitenoiseSerializableToken) -> Self {
-        match token {
-            WhitenoiseSerializableToken::Nostr(s) => Self {
-                token_type: "Nostr".to_string(),
-                content: Some(s.clone()),
-            },
-            WhitenoiseSerializableToken::Url(s) => Self {
-                token_type: "Url".to_string(),
-                content: Some(s.clone()),
-            },
-            WhitenoiseSerializableToken::Hashtag(s) => Self {
-                token_type: "Hashtag".to_string(),
-                content: Some(s.clone()),
-            },
-            WhitenoiseSerializableToken::Text(s) => Self {
-                token_type: "Text".to_string(),
-                content: Some(s.clone()),
-            },
-            WhitenoiseSerializableToken::LineBreak => Self {
-                token_type: "LineBreak".to_string(),
-                content: None,
-            },
-            WhitenoiseSerializableToken::Whitespace => Self {
-                token_type: "Whitespace".to_string(),
-                content: None,
-            },
-        }
-    }
-}
-
-impl From<WhitenoiseSerializableToken> for SerializableToken {
-    fn from(token: WhitenoiseSerializableToken) -> Self {
-        (&token).into()
     }
 }
 
@@ -352,12 +433,7 @@ impl From<&WhitenoiseChatMessage> for ChatMessage {
             .map(|tag| tag.as_slice().to_vec())
             .collect();
 
-        // Convert content tokens to proper Flutter-compatible structs
-        let content_tokens = chat_message
-            .content_tokens
-            .iter()
-            .map(|token| token.into())
-            .collect();
+        let content_tokens = tokens_from_document(&chat_message.content_tokens);
 
         // Convert reactions to proper Flutter-compatible struct
         let reactions = (&chat_message.reactions).into();

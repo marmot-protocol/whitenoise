@@ -316,6 +316,12 @@ void main() {
       expect(find.text('v1.2.3+45'), findsOneWidget);
     });
 
+    testWidgets('does not display analytics consent toggle on main settings', (tester) async {
+      await pumpSettingsScreen(tester);
+
+      expect(find.byKey(const Key('settings_analytics_consent_checkbox')), findsNothing);
+    });
+
     group('notification settings menu item (Android-only)', () {
       testWidgets('shows Notification Settings menu item on Android', (tester) async {
         debugDefaultTargetPlatformOverride = TargetPlatform.android;

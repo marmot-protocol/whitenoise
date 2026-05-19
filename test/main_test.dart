@@ -5,11 +5,14 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart'
     show AsyncData, ProviderContainer, ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 import 'package:whitenoise/main.dart'
     show WnApp, initializeAppContainer, kDataVersion, kDataVersionFile;
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/providers/theme_provider.dart';
+import 'package:whitenoise/services/product_analytics_service.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
+import 'package:whitenoise/src/rust/api/product_analytics.dart' as rust_analytics;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 
 import 'mocks/mock_secure_storage.dart';
@@ -103,6 +106,7 @@ class _MockInitApi extends MockWnApi {
     required String dataDir,
     required String logsDir,
     List<String>? defaultRelayUrls,
+    rust_analytics.ProductAnalyticsConfig? productAnalyticsConfig,
   }) async {
     createdConfigDataDir = dataDir;
     createdConfigLogsDir = logsDir;
@@ -110,6 +114,7 @@ class _MockInitApi extends MockWnApi {
       dataDir: dataDir,
       logsDir: logsDir,
       defaultRelayUrls: defaultRelayUrls,
+      productAnalyticsConfig: productAnalyticsConfig,
     );
   }
 
@@ -131,12 +136,54 @@ class _MockInitApi extends MockWnApi {
   }
 }
 
+class _AnalyticsRecorder {
+  final events = <rust_analytics.ProductAnalyticsEventName>[];
+  int flushCount = 0;
+
+  ProductAnalyticsService service() {
+    return ProductAnalyticsService(
+      readSettings: () async => _settings(),
+      setEnabled: ({required enabled, required consentVersion}) async =>
+          _settings(enabled: enabled, consentVersion: consentVersion),
+      track: ({required event}) async {
+        events.add(event.name);
+        return rust_analytics.ProductAnalyticsTrackStatus.queued;
+      },
+      flush: () async {
+        flushCount++;
+        return rust_analytics.ProductAnalyticsFlushStatus.flushed;
+      },
+      consentVersion: () async => 'test-consent-version',
+    );
+  }
+
+  rust_analytics.ProductAnalyticsSettings _settings({
+    bool enabled = false,
+    String consentVersion = 'test-consent-version',
+  }) {
+    final now = DateTime(2026);
+    return rust_analytics.ProductAnalyticsSettings(
+      enabled: enabled,
+      createdAt: now,
+      updatedAt: now,
+      consentVersion: consentVersion,
+    );
+  }
+}
+
 void main() {
   late _MockInitApi mockApi;
 
   setUpAll(() {
     mockApi = _MockInitApi();
     RustLib.initMock(api: mockApi);
+    PackageInfo.setMockInitialValues(
+      appName: 'White Noise',
+      packageName: 'org.parres.whitenoise.staging',
+      version: '1.2.3',
+      buildNumber: '45',
+      buildSignature: '',
+    );
   });
 
   setUp(() {
@@ -146,17 +193,20 @@ void main() {
   group('WnApp', () {
     late _MockAuthNotifier mockAuth;
     late _MockThemeNotifier mockTheme;
+    late _AnalyticsRecorder analytics;
 
     Future<void> pumpWnApp(WidgetTester tester) async {
       setUpTestView(tester);
       mockAuth = _MockAuthNotifier();
       mockTheme = _MockThemeNotifier();
+      analytics = _AnalyticsRecorder();
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             authProvider.overrideWith(() => mockAuth),
             themeProvider.overrideWith(() => mockTheme),
             secureStorageProvider.overrideWithValue(MockSecureStorage()),
+            productAnalyticsServiceProvider.overrideWithValue(analytics.service()),
           ],
           child: const WnApp(),
         ),
@@ -207,6 +257,12 @@ void main() {
       await tester.pumpAndSettle();
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
+
+      expect(analytics.events, [
+        rust_analytics.ProductAnalyticsEventName.appBackgrounded,
+        rust_analytics.ProductAnalyticsEventName.appForegrounded,
+      ]);
+      expect(analytics.flushCount, 1);
     });
 
     testWidgets('reconciles external signer callbacks on app resume', (tester) async {
@@ -270,6 +326,16 @@ void main() {
       await initializeAppContainer();
 
       expect(mockApi.initializedConfig, isNotNull);
+    });
+
+    test('passes product analytics config into Rust initialization', () async {
+      await initializeAppContainer();
+
+      final analyticsConfig = mockApi.initializedConfig?.productAnalyticsConfig;
+      expect(analyticsConfig, isNotNull);
+      expect(analyticsConfig?.appVersion, '1.2.3+45');
+      expect(analyticsConfig?.bundleIdentifier, 'org.parres.whitenoise.staging');
+      expect(analyticsConfig?.backend, const rust_analytics.ProductAnalyticsBackend.disabled());
     });
 
     test('returns a ProviderContainer', () async {

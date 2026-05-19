@@ -13,6 +13,8 @@ pub struct FileMetadata {
     pub dimensions: Option<String>,
     pub blurhash: Option<String>,
     pub thumbhash: Option<String>,
+    pub duration_ms: Option<u64>,
+    pub waveform: Option<Vec<u8>>,
 }
 
 impl From<WhitenoiseFileMetadata> for FileMetadata {
@@ -22,6 +24,8 @@ impl From<WhitenoiseFileMetadata> for FileMetadata {
             dimensions: metadata.dimensions,
             blurhash: metadata.blurhash,
             thumbhash: metadata.thumbhash,
+            duration_ms: metadata.duration_ms,
+            waveform: metadata.waveform,
         }
     }
 }
@@ -33,6 +37,8 @@ impl From<FileMetadata> for WhitenoiseFileMetadata {
             dimensions: metadata.dimensions,
             blurhash: metadata.blurhash,
             thumbhash: metadata.thumbhash,
+            duration_ms: metadata.duration_ms,
+            waveform: metadata.waveform,
         }
     }
 }

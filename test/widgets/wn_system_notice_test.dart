@@ -176,6 +176,29 @@ void main() {
   });
 
   group('Content and Actions', () {
+    testWidgets('uses custom background color when provided', (tester) async {
+      await mountWidget(
+        WnSystemNotice(
+          title: 'Notice',
+          backgroundColor: Colors.pink,
+          variant: WnSystemNoticeVariant.dismissible,
+          onDismiss: () {},
+        ),
+        tester,
+      );
+
+      final container = tester.widget<Container>(
+        find
+            .descendant(
+              of: find.byType(WnSystemNotice),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      final decoration = container.decoration! as BoxDecoration;
+      expect(decoration.color, Colors.pink);
+    });
+
     testWidgets('renders description when appropriate', (tester) async {
       await mountWidget(
         WnSystemNotice(
@@ -204,6 +227,33 @@ void main() {
 
       expect(find.text('Primary'), findsOneWidget);
       expect(find.text('Secondary'), findsOneWidget);
+    });
+
+    testWidgets('renders horizontal actions side by side', (tester) async {
+      await mountWidget(
+        WnSystemNotice(
+          title: 'Notice',
+          variant: WnSystemNoticeVariant.expanded,
+          actionLayout: WnSystemNoticeActionLayout.horizontal,
+          primaryAction: const WnButton(
+            key: Key('primary_action'),
+            text: 'Primary',
+            onPressed: null,
+          ),
+          secondaryAction: const WnButton(
+            key: Key('secondary_action'),
+            text: 'Secondary',
+            onPressed: null,
+          ),
+          onToggle: () {},
+        ),
+        tester,
+      );
+
+      final primaryTopLeft = tester.getTopLeft(find.byKey(const Key('primary_action')));
+      final secondaryTopLeft = tester.getTopLeft(find.byKey(const Key('secondary_action')));
+      expect(primaryTopLeft.dx, greaterThan(secondaryTopLeft.dx));
+      expect(primaryTopLeft.dy, equals(secondaryTopLeft.dy));
     });
   });
 
@@ -377,6 +427,26 @@ void main() {
       expect(dismissed, isFalse);
 
       await tester.pumpAndSettle();
+
+      expect(dismissed, isTrue);
+    });
+
+    testWidgets('can call onDismiss immediately without exit animation', (tester) async {
+      var dismissed = false;
+      await mountWidget(
+        WnSystemNotice(
+          title: 'Swap me',
+          variant: WnSystemNoticeVariant.dismissible,
+          animateDismiss: false,
+          onDismiss: () => dismissed = true,
+        ),
+        tester,
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.byKey(const ValueKey('systemNotice_actionIcon')));
+      await tester.pump();
 
       expect(dismissed, isTrue);
     });

@@ -45,7 +45,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.12.0";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1064693455;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 2006763366;
 
 // Section: executor
 
@@ -907,6 +907,9 @@ fn wire__crate__api__create_whitenoise_config_impl(
             let api_data_dir = <String>::sse_decode(&mut deserializer);
             let api_logs_dir = <String>::sse_decode(&mut deserializer);
             let api_default_relay_urls = <Option<Vec<String>>>::sse_decode(&mut deserializer);
+            let api_product_analytics_config = <Option<
+                crate::api::product_analytics::ProductAnalyticsConfig,
+            >>::sse_decode(&mut deserializer);
             deserializer.end();
             move |context| {
                 transform_result_sse::<_, ()>((move || {
@@ -914,6 +917,7 @@ fn wire__crate__api__create_whitenoise_config_impl(
                         api_data_dir,
                         api_logs_dir,
                         api_default_relay_urls,
+                        api_product_analytics_config,
                     ))?;
                     Ok(output_ok)
                 })())
@@ -1558,6 +1562,42 @@ fn wire__crate__api__messages__fetch_messages_unread_with_minimum_impl(
                             api_minimum,
                         )
                         .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__product_analytics__flush_product_analytics_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "flush_product_analytics",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::error::ApiError>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::product_analytics::flush_product_analytics().await?;
                         Ok(output_ok)
                     })()
                     .await,
@@ -3669,6 +3709,76 @@ fn wire__crate__api__utils__npub_from_hex_pubkey_impl(
         },
     )
 }
+fn wire__crate__api__product_analytics__product_analytics_consent_version_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_normal::<flutter_rust_bridge::for_generated::SseCodec, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "product_analytics_consent_version",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| {
+                transform_result_sse::<_, ()>((move || {
+                    let output_ok = Result::<_, ()>::Ok(
+                        crate::api::product_analytics::product_analytics_consent_version(),
+                    )?;
+                    Ok(output_ok)
+                })())
+            }
+        },
+    )
+}
+fn wire__crate__api__product_analytics__product_analytics_settings_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "product_analytics_settings",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::error::ApiError>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::product_analytics::product_analytics_settings().await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__accounts__publish_account_key_package_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -4432,6 +4542,48 @@ fn wire__crate__api__chat_list__set_chat_pin_order_impl(
         },
     )
 }
+fn wire__crate__api__product_analytics__set_product_analytics_enabled_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "set_product_analytics_enabled",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_enabled = <bool>::sse_decode(&mut deserializer);
+            let api_consent_version = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::error::ApiError>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::product_analytics::set_product_analytics_enabled(
+                                api_enabled,
+                                api_consent_version,
+                            )
+                            .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__utils__string_from_relay_url_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -4957,6 +5109,46 @@ fn wire__crate__api__utils__theme_mode_to_string_impl(
                 ))?;
                 Ok(output_ok)
             })())
+        },
+    )
+}
+fn wire__crate__api__product_analytics__track_product_analytics_event_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "track_product_analytics_event",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_event = <crate::api::product_analytics::ProductAnalyticsEvent>::sse_decode(
+                &mut deserializer,
+            );
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, crate::api::error::ApiError>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::product_analytics::track_product_analytics_event(api_event)
+                                .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
         },
     )
 }
@@ -6187,6 +6379,18 @@ impl SseDecode for crate::api::error::ApiError {
     }
 }
 
+impl SseDecode for crate::api::product_analytics::AptabaseAnalyticsConfig {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_appKey = <String>::sse_decode(deserializer);
+        let mut var_host = <String>::sse_decode(deserializer);
+        return crate::api::product_analytics::AptabaseAnalyticsConfig {
+            app_key: var_appKey,
+            host: var_host,
+        };
+    }
+}
+
 impl SseDecode for bool {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -6445,6 +6649,13 @@ impl SseDecode for crate::api::messages::EmojiReaction {
     }
 }
 
+impl SseDecode for f64 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_f64::<NativeEndian>().unwrap()
+    }
+}
+
 impl SseDecode for crate::api::media_files::FileMetadata {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -6452,11 +6663,15 @@ impl SseDecode for crate::api::media_files::FileMetadata {
         let mut var_dimensions = <Option<String>>::sse_decode(deserializer);
         let mut var_blurhash = <Option<String>>::sse_decode(deserializer);
         let mut var_thumbhash = <Option<String>>::sse_decode(deserializer);
+        let mut var_durationMs = <Option<u64>>::sse_decode(deserializer);
+        let mut var_waveform = <Option<Vec<u8>>>::sse_decode(deserializer);
         return crate::api::media_files::FileMetadata {
             original_filename: var_originalFilename,
             dimensions: var_dimensions,
             blurhash: var_blurhash,
             thumbhash: var_thumbhash,
+            duration_ms: var_durationMs,
+            waveform: var_waveform,
         };
     }
 }
@@ -6491,6 +6706,7 @@ impl SseDecode for crate::api::groups::FlutterGroupDataUpdate {
         let mut var_imageKey = <Option<[u8; 32]>>::sse_decode(deserializer);
         let mut var_imageHash = <Option<[u8; 32]>>::sse_decode(deserializer);
         let mut var_imageNonce = <Option<[u8; 12]>>::sse_decode(deserializer);
+        let mut var_disappearingMessageSecs = <Option<u64>>::sse_decode(deserializer);
         return crate::api::groups::FlutterGroupDataUpdate {
             name: var_name,
             description: var_description,
@@ -6499,6 +6715,7 @@ impl SseDecode for crate::api::groups::FlutterGroupDataUpdate {
             image_key: var_imageKey,
             image_hash: var_imageHash,
             image_nonce: var_imageNonce,
+            disappearing_message_secs: var_disappearingMessageSecs,
         };
     }
 }
@@ -6921,6 +7138,38 @@ impl SseDecode for Vec<u8> {
         let mut ans_ = Vec::with_capacity(len_ as usize);
         for idx_ in 0..len_ {
             ans_.push(<u8>::sse_decode(deserializer));
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for Vec<crate::api::product_analytics::ProductAnalyticsNumberProp> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(
+                <crate::api::product_analytics::ProductAnalyticsNumberProp>::sse_decode(
+                    deserializer,
+                ),
+            );
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for Vec<crate::api::product_analytics::ProductAnalyticsStringProp> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = Vec::with_capacity(len_ as usize);
+        for idx_ in 0..len_ {
+            ans_.push(
+                <crate::api::product_analytics::ProductAnalyticsStringProp>::sse_decode(
+                    deserializer,
+                ),
+            );
         }
         return ans_;
     }
@@ -7366,6 +7615,19 @@ impl SseDecode for Option<i64> {
     }
 }
 
+impl SseDecode for Option<crate::api::product_analytics::ProductAnalyticsConfig> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(
+                <crate::api::product_analytics::ProductAnalyticsConfig>::sse_decode(deserializer),
+            );
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for Option<crate::api::notifications::PushRegistration> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -7384,6 +7646,17 @@ impl SseDecode for Option<u32> {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         if (<bool>::sse_decode(deserializer)) {
             return Some(<u32>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
+impl SseDecode for Option<u64> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<u64>::sse_decode(deserializer));
         } else {
             return None;
         }
@@ -7412,6 +7685,17 @@ impl SseDecode for Option<Vec<String>> {
     }
 }
 
+impl SseDecode for Option<Vec<u8>> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        if (<bool>::sse_decode(deserializer)) {
+            return Some(<Vec<u8>>::sse_decode(deserializer));
+        } else {
+            return None;
+        }
+    }
+}
+
 impl SseDecode for Option<[u8; 12]> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -7431,6 +7715,194 @@ impl SseDecode for Option<[u8; 32]> {
         } else {
             return None;
         }
+    }
+}
+
+impl SseDecode for crate::api::product_analytics::ProductAnalyticsBackend {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut tag_ = <i32>::sse_decode(deserializer);
+        match tag_ {
+            0 => {
+                return crate::api::product_analytics::ProductAnalyticsBackend::Disabled;
+            }
+            1 => {
+                let mut var_config =
+                    <crate::api::product_analytics::AptabaseAnalyticsConfig>::sse_decode(
+                        deserializer,
+                    );
+                return crate::api::product_analytics::ProductAnalyticsBackend::Aptabase {
+                    config: var_config,
+                };
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
+impl SseDecode for crate::api::product_analytics::ProductAnalyticsConfig {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_backend =
+            <crate::api::product_analytics::ProductAnalyticsBackend>::sse_decode(deserializer);
+        let mut var_appVersion = <String>::sse_decode(deserializer);
+        let mut var_bundleIdentifier = <String>::sse_decode(deserializer);
+        let mut var_deviceClass =
+            <crate::api::product_analytics::ProductAnalyticsDeviceClass>::sse_decode(deserializer);
+        let mut var_osName = <String>::sse_decode(deserializer);
+        let mut var_locale = <String>::sse_decode(deserializer);
+        let mut var_isDebug = <bool>::sse_decode(deserializer);
+        return crate::api::product_analytics::ProductAnalyticsConfig {
+            backend: var_backend,
+            app_version: var_appVersion,
+            bundle_identifier: var_bundleIdentifier,
+            device_class: var_deviceClass,
+            os_name: var_osName,
+            locale: var_locale,
+            is_debug: var_isDebug,
+        };
+    }
+}
+
+impl SseDecode for crate::api::product_analytics::ProductAnalyticsDeviceClass {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::product_analytics::ProductAnalyticsDeviceClass::Phone,
+            1 => crate::api::product_analytics::ProductAnalyticsDeviceClass::Tablet,
+            2 => crate::api::product_analytics::ProductAnalyticsDeviceClass::Desktop,
+            3 => crate::api::product_analytics::ProductAnalyticsDeviceClass::Unknown,
+            _ => unreachable!("Invalid variant for ProductAnalyticsDeviceClass: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::product_analytics::ProductAnalyticsEvent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_name =
+            <crate::api::product_analytics::ProductAnalyticsEventName>::sse_decode(deserializer);
+        let mut var_stringProps =
+            <Vec<crate::api::product_analytics::ProductAnalyticsStringProp>>::sse_decode(
+                deserializer,
+            );
+        let mut var_numberProps =
+            <Vec<crate::api::product_analytics::ProductAnalyticsNumberProp>>::sse_decode(
+                deserializer,
+            );
+        return crate::api::product_analytics::ProductAnalyticsEvent {
+            name: var_name,
+            string_props: var_stringProps,
+            number_props: var_numberProps,
+        };
+    }
+}
+
+impl SseDecode for crate::api::product_analytics::ProductAnalyticsEventName {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::product_analytics::ProductAnalyticsEventName::AnalyticsEnabled,
+            1 => crate::api::product_analytics::ProductAnalyticsEventName::AppStarted,
+            2 => crate::api::product_analytics::ProductAnalyticsEventName::AppForegrounded,
+            3 => crate::api::product_analytics::ProductAnalyticsEventName::AppBackgrounded,
+            4 => crate::api::product_analytics::ProductAnalyticsEventName::OnboardingStarted,
+            5 => crate::api::product_analytics::ProductAnalyticsEventName::OnboardingCompleted,
+            6 => crate::api::product_analytics::ProductAnalyticsEventName::IdentityCreated,
+            7 => crate::api::product_analytics::ProductAnalyticsEventName::LoginStarted,
+            8 => crate::api::product_analytics::ProductAnalyticsEventName::LoginCompleted,
+            9 => crate::api::product_analytics::ProductAnalyticsEventName::LoginFailed,
+            10 => crate::api::product_analytics::ProductAnalyticsEventName::MessageSendStarted,
+            11 => crate::api::product_analytics::ProductAnalyticsEventName::MessageSendCompleted,
+            12 => crate::api::product_analytics::ProductAnalyticsEventName::MessageSendFailed,
+            13 => crate::api::product_analytics::ProductAnalyticsEventName::GroupCreateStarted,
+            14 => crate::api::product_analytics::ProductAnalyticsEventName::GroupCreateCompleted,
+            15 => crate::api::product_analytics::ProductAnalyticsEventName::GroupCreateFailed,
+            16 => crate::api::product_analytics::ProductAnalyticsEventName::MembersAdded,
+            17 => crate::api::product_analytics::ProductAnalyticsEventName::MembersRemoved,
+            18 => crate::api::product_analytics::ProductAnalyticsEventName::GroupDataUpdated,
+            19 => crate::api::product_analytics::ProductAnalyticsEventName::MediaUploadStarted,
+            20 => crate::api::product_analytics::ProductAnalyticsEventName::MediaUploadCompleted,
+            21 => crate::api::product_analytics::ProductAnalyticsEventName::MediaUploadFailed,
+            22 => {
+                crate::api::product_analytics::ProductAnalyticsEventName::PushRegistrationCompleted
+            }
+            23 => crate::api::product_analytics::ProductAnalyticsEventName::PushRegistrationFailed,
+            24 => crate::api::product_analytics::ProductAnalyticsEventName::SettingChanged,
+            _ => unreachable!("Invalid variant for ProductAnalyticsEventName: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::product_analytics::ProductAnalyticsFlushStatus {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::product_analytics::ProductAnalyticsFlushStatus::Flushed,
+            1 => crate::api::product_analytics::ProductAnalyticsFlushStatus::NothingToFlush,
+            2 => crate::api::product_analytics::ProductAnalyticsFlushStatus::Disabled,
+            3 => crate::api::product_analytics::ProductAnalyticsFlushStatus::Unconfigured,
+            4 => crate::api::product_analytics::ProductAnalyticsFlushStatus::TimedOut,
+            _ => unreachable!("Invalid variant for ProductAnalyticsFlushStatus: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::product_analytics::ProductAnalyticsNumberProp {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_key = <String>::sse_decode(deserializer);
+        let mut var_value = <f64>::sse_decode(deserializer);
+        return crate::api::product_analytics::ProductAnalyticsNumberProp {
+            key: var_key,
+            value: var_value,
+        };
+    }
+}
+
+impl SseDecode for crate::api::product_analytics::ProductAnalyticsSettings {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_enabled = <bool>::sse_decode(deserializer);
+        let mut var_createdAt = <chrono::DateTime<chrono::Utc>>::sse_decode(deserializer);
+        let mut var_updatedAt = <chrono::DateTime<chrono::Utc>>::sse_decode(deserializer);
+        let mut var_consentVersion = <String>::sse_decode(deserializer);
+        return crate::api::product_analytics::ProductAnalyticsSettings {
+            enabled: var_enabled,
+            created_at: var_createdAt,
+            updated_at: var_updatedAt,
+            consent_version: var_consentVersion,
+        };
+    }
+}
+
+impl SseDecode for crate::api::product_analytics::ProductAnalyticsStringProp {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_key = <String>::sse_decode(deserializer);
+        let mut var_value = <String>::sse_decode(deserializer);
+        return crate::api::product_analytics::ProductAnalyticsStringProp {
+            key: var_key,
+            value: var_value,
+        };
+    }
+}
+
+impl SseDecode for crate::api::product_analytics::ProductAnalyticsTrackStatus {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::product_analytics::ProductAnalyticsTrackStatus::Queued,
+            1 => crate::api::product_analytics::ProductAnalyticsTrackStatus::IgnoredDisabled,
+            2 => crate::api::product_analytics::ProductAnalyticsTrackStatus::IgnoredUnconfigured,
+            _ => unreachable!("Invalid variant for ProductAnalyticsTrackStatus: {}", inner),
+        };
     }
 }
 
@@ -7817,10 +8289,14 @@ impl SseDecode for crate::api::WhitenoiseConfig {
         let mut var_dataDir = <String>::sse_decode(deserializer);
         let mut var_logsDir = <String>::sse_decode(deserializer);
         let mut var_defaultRelayUrls = <Option<Vec<String>>>::sse_decode(deserializer);
+        let mut var_productAnalyticsConfig = <Option<
+            crate::api::product_analytics::ProductAnalyticsConfig,
+        >>::sse_decode(deserializer);
         return crate::api::WhitenoiseConfig {
             data_dir: var_dataDir,
             logs_dir: var_logsDir,
             default_relay_urls: var_defaultRelayUrls,
+            product_analytics_config: var_productAnalyticsConfig,
         };
     }
 }
@@ -7944,273 +8420,303 @@ fn pde_ffi_dispatcher_primary_impl(
             rust_vec_len,
             data_len,
         ),
-        39 => wire__crate__api__accounts__follow_user_impl(port, ptr, rust_vec_len, data_len),
-        40 => wire__crate__api__accounts__get_account_impl(port, ptr, rust_vec_len, data_len),
-        41 => wire__crate__api__account_groups__get_account_group_impl(
+        39 => wire__crate__api__product_analytics__flush_product_analytics_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        42 => wire__crate__api__accounts__get_accounts_impl(port, ptr, rust_vec_len, data_len),
-        43 => wire__crate__api__get_app_settings_impl(port, ptr, rust_vec_len, data_len),
-        44 => {
+        40 => wire__crate__api__accounts__follow_user_impl(port, ptr, rust_vec_len, data_len),
+        41 => wire__crate__api__accounts__get_account_impl(port, ptr, rust_vec_len, data_len),
+        42 => wire__crate__api__account_groups__get_account_group_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        43 => wire__crate__api__accounts__get_accounts_impl(port, ptr, rust_vec_len, data_len),
+        44 => wire__crate__api__get_app_settings_impl(port, ptr, rust_vec_len, data_len),
+        45 => {
             wire__crate__api__mute_list__get_blocked_users_impl(port, ptr, rust_vec_len, data_len)
         }
-        45 => wire__crate__api__chat_list__get_chat_list_impl(port, ptr, rust_vec_len, data_len),
-        46 => {
+        46 => wire__crate__api__chat_list__get_chat_list_impl(port, ptr, rust_vec_len, data_len),
+        47 => {
             wire__crate__api__chat_summary__get_chat_summary_impl(port, ptr, rust_vec_len, data_len)
         }
-        47 => wire__crate__api__utils__get_default_blossom_server_url_impl(
+        48 => wire__crate__api__utils__get_default_blossom_server_url_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        48 => wire__crate__api__account_groups__get_dm_group_with_peer_impl(
+        49 => wire__crate__api__account_groups__get_dm_group_with_peer_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        49 => wire__crate__api__groups__get_group_impl(port, ptr, rust_vec_len, data_len),
-        50 => {
+        50 => wire__crate__api__groups__get_group_impl(port, ptr, rust_vec_len, data_len),
+        51 => {
             wire__crate__api__groups__get_group_image_path_impl(port, ptr, rust_vec_len, data_len)
         }
-        51 => {
+        52 => {
             wire__crate__api__groups__get_group_information_impl(port, ptr, rust_vec_len, data_len)
         }
-        52 => wire__crate__api__groups__get_groups_informations_impl(
+        53 => wire__crate__api__groups__get_groups_informations_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        53 => wire__crate__api__notifications__get_push_registration_impl(
+        54 => wire__crate__api__notifications__get_push_registration_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        54 => {
+        55 => {
             wire__crate__api__groups__get_ratchet_tree_info_impl(port, ptr, rust_vec_len, data_len)
         }
-        55 => wire__crate__api__users__get_user_impl(port, ptr, rust_vec_len, data_len),
-        56 => wire__crate__api__groups__group_admins_impl(port, ptr, rust_vec_len, data_len),
-        57 => wire__crate__api__groups__group_group_type_impl(port, ptr, rust_vec_len, data_len),
-        58 => wire__crate__api__utils__group_id_from_string_impl(port, ptr, rust_vec_len, data_len),
-        59 => wire__crate__api__utils__group_id_to_string_impl(port, ptr, rust_vec_len, data_len),
-        60 => wire__crate__api__groups__group_is_direct_message_type_impl(
+        56 => wire__crate__api__users__get_user_impl(port, ptr, rust_vec_len, data_len),
+        57 => wire__crate__api__groups__group_admins_impl(port, ptr, rust_vec_len, data_len),
+        58 => wire__crate__api__groups__group_group_type_impl(port, ptr, rust_vec_len, data_len),
+        59 => wire__crate__api__utils__group_id_from_string_impl(port, ptr, rust_vec_len, data_len),
+        60 => wire__crate__api__utils__group_id_to_string_impl(port, ptr, rust_vec_len, data_len),
+        61 => wire__crate__api__groups__group_is_direct_message_type_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        61 => wire__crate__api__groups__group_is_group_type_impl(port, ptr, rust_vec_len, data_len),
-        62 => wire__crate__api__groups__group_members_impl(port, ptr, rust_vec_len, data_len),
-        63 => wire__crate__api__groups__group_required_proposals_impl(
+        62 => wire__crate__api__groups__group_is_group_type_impl(port, ptr, rust_vec_len, data_len),
+        63 => wire__crate__api__groups__group_members_impl(port, ptr, rust_vec_len, data_len),
+        64 => wire__crate__api__groups__group_required_proposals_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        64 => wire__crate__api__groups__group_update_group_data_impl(
+        65 => wire__crate__api__groups__group_update_group_data_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        66 => wire__crate__api__initialize_whitenoise_impl(port, ptr, rust_vec_len, data_len),
-        67 => wire__crate__api__accounts__is_following_user_impl(port, ptr, rust_vec_len, data_len),
-        68 => wire__crate__api__mute_list__is_user_blocked_impl(port, ptr, rust_vec_len, data_len),
-        81 => {
+        67 => wire__crate__api__initialize_whitenoise_impl(port, ptr, rust_vec_len, data_len),
+        68 => wire__crate__api__accounts__is_following_user_impl(port, ptr, rust_vec_len, data_len),
+        69 => wire__crate__api__mute_list__is_user_blocked_impl(port, ptr, rust_vec_len, data_len),
+        82 => {
             wire__crate__api__groups__leave_and_delete_group_impl(port, ptr, rust_vec_len, data_len)
         }
-        82 => wire__crate__api__groups__leave_group_impl(port, ptr, rust_vec_len, data_len),
-        83 => wire__crate__api__drafts__load_draft_impl(port, ptr, rust_vec_len, data_len),
-        84 => wire__crate__api__accounts__login_cancel_impl(port, ptr, rust_vec_len, data_len),
-        85 => wire__crate__api__signer__login_external_signer_publish_default_relays_impl(
+        83 => wire__crate__api__groups__leave_group_impl(port, ptr, rust_vec_len, data_len),
+        84 => wire__crate__api__drafts__load_draft_impl(port, ptr, rust_vec_len, data_len),
+        85 => wire__crate__api__accounts__login_cancel_impl(port, ptr, rust_vec_len, data_len),
+        86 => wire__crate__api__signer__login_external_signer_publish_default_relays_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        86 => wire__crate__api__signer__login_external_signer_start_impl(
+        87 => wire__crate__api__signer__login_external_signer_start_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        87 => wire__crate__api__signer__login_external_signer_with_custom_relay_impl(
+        88 => wire__crate__api__signer__login_external_signer_with_custom_relay_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        88 => wire__crate__api__accounts__login_publish_default_relays_impl(
+        89 => wire__crate__api__accounts__login_publish_default_relays_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        89 => wire__crate__api__accounts__login_start_impl(port, ptr, rust_vec_len, data_len),
-        90 => wire__crate__api__accounts__login_with_custom_relay_impl(
+        90 => wire__crate__api__accounts__login_start_impl(port, ptr, rust_vec_len, data_len),
+        91 => wire__crate__api__accounts__login_with_custom_relay_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        91 => wire__crate__api__accounts__logout_impl(port, ptr, rust_vec_len, data_len),
-        92 => wire__crate__api__account_groups__mark_message_read_impl(
+        92 => wire__crate__api__accounts__logout_impl(port, ptr, rust_vec_len, data_len),
+        93 => wire__crate__api__account_groups__mark_message_read_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        93 => wire__crate__api__chat_list__mute_chat_impl(port, ptr, rust_vec_len, data_len),
-        95 => wire__crate__api__accounts__publish_account_key_package_impl(
+        94 => wire__crate__api__chat_list__mute_chat_impl(port, ptr, rust_vec_len, data_len),
+        96 => wire__crate__api__product_analytics__product_analytics_consent_version_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        96 => wire__crate__api__signer__register_external_signer_impl(
+        97 => wire__crate__api__product_analytics__product_analytics_settings_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        97 => wire__crate__api__relays__relay_type_inbox_impl(port, ptr, rust_vec_len, data_len),
-        98 => {
+        98 => wire__crate__api__accounts__publish_account_key_package_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        99 => wire__crate__api__signer__register_external_signer_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        100 => wire__crate__api__relays__relay_type_inbox_impl(port, ptr, rust_vec_len, data_len),
+        101 => {
             wire__crate__api__relays__relay_type_key_package_impl(port, ptr, rust_vec_len, data_len)
         }
-        99 => wire__crate__api__relays__relay_type_nip65_impl(port, ptr, rust_vec_len, data_len),
-        100 => {
+        102 => wire__crate__api__relays__relay_type_nip65_impl(port, ptr, rust_vec_len, data_len),
+        103 => {
             wire__crate__api__utils__relay_url_from_string_impl(port, ptr, rust_vec_len, data_len)
         }
-        101 => {
+        104 => {
             wire__crate__api__accounts__remove_account_relay_impl(port, ptr, rust_vec_len, data_len)
         }
-        102 => wire__crate__api__groups__remove_members_from_group_impl(
+        105 => wire__crate__api__groups__remove_members_from_group_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        103 => wire__crate__api__accounts__restore_default_relays_impl(
+        106 => wire__crate__api__accounts__restore_default_relays_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        104 => wire__crate__api__messages__retry_message_publish_impl(
+        107 => wire__crate__api__messages__retry_message_publish_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        105 => wire__crate__api__drafts__save_draft_impl(port, ptr, rust_vec_len, data_len),
-        106 => wire__crate__api__messages__search_messages_impl(port, ptr, rust_vec_len, data_len),
-        107 => wire__crate__api__messages__search_messages_in_group_impl(
+        108 => wire__crate__api__drafts__save_draft_impl(port, ptr, rust_vec_len, data_len),
+        109 => wire__crate__api__messages__search_messages_impl(port, ptr, rust_vec_len, data_len),
+        110 => wire__crate__api__messages__search_messages_in_group_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        108 => wire__crate__api__user_search__search_users_impl(port, ptr, rust_vec_len, data_len),
-        109 => wire__crate__api__groups__self_demote_impl(port, ptr, rust_vec_len, data_len),
-        110 => {
+        111 => wire__crate__api__user_search__search_users_impl(port, ptr, rust_vec_len, data_len),
+        112 => wire__crate__api__groups__self_demote_impl(port, ptr, rust_vec_len, data_len),
+        113 => {
             wire__crate__api__bug_report__send_bug_report_impl(port, ptr, rust_vec_len, data_len)
         }
-        111 => wire__crate__api__messages__send_message_to_group_impl(
+        114 => wire__crate__api__messages__send_message_to_group_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        112 => {
+        115 => {
             wire__crate__api__chat_list__set_chat_pin_order_impl(port, ptr, rust_vec_len, data_len)
         }
-        113 => {
+        116 => wire__crate__api__product_analytics__set_product_analytics_enabled_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        117 => {
             wire__crate__api__utils__string_from_relay_url_impl(port, ptr, rust_vec_len, data_len)
         }
-        114 => wire__crate__api__chat_list__subscribe_to_archived_chat_list_impl(
+        118 => wire__crate__api__chat_list__subscribe_to_archived_chat_list_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        115 => wire__crate__api__chat_list__subscribe_to_chat_list_impl(
+        119 => wire__crate__api__chat_list__subscribe_to_chat_list_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        116 => wire__crate__api__messages__subscribe_to_group_messages_impl(
+        120 => wire__crate__api__messages__subscribe_to_group_messages_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        117 => wire__crate__api__group_state__subscribe_to_group_state_impl(
+        121 => wire__crate__api__group_state__subscribe_to_group_state_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        118 => wire__crate__api__notifications__subscribe_to_notifications_impl(
+        122 => wire__crate__api__notifications__subscribe_to_notifications_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        119 => {
+        123 => {
             wire__crate__api__logs__subscribe_to_rust_logs_impl(port, ptr, rust_vec_len, data_len)
         }
-        120 => wire__crate__api__users__subscribe_to_user_impl(port, ptr, rust_vec_len, data_len),
-        121 => wire__crate__api__utils__tag_from_vec_impl(port, ptr, rust_vec_len, data_len),
-        126 => {
+        124 => wire__crate__api__users__subscribe_to_user_impl(port, ptr, rust_vec_len, data_len),
+        125 => wire__crate__api__utils__tag_from_vec_impl(port, ptr, rust_vec_len, data_len),
+        130 => wire__crate__api__product_analytics__track_product_analytics_event_impl(
+            port,
+            ptr,
+            rust_vec_len,
+            data_len,
+        ),
+        131 => {
             wire__crate__api__account_groups__unarchive_chat_impl(port, ptr, rust_vec_len, data_len)
         }
-        127 => wire__crate__api__mute_list__unblock_user_impl(port, ptr, rust_vec_len, data_len),
-        128 => wire__crate__api__accounts__unfollow_user_impl(port, ptr, rust_vec_len, data_len),
-        129 => wire__crate__api__chat_list__unmute_chat_impl(port, ptr, rust_vec_len, data_len),
-        130 => wire__crate__api__accounts__update_account_metadata_impl(
+        132 => wire__crate__api__mute_list__unblock_user_impl(port, ptr, rust_vec_len, data_len),
+        133 => wire__crate__api__accounts__unfollow_user_impl(port, ptr, rust_vec_len, data_len),
+        134 => wire__crate__api__chat_list__unmute_chat_impl(port, ptr, rust_vec_len, data_len),
+        135 => wire__crate__api__accounts__update_account_metadata_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        131 => wire__crate__api__update_language_impl(port, ptr, rust_vec_len, data_len),
-        132 => wire__crate__api__accounts__update_notifications_enabled_impl(
+        136 => wire__crate__api__update_language_impl(port, ptr, rust_vec_len, data_len),
+        137 => wire__crate__api__accounts__update_notifications_enabled_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        133 => wire__crate__api__update_theme_mode_impl(port, ptr, rust_vec_len, data_len),
-        134 => wire__crate__api__accounts__upload_account_profile_picture_impl(
+        138 => wire__crate__api__update_theme_mode_impl(port, ptr, rust_vec_len, data_len),
+        139 => wire__crate__api__accounts__upload_account_profile_picture_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        135 => {
+        140 => {
             wire__crate__api__media_files__upload_chat_media_impl(port, ptr, rust_vec_len, data_len)
         }
-        136 => wire__crate__api__groups__upload_group_image_impl(port, ptr, rust_vec_len, data_len),
-        137 => wire__crate__api__notifications__upsert_push_registration_impl(
+        141 => wire__crate__api__groups__upload_group_image_impl(port, ptr, rust_vec_len, data_len),
+        142 => wire__crate__api__notifications__upsert_push_registration_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        138 => {
+        143 => {
             wire__crate__api__users__user_has_key_package_impl(port, ptr, rust_vec_len, data_len)
         }
-        139 => wire__crate__api__users__user_metadata_impl(port, ptr, rust_vec_len, data_len),
-        140 => wire__crate__api__users__user_relays_impl(port, ptr, rust_vec_len, data_len),
-        141 => wire__crate__api__groups__visible_groups_with_info_impl(
+        144 => wire__crate__api__users__user_metadata_impl(port, ptr, rust_vec_len, data_len),
+        145 => wire__crate__api__users__user_relays_impl(port, ptr, rust_vec_len, data_len),
+        146 => wire__crate__api__groups__visible_groups_with_info_impl(
             port,
             ptr,
             rust_vec_len,
@@ -8232,28 +8738,28 @@ fn pde_ffi_dispatcher_sync_impl(
             wire__crate__api__relay_defaults__default_relay_urls_impl(ptr, rust_vec_len, data_len)
         }
         33 => wire__crate__api__utils__event_id_to_nevent_uri_impl(ptr, rust_vec_len, data_len),
-        65 => wire__crate__api__utils__hex_pubkey_from_npub_impl(ptr, rust_vec_len, data_len),
-        69 => {
+        66 => wire__crate__api__utils__hex_pubkey_from_npub_impl(ptr, rust_vec_len, data_len),
+        70 => {
             wire__crate__api__utils__language_chinese_simplified_impl(ptr, rust_vec_len, data_len)
         }
-        70 => {
+        71 => {
             wire__crate__api__utils__language_chinese_traditional_impl(ptr, rust_vec_len, data_len)
         }
-        71 => wire__crate__api__utils__language_english_impl(ptr, rust_vec_len, data_len),
-        72 => wire__crate__api__utils__language_french_impl(ptr, rust_vec_len, data_len),
-        73 => wire__crate__api__utils__language_german_impl(ptr, rust_vec_len, data_len),
-        74 => wire__crate__api__utils__language_italian_impl(ptr, rust_vec_len, data_len),
-        75 => wire__crate__api__utils__language_portuguese_impl(ptr, rust_vec_len, data_len),
-        76 => wire__crate__api__utils__language_russian_impl(ptr, rust_vec_len, data_len),
-        77 => wire__crate__api__utils__language_spanish_impl(ptr, rust_vec_len, data_len),
-        78 => wire__crate__api__utils__language_system_impl(ptr, rust_vec_len, data_len),
-        79 => wire__crate__api__utils__language_to_string_impl(ptr, rust_vec_len, data_len),
-        80 => wire__crate__api__utils__language_turkish_impl(ptr, rust_vec_len, data_len),
-        94 => wire__crate__api__utils__npub_from_hex_pubkey_impl(ptr, rust_vec_len, data_len),
-        122 => wire__crate__api__utils__theme_mode_dark_impl(ptr, rust_vec_len, data_len),
-        123 => wire__crate__api__utils__theme_mode_light_impl(ptr, rust_vec_len, data_len),
-        124 => wire__crate__api__utils__theme_mode_system_impl(ptr, rust_vec_len, data_len),
-        125 => wire__crate__api__utils__theme_mode_to_string_impl(ptr, rust_vec_len, data_len),
+        72 => wire__crate__api__utils__language_english_impl(ptr, rust_vec_len, data_len),
+        73 => wire__crate__api__utils__language_french_impl(ptr, rust_vec_len, data_len),
+        74 => wire__crate__api__utils__language_german_impl(ptr, rust_vec_len, data_len),
+        75 => wire__crate__api__utils__language_italian_impl(ptr, rust_vec_len, data_len),
+        76 => wire__crate__api__utils__language_portuguese_impl(ptr, rust_vec_len, data_len),
+        77 => wire__crate__api__utils__language_russian_impl(ptr, rust_vec_len, data_len),
+        78 => wire__crate__api__utils__language_spanish_impl(ptr, rust_vec_len, data_len),
+        79 => wire__crate__api__utils__language_system_impl(ptr, rust_vec_len, data_len),
+        80 => wire__crate__api__utils__language_to_string_impl(ptr, rust_vec_len, data_len),
+        81 => wire__crate__api__utils__language_turkish_impl(ptr, rust_vec_len, data_len),
+        95 => wire__crate__api__utils__npub_from_hex_pubkey_impl(ptr, rust_vec_len, data_len),
+        126 => wire__crate__api__utils__theme_mode_dark_impl(ptr, rust_vec_len, data_len),
+        127 => wire__crate__api__utils__theme_mode_light_impl(ptr, rust_vec_len, data_len),
+        128 => wire__crate__api__utils__theme_mode_system_impl(ptr, rust_vec_len, data_len),
+        129 => wire__crate__api__utils__theme_mode_to_string_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -8540,6 +9046,27 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::error::ApiError>
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::product_analytics::AptabaseAnalyticsConfig {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.app_key.into_into_dart().into_dart(),
+            self.host.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::product_analytics::AptabaseAnalyticsConfig
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::product_analytics::AptabaseAnalyticsConfig>
+    for crate::api::product_analytics::AptabaseAnalyticsConfig
+{
+    fn into_into_dart(self) -> crate::api::product_analytics::AptabaseAnalyticsConfig {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::chat_list::ChatListStreamItem {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
@@ -8817,6 +9344,8 @@ impl flutter_rust_bridge::IntoDart for crate::api::media_files::FileMetadata {
             self.dimensions.into_into_dart().into_dart(),
             self.blurhash.into_into_dart().into_dart(),
             self.thumbhash.into_into_dart().into_dart(),
+            self.duration_ms.into_into_dart().into_dart(),
+            self.waveform.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -8868,6 +9397,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::groups::FlutterGroupDataUpdat
             self.image_key.into_into_dart().into_dart(),
             self.image_hash.into_into_dart().into_dart(),
             self.image_nonce.into_into_dart().into_dart(),
+            self.disappearing_message_secs.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -9396,6 +9926,259 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::notifications::NotificationUs
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::product_analytics::ProductAnalyticsBackend {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            crate::api::product_analytics::ProductAnalyticsBackend::Disabled => {
+                [0.into_dart()].into_dart()
+            }
+            crate::api::product_analytics::ProductAnalyticsBackend::Aptabase { config } => {
+                [1.into_dart(), config.into_into_dart().into_dart()].into_dart()
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::product_analytics::ProductAnalyticsBackend
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::product_analytics::ProductAnalyticsBackend>
+    for crate::api::product_analytics::ProductAnalyticsBackend
+{
+    fn into_into_dart(self) -> crate::api::product_analytics::ProductAnalyticsBackend {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::product_analytics::ProductAnalyticsConfig {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.backend.into_into_dart().into_dart(),
+            self.app_version.into_into_dart().into_dart(),
+            self.bundle_identifier.into_into_dart().into_dart(),
+            self.device_class.into_into_dart().into_dart(),
+            self.os_name.into_into_dart().into_dart(),
+            self.locale.into_into_dart().into_dart(),
+            self.is_debug.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::product_analytics::ProductAnalyticsConfig
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::product_analytics::ProductAnalyticsConfig>
+    for crate::api::product_analytics::ProductAnalyticsConfig
+{
+    fn into_into_dart(self) -> crate::api::product_analytics::ProductAnalyticsConfig {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::product_analytics::ProductAnalyticsDeviceClass {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Phone => 0.into_dart(),
+            Self::Tablet => 1.into_dart(),
+            Self::Desktop => 2.into_dart(),
+            Self::Unknown => 3.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::product_analytics::ProductAnalyticsDeviceClass
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::product_analytics::ProductAnalyticsDeviceClass>
+    for crate::api::product_analytics::ProductAnalyticsDeviceClass
+{
+    fn into_into_dart(self) -> crate::api::product_analytics::ProductAnalyticsDeviceClass {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::product_analytics::ProductAnalyticsEvent {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.name.into_into_dart().into_dart(),
+            self.string_props.into_into_dart().into_dart(),
+            self.number_props.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::product_analytics::ProductAnalyticsEvent
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::product_analytics::ProductAnalyticsEvent>
+    for crate::api::product_analytics::ProductAnalyticsEvent
+{
+    fn into_into_dart(self) -> crate::api::product_analytics::ProductAnalyticsEvent {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::product_analytics::ProductAnalyticsEventName {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::AnalyticsEnabled => 0.into_dart(),
+            Self::AppStarted => 1.into_dart(),
+            Self::AppForegrounded => 2.into_dart(),
+            Self::AppBackgrounded => 3.into_dart(),
+            Self::OnboardingStarted => 4.into_dart(),
+            Self::OnboardingCompleted => 5.into_dart(),
+            Self::IdentityCreated => 6.into_dart(),
+            Self::LoginStarted => 7.into_dart(),
+            Self::LoginCompleted => 8.into_dart(),
+            Self::LoginFailed => 9.into_dart(),
+            Self::MessageSendStarted => 10.into_dart(),
+            Self::MessageSendCompleted => 11.into_dart(),
+            Self::MessageSendFailed => 12.into_dart(),
+            Self::GroupCreateStarted => 13.into_dart(),
+            Self::GroupCreateCompleted => 14.into_dart(),
+            Self::GroupCreateFailed => 15.into_dart(),
+            Self::MembersAdded => 16.into_dart(),
+            Self::MembersRemoved => 17.into_dart(),
+            Self::GroupDataUpdated => 18.into_dart(),
+            Self::MediaUploadStarted => 19.into_dart(),
+            Self::MediaUploadCompleted => 20.into_dart(),
+            Self::MediaUploadFailed => 21.into_dart(),
+            Self::PushRegistrationCompleted => 22.into_dart(),
+            Self::PushRegistrationFailed => 23.into_dart(),
+            Self::SettingChanged => 24.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::product_analytics::ProductAnalyticsEventName
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::product_analytics::ProductAnalyticsEventName>
+    for crate::api::product_analytics::ProductAnalyticsEventName
+{
+    fn into_into_dart(self) -> crate::api::product_analytics::ProductAnalyticsEventName {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::product_analytics::ProductAnalyticsFlushStatus {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Flushed => 0.into_dart(),
+            Self::NothingToFlush => 1.into_dart(),
+            Self::Disabled => 2.into_dart(),
+            Self::Unconfigured => 3.into_dart(),
+            Self::TimedOut => 4.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::product_analytics::ProductAnalyticsFlushStatus
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::product_analytics::ProductAnalyticsFlushStatus>
+    for crate::api::product_analytics::ProductAnalyticsFlushStatus
+{
+    fn into_into_dart(self) -> crate::api::product_analytics::ProductAnalyticsFlushStatus {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::product_analytics::ProductAnalyticsNumberProp {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.key.into_into_dart().into_dart(),
+            self.value.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::product_analytics::ProductAnalyticsNumberProp
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::product_analytics::ProductAnalyticsNumberProp>
+    for crate::api::product_analytics::ProductAnalyticsNumberProp
+{
+    fn into_into_dart(self) -> crate::api::product_analytics::ProductAnalyticsNumberProp {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::product_analytics::ProductAnalyticsSettings {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.enabled.into_into_dart().into_dart(),
+            self.created_at.into_into_dart().into_dart(),
+            self.updated_at.into_into_dart().into_dart(),
+            self.consent_version.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::product_analytics::ProductAnalyticsSettings
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::product_analytics::ProductAnalyticsSettings>
+    for crate::api::product_analytics::ProductAnalyticsSettings
+{
+    fn into_into_dart(self) -> crate::api::product_analytics::ProductAnalyticsSettings {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::product_analytics::ProductAnalyticsStringProp {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.key.into_into_dart().into_dart(),
+            self.value.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::product_analytics::ProductAnalyticsStringProp
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::product_analytics::ProductAnalyticsStringProp>
+    for crate::api::product_analytics::ProductAnalyticsStringProp
+{
+    fn into_into_dart(self) -> crate::api::product_analytics::ProductAnalyticsStringProp {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::product_analytics::ProductAnalyticsTrackStatus {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::Queued => 0.into_dart(),
+            Self::IgnoredDisabled => 1.into_dart(),
+            Self::IgnoredUnconfigured => 2.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::product_analytics::ProductAnalyticsTrackStatus
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::product_analytics::ProductAnalyticsTrackStatus>
+    for crate::api::product_analytics::ProductAnalyticsTrackStatus
+{
+    fn into_into_dart(self) -> crate::api::product_analytics::ProductAnalyticsTrackStatus {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::notifications::PushPlatform {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
@@ -9827,6 +10610,7 @@ impl flutter_rust_bridge::IntoDart for crate::api::WhitenoiseConfig {
             self.data_dir.into_into_dart().into_dart(),
             self.logs_dir.into_into_dart().into_dart(),
             self.default_relay_urls.into_into_dart().into_dart(),
+            self.product_analytics_config.into_into_dart().into_dart(),
         ]
         .into_dart()
     }
@@ -10227,6 +11011,14 @@ impl SseEncode for crate::api::error::ApiError {
     }
 }
 
+impl SseEncode for crate::api::product_analytics::AptabaseAnalyticsConfig {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.app_key, serializer);
+        <String>::sse_encode(self.host, serializer);
+    }
+}
+
 impl SseEncode for bool {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -10421,6 +11213,13 @@ impl SseEncode for crate::api::messages::EmojiReaction {
     }
 }
 
+impl SseEncode for f64 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_f64::<NativeEndian>(self).unwrap();
+    }
+}
+
 impl SseEncode for crate::api::media_files::FileMetadata {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -10428,6 +11227,8 @@ impl SseEncode for crate::api::media_files::FileMetadata {
         <Option<String>>::sse_encode(self.dimensions, serializer);
         <Option<String>>::sse_encode(self.blurhash, serializer);
         <Option<String>>::sse_encode(self.thumbhash, serializer);
+        <Option<u64>>::sse_encode(self.duration_ms, serializer);
+        <Option<Vec<u8>>>::sse_encode(self.waveform, serializer);
     }
 }
 
@@ -10453,6 +11254,7 @@ impl SseEncode for crate::api::groups::FlutterGroupDataUpdate {
         <Option<[u8; 32]>>::sse_encode(self.image_key, serializer);
         <Option<[u8; 32]>>::sse_encode(self.image_hash, serializer);
         <Option<[u8; 12]>>::sse_encode(self.image_nonce, serializer);
+        <Option<u64>>::sse_encode(self.disappearing_message_secs, serializer);
     }
 }
 
@@ -10792,6 +11594,30 @@ impl SseEncode for Vec<u8> {
         <i32>::sse_encode(self.len() as _, serializer);
         for item in self {
             <u8>::sse_encode(item, serializer);
+        }
+    }
+}
+
+impl SseEncode for Vec<crate::api::product_analytics::ProductAnalyticsNumberProp> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::product_analytics::ProductAnalyticsNumberProp>::sse_encode(
+                item, serializer,
+            );
+        }
+    }
+}
+
+impl SseEncode for Vec<crate::api::product_analytics::ProductAnalyticsStringProp> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::product_analytics::ProductAnalyticsStringProp>::sse_encode(
+                item, serializer,
+            );
         }
     }
 }
@@ -11143,6 +11969,16 @@ impl SseEncode for Option<i64> {
     }
 }
 
+impl SseEncode for Option<crate::api::product_analytics::ProductAnalyticsConfig> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <crate::api::product_analytics::ProductAnalyticsConfig>::sse_encode(value, serializer);
+        }
+    }
+}
+
 impl SseEncode for Option<crate::api::notifications::PushRegistration> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -11159,6 +11995,16 @@ impl SseEncode for Option<u32> {
         <bool>::sse_encode(self.is_some(), serializer);
         if let Some(value) = self {
             <u32>::sse_encode(value, serializer);
+        }
+    }
+}
+
+impl SseEncode for Option<u64> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <u64>::sse_encode(value, serializer);
         }
     }
 }
@@ -11183,6 +12029,16 @@ impl SseEncode for Option<Vec<String>> {
     }
 }
 
+impl SseEncode for Option<Vec<u8>> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.is_some(), serializer);
+        if let Some(value) = self {
+            <Vec<u8>>::sse_encode(value, serializer);
+        }
+    }
+}
+
 impl SseEncode for Option<[u8; 12]> {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
@@ -11200,6 +12056,176 @@ impl SseEncode for Option<[u8; 32]> {
         if let Some(value) = self {
             <[u8; 32]>::sse_encode(value, serializer);
         }
+    }
+}
+
+impl SseEncode for crate::api::product_analytics::ProductAnalyticsBackend {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        match self {
+            crate::api::product_analytics::ProductAnalyticsBackend::Disabled => {
+                <i32>::sse_encode(0, serializer);
+            }
+            crate::api::product_analytics::ProductAnalyticsBackend::Aptabase { config } => {
+                <i32>::sse_encode(1, serializer);
+                <crate::api::product_analytics::AptabaseAnalyticsConfig>::sse_encode(
+                    config, serializer,
+                );
+            }
+            _ => {
+                unimplemented!("");
+            }
+        }
+    }
+}
+
+impl SseEncode for crate::api::product_analytics::ProductAnalyticsConfig {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::product_analytics::ProductAnalyticsBackend>::sse_encode(
+            self.backend,
+            serializer,
+        );
+        <String>::sse_encode(self.app_version, serializer);
+        <String>::sse_encode(self.bundle_identifier, serializer);
+        <crate::api::product_analytics::ProductAnalyticsDeviceClass>::sse_encode(
+            self.device_class,
+            serializer,
+        );
+        <String>::sse_encode(self.os_name, serializer);
+        <String>::sse_encode(self.locale, serializer);
+        <bool>::sse_encode(self.is_debug, serializer);
+    }
+}
+
+impl SseEncode for crate::api::product_analytics::ProductAnalyticsDeviceClass {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::product_analytics::ProductAnalyticsDeviceClass::Phone => 0,
+                crate::api::product_analytics::ProductAnalyticsDeviceClass::Tablet => 1,
+                crate::api::product_analytics::ProductAnalyticsDeviceClass::Desktop => 2,
+                crate::api::product_analytics::ProductAnalyticsDeviceClass::Unknown => 3,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::product_analytics::ProductAnalyticsEvent {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <crate::api::product_analytics::ProductAnalyticsEventName>::sse_encode(
+            self.name, serializer,
+        );
+        <Vec<crate::api::product_analytics::ProductAnalyticsStringProp>>::sse_encode(
+            self.string_props,
+            serializer,
+        );
+        <Vec<crate::api::product_analytics::ProductAnalyticsNumberProp>>::sse_encode(
+            self.number_props,
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::product_analytics::ProductAnalyticsEventName {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(match self {crate::api::product_analytics::ProductAnalyticsEventName::AnalyticsEnabled => { 0 }
+crate::api::product_analytics::ProductAnalyticsEventName::AppStarted => { 1 }
+crate::api::product_analytics::ProductAnalyticsEventName::AppForegrounded => { 2 }
+crate::api::product_analytics::ProductAnalyticsEventName::AppBackgrounded => { 3 }
+crate::api::product_analytics::ProductAnalyticsEventName::OnboardingStarted => { 4 }
+crate::api::product_analytics::ProductAnalyticsEventName::OnboardingCompleted => { 5 }
+crate::api::product_analytics::ProductAnalyticsEventName::IdentityCreated => { 6 }
+crate::api::product_analytics::ProductAnalyticsEventName::LoginStarted => { 7 }
+crate::api::product_analytics::ProductAnalyticsEventName::LoginCompleted => { 8 }
+crate::api::product_analytics::ProductAnalyticsEventName::LoginFailed => { 9 }
+crate::api::product_analytics::ProductAnalyticsEventName::MessageSendStarted => { 10 }
+crate::api::product_analytics::ProductAnalyticsEventName::MessageSendCompleted => { 11 }
+crate::api::product_analytics::ProductAnalyticsEventName::MessageSendFailed => { 12 }
+crate::api::product_analytics::ProductAnalyticsEventName::GroupCreateStarted => { 13 }
+crate::api::product_analytics::ProductAnalyticsEventName::GroupCreateCompleted => { 14 }
+crate::api::product_analytics::ProductAnalyticsEventName::GroupCreateFailed => { 15 }
+crate::api::product_analytics::ProductAnalyticsEventName::MembersAdded => { 16 }
+crate::api::product_analytics::ProductAnalyticsEventName::MembersRemoved => { 17 }
+crate::api::product_analytics::ProductAnalyticsEventName::GroupDataUpdated => { 18 }
+crate::api::product_analytics::ProductAnalyticsEventName::MediaUploadStarted => { 19 }
+crate::api::product_analytics::ProductAnalyticsEventName::MediaUploadCompleted => { 20 }
+crate::api::product_analytics::ProductAnalyticsEventName::MediaUploadFailed => { 21 }
+crate::api::product_analytics::ProductAnalyticsEventName::PushRegistrationCompleted => { 22 }
+crate::api::product_analytics::ProductAnalyticsEventName::PushRegistrationFailed => { 23 }
+crate::api::product_analytics::ProductAnalyticsEventName::SettingChanged => { 24 }
+ _ => { unimplemented!(""); }}, serializer);
+    }
+}
+
+impl SseEncode for crate::api::product_analytics::ProductAnalyticsFlushStatus {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::product_analytics::ProductAnalyticsFlushStatus::Flushed => 0,
+                crate::api::product_analytics::ProductAnalyticsFlushStatus::NothingToFlush => 1,
+                crate::api::product_analytics::ProductAnalyticsFlushStatus::Disabled => 2,
+                crate::api::product_analytics::ProductAnalyticsFlushStatus::Unconfigured => 3,
+                crate::api::product_analytics::ProductAnalyticsFlushStatus::TimedOut => 4,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::product_analytics::ProductAnalyticsNumberProp {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.key, serializer);
+        <f64>::sse_encode(self.value, serializer);
+    }
+}
+
+impl SseEncode for crate::api::product_analytics::ProductAnalyticsSettings {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <bool>::sse_encode(self.enabled, serializer);
+        <chrono::DateTime<chrono::Utc>>::sse_encode(self.created_at, serializer);
+        <chrono::DateTime<chrono::Utc>>::sse_encode(self.updated_at, serializer);
+        <String>::sse_encode(self.consent_version, serializer);
+    }
+}
+
+impl SseEncode for crate::api::product_analytics::ProductAnalyticsStringProp {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.key, serializer);
+        <String>::sse_encode(self.value, serializer);
+    }
+}
+
+impl SseEncode for crate::api::product_analytics::ProductAnalyticsTrackStatus {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::product_analytics::ProductAnalyticsTrackStatus::Queued => 0,
+                crate::api::product_analytics::ProductAnalyticsTrackStatus::IgnoredDisabled => 1,
+                crate::api::product_analytics::ProductAnalyticsTrackStatus::IgnoredUnconfigured => {
+                    2
+                }
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
     }
 }
 
@@ -11531,6 +12557,10 @@ impl SseEncode for crate::api::WhitenoiseConfig {
         <String>::sse_encode(self.data_dir, serializer);
         <String>::sse_encode(self.logs_dir, serializer);
         <Option<Vec<String>>>::sse_encode(self.default_relay_urls, serializer);
+        <Option<crate::api::product_analytics::ProductAnalyticsConfig>>::sse_encode(
+            self.product_analytics_config,
+            serializer,
+        );
     }
 }
 

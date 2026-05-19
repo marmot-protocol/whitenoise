@@ -58,6 +58,25 @@ just deps    # Install Flutter and Rust dependencies
 just run     # Run on a connected device (staging flavor)
 ```
 
+## Product Analytics
+
+Product analytics are opt-in only and delivered by `whitenoise-rs`; Flutter does not call Aptabase directly. To enable a staging or production analytics build, pass the self-hosted Aptabase base URL and the flavor-specific app key as Dart defines:
+
+```sh
+flutter run --flavor staging \
+  --dart-define=APTABASE_HOST=https://analytics.example.com \
+  --dart-define=APTABASE_APP_KEY=staging-app-key
+```
+
+For local builds, a Flutter dart-define file is usually less error-prone:
+
+```sh
+flutter run --flavor staging --dart-define-from-file=.env.analytics.staging.local.json
+flutter run --flavor production --dart-define-from-file=.env.analytics.production.local.json
+```
+
+Use separate staging and production app keys. Keep real values in CI secrets or local ignored `.env.analytics*.json` files; do not commit them.
+
 ## Structure
 
 ```

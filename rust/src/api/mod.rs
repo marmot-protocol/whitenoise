@@ -44,6 +44,9 @@ pub struct WhitenoiseConfig {
     pub logs_dir: String,
     /// Relay URLs used when the app needs to create default relay metadata.
     pub default_relay_urls: Option<Vec<String>>,
+    /// Optional product analytics configuration. Consent is still device-local
+    /// and disabled by default inside whitenoise-rs.
+    pub product_analytics_config: Option<product_analytics::ProductAnalyticsConfig>,
 }
 
 impl From<whitenoise::WhitenoiseConfig> for WhitenoiseConfig {
@@ -52,6 +55,10 @@ impl From<whitenoise::WhitenoiseConfig> for WhitenoiseConfig {
             data_dir: config.data_dir.to_string_lossy().to_string(),
             logs_dir: config.logs_dir.to_string_lossy().to_string(),
             default_relay_urls: None,
+            product_analytics_config: config
+                .product_analytics_config
+                .clone()
+                .map(product_analytics::ProductAnalyticsConfig::from),
         }
     }
 }
@@ -81,11 +88,13 @@ pub fn create_whitenoise_config(
     data_dir: String,
     logs_dir: String,
     default_relay_urls: Option<Vec<String>>,
+    product_analytics_config: Option<product_analytics::ProductAnalyticsConfig>,
 ) -> WhitenoiseConfig {
     WhitenoiseConfig {
         data_dir,
         logs_dir,
         default_relay_urls,
+        product_analytics_config,
     }
 }
 
@@ -105,6 +114,7 @@ pub mod messages;
 pub mod metadata;
 pub mod mute_list;
 pub mod notifications;
+pub mod product_analytics;
 pub mod relay_defaults;
 pub mod relays;
 pub mod signer;
@@ -129,6 +139,7 @@ pub use messages::*;
 pub use metadata::*;
 pub use mute_list::*;
 pub use notifications::*;
+pub use product_analytics::*;
 pub use relay_defaults::*;
 pub use relays::*;
 pub use signer::*;
@@ -140,11 +151,14 @@ pub use zapstore::*;
 #[frb]
 pub async fn initialize_whitenoise(config: WhitenoiseConfig) -> Result<(), ApiError> {
     let default_relay_urls = config.default_relay_urls.clone();
-    let core_config = whitenoise::WhitenoiseConfig::new(
+    let mut core_config = whitenoise::WhitenoiseConfig::new(
         Path::new(&config.data_dir),
         Path::new(&config.logs_dir),
         "com.whitenoise.app",
     );
+    if let Some(product_analytics_config) = config.product_analytics_config {
+        core_config = core_config.with_product_analytics_config(product_analytics_config.into());
+    }
     GLOBAL_WN
         .get_or_try_init(|| async move {
             configure_default_relay_urls(default_relay_urls)?;

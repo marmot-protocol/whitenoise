@@ -60,6 +60,7 @@ pub struct FlutterGroupDataUpdate {
     pub image_key: Option<[u8; 32]>,
     pub image_hash: Option<[u8; 32]>,
     pub image_nonce: Option<[u8; 12]>,
+    pub disappearing_message_secs: Option<u64>,
 }
 
 impl From<FlutterGroupDataUpdate> for NostrGroupDataUpdate {
@@ -72,6 +73,7 @@ impl From<FlutterGroupDataUpdate> for NostrGroupDataUpdate {
             image_nonce: group_data.image_nonce.map(Some),
             image_upload_key: None,
             nostr_group_id: None,
+            disappearing_message_secs: group_data.disappearing_message_secs.map(Some),
             relays: group_data.relays.map(|relays| {
                 relays
                     .into_iter()
@@ -269,6 +271,7 @@ pub async fn create_group(
         image_key: None,
         image_hash: None,
         image_nonce: None,
+        disappearing_message_secs: None,
         relays: default_relay_urls_parsed()?,
         admins: admin_pubkeys,
     };

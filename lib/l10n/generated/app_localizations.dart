@@ -195,6 +195,42 @@ abstract class AppLocalizations {
   /// **'Create profile'**
   String get createProfile;
 
+  /// Title for the optional product analytics consent checkbox
+  ///
+  /// In en, this message translates to:
+  /// **'Help improve White Noise'**
+  String get analyticsConsentTitle;
+
+  /// Description for the optional product analytics consent checkbox
+  ///
+  /// In en, this message translates to:
+  /// **'Share privacy-preserving usage analytics. We never send message content, contacts, public keys, relay URLs, group ids, message ids, or profile data. You can turn this off anytime.'**
+  String get analyticsConsentDescription;
+
+  /// Description for the product analytics setting row
+  ///
+  /// In en, this message translates to:
+  /// **'Share anonymous usage data to help us find bugs and improve the app. Messages, contacts, and keys are never included.'**
+  String get analyticsConsentSettingsDescription;
+
+  /// Title for the product analytics prompt on the empty chat list
+  ///
+  /// In en, this message translates to:
+  /// **'Help improve White Noise?'**
+  String get analyticsPromptTitle;
+
+  /// Decline button for the product analytics prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Not now'**
+  String get analyticsPromptNotNow;
+
+  /// Opt-in button for the product analytics prompt
+  ///
+  /// In en, this message translates to:
+  /// **'Share analytics'**
+  String get analyticsPromptShare;
+
   /// Label for name input field
   ///
   /// In en, this message translates to:
