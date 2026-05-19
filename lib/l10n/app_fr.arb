@@ -288,6 +288,7 @@
   "deleteAllDataError": "Échec de la suppression de toutes les données. Veuillez réessayer.",
   "chatInformation": "Informations du chat",
   "addToGroup": "Ajouter à un groupe",
+  "addMembers": "Ajouter des membres",
   "blockUser": "Bloquer l'utilisateur",
   "unblockUser": "Débloquer l'utilisateur",
   "unblock": "Débloquer",

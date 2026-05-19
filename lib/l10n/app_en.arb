@@ -1505,6 +1505,10 @@
   "@failedToAddMembers": {
     "description": "Error message when adding members to group fails"
   },
+  "addMembers": "Add members",
+  "@addMembers": {
+    "description": "Action label for opening the add-members screen from group info"
+  },
   "groupImageUploadFailed": "Group created, but the image failed to upload.",
   "@groupImageUploadFailed": {
     "description": "Warning message when group is created successfully but image upload fails"

@@ -288,6 +288,7 @@
   "deleteAllDataError": "Tüm veriler silinemedi. Lütfen tekrar deneyin.",
   "chatInformation": "Sohbet Bilgileri",
   "addToGroup": "Gruba ekle",
+  "addMembers": "Üye ekle",
   "blockUser": "Kullanıcıyı engelle",
   "unblockUser": "Engeli kaldır",
   "unblock": "Engeli kaldır",

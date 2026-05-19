@@ -9,6 +9,7 @@ import 'package:whitenoise/observers/active_chat_route_observer.dart' show Activ
 import 'package:whitenoise/providers/active_chat_provider.dart' show activeChatProvider;
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
 import 'package:whitenoise/providers/is_adding_account_provider.dart' show isAddingAccountProvider;
+import 'package:whitenoise/screens/add_group_members_screen.dart' show AddGroupMembersScreen;
 import 'package:whitenoise/screens/add_profile_screen.dart' show AddProfileScreen;
 import 'package:whitenoise/screens/add_relay_screen.dart' show AddRelayScreen;
 import 'package:whitenoise/screens/add_to_group_screen.dart' show AddToGroupScreen;
@@ -105,6 +106,7 @@ abstract final class Routes {
   static const _groupInfo = '/group-info/:groupId';
   static const _editGroup = '/edit-group/:groupId';
   static const _groupMember = '/group-member/:groupId/:memberPubkey';
+  static const _addGroupMembers = '/add-group-members/:groupId';
   static const _invite = '/invites/:mlsGroupId';
   static const _chat = '/chats/:groupId';
   static const _chatRawDebug = '/chats/:groupId/debug';
@@ -440,6 +442,20 @@ abstract final class Routes {
           ),
         ),
         GoRoute(
+          name: 'addGroupMembers',
+          path: _addGroupMembers,
+          pageBuilder: (context, state) {
+            final existingMembers = state.extra as List<String>? ?? const [];
+            return _navigationTransition(
+              state: state,
+              child: AddGroupMembersScreen(
+                groupId: state.pathParameters['groupId']!,
+                existingMemberPubkeys: existingMembers,
+              ),
+            );
+          },
+        ),
+        GoRoute(
           name: 'invite',
           path: _invite,
           pageBuilder: (context, state) => _navigationTransition(
@@ -676,6 +692,18 @@ abstract final class Routes {
     GoRouter.of(context).pushNamed(
       'groupMember',
       pathParameters: {'groupId': groupId, 'memberPubkey': memberPubkey},
+    );
+  }
+
+  static void pushToAddGroupMembers(
+    BuildContext context,
+    String groupId, {
+    List<String> existingMemberPubkeys = const [],
+  }) {
+    GoRouter.of(context).pushNamed(
+      'addGroupMembers',
+      pathParameters: {'groupId': groupId},
+      extra: existingMemberPubkeys,
     );
   }
 

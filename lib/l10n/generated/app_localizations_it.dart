@@ -1195,6 +1195,9 @@ class AppLocalizationsIt extends AppLocalizations {
   String get failedToAddMembers => 'Impossibile aggiungere membri. Riprova.';
 
   @override
+  String get addMembers => 'Aggiungi membri';
+
+  @override
   String get groupImageUploadFailed => 'Gruppo creato, ma il caricamento dell\'immagine è fallito.';
 
   @override

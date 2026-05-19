@@ -288,6 +288,7 @@
   "deleteAllDataError": "No se pudieron eliminar todos los datos. Por favor, inténtalo de nuevo.",
   "chatInformation": "Información del chat",
   "addToGroup": "Añadir al grupo",
+  "addMembers": "Añadir miembros",
   "blockUser": "Bloquear usuario",
   "unblockUser": "Desbloquear usuario",
   "unblock": "Desbloquear",
