@@ -117,6 +117,8 @@ pub struct WhitenoiseConfig {
     pub data_dir: String,
     /// Path to the directory where log files will be written
     pub logs_dir: String,
+    /// Relay URLs used when the app needs to create default relay metadata.
+    pub default_relay_urls: Option<Vec<String>>,
 }
 
 impl From<whitenoise::WhitenoiseConfig> for WhitenoiseConfig {
@@ -124,6 +126,7 @@ impl From<whitenoise::WhitenoiseConfig> for WhitenoiseConfig {
         Self {
             data_dir: config.data_dir.to_string_lossy().to_string(),
             logs_dir: config.logs_dir.to_string_lossy().to_string(),
+            default_relay_urls: None,
         }
     }
 }
@@ -144,6 +147,7 @@ fn to_core_config(config: &WhitenoiseConfig) -> whitenoise::WhitenoiseConfig {
 /// # Parameters
 /// * `data_dir` - Path string for data directory where app data will be stored
 /// * `logs_dir` - Path string for logs directory where log files will be written
+/// * `default_relay_urls` - Optional relay URLs for test or environment-specific defaults
 ///
 /// # Returns
 /// A WhitenoiseConfig object ready for initialization
@@ -156,8 +160,16 @@ fn to_core_config(config: &WhitenoiseConfig) -> whitenoise::WhitenoiseConfig {
 /// );
 /// ```
 #[frb]
-pub fn create_whitenoise_config(data_dir: String, logs_dir: String) -> WhitenoiseConfig {
-    WhitenoiseConfig { data_dir, logs_dir }
+pub fn create_whitenoise_config(
+    data_dir: String,
+    logs_dir: String,
+    default_relay_urls: Option<Vec<String>>,
+) -> WhitenoiseConfig {
+    WhitenoiseConfig {
+        data_dir,
+        logs_dir,
+        default_relay_urls,
+    }
 }
 
 // Declare the modules
@@ -232,7 +244,9 @@ pub async fn initialize_whitenoise(config: WhitenoiseConfig) -> Result<(), ApiEr
         return Ok(());
     }
 
+    let default_relay_urls = config.default_relay_urls.clone();
     let core_config = to_core_config(&config);
+    configure_default_relay_urls(default_relay_urls)?;
     *LAST_CONFIG.write().map_err(|_| ApiError::Whitenoise {
         message: "Whitenoise config lock poisoned".to_string(),
     })? = Some(core_config.clone());

@@ -177,6 +177,7 @@ abstract class RustLibApi extends BaseApi {
   Future<WhitenoiseConfig> crateApiCreateWhitenoiseConfig({
     required String dataDir,
     required String logsDir,
+    List<String>? defaultRelayUrls,
   });
 
   Future<String> crateApiRelaysDebugRelayControlState();
@@ -1303,6 +1304,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   Future<WhitenoiseConfig> crateApiCreateWhitenoiseConfig({
     required String dataDir,
     required String logsDir,
+    List<String>? defaultRelayUrls,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -1310,14 +1312,20 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           final serializer = SseSerializer(generalizedFrbRustBinding);
           sse_encode_String(dataDir, serializer);
           sse_encode_String(logsDir, serializer);
-          pdeCallFfi(generalizedFrbRustBinding, serializer, funcId: 21, port: port_);
+          sse_encode_opt_list_String(defaultRelayUrls, serializer);
+          pdeCallFfi(
+            generalizedFrbRustBinding,
+            serializer,
+            funcId: 21,
+            port: port_,
+          );
         },
         codec: SseCodec(
           decodeSuccessData: sse_decode_whitenoise_config,
           decodeErrorData: null,
         ),
         constMeta: kCrateApiCreateWhitenoiseConfigConstMeta,
-        argValues: [dataDir, logsDir],
+        argValues: [dataDir, logsDir, defaultRelayUrls],
         apiImpl: this,
       ),
     );
@@ -1325,7 +1333,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
 
   TaskConstMeta get kCrateApiCreateWhitenoiseConfigConstMeta => const TaskConstMeta(
     debugName: 'create_whitenoise_config',
-    argNames: ['dataDir', 'logsDir'],
+    argNames: ['dataDir', 'logsDir', 'defaultRelayUrls'],
   );
 
   @override
@@ -6501,10 +6509,11 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   WhitenoiseConfig dco_decode_whitenoise_config(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 2) throw Exception('unexpected arr length: expect 2 but see ${arr.length}');
+    if (arr.length != 3) throw Exception('unexpected arr length: expect 3 but see ${arr.length}');
     return WhitenoiseConfig(
       dataDir: dco_decode_String(arr[0]),
       logsDir: dco_decode_String(arr[1]),
+      defaultRelayUrls: dco_decode_opt_list_String(arr[2]),
     );
   }
 
@@ -8483,7 +8492,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     final var_dataDir = sse_decode_String(deserializer);
     final var_logsDir = sse_decode_String(deserializer);
-    return WhitenoiseConfig(dataDir: var_dataDir, logsDir: var_logsDir);
+    final var_defaultRelayUrls = sse_decode_opt_list_String(deserializer);
+    return WhitenoiseConfig(
+      dataDir: var_dataDir,
+      logsDir: var_logsDir,
+      defaultRelayUrls: var_defaultRelayUrls,
+    );
   }
 
   @protected
@@ -10137,6 +10151,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.dataDir, serializer);
     sse_encode_String(self.logsDir, serializer);
+    sse_encode_opt_list_String(self.defaultRelayUrls, serializer);
   }
 }
 

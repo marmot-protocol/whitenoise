@@ -134,4 +134,24 @@ class Rustup {
     }
     return null;
   }
+
+  static Map<String, String> environmentWithRustupFirst(
+    Map<String, String> environment,
+  ) {
+    final rustupPath = executablePath();
+    if (rustupPath == null) {
+      return environment;
+    }
+
+    final rustupDirectory = path.dirname(rustupPath);
+    final envPathSeparator = Platform.isWindows ? ';' : ':';
+    final inheritedPath = environment['PATH'] ?? Platform.environment['PATH'];
+    final pathValue = inheritedPath == null || inheritedPath.isEmpty
+        ? rustupDirectory
+        : '$rustupDirectory$envPathSeparator$inheritedPath';
+    return {
+      ...environment,
+      'PATH': pathValue,
+    };
+  }
 }
