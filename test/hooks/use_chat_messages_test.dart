@@ -302,34 +302,27 @@ void main() {
     });
 
     testWidgets('reloads initial snapshot when refresh token changes', (tester) async {
-      var refreshToken = 0;
-      ChatMessagesResult? result;
-
-      Widget buildHook() {
-        return HookBuilder(
-          builder: (_) {
-            result = useChatMessages(
-              'group1',
-              pubkey: testPubkeyA,
-              refreshToken: refreshToken,
-            );
-            return const SizedBox();
-          },
-        );
-      }
-
-      await mountWidget(buildHook(), tester);
+      final refreshToken = ValueNotifier(0);
+      addTearDown(refreshToken.dispose);
+      final getResult = await mountHook(
+        tester,
+        () => useChatMessages(
+          'group1',
+          pubkey: testPubkeyA,
+          refreshToken: useValueListenable(refreshToken),
+        ),
+      );
 
       _api.emitInitialSnapshot([
         _message('m1', DateTime(2024), content: 'First'),
       ]);
       await tester.pumpAndSettle();
 
-      expect(result!.messageCount, 1);
-      expect(result!.getMessage(0).content, 'First');
+      expect(getResult().messageCount, 1);
+      expect(getResult().getMessage(0).content, 'First');
 
-      refreshToken++;
-      await mountWidget(buildHook(), tester);
+      refreshToken.value++;
+      await tester.pump();
 
       _api.emitInitialSnapshot([
         _message('m1', DateTime(2024), content: 'First'),
@@ -337,8 +330,8 @@ void main() {
       ]);
       await tester.pumpAndSettle();
 
-      expect(result!.messageCount, 2);
-      expect(result!.getMessage(0).content, 'Second');
+      expect(getResult().messageCount, 2);
+      expect(getResult().getMessage(0).content, 'Second');
     });
 
     testWidgets('prepends new message at start (newest first)', (tester) async {

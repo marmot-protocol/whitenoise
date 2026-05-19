@@ -18,7 +18,7 @@ class WhitenoiseApplication : Application(), FlutterForegroundTaskLifecycleListe
         // by RebootReceiver / MY_PACKAGE_REPLACED.
         try {
             Keyring.initializeNdkContext(applicationContext)
-        } catch (t: Throwable) {
+        } catch (t: Exception) {
             Log.e(TAG, "onCreate: Keyring.initializeNdkContext failed", t)
         }
     }
@@ -30,7 +30,7 @@ class WhitenoiseApplication : Application(), FlutterForegroundTaskLifecycleListe
             flutterEngine.plugins.add(AndroidSignerPlugin())
             flutterEngine.plugins.add(AndroidPlayServicesPlugin())
             flutterEngine.plugins.add(AndroidPushNotificationsPlugin())
-        } catch (t: Throwable) {
+        } catch (t: Exception) {
             Log.e(TAG, "onEngineCreate: failed to register app plugins", t)
         }
     }

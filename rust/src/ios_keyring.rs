@@ -1,5 +1,10 @@
 #[cfg(any(target_os = "ios", test))]
-use std::{any::Any, collections::HashMap, fmt, sync::Arc};
+use std::{
+    any::Any,
+    collections::{HashMap, HashSet},
+    fmt,
+    sync::Arc,
+};
 
 #[cfg(any(target_os = "ios", test))]
 use apple_native_keyring_store::protected::{AccessPolicy, Cred, Store as ProtectedStore};
@@ -129,7 +134,13 @@ impl CredentialStoreApi for AfterFirstUnlockMigratingStore {
     }
 
     fn search(&self, spec: &HashMap<&str, &str>) -> Result<Vec<Entry>> {
-        self.fallback.search(spec)
+        let mut entries = self.fallback.search(spec)?;
+        let primary_service = primary_service_id(WHITENOISE_KEYRING_SERVICE_ID);
+        if let Some(primary_spec) = remapped_primary_search_spec(spec, &primary_service) {
+            entries.extend(self.fallback.search(&primary_spec)?);
+            dedupe_entries_by_specifiers(&mut entries);
+        }
+        Ok(entries)
     }
 
     fn as_any(&self) -> &dyn Any {
@@ -264,6 +275,29 @@ fn primary_service_id(service: &str) -> String {
     format!("{service}{AFTER_FIRST_UNLOCK_SERVICE_SUFFIX}")
 }
 
+#[cfg(any(target_os = "ios", test))]
+fn remapped_primary_search_spec<'a>(
+    spec: &'a HashMap<&'a str, &'a str>,
+    primary_service: &'a str,
+) -> Option<HashMap<&'a str, &'a str>> {
+    if spec.get("service").copied() != Some(WHITENOISE_KEYRING_SERVICE_ID) {
+        return None;
+    }
+
+    let mut primary_spec = spec.clone();
+    primary_spec.insert("service", primary_service);
+    Some(primary_spec)
+}
+
+#[cfg(any(target_os = "ios", test))]
+fn dedupe_entries_by_specifiers(entries: &mut Vec<Entry>) {
+    let mut seen = HashSet::new();
+    entries.retain(|entry| match entry.get_specifiers() {
+        Some(specifiers) => seen.insert(specifiers),
+        None => true,
+    });
+}
+
 #[cfg(test)]
 mod tests {
     use std::sync::Mutex;
@@ -328,6 +362,26 @@ mod tests {
         assert_eq!(credential.service, "com.example.other");
         assert_eq!(credential.account, "account-key");
         assert_eq!(credential.access_policy, AccessPolicy::WhenUnlocked);
+    }
+
+    #[test]
+    fn logical_service_search_spec_is_remapped_to_primary_service() {
+        let mut spec = HashMap::new();
+        spec.insert("service", WHITENOISE_KEYRING_SERVICE_ID);
+        spec.insert("account", "account-key");
+        let primary_service = primary_service_id(WHITENOISE_KEYRING_SERVICE_ID);
+
+        let remapped = remapped_primary_search_spec(&spec, &primary_service).unwrap();
+
+        assert_eq!(
+            remapped.get("service").copied(),
+            Some(primary_service.as_str())
+        );
+        assert_eq!(remapped.get("account").copied(), Some("account-key"));
+        assert_eq!(
+            spec.get("service").copied(),
+            Some(WHITENOISE_KEYRING_SERVICE_ID)
+        );
     }
 
     #[test]

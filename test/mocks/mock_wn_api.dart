@@ -1008,7 +1008,8 @@ class MockWnApi implements RustLibApi {
     if (shouldFailUpsertPushRegistration) {
       throw Exception('Failed to upsert push registration');
     }
-    return mockPushRegistration ??
+    final registration =
+        mockPushRegistration ??
         PushRegistration(
           accountPubkey: pubkey,
           platform: platform,
@@ -1018,6 +1019,8 @@ class MockWnApi implements RustLibApi {
           createdAt: DateTime(2024),
           updatedAt: DateTime(2024),
         );
+    mockPushRegistration = registration;
+    return registration;
   }
 
   @override

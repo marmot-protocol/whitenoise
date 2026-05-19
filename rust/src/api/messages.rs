@@ -302,17 +302,17 @@ fn append_inline(inline: &WhitenoiseMarkdownInline, tokens: &mut Vec<Serializabl
         WhitenoiseMarkdownInline::Emph(children)
         | WhitenoiseMarkdownInline::Strong(children)
         | WhitenoiseMarkdownInline::Strikethrough(children) => append_inlines(children, tokens),
-        WhitenoiseMarkdownInline::Link { children, .. } => append_inlines(children, tokens),
+        WhitenoiseMarkdownInline::Link { dest, children, .. } => {
+            append_inlines(children, tokens);
+            push_url(tokens, dest);
+        }
         WhitenoiseMarkdownInline::Image { alt, .. } => append_inlines(alt, tokens),
         WhitenoiseMarkdownInline::Autolink { url, kind } => {
             let content = match kind {
                 WhitenoiseAutolinkKind::Uri => url.clone(),
                 WhitenoiseAutolinkKind::Email => format!("mailto:{url}"),
             };
-            tokens.push(SerializableToken {
-                token_type: "Url".to_string(),
-                content: Some(content),
-            });
+            push_url(tokens, content);
         }
         WhitenoiseMarkdownInline::NostrMention(entity)
         | WhitenoiseMarkdownInline::NostrUri(entity) => push_nostr_entity(tokens, entity),
@@ -340,6 +340,13 @@ fn push_whitespace(tokens: &mut Vec<SerializableToken>) {
     tokens.push(SerializableToken {
         token_type: "Whitespace".to_string(),
         content: None,
+    });
+}
+
+fn push_url(tokens: &mut Vec<SerializableToken>, content: impl Into<String>) {
+    tokens.push(SerializableToken {
+        token_type: "Url".to_string(),
+        content: Some(content.into()),
     });
 }
 
@@ -806,6 +813,20 @@ mod tests {
             token.token_type == "Nostr"
                 && token.content.as_deref()
                     == Some("nostr:npub1udnxw6gt4mhefdg0emat9jeh8trszd5dcz3xzft022afhkjsz3dq9y8yfj")
+        }));
+    }
+
+    #[test]
+    fn markdown_link_keeps_label_and_destination_url() {
+        let document = whitenoise::markdown::parse("[label](https://example.com)");
+
+        let tokens = serializable_tokens_from_document(&document);
+
+        assert!(tokens.iter().any(|token| {
+            token.token_type == "Text" && token.content.as_deref() == Some("label")
+        }));
+        assert!(tokens.iter().any(|token| {
+            token.token_type == "Url" && token.content.as_deref() == Some("https://example.com")
         }));
     }
 

@@ -11,6 +11,7 @@ import 'package:go_router/go_router.dart' show GoRouter;
 import 'package:hooks_riverpod/hooks_riverpod.dart'
     show ConsumerStatefulWidget, ConsumerState, ProviderContainer, UncontrolledProviderScope;
 import 'package:logging/logging.dart';
+import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDirectory;
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/app_log_provider.dart' show appLogStore;
@@ -189,7 +190,7 @@ Future<void> _moveWhitenoiseDirectoryIfNeeded({
 Future<void> _copyDirectory(Directory from, Directory to) async {
   await to.create(recursive: true);
   await for (final entity in from.list()) {
-    final targetPath = '${to.path}/${entity.uri.pathSegments.last}';
+    final targetPath = p.join(to.path, p.basename(entity.path));
     if (entity is Directory) {
       await _copyDirectory(entity, Directory(targetPath));
     } else if (entity is File) {

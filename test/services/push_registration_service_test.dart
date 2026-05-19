@@ -124,6 +124,10 @@ void main() {
       expect(mockApi.lastPushRegistrationRawToken, 'fcm-token');
       expect(mockApi.lastPushRegistrationServerPubkey, testPubkeyB);
       expect(mockApi.lastPushRegistrationRelayHint, 'wss://push.example.com');
+      expect(
+        await mockApi.crateApiNotificationsGetPushRegistration(pubkey: testPubkeyA),
+        result.registration,
+      );
     });
 
     test(
