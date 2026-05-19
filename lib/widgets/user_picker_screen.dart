@@ -95,16 +95,14 @@ class UserPickerScreen extends HookConsumerWidget {
       }
     }
 
-    final WnSystemNotice? notice =
-        additionalNotice ??
-        (noticeMessage != null
-            ? WnSystemNotice(
-                key: ValueKey(noticeMessage),
-                title: noticeMessage,
-                type: noticeType,
-                onDismiss: dismissNotice,
-              )
-            : null);
+    final WnSystemNotice? notice = noticeMessage != null
+        ? WnSystemNotice(
+            key: ValueKey(noticeMessage),
+            title: noticeMessage,
+            type: noticeType,
+            onDismiss: dismissNotice,
+          )
+        : additionalNotice;
 
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,

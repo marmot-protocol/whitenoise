@@ -238,5 +238,22 @@ void main() {
       expect(find.byType(WnSystemNotice), findsOneWidget);
       expect(find.text('Failed to load group members. Please try again.'), findsOneWidget);
     });
+
+    testWidgets('submit-error notice replaces the fetch-error notice', (tester) async {
+      _api.followsList = [_userFactory(testPubkeyB, displayName: 'Bob')];
+      _api.shouldFailLoadMembers = true;
+      _api.addMembersError = Exception('boom');
+      await pumpAddGroupMembersScreen(tester);
+
+      expect(find.text('Failed to load group members. Please try again.'), findsOneWidget);
+
+      await tester.tap(find.text('Bob'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('user_picker_submit_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Failed to add members. Please try again.'), findsOneWidget);
+      expect(find.text('Failed to load group members. Please try again.'), findsNothing);
+    });
   });
 }
