@@ -139,6 +139,8 @@ bool _isDatabasePoolTimeout(Object error) {
 Future<Directory> resolveWhitenoiseBaseDirectory({
   bool? isIOS,
   MethodChannel appGroupChannel = _appGroupChannel,
+  Future<Directory> Function(Directory from, String newPath)? renameDirectory,
+  Future<void> Function(Directory from, Directory to)? copyDirectory,
 }) async {
   final documentsDir = await getApplicationDocumentsDirectory();
   final documentsBaseDir = Directory('${documentsDir.path}/whitenoise');
@@ -156,6 +158,8 @@ Future<Directory> resolveWhitenoiseBaseDirectory({
     await _moveWhitenoiseDirectoryIfNeeded(
       from: documentsBaseDir,
       to: appGroupBaseDir,
+      renameDirectory: renameDirectory ?? _renameDirectory,
+      copyDirectory: copyDirectory ?? _copyDirectory,
     );
     return appGroupBaseDir;
   } catch (error, stackTrace) {
@@ -171,6 +175,8 @@ Future<Directory> resolveWhitenoiseBaseDirectory({
 Future<void> _moveWhitenoiseDirectoryIfNeeded({
   required Directory from,
   required Directory to,
+  required Future<Directory> Function(Directory from, String newPath) renameDirectory,
+  required Future<void> Function(Directory from, Directory to) copyDirectory,
 }) async {
   if (!from.existsSync()) return;
 
@@ -180,12 +186,21 @@ Future<void> _moveWhitenoiseDirectoryIfNeeded({
   }
   await to.parent.create(recursive: true);
   try {
-    await from.rename(to.path);
+    await renameDirectory(from, to.path);
   } on FileSystemException {
-    await _copyDirectory(from, to);
+    try {
+      await copyDirectory(from, to);
+    } catch (error, stackTrace) {
+      if (to.existsSync()) {
+        await to.delete(recursive: true);
+      }
+      Error.throwWithStackTrace(error, stackTrace);
+    }
     await from.delete(recursive: true);
   }
 }
+
+Future<Directory> _renameDirectory(Directory from, String newPath) => from.rename(newPath);
 
 Future<void> _copyDirectory(Directory from, Directory to) async {
   await to.create(recursive: true);

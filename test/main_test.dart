@@ -577,6 +577,35 @@ void main() {
       expect(Directory('${pathProvider.tempDir.path}/whitenoise').existsSync(), isFalse);
     });
 
+    test('removes partial App Group copy when Documents migration copy fails', () async {
+      final appGroupDir = Directory.systemTemp.createTempSync('whitenoise_app_group_test');
+      _mockAppGroupContainerPath(appGroupDir.path);
+      final oldDataDir = Directory('${pathProvider.tempDir.path}/whitenoise/data');
+      await oldDataDir.create(recursive: true);
+      await File('${oldDataDir.path}/marker.txt').writeAsString('existing');
+      addTearDown(() {
+        if (appGroupDir.existsSync()) {
+          appGroupDir.deleteSync(recursive: true);
+        }
+      });
+
+      final baseDir = await resolveWhitenoiseBaseDirectory(
+        isIOS: true,
+        renameDirectory: (_, _) async {
+          throw const FileSystemException('rename failed');
+        },
+        copyDirectory: (_, to) async {
+          await Directory('${to.path}/data').create(recursive: true);
+          await File('${to.path}/data/partial.txt').writeAsString('partial');
+          throw const FileSystemException('copy failed');
+        },
+      );
+
+      expect(baseDir.path, '${pathProvider.tempDir.path}/whitenoise');
+      expect(File('${oldDataDir.path}/marker.txt').readAsStringSync(), 'existing');
+      expect(Directory('${appGroupDir.path}/whitenoise').existsSync(), isFalse);
+    });
+
     test('preserves App Group data when both storage locations contain data', () async {
       final appGroupDir = Directory.systemTemp.createTempSync('whitenoise_app_group_test');
       _mockAppGroupContainerPath(appGroupDir.path);
