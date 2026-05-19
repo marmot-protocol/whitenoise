@@ -377,7 +377,7 @@ pub async fn send_message_to_group(
     kind: u16,
     tags: Option<Vec<Tag>>,
 ) -> Result<MessageWithTokens, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let group_id = group_id_from_string(&group_id)?;
@@ -396,7 +396,7 @@ pub async fn retry_message_publish(
     group_id: String,
     event_id: String,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
     let group_id = group_id_from_string(&group_id)?;
@@ -422,7 +422,7 @@ pub async fn search_messages_in_group(
     query: String,
     limit: Option<u32>,
 ) -> Result<Vec<SearchResult>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let results = whitenoise
@@ -443,7 +443,7 @@ pub async fn search_messages(
     query: String,
     limit: Option<u32>,
 ) -> Result<Vec<SearchResult>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let results = whitenoise.search_messages(&pubkey, &query, limit).await?;
     Ok(results.into_iter().map(|r| r.into()).collect())
@@ -462,7 +462,7 @@ pub async fn fetch_aggregated_messages_for_group(
     before_message_id: Option<String>,
     limit: Option<u32>,
 ) -> Result<Vec<ChatMessage>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let before_ts = before
@@ -496,7 +496,7 @@ pub async fn fetch_message_by_id(
     group_id: String,
     message_id: String,
 ) -> Result<Option<ChatMessage>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let message = whitenoise
@@ -519,7 +519,7 @@ pub async fn fetch_messages_unread_with_minimum(
     group_id: String,
     minimum: Option<u32>,
 ) -> Result<Vec<ChatMessage>, ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let pubkey = PublicKey::parse(&pubkey)?;
     let group_id = group_id_from_string(&group_id)?;
     let messages = whitenoise
@@ -553,7 +553,7 @@ pub async fn subscribe_to_group_messages(
     group_id: String,
     sink: StreamSink<MessageStreamItem>,
 ) -> Result<(), ApiError> {
-    let whitenoise = wn()?;
+    let whitenoise = wn().await?;
     let group_id_str = group_id.clone();
     let group_id = group_id_from_string(&group_id)?;
 
@@ -615,6 +615,7 @@ pub async fn subscribe_to_group_messages(
     // Stream real-time updates
     let mut rx = subscription.updates;
     let mut lagged_total: u64 = 0;
+    whitenoise.release_lifecycle();
     loop {
         match rx.recv().await {
             Ok(update) => {

@@ -36,7 +36,7 @@ dependencies:
   intl: ^0.20.2
   rust_lib_whitenoise:
     path: rust_builder
-  flutter_rust_bridge: 2.11.1
+  flutter_rust_bridge: 2.12.0
   logging: ^1.2.0
   freezed_annotation: ^3.1.0
   connectivity_plus: ^7.1.0

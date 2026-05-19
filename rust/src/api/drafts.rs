@@ -56,7 +56,7 @@ pub async fn save_draft(
     media_attachments: Vec<MediaFile>,
 ) -> Result<Draft, ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let group_id = group_id_from_string(&group_id)?;
     let reply_to = reply_to_id.as_deref().map(EventId::parse).transpose()?;
     let attachments = media_attachments
@@ -74,7 +74,7 @@ pub async fn save_draft(
 #[frb]
 pub async fn load_draft(pubkey: String, group_id: String) -> Result<Option<Draft>, ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let group_id = group_id_from_string(&group_id)?;
     let draft = session.drafts().load(&group_id).await?;
     Ok(draft.map(|d| d.into()))
@@ -86,7 +86,7 @@ pub async fn load_draft(pubkey: String, group_id: String) -> Result<Option<Draft
 #[frb]
 pub async fn delete_draft(pubkey: String, group_id: String) -> Result<(), ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
-    let session = wn_session(&pubkey)?;
+    let session = wn_session(&pubkey).await?;
     let group_id = group_id_from_string(&group_id)?;
     session.drafts().delete(&group_id).await?;
     Ok(())
