@@ -823,6 +823,53 @@ void main() {
       );
     });
 
+    test('keeps legacy Documents data when accepted App Group cleanup fails', () async {
+      final previousLogLevel = Logger.root.level;
+      Logger.root.level = Level.ALL;
+      final records = <LogRecord>[];
+      final logSubscription = Logger('WnApp').onRecord.listen(records.add);
+      addTearDown(() async {
+        await logSubscription.cancel();
+        Logger.root.level = previousLogLevel;
+      });
+
+      final appGroupDir = Directory.systemTemp.createTempSync('whitenoise_app_group_test');
+      _mockAppGroupContainerPath(appGroupDir.path);
+      final oldDataDir = Directory('${pathProvider.tempDir.path}/whitenoise/data');
+      await oldDataDir.create(recursive: true);
+      await File('${oldDataDir.path}/old-marker.txt').writeAsString('old');
+      final appGroupDataDir = Directory('${appGroupDir.path}/whitenoise/data');
+      await appGroupDataDir.create(recursive: true);
+      await File('${appGroupDataDir.path}/new-marker.txt').writeAsString('new');
+      await File('${appGroupDataDir.path}/$kDataVersionFile').writeAsString('$kDataVersion');
+      addTearDown(() {
+        if (appGroupDir.existsSync()) {
+          appGroupDir.deleteSync(recursive: true);
+        }
+      });
+
+      final baseDir = await resolveWhitenoiseBaseDirectory(
+        isIOS: true,
+        deleteSourceDirectory: (_) async {
+          throw const FileSystemException('delete failed');
+        },
+      );
+
+      expect(baseDir.path, '${appGroupDir.path}/whitenoise');
+      expect(File('${baseDir.path}/data/new-marker.txt').readAsStringSync(), 'new');
+      expect(File('${oldDataDir.path}/old-marker.txt').readAsStringSync(), 'old');
+      expect(
+        records.any(
+          (record) =>
+              record.message ==
+                  'Failed to remove old Documents data after App Group data was already accepted' &&
+              record.error is FileSystemException &&
+              record.stackTrace != null,
+        ),
+        isTrue,
+      );
+    });
+
     test('throws on iOS when App Group container is unavailable', () async {
       _mockAppGroupContainerPath(null);
 

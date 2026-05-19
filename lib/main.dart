@@ -237,7 +237,7 @@ Future<void> _moveWhitenoiseDirectoryIfNeeded({
 
   if (to.existsSync()) {
     if (_hasMainAppDataMarker(to)) {
-      await _deleteLegacyDocumentsDataBestEffort(from);
+      await _deleteLegacyDocumentsDataBestEffort(from, deleteSourceDirectory);
       return;
     }
     _logger.info('Replacing unversioned App Group data during Documents migration');
@@ -267,9 +267,12 @@ Future<void> _moveWhitenoiseDirectoryIfNeeded({
   }
 }
 
-Future<void> _deleteLegacyDocumentsDataBestEffort(Directory from) async {
+Future<void> _deleteLegacyDocumentsDataBestEffort(
+  Directory from,
+  Future<void> Function(Directory directory) deleteSourceDirectory,
+) async {
   try {
-    await _deleteDirectory(from);
+    await deleteSourceDirectory(from);
   } catch (error, stackTrace) {
     _logger.warning(
       'Failed to remove old Documents data after App Group data was already accepted',

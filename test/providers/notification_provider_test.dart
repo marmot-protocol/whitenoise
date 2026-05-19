@@ -196,6 +196,19 @@ void main() {
 
       expect(result, isNull);
     });
+
+    test('returns null when iOS pending APNS tap channel throws', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        pushChannel,
+        (_) async {
+          throw PlatformException(code: 'unavailable');
+        },
+      );
+
+      final result = await consumePendingNotificationTap(isAndroid: false, isIOS: true);
+
+      expect(result, isNull);
+    });
   });
 
   group('handleNotificationTap', () {
