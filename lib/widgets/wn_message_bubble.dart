@@ -9,6 +9,9 @@ import 'package:whitenoise/widgets/wn_chat_status.dart';
 import 'package:whitenoise/widgets/wn_reaction.dart';
 export 'package:whitenoise/src/rust/api/messages.dart' show EmojiReaction;
 
+final _unorderedMarkdownListPattern = RegExp(r'^(\s*)[-+*]\s+(.+)$');
+final _orderedMarkdownListPattern = RegExp(r'^(\s*)(\d+)[.)]\s+(.+)$');
+
 int _codePointToCodeUnit(String text, int codePointIndex) {
   var codeUnits = 0;
   var codePoints = 0;
@@ -47,6 +50,226 @@ List<TextSpan> _buildHighlightedSpans(
     result.add(TextSpan(text: text.substring(cursor), style: baseStyle));
   }
   return result;
+}
+
+List<TextSpan> _buildMessageTextSpans(
+  String text,
+  TextStyle baseStyle,
+  List<HighlightSpan>? highlightSpans,
+  Color? highlightColor,
+) {
+  if (highlightSpans != null && highlightSpans.isNotEmpty) {
+    return _buildHighlightedSpans(text, baseStyle, highlightSpans, highlightColor!);
+  }
+  return _buildMarkdownSpans(text, baseStyle) ?? [TextSpan(text: text, style: baseStyle)];
+}
+
+List<TextSpan>? _buildMarkdownSpans(String text, TextStyle baseStyle) {
+  final spans = <TextSpan>[];
+  var didFormat = false;
+
+  final lines = text.split('\n');
+  for (var index = 0; index < lines.length; index++) {
+    if (index > 0) {
+      spans.add(TextSpan(text: '\n', style: baseStyle));
+    }
+
+    final line = lines[index];
+    final listItem = _parseMarkdownListItem(line);
+    if (listItem != null) {
+      didFormat = true;
+      spans.add(TextSpan(text: '${listItem.indent}${listItem.marker}', style: baseStyle));
+      final itemSpans = _buildInlineMarkdownSpans(listItem.content, baseStyle);
+      if (itemSpans == null) {
+        spans.add(TextSpan(text: listItem.content, style: baseStyle));
+      } else {
+        spans.addAll(itemSpans);
+      }
+      continue;
+    }
+
+    final inlineSpans = _buildInlineMarkdownSpans(line, baseStyle);
+    if (inlineSpans == null) {
+      spans.add(TextSpan(text: line, style: baseStyle));
+    } else {
+      didFormat = true;
+      spans.addAll(inlineSpans);
+    }
+  }
+
+  return didFormat ? spans : null;
+}
+
+List<TextSpan>? _buildInlineMarkdownSpans(String text, TextStyle baseStyle) {
+  final spans = <TextSpan>[];
+  var cursor = 0;
+  var didFormat = false;
+
+  void appendPlain(int end) {
+    if (end > cursor) {
+      spans.add(TextSpan(text: text.substring(cursor, end), style: baseStyle));
+    }
+  }
+
+  while (cursor < text.length) {
+    final token = _nextMarkdownToken(text, cursor, baseStyle);
+    if (token == null) {
+      break;
+    }
+
+    appendPlain(token.start);
+    spans.add(token.span);
+    cursor = token.end;
+    didFormat = true;
+  }
+
+  appendPlain(text.length);
+  return didFormat ? spans : null;
+}
+
+_MarkdownListItem? _parseMarkdownListItem(String line) {
+  final unordered = _unorderedMarkdownListPattern.firstMatch(line);
+  if (unordered != null) {
+    return _MarkdownListItem(
+      indent: unordered.group(1)!,
+      marker: '• ',
+      content: unordered.group(2)!,
+    );
+  }
+
+  final ordered = _orderedMarkdownListPattern.firstMatch(line);
+  if (ordered != null) {
+    return _MarkdownListItem(
+      indent: ordered.group(1)!,
+      marker: '${ordered.group(2)!}. ',
+      content: ordered.group(3)!,
+    );
+  }
+
+  return null;
+}
+
+_MarkdownToken? _nextMarkdownToken(String text, int start, TextStyle baseStyle) {
+  for (var index = start; index < text.length; index++) {
+    final codeToken = _markdownTokenAt(text, index, '`', baseStyle);
+    if (codeToken != null) return codeToken;
+
+    final boldAsteriskToken = _markdownTokenAt(text, index, '**', baseStyle);
+    if (boldAsteriskToken != null) return boldAsteriskToken;
+
+    final boldUnderscoreToken = _markdownTokenAt(text, index, '__', baseStyle);
+    if (boldUnderscoreToken != null) return boldUnderscoreToken;
+
+    final italicAsteriskToken = _markdownTokenAt(text, index, '*', baseStyle);
+    if (italicAsteriskToken != null) return italicAsteriskToken;
+
+    final italicUnderscoreToken = _markdownTokenAt(text, index, '_', baseStyle);
+    if (italicUnderscoreToken != null) return italicUnderscoreToken;
+  }
+  return null;
+}
+
+_MarkdownToken? _markdownTokenAt(
+  String text,
+  int index,
+  String delimiter,
+  TextStyle baseStyle,
+) {
+  if (!text.startsWith(delimiter, index)) return null;
+  if (!_canOpenMarkdown(text, index, delimiter)) return null;
+
+  final contentStart = index + delimiter.length;
+  final closingIndex = _findClosingDelimiter(text, delimiter, contentStart);
+  if (closingIndex <= contentStart) return null;
+  if (!_canCloseMarkdown(text, closingIndex, delimiter)) return null;
+
+  final rawContent = text.substring(contentStart, closingIndex);
+  if (rawContent.trim().isEmpty) return null;
+
+  return _MarkdownToken(
+    start: index,
+    end: closingIndex + delimiter.length,
+    span: TextSpan(text: rawContent, style: _markdownStyle(baseStyle, delimiter)),
+  );
+}
+
+int _findClosingDelimiter(String text, String delimiter, int start) {
+  var index = start;
+  while (index < text.length) {
+    final found = text.indexOf(delimiter, index);
+    if (found == -1) return -1;
+    if (_canCloseMarkdown(text, found, delimiter)) return found;
+    index = found + delimiter.length;
+  }
+  return -1;
+}
+
+bool _canOpenMarkdown(String text, int index, String delimiter) {
+  if (delimiter == '`') return true;
+
+  final before = index == 0 ? null : text[index - 1];
+  final afterIndex = index + delimiter.length;
+  final after = afterIndex >= text.length ? null : text[afterIndex];
+  if (after == null || after.trim().isEmpty) return false;
+
+  if (delimiter.contains('_')) {
+    return before == null || !_isWordChar(before);
+  }
+  return true;
+}
+
+bool _canCloseMarkdown(String text, int index, String delimiter) {
+  if (delimiter == '`') return true;
+
+  final before = index == 0 ? null : text[index - 1];
+  final afterIndex = index + delimiter.length;
+  final after = afterIndex >= text.length ? null : text[afterIndex];
+  if (before == null || before.trim().isEmpty) return false;
+
+  if (delimiter.contains('_')) {
+    return after == null || !_isWordChar(after);
+  }
+  return true;
+}
+
+bool _isWordChar(String value) {
+  final codeUnit = value.codeUnitAt(0);
+  return (codeUnit >= 48 && codeUnit <= 57) ||
+      (codeUnit >= 65 && codeUnit <= 90) ||
+      (codeUnit >= 97 && codeUnit <= 122);
+}
+
+TextStyle _markdownStyle(TextStyle baseStyle, String delimiter) {
+  return switch (delimiter) {
+    '`' => baseStyle.copyWith(fontFamily: 'monospace'),
+    '**' || '__' => baseStyle.copyWith(fontWeight: FontWeight.w700),
+    '*' || '_' => baseStyle.copyWith(fontStyle: FontStyle.italic),
+    _ => baseStyle,
+  };
+}
+
+class _MarkdownToken {
+  const _MarkdownToken({
+    required this.start,
+    required this.end,
+    required this.span,
+  });
+
+  final int start;
+  final int end;
+  final TextSpan span;
+}
+
+class _MarkdownListItem {
+  const _MarkdownListItem({
+    required this.indent,
+    required this.marker,
+    required this.content,
+  });
+
+  final String indent;
+  final String marker;
+  final String content;
 }
 
 const _timestampMinPadding = 16.0;
@@ -120,9 +343,12 @@ class _TextWithTimestamp extends StatelessWidget {
       );
     }
 
-    final textChildren = highlightSpans != null && highlightSpans!.isNotEmpty
-        ? _buildHighlightedSpans(content, textStyle, highlightSpans!, highlightColor!)
-        : [TextSpan(text: content, style: textStyle)];
+    final textChildren = _buildMessageTextSpans(
+      content,
+      textStyle,
+      highlightSpans,
+      highlightColor,
+    );
 
     if (maxLines != null) {
       return LayoutBuilder(
@@ -282,6 +508,47 @@ class _BubbleTailPainter extends CustomPainter {
 
   @override
   bool shouldRepaint(_BubbleTailPainter old) => old.color != color || old.incoming != incoming;
+}
+
+class _MessageText extends StatelessWidget {
+  const _MessageText({
+    required this.content,
+    required this.textStyle,
+    this.highlightSpans,
+    this.highlightColor,
+    this.maxLines,
+  });
+
+  final String content;
+  final TextStyle textStyle;
+  final List<HighlightSpan>? highlightSpans;
+  final Color? highlightColor;
+  final int? maxLines;
+
+  @override
+  Widget build(BuildContext context) {
+    final spans = _buildMessageTextSpans(
+      content,
+      textStyle,
+      highlightSpans,
+      highlightColor,
+    );
+    final hasHighlights = highlightSpans != null && highlightSpans!.isNotEmpty;
+    if (!hasHighlights && spans.length == 1 && spans.single.text == content) {
+      return Text(
+        content,
+        style: textStyle,
+        maxLines: maxLines,
+        overflow: maxLines != null ? TextOverflow.ellipsis : TextOverflow.clip,
+      );
+    }
+
+    return Text.rich(
+      TextSpan(children: spans),
+      maxLines: maxLines,
+      overflow: maxLines != null ? TextOverflow.ellipsis : TextOverflow.clip,
+    );
+  }
 }
 
 BorderRadius _bubbleBorderRadius({
@@ -488,25 +755,13 @@ class _BubbleContent extends StatelessWidget {
               maxLines: contentMaxLines,
             )
           else if (hasText)
-            highlightSpans != null && highlightSpans!.isNotEmpty
-                ? Text.rich(
-                    TextSpan(
-                      children: _buildHighlightedSpans(
-                        content!,
-                        textStyle,
-                        highlightSpans!,
-                        highlightColor!,
-                      ),
-                    ),
-                    maxLines: contentMaxLines,
-                    overflow: contentMaxLines != null ? TextOverflow.ellipsis : TextOverflow.clip,
-                  )
-                : Text(
-                    content!,
-                    style: textStyle,
-                    maxLines: contentMaxLines,
-                    overflow: contentMaxLines != null ? TextOverflow.ellipsis : TextOverflow.clip,
-                  )
+            _MessageText(
+              content: content!,
+              textStyle: textStyle,
+              highlightSpans: highlightSpans,
+              highlightColor: highlightColor,
+              maxLines: contentMaxLines,
+            )
           else if (hasTimestamp) ...[
             SizedBox(height: 2.h),
             _buildTimestampRow(),

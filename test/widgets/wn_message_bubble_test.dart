@@ -16,6 +16,17 @@ Finder _findTail() => find.descendant(
   matching: find.byType(CustomPaint),
 );
 
+TextSpan? _findTextSpan(InlineSpan span, String text) {
+  if (span is TextSpan) {
+    if (span.text == text) return span;
+    for (final child in span.children ?? const <InlineSpan>[]) {
+      final match = _findTextSpan(child, text);
+      if (match != null) return match;
+    }
+  }
+  return null;
+}
+
 void main() {
   setUpAll(() => RustLib.initMock(api: MockWnApi()));
 
@@ -31,6 +42,77 @@ void main() {
       );
 
       expect(find.text('Test message'), findsOneWidget);
+    });
+
+    testWidgets('renders basic inline markdown in message content', (tester) async {
+      await mountWidget(
+        const WnMessageBubble(
+          direction: MessageDirection.incoming,
+          isDeleted: false,
+          content: 'A **bold** _italic_ `code` message',
+          timestamp: '12:34',
+        ),
+        tester,
+      );
+
+      final richText = tester.widget<RichText>(
+        find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is RichText &&
+                  widget.text.toPlainText().contains('A bold italic code message'),
+            )
+            .first,
+      );
+
+      final bold = _findTextSpan(richText.text, 'bold');
+      final italic = _findTextSpan(richText.text, 'italic');
+      final code = _findTextSpan(richText.text, 'code');
+
+      expect(bold?.style?.fontWeight, FontWeight.w700);
+      expect(italic?.style?.fontStyle, FontStyle.italic);
+      expect(code?.style?.fontFamily, 'monospace');
+    });
+
+    testWidgets('renders markdown lists with inline formatting', (tester) async {
+      await mountWidget(
+        const WnMessageBubble(
+          direction: MessageDirection.incoming,
+          isDeleted: false,
+          content: '- **first**\n2) `second`',
+          timestamp: '12:34',
+        ),
+        tester,
+      );
+
+      final richText = tester.widget<RichText>(
+        find
+            .byWidgetPredicate(
+              (widget) =>
+                  widget is RichText &&
+                  widget.text.toPlainText().contains('• first\n2. second'),
+            )
+            .first,
+      );
+
+      final first = _findTextSpan(richText.text, 'first');
+      final second = _findTextSpan(richText.text, 'second');
+
+      expect(first?.style?.fontWeight, FontWeight.w700);
+      expect(second?.style?.fontFamily, 'monospace');
+    });
+
+    testWidgets('keeps unmatched markdown markers as plain text', (tester) async {
+      await mountWidget(
+        const WnMessageBubble(
+          direction: MessageDirection.incoming,
+          isDeleted: false,
+          content: 'unmatched **bold',
+        ),
+        tester,
+      );
+
+      expect(find.text('unmatched **bold'), findsOneWidget);
     });
 
     testWidgets('does not display text when content is null', (tester) async {
