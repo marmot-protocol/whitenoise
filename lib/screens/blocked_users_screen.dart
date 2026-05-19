@@ -9,6 +9,7 @@ import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/services/user_service.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/formatting.dart';
@@ -29,10 +30,16 @@ class BlockedUsersScreen extends HookConsumerWidget {
 
     useRouteRefresh(context, blocked.refresh);
 
-    final sortedPubkeys = blocked.blockedPubkeys.toList()..sort();
+    final pubkeysKey = (blocked.blockedPubkeys.toList()..sort()).join(',');
+    final sortedFuture = useMemoized(
+      () => _sortByDisplayName(blocked.blockedPubkeys),
+      [pubkeysKey],
+    );
+    final sortedSnapshot = useFuture(sortedFuture);
+    final sortedPubkeys = sortedSnapshot.data ?? const <String>[];
 
     Widget body;
-    if (blocked.isLoading) {
+    if (blocked.isLoading || sortedSnapshot.connectionState != ConnectionState.done) {
       body = Center(
         key: const Key('blocked_users_loading'),
         child: CircularProgressIndicator(
@@ -91,6 +98,25 @@ class BlockedUsersScreen extends HookConsumerWidget {
       ),
     );
   }
+}
+
+Future<List<String>> _sortByDisplayName(Set<String> pubkeys) async {
+  if (pubkeys.isEmpty) return const [];
+  final entries = await Future.wait(
+    pubkeys.map((pubkey) async {
+      String? name;
+      try {
+        final metadata = await UserService(pubkey).getInitialMetadata();
+        name = presentName(metadata);
+      } catch (_) {
+        name = null;
+      }
+      final sortKey = (name ?? npubFromHex(pubkey) ?? pubkey).toLowerCase();
+      return (pubkey: pubkey, sortKey: sortKey);
+    }),
+  );
+  entries.sort((a, b) => a.sortKey.compareTo(b.sortKey));
+  return entries.map((e) => e.pubkey).toList();
 }
 
 class _BlockedUserTile extends HookWidget {

@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/screens/blocked_user_screen.dart';
+import 'package:whitenoise/screens/blocked_users_screen.dart';
 import 'package:whitenoise/screens/chat_info_screen.dart';
 import 'package:whitenoise/screens/chat_invite_screen.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
@@ -702,6 +704,49 @@ void main() {
     testWidgets('redirects to LoginScreen when not authenticated', (tester) async {
       await pumpRouter(tester);
       Routes.pushToNotificationSettings(getContext(tester));
+      await tester.pumpAndSettle();
+      expect(find.byType(LoginScreen), findsOneWidget);
+    });
+  });
+
+  group('pushToBlockedUsers', () {
+    testWidgets('navigates to BlockedUsersScreen when authenticated', (tester) async {
+      await pumpRouter(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
+        ],
+      );
+      Routes.pushToBlockedUsers(getContext(tester));
+      await tester.pumpAndSettle();
+      expect(find.byType(BlockedUsersScreen), findsOneWidget);
+    });
+
+    testWidgets('redirects to LoginScreen when not authenticated', (tester) async {
+      await pumpRouter(tester);
+      Routes.pushToBlockedUsers(getContext(tester));
+      await tester.pumpAndSettle();
+      expect(find.byType(LoginScreen), findsOneWidget);
+    });
+  });
+
+  group('pushToBlockedUser', () {
+    testWidgets('passes userPubkey into BlockedUserScreen', (tester) async {
+      await pumpRouter(
+        tester,
+        overrides: [
+          authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
+        ],
+      );
+      Routes.pushToBlockedUser(getContext(tester), testPubkeyB);
+      await tester.pumpAndSettle();
+      final screen = tester.widget<BlockedUserScreen>(find.byType(BlockedUserScreen));
+      expect(screen.userPubkey, testPubkeyB);
+    });
+
+    testWidgets('redirects to LoginScreen when not authenticated', (tester) async {
+      await pumpRouter(tester);
+      Routes.pushToBlockedUser(getContext(tester), testPubkeyB);
       await tester.pumpAndSettle();
       expect(find.byType(LoginScreen), findsOneWidget);
     });

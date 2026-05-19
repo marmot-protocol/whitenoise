@@ -15,7 +15,6 @@ import 'package:whitenoise/utils/metadata.dart' show presentName;
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_chat_info_profile_card.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
-import 'package:whitenoise/widgets/wn_icon_button.dart';
 import 'package:whitenoise/widgets/wn_overlay.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
@@ -75,14 +74,13 @@ class BlockedUserScreen extends HookConsumerWidget {
                         onDismiss: systemNotice.dismissNotice,
                       )
                     : null,
-                child: Padding(
-                  padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Gap(8.h),
-                      WnChatInfoProfileCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: EdgeInsets.fromLTRB(16.w, 8.h, 16.w, 16.h),
+                      child: WnChatInfoProfileCard(
                         userPubkey: userPubkey,
                         displayName: presentName(metadata),
                         pictureUrl: metadata?.picture,
@@ -94,71 +92,35 @@ class BlockedUserScreen extends HookConsumerWidget {
                           context.l10n.publicKeyCopyError,
                         ),
                       ),
-                      Gap(16.h),
-                      Container(
-                        key: const Key('blocked_user_detail_card'),
-                        decoration: BoxDecoration(
-                          color: colors.fillSecondary,
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        padding: EdgeInsets.fromLTRB(16.w, 8.h, 8.w, 16.h),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Row(
-                              key: const Key('blocked_user_detail_header'),
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    context.l10n.userIsBlocked,
-                                    style: typography.semiBold16.copyWith(
-                                      color: colors.backgroundContentPrimary,
-                                    ),
-                                  ),
-                                ),
-                                WnIconButton(
-                                  key: const Key('blocked_user_detail_chevron'),
-                                  icon: isBannerCollapsed.value
-                                      ? WnIcons.chevronDown
-                                      : WnIcons.chevronUp,
-                                  size: WnIconButtonSize.size36,
-                                  onPressed: () =>
-                                      isBannerCollapsed.value = !isBannerCollapsed.value,
-                                ),
-                              ],
-                            ),
-                            if (!isBannerCollapsed.value) ...[
-                              Padding(
-                                padding: EdgeInsets.only(right: 8.w),
-                                child: Text(
-                                  context.l10n.blockedUserDetailDescription,
-                                  key: const Key('blocked_user_detail_description'),
-                                  style: typography.medium14.copyWith(
-                                    color: colors.backgroundContentSecondary,
-                                  ),
-                                ),
-                              ),
-                              Gap(16.h),
-                              Padding(
-                                padding: EdgeInsets.only(right: 8.w),
-                                child: WnButton(
-                                  key: const Key('blocked_user_unblock_button'),
-                                  text: context.l10n.unblockUser,
-                                  type: WnButtonType.overlay,
-                                  size: WnButtonSize.medium,
-                                  loading: blockState.isActionLoading,
-                                  disabled: blockState.isLoading || blockState.isActionLoading,
-                                  trailingIcon: WnIcons.userCheck,
-                                  onPressed: handleUnblock,
-                                ),
-                              ),
-                            ],
-                          ],
+                    ),
+                    WnSystemNotice(
+                      key: const Key('blocked_user_detail_notice'),
+                      title: context.l10n.userIsBlocked,
+                      description: Text(
+                        context.l10n.blockedUserDetailDescription,
+                        style: typography.medium14.copyWith(
+                          color: colors.backgroundContentSecondary,
                         ),
                       ),
-                    ],
-                  ),
+                      type: WnSystemNoticeType.neutral,
+                      variant: isBannerCollapsed.value
+                          ? WnSystemNoticeVariant.collapsed
+                          : WnSystemNoticeVariant.expanded,
+                      animateEntrance: false,
+                      onToggle: () => isBannerCollapsed.value = !isBannerCollapsed.value,
+                      primaryAction: WnButton(
+                        key: const Key('blocked_user_unblock_button'),
+                        text: context.l10n.unblockUser,
+                        type: WnButtonType.outline,
+                        size: WnButtonSize.medium,
+                        loading: blockState.isActionLoading,
+                        disabled: blockState.isLoading || blockState.isActionLoading,
+                        trailingIcon: WnIcons.userCheck,
+                        onPressed: handleUnblock,
+                      ),
+                    ),
+                    Gap(16.h),
+                  ],
                 ),
               ),
             ),

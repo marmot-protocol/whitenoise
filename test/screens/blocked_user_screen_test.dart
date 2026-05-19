@@ -11,6 +11,7 @@ import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_overlay.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 
 import '../mocks/mock_clipboard.dart' show clearClipboardMock, mockClipboard, mockClipboardFailing;
 import '../mocks/mock_wn_api.dart';
@@ -116,11 +117,10 @@ void main() {
       );
     });
 
-    testWidgets('shows the blocked notice header and description', (tester) async {
+    testWidgets('shows the blocked notice with header and description', (tester) async {
       await pumpBlockedUserScreen(tester);
 
-      expect(find.byKey(const Key('blocked_user_detail_card')), findsOneWidget);
-      expect(find.byKey(const Key('blocked_user_detail_header')), findsOneWidget);
+      expect(find.byKey(const Key('blocked_user_detail_notice')), findsOneWidget);
       expect(find.text('You blocked this user'), findsOneWidget);
       expect(
         find.textContaining("You've blocked this user"),
@@ -128,33 +128,35 @@ void main() {
       );
     });
 
-    testWidgets('notice is expanded by default (description + unblock visible)', (tester) async {
+    testWidgets('notice is expanded by default', (tester) async {
       await pumpBlockedUserScreen(tester);
 
-      expect(find.byKey(const Key('blocked_user_detail_description')), findsOneWidget);
+      final notice = tester.widget<WnSystemNotice>(
+        find.byKey(const Key('blocked_user_detail_notice')),
+      );
+      expect(notice.variant, WnSystemNoticeVariant.expanded);
       expect(find.byKey(const Key('blocked_user_unblock_button')), findsOneWidget);
     });
 
-    testWidgets('chevron collapses description and unblock button', (tester) async {
+    testWidgets('notice uses neutral type', (tester) async {
       await pumpBlockedUserScreen(tester);
 
-      await tester.tap(find.byKey(const Key('blocked_user_detail_chevron')));
-      await tester.pumpAndSettle();
-
-      expect(find.byKey(const Key('blocked_user_detail_description')), findsNothing);
-      expect(find.byKey(const Key('blocked_user_unblock_button')), findsNothing);
+      final notice = tester.widget<WnSystemNotice>(
+        find.byKey(const Key('blocked_user_detail_notice')),
+      );
+      expect(notice.type, WnSystemNoticeType.neutral);
     });
 
-    testWidgets('chevron re-expands description after a second tap', (tester) async {
+    testWidgets('notice collapses when chevron is tapped', (tester) async {
       await pumpBlockedUserScreen(tester);
 
-      await tester.tap(find.byKey(const Key('blocked_user_detail_chevron')));
-      await tester.pumpAndSettle();
-      await tester.tap(find.byKey(const Key('blocked_user_detail_chevron')));
+      await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
       await tester.pumpAndSettle();
 
-      expect(find.byKey(const Key('blocked_user_detail_description')), findsOneWidget);
-      expect(find.byKey(const Key('blocked_user_unblock_button')), findsOneWidget);
+      final notice = tester.widget<WnSystemNotice>(
+        find.byKey(const Key('blocked_user_detail_notice')),
+      );
+      expect(notice.variant, WnSystemNoticeVariant.collapsed);
     });
 
     testWidgets('tapping unblock calls the unblock API', (tester) async {
