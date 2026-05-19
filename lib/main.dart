@@ -22,6 +22,8 @@ import 'package:whitenoise/providers/notification_provider.dart'
 import 'package:whitenoise/providers/theme_provider.dart' show themeProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/screens/fatal_error_screen.dart';
+import 'package:whitenoise/services/product_analytics_config.dart';
+import 'package:whitenoise/services/product_analytics_service.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/theme.dart';
@@ -70,11 +72,19 @@ Future<ProviderContainer> initializeAppContainer() async {
 
   await _migrateDataIfNeeded(dataDir);
 
-  final config = await rust_api.createWhitenoiseConfig(dataDir: dataDir, logsDir: logsDir);
+  final productAnalyticsConfig = await loadProductAnalyticsConfig();
+  final config = await rust_api.createWhitenoiseConfig(
+    dataDir: dataDir,
+    logsDir: logsDir,
+    productAnalyticsConfig: productAnalyticsConfig,
+  );
   await rust_api.initializeWhitenoise(config: config);
 
   final container = ProviderContainer();
   await container.read(authProvider.future);
+  final analytics = container.read(productAnalyticsServiceProvider);
+  await analytics.settings();
+  unawaited(analytics.trackAppStarted(platform: analyticsPlatformForTarget()));
   return container;
 }
 
@@ -114,8 +124,11 @@ class WnApp extends ConsumerStatefulWidget {
   ConsumerState<WnApp> createState() => _WnAppState();
 }
 
+enum _AnalyticsLifecycleState { foreground, background }
+
 class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
   late final GoRouter _router;
+  var _analyticsLifecycleState = _AnalyticsLifecycleState.foreground;
 
   @override
   void initState() {
@@ -146,9 +159,24 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     unawaited(ref.read(foregroundServiceProvider).handleAppLifecycleChange(state));
+    final analytics = ref.read(productAnalyticsServiceProvider);
     if (state == AppLifecycleState.resumed) {
+      if (_analyticsLifecycleState != _AnalyticsLifecycleState.foreground) {
+        _analyticsLifecycleState = _AnalyticsLifecycleState.foreground;
+        unawaited(analytics.trackAppForegrounded(platform: analyticsPlatformForTarget()));
+      }
       unawaited(ref.read(authProvider.notifier).ensureExternalSignersRegistered());
       unawaited(_consumePendingNotificationTap());
+    } else if (state == AppLifecycleState.paused ||
+        state == AppLifecycleState.hidden ||
+        state == AppLifecycleState.detached) {
+      if (_analyticsLifecycleState != _AnalyticsLifecycleState.background) {
+        _analyticsLifecycleState = _AnalyticsLifecycleState.background;
+        unawaited(() async {
+          await analytics.trackAppBackgrounded(platform: analyticsPlatformForTarget());
+          await analytics.flush();
+        }());
+      }
     }
   }
 

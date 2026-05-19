@@ -13,6 +13,7 @@ import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/mute_list.dart';
+import 'package:whitenoise/src/rust/api/product_analytics.dart';
 import 'package:whitenoise/src/rust/api/user_search.dart';
 import 'package:whitenoise/src/rust/api/users.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -105,6 +106,15 @@ class MockWnApi implements RustLibApi {
   bool mockNotificationsEnabled = true;
   bool shouldFailAccountSettings = false;
   bool shouldFailUpdateNotificationsEnabled = false;
+  bool productAnalyticsEnabled = false;
+  String productAnalyticsConsentVersion = 'test-consent-version';
+  final productAnalyticsSetEnabledCalls = <bool>[];
+  final productAnalyticsEvents = <ProductAnalyticsEvent>[];
+  int productAnalyticsFlushCallCount = 0;
+  bool shouldFailProductAnalyticsSettings = false;
+  bool shouldFailSetProductAnalyticsEnabled = false;
+  bool shouldFailTrackProductAnalyticsEvent = false;
+  bool shouldFailFlushProductAnalytics = false;
 
   @override
   Future<KeyPackageStatus> crateApiUsersUserHasKeyPackage({
@@ -919,6 +929,68 @@ class MockWnApi implements RustLibApi {
     return AccountSettings(notificationsEnabled: mockNotificationsEnabled);
   }
 
+  @override
+  Future<String> crateApiProductAnalyticsProductAnalyticsConsentVersion() async {
+    return productAnalyticsConsentVersion;
+  }
+
+  @override
+  Future<ProductAnalyticsSettings> crateApiProductAnalyticsProductAnalyticsSettings() async {
+    if (shouldFailProductAnalyticsSettings) {
+      throw Exception('Failed to read product analytics settings');
+    }
+    return _productAnalyticsSettings();
+  }
+
+  @override
+  Future<ProductAnalyticsSettings> crateApiProductAnalyticsSetProductAnalyticsEnabled({
+    required bool enabled,
+    required String consentVersion,
+  }) async {
+    productAnalyticsSetEnabledCalls.add(enabled);
+    if (shouldFailSetProductAnalyticsEnabled) {
+      throw Exception('Failed to update product analytics consent');
+    }
+    productAnalyticsEnabled = enabled;
+    productAnalyticsConsentVersion = consentVersion;
+    return _productAnalyticsSettings();
+  }
+
+  @override
+  Future<ProductAnalyticsTrackStatus> crateApiProductAnalyticsTrackProductAnalyticsEvent({
+    required ProductAnalyticsEvent event,
+  }) async {
+    if (shouldFailTrackProductAnalyticsEvent) {
+      throw Exception('Failed to track product analytics event');
+    }
+    if (!productAnalyticsEnabled) {
+      return ProductAnalyticsTrackStatus.ignoredDisabled;
+    }
+    productAnalyticsEvents.add(event);
+    return ProductAnalyticsTrackStatus.queued;
+  }
+
+  @override
+  Future<ProductAnalyticsFlushStatus> crateApiProductAnalyticsFlushProductAnalytics() async {
+    productAnalyticsFlushCallCount++;
+    if (shouldFailFlushProductAnalytics) {
+      throw Exception('Failed to flush product analytics');
+    }
+    return productAnalyticsEnabled
+        ? ProductAnalyticsFlushStatus.flushed
+        : ProductAnalyticsFlushStatus.disabled;
+  }
+
+  ProductAnalyticsSettings _productAnalyticsSettings() {
+    final now = DateTime(2026);
+    return ProductAnalyticsSettings(
+      enabled: productAnalyticsEnabled,
+      createdAt: now,
+      updatedAt: now,
+      consentVersion: productAnalyticsConsentVersion,
+    );
+  }
+
   void reset() {
     sendBugReportCalled = false;
     lastBugReportWhatWentWrong = null;
@@ -975,6 +1047,15 @@ class MockWnApi implements RustLibApi {
     mockNotificationsEnabled = true;
     shouldFailAccountSettings = false;
     shouldFailUpdateNotificationsEnabled = false;
+    productAnalyticsEnabled = false;
+    productAnalyticsConsentVersion = 'test-consent-version';
+    productAnalyticsSetEnabledCalls.clear();
+    productAnalyticsEvents.clear();
+    productAnalyticsFlushCallCount = 0;
+    shouldFailProductAnalyticsSettings = false;
+    shouldFailSetProductAnalyticsEnabled = false;
+    shouldFailTrackProductAnalyticsEvent = false;
+    shouldFailFlushProductAnalytics = false;
     zapstoreVersion = null;
     zapstoreShouldThrow = false;
     shouldFailArchiveChat = false;

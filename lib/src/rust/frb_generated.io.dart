@@ -25,6 +25,7 @@ import 'api/messages.dart';
 import 'api/metadata.dart';
 import 'api/mute_list.dart';
 import 'api/notifications.dart';
+import 'api/product_analytics.dart';
 import 'api/relay_defaults.dart';
 import 'api/relays.dart';
 import 'api/signer.dart';
@@ -266,6 +267,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ApiError dco_decode_api_error(dynamic raw);
 
   @protected
+  AptabaseAnalyticsConfig dco_decode_aptabase_analytics_config(dynamic raw);
+
+  @protected
   bool dco_decode_bool(dynamic raw);
 
   @protected
@@ -273,6 +277,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ApiError dco_decode_box_autoadd_api_error(dynamic raw);
+
+  @protected
+  AptabaseAnalyticsConfig dco_decode_box_autoadd_aptabase_analytics_config(
+    dynamic raw,
+  );
 
   @protected
   bool dco_decode_box_autoadd_bool(dynamic raw);
@@ -319,10 +328,23 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   MessageUpdate dco_decode_box_autoadd_message_update(dynamic raw);
 
   @protected
+  ProductAnalyticsConfig dco_decode_box_autoadd_product_analytics_config(
+    dynamic raw,
+  );
+
+  @protected
+  ProductAnalyticsEvent dco_decode_box_autoadd_product_analytics_event(
+    dynamic raw,
+  );
+
+  @protected
   PushRegistration dco_decode_box_autoadd_push_registration(dynamic raw);
 
   @protected
   int dco_decode_box_autoadd_u_32(dynamic raw);
+
+  @protected
+  BigInt dco_decode_box_autoadd_u_64(dynamic raw);
 
   @protected
   User dco_decode_box_autoadd_user(dynamic raw);
@@ -362,6 +384,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   EmojiReaction dco_decode_emoji_reaction(dynamic raw);
+
+  @protected
+  double dco_decode_f_64(dynamic raw);
 
   @protected
   FileMetadata dco_decode_file_metadata(dynamic raw);
@@ -474,6 +499,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List dco_decode_list_prim_u_8_strict(dynamic raw);
 
   @protected
+  List<ProductAnalyticsNumberProp> dco_decode_list_product_analytics_number_prop(dynamic raw);
+
+  @protected
+  List<ProductAnalyticsStringProp> dco_decode_list_product_analytics_string_prop(dynamic raw);
+
+  @protected
   List<(String, String)> dco_decode_list_record_string_string(dynamic raw);
 
   @protected
@@ -566,10 +597,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64? dco_decode_opt_box_autoadd_i_64(dynamic raw);
 
   @protected
+  ProductAnalyticsConfig? dco_decode_opt_box_autoadd_product_analytics_config(
+    dynamic raw,
+  );
+
+  @protected
   PushRegistration? dco_decode_opt_box_autoadd_push_registration(dynamic raw);
 
   @protected
   int? dco_decode_opt_box_autoadd_u_32(dynamic raw);
+
+  @protected
+  BigInt? dco_decode_opt_box_autoadd_u_64(dynamic raw);
 
   @protected
   List<Tag>?
@@ -581,10 +620,55 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<String>? dco_decode_opt_list_String(dynamic raw);
 
   @protected
+  Uint8List? dco_decode_opt_list_prim_u_8_strict(dynamic raw);
+
+  @protected
   U8Array12? dco_decode_opt_u_8_array_12(dynamic raw);
 
   @protected
   U8Array32? dco_decode_opt_u_8_array_32(dynamic raw);
+
+  @protected
+  ProductAnalyticsBackend dco_decode_product_analytics_backend(dynamic raw);
+
+  @protected
+  ProductAnalyticsConfig dco_decode_product_analytics_config(dynamic raw);
+
+  @protected
+  ProductAnalyticsDeviceClass dco_decode_product_analytics_device_class(
+    dynamic raw,
+  );
+
+  @protected
+  ProductAnalyticsEvent dco_decode_product_analytics_event(dynamic raw);
+
+  @protected
+  ProductAnalyticsEventName dco_decode_product_analytics_event_name(
+    dynamic raw,
+  );
+
+  @protected
+  ProductAnalyticsFlushStatus dco_decode_product_analytics_flush_status(
+    dynamic raw,
+  );
+
+  @protected
+  ProductAnalyticsNumberProp dco_decode_product_analytics_number_prop(
+    dynamic raw,
+  );
+
+  @protected
+  ProductAnalyticsSettings dco_decode_product_analytics_settings(dynamic raw);
+
+  @protected
+  ProductAnalyticsStringProp dco_decode_product_analytics_string_prop(
+    dynamic raw,
+  );
+
+  @protected
+  ProductAnalyticsTrackStatus dco_decode_product_analytics_track_status(
+    dynamic raw,
+  );
 
   @protected
   PushPlatform dco_decode_push_platform(dynamic raw);
@@ -865,6 +949,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   ApiError sse_decode_api_error(SseDeserializer deserializer);
 
   @protected
+  AptabaseAnalyticsConfig sse_decode_aptabase_analytics_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
@@ -872,6 +961,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   ApiError sse_decode_box_autoadd_api_error(SseDeserializer deserializer);
+
+  @protected
+  AptabaseAnalyticsConfig sse_decode_box_autoadd_aptabase_analytics_config(
+    SseDeserializer deserializer,
+  );
 
   @protected
   bool sse_decode_box_autoadd_bool(SseDeserializer deserializer);
@@ -934,12 +1028,25 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  ProductAnalyticsConfig sse_decode_box_autoadd_product_analytics_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ProductAnalyticsEvent sse_decode_box_autoadd_product_analytics_event(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   PushRegistration sse_decode_box_autoadd_push_registration(
     SseDeserializer deserializer,
   );
 
   @protected
   int sse_decode_box_autoadd_u_32(SseDeserializer deserializer);
+
+  @protected
+  BigInt sse_decode_box_autoadd_u_64(SseDeserializer deserializer);
 
   @protected
   User sse_decode_box_autoadd_user(SseDeserializer deserializer);
@@ -987,6 +1094,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   EmojiReaction sse_decode_emoji_reaction(SseDeserializer deserializer);
+
+  @protected
+  double sse_decode_f_64(SseDeserializer deserializer);
 
   @protected
   FileMetadata sse_decode_file_metadata(SseDeserializer deserializer);
@@ -1117,6 +1227,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   Uint8List sse_decode_list_prim_u_8_strict(SseDeserializer deserializer);
 
   @protected
+  List<ProductAnalyticsNumberProp> sse_decode_list_product_analytics_number_prop(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  List<ProductAnalyticsStringProp> sse_decode_list_product_analytics_string_prop(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   List<(String, String)> sse_decode_list_record_string_string(
     SseDeserializer deserializer,
   );
@@ -1237,12 +1357,20 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   PlatformInt64? sse_decode_opt_box_autoadd_i_64(SseDeserializer deserializer);
 
   @protected
+  ProductAnalyticsConfig? sse_decode_opt_box_autoadd_product_analytics_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   PushRegistration? sse_decode_opt_box_autoadd_push_registration(
     SseDeserializer deserializer,
   );
 
   @protected
   int? sse_decode_opt_box_autoadd_u_32(SseDeserializer deserializer);
+
+  @protected
+  BigInt? sse_decode_opt_box_autoadd_u_64(SseDeserializer deserializer);
 
   @protected
   List<Tag>?
@@ -1254,10 +1382,63 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<String>? sse_decode_opt_list_String(SseDeserializer deserializer);
 
   @protected
+  Uint8List? sse_decode_opt_list_prim_u_8_strict(SseDeserializer deserializer);
+
+  @protected
   U8Array12? sse_decode_opt_u_8_array_12(SseDeserializer deserializer);
 
   @protected
   U8Array32? sse_decode_opt_u_8_array_32(SseDeserializer deserializer);
+
+  @protected
+  ProductAnalyticsBackend sse_decode_product_analytics_backend(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ProductAnalyticsConfig sse_decode_product_analytics_config(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ProductAnalyticsDeviceClass sse_decode_product_analytics_device_class(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ProductAnalyticsEvent sse_decode_product_analytics_event(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ProductAnalyticsEventName sse_decode_product_analytics_event_name(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ProductAnalyticsFlushStatus sse_decode_product_analytics_flush_status(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ProductAnalyticsNumberProp sse_decode_product_analytics_number_prop(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ProductAnalyticsSettings sse_decode_product_analytics_settings(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ProductAnalyticsStringProp sse_decode_product_analytics_string_prop(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  ProductAnalyticsTrackStatus sse_decode_product_analytics_track_status(
+    SseDeserializer deserializer,
+  );
 
   @protected
   PushPlatform sse_decode_push_platform(SseDeserializer deserializer);
@@ -1589,6 +1770,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_api_error(ApiError self, SseSerializer serializer);
 
   @protected
+  void sse_encode_aptabase_analytics_config(
+    AptabaseAnalyticsConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
@@ -1600,6 +1787,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_box_autoadd_api_error(
     ApiError self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_aptabase_analytics_config(
+    AptabaseAnalyticsConfig self,
     SseSerializer serializer,
   );
 
@@ -1679,6 +1872,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_box_autoadd_product_analytics_config(
+    ProductAnalyticsConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_box_autoadd_product_analytics_event(
+    ProductAnalyticsEvent self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_box_autoadd_push_registration(
     PushRegistration self,
     SseSerializer serializer,
@@ -1686,6 +1891,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_box_autoadd_u_32(int self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_box_autoadd_u_64(BigInt self, SseSerializer serializer);
 
   @protected
   void sse_encode_box_autoadd_user(User self, SseSerializer serializer);
@@ -1749,6 +1957,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_emoji_reaction(EmojiReaction self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_f_64(double self, SseSerializer serializer);
 
   @protected
   void sse_encode_file_metadata(FileMetadata self, SseSerializer serializer);
@@ -1917,6 +2128,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_list_product_analytics_number_prop(
+    List<ProductAnalyticsNumberProp> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_product_analytics_string_prop(
+    List<ProductAnalyticsStringProp> self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_list_record_string_string(
     List<(String, String)> self,
     SseSerializer serializer,
@@ -2061,6 +2284,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_opt_box_autoadd_product_analytics_config(
+    ProductAnalyticsConfig? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_box_autoadd_push_registration(
     PushRegistration? self,
     SseSerializer serializer,
@@ -2068,6 +2297,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_opt_box_autoadd_u_32(int? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_opt_box_autoadd_u_64(BigInt? self, SseSerializer serializer);
 
   @protected
   void
@@ -2080,10 +2312,76 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_opt_list_String(List<String>? self, SseSerializer serializer);
 
   @protected
+  void sse_encode_opt_list_prim_u_8_strict(
+    Uint8List? self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_opt_u_8_array_12(U8Array12? self, SseSerializer serializer);
 
   @protected
   void sse_encode_opt_u_8_array_32(U8Array32? self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_product_analytics_backend(
+    ProductAnalyticsBackend self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_product_analytics_config(
+    ProductAnalyticsConfig self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_product_analytics_device_class(
+    ProductAnalyticsDeviceClass self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_product_analytics_event(
+    ProductAnalyticsEvent self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_product_analytics_event_name(
+    ProductAnalyticsEventName self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_product_analytics_flush_status(
+    ProductAnalyticsFlushStatus self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_product_analytics_number_prop(
+    ProductAnalyticsNumberProp self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_product_analytics_settings(
+    ProductAnalyticsSettings self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_product_analytics_string_prop(
+    ProductAnalyticsStringProp self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_product_analytics_track_status(
+    ProductAnalyticsTrackStatus self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_push_platform(PushPlatform self, SseSerializer serializer);

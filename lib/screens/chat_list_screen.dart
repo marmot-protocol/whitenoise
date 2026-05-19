@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
@@ -9,8 +11,11 @@ import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_zapstore_update.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
+import 'package:whitenoise/providers/analytics_onboarding_provider.dart';
 import 'package:whitenoise/providers/offline_provider.dart';
+import 'package:whitenoise/providers/product_analytics_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/services/product_analytics_service.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/chat_search.dart';
 import 'package:whitenoise/widgets/chat_list_filters.dart';
@@ -94,9 +99,13 @@ class ChatListScreen extends HookConsumerWidget {
     AppTypography typography,
     SemanticColors colors, {
     required bool isOffline,
+    required bool showAnalyticsNotice,
     required bool showWelcomeNotice,
+    required bool analyticsNoticeLoading,
     required String? updateVersion,
     required VoidCallback onUpdateDismiss,
+    required VoidCallback onAnalyticsDismiss,
+    required VoidCallback onAnalyticsShare,
     required VoidCallback onWelcomeDismiss,
     required String? noticeMessage,
     required WnSystemNoticeType noticeType,
@@ -145,6 +154,42 @@ class ChatListScreen extends HookConsumerWidget {
       );
     }
 
+    if (showAnalyticsNotice) {
+      return WnSystemNotice(
+        key: const Key('analytics_onboarding_notice'),
+        title: context.l10n.analyticsPromptTitle,
+        description: Text(
+          context.l10n.analyticsConsentSettingsDescription,
+          style: typography.medium14.copyWith(
+            color: colors.backgroundContentQuaternary,
+          ),
+        ),
+        type: WnSystemNoticeType.neutral,
+        variant: WnSystemNoticeVariant.dismissible,
+        actionLayout: WnSystemNoticeActionLayout.horizontal,
+        backgroundColor: colors.backgroundTertiary,
+        animateEntrance: false,
+        animateDismiss: false,
+        onDismiss: onAnalyticsDismiss,
+        secondaryAction: WnButton(
+          key: const Key('not_now_analytics_button'),
+          text: context.l10n.analyticsPromptNotNow,
+          type: WnButtonType.outline,
+          size: WnButtonSize.medium,
+          disabled: analyticsNoticeLoading,
+          onPressed: onAnalyticsDismiss,
+        ),
+        primaryAction: WnButton(
+          key: const Key('share_analytics_button'),
+          text: context.l10n.analyticsPromptShare,
+          size: WnButtonSize.medium,
+          loading: analyticsNoticeLoading,
+          disabled: analyticsNoticeLoading,
+          onPressed: onAnalyticsShare,
+        ),
+      );
+    }
+
     if (showWelcomeNotice) {
       return WnSystemNotice(
         key: const Key('welcome_notice'),
@@ -152,6 +197,8 @@ class ChatListScreen extends HookConsumerWidget {
         description: _buildWelcomeDescription(context, typography, colors),
         type: WnSystemNoticeType.neutral,
         variant: WnSystemNoticeVariant.dismissible,
+        actionLayout: WnSystemNoticeActionLayout.horizontal,
+        backgroundColor: colors.backgroundTertiary,
         animateEntrance: false,
         onDismiss: onWelcomeDismiss,
         secondaryAction: WnButton(
@@ -189,7 +236,11 @@ class ChatListScreen extends HookConsumerWidget {
     final updateState = useZapstoreUpdate();
     final searchQuery = useState('');
     final headerOpen = useState(false);
+    final analyticsStepResolved = useState(false);
     final welcomeNoticeDismissed = useState(false);
+    final analyticsNoticeLoading = useState(false);
+    final analyticsSettings = ref.watch(productAnalyticsSettingsProvider);
+    final analyticsOnboardingResolved = ref.watch(analyticsOnboardingResolvedProvider(pubkey));
     final chatListTopPadding = useMemoized(() => ValueNotifier(safeAreaTop + _slateHeight.h));
     final chatListSearch = useChatListSearch(
       pubkey: pubkey,
@@ -198,6 +249,7 @@ class ChatListScreen extends HookConsumerWidget {
     );
 
     useEffect(() {
+      analyticsStepResolved.value = false;
       welcomeNoticeDismissed.value = false;
       return null;
     }, [pubkey]);
@@ -214,10 +266,54 @@ class ChatListScreen extends HookConsumerWidget {
     );
     final isLoading = isArchiveView ? archivedChatListResult.isLoading : chatListResult.isLoading;
     final isEmpty = activeChatList.isEmpty && !isLoading;
-    final showWelcomeNotice = !isArchiveView && isEmpty && !welcomeNoticeDismissed.value;
+    final showEmptyOnboarding = !isArchiveView && isEmpty;
+    final analyticsEnabled = analyticsSettings.value?.enabled == true;
+    final analyticsOnboardingIsResolved =
+        analyticsStepResolved.value || (analyticsOnboardingResolved.value ?? false);
+    final showAnalyticsNotice =
+        showEmptyOnboarding &&
+        analyticsOnboardingResolved.hasValue &&
+        !analyticsOnboardingIsResolved &&
+        analyticsSettings.hasValue &&
+        !analyticsEnabled;
+    final showWelcomeNotice =
+        showEmptyOnboarding &&
+        !welcomeNoticeDismissed.value &&
+        (analyticsOnboardingIsResolved || analyticsEnabled);
     final activeUpdateVersion = updateState.isDismissed ? null : updateState.availableVersion;
 
     final isSearchVisible = headerOpen.value || searchQuery.value.isNotEmpty;
+
+    Future<void> resolveAnalyticsNotice() async {
+      if (context.mounted) {
+        analyticsStepResolved.value = true;
+      }
+      await ref.read(analyticsOnboardingResolutionServiceProvider).markResolved(pubkey);
+      ref.invalidate(analyticsOnboardingResolvedProvider(pubkey));
+    }
+
+    void dismissWelcomeNotice() {
+      if (context.mounted) {
+        welcomeNoticeDismissed.value = true;
+      }
+    }
+
+    Future<void> shareAnalytics() async {
+      if (analyticsNoticeLoading.value) return;
+      analyticsNoticeLoading.value = true;
+      try {
+        await ref.read(productAnalyticsSettingsProvider.notifier).setEnabled(true);
+        final enabled = ref.read(productAnalyticsSettingsProvider).value?.enabled ?? false;
+        if (enabled) {
+          final analytics = ref.read(productAnalyticsServiceProvider);
+          await analytics.trackOnboardingStarted();
+          await analytics.trackOnboardingCompleted();
+        }
+        await resolveAnalyticsNotice();
+      } finally {
+        analyticsNoticeLoading.value = false;
+      }
+    }
 
     return PopScope(
       canPop: !isSearchVisible,
@@ -312,19 +408,20 @@ class ChatListScreen extends HookConsumerWidget {
                     context,
                     typography,
                     colors,
+                    showAnalyticsNotice: showAnalyticsNotice,
                     showWelcomeNotice: showWelcomeNotice,
+                    analyticsNoticeLoading: analyticsNoticeLoading.value,
                     isOffline: isOffline,
                     updateVersion: activeUpdateVersion,
                     onUpdateDismiss: updateState.dismiss,
-                    onWelcomeDismiss: () {
-                      if (context.mounted) {
-                        welcomeNoticeDismissed.value = true;
-                      }
-                    },
+                    onAnalyticsDismiss: () => unawaited(resolveAnalyticsNotice()),
+                    onAnalyticsShare: () => unawaited(shareAnalytics()),
+                    onWelcomeDismiss: dismissWelcomeNotice,
                     noticeMessage: notice.noticeMessage,
                     noticeType: notice.noticeType,
                     onNoticeDismiss: notice.dismissNotice,
                   ),
+                  systemNoticePosition: WnSlateSystemNoticePosition.belowHeader,
                   header: const ChatListHeader(),
                 ),
               ),

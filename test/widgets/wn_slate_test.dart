@@ -99,6 +99,53 @@ void main() {
         expect(find.byType(WnSlate), findsOneWidget);
       });
 
+      testWidgets('renders systemNotice above header by default', (tester) async {
+        await mountWidget(
+          const WnSlate(
+            animateContent: false,
+            systemNotice: SizedBox(
+              key: Key('system_notice'),
+              height: 20,
+              child: Text('System Notice'),
+            ),
+            header: SizedBox(
+              key: Key('header'),
+              height: 20,
+              child: Text('Header'),
+            ),
+          ),
+          tester,
+        );
+
+        final noticeTop = tester.getTopLeft(find.byKey(const Key('system_notice'))).dy;
+        final headerTop = tester.getTopLeft(find.byKey(const Key('header'))).dy;
+        expect(noticeTop, lessThan(headerTop));
+      });
+
+      testWidgets('renders systemNotice below header when configured', (tester) async {
+        await mountWidget(
+          const WnSlate(
+            animateContent: false,
+            systemNoticePosition: WnSlateSystemNoticePosition.belowHeader,
+            systemNotice: SizedBox(
+              key: Key('system_notice'),
+              height: 20,
+              child: Text('System Notice'),
+            ),
+            header: SizedBox(
+              key: Key('header'),
+              height: 20,
+              child: Text('Header'),
+            ),
+          ),
+          tester,
+        );
+
+        final noticeTop = tester.getTopLeft(find.byKey(const Key('system_notice'))).dy;
+        final headerTop = tester.getTopLeft(find.byKey(const Key('header'))).dy;
+        expect(noticeTop, greaterThan(headerTop));
+      });
+
       group('without shrinkWrapContent', () {
         testWidgets('child uses all available space left after system notice', (tester) async {
           await mountWidget(

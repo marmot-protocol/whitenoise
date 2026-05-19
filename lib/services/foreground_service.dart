@@ -13,6 +13,7 @@ import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDi
 import 'package:whitenoise/services/external_signer_callback_registry.dart';
 import 'package:whitenoise/services/notification_service.dart';
 import 'package:whitenoise/services/notification_subscription.dart';
+import 'package:whitenoise/services/product_analytics_config.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/api/relays.dart' as relays_api;
 import 'package:whitenoise/src/rust/api/utils.dart' as rust_utils;
@@ -248,9 +249,11 @@ class NotificationTaskHandler extends TaskHandler {
       await Directory(logsDir).create(recursive: true);
 
       try {
+        final productAnalyticsConfig = await loadProductAnalyticsConfig();
         final config = await rust_api.createWhitenoiseConfig(
           dataDir: dataDir,
           logsDir: logsDir,
+          productAnalyticsConfig: productAnalyticsConfig,
         );
         await rust_api.initializeWhitenoise(config: config);
         _logger.info('Initialized whitenoise singleton in task isolate');

@@ -66,6 +66,30 @@
   "@createProfile": {
     "description": "Submit button text on signup screen"
   },
+  "analyticsConsentTitle": "Help improve White Noise",
+  "@analyticsConsentTitle": {
+    "description": "Title for the optional product analytics consent checkbox"
+  },
+  "analyticsConsentDescription": "Share privacy-preserving usage analytics. We never send message content, contacts, public keys, relay URLs, group ids, message ids, or profile data. You can turn this off anytime.",
+  "analyticsConsentSettingsDescription": "Share anonymous usage data to help us find bugs and improve the app. Messages, contacts, and keys are never included.",
+  "analyticsPromptTitle": "Help improve White Noise?",
+  "analyticsPromptNotNow": "Not now",
+  "analyticsPromptShare": "Share analytics",
+  "@analyticsConsentDescription": {
+    "description": "Description for the optional product analytics consent checkbox"
+  },
+  "@analyticsConsentSettingsDescription": {
+    "description": "Description for the product analytics setting row"
+  },
+  "@analyticsPromptTitle": {
+    "description": "Title for the product analytics prompt on the empty chat list"
+  },
+  "@analyticsPromptNotNow": {
+    "description": "Decline button for the product analytics prompt"
+  },
+  "@analyticsPromptShare": {
+    "description": "Opt-in button for the product analytics prompt"
+  },
   "chooseName": "Name",
   "@chooseName": {
     "description": "Label for name input field"

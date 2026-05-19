@@ -5,13 +5,49 @@ import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_list_screen.dart';
 import 'package:whitenoise/screens/home_screen.dart';
 import 'package:whitenoise/screens/privacy_security_screen.dart';
+import 'package:whitenoise/services/product_analytics_service.dart';
+import 'package:whitenoise/src/rust/api/product_analytics.dart' as rust_analytics;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
+import 'package:whitenoise/widgets/wn_toggle.dart';
 
 import '../mocks/mock_auth_notifier.dart';
 import '../mocks/mock_secure_storage.dart';
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
+
+class _AnalyticsRecorder {
+  bool enabled = false;
+  final events = <rust_analytics.ProductAnalyticsEventName>[];
+
+  ProductAnalyticsService service() {
+    return ProductAnalyticsService(
+      readSettings: () async => _settings(),
+      setEnabled: ({required enabled, required consentVersion}) async {
+        this.enabled = enabled;
+        return _settings(consentVersion: consentVersion);
+      },
+      track: ({required event}) async {
+        events.add(event.name);
+        return rust_analytics.ProductAnalyticsTrackStatus.queued;
+      },
+      flush: () async => rust_analytics.ProductAnalyticsFlushStatus.flushed,
+      consentVersion: () async => 'test-consent-version',
+    );
+  }
+
+  rust_analytics.ProductAnalyticsSettings _settings({
+    String consentVersion = 'test-consent-version',
+  }) {
+    final now = DateTime(2026);
+    return rust_analytics.ProductAnalyticsSettings(
+      enabled: enabled,
+      createdAt: now,
+      updatedAt: now,
+      consentVersion: consentVersion,
+    );
+  }
+}
 
 void main() {
   late MockWnApi mockApi;
@@ -25,12 +61,16 @@ void main() {
     mockApi.reset();
   });
 
-  Future<void> pumpPrivacySecurityScreen(WidgetTester tester) async {
+  Future<void> pumpPrivacySecurityScreen(
+    WidgetTester tester, {
+    List<dynamic> overrides = const [],
+  }) async {
     await mountTestApp(
       tester,
       overrides: [
         authProvider.overrideWith(MockAuthNotifier.new),
         secureStorageProvider.overrideWithValue(MockSecureStorage()),
+        ...overrides,
       ],
     );
     Routes.pushToPrivacySecurity(tester.element(find.byType(Scaffold)));
@@ -61,6 +101,41 @@ void main() {
         ),
         findsOneWidget,
       );
+    });
+
+    testWidgets('displays device-local analytics consent toggle', (tester) async {
+      final analytics = _AnalyticsRecorder();
+      await pumpPrivacySecurityScreen(
+        tester,
+        overrides: [productAnalyticsServiceProvider.overrideWithValue(analytics.service())],
+      );
+
+      final toggle = tester.widget<WnToggle>(
+        find.byKey(const Key('privacy_security_analytics_consent_toggle')),
+      );
+      expect(toggle.value, isFalse);
+      expect(find.text('Help improve White Noise'), findsOneWidget);
+      expect(
+        find.text(
+          'Share anonymous usage data to help us find bugs and improve the app. '
+          'Messages, contacts, and keys are never included.',
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('analytics toggle updates Rust consent state', (tester) async {
+      final analytics = _AnalyticsRecorder();
+      await pumpPrivacySecurityScreen(
+        tester,
+        overrides: [productAnalyticsServiceProvider.overrideWithValue(analytics.service())],
+      );
+
+      await tester.tap(find.byKey(const Key('privacy_security_analytics_consent_toggle')));
+      await tester.pumpAndSettle();
+
+      expect(analytics.enabled, isTrue);
+      expect(analytics.events, isEmpty);
     });
 
     testWidgets('tapping delete app data shows confirmation sheet', (tester) async {

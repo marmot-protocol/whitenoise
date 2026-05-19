@@ -72,6 +72,8 @@ import 'package:whitenoise_widgetbook/components/wn_profile_switcher_item.dart'
     as _whitenoise_widgetbook_components_wn_profile_switcher_item;
 import 'package:whitenoise_widgetbook/components/wn_slate_headers.dart'
     as _whitenoise_widgetbook_components_wn_slate_headers;
+import 'package:whitenoise_widgetbook/components/wn_toggle.dart'
+    as _whitenoise_widgetbook_components_wn_toggle;
 import 'package:whitenoise_widgetbook/components/wn_user_item.dart'
     as _whitenoise_widgetbook_components_wn_user_item;
 import 'package:whitenoise_widgetbook/foundations/semantic_colors.dart'
@@ -425,6 +427,16 @@ final directories = <_widgetbook.WidgetbookNode>[
             name: 'Timestamp',
             builder:
                 _whitenoise_widgetbook_components_timestamp.wnTimestampShowcase,
+          ),
+        ],
+      ),
+      _widgetbook.WidgetbookComponent(
+        name: 'WnToggleStory',
+        useCases: [
+          _widgetbook.WidgetbookUseCase(
+            name: 'Toggle',
+            builder:
+                _whitenoise_widgetbook_components_wn_toggle.wnToggleShowcase,
           ),
         ],
       ),

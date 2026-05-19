@@ -6,6 +6,7 @@
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 import 'api/error.dart';
+import 'api/product_analytics.dart';
 import 'frb_generated.dart';
 
 // These functions are ignored because they are not marked as `pub`: `wn_session`, `wn`
@@ -35,10 +36,12 @@ Future<WhitenoiseConfig> createWhitenoiseConfig({
   required String dataDir,
   required String logsDir,
   List<String>? defaultRelayUrls,
+  ProductAnalyticsConfig? productAnalyticsConfig,
 }) => RustLib.instance.api.crateApiCreateWhitenoiseConfig(
   dataDir: dataDir,
   logsDir: logsDir,
   defaultRelayUrls: defaultRelayUrls,
+  productAnalyticsConfig: productAnalyticsConfig,
 );
 
 Future<void> initializeWhitenoise({required WhitenoiseConfig config}) =>
@@ -84,14 +87,23 @@ class WhitenoiseConfig {
   /// Relay URLs used when the app needs to create default relay metadata.
   final List<String>? defaultRelayUrls;
 
+  /// Optional product analytics configuration. Consent is still device-local
+  /// and disabled by default inside whitenoise-rs.
+  final ProductAnalyticsConfig? productAnalyticsConfig;
+
   const WhitenoiseConfig({
     required this.dataDir,
     required this.logsDir,
     this.defaultRelayUrls,
+    this.productAnalyticsConfig,
   });
 
   @override
-  int get hashCode => dataDir.hashCode ^ logsDir.hashCode ^ defaultRelayUrls.hashCode;
+  int get hashCode =>
+      dataDir.hashCode ^
+      logsDir.hashCode ^
+      defaultRelayUrls.hashCode ^
+      productAnalyticsConfig.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -100,5 +112,6 @@ class WhitenoiseConfig {
           runtimeType == other.runtimeType &&
           dataDir == other.dataDir &&
           logsDir == other.logsDir &&
-          defaultRelayUrls == other.defaultRelayUrls;
+          defaultRelayUrls == other.defaultRelayUrls &&
+          productAnalyticsConfig == other.productAnalyticsConfig;
 }

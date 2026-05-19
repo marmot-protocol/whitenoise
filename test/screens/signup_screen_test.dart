@@ -292,12 +292,21 @@ void main() {
         ];
       });
 
-      testWidgets('redirects to chat list on success', (tester) async {
+      testWidgets('redirects to chat list after profile creation', (tester) async {
         await pumpSignupScreen(tester, overrides: overrides);
         await tester.enterText(find.byType(TextField).first, 'Test User');
         await tester.tap(find.text('Create profile'));
         await tester.pumpAndSettle();
+
         expect(find.byType(ChatListScreen), findsOneWidget);
+      });
+
+      testWidgets('does not show analytics consent controls in signup', (tester) async {
+        await pumpSignupScreen(tester, overrides: overrides);
+        await tester.enterText(find.byType(TextField).first, 'Test User');
+
+        expect(find.byKey(const Key('signup_analytics_consent_checkbox')), findsNothing);
+        expect(find.text('Help improve White Noise?'), findsNothing);
       });
 
       testWidgets('does not redirect on failure', (tester) async {

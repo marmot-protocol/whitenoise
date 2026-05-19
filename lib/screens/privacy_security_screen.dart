@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_delete_all_data.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
+import 'package:whitenoise/providers/product_analytics_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
@@ -13,6 +15,7 @@ import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
+import 'package:whitenoise/widgets/wn_toggle.dart';
 
 class PrivacySecurityScreen extends HookConsumerWidget {
   const PrivacySecurityScreen({super.key});
@@ -20,9 +23,9 @@ class PrivacySecurityScreen extends HookConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final colors = context.colors;
-    final typography = context.typographyScaled;
     final (:state, :deleteAllData) = useDeleteAllData();
     final systemNotice = useSystemNotice();
+    final analyticsSettings = ref.watch(productAnalyticsSettingsProvider);
 
     Future<void> handleDeleteAllData() async {
       final result = await WnConfirmationSlate.show(
@@ -67,43 +70,166 @@ class PrivacySecurityScreen extends HookConsumerWidget {
                   onDismiss: systemNotice.dismissNotice,
                 )
               : null,
-          child: Padding(
-            padding: EdgeInsets.fromLTRB(14.w, 0, 14.w, 14.h),
+          child: SingleChildScrollView(
+            padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  context.l10n.deleteAllAppData,
-                  style: typography.semiBold16.copyWith(
-                    color: colors.backgroundContentSecondary,
-                  ),
+                _AnalyticsActionBlock(
+                  title: context.l10n.analyticsConsentTitle,
+                  description: context.l10n.analyticsConsentSettingsDescription,
+                  value: analyticsSettings.value?.enabled ?? false,
+                  enabled: analyticsSettings.hasValue,
+                  onChanged: (enabled) {
+                    ref.read(productAnalyticsSettingsProvider.notifier).setEnabled(enabled);
+                  },
                 ),
-                SizedBox(height: 8.h),
-                SizedBox(
-                  width: double.infinity,
-                  child: WnButton(
-                    key: const Key('delete_all_data_button'),
-                    text: context.l10n.deleteAppData,
-                    onPressed: handleDeleteAllData,
-                    type: WnButtonType.destructive,
-                    size: WnButtonSize.medium,
-                    loading: state.isDeleting,
-                    disabled: state.isDeleting,
-                    trailingIcon: WnIcons.trashCan,
-                  ),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  context.l10n.deleteAllAppDataDescription,
-                  style: typography.medium12.copyWith(
-                    color: colors.backgroundContentSecondary,
-                  ),
+                Gap(12.h),
+                _DestructiveActionBlock(
+                  title: context.l10n.deleteAllAppData,
+                  buttonText: context.l10n.deleteAppData,
+                  description: context.l10n.deleteAllAppDataDescription,
+                  icon: WnIcons.trashCan,
+                  buttonKey: const Key('delete_all_data_button'),
+                  loading: state.isDeleting,
+                  onPressed: state.isDeleting ? null : handleDeleteAllData,
                 ),
               ],
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _AnalyticsActionBlock extends StatelessWidget {
+  const _AnalyticsActionBlock({
+    required this.title,
+    required this.description,
+    required this.value,
+    required this.enabled,
+    required this.onChanged,
+  });
+
+  final String title;
+  final String description;
+  final bool value;
+  final bool enabled;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Expanded(
+          child: _ActionTextBlock(
+            title: title,
+            description: description,
+            descriptionGap: 0,
+          ),
+        ),
+        Gap(24.w),
+        Padding(
+          padding: EdgeInsets.only(top: 4.h),
+          child: WnToggle(
+            key: const Key('privacy_security_analytics_consent_toggle'),
+            thumbKey: const Key('privacy_security_analytics_consent_toggle_thumb'),
+            value: value,
+            enabled: enabled,
+            onChanged: onChanged,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _DestructiveActionBlock extends StatelessWidget {
+  const _DestructiveActionBlock({
+    required this.title,
+    required this.buttonText,
+    required this.description,
+    required this.icon,
+    required this.buttonKey,
+    required this.loading,
+    required this.onPressed,
+  });
+
+  final String title;
+  final String buttonText;
+  final String description;
+  final WnIcons icon;
+  final Key buttonKey;
+  final bool loading;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return _ActionTextBlock(
+      title: title,
+      description: description,
+      descriptionGap: 4.h,
+      child: WnButton(
+        key: buttonKey,
+        text: buttonText,
+        onPressed: onPressed,
+        type: WnButtonType.destructive,
+        size: WnButtonSize.medium,
+        loading: loading,
+        disabled: loading,
+        trailingIcon: icon,
+      ),
+    );
+  }
+}
+
+class _ActionTextBlock extends StatelessWidget {
+  const _ActionTextBlock({
+    required this.title,
+    required this.description,
+    required this.descriptionGap,
+    this.child,
+  });
+
+  final String title;
+  final String description;
+  final double descriptionGap;
+  final Widget? child;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.only(left: 2.w, top: 4.h, bottom: 4.h),
+          child: Text(
+            title,
+            style: typography.semiBold16.copyWith(
+              color: colors.backgroundContentSecondary,
+            ),
+          ),
+        ),
+        if (child != null) ...[
+          Gap(4.h),
+          SizedBox(width: double.infinity, child: child),
+        ],
+        Gap(descriptionGap),
+        Padding(
+          padding: EdgeInsets.only(left: 2.w, top: 4.h, bottom: 4.h),
+          child: Text(
+            description,
+            style: typography.medium14.copyWith(
+              color: colors.backgroundContentSecondary,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

@@ -19,7 +19,9 @@ import 'package:whitenoise/src/rust/api/chat_list.dart';
 import 'package:whitenoise/src/rust/api/chat_summary.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage;
+import 'package:whitenoise/src/rust/api/product_analytics.dart' as rust_analytics;
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/chat_list_header.dart';
 import 'package:whitenoise/widgets/chat_list_search_and_filters.dart';
 import 'package:whitenoise/widgets/chat_list_tile.dart';
@@ -28,6 +30,7 @@ import 'package:whitenoise/widgets/wn_icon_button.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
 
+import '../mocks/mock_secure_storage.dart';
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
@@ -159,18 +162,27 @@ class _SwitchableAuthNotifier extends AuthNotifier {
 }
 
 final _api = _MockApi();
+late MockSecureStorage _secureStorage;
 
 void main() {
   setUpAll(() => RustLib.initMock(api: _api));
   setUp(() {
     _api.reset();
+    _secureStorage = MockSecureStorage();
     _setInstalledVersion('2026.3.5');
   });
 
-  Future<void> pumpChatListScreen(WidgetTester tester) async {
+  Future<void> pumpChatListScreen(
+    WidgetTester tester, {
+    List overrides = const [],
+  }) async {
     await mountTestApp(
       tester,
-      overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
+      overrides: [
+        secureStorageProvider.overrideWithValue(_secureStorage),
+        authProvider.overrideWith(() => _MockAuthNotifier()),
+        ...overrides,
+      ],
     );
     await tester.pumpAndSettle();
   }
@@ -240,32 +252,55 @@ void main() {
     });
 
     group('without chats', () {
-      testWidgets('shows welcome notice', (tester) async {
+      testWidgets('shows analytics prompt', (tester) async {
         await pumpChatListScreen(tester);
 
         expect(find.byType(WnSystemNotice), findsOneWidget);
-        expect(find.text('Your profile is ready'), findsOneWidget);
+        expect(find.byKey(const Key('analytics_onboarding_notice')), findsOneWidget);
+        expect(find.text('Help improve White Noise?'), findsOneWidget);
       });
 
-      testWidgets('shows welcome notice description', (tester) async {
+      testWidgets('shows analytics prompt description', (tester) async {
         await pumpChatListScreen(tester);
 
         expect(
-          find.textContaining('Find people'),
-          findsWidgets,
+          find.textContaining('Share anonymous usage data'),
+          findsOneWidget,
         );
       });
 
-      testWidgets('shows find people button', (tester) async {
+      testWidgets('shows analytics prompt actions', (tester) async {
         await pumpChatListScreen(tester);
 
-        expect(find.byKey(const Key('find_people_button')), findsOneWidget);
+        expect(find.byKey(const Key('not_now_analytics_button')), findsOneWidget);
+        expect(find.byKey(const Key('share_analytics_button')), findsOneWidget);
       });
 
-      testWidgets('shows share profile button', (tester) async {
+      testWidgets('shows analytics prompt below chat list header', (tester) async {
         await pumpChatListScreen(tester);
 
-        expect(find.byKey(const Key('share_profile_button')), findsOneWidget);
+        final headerBottom = tester.getBottomLeft(find.byType(ChatListHeader)).dy;
+        final noticeTop = tester
+            .getTopLeft(find.byKey(const Key('analytics_onboarding_notice')))
+            .dy;
+        expect(noticeTop, greaterThanOrEqualTo(headerBottom));
+      });
+
+      testWidgets('analytics prompt uses distinct content background', (tester) async {
+        await pumpChatListScreen(tester);
+
+        final container = tester.widget<Container>(
+          find
+              .descendant(
+                of: find.byKey(const Key('analytics_onboarding_notice')),
+                matching: find.byType(Container),
+              )
+              .first,
+        );
+        final decoration = container.decoration! as BoxDecoration;
+
+        expect(decoration.color, SemanticColors.light.backgroundTertiary);
+        expect(decoration.color, isNot(SemanticColors.light.backgroundSlate));
       });
 
       testWidgets('shows slogan in body', (tester) async {
@@ -291,35 +326,169 @@ void main() {
         await tester.pumpAndSettle();
       });
 
-      testWidgets('tapping find people navigates to user search', (tester) async {
+      testWidgets('tapping Not now dismisses analytics prompt without consent call', (
+        tester,
+      ) async {
         await pumpChatListScreen(tester);
+
+        await tester.tap(find.byKey(const Key('not_now_analytics_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('analytics_onboarding_notice')), findsNothing);
+        expect(find.byKey(const Key('welcome_notice')), findsOneWidget);
+        expect(_api.productAnalyticsSetEnabledCalls, isEmpty);
+        expect(_api.productAnalyticsEvents, isEmpty);
+      });
+
+      testWidgets('tapping Not now keeps analytics prompt dismissed for same account', (
+        tester,
+      ) async {
+        await pumpChatListScreen(tester);
+
+        await tester.tap(find.byKey(const Key('not_now_analytics_button')));
+        await tester.pumpAndSettle();
+        await tester.pumpWidget(const SizedBox.shrink());
+        await tester.pumpAndSettle();
+        await pumpChatListScreen(tester);
+
+        expect(find.byKey(const Key('analytics_onboarding_notice')), findsNothing);
+        expect(find.byKey(const Key('welcome_notice')), findsOneWidget);
+        expect(_api.productAnalyticsSetEnabledCalls, isEmpty);
+        expect(_api.productAnalyticsEvents, isEmpty);
+      });
+
+      testWidgets('tapping Share analytics enables consent and tracks onboarding', (
+        tester,
+      ) async {
+        await pumpChatListScreen(tester);
+
+        await tester.tap(find.byKey(const Key('share_analytics_button')));
+        await tester.pumpAndSettle();
+
+        expect(_api.productAnalyticsSetEnabledCalls, equals([true]));
+        expect(
+          _api.productAnalyticsEvents.map((event) => event.name),
+          containsAll([
+            rust_analytics.ProductAnalyticsEventName.onboardingStarted,
+            rust_analytics.ProductAnalyticsEventName.onboardingCompleted,
+          ]),
+        );
+        expect(
+          _api.productAnalyticsEvents.map((event) => event.name),
+          isNot(contains(rust_analytics.ProductAnalyticsEventName.identityCreated)),
+        );
+        expect(find.byKey(const Key('analytics_onboarding_notice')), findsNothing);
+        expect(find.byKey(const Key('welcome_notice')), findsOneWidget);
+      });
+
+      testWidgets('hides analytics prompt when consent is already enabled', (tester) async {
+        _api.productAnalyticsEnabled = true;
+
+        await pumpChatListScreen(tester);
+
+        expect(find.byKey(const Key('analytics_onboarding_notice')), findsNothing);
+        expect(find.byKey(const Key('welcome_notice')), findsOneWidget);
+      });
+
+      testWidgets('shows welcome notice after analytics step', (tester) async {
+        await pumpChatListScreen(tester);
+
+        await tester.tap(find.byKey(const Key('not_now_analytics_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Your profile is ready'), findsOneWidget);
+        expect(find.textContaining('Find people'), findsWidgets);
+        expect(find.byKey(const Key('find_people_button')), findsOneWidget);
+        expect(find.byKey(const Key('share_profile_button')), findsOneWidget);
+      });
+
+      testWidgets('welcome notice actions are side by side', (tester) async {
+        await pumpChatListScreen(tester);
+
+        await tester.tap(find.byKey(const Key('not_now_analytics_button')));
+        await tester.pumpAndSettle();
+
+        final findPeopleTopLeft = tester.getTopLeft(find.byKey(const Key('find_people_button')));
+        final shareProfileTopLeft = tester.getTopLeft(
+          find.byKey(const Key('share_profile_button')),
+        );
+
+        expect(shareProfileTopLeft.dx, greaterThan(findPeopleTopLeft.dx));
+        expect(shareProfileTopLeft.dy, equals(findPeopleTopLeft.dy));
+      });
+
+      testWidgets('welcome notice uses distinct content background', (tester) async {
+        await pumpChatListScreen(tester);
+
+        await tester.tap(find.byKey(const Key('not_now_analytics_button')));
+        await tester.pumpAndSettle();
+
+        final container = tester.widget<Container>(
+          find
+              .descendant(
+                of: find.byKey(const Key('welcome_notice')),
+                matching: find.byType(Container),
+              )
+              .first,
+        );
+        final decoration = container.decoration! as BoxDecoration;
+
+        expect(decoration.color, SemanticColors.light.backgroundTertiary);
+        expect(decoration.color, isNot(SemanticColors.light.backgroundSlate));
+      });
+
+      testWidgets('dismissing analytics prompt hides it', (tester) async {
+        await pumpChatListScreen(tester);
+
+        await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('analytics_onboarding_notice')), findsNothing);
+        expect(find.byKey(const Key('welcome_notice')), findsOneWidget);
+      });
+
+      testWidgets('dismissing analytics prompt swaps to welcome notice without exit animation', (
+        tester,
+      ) async {
+        await pumpChatListScreen(tester);
+
+        await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
+        await tester.pump();
+
+        expect(find.byKey(const Key('analytics_onboarding_notice')), findsNothing);
+        expect(find.byKey(const Key('welcome_notice')), findsOneWidget);
+      });
+
+      testWidgets('tapping find people navigates to user search after analytics step', (
+        tester,
+      ) async {
+        await pumpChatListScreen(tester);
+        await tester.tap(find.byKey(const Key('not_now_analytics_button')));
+        await tester.pumpAndSettle();
+
         await tester.tap(find.byKey(const Key('find_people_button')));
         await tester.pumpAndSettle();
 
         expect(find.byType(UserSearchScreen), findsOneWidget);
       });
 
-      testWidgets('tapping share profile navigates to share profile', (tester) async {
+      testWidgets('tapping share profile navigates to share profile after analytics step', (
+        tester,
+      ) async {
         await pumpChatListScreen(tester);
+        await tester.tap(find.byKey(const Key('not_now_analytics_button')));
+        await tester.pumpAndSettle();
+
         await tester.tap(find.byKey(const Key('share_profile_button')));
         await tester.pumpAndSettle();
 
         expect(find.byType(ShareProfileScreen), findsOneWidget);
       });
 
-      testWidgets('dismissing welcome notice hides it', (tester) async {
-        await pumpChatListScreen(tester);
-
-        expect(find.byType(WnSystemNotice), findsOneWidget);
-
-        await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
-        await tester.pumpAndSettle();
-
-        expect(find.byType(WnSystemNotice), findsNothing);
-      });
-
       testWidgets('keeps showing slogan after dismissing notice', (tester) async {
         await pumpChatListScreen(tester);
+        await tester.tap(find.byKey(const Key('not_now_analytics_button')));
+        await tester.pumpAndSettle();
         await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
         await tester.pumpAndSettle();
 
@@ -329,15 +498,23 @@ void main() {
         expect(find.text('Start a conversation'), findsNothing);
       });
 
-      testWidgets('welcome notice reappears after switching accounts', (tester) async {
+      testWidgets('analytics prompt reappears after switching accounts', (tester) async {
         final mockAuth = _SwitchableAuthNotifier();
         await mountTestApp(
           tester,
-          overrides: [authProvider.overrideWith(() => mockAuth)],
+          overrides: [
+            secureStorageProvider.overrideWithValue(_secureStorage),
+            authProvider.overrideWith(() => mockAuth),
+          ],
         );
         await tester.pumpAndSettle();
 
         expect(find.byType(WnSystemNotice), findsOneWidget);
+
+        await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('welcome_notice')), findsOneWidget);
 
         await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
         await tester.pumpAndSettle();
@@ -348,6 +525,13 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(WnSystemNotice), findsOneWidget);
+        expect(find.byKey(const Key('analytics_onboarding_notice')), findsOneWidget);
+
+        mockAuth.switchTo(testPubkeyA);
+        await tester.pumpAndSettle();
+
+        expect(find.byKey(const Key('analytics_onboarding_notice')), findsNothing);
+        expect(find.byKey(const Key('welcome_notice')), findsOneWidget);
       });
     });
 
@@ -373,7 +557,7 @@ void main() {
         expect(tiles.last.key, const Key(testPubkeyB));
       });
 
-      testWidgets('hides welcome notice when chats exist', (tester) async {
+      testWidgets('hides analytics prompt when chats exist', (tester) async {
         await pumpChatListScreen(tester);
 
         expect(find.byType(WnSystemNotice), findsNothing);
@@ -498,20 +682,17 @@ void main() {
         );
       });
 
-      testWidgets('update notice takes priority over welcome notice', (tester) async {
-        // No chats → welcome notice would normally show.
-        // Newer version available → update notice should show instead.
+      testWidgets('update notice takes priority over analytics prompt', (tester) async {
         _api.zapstoreVersion = '2026.4.0';
 
         await pumpChatListScreen(tester);
         await tester.pump();
 
         expect(find.text('Update available'), findsOneWidget);
-        expect(find.text('Your profile is ready'), findsNothing);
+        expect(find.text('Help improve White Noise?'), findsNothing);
       });
 
-      testWidgets('welcome notice shown after update notice is dismissed', (tester) async {
-        // No chats, so welcome notice is also pending.
+      testWidgets('analytics prompt shown after update notice is dismissed', (tester) async {
         _api.zapstoreVersion = '2026.4.0';
 
         await pumpChatListScreen(tester);
@@ -520,7 +701,7 @@ void main() {
         await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
         await tester.pumpAndSettle();
 
-        expect(find.text('Your profile is ready'), findsOneWidget);
+        expect(find.text('Help improve White Noise?'), findsOneWidget);
       });
 
       testWidgets('tapping Update now launches Zapstore URL with externalApplication mode', (
@@ -815,7 +996,7 @@ void main() {
         expect(find.byKey(const Key(testPubkeyA)), findsOneWidget);
       });
 
-      testWidgets('welcome notice is not shown in archived view', (tester) async {
+      testWidgets('analytics prompt is not shown in archived view', (tester) async {
         _api.initialChats = [];
         await pumpChatListScreen(tester);
         await revealSearchHeader(tester);

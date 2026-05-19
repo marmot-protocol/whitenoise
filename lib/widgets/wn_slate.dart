@@ -5,6 +5,11 @@ import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/widgets/wn_scroll_edge_effect.dart';
 import 'package:whitenoise/widgets/wn_slate_content_transition.dart';
 
+enum WnSlateSystemNoticePosition {
+  aboveHeader,
+  belowHeader,
+}
+
 class WnSlate extends HookWidget {
   const WnSlate({
     super.key,
@@ -14,6 +19,7 @@ class WnSlate extends HookWidget {
     this.showTopScrollEffect = false,
     this.showBottomScrollEffect = false,
     this.systemNotice,
+    this.systemNoticePosition = WnSlateSystemNoticePosition.aboveHeader,
     this.child,
     this.footer,
     this.animateContent = true,
@@ -26,6 +32,7 @@ class WnSlate extends HookWidget {
   final bool showTopScrollEffect;
   final bool showBottomScrollEffect;
   final Widget? systemNotice;
+  final WnSlateSystemNoticePosition systemNoticePosition;
   final Widget? child;
   final Widget? footer;
   final bool animateContent;
@@ -100,8 +107,11 @@ class WnSlate extends HookWidget {
     final content = Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (systemNotice != null) systemNotice!,
+        if (systemNotice != null && systemNoticePosition == WnSlateSystemNoticePosition.aboveHeader)
+          systemNotice!,
         if (header != null) header!,
+        if (systemNotice != null && systemNoticePosition == WnSlateSystemNoticePosition.belowHeader)
+          systemNotice!,
         if (childWidget != null)
           if (shrinkWrapContent) childWidget else Flexible(child: childWidget),
         if (footer != null) footer!,

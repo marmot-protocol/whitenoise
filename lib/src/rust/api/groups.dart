@@ -190,6 +190,7 @@ class FlutterGroupDataUpdate {
   final U8Array32? imageKey;
   final U8Array32? imageHash;
   final U8Array12? imageNonce;
+  final BigInt? disappearingMessageSecs;
 
   const FlutterGroupDataUpdate({
     this.name,
@@ -199,6 +200,7 @@ class FlutterGroupDataUpdate {
     this.imageKey,
     this.imageHash,
     this.imageNonce,
+    this.disappearingMessageSecs,
   });
 
   @override
@@ -209,7 +211,8 @@ class FlutterGroupDataUpdate {
       admins.hashCode ^
       imageKey.hashCode ^
       imageHash.hashCode ^
-      imageNonce.hashCode;
+      imageNonce.hashCode ^
+      disappearingMessageSecs.hashCode;
 
   @override
   bool operator ==(Object other) =>
@@ -222,7 +225,8 @@ class FlutterGroupDataUpdate {
           admins == other.admins &&
           imageKey == other.imageKey &&
           imageHash == other.imageHash &&
-          imageNonce == other.imageNonce;
+          imageNonce == other.imageNonce &&
+          disappearingMessageSecs == other.disappearingMessageSecs;
 }
 
 class Group {
