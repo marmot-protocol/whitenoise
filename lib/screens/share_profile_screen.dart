@@ -92,16 +92,15 @@ class ShareProfileScreen extends HookConsumerWidget {
                     ),
                     if (profileDeepLink != null) ...[
                       Gap(36.h),
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(12.r),
-                        child: SizedBox.square(
-                          dimension: 256.w,
-                          child: FittedBox(
-                            fit: BoxFit.fill,
+                      ConstrainedBox(
+                        constraints: BoxConstraints(maxWidth: 256.w),
+                        child: AspectRatio(
+                          aspectRatio: 1,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12.r),
                             child: QrImageView(
                               key: ValueKey<String>(profileDeepLink),
                               data: profileDeepLink,
-                              size: 98.w,
                               padding: EdgeInsets.zero,
                               backgroundColor: colors.backgroundSecondary,
                               eyeStyle: QrEyeStyle(
