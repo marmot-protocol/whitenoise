@@ -1,4 +1,3 @@
-import 'package:flutter/foundation.dart' show defaultTargetPlatform, TargetPlatform;
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
@@ -146,13 +145,12 @@ class SettingsScreen extends HookConsumerWidget {
                       label: context.l10n.appearance,
                       onTap: () => Routes.pushToAppearance(context),
                     ),
-                    if (defaultTargetPlatform == TargetPlatform.android)
-                      WnMenuItem(
-                        key: const Key('notification_settings_menu_item'),
-                        icon: WnIcons.notification,
-                        label: context.l10n.notificationSettings,
-                        onTap: () => Routes.pushToNotificationSettings(context),
-                      ),
+                    WnMenuItem(
+                      key: const Key('notification_settings_menu_item'),
+                      icon: WnIcons.notification,
+                      label: context.l10n.notificationSettings,
+                      onTap: () => Routes.pushToNotificationSettings(context),
+                    ),
                     WnMenuItem(
                       key: const Key('help_and_support_menu_item'),
                       icon: WnIcons.helpChat,
