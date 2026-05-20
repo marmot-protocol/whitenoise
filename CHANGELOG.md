@@ -23,7 +23,13 @@ and this project adheres to Calendar Versioning (CalVer).
 ### Added
 - Leave group from chat list for non-last admins [PR #638](https://github.com/marmot-protocol/whitenoise/pull/638)
 - Add archive option in chat removed warning and change wording for leave case [PR #657](https://github.com/marmot-protocol/whitenoise/pull/657)
+- Add native deep links for users, chats, and settings [PR #661](https://github.com/marmot-protocol/whitenoise/pull/661)
+- Add markdown rendering for chat messages [PR #665](https://github.com/marmot-protocol/whitenoise/pull/665)
+- Push notifications [PR #673](https://github.com/marmot-protocol/whitenoise/pull/673)
 - Enable leave group [PR #675](https://github.com/marmot-protocol/whitenoise/pull/675)
+- Add members from group info screen [PR #679](https://github.com/marmot-protocol/whitenoise/pull/679)
+- Add key package developer controls [PR #685](https://github.com/marmot-protocol/whitenoise/pull/685)
+- Show notifications settings screen on iOS [PR #688](https://github.com/marmot-protocol/whitenoise/pull/688)
 
 ### Changed
 
