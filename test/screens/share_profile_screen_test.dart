@@ -16,6 +16,7 @@ import 'package:whitenoise/widgets/wn_copy_card.dart';
 
 import '../mocks/mock_clipboard.dart' show clearClipboardMock, mockClipboard, mockClipboardFailing;
 import '../mocks/mock_secure_storage.dart';
+import '../mocks/mock_share_plus.dart';
 import '../mocks/mock_wn_api.dart';
 import '../test_helpers.dart';
 
@@ -27,7 +28,7 @@ class _MockApi extends MockWnApi {
   }) async => const FlutterMetadata(
     name: 'Test User',
     displayName: 'Test Display Name',
-    picture: 'https://example.com/picture.jpg',
+    picture: null,
     custom: {},
   );
 }
@@ -237,6 +238,115 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text("Scan a contact's QR code."), findsOneWidget);
+    });
+
+    testWidgets('shows holding label when long pressing QR code', (tester) async {
+      mockSharePlus();
+      addTearDown(clearSharePlusMock);
+      await pumpShareProfileScreen(tester);
+
+      final gesture = await tester.startGesture(tester.getCenter(find.byType(QrImageView)));
+      // Long press fires at 500ms; pump 600ms to clear threshold
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.textContaining('Hold to share QR code'), findsOneWidget);
+
+      await gesture.up();
+      // Drain the first 500ms delay (started at t=500ms, still pending at t=600ms)
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('resets label to scan to connect on long press end', (tester) async {
+      mockSharePlus();
+      addTearDown(clearSharePlusMock);
+      await pumpShareProfileScreen(tester);
+
+      final gesture = await tester.startGesture(tester.getCenter(find.byType(QrImageView)));
+      await tester.pump(const Duration(milliseconds: 600));
+      await gesture.up();
+      // Drain first delay before asserting
+      await tester.pump(const Duration(milliseconds: 500));
+
+      expect(find.text('Scan to connect'), findsOneWidget);
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('resets state on long press cancel', (tester) async {
+      await pumpShareProfileScreen(tester);
+
+      final gesture = await tester.startGesture(tester.getCenter(find.byType(QrImageView)));
+      await gesture.cancel();
+      await tester.pumpAndSettle();
+
+      expect(find.text('Scan to connect'), findsOneWidget);
+    });
+
+    testWidgets('progresses dots during hold', (tester) async {
+      mockSharePlus();
+      addTearDown(clearSharePlusMock);
+      await pumpShareProfileScreen(tester);
+
+      final gesture = await tester.startGesture(tester.getCenter(find.byType(QrImageView)));
+      await tester.pump(const Duration(milliseconds: 600));
+      expect(find.text('Hold to share QR code.'), findsOneWidget);
+
+      // First delay (t=500ms start) completes at t=1000ms; 400ms more needed
+      await tester.pump(const Duration(milliseconds: 400));
+      expect(find.text('Hold to share QR code..'), findsOneWidget);
+
+      await gesture.up();
+      // Drain second delay (started at t=1000ms) to prevent pending-timer failure
+      await tester.pump(const Duration(milliseconds: 500));
+      await tester.pumpAndSettle();
+    });
+
+    testWidgets('shares QR image after full hold', (tester) async {
+      final calls = mockSharePlus();
+      addTearDown(clearSharePlusMock);
+      await pumpShareProfileScreen(tester);
+
+      // Start the gesture OUTSIDE runAsync so the long-press timer and
+      // captureAndShareQr's Future.delayed timers stay on the fake clock.
+      final gesture = await tester.startGesture(tester.getCenter(find.byType(QrImageView)));
+      await tester.pump(const Duration(milliseconds: 600)); // onLongPressStart fires at fake t=500ms
+
+      await tester.runAsync(() async {
+        // Advance fake timers for captureAndShareQr's two 500ms delays.
+        await tester.pump(const Duration(milliseconds: 400)); // first delay (fake t=1000ms)
+        await tester.pump(const Duration(milliseconds: 500)); // second delay (fake t=1500ms)
+        // Give toByteData(png) real time to complete via the engine.
+        await Future<void>.delayed(const Duration(milliseconds: 100));
+        await tester.pump(); // captureFuture resolved → share() called
+        await tester.pump(); // SharePlus response + finally block
+
+        expect(calls, isNotEmpty);
+
+        await gesture.up();
+        await tester.pumpAndSettle();
+      });
+    });
+
+    testWidgets('shows error notice when share fails', (tester) async {
+      mockSharePlusFailing();
+      addTearDown(clearSharePlusMock);
+      await pumpShareProfileScreen(tester);
+
+      final gesture = await tester.startGesture(tester.getCenter(find.byType(QrImageView)));
+      await tester.pump(const Duration(milliseconds: 600));
+
+      await tester.runAsync(() async {
+        await tester.pump(const Duration(milliseconds: 400));
+        await tester.pump(const Duration(milliseconds: 500)); // second delay; dotCount=3
+        await Future<void>.delayed(const Duration(milliseconds: 300)); // toByteData completes
+        await tester.pump(); // captureFuture resolved → share() throws → catch fires
+        await tester.pump(); // showErrorNotice state applied
+        await tester.pump(); // widget rebuilt with error notice
+
+        expect(find.text('Unable to share QR code. Please try again.'), findsOneWidget);
+
+        await gesture.up();
+        await tester.pumpAndSettle();
+      });
     });
   });
 }

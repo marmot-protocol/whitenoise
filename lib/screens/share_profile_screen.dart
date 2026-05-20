@@ -74,13 +74,13 @@ class ShareProfileScreen extends HookConsumerWidget {
         return;
       }
       final errorMessage = context.l10n.shareQrCodeError;
-      // Start dots and animation immediately; capture the last painted frame
-      // in parallel — it's still full-color since no new frame has rendered yet.
+      // Capture synchronously before any animation frame can render, so the
+      // image is always the full-color QR regardless of animation state.
       dotCount.value = 1;
       qrColorAnim.forward();
       final captureFuture = boundary
-          .toImage(pixelRatio: 3)
-          .then((img) => img.toByteData(format: ui.ImageByteFormat.png));
+          .toImageSync(pixelRatio: 3)
+          .toByteData(format: ui.ImageByteFormat.png);
       // onLongPressStart fires at 500ms total; dots step every 500ms after that
       await Future.delayed(const Duration(milliseconds: 500));
       if (!isMounted.value || !isHolding.value) {
