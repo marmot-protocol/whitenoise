@@ -919,6 +919,82 @@ void main() {
         );
       });
 
+      testWidgets('npub mention of group member navigates to group member screen', (tester) async {
+        await _mountBubbleWithRouter(
+          tester,
+          ChatMessageBubble(
+            message: withDoc(
+              const MarkdownDocument(
+                blocks: [
+                  MarkdownBlock.paragraph(
+                    inlines: [
+                      MarkdownInline.nostrMention(
+                        entity: MarkdownNostrEntity(
+                          hrp: MarkdownNostrHrp.npub,
+                          bech32: testNpubA,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isOwnMessage: false,
+            groupId: testGroupId,
+            groupMemberPubkeys: const {testPubkeyA},
+          ),
+        );
+        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
+        final entity = _firstTextSpanWithRecognizer(span);
+        (entity.recognizer as TapGestureRecognizer).onTap!();
+        await tester.pumpAndSettle();
+        expect(launcher.calls, isEmpty);
+        expect(find.byType(StartChatScreen), findsNothing);
+        expect(
+          find.byKey(const ValueKey('group_member_route_${testGroupId}_$testPubkeyA')),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('npub mention of non-member in group opens StartChatScreen', (tester) async {
+        await _mountBubbleWithRouter(
+          tester,
+          ChatMessageBubble(
+            message: withDoc(
+              const MarkdownDocument(
+                blocks: [
+                  MarkdownBlock.paragraph(
+                    inlines: [
+                      MarkdownInline.nostrMention(
+                        entity: MarkdownNostrEntity(
+                          hrp: MarkdownNostrHrp.npub,
+                          bech32: testNpubA,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            isOwnMessage: false,
+            groupId: testGroupId,
+            groupMemberPubkeys: const {testPubkeyB},
+          ),
+        );
+        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
+        final entity = _firstTextSpanWithRecognizer(span);
+        (entity.recognizer as TapGestureRecognizer).onTap!();
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 50));
+        tester.takeException();
+        expect(launcher.calls, isEmpty);
+        expect(
+          find.byKey(const ValueKey('group_member_route_${testGroupId}_$testPubkeyA')),
+          findsNothing,
+        );
+        expect(find.byType(StartChatScreen), findsOneWidget);
+      });
+
       testWidgets('whitenoise://chat/<id> tap navigates via GoRouter', (tester) async {
         await _mountBubbleWithRouter(
           tester,
@@ -1072,6 +1148,16 @@ Future<void> _mountBubbleWithRouter(WidgetTester tester, Widget bubble) async {
         path: '/start-chat/:pubkey',
         builder: (_, state) => Scaffold(
           key: ValueKey('user_route_${state.pathParameters['pubkey']}'),
+          body: const SizedBox(),
+        ),
+      ),
+      GoRoute(
+        name: 'groupMember',
+        path: '/group-member/:groupId/:memberPubkey',
+        builder: (_, state) => Scaffold(
+          key: ValueKey(
+            'group_member_route_${state.pathParameters['groupId']}_${state.pathParameters['memberPubkey']}',
+          ),
           body: const SizedBox(),
         ),
       ),

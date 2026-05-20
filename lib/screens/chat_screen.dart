@@ -207,6 +207,10 @@ class ChatScreen extends HookConsumerWidget {
       },
       [mentionMembers],
     );
+    final groupMemberPubkeySet = useMemoized(
+      () => mentionMemberPubkeys.toSet(),
+      [mentionMemberPubkeyKey],
+    );
     String? resolveMentionDisplayName(String hexPubkey) =>
         mentionNamesByPubkey[hexPubkey] ?? presentName(getAuthorMetadata(hexPubkey));
     final resolveMentionDisplayNameRef = useRef(resolveMentionDisplayName);
@@ -547,6 +551,8 @@ class ChatScreen extends HookConsumerWidget {
                   : null,
               onHorizontalDragEnd: isSearchMode ? null : () => input.setReplyingTo(message),
               mentionDisplayName: resolveMentionDisplayName,
+              groupId: groupId,
+              groupMemberPubkeys: isGroupChat ? groupMemberPubkeySet : null,
               onRetry:
                   !isSearchMode && isOwnMessage && message.deliveryStatus is DeliveryStatus_Failed
                   ? () async {
