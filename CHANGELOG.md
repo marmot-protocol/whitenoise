@@ -56,6 +56,7 @@ and this project adheres to Calendar Versioning (CalVer).
 - Fix deleting all app data reusing a closed Whitenoise database instance [PR #662](https://github.com/marmot-protocol/whitenoise/pull/662)
 - Fixed QR scanner not showing camera on first attempt after giving permission [PR #654](https://github.com/marmot-protocol/whitenoise/pull/654)
 - Fix show author name in last message of pending invites in chat list [PR #668](https://github.com/marmot-protocol/whitenoise/pull/668)
+- Fix double camera permission request on OS back [PR #655](https://github.com/marmot-protocol/whitenoise/pull/655)
 
 ### Security
 
