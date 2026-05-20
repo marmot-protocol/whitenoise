@@ -82,6 +82,58 @@ useKeyPackages(String pubkey) {
     return null;
   }, [pubkey]);
 
+  bool isCurrentRefresh(int currentRefreshKey) {
+    return isMountedRef.value && refreshKey.value == currentRefreshKey;
+  }
+
+  Future<List<accounts_api.FlutterEvent>?> refreshPackagesIfCurrent(
+    int currentRefreshKey,
+  ) async {
+    if (!isCurrentRefresh(currentRefreshKey)) return null;
+    final packages = await accounts_api.accountKeyPackages(accountPubkey: pubkey);
+    if (!isCurrentRefresh(currentRefreshKey)) return null;
+    return packages;
+  }
+
+  Future<KeyPackageResult> runBulkDelete({
+    required KeyPackageAction action,
+    required Future<void> Function() deletePackages,
+    required String deleteFailureMessage,
+    required String refreshFailureMessage,
+  }) async {
+    if (state.value.isLoading) {
+      return (success: false, action: action);
+    }
+    final currentRefreshKey = refreshKey.value;
+    state.value = state.value.copyWith(
+      status: KeyPackagesLoading(action),
+    );
+    try {
+      await deletePackages();
+    } catch (e) {
+      _logger.severe(deleteFailureMessage, e);
+      if (!isCurrentRefresh(currentRefreshKey)) {
+        return (success: false, action: action);
+      }
+      state.value = state.value.copyWith(status: const KeyPackagesError());
+      return (success: false, action: action);
+    }
+    try {
+      final packages = await refreshPackagesIfCurrent(currentRefreshKey);
+      if (packages == null) {
+        return (success: true, action: action);
+      }
+      state.value = state.value.copyWith(status: const KeyPackagesIdle(), packages: packages);
+    } catch (e) {
+      _logger.severe(refreshFailureMessage, e);
+      if (isCurrentRefresh(currentRefreshKey)) {
+        state.value = state.value.copyWith(status: const KeyPackagesIdle());
+      }
+      return (success: false, action: KeyPackageAction.fetch);
+    }
+    return (success: true, action: action);
+  }
+
   Future<KeyPackageResult> fetch() async {
     if (state.value.isLoading) {
       return (success: false, action: KeyPackageAction.fetch);
@@ -192,77 +244,25 @@ useKeyPackages(String pubkey) {
   }
 
   Future<KeyPackageResult> deleteAllLegacy() async {
-    if (state.value.isLoading) {
-      return (success: false, action: KeyPackageAction.deleteAllLegacy);
-    }
-    final currentRefreshKey = refreshKey.value;
-    state.value = state.value.copyWith(
-      status: const KeyPackagesLoading(KeyPackageAction.deleteAllLegacy),
+    return runBulkDelete(
+      action: KeyPackageAction.deleteAllLegacy,
+      deletePackages: () async {
+        await accounts_api.deleteAccountKeyPackages(accountPubkey: pubkey);
+      },
+      deleteFailureMessage: 'Failed to delete legacy key packages',
+      refreshFailureMessage: 'Failed to refresh key packages after delete legacy',
     );
-    try {
-      await accounts_api.deleteAccountKeyPackages(accountPubkey: pubkey);
-    } catch (e) {
-      _logger.severe('Failed to delete legacy key packages', e);
-      if (!isMountedRef.value || refreshKey.value != currentRefreshKey) {
-        return (success: false, action: KeyPackageAction.deleteAllLegacy);
-      }
-      state.value = state.value.copyWith(status: const KeyPackagesError());
-      return (success: false, action: KeyPackageAction.deleteAllLegacy);
-    }
-    try {
-      if (!isMountedRef.value || refreshKey.value != currentRefreshKey) {
-        return (success: true, action: KeyPackageAction.deleteAllLegacy);
-      }
-      final packages = await accounts_api.accountKeyPackages(accountPubkey: pubkey);
-      if (!isMountedRef.value || refreshKey.value != currentRefreshKey) {
-        return (success: true, action: KeyPackageAction.deleteAllLegacy);
-      }
-      state.value = state.value.copyWith(status: const KeyPackagesIdle(), packages: packages);
-    } catch (e) {
-      _logger.severe('Failed to refresh key packages after delete legacy', e);
-      if (isMountedRef.value && refreshKey.value == currentRefreshKey) {
-        state.value = state.value.copyWith(status: const KeyPackagesIdle());
-      }
-      return (success: false, action: KeyPackageAction.fetch);
-    }
-    return (success: true, action: KeyPackageAction.deleteAllLegacy);
   }
 
   Future<KeyPackageResult> deleteAll() async {
-    if (state.value.isLoading) {
-      return (success: false, action: KeyPackageAction.deleteAll);
-    }
-    final currentRefreshKey = refreshKey.value;
-    state.value = state.value.copyWith(
-      status: const KeyPackagesLoading(KeyPackageAction.deleteAll),
+    return runBulkDelete(
+      action: KeyPackageAction.deleteAll,
+      deletePackages: () async {
+        await accounts_api.deleteAllAccountKeyPackages(accountPubkey: pubkey);
+      },
+      deleteFailureMessage: 'Failed to delete all key packages',
+      refreshFailureMessage: 'Failed to refresh key packages after delete all',
     );
-    try {
-      await accounts_api.deleteAllAccountKeyPackages(accountPubkey: pubkey);
-    } catch (e) {
-      _logger.severe('Failed to delete all key packages', e);
-      if (!isMountedRef.value || refreshKey.value != currentRefreshKey) {
-        return (success: false, action: KeyPackageAction.deleteAll);
-      }
-      state.value = state.value.copyWith(status: const KeyPackagesError());
-      return (success: false, action: KeyPackageAction.deleteAll);
-    }
-    try {
-      if (!isMountedRef.value || refreshKey.value != currentRefreshKey) {
-        return (success: true, action: KeyPackageAction.deleteAll);
-      }
-      final packages = await accounts_api.accountKeyPackages(accountPubkey: pubkey);
-      if (!isMountedRef.value || refreshKey.value != currentRefreshKey) {
-        return (success: true, action: KeyPackageAction.deleteAll);
-      }
-      state.value = state.value.copyWith(status: const KeyPackagesIdle(), packages: packages);
-    } catch (e) {
-      _logger.severe('Failed to refresh key packages after delete all', e);
-      if (isMountedRef.value && refreshKey.value == currentRefreshKey) {
-        state.value = state.value.copyWith(status: const KeyPackagesIdle());
-      }
-      return (success: false, action: KeyPackageAction.fetch);
-    }
-    return (success: true, action: KeyPackageAction.deleteAll);
   }
 
   return (
