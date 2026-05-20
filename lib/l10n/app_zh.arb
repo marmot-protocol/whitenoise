@@ -140,6 +140,7 @@
   "deleteLegacyKeyPackages": "删除旧版密钥包",
   "deleteAllKeyPackages": "删除所有密钥包",
   "keyPackagesCount": "密钥包 ({count})",
+  "keyPackageDTagLabel": "d-tag: {dTag}",
   "noKeyPackagesFound": "未发现密钥包",
   "keyPackagePublished": "密钥包已发布",
   "keyPackagesRefreshed": "密钥包已刷新",

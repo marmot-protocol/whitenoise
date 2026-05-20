@@ -162,6 +162,7 @@
   "deleteLegacyKeyPackages": "Elimina Pacchetti Chiavi Obsoleti",
   "deleteAllKeyPackages": "Elimina Tutti i Pacchetti Chiavi",
   "keyPackagesCount": "Pacchetti Chiavi ({count})",
+  "keyPackageDTagLabel": "d-tag: {dTag}",
   "noKeyPackagesFound": "Nessun pacchetto chiavi trovato",
   "keyPackagePublished": "Pacchetto chiavi pubblicato",
   "keyPackagesRefreshed": "Pacchetti chiavi aggiornati",

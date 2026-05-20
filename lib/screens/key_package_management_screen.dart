@@ -271,11 +271,12 @@ class _KeyPackageList extends HookWidget {
                 final isLegacy = package.kind == NostrEventKinds.mlsKeyPackageLegacy;
                 final isCurrent = package.kind == NostrEventKinds.mlsKeyPackage;
                 final dTag = isCurrent ? _dTagValue(package.tags) : null;
+                final dTagText = dTag == null ? null : context.l10n.keyPackageDTagLabel(dTag);
                 return WnKeyPackageCard(
                   key: Key('key_package_card_${package.id}'),
                   title: context.l10n.packageNumber(index + 1),
                   packageId: package.id,
-                  dTag: dTag,
+                  dTagText: dTagText,
                   createdAt: package.createdAt.toIso8601String(),
                   onDelete: () => onDelete(package.id),
                   deleteLabel: context.l10n.delete,

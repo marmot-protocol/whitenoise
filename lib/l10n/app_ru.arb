@@ -162,6 +162,7 @@
   "deleteLegacyKeyPackages": "Удалить Устаревшие Пакеты Ключей",
   "deleteAllKeyPackages": "Удалить все пакеты ключей",
   "keyPackagesCount": "Пакеты Ключей ({count})",
+  "keyPackageDTagLabel": "d-tag: {dTag}",
   "noKeyPackagesFound": "Пакеты ключей не найдены",
   "keyPackagePublished": "Пакет ключей опубликован",
   "keyPackagesRefreshed": "Пакеты ключей обновлены",

@@ -140,6 +140,7 @@
   "deleteLegacyKeyPackages": "刪除舊版金鑰套件",
   "deleteAllKeyPackages": "刪除所有金鑰套件",
   "keyPackagesCount": "金鑰套件 ({count})",
+  "keyPackageDTagLabel": "d-tag: {dTag}",
   "noKeyPackagesFound": "找不到金鑰套件",
   "keyPackagePublished": "金鑰套件已發布",
   "keyPackagesRefreshed": "金鑰套件已重新整理",

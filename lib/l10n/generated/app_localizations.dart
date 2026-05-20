@@ -951,6 +951,12 @@ abstract class AppLocalizations {
   /// **'Key Packages ({count})'**
   String keyPackagesCount(int count);
 
+  /// Label showing the d-tag value on a key package
+  ///
+  /// In en, this message translates to:
+  /// **'d-tag: {dTag}'**
+  String keyPackageDTagLabel(String dTag);
+
   /// Message when no key packages exist
   ///
   /// In en, this message translates to:

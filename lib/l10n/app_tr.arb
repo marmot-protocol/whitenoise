@@ -162,6 +162,7 @@
   "deleteLegacyKeyPackages": "Eski Anahtar Paketlerini Sil",
   "deleteAllKeyPackages": "Tüm Anahtar Paketlerini Sil",
   "keyPackagesCount": "Anahtar Paketleri ({count})",
+  "keyPackageDTagLabel": "d-tag: {dTag}",
   "noKeyPackagesFound": "Anahtar paketi bulunamadı",
   "keyPackagePublished": "Anahtar paketi yayınlandı",
   "keyPackagesRefreshed": "Anahtar paketleri yenilendi",

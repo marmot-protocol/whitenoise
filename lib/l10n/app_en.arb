@@ -599,6 +599,15 @@
       }
     }
   },
+  "keyPackageDTagLabel": "d-tag: {dTag}",
+  "@keyPackageDTagLabel": {
+    "description": "Label showing the d-tag value on a key package",
+    "placeholders": {
+      "dTag": {
+        "type": "String"
+      }
+    }
+  },
   "noKeyPackagesFound": "No key packages found",
   "@noKeyPackagesFound": {
     "description": "Message when no key packages exist"

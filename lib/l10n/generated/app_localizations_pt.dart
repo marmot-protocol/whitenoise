@@ -474,6 +474,11 @@ class AppLocalizationsPt extends AppLocalizations {
   }
 
   @override
+  String keyPackageDTagLabel(String dTag) {
+    return 'd-tag: $dTag';
+  }
+
+  @override
   String get noKeyPackagesFound => 'Nenhum pacote de chaves encontrado';
 
   @override

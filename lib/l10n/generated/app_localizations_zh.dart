@@ -455,6 +455,11 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
+  String keyPackageDTagLabel(String dTag) {
+    return 'd-tag: $dTag';
+  }
+
+  @override
   String get noKeyPackagesFound => '未发现密钥包';
 
   @override
@@ -1894,6 +1899,11 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String keyPackagesCount(int count) {
     return '金鑰套件 ($count)';
+  }
+
+  @override
+  String keyPackageDTagLabel(String dTag) {
+    return 'd-tag: $dTag';
   }
 
   @override

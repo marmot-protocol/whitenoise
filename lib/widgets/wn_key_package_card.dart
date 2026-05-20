@@ -13,7 +13,7 @@ class WnKeyPackageCard extends StatelessWidget {
     required this.createdAt,
     required this.onDelete,
     required this.deleteLabel,
-    this.dTag,
+    this.dTagText,
     this.legacyLabel,
     this.disabled = false,
     this.loading = false,
@@ -25,7 +25,7 @@ class WnKeyPackageCard extends StatelessWidget {
   final String createdAt;
   final VoidCallback onDelete;
   final String deleteLabel;
-  final String? dTag;
+  final String? dTagText;
   final String? legacyLabel;
   final bool disabled;
   final bool loading;
@@ -92,8 +92,8 @@ class WnKeyPackageCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildIdField(context, hasDTag: dTag != null),
-        if (dTag != null) _buildDTagField(context),
+        _buildIdField(context, hasDTag: dTagText != null),
+        if (dTagText != null) _buildDTagField(context),
         _buildCreatedAtField(context),
         SizedBox(
           height: 44.h,
@@ -141,7 +141,7 @@ class WnKeyPackageCard extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(0, 0, 8.w, 13.h),
       child: Text(
-        'd-tag: $dTag',
+        dTagText!,
         key: const Key('package_d_tag_text'),
         style: textStyle,
       ),
