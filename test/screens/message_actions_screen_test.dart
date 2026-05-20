@@ -476,6 +476,85 @@ void main() {
         expect(find.byType(ChatMessageBubble), findsNothing);
         expect(tester.takeException(), isNull);
       });
+
+      testWidgets(
+        'preview slot shrinks to bubble size for a short text message',
+        (tester) async {
+          await mountWidget(
+            MessageActionsModal(
+              message: _createTestMessage(content: 'Hello'),
+              isOwnMessage: true,
+              onReaction: (_) {},
+              onEmojiPicker: () {},
+              currentUserPubkey: testPubkeyA,
+              onReply: () {},
+              onShare: () {},
+              onDelete: () {},
+            ),
+            tester,
+          );
+
+          expect(tester.takeException(), isNull);
+
+          final bubbleSize = tester.getSize(find.byType(ChatMessageBubble));
+          final viewportHeight = tester.view.physicalSize.height / tester.view.devicePixelRatio;
+          // Bubble for "Hello" should be small — well under half the viewport.
+          expect(bubbleSize.height, lessThan(viewportHeight / 4));
+        },
+      );
+
+      testWidgets(
+        'preview does not throw overflow for media-only message in hold menu',
+        (tester) async {
+          await mountWidget(
+            MessageActionsModal(
+              message: _createTestMessage(
+                content: '',
+                mediaAttachments: [_mediaFile('marmot')],
+              ),
+              isOwnMessage: true,
+              onReaction: (_) {},
+              onEmojiPicker: () {},
+              currentUserPubkey: testPubkeyA,
+              onReply: () {},
+              onShare: () {},
+              onDelete: () {},
+            ),
+            tester,
+          );
+
+          expect(tester.takeException(), isNull);
+        },
+      );
+
+      testWidgets(
+        'preview does not throw overflow when all action rows are present',
+        (tester) async {
+          final longContent = List.filled(200, 'token').join(' ');
+          await mountWidget(
+            MessageActionsModal(
+              message: _createTestMessage(
+                content: longContent,
+                mediaAttachments: [_mediaFile('1'), _mediaFile('2')],
+                reactions: ReactionSummary(
+                  byEmoji: [EmojiReaction(emoji: '🔥', count: BigInt.from(3), users: const [])],
+                  userReactions: const [],
+                ),
+              ),
+              isOwnMessage: true,
+              onReaction: (_) {},
+              onEmojiPicker: () {},
+              currentUserPubkey: testPubkeyA,
+              onReply: () {},
+              onShare: () {},
+              onDelete: () {},
+            ),
+            tester,
+          );
+
+          expect(tester.takeException(), isNull);
+        },
+      );
     });
 
     group('Copy button', () {
@@ -528,6 +607,59 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(clipboardContent, 'Hello, world!');
+      });
+    });
+
+    group('Share button', () {
+      testWidgets('is visible when onShare is provided', (tester) async {
+        await mountWidget(
+          MessageActionsModal(
+            message: _createTestMessage(),
+            isOwnMessage: false,
+            onReaction: (_) {},
+            onEmojiPicker: () {},
+            currentUserPubkey: testPubkeyA,
+            onShare: () {},
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('share_button')), findsOneWidget);
+      });
+
+      testWidgets('is hidden when onShare is null', (tester) async {
+        await mountWidget(
+          MessageActionsModal(
+            message: _createTestMessage(),
+            isOwnMessage: false,
+            onReaction: (_) {},
+            onEmojiPicker: () {},
+            currentUserPubkey: testPubkeyA,
+          ),
+          tester,
+        );
+
+        expect(find.byKey(const Key('share_button')), findsNothing);
+      });
+
+      testWidgets('calls onShare when tapped', (tester) async {
+        var shareCalled = false;
+        await mountWidget(
+          MessageActionsModal(
+            message: _createTestMessage(),
+            isOwnMessage: false,
+            onReaction: (_) {},
+            onEmojiPicker: () {},
+            currentUserPubkey: testPubkeyA,
+            onShare: () => shareCalled = true,
+          ),
+          tester,
+        );
+
+        await tester.tap(find.byKey(const Key('share_button')));
+        await tester.pumpAndSettle();
+
+        expect(shareCalled, isTrue);
       });
     });
 

@@ -6,7 +6,9 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
+import 'package:whitenoise/hooks/use_share_message.dart';
 import 'package:whitenoise/l10n/l10n.dart';
+import 'package:whitenoise/src/rust/api/media_files.dart' show MediaFile;
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart' show shouldShowAvatar;
@@ -29,7 +31,7 @@ const _modalSectionSpacing = 16.0;
 const _modalButtonSpacing = 8.0;
 const _modalContentHorizontalPadding = 14.0;
 const _modalContentVerticalPadding = 14.0;
-const _modalPreviewSafetyReserve = 12.0;
+const _modalPreviewSafetyReserve = 32.0;
 const _modalMinPreviewHeight = 1.0;
 const _emojiPickerReservedHeight = 320.0;
 const _modalToPickerGap = 8.0;
@@ -163,6 +165,7 @@ class MessageActionsScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final showEmojiPicker = useState(false);
     final noticeMessage = useState<String?>(null);
 
@@ -181,6 +184,32 @@ class MessageActionsScreen extends HookWidget {
           .map((r) => MapEntry(r.emoji, r.reactionId)),
     );
     final selectedEmojis = userReactionIds.keys.toSet();
+
+    final cachedMedia = useMemoized(
+      () => _cachedAttachments(message.mediaAttachments),
+      [
+        message.id,
+        message.mediaAttachments.map((m) => m.filePath).join(''),
+      ],
+    );
+    final cachedPaths = cachedMedia.map((m) => m.filePath).toList(growable: false);
+    final hasContent = !message.isDeleted && message.content.trim().isNotEmpty;
+    final shareMessage = useShareMessage(
+      text: hasContent ? message.content : null,
+      filePaths: cachedPaths,
+      onError: (_) => showNotice(l10n.shareError),
+    );
+    final shareFn = shareMessage.share;
+    final shareCallback = shareFn == null
+        ? null
+        : () async {
+            final renderBox = context.findRenderObject() as RenderBox?;
+            final origin = renderBox != null && renderBox.hasSize
+                ? renderBox.localToGlobal(Offset.zero) & renderBox.size
+                : null;
+            await WidgetsBinding.instance.endOfFrame;
+            await shareFn(sharePositionOrigin: origin);
+          };
 
     Future<void> handleDelete() async {
       try {
@@ -251,6 +280,7 @@ class MessageActionsScreen extends HookWidget {
                             });
                           }
                         : null,
+                    onShare: shareCallback,
                     senderName: senderName,
                     senderPictureUrl: senderPictureUrl,
                     isGroupChat: isGroupChat,
@@ -286,6 +316,7 @@ class MessageActionsModal extends StatelessWidget {
     this.onDelete,
     this.selectedEmojis = const {},
     this.onReply,
+    this.onShare,
     this.senderName,
     this.senderPictureUrl,
     this.isGroupChat = false,
@@ -302,6 +333,7 @@ class MessageActionsModal extends StatelessWidget {
   final VoidCallback? onDelete;
   final Set<String> selectedEmojis;
   final VoidCallback? onReply;
+  final VoidCallback? onShare;
   final String? senderName;
   final String? senderPictureUrl;
   final bool isGroupChat;
@@ -325,6 +357,9 @@ class MessageActionsModal extends StatelessWidget {
       height += 40.h + _modalSectionSpacing.h;
     }
     if (onReply != null) {
+      height += _modalButtonSpacing.h + 52.h;
+    }
+    if (onShare != null) {
       height += _modalButtonSpacing.h + 52.h;
     }
     if (onDelete != null) {
@@ -397,9 +432,10 @@ class MessageActionsModal extends StatelessWidget {
                                     replyPreview != null ||
                                     message.mediaAttachments.isNotEmpty ||
                                     message.reactions.byEmoji.isNotEmpty;
-                                return Align(
+                                return UnconstrainedBox(
+                                  constrainedAxis: Axis.horizontal,
+                                  clipBehavior: Clip.hardEdge,
                                   alignment: isOwnMessage ? Alignment.topRight : Alignment.topLeft,
-                                  heightFactor: 1,
                                   child: ChatMessageBubble(
                                     message: message,
                                     isOwnMessage: isOwnMessage,
@@ -472,6 +508,17 @@ class MessageActionsModal extends StatelessWidget {
                             Navigator.of(context).pop();
                           },
                         ),
+                        if (onShare != null) ...[
+                          Gap(_modalButtonSpacing.h),
+                          WnButton(
+                            key: const Key('share_button'),
+                            text: context.l10n.share,
+                            type: WnButtonType.outline,
+                            size: WnButtonSize.medium,
+                            trailingIcon: WnIcons.share,
+                            onPressed: onShare,
+                          ),
+                        ],
                         if (onDelete != null) ...[
                           Gap(_modalButtonSpacing.h),
                           WnButton(
@@ -531,4 +578,9 @@ class _ReactionButton extends StatelessWidget {
       ),
     );
   }
+}
+
+List<MediaFile> _cachedAttachments(List<MediaFile> attachments) {
+  final cachedPaths = filterExistingFiles(attachments.map((m) => m.filePath)).toSet();
+  return attachments.where((m) => cachedPaths.contains(m.filePath)).toList(growable: false);
 }
