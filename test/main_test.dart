@@ -458,9 +458,8 @@ void main() {
 
     test('retries initializeWhitenoise when the database pool is temporarily exhausted', () async {
       mockApi.initializeWhitenoiseErrors.add(
-        const ApiError.whitenoise(
-          message:
-              'Database error: SQLx error: pool timed out while waiting for an open connection',
+        const ApiError.databasePoolTimedOut(
+          message: 'pool timed out while waiting for an open connection',
         ),
       );
 
@@ -471,9 +470,8 @@ void main() {
 
     test('uses the default retry delay for transient startup errors', () async {
       mockApi.initializeWhitenoiseErrors.add(
-        const ApiError.whitenoise(
-          message:
-              'Database error: SQLx error: pool timed out while waiting for an open connection',
+        const ApiError.databasePoolTimedOut(
+          message: 'pool timed out while waiting for an open connection',
         ),
       );
       final config = const rust_api.WhitenoiseConfig(dataDir: 'data', logsDir: 'logs');
@@ -488,6 +486,21 @@ void main() {
     test('does not retry initializeWhitenoise for non-transient startup errors', () async {
       mockApi.initializeWhitenoiseErrors.add(
         const ApiError.whitenoise(message: 'Database error: migration failed'),
+      );
+
+      await expectLater(
+        initializeAppContainer(initializeRetryDelay: (_) async {}),
+        throwsA(isA<ApiError>()),
+      );
+      expect(mockApi.initCallCount, 1);
+    });
+
+    test('does not retry initializeWhitenoise for text that looks like a pool timeout', () async {
+      mockApi.initializeWhitenoiseErrors.add(
+        const ApiError.whitenoise(
+          message:
+              'Database error: SQLx error: pool timed out while waiting for an open connection',
+        ),
       );
 
       await expectLater(
@@ -635,6 +648,27 @@ void main() {
 
       expect(baseDir.path, '${appGroupDir.path}/whitenoise');
       expect(File('${baseDir.path}/data/marker.txt').readAsStringSync(), 'existing');
+      expect(Directory('${pathProvider.tempDir.path}/whitenoise').existsSync(), isFalse);
+    });
+
+    test('preserves unversioned App Group data when Documents has no data', () async {
+      final appGroupDir = Directory.systemTemp.createTempSync('whitenoise_app_group_test');
+      _mockAppGroupContainerPath(appGroupDir.path);
+      await Directory('${pathProvider.tempDir.path}/whitenoise/data').create(recursive: true);
+      await Directory('${pathProvider.tempDir.path}/whitenoise/logs').create(recursive: true);
+      final appGroupDataDir = Directory('${appGroupDir.path}/whitenoise/data');
+      await appGroupDataDir.create(recursive: true);
+      await File('${appGroupDataDir.path}/nse-created.sqlite').writeAsString('nse');
+      addTearDown(() {
+        if (appGroupDir.existsSync()) {
+          appGroupDir.deleteSync(recursive: true);
+        }
+      });
+
+      final baseDir = await resolveWhitenoiseBaseDirectory(isIOS: true);
+
+      expect(baseDir.path, '${appGroupDir.path}/whitenoise');
+      expect(File('${baseDir.path}/data/nse-created.sqlite').readAsStringSync(), 'nse');
       expect(Directory('${pathProvider.tempDir.path}/whitenoise').existsSync(), isFalse);
     });
 

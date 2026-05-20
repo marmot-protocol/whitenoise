@@ -10,6 +10,9 @@ pub enum ApiError {
     #[error("Whitenoise error: {message}")]
     Whitenoise { message: String },
 
+    #[error("Database pool timed out: {message}")]
+    DatabasePoolTimedOut { message: String },
+
     #[error("Nostr key error: {message}")]
     InvalidKey { message: String },
 
@@ -53,9 +56,27 @@ pub enum ApiError {
 // Implement From traits for common error types
 impl From<whitenoise::WhitenoiseError> for ApiError {
     fn from(error: whitenoise::WhitenoiseError) -> Self {
+        if is_database_pool_timeout(&error) {
+            return Self::DatabasePoolTimedOut {
+                message: error.to_string(),
+            };
+        }
         Self::Whitenoise {
             message: error.to_string(),
         }
+    }
+}
+
+fn is_database_pool_timeout(error: &whitenoise::WhitenoiseError) -> bool {
+    match error {
+        whitenoise::WhitenoiseError::Database(database_error) => {
+            matches!(
+                database_error,
+                whitenoise::whitenoise::database::DatabaseError::Sqlx(sqlx::Error::PoolTimedOut)
+            )
+        }
+        whitenoise::WhitenoiseError::SqlxError(sqlx::Error::PoolTimedOut) => true,
+        _ => false,
     }
 }
 
@@ -145,6 +166,7 @@ impl ApiError {
     pub fn error_type(&self) -> String {
         match self {
             ApiError::Whitenoise { .. } => "Whitenoise".to_string(),
+            ApiError::DatabasePoolTimedOut { .. } => "DatabasePoolTimedOut".to_string(),
             ApiError::InvalidKey { .. } => "InvalidKey".to_string(),
             ApiError::NostrUrl { .. } => "NostrUrl".to_string(),
             ApiError::NostrTag { .. } => "NostrTag".to_string(),
@@ -165,6 +187,7 @@ impl ApiError {
     pub fn message_text(&self) -> String {
         match self {
             ApiError::Whitenoise { message } => message.clone(),
+            ApiError::DatabasePoolTimedOut { message } => message.clone(),
             ApiError::InvalidKey { message } => message.clone(),
             ApiError::NostrUrl { message } => message.clone(),
             ApiError::NostrTag { message } => message.clone(),
@@ -179,5 +202,21 @@ impl ApiError {
             ApiError::LoginKeyringUnavailable { message } => message.clone(),
             ApiError::Other { message } => message.clone(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn maps_nested_database_pool_timeout_to_typed_api_error() {
+        let error = whitenoise::WhitenoiseError::Database(
+            whitenoise::whitenoise::database::DatabaseError::Sqlx(sqlx::Error::PoolTimedOut),
+        );
+
+        let api_error = ApiError::from(error);
+
+        assert!(matches!(api_error, ApiError::DatabasePoolTimedOut { .. }));
     }
 }

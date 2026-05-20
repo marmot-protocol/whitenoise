@@ -77,6 +77,8 @@ final class NotificationService: UNNotificationServiceExtension {
     label: "org.parres.whitenoise.notification-service.collection",
     qos: .userInitiated
   )
+  private let dataVersionFileName = "data_version"
+  private let currentDataVersion = "1"
   private let keyringServiceId = "com.whitenoise.app"
   // Keep fallback delivery quick; slow relay collection should not hold the system UI for 30 seconds.
   private let maxNotificationServiceWaitMs: UInt32 = 8_000
@@ -166,10 +168,12 @@ final class NotificationService: UNNotificationServiceExtension {
     }
 
     let baseDir = container.appendingPathComponent("whitenoise", isDirectory: true)
-    let dataDir = baseDir.appendingPathComponent("data", isDirectory: true).path
-    let logsDir = baseDir.appendingPathComponent("logs", isDirectory: true).path
-    try? FileManager.default.createDirectory(atPath: dataDir, withIntermediateDirectories: true)
-    try? FileManager.default.createDirectory(atPath: logsDir, withIntermediateDirectories: true)
+    let dataDirURL = baseDir.appendingPathComponent("data", isDirectory: true)
+    let logsDirURL = baseDir.appendingPathComponent("logs", isDirectory: true)
+    let dataDir = dataDirURL.path
+    let logsDir = logsDirURL.path
+    try? FileManager.default.createDirectory(at: dataDirURL, withIntermediateDirectories: true)
+    try? FileManager.default.createDirectory(at: logsDirURL, withIntermediateDirectories: true)
 
     guard let json = collectNotificationsJson(
       dataDir: dataDir,
@@ -180,10 +184,26 @@ final class NotificationService: UNNotificationServiceExtension {
     }
 
     do {
-      return .success(try JSONDecoder().decode(BackgroundPushResult.self, from: Data(json.utf8)))
+      let result = try JSONDecoder().decode(BackgroundPushResult.self, from: Data(json.utf8))
+      if result.status == "new_data" {
+        writeDataVersionMarker(in: dataDirURL)
+      }
+      return .success(result)
     } catch {
       NSLog("White Noise NSE notification JSON decode failed: %@", error.localizedDescription)
       return .failure("decode \(error.localizedDescription)")
+    }
+  }
+
+  private func writeDataVersionMarker(in dataDir: URL) {
+    let markerURL = dataDir.appendingPathComponent(dataVersionFileName, isDirectory: false)
+    guard !FileManager.default.fileExists(atPath: markerURL.path) else {
+      return
+    }
+    do {
+      try currentDataVersion.write(to: markerURL, atomically: true, encoding: .utf8)
+    } catch {
+      NSLog("White Noise NSE failed to write data version marker: %@", error.localizedDescription)
     }
   }
 

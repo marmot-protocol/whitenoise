@@ -6116,50 +6116,54 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           message: dco_decode_String(raw[1]),
         );
       case 1:
-        return ApiError_InvalidKey(
+        return ApiError_DatabasePoolTimedOut(
           message: dco_decode_String(raw[1]),
         );
       case 2:
-        return ApiError_NostrUrl(
+        return ApiError_InvalidKey(
           message: dco_decode_String(raw[1]),
         );
       case 3:
-        return ApiError_NostrTag(
+        return ApiError_NostrUrl(
           message: dco_decode_String(raw[1]),
         );
       case 4:
-        return ApiError_NostrEvent(
+        return ApiError_NostrTag(
           message: dco_decode_String(raw[1]),
         );
       case 5:
-        return ApiError_NostrParse(
+        return ApiError_NostrEvent(
           message: dco_decode_String(raw[1]),
         );
       case 6:
-        return ApiError_NostrHex(
+        return ApiError_NostrParse(
           message: dco_decode_String(raw[1]),
         );
       case 7:
-        return ApiError_LoginInvalidKeyFormat(
+        return ApiError_NostrHex(
           message: dco_decode_String(raw[1]),
         );
       case 8:
-        return const ApiError_LoginNoRelayConnections();
+        return ApiError_LoginInvalidKeyFormat(
+          message: dco_decode_String(raw[1]),
+        );
       case 9:
+        return const ApiError_LoginNoRelayConnections();
+      case 10:
         return ApiError_LoginTimeout(
           message: dco_decode_String(raw[1]),
         );
-      case 10:
-        return const ApiError_LoginNoLoginInProgress();
       case 11:
+        return const ApiError_LoginNoLoginInProgress();
+      case 12:
         return ApiError_LoginInternal(
           message: dco_decode_String(raw[1]),
         );
-      case 12:
+      case 13:
         return ApiError_LoginKeyringUnavailable(
           message: dco_decode_String(raw[1]),
         );
-      case 13:
+      case 14:
         return ApiError_Other(
           message: dco_decode_String(raw[1]),
         );
@@ -8078,39 +8082,42 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
         return ApiError_Whitenoise(message: var_message);
       case 1:
         final var_message = sse_decode_String(deserializer);
-        return ApiError_InvalidKey(message: var_message);
+        return ApiError_DatabasePoolTimedOut(message: var_message);
       case 2:
         final var_message = sse_decode_String(deserializer);
-        return ApiError_NostrUrl(message: var_message);
+        return ApiError_InvalidKey(message: var_message);
       case 3:
         final var_message = sse_decode_String(deserializer);
-        return ApiError_NostrTag(message: var_message);
+        return ApiError_NostrUrl(message: var_message);
       case 4:
         final var_message = sse_decode_String(deserializer);
-        return ApiError_NostrEvent(message: var_message);
+        return ApiError_NostrTag(message: var_message);
       case 5:
         final var_message = sse_decode_String(deserializer);
-        return ApiError_NostrParse(message: var_message);
+        return ApiError_NostrEvent(message: var_message);
       case 6:
         final var_message = sse_decode_String(deserializer);
-        return ApiError_NostrHex(message: var_message);
+        return ApiError_NostrParse(message: var_message);
       case 7:
         final var_message = sse_decode_String(deserializer);
-        return ApiError_LoginInvalidKeyFormat(message: var_message);
+        return ApiError_NostrHex(message: var_message);
       case 8:
-        return const ApiError_LoginNoRelayConnections();
+        final var_message = sse_decode_String(deserializer);
+        return ApiError_LoginInvalidKeyFormat(message: var_message);
       case 9:
+        return const ApiError_LoginNoRelayConnections();
+      case 10:
         final var_message = sse_decode_String(deserializer);
         return ApiError_LoginTimeout(message: var_message);
-      case 10:
-        return const ApiError_LoginNoLoginInProgress();
       case 11:
-        final var_message = sse_decode_String(deserializer);
-        return ApiError_LoginInternal(message: var_message);
+        return const ApiError_LoginNoLoginInProgress();
       case 12:
         final var_message = sse_decode_String(deserializer);
-        return ApiError_LoginKeyringUnavailable(message: var_message);
+        return ApiError_LoginInternal(message: var_message);
       case 13:
+        final var_message = sse_decode_String(deserializer);
+        return ApiError_LoginKeyringUnavailable(message: var_message);
+      case 14:
         final var_message = sse_decode_String(deserializer);
         return ApiError_Other(message: var_message);
       default:
@@ -10630,42 +10637,45 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       case ApiError_Whitenoise(message: final message):
         sse_encode_i_32(0, serializer);
         sse_encode_String(message, serializer);
-      case ApiError_InvalidKey(message: final message):
+      case ApiError_DatabasePoolTimedOut(message: final message):
         sse_encode_i_32(1, serializer);
         sse_encode_String(message, serializer);
-      case ApiError_NostrUrl(message: final message):
+      case ApiError_InvalidKey(message: final message):
         sse_encode_i_32(2, serializer);
         sse_encode_String(message, serializer);
-      case ApiError_NostrTag(message: final message):
+      case ApiError_NostrUrl(message: final message):
         sse_encode_i_32(3, serializer);
         sse_encode_String(message, serializer);
-      case ApiError_NostrEvent(message: final message):
+      case ApiError_NostrTag(message: final message):
         sse_encode_i_32(4, serializer);
         sse_encode_String(message, serializer);
-      case ApiError_NostrParse(message: final message):
+      case ApiError_NostrEvent(message: final message):
         sse_encode_i_32(5, serializer);
         sse_encode_String(message, serializer);
-      case ApiError_NostrHex(message: final message):
+      case ApiError_NostrParse(message: final message):
         sse_encode_i_32(6, serializer);
         sse_encode_String(message, serializer);
-      case ApiError_LoginInvalidKeyFormat(message: final message):
+      case ApiError_NostrHex(message: final message):
         sse_encode_i_32(7, serializer);
         sse_encode_String(message, serializer);
-      case ApiError_LoginNoRelayConnections():
+      case ApiError_LoginInvalidKeyFormat(message: final message):
         sse_encode_i_32(8, serializer);
-      case ApiError_LoginTimeout(message: final message):
+        sse_encode_String(message, serializer);
+      case ApiError_LoginNoRelayConnections():
         sse_encode_i_32(9, serializer);
+      case ApiError_LoginTimeout(message: final message):
+        sse_encode_i_32(10, serializer);
         sse_encode_String(message, serializer);
       case ApiError_LoginNoLoginInProgress():
-        sse_encode_i_32(10, serializer);
-      case ApiError_LoginInternal(message: final message):
         sse_encode_i_32(11, serializer);
-        sse_encode_String(message, serializer);
-      case ApiError_LoginKeyringUnavailable(message: final message):
+      case ApiError_LoginInternal(message: final message):
         sse_encode_i_32(12, serializer);
         sse_encode_String(message, serializer);
-      case ApiError_Other(message: final message):
+      case ApiError_LoginKeyringUnavailable(message: final message):
         sse_encode_i_32(13, serializer);
+        sse_encode_String(message, serializer);
+      case ApiError_Other(message: final message):
+        sse_encode_i_32(14, serializer);
         sse_encode_String(message, serializer);
     }
   }

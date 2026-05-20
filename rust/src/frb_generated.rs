@@ -6186,71 +6186,77 @@ impl SseDecode for crate::api::error::ApiError {
             }
             1 => {
                 let mut var_message = <String>::sse_decode(deserializer);
-                return crate::api::error::ApiError::InvalidKey {
+                return crate::api::error::ApiError::DatabasePoolTimedOut {
                     message: var_message,
                 };
             }
             2 => {
                 let mut var_message = <String>::sse_decode(deserializer);
-                return crate::api::error::ApiError::NostrUrl {
+                return crate::api::error::ApiError::InvalidKey {
                     message: var_message,
                 };
             }
             3 => {
                 let mut var_message = <String>::sse_decode(deserializer);
-                return crate::api::error::ApiError::NostrTag {
+                return crate::api::error::ApiError::NostrUrl {
                     message: var_message,
                 };
             }
             4 => {
                 let mut var_message = <String>::sse_decode(deserializer);
-                return crate::api::error::ApiError::NostrEvent {
+                return crate::api::error::ApiError::NostrTag {
                     message: var_message,
                 };
             }
             5 => {
                 let mut var_message = <String>::sse_decode(deserializer);
-                return crate::api::error::ApiError::NostrParse {
+                return crate::api::error::ApiError::NostrEvent {
                     message: var_message,
                 };
             }
             6 => {
                 let mut var_message = <String>::sse_decode(deserializer);
-                return crate::api::error::ApiError::NostrHex {
+                return crate::api::error::ApiError::NostrParse {
                     message: var_message,
                 };
             }
             7 => {
                 let mut var_message = <String>::sse_decode(deserializer);
-                return crate::api::error::ApiError::LoginInvalidKeyFormat {
+                return crate::api::error::ApiError::NostrHex {
                     message: var_message,
                 };
             }
             8 => {
-                return crate::api::error::ApiError::LoginNoRelayConnections;
+                let mut var_message = <String>::sse_decode(deserializer);
+                return crate::api::error::ApiError::LoginInvalidKeyFormat {
+                    message: var_message,
+                };
             }
             9 => {
+                return crate::api::error::ApiError::LoginNoRelayConnections;
+            }
+            10 => {
                 let mut var_message = <String>::sse_decode(deserializer);
                 return crate::api::error::ApiError::LoginTimeout {
                     message: var_message,
                 };
             }
-            10 => {
+            11 => {
                 return crate::api::error::ApiError::LoginNoLoginInProgress;
             }
-            11 => {
+            12 => {
                 let mut var_message = <String>::sse_decode(deserializer);
                 return crate::api::error::ApiError::LoginInternal {
                     message: var_message,
                 };
             }
-            12 => {
+            13 => {
                 let mut var_message = <String>::sse_decode(deserializer);
                 return crate::api::error::ApiError::LoginKeyringUnavailable {
                     message: var_message,
                 };
             }
-            13 => {
+            14 => {
                 let mut var_message = <String>::sse_decode(deserializer);
                 return crate::api::error::ApiError::Other {
                     message: var_message,
@@ -9007,40 +9013,43 @@ impl flutter_rust_bridge::IntoDart for crate::api::error::ApiError {
             crate::api::error::ApiError::Whitenoise { message } => {
                 [0.into_dart(), message.into_into_dart().into_dart()].into_dart()
             }
-            crate::api::error::ApiError::InvalidKey { message } => {
+            crate::api::error::ApiError::DatabasePoolTimedOut { message } => {
                 [1.into_dart(), message.into_into_dart().into_dart()].into_dart()
             }
-            crate::api::error::ApiError::NostrUrl { message } => {
+            crate::api::error::ApiError::InvalidKey { message } => {
                 [2.into_dart(), message.into_into_dart().into_dart()].into_dart()
             }
-            crate::api::error::ApiError::NostrTag { message } => {
+            crate::api::error::ApiError::NostrUrl { message } => {
                 [3.into_dart(), message.into_into_dart().into_dart()].into_dart()
             }
-            crate::api::error::ApiError::NostrEvent { message } => {
+            crate::api::error::ApiError::NostrTag { message } => {
                 [4.into_dart(), message.into_into_dart().into_dart()].into_dart()
             }
-            crate::api::error::ApiError::NostrParse { message } => {
+            crate::api::error::ApiError::NostrEvent { message } => {
                 [5.into_dart(), message.into_into_dart().into_dart()].into_dart()
             }
-            crate::api::error::ApiError::NostrHex { message } => {
+            crate::api::error::ApiError::NostrParse { message } => {
                 [6.into_dart(), message.into_into_dart().into_dart()].into_dart()
             }
-            crate::api::error::ApiError::LoginInvalidKeyFormat { message } => {
+            crate::api::error::ApiError::NostrHex { message } => {
                 [7.into_dart(), message.into_into_dart().into_dart()].into_dart()
             }
-            crate::api::error::ApiError::LoginNoRelayConnections => [8.into_dart()].into_dart(),
+            crate::api::error::ApiError::LoginInvalidKeyFormat { message } => {
+                [8.into_dart(), message.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::error::ApiError::LoginNoRelayConnections => [9.into_dart()].into_dart(),
             crate::api::error::ApiError::LoginTimeout { message } => {
-                [9.into_dart(), message.into_into_dart().into_dart()].into_dart()
+                [10.into_dart(), message.into_into_dart().into_dart()].into_dart()
             }
-            crate::api::error::ApiError::LoginNoLoginInProgress => [10.into_dart()].into_dart(),
+            crate::api::error::ApiError::LoginNoLoginInProgress => [11.into_dart()].into_dart(),
             crate::api::error::ApiError::LoginInternal { message } => {
-                [11.into_dart(), message.into_into_dart().into_dart()].into_dart()
-            }
-            crate::api::error::ApiError::LoginKeyringUnavailable { message } => {
                 [12.into_dart(), message.into_into_dart().into_dart()].into_dart()
             }
-            crate::api::error::ApiError::Other { message } => {
+            crate::api::error::ApiError::LoginKeyringUnavailable { message } => {
                 [13.into_dart(), message.into_into_dart().into_dart()].into_dart()
+            }
+            crate::api::error::ApiError::Other { message } => {
+                [14.into_dart(), message.into_into_dart().into_dart()].into_dart()
             }
             _ => {
                 unimplemented!("");
@@ -11076,54 +11085,58 @@ impl SseEncode for crate::api::error::ApiError {
                 <i32>::sse_encode(0, serializer);
                 <String>::sse_encode(message, serializer);
             }
-            crate::api::error::ApiError::InvalidKey { message } => {
+            crate::api::error::ApiError::DatabasePoolTimedOut { message } => {
                 <i32>::sse_encode(1, serializer);
                 <String>::sse_encode(message, serializer);
             }
-            crate::api::error::ApiError::NostrUrl { message } => {
+            crate::api::error::ApiError::InvalidKey { message } => {
                 <i32>::sse_encode(2, serializer);
                 <String>::sse_encode(message, serializer);
             }
-            crate::api::error::ApiError::NostrTag { message } => {
+            crate::api::error::ApiError::NostrUrl { message } => {
                 <i32>::sse_encode(3, serializer);
                 <String>::sse_encode(message, serializer);
             }
-            crate::api::error::ApiError::NostrEvent { message } => {
+            crate::api::error::ApiError::NostrTag { message } => {
                 <i32>::sse_encode(4, serializer);
                 <String>::sse_encode(message, serializer);
             }
-            crate::api::error::ApiError::NostrParse { message } => {
+            crate::api::error::ApiError::NostrEvent { message } => {
                 <i32>::sse_encode(5, serializer);
                 <String>::sse_encode(message, serializer);
             }
-            crate::api::error::ApiError::NostrHex { message } => {
+            crate::api::error::ApiError::NostrParse { message } => {
                 <i32>::sse_encode(6, serializer);
                 <String>::sse_encode(message, serializer);
             }
-            crate::api::error::ApiError::LoginInvalidKeyFormat { message } => {
+            crate::api::error::ApiError::NostrHex { message } => {
                 <i32>::sse_encode(7, serializer);
                 <String>::sse_encode(message, serializer);
             }
-            crate::api::error::ApiError::LoginNoRelayConnections => {
+            crate::api::error::ApiError::LoginInvalidKeyFormat { message } => {
                 <i32>::sse_encode(8, serializer);
+                <String>::sse_encode(message, serializer);
+            }
+            crate::api::error::ApiError::LoginNoRelayConnections => {
+                <i32>::sse_encode(9, serializer);
             }
             crate::api::error::ApiError::LoginTimeout { message } => {
-                <i32>::sse_encode(9, serializer);
+                <i32>::sse_encode(10, serializer);
                 <String>::sse_encode(message, serializer);
             }
             crate::api::error::ApiError::LoginNoLoginInProgress => {
-                <i32>::sse_encode(10, serializer);
+                <i32>::sse_encode(11, serializer);
             }
             crate::api::error::ApiError::LoginInternal { message } => {
-                <i32>::sse_encode(11, serializer);
-                <String>::sse_encode(message, serializer);
-            }
-            crate::api::error::ApiError::LoginKeyringUnavailable { message } => {
                 <i32>::sse_encode(12, serializer);
                 <String>::sse_encode(message, serializer);
             }
-            crate::api::error::ApiError::Other { message } => {
+            crate::api::error::ApiError::LoginKeyringUnavailable { message } => {
                 <i32>::sse_encode(13, serializer);
+                <String>::sse_encode(message, serializer);
+            }
+            crate::api::error::ApiError::Other { message } => {
+                <i32>::sse_encode(14, serializer);
                 <String>::sse_encode(message, serializer);
             }
             _ => {

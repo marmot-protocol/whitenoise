@@ -31,6 +31,7 @@ import 'package:whitenoise/providers/theme_provider.dart' show themeProvider;
 import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/screens/fatal_error_screen.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
+import 'package:whitenoise/src/rust/api/error.dart' as rust_error;
 import 'package:whitenoise/src/rust/api/relays.dart' as relays_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/theme.dart';
@@ -169,8 +170,7 @@ Future<void> initializeWhitenoiseWithRetry(
 }
 
 bool _isDatabasePoolTimeout(Object error) {
-  final message = error.toString().toLowerCase();
-  return message.contains('pool timed out while waiting for an open connection');
+  return error is rust_error.ApiError_DatabasePoolTimedOut;
 }
 
 @visibleForTesting
@@ -235,6 +235,13 @@ Future<void> _moveWhitenoiseDirectoryIfNeeded({
 }) async {
   if (!from.existsSync()) return;
 
+  if (!_hasLegacyDocumentsData(from)) {
+    if (to.existsSync()) {
+      await _deleteLegacyDocumentsDataBestEffort(from, deleteSourceDirectory);
+    }
+    return;
+  }
+
   if (to.existsSync()) {
     if (_hasMainAppDataMarker(to)) {
       await _deleteLegacyDocumentsDataBestEffort(from, deleteSourceDirectory);
@@ -288,6 +295,12 @@ Future<void> _deleteDirectory(Directory directory) => directory.delete(recursive
 
 bool _hasMainAppDataMarker(Directory baseDir) =>
     File(p.join(baseDir.path, 'data', kDataVersionFile)).existsSync();
+
+bool _hasLegacyDocumentsData(Directory baseDir) {
+  final dataDir = Directory(p.join(baseDir.path, 'data'));
+  if (!dataDir.existsSync()) return false;
+  return dataDir.listSync(recursive: true, followLinks: false).any((entity) => entity is File);
+}
 
 Future<void> _copyDirectory(Directory from, Directory to) async {
   await to.create(recursive: true);
