@@ -210,7 +210,7 @@ class _UnblockedActionsPanel extends StatelessWidget {
     final isFollowing = followState.isFollowing;
     return Padding(
       key: const Key('blocked_user_unblocked_panel'),
-      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
