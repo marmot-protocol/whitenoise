@@ -88,6 +88,8 @@ class MockWnApi implements RustLibApi {
   int relayControlStateCallCount = 0;
   int ensureAllSubscriptionsCallCount = 0;
   bool shouldFailEnsureAllSubscriptions = false;
+  int resumeAfterBackgroundCallCount = 0;
+  bool shouldFailResumeAfterBackground = false;
   List<String> relayDefaultUrls = List.of(_defaultRelayUrls);
   bool shouldFailDefaultRelayUrls = false;
 
@@ -374,6 +376,14 @@ class MockWnApi implements RustLibApi {
   }
 
   @override
+  Future<void> crateApiLifecycleResumeAfterBackground() async {
+    resumeAfterBackgroundCallCount++;
+    if (shouldFailResumeAfterBackground) {
+      throw Exception('resume after background failed');
+    }
+  }
+
+  @override
   List<String> crateApiRelayDefaultsDefaultRelayUrls() {
     if (shouldFailDefaultRelayUrls) {
       throw Exception('default relay urls failed');
@@ -482,6 +492,20 @@ class MockWnApi implements RustLibApi {
 
   @override
   Future<List<ChatSummary>> crateApiChatListGetChatList({
+    required String accountPubkey,
+  }) async {
+    return [];
+  }
+
+  @override
+  Future<List<ChatSummary>> crateApiChatListFetchChatListSnapshot({
+    required String accountPubkey,
+  }) async {
+    return [];
+  }
+
+  @override
+  Future<List<ChatSummary>> crateApiChatListFetchArchivedChatListSnapshot({
     required String accountPubkey,
   }) async {
     return [];
@@ -1082,6 +1106,8 @@ class MockWnApi implements RustLibApi {
     relayControlStateCallCount = 0;
     ensureAllSubscriptionsCallCount = 0;
     shouldFailEnsureAllSubscriptions = false;
+    resumeAfterBackgroundCallCount = 0;
+    shouldFailResumeAfterBackground = false;
     relayDefaultUrls = List.of(_defaultRelayUrls);
     shouldFailDefaultRelayUrls = false;
     lastReadMessageId = null;

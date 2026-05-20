@@ -16,7 +16,6 @@ import 'package:path_provider/path_provider.dart' show getApplicationDocumentsDi
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/app_log_provider.dart' show appLogStore;
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
-import 'package:whitenoise/providers/chat_list_refresh_provider.dart';
 import 'package:whitenoise/providers/foreground_service_provider.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart'
@@ -32,7 +31,7 @@ import 'package:whitenoise/routes.dart' show Routes;
 import 'package:whitenoise/screens/fatal_error_screen.dart';
 import 'package:whitenoise/src/rust/api.dart' as rust_api;
 import 'package:whitenoise/src/rust/api/error.dart' as rust_error;
-import 'package:whitenoise/src/rust/api/relays.dart' as relays_api;
+import 'package:whitenoise/src/rust/api/lifecycle.dart' as lifecycle_api;
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/reset_marker.dart';
@@ -337,9 +336,9 @@ Future<void> _migrateDataIfNeeded(String dataDir) async {
 
 @visibleForTesting
 Future<void> refreshAfterNotificationRoute({
-  required Future<void> Function() ensureRelaySubscriptions,
+  required Future<void> Function() resumeAfterBackground,
 }) async {
-  await ensureRelaySubscriptions();
+  await resumeAfterBackground();
 }
 
 class WnApp extends ConsumerStatefulWidget {
@@ -361,7 +360,7 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _suppressLocalNotificationsDuringResume();
       unawaited(
-        _consumePendingNotificationTap(afterNavigate: _ensureRelaySubscriptionsAfterResume),
+        _consumePendingNotificationTap(afterNavigate: _resumeAfterBackground),
       );
     });
   }
@@ -416,23 +415,22 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
     var routed = false;
     try {
       routed = await _consumePendingNotificationTap(
-        afterNavigate: _ensureRelaySubscriptionsAfterResume,
+        afterNavigate: _resumeAfterBackground,
       );
     } catch (error, stackTrace) {
       _logger.warning('Failed to route pending notification tap on resume', error, stackTrace);
     }
 
     if (!routed) {
-      await _ensureRelaySubscriptionsAfterResume();
+      await _resumeAfterBackground();
     }
   }
 
-  Future<void> _ensureRelaySubscriptionsAfterResume() async {
+  Future<void> _resumeAfterBackground() async {
     try {
-      await relays_api.ensureAllSubscriptions();
-      ref.read(chatListRefreshProvider.notifier).requestRefresh();
+      await lifecycle_api.resumeAfterBackground();
     } catch (error, stackTrace) {
-      _logger.warning('Failed to ensure relay subscriptions on resume', error, stackTrace);
+      _logger.warning('Failed to resume Whitenoise after background', error, stackTrace);
     }
   }
 

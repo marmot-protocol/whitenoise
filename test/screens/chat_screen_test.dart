@@ -1,13 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderScope;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 import 'package:plugin_platform_interface/plugin_platform_interface.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
-import 'package:whitenoise/providers/chat_list_refresh_provider.dart';
 import 'package:whitenoise/providers/debug_view_provider.dart';
 import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
@@ -177,6 +175,9 @@ class _MockApi extends MockWnApi {
     int? limit,
   }) {
     if (fetchOlderCompleter != null) return fetchOlderCompleter!.future;
+    if (before == null && beforeMessageId == null) {
+      return Future.value(initialMessages);
+    }
     if (before != null && beforeMessageId != null && initialMessages.isNotEmpty) {
       final sorted = [...initialMessages]..sort((a, b) => a.createdAt.compareTo(b.createdAt));
       final idx = sorted.indexWhere((m) => m.id == beforeMessageId);
@@ -1012,7 +1013,7 @@ void main() {
         expect(find.textContaining('Message new_msg'), findsOneWidget);
       });
 
-      testWidgets('reloads messages when chat list refresh is requested', (tester) async {
+      testWidgets('reloads messages from snapshot when app resumes', (tester) async {
         _api.initialMessages = [_message('m1', DateTime(2024))];
 
         await pumpChatScreen(tester);
@@ -1020,15 +1021,13 @@ void main() {
         expect(find.textContaining('Message m1'), findsOneWidget);
         expect(find.textContaining('Message m2'), findsNothing);
 
-        final container = ProviderScope.containerOf(
-          tester.element(find.byType(ChatScreen)),
-          listen: false,
-        );
         _api.initialMessages = [
           _message('m1', DateTime(2024)),
           _message('m2', DateTime(2024, 2)),
         ];
-        container.read(chatListRefreshProvider.notifier).requestRefresh();
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        await tester.pumpAndSettle();
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
         await tester.pumpAndSettle();
 
         expect(find.textContaining('Message m2'), findsOneWidget);

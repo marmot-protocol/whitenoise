@@ -21,7 +21,6 @@ import 'package:whitenoise/hooks/use_scroll_to_message.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/providers/active_chat_provider.dart';
-import 'package:whitenoise/providers/chat_list_refresh_provider.dart';
 import 'package:whitenoise/providers/debug_view_provider.dart';
 import 'package:whitenoise/providers/message_debug_log_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart';
@@ -156,7 +155,6 @@ class ChatScreen extends HookConsumerWidget {
     final typography = context.typographyScaled;
     final pubkey = ref.watch(accountPubkeyProvider);
     final isOffline = ref.watch(offlineProvider).value ?? false;
-    final chatListRefreshToken = ref.watch(chatListRefreshProvider);
     final debugLog = ref.read(messageDebugLogProvider.notifier);
     final blockActionsRefreshKey = useState(0);
     final blockedPubkeysState = useBlockedPubkeys(pubkey);
@@ -179,7 +177,6 @@ class ChatScreen extends HookConsumerWidget {
       pubkey: pubkey,
       debugLog: debugLog,
       hiddenPubkeys: hiddenPubkeys,
-      refreshToken: chatListRefreshToken,
     );
     final chatSummary = useChatSummary(context, pubkey, groupId);
     final header = chatSummaryDisplay(chatSummary.data, groupId);

@@ -127,6 +127,8 @@ pub enum UpdateTrigger {
     MessageDeleted,
     /// The delivery status of an outgoing message changed (Sending -> Sent or Failed)
     DeliveryStatusChanged,
+    /// A foreground catch-up replay refreshed this message from the local snapshot.
+    SnapshotRefresh,
 }
 
 /// A real-time update for a group message.
@@ -350,6 +352,7 @@ impl From<WhitenoiseUpdateTrigger> for UpdateTrigger {
             WhitenoiseUpdateTrigger::ReactionRemoved => Self::ReactionRemoved,
             WhitenoiseUpdateTrigger::MessageDeleted => Self::MessageDeleted,
             WhitenoiseUpdateTrigger::DeliveryStatusChanged => Self::DeliveryStatusChanged,
+            WhitenoiseUpdateTrigger::SnapshotRefresh => Self::SnapshotRefresh,
         }
     }
 }

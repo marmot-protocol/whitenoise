@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
@@ -14,16 +16,15 @@ typedef ChatListResult = ({
   VoidCallback refresh,
 });
 
-ChatListResult useChatList(String pubkey, {bool archived = false, int refreshToken = 0}) {
+ChatListResult useChatList(String pubkey, {bool archived = false}) {
   final blockedPubkeysRefreshKey = useState(0);
   final blockedState = useBlockedPubkeys(
     pubkey,
-    refreshKey: blockedPubkeysRefreshKey.value + refreshToken,
+    refreshKey: blockedPubkeysRefreshKey.value,
   );
   return _useChatList(
     pubkey,
     archived: archived,
-    refreshToken: refreshToken,
     blockedState: blockedState,
     refreshBlockedPubkeys: () => blockedPubkeysRefreshKey.value++,
   );
@@ -32,7 +33,6 @@ ChatListResult useChatList(String pubkey, {bool archived = false, int refreshTok
 ChatListResult useChatListWithBlockedPubkeys(
   String pubkey, {
   bool archived = false,
-  int refreshToken = 0,
   required BlockedPubkeysState blockedState,
 }) {
   final refreshBlockedPubkeysRef = useRef<VoidCallback>(() {});
@@ -41,7 +41,6 @@ ChatListResult useChatListWithBlockedPubkeys(
   return _useChatList(
     pubkey,
     archived: archived,
-    refreshToken: refreshToken,
     blockedState: blockedState,
     refreshBlockedPubkeys: () => refreshBlockedPubkeysRef.value(),
   );
@@ -50,14 +49,50 @@ ChatListResult useChatListWithBlockedPubkeys(
 ChatListResult _useChatList(
   String pubkey, {
   required bool archived,
-  required int refreshToken,
   required BlockedPubkeysState blockedState,
   required VoidCallback refreshBlockedPubkeys,
 }) {
   final chatMap = useRef(<String, ChatSummary>{});
   final refreshKey = useState(0);
+  final snapshotVersion = useState(0);
+  final snapshotRequestToken = useRef(0);
+  final isDisposed = useRef(false);
   final blockedPubkeysRef = useRef<Set<String>>({});
   blockedPubkeysRef.value = blockedState.blockedPubkeys;
+
+  useEffect(() {
+    isDisposed.value = false;
+    return () {
+      isDisposed.value = true;
+      snapshotRequestToken.value++;
+    };
+  }, [pubkey, archived]);
+
+  Future<void> refreshFromSnapshot() async {
+    final requestToken = ++snapshotRequestToken.value;
+    try {
+      final items = archived
+          ? await fetchArchivedChatListSnapshot(accountPubkey: pubkey)
+          : await fetchChatListSnapshot(accountPubkey: pubkey);
+      if (isDisposed.value || requestToken != snapshotRequestToken.value) return;
+      chatMap.value = {for (final c in items.reversed) c.mlsGroupId: c};
+      snapshotVersion.value++;
+    } catch (error, stackTrace) {
+      _logger.warning(
+        'chatList snapshot refresh failed pubkey=${pubkey.substring(0, 8)}… archived=$archived',
+        error,
+        stackTrace,
+      );
+    }
+  }
+
+  useOnAppLifecycleStateChange((previous, current) {
+    if (current == AppLifecycleState.resumed &&
+        previous != null &&
+        previous != AppLifecycleState.resumed) {
+      unawaited(refreshFromSnapshot());
+    }
+  });
 
   final stream = useMemoized(
     () {
@@ -120,17 +155,20 @@ ChatListResult _useChatList(
                   case ChatListUpdateTrigger.userBlockChanged:
                     chatMap.value[id] = update.item;
                     refreshBlockedPubkeys();
+                  case ChatListUpdateTrigger.snapshotRefresh:
+                    chatMap.value[id] = update.item;
                 }
                 return chatMap.value;
               },
             );
           });
     },
-    [pubkey, refreshKey.value, archived, refreshToken],
+    [pubkey, refreshKey.value, archived],
   );
 
   final snapshot = useStream(stream, initialData: <String, ChatSummary>{});
   final isLoading = snapshot.connectionState == ConnectionState.waiting || blockedState.isLoading;
+  snapshotVersion.value;
   final chats = blockedState.isLoading
       ? <ChatSummary>[]
       : chatMap.value.values

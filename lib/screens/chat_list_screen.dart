@@ -9,7 +9,6 @@ import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_zapstore_update.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
-import 'package:whitenoise/providers/chat_list_refresh_provider.dart';
 import 'package:whitenoise/providers/offline_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/theme.dart';
@@ -182,12 +181,10 @@ class ChatListScreen extends HookConsumerWidget {
     final isOffline = ref.watch(offlineProvider).value ?? false;
     final typography = context.typographyScaled;
     final pubkey = ref.watch(accountPubkeyProvider);
-    final chatListRefreshToken = ref.watch(chatListRefreshProvider);
-    final chatListResult = useChatList(pubkey, refreshToken: chatListRefreshToken);
+    final chatListResult = useChatList(pubkey);
     final archivedChatListResult = useChatList(
       pubkey,
       archived: true,
-      refreshToken: chatListRefreshToken,
     );
     final selectedFilter = useState(ChatListFilter.chats);
     final safeAreaTop = MediaQuery.of(context).padding.top;

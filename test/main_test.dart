@@ -17,7 +17,6 @@ import 'package:whitenoise/main.dart'
         refreshAfterNotificationRoute,
         resolveWhitenoiseBaseDirectory;
 import 'package:whitenoise/providers/auth_provider.dart';
-import 'package:whitenoise/providers/chat_list_refresh_provider.dart';
 import 'package:whitenoise/providers/notification_provider.dart'
     show localNotificationSuppressedUntilProvider;
 import 'package:whitenoise/providers/theme_provider.dart';
@@ -298,13 +297,13 @@ void main() {
     testWidgets('does not run resume refresh for the initial resumed event', (tester) async {
       await pumpWnApp(tester);
       mockAuth.ensureExternalSignersRegisteredCount = 0;
-      mockApi.ensureAllSubscriptionsCallCount = 0;
+      mockApi.resumeAfterBackgroundCallCount = 0;
 
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
 
       expect(mockAuth.ensureExternalSignersRegisteredCount, 0);
-      expect(mockApi.ensureAllSubscriptionsCallCount, 0);
+      expect(mockApi.resumeAfterBackgroundCallCount, 0);
     });
 
     testWidgets('reconciles external signer callbacks on foreground resume', (tester) async {
@@ -322,11 +321,7 @@ void main() {
     testWidgets('continues resume work when external signer reconciliation fails', (tester) async {
       await pumpWnApp(tester);
       mockAuth.ensureExternalSignersRegisteredError = Exception('signer failed');
-      mockApi.ensureAllSubscriptionsCallCount = 0;
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(WnApp)),
-        listen: false,
-      );
+      mockApi.resumeAfterBackgroundCallCount = 0;
 
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
       await tester.pumpAndSettle();
@@ -334,25 +329,19 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(mockAuth.ensureExternalSignersRegisteredCount, 1);
-      expect(mockApi.ensureAllSubscriptionsCallCount, 1);
-      expect(container.read(chatListRefreshProvider), 1);
+      expect(mockApi.resumeAfterBackgroundCallCount, 1);
     });
 
-    testWidgets('ensures relay subscriptions on foreground resume', (tester) async {
+    testWidgets('resumes Whitenoise catch-up on foreground resume', (tester) async {
       await pumpWnApp(tester);
-      mockApi.ensureAllSubscriptionsCallCount = 0;
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(WnApp)),
-        listen: false,
-      );
+      mockApi.resumeAfterBackgroundCallCount = 0;
 
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
       await tester.pumpAndSettle();
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
 
-      expect(mockApi.ensureAllSubscriptionsCallCount, 1);
-      expect(container.read(chatListRefreshProvider), 1);
+      expect(mockApi.resumeAfterBackgroundCallCount, 1);
     });
 
     testWidgets('temporarily suppresses local notifications on app resume', (tester) async {
@@ -373,33 +362,28 @@ void main() {
       expect(suppressedUntil!.isAfter(DateTime.now().toUtc()), isTrue);
     });
 
-    testWidgets('logs relay subscription resume failures without throwing', (tester) async {
+    testWidgets('logs Whitenoise resume failures without throwing', (tester) async {
       await pumpWnApp(tester);
-      mockApi.shouldFailEnsureAllSubscriptions = true;
-      final container = ProviderScope.containerOf(
-        tester.element(find.byType(WnApp)),
-        listen: false,
-      );
+      mockApi.shouldFailResumeAfterBackground = true;
 
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.paused);
       await tester.pumpAndSettle();
       tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
 
-      expect(mockApi.ensureAllSubscriptionsCallCount, 1);
-      expect(container.read(chatListRefreshProvider), 0);
+      expect(mockApi.resumeAfterBackgroundCallCount, 1);
     });
 
-    test('refreshAfterNotificationRoute relies on relay refresh only', () async {
+    test('refreshAfterNotificationRoute relies on foreground catch-up only', () async {
       final events = <String>[];
 
       await refreshAfterNotificationRoute(
-        ensureRelaySubscriptions: () async {
-          events.add('relay-refresh');
+        resumeAfterBackground: () async {
+          events.add('foreground-catch-up');
         },
       );
 
-      expect(events, ['relay-refresh']);
+      expect(events, ['foreground-catch-up']);
     });
   });
 

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/widgets.dart';
-import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderContainer;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart'
@@ -106,6 +105,14 @@ class _MockApi extends MockWnApi {
     controller?.add(
       MessageStreamItem.update(
         update: MessageUpdate(trigger: UpdateTrigger.deliveryStatusChanged, message: message),
+      ),
+    );
+  }
+
+  void emitSnapshotRefresh(ChatMessage message) {
+    controller?.add(
+      MessageStreamItem.update(
+        update: MessageUpdate(trigger: UpdateTrigger.snapshotRefresh, message: message),
       ),
     );
   }
@@ -216,7 +223,6 @@ Future<ChatMessagesResult Function()> _pump(
   WidgetTester tester,
   String groupId, {
   Set<String> hiddenPubkeys = const {},
-  int refreshToken = 0,
 }) async {
   return await mountHook(
     tester,
@@ -224,7 +230,6 @@ Future<ChatMessagesResult Function()> _pump(
       groupId,
       pubkey: testPubkeyA,
       hiddenPubkeys: hiddenPubkeys,
-      refreshToken: refreshToken,
     ),
   );
 }
@@ -302,17 +307,8 @@ void main() {
       expect(result.getMessage(1).id, 'm1');
     });
 
-    testWidgets('reloads initial snapshot when refresh token changes', (tester) async {
-      final refreshToken = ValueNotifier(0);
-      addTearDown(refreshToken.dispose);
-      final getResult = await mountHook(
-        tester,
-        () => useChatMessages(
-          'group1',
-          pubkey: testPubkeyA,
-          refreshToken: useValueListenable(refreshToken),
-        ),
-      );
+    testWidgets('replaces visible timeline from snapshot on app resume', (tester) async {
+      final getResult = await _pump(tester, 'group1');
 
       _api.emitInitialSnapshot([
         _message('m1', DateTime(2024), content: 'First'),
@@ -322,17 +318,18 @@ void main() {
       expect(getResult().messageCount, 1);
       expect(getResult().getMessage(0).content, 'First');
 
-      refreshToken.value++;
-      await tester.pump();
-
-      _api.emitInitialSnapshot([
-        _message('m1', DateTime(2024), content: 'First'),
+      _api.olderMessagesResponse = [
         _message('m2', DateTime(2024, 2), content: 'Second'),
-      ]);
+      ];
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pumpAndSettle();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
       await tester.pumpAndSettle();
 
-      expect(getResult().messageCount, 2);
+      expect(getResult().messageCount, 1);
       expect(getResult().getMessage(0).content, 'Second');
+      expect(_api.lastFetchOlderCall?.before, isNull);
+      expect(_api.lastFetchOlderCall?.limit, 100);
     });
 
     testWidgets('prepends new message at start (newest first)', (tester) async {
@@ -349,6 +346,45 @@ void main() {
       final result = getResult();
       expect(result.messageCount, 2);
       expect(result.getMessage(0).id, 'm2');
+    });
+
+    testWidgets('snapshot refresh upserts existing message without duplicating it', (
+      tester,
+    ) async {
+      final getResult = await _pump(tester, 'group1');
+
+      _api.emitInitialSnapshot([
+        _message('m1', DateTime(2024), content: 'old'),
+      ]);
+      await tester.pumpAndSettle();
+
+      _api.emitSnapshotRefresh(
+        _message('m1', DateTime(2024), content: 'new'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(getResult().messageCount, 1);
+      expect(getResult().getMessage(0).content, 'new');
+    });
+
+    testWidgets('snapshot refresh adds missing message without duplicating existing rows', (
+      tester,
+    ) async {
+      final getResult = await _pump(tester, 'group1');
+
+      _api.emitInitialSnapshot([
+        _message('m1', DateTime(2024), content: 'First'),
+      ]);
+      await tester.pumpAndSettle();
+
+      _api.emitSnapshotRefresh(
+        _message('m2', DateTime(2024, 2), content: 'Second'),
+      );
+      await tester.pumpAndSettle();
+
+      expect(getResult().messageCount, 2);
+      expect(getResult().getMessage(0).id, 'm2');
+      expect(getResult().getMessage(1).id, 'm1');
     });
 
     testWidgets('hides new messages from blocked authors', (tester) async {

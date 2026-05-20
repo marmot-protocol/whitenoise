@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_list.dart';
@@ -56,6 +56,8 @@ ChatMessageSummary _lastMessage({
 class _MockApi extends MockWnApi {
   StreamController<ChatListStreamItem>? controller;
   StreamController<ChatListStreamItem>? archivedController;
+  List<ChatSummary> activeSnapshot = [];
+  List<ChatSummary> archivedSnapshot = [];
 
   void emitInitialSnapshot(List<ChatSummary> items) {
     controller?.add(ChatListStreamItem.initialSnapshot(items: items));
@@ -87,6 +89,20 @@ class _MockApi extends MockWnApi {
     controller = archivedController;
     return archivedController!.stream;
   }
+
+  @override
+  Future<List<ChatSummary>> crateApiChatListFetchChatListSnapshot({
+    required String accountPubkey,
+  }) async {
+    return activeSnapshot;
+  }
+
+  @override
+  Future<List<ChatSummary>> crateApiChatListFetchArchivedChatListSnapshot({
+    required String accountPubkey,
+  }) async {
+    return archivedSnapshot;
+  }
 }
 
 final _api = _MockApi();
@@ -111,6 +127,8 @@ void main() {
     _api.archivedController?.close();
     _api.controller = null;
     _api.archivedController = null;
+    _api.activeSnapshot = [];
+    _api.archivedSnapshot = [];
     _api.blockedPubkeys.clear();
   });
 
@@ -323,28 +341,52 @@ void main() {
         expect(getResult().chats.length, 2);
       });
 
-      testWidgets('re-subscribes when refresh token changes', (tester) async {
-        late ValueNotifier<int> refreshToken;
-        final getResult = await mountHook(tester, () {
-          refreshToken = useState(0);
-          return useChatList(testPubkeyA, refreshToken: refreshToken.value);
-        });
+      testWidgets('replaces visible list from snapshot on app resume', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
 
         _api.emitInitialSnapshot([_chatSummary('c1', DateTime(2024))]);
         await tester.pumpAndSettle();
 
         expect(getResult().chats.length, 1);
 
-        refreshToken.value++;
-        await tester.pump();
+        _api.activeSnapshot = [
+          _chatSummary('c2', DateTime(2024, 1, 2)),
+        ];
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        await tester.pumpAndSettle();
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pumpAndSettle();
+
+        final ids = getResult().chats.map((c) => c.mlsGroupId).toList();
+        expect(ids, ['mls_c2']);
+      });
+    });
+
+    group('snapshotRefresh trigger', () {
+      testWidgets('upserts existing chat without duplicating it', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
 
         _api.emitInitialSnapshot([
-          _chatSummary('c1', DateTime(2024)),
-          _chatSummary('c2', DateTime(2024, 1, 2)),
+          _chatSummary(
+            'c1',
+            DateTime(2024),
+            lastMessage: _lastMessage(id: 'c1', author: testPubkeyA, content: 'old'),
+          ),
         ]);
         await tester.pumpAndSettle();
 
-        expect(getResult().chats.length, 2);
+        _api.emitUpdate(
+          ChatListUpdateTrigger.snapshotRefresh,
+          _chatSummary(
+            'c1',
+            DateTime(2024),
+            lastMessage: _lastMessage(id: 'c1', author: testPubkeyA, content: 'new'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(getResult().chats, hasLength(1));
+        expect(getResult().chats.single.lastMessage?.content, 'new');
       });
     });
 

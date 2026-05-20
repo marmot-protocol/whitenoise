@@ -69,6 +69,8 @@ pub enum ChatListUpdateTrigger {
     ChatDeleted,
     /// A user was blocked or unblocked.
     UserBlockChanged,
+    /// A foreground catch-up replay refreshed this chat from the local snapshot.
+    SnapshotRefresh,
 }
 
 impl From<WhitenoiseChatListUpdateTrigger> for ChatListUpdateTrigger {
@@ -84,6 +86,7 @@ impl From<WhitenoiseChatListUpdateTrigger> for ChatListUpdateTrigger {
             WhitenoiseChatListUpdateTrigger::ChatCleared => Self::ChatCleared,
             WhitenoiseChatListUpdateTrigger::ChatDeleted => Self::ChatDeleted,
             WhitenoiseChatListUpdateTrigger::UserBlockChanged => Self::UserBlockChanged,
+            WhitenoiseChatListUpdateTrigger::SnapshotRefresh => Self::SnapshotRefresh,
         }
     }
 }
@@ -198,6 +201,30 @@ pub async fn get_chat_list(account_pubkey: String) -> Result<Vec<ChatSummary>, A
     let pubkey = PublicKey::parse(&account_pubkey)?;
     let session = wn_session(&pubkey).await?;
     let chat_list = session.chat_list().active().await?;
+    Ok(chat_list.into_iter().map(|item| item.into()).collect())
+}
+
+#[frb]
+pub async fn fetch_chat_list_snapshot(
+    account_pubkey: String,
+) -> Result<Vec<ChatSummary>, ApiError> {
+    let whitenoise = wn().await?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let chat_list = whitenoise.fetch_chat_list_snapshot(&account).await?;
+    Ok(chat_list.into_iter().map(|item| item.into()).collect())
+}
+
+#[frb]
+pub async fn fetch_archived_chat_list_snapshot(
+    account_pubkey: String,
+) -> Result<Vec<ChatSummary>, ApiError> {
+    let whitenoise = wn().await?;
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let account = whitenoise.find_account_by_pubkey(&pubkey).await?;
+    let chat_list = whitenoise
+        .fetch_archived_chat_list_snapshot(&account)
+        .await?;
     Ok(chat_list.into_iter().map(|item| item.into()).collect())
 }
 
@@ -407,5 +434,12 @@ mod tests {
         let trigger: ChatListUpdateTrigger =
             WhitenoiseChatListUpdateTrigger::UserBlockChanged.into();
         assert_eq!(trigger, ChatListUpdateTrigger::UserBlockChanged);
+    }
+
+    #[test]
+    fn test_chat_list_update_trigger_conversion_snapshot_refresh() {
+        let trigger: ChatListUpdateTrigger =
+            WhitenoiseChatListUpdateTrigger::SnapshotRefresh.into();
+        assert_eq!(trigger, ChatListUpdateTrigger::SnapshotRefresh);
     }
 }
