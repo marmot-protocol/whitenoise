@@ -1777,10 +1777,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get scanToConnect => '掃描即可連結';
 
   @override
-  String get holdToShareQrCode => '長按以分享QR碼';
+  String get holdToShareQrCode => '長按以分享 QR 碼';
 
   @override
-  String get shareQrCodeError => '無法分享QR碼。請重試。';
+  String get shareQrCodeError => '無法分享 QR 碼。請再試一次。';
 
   @override
   String get signOutTitle => '登出';
