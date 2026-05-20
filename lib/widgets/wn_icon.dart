@@ -83,6 +83,7 @@ enum WnIcons {
   search('search'),
   selectText('select_text'),
   settings('settings'),
+  share('share'),
   time('time'),
   trashCan('trash_can'),
   unarchive('unarchive'),

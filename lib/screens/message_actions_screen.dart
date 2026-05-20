@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:gal/gal.dart';
 import 'package:gap/gap.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/hooks/use_share_message.dart';
@@ -13,7 +12,6 @@ import 'package:whitenoise/src/rust/api/media_files.dart' show MediaFile;
 import 'package:whitenoise/src/rust/api/messages.dart' show ChatMessage;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/bubble_grouping.dart' show shouldShowAvatar;
-import 'package:whitenoise/utils/media_type.dart';
 import 'package:whitenoise/widgets/chat_message_bubble.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_emoji_picker.dart';
@@ -213,34 +211,6 @@ class MessageActionsScreen extends HookWidget {
             await shareFn(sharePositionOrigin: origin);
           };
 
-    Future<void> handleSaveMedia() async {
-      if (cachedMedia.isEmpty) return;
-      for (final media in cachedMedia) {
-        try {
-          if (isVideoMediaFile(media)) {
-            await Gal.putVideo(media.filePath);
-          } else {
-            await Gal.putImage(media.filePath);
-          }
-        } on GalException catch (e) {
-          final m = switch (e.type) {
-            GalExceptionType.accessDenied => l10n.saveToGalleryPermissionDenied,
-            GalExceptionType.notEnoughSpace => l10n.saveToGalleryNotEnoughSpace,
-            GalExceptionType.notSupportedFormat => l10n.saveToGalleryNotSupportedFormat,
-            GalExceptionType.unexpected => l10n.saveToGalleryError,
-          };
-          if (context.mounted) showNotice(m);
-          return;
-        } catch (_) {
-          if (context.mounted) showNotice(l10n.saveToGalleryError);
-          return;
-        }
-      }
-      if (context.mounted) Navigator.of(context).pop();
-    }
-
-    final saveMediaCallback = cachedMedia.isEmpty || isOffline ? null : handleSaveMedia;
-
     Future<void> handleDelete() async {
       try {
         await onDelete?.call();
@@ -311,7 +281,6 @@ class MessageActionsScreen extends HookWidget {
                           }
                         : null,
                     onShare: shareCallback,
-                    onSaveMedia: saveMediaCallback,
                     senderName: senderName,
                     senderPictureUrl: senderPictureUrl,
                     isGroupChat: isGroupChat,
@@ -348,7 +317,6 @@ class MessageActionsModal extends StatelessWidget {
     this.selectedEmojis = const {},
     this.onReply,
     this.onShare,
-    this.onSaveMedia,
     this.senderName,
     this.senderPictureUrl,
     this.isGroupChat = false,
@@ -366,7 +334,6 @@ class MessageActionsModal extends StatelessWidget {
   final Set<String> selectedEmojis;
   final VoidCallback? onReply;
   final VoidCallback? onShare;
-  final VoidCallback? onSaveMedia;
   final String? senderName;
   final String? senderPictureUrl;
   final bool isGroupChat;
@@ -393,9 +360,6 @@ class MessageActionsModal extends StatelessWidget {
       height += _modalButtonSpacing.h + 52.h;
     }
     if (onShare != null) {
-      height += _modalButtonSpacing.h + 52.h;
-    }
-    if (onSaveMedia != null) {
       height += _modalButtonSpacing.h + 52.h;
     }
     if (onDelete != null) {
@@ -551,19 +515,8 @@ class MessageActionsModal extends StatelessWidget {
                             text: context.l10n.share,
                             type: WnButtonType.outline,
                             size: WnButtonSize.medium,
-                            trailingIcon: WnIcons.forward,
+                            trailingIcon: WnIcons.share,
                             onPressed: onShare,
-                          ),
-                        ],
-                        if (onSaveMedia != null) ...[
-                          Gap(_modalButtonSpacing.h),
-                          WnButton(
-                            key: const Key('save_to_gallery_button'),
-                            text: context.l10n.saveToGallery,
-                            type: WnButtonType.outline,
-                            size: WnButtonSize.medium,
-                            trailingIcon: WnIcons.download,
-                            onPressed: onSaveMedia,
                           ),
                         ],
                         if (onDelete != null) ...[

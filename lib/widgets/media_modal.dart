@@ -3,7 +3,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_media_download.dart';
-import 'package:whitenoise/hooks/use_save_to_gallery.dart';
 import 'package:whitenoise/hooks/use_share_message.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/l10n/l10n.dart';
@@ -15,7 +14,6 @@ import 'package:whitenoise/utils/media_type.dart';
 import 'package:whitenoise/widgets/chat_media_thumbnail.dart';
 import 'package:whitenoise/widgets/media_image.dart';
 import 'package:whitenoise/widgets/media_video.dart';
-import 'package:whitenoise/widgets/wn_action_sheet.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_icon_button.dart';
@@ -182,62 +180,25 @@ class _MediaContent extends HookWidget {
     final localPath = mediaDownload.status == MediaDownloadStatus.success
         ? mediaDownload.localPath
         : null;
-    final saveToGallery = useSaveToGallery(
-      localPath: localPath ?? '',
-      isVideo: isVideoMediaFile(currentFile),
-      onError: (err) {
-        final message = switch (err) {
-          SaveToGalleryError.accessDenied => l10n.saveToGalleryPermissionDenied,
-          SaveToGalleryError.notEnoughSpace => l10n.saveToGalleryNotEnoughSpace,
-          SaveToGalleryError.notSupportedFormat => l10n.saveToGalleryNotSupportedFormat,
-          SaveToGalleryError.unexpected => l10n.saveToGalleryError,
-        };
-        onSaveError(message);
-      },
-    );
     final shareMedia = useShareMessage(
       filePaths: localPath != null ? [localPath] : const [],
       onError: (_) => onSaveError(l10n.shareError),
     );
 
-    Future<void> onLongPress() async {
-      final saveAction = saveToGallery.save;
+    Future<void> shareCurrent() async {
       final shareAction = shareMedia.share;
+      if (shareAction == null) return;
       final renderBox = context.findRenderObject() as RenderBox?;
       final sharePositionOrigin = renderBox != null && renderBox.hasSize
           ? renderBox.localToGlobal(Offset.zero) & renderBox.size
           : null;
-      final picked = await WnActionSheet.show<_MediaAction>(
-        context: context,
-        actions: [
-          WnActionSheetAction(
-            key: const Key('media_action_save'),
-            value: _MediaAction.save,
-            label: l10n.saveToGallery,
-            icon: WnIcons.download,
-          ),
-          WnActionSheetAction(
-            key: const Key('media_action_share'),
-            value: _MediaAction.share,
-            label: l10n.share,
-            icon: WnIcons.forward,
-          ),
-        ],
-      );
-      if (picked == null) return;
-      await WidgetsBinding.instance.endOfFrame;
-      switch (picked) {
-        case _MediaAction.save:
-          saveAction?.call();
-        case _MediaAction.share:
-          await shareAction?.call(sharePositionOrigin: sharePositionOrigin);
-      }
+      await shareAction(sharePositionOrigin: sharePositionOrigin);
     }
 
     return GestureDetector(
       key: const Key('media_content_tap_area'),
       onTap: onTap,
-      onLongPress: localPath != null ? onLongPress : null,
+      onLongPress: localPath != null ? shareCurrent : null,
       behavior: HitTestBehavior.opaque,
       child: Column(
         children: [
@@ -254,10 +215,10 @@ class _MediaContent extends HookWidget {
                   mediaFile.fileMetadata?.dimensions,
                 );
 
-                final downloadButton = WnIconButton(
-                  key: Key('media_modal_download_button_$index'),
-                  icon: saveToGallery.savedRecently ? WnIcons.checkmark : WnIcons.download,
-                  onPressed: localPath != null ? saveToGallery.save : null,
+                final shareButton = WnIconButton(
+                  key: Key('media_modal_share_button_$index'),
+                  icon: WnIcons.share,
+                  onPressed: localPath != null ? shareCurrent : null,
                   type: WnIconButtonType.outline,
                 );
 
@@ -265,7 +226,7 @@ class _MediaContent extends HookWidget {
                   return MediaVideo(
                     key: Key('media_video_$index'),
                     mediaFile: mediaFile,
-                    overlay: index == currentIndex && showOverlays ? downloadButton : null,
+                    overlay: index == currentIndex && showOverlays ? shareButton : null,
                   );
                 }
 
@@ -290,7 +251,7 @@ class _MediaContent extends HookWidget {
                                   Positioned(
                                     top: 12.h,
                                     right: 12.w,
-                                    child: downloadButton,
+                                    child: shareButton,
                                   ),
                                 ],
                               ),
@@ -301,7 +262,7 @@ class _MediaContent extends HookWidget {
                         Positioned(
                           top: 12.h,
                           right: 12.w,
-                          child: downloadButton,
+                          child: shareButton,
                         ),
                   ],
                 );
@@ -445,5 +406,3 @@ class _ThumbnailStrip extends StatelessWidget {
     );
   }
 }
-
-enum _MediaAction { save, share }

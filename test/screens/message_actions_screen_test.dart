@@ -518,7 +518,6 @@ void main() {
               currentUserPubkey: testPubkeyA,
               onReply: () {},
               onShare: () {},
-              onSaveMedia: () {},
               onDelete: () {},
             ),
             tester,
@@ -548,7 +547,6 @@ void main() {
               currentUserPubkey: testPubkeyA,
               onReply: () {},
               onShare: () {},
-              onSaveMedia: () {},
               onDelete: () {},
             ),
             tester,
@@ -662,59 +660,6 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(shareCalled, isTrue);
-      });
-    });
-
-    group('Save to gallery button', () {
-      testWidgets('is visible when onSaveMedia is provided', (tester) async {
-        await mountWidget(
-          MessageActionsModal(
-            message: _createTestMessage(mediaAttachments: [_mediaFile('1')]),
-            isOwnMessage: false,
-            onReaction: (_) {},
-            onEmojiPicker: () {},
-            currentUserPubkey: testPubkeyA,
-            onSaveMedia: () {},
-          ),
-          tester,
-        );
-
-        expect(find.byKey(const Key('save_to_gallery_button')), findsOneWidget);
-      });
-
-      testWidgets('is hidden when onSaveMedia is null', (tester) async {
-        await mountWidget(
-          MessageActionsModal(
-            message: _createTestMessage(),
-            isOwnMessage: false,
-            onReaction: (_) {},
-            onEmojiPicker: () {},
-            currentUserPubkey: testPubkeyA,
-          ),
-          tester,
-        );
-
-        expect(find.byKey(const Key('save_to_gallery_button')), findsNothing);
-      });
-
-      testWidgets('calls onSaveMedia when tapped', (tester) async {
-        var saveCalled = false;
-        await mountWidget(
-          MessageActionsModal(
-            message: _createTestMessage(mediaAttachments: [_mediaFile('1')]),
-            isOwnMessage: false,
-            onReaction: (_) {},
-            onEmojiPicker: () {},
-            currentUserPubkey: testPubkeyA,
-            onSaveMedia: () => saveCalled = true,
-          ),
-          tester,
-        );
-
-        await tester.tap(find.byKey(const Key('save_to_gallery_button')));
-        await tester.pumpAndSettle();
-
-        expect(saveCalled, isTrue);
       });
     });
 
