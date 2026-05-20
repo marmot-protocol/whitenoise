@@ -1411,16 +1411,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get waitingForInternet => '正在等待网络连接';
 
   @override
-  String get saveToGalleryPermissionDenied => '无权保存图片';
-
-  @override
-  String get saveToGalleryNotEnoughSpace => '存储空间不足';
-
-  @override
-  String get saveToGalleryNotSupportedFormat => '不支持的图片格式';
-
-  @override
-  String get saveToGalleryError => '图片保存到相册失败';
+  String get shareError => '分享失败';
 
   @override
   String get leave => '退出';
@@ -2861,16 +2852,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get waitingForInternet => '正在等待網路連線';
 
   @override
-  String get saveToGalleryPermissionDenied => '沒有儲存圖片的權限';
-
-  @override
-  String get saveToGalleryNotEnoughSpace => '儲存空間不足';
-
-  @override
-  String get saveToGalleryNotSupportedFormat => '不支援此圖片格式';
-
-  @override
-  String get saveToGalleryError => '圖片儲存到相簿失敗';
+  String get shareError => '分享失敗';
 
   @override
   String get leave => '離開';

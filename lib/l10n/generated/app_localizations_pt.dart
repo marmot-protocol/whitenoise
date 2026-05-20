@@ -1469,16 +1469,7 @@ class AppLocalizationsPt extends AppLocalizations {
   String get waitingForInternet => 'Aguardando conexão com a internet';
 
   @override
-  String get saveToGalleryPermissionDenied => 'Permissão negada para salvar imagem';
-
-  @override
-  String get saveToGalleryNotEnoughSpace => 'Espaço de armazenamento insuficiente';
-
-  @override
-  String get saveToGalleryNotSupportedFormat => 'Formato de imagem não suportado';
-
-  @override
-  String get saveToGalleryError => 'Falha ao salvar imagem na galeria';
+  String get shareError => 'Falha ao compartilhar';
 
   @override
   String get leave => 'Sair';
