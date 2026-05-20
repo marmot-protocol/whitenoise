@@ -844,6 +844,40 @@ void main() {
         expect(find.byKey(const Key('invite_button')), findsOneWidget);
       });
 
+      testWidgets('tapping invite button calls SharePlus with invite message', (
+        tester,
+      ) async {
+        final shareCalls = mockSharePlus();
+        addTearDown(clearSharePlusMock);
+        _api.userHasKeyPackageStatus = KeyPackageStatus.notFound;
+        await pumpUserProfileScreen(
+          tester,
+          userPubkey: _otherPubkey,
+          topAligned: true,
+        );
+
+        await tester.tap(find.byKey(const Key('invite_button')));
+        await tester.pumpAndSettle();
+
+        expect(shareCalls, hasLength(1));
+      });
+
+      testWidgets('invite share failure is swallowed without rethrowing', (tester) async {
+        mockSharePlusFailing();
+        addTearDown(clearSharePlusMock);
+        _api.userHasKeyPackageStatus = KeyPackageStatus.notFound;
+        await pumpUserProfileScreen(
+          tester,
+          userPubkey: _otherPubkey,
+          topAligned: true,
+        );
+
+        await tester.tap(find.byKey(const Key('invite_button')));
+        await tester.pumpAndSettle();
+
+        expect(tester.takeException(), isNull);
+      });
+
       testWidgets('shows success notice on public key copy', (tester) async {
         mockClipboard();
         addTearDown(clearClipboardMock);
