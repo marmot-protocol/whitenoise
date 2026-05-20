@@ -123,6 +123,11 @@ Future<BigInt> deleteAccountKeyPackages({required String accountPubkey}) =>
       accountPubkey: accountPubkey,
     );
 
+Future<BigInt> deleteAllAccountKeyPackages({required String accountPubkey}) =>
+    RustLib.instance.api.crateApiAccountsDeleteAllAccountKeyPackages(
+      accountPubkey: accountPubkey,
+    );
+
 Future<List<User>> accountFollows({required String pubkey}) =>
     RustLib.instance.api.crateApiAccountsAccountFollows(pubkey: pubkey);
 

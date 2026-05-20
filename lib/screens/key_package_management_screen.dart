@@ -27,7 +27,9 @@ class KeyPackageManagementScreen extends HookConsumerWidget {
     final typography = context.typographyScaled;
     final pubkey = ref.watch(accountPubkeyProvider);
     final isOffline = ref.watch(offlineProvider).value ?? false;
-    final (:state, :fetch, :publish, :delete, :deleteAllLegacy) = useKeyPackages(pubkey);
+    final (:state, :fetch, :publish, :delete, :deleteAllLegacy, :deleteAll) = useKeyPackages(
+      pubkey,
+    );
 
     final noticeMessage = useState<String?>(null);
     final noticeType = useState<WnSystemNoticeType>(WnSystemNoticeType.success);
@@ -47,6 +49,7 @@ class KeyPackageManagementScreen extends HookConsumerWidget {
         KeyPackageAction.publish => context.l10n.keyPackagePublished,
         KeyPackageAction.delete => context.l10n.keyPackageDeleted,
         KeyPackageAction.deleteAllLegacy => context.l10n.legacyKeyPackagesDeleted,
+        KeyPackageAction.deleteAll => context.l10n.allKeyPackagesDeleted,
       };
     }
 
@@ -56,6 +59,7 @@ class KeyPackageManagementScreen extends HookConsumerWidget {
         KeyPackageAction.publish => context.l10n.keyPackagePublishFailed,
         KeyPackageAction.delete => context.l10n.keyPackageDeleteFailed,
         KeyPackageAction.deleteAllLegacy => context.l10n.legacyKeyPackageDeleteFailed,
+        KeyPackageAction.deleteAll => context.l10n.allKeyPackageDeleteFailed,
       };
     }
 
@@ -111,11 +115,13 @@ class KeyPackageManagementScreen extends HookConsumerWidget {
                   _KeyPackageActionButtons(
                     isLoading: state.isLoading,
                     isOffline: isOffline,
+                    hasPackages: state.packages.isNotEmpty,
                     hasLegacyPackages: state.hasLegacyPackages,
                     activeAction: state.activeAction,
                     onPublish: () => handleAction(publish),
                     onFetch: () => handleAction(fetch),
-                    onDeleteAll: () => handleAction(deleteAllLegacy),
+                    onDeleteAllLegacy: () => handleAction(deleteAllLegacy),
+                    onDeleteAll: () => handleAction(deleteAll),
                   ),
                   SizedBox(height: 16.h),
                   Text(
@@ -147,19 +153,23 @@ class _KeyPackageActionButtons extends StatelessWidget {
   const _KeyPackageActionButtons({
     required this.isLoading,
     required this.isOffline,
+    required this.hasPackages,
     required this.hasLegacyPackages,
     required this.activeAction,
     required this.onPublish,
     required this.onFetch,
+    required this.onDeleteAllLegacy,
     required this.onDeleteAll,
   });
 
   final bool isLoading;
   final bool isOffline;
+  final bool hasPackages;
   final bool hasLegacyPackages;
   final KeyPackageAction? activeAction;
   final VoidCallback onPublish;
   final VoidCallback onFetch;
+  final VoidCallback onDeleteAllLegacy;
   final VoidCallback onDeleteAll;
 
   @override
@@ -185,9 +195,17 @@ class _KeyPackageActionButtons extends StatelessWidget {
         ),
         WnButton(
           text: context.l10n.deleteLegacyKeyPackages,
-          onPressed: onDeleteAll,
+          onPressed: onDeleteAllLegacy,
           disabled: isLoading || isOffline || !hasLegacyPackages,
           loading: activeAction == KeyPackageAction.deleteAllLegacy,
+          type: WnButtonType.destructive,
+          size: WnButtonSize.medium,
+        ),
+        WnButton(
+          text: context.l10n.deleteAllKeyPackages,
+          onPressed: onDeleteAll,
+          disabled: isLoading || isOffline || !hasPackages,
+          loading: activeAction == KeyPackageAction.deleteAll,
           type: WnButtonType.destructive,
           size: WnButtonSize.medium,
         ),
@@ -251,10 +269,14 @@ class _KeyPackageList extends HookWidget {
                 final package = packages[index];
                 final isDeleting = deletingId == package.id;
                 final isLegacy = package.kind == NostrEventKinds.mlsKeyPackageLegacy;
+                final isCurrent = package.kind == NostrEventKinds.mlsKeyPackage;
+                final dTag = isCurrent ? _dTagValue(package.tags) : null;
+                final dTagText = dTag == null ? null : context.l10n.keyPackageDTagLabel(dTag);
                 return WnKeyPackageCard(
                   key: Key('key_package_card_${package.id}'),
                   title: context.l10n.packageNumber(index + 1),
                   packageId: package.id,
+                  dTagText: dTagText,
                   createdAt: package.createdAt.toIso8601String(),
                   onDelete: () => onDelete(package.id),
                   deleteLabel: context.l10n.delete,
@@ -273,4 +295,13 @@ class _KeyPackageList extends HookWidget {
       ),
     );
   }
+}
+
+String? _dTagValue(List<List<String>> tags) {
+  for (final tag in tags) {
+    if (tag.length >= 2 && tag.first == 'd' && tag[1].isNotEmpty) {
+      return tag[1];
+    }
+  }
+  return null;
 }
