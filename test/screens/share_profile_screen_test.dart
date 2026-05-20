@@ -308,7 +308,9 @@ void main() {
       // Start the gesture OUTSIDE runAsync so the long-press timer and
       // captureAndShareQr's Future.delayed timers stay on the fake clock.
       final gesture = await tester.startGesture(tester.getCenter(find.byType(QrImageView)));
-      await tester.pump(const Duration(milliseconds: 600)); // onLongPressStart fires at fake t=500ms
+      await tester.pump(
+        const Duration(milliseconds: 600),
+      ); // onLongPressStart fires at fake t=500ms
 
       await tester.runAsync(() async {
         // Advance fake timers for captureAndShareQr's two 500ms delays.
