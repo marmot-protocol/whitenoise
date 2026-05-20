@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/screens/user_profile_screen.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/users.dart';
@@ -42,6 +43,10 @@ class _MockApi extends MockWnApi {
   Completer<void>? followCompleter;
   Exception? followError;
   final Set<String> followingPubkeys = {};
+  final blockCalls = <({String account, String target})>[];
+  final unblockCalls = <({String account, String target})>[];
+  Exception? blockError;
+  Exception? unblockError;
 
   @override
   Future<FlutterMetadata> crateApiUsersUserMetadata({
@@ -113,6 +118,32 @@ class _MockApi extends MockWnApi {
   }
 
   @override
+  Future<void> crateApiMuteListBlockUser({
+    required String accountPubkey,
+    required String targetPubkey,
+  }) async {
+    blockCalls.add((account: accountPubkey, target: targetPubkey));
+    if (blockError != null) throw blockError!;
+    await super.crateApiMuteListBlockUser(
+      accountPubkey: accountPubkey,
+      targetPubkey: targetPubkey,
+    );
+  }
+
+  @override
+  Future<void> crateApiMuteListUnblockUser({
+    required String accountPubkey,
+    required String targetPubkey,
+  }) async {
+    unblockCalls.add((account: accountPubkey, target: targetPubkey));
+    if (unblockError != null) throw unblockError!;
+    await super.crateApiMuteListUnblockUser(
+      accountPubkey: accountPubkey,
+      targetPubkey: targetPubkey,
+    );
+  }
+
+  @override
   void reset() {
     super.reset();
     metadata = const FlutterMetadata(custom: {});
@@ -126,6 +157,10 @@ class _MockApi extends MockWnApi {
     followError = null;
     followingPubkeys.clear();
     groupsList = [];
+    blockCalls.clear();
+    unblockCalls.clear();
+    blockError = null;
+    unblockError = null;
   }
 }
 
@@ -147,6 +182,7 @@ void main() {
     WidgetTester tester, {
     required String userPubkey,
     bool settle = true,
+    bool topAligned = false,
   }) async {
     setUpTestView(tester);
     await mountTestApp(
@@ -157,6 +193,7 @@ void main() {
     Routes.pushToUserProfile(
       tester.element(find.byType(Scaffold)),
       userPubkey,
+      topAligned: topAligned,
     );
     if (settle) {
       await tester.pumpAndSettle();
@@ -660,6 +697,215 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Public key copied to clipboard'), findsNothing);
+      });
+    });
+
+    group('topAligned mode (from blocked-users list)', () {
+      testWidgets('renders the blocked notice when the target is already blocked', (
+        tester,
+      ) async {
+        _api.blockedPubkeys.add(_otherPubkey);
+        await pumpUserProfileScreen(
+          tester,
+          userPubkey: _otherPubkey,
+          topAligned: true,
+        );
+
+        expect(find.byKey(const Key('blocked_user_detail_notice')), findsOneWidget);
+        expect(find.byKey(const Key('unblock_button')), findsOneWidget);
+      });
+
+      testWidgets('renders the action panel when the target is not blocked', (
+        tester,
+      ) async {
+        await pumpUserProfileScreen(
+          tester,
+          userPubkey: _otherPubkey,
+          topAligned: true,
+        );
+
+        expect(find.byKey(const Key('blocked_user_detail_notice')), findsNothing);
+        expect(find.byKey(const Key('block_button')), findsOneWidget);
+        expect(find.byKey(const Key('start_chat_button')), findsOneWidget);
+      });
+
+      testWidgets('tapping Unblock calls the unblock API', (tester) async {
+        _api.blockedPubkeys.add(_otherPubkey);
+        await pumpUserProfileScreen(
+          tester,
+          userPubkey: _otherPubkey,
+          topAligned: true,
+        );
+
+        await tester.tap(find.byKey(const Key('unblock_button')));
+        await tester.pumpAndSettle();
+
+        expect(_api.unblockCalls.length, 1);
+        expect(_api.unblockCalls[0].target, _otherPubkey);
+      });
+
+      testWidgets('Unblock failure surfaces an error notice', (tester) async {
+        _api.blockedPubkeys.add(_otherPubkey);
+        _api.unblockError = Exception('boom');
+        await pumpUserProfileScreen(
+          tester,
+          userPubkey: _otherPubkey,
+          topAligned: true,
+        );
+
+        await tester.tap(find.byKey(const Key('unblock_button')));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('Failed to unblock user. Please try again.'),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('tapping Block transitions to the blocked notice', (tester) async {
+        await pumpUserProfileScreen(
+          tester,
+          userPubkey: _otherPubkey,
+          topAligned: true,
+        );
+
+        await tester.tap(find.byKey(const Key('block_button')));
+        await tester.pumpAndSettle();
+
+        expect(_api.blockCalls.length, 1);
+        expect(find.byKey(const Key('blocked_user_detail_notice')), findsOneWidget);
+        expect(find.byKey(const Key('unblock_button')), findsOneWidget);
+      });
+
+      testWidgets('Block failure surfaces an error notice', (tester) async {
+        _api.blockError = Exception('boom');
+        await pumpUserProfileScreen(
+          tester,
+          userPubkey: _otherPubkey,
+          topAligned: true,
+        );
+
+        await tester.tap(find.byKey(const Key('block_button')));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.text('Failed to block user. Please try again.'),
+          findsOneWidget,
+        );
+      });
+
+      testWidgets('tapping outside the slate dismisses the popup', (tester) async {
+        await pumpUserProfileScreen(
+          tester,
+          userPubkey: _otherPubkey,
+          topAligned: true,
+        );
+
+        await tester.tapAt(const Offset(50, 750));
+        await tester.pumpAndSettle();
+
+        expect(find.byType(UserProfileScreen), findsNothing);
+      });
+
+      testWidgets('toggles the blocked notice between collapsed and expanded', (
+        tester,
+      ) async {
+        _api.blockedPubkeys.add(_otherPubkey);
+        await pumpUserProfileScreen(
+          tester,
+          userPubkey: _otherPubkey,
+          topAligned: true,
+        );
+
+        final initial = tester.widget<WnSystemNotice>(
+          find.byKey(const Key('blocked_user_detail_notice')),
+        );
+        expect(initial.variant, WnSystemNoticeVariant.expanded);
+
+        await tester.tap(find.byKey(const Key('systemNotice_actionIcon')));
+        await tester.pumpAndSettle();
+
+        final collapsed = tester.widget<WnSystemNotice>(
+          find.byKey(const Key('blocked_user_detail_notice')),
+        );
+        expect(collapsed.variant, WnSystemNoticeVariant.collapsed);
+      });
+
+      testWidgets('renders the invite share button when peer has no key package', (
+        tester,
+      ) async {
+        _api.userHasKeyPackageStatus = KeyPackageStatus.notFound;
+        await pumpUserProfileScreen(
+          tester,
+          userPubkey: _otherPubkey,
+          topAligned: true,
+        );
+
+        expect(find.byKey(const Key('invite_button')), findsOneWidget);
+      });
+
+      testWidgets('shows success notice on public key copy', (tester) async {
+        mockClipboard();
+        addTearDown(clearClipboardMock);
+        await pumpUserProfileScreen(
+          tester,
+          userPubkey: _otherPubkey,
+          topAligned: true,
+        );
+
+        await tester.tap(find.byKey(const Key('copy_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Public key copied to clipboard'), findsOneWidget);
+      });
+
+      testWidgets('shows error notice on public key copy failure', (tester) async {
+        mockClipboardFailing();
+        addTearDown(clearClipboardMock);
+        await pumpUserProfileScreen(
+          tester,
+          userPubkey: _otherPubkey,
+          topAligned: true,
+        );
+
+        await tester.tap(find.byKey(const Key('copy_button')));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Failed to copy public key. Please try again.'), findsOneWidget);
+      });
+    });
+
+    group('bottom-aligned mode (default chat/search entry)', () {
+      testWidgets('renders the blocked notice when the target is already blocked', (
+        tester,
+      ) async {
+        _api.blockedPubkeys.add(_otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
+
+        expect(find.byKey(const Key('blocked_user_detail_notice')), findsOneWidget);
+        expect(find.byKey(const Key('unblock_button')), findsOneWidget);
+      });
+    });
+
+    group('UserProfileScreen.show', () {
+      testWidgets('opens the screen as a modal with asShade enabled', (tester) async {
+        await mountTestApp(
+          tester,
+          overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
+        );
+        await tester.pumpAndSettle();
+
+        unawaited(
+          UserProfileScreen.show(
+            tester.element(find.byType(Scaffold)),
+            userPubkey: _otherPubkey,
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final screen = tester.widget<UserProfileScreen>(find.byType(UserProfileScreen));
+        expect(screen.asShade, isTrue);
+        expect(screen.userPubkey, _otherPubkey);
       });
     });
   });
