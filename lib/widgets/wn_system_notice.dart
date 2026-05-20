@@ -9,6 +9,7 @@ import 'package:whitenoise/widgets/wn_icon.dart';
 
 enum WnSystemNoticeType {
   neutral,
+  elevatedCard,
   info,
   success,
   warning,
@@ -228,6 +229,12 @@ class WnSystemNotice extends HookWidget {
       case WnSystemNoticeType.neutral:
         return (
           colors.backgroundSecondary,
+          colors.backgroundContentPrimary,
+          null,
+        );
+      case WnSystemNoticeType.elevatedCard:
+        return (
+          colors.backgroundSlateElevated,
           colors.backgroundContentPrimary,
           null,
         );

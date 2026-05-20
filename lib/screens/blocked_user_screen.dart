@@ -3,7 +3,10 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
+import 'package:logging/logging.dart';
 import 'package:whitenoise/hooks/use_block_actions.dart';
+import 'package:whitenoise/hooks/use_follow_actions.dart';
+import 'package:whitenoise/hooks/use_start_dm.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
@@ -19,6 +22,8 @@ import 'package:whitenoise/widgets/wn_overlay.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
+
+final _logger = Logger('BlockedUserScreen');
 
 class BlockedUserScreen extends HookConsumerWidget {
   const BlockedUserScreen({super.key, required this.userPubkey});
@@ -36,19 +41,95 @@ class BlockedUserScreen extends HookConsumerWidget {
       accountPubkey: accountPubkey,
       userPubkey: userPubkey,
     );
+    final followState = useFollowActions(
+      accountPubkey: accountPubkey,
+      userPubkey: userPubkey,
+    );
+    final dmState = useStartDm(
+      accountPubkey: accountPubkey,
+      peerPubkey: userPubkey,
+    );
     final systemNotice = useSystemNotice();
     final isBannerCollapsed = useState(false);
 
-    Future<void> handleUnblock() async {
+    Future<void> handleToggleBlock({required bool wasBlocked}) async {
       try {
         await blockState.toggleBlock();
-        if (!context.mounted) return;
-        Routes.goBack(context);
       } catch (_) {
         if (context.mounted) {
-          systemNotice.showErrorNotice(context.l10n.failedToUnblockUser);
+          systemNotice.showErrorNotice(
+            wasBlocked
+                ? context.l10n.failedToUnblockUser
+                : context.l10n.failedToBlockUser,
+          );
         }
       }
+    }
+
+    Future<void> handleToggleFollow() async {
+      try {
+        await followState.toggleFollow();
+      } catch (_) {
+        if (context.mounted) {
+          systemNotice.showErrorNotice(context.l10n.failedToUpdateFollow);
+        }
+      }
+    }
+
+    Future<void> handleStartChat() async {
+      try {
+        final groupId = await dmState.startDm();
+        if (context.mounted) {
+          Routes.goToChat(context, groupId);
+        }
+      } catch (e, st) {
+        _logger.severe('Failed to start chat after unblock', e, st);
+        if (context.mounted) {
+          systemNotice.showErrorNotice(context.l10n.failedToStartChat);
+        }
+      }
+    }
+
+    final isBlocked = blockState.isBlocked;
+
+    Widget bottomPanel;
+    if (isBlocked == false) {
+      bottomPanel = _UnblockedActionsPanel(
+        followState: followState,
+        blockState: blockState,
+        dmState: dmState,
+        onFollow: handleToggleFollow,
+        onAddToGroup: () => Routes.pushToAddToGroup(context, userPubkey),
+        onBlock: () => handleToggleBlock(wasBlocked: false),
+        onSendMessage: handleStartChat,
+      );
+    } else {
+      bottomPanel = WnSystemNotice(
+        key: const Key('blocked_user_detail_notice'),
+        title: context.l10n.userIsBlocked,
+        description: Text(
+          context.l10n.blockedUserDetailDescription,
+          style: typography.medium14.copyWith(
+            color: colors.backgroundContentSecondary,
+          ),
+        ),
+        type: WnSystemNoticeType.elevatedCard,
+        variant: isBannerCollapsed.value
+            ? WnSystemNoticeVariant.collapsed
+            : WnSystemNoticeVariant.expanded,
+        animateEntrance: false,
+        onToggle: () => isBannerCollapsed.value = !isBannerCollapsed.value,
+        primaryAction: WnButton(
+          key: const Key('blocked_user_unblock_button'),
+          text: context.l10n.unblockUser,
+          type: WnButtonType.overlay,
+          size: WnButtonSize.medium,
+          loading: blockState.isActionLoading,
+          disabled: blockState.isLoading || blockState.isActionLoading,
+          trailingIcon: WnIcons.userCheck,
+          onPressed: () => handleToggleBlock(wasBlocked: true),
+        ),
+      );
     }
 
     return Scaffold(
@@ -93,37 +174,84 @@ class BlockedUserScreen extends HookConsumerWidget {
                         ),
                       ),
                     ),
-                    WnSystemNotice(
-                      key: const Key('blocked_user_detail_notice'),
-                      title: context.l10n.userIsBlocked,
-                      description: Text(
-                        context.l10n.blockedUserDetailDescription,
-                        style: typography.medium14.copyWith(
-                          color: colors.backgroundContentSecondary,
-                        ),
-                      ),
-                      type: WnSystemNoticeType.neutral,
-                      variant: isBannerCollapsed.value
-                          ? WnSystemNoticeVariant.collapsed
-                          : WnSystemNoticeVariant.expanded,
-                      animateEntrance: false,
-                      onToggle: () => isBannerCollapsed.value = !isBannerCollapsed.value,
-                      primaryAction: WnButton(
-                        key: const Key('blocked_user_unblock_button'),
-                        text: context.l10n.unblockUser,
-                        type: WnButtonType.outline,
-                        size: WnButtonSize.medium,
-                        loading: blockState.isActionLoading,
-                        disabled: blockState.isLoading || blockState.isActionLoading,
-                        trailingIcon: WnIcons.userCheck,
-                        onPressed: handleUnblock,
-                      ),
-                    ),
-                    Gap(16.h),
+                    bottomPanel,
                   ],
                 ),
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _UnblockedActionsPanel extends StatelessWidget {
+  const _UnblockedActionsPanel({
+    required this.followState,
+    required this.blockState,
+    required this.dmState,
+    required this.onFollow,
+    required this.onAddToGroup,
+    required this.onBlock,
+    required this.onSendMessage,
+  });
+
+  final FollowActionsState followState;
+  final BlockActionsState blockState;
+  final StartDmState dmState;
+  final VoidCallback onFollow;
+  final VoidCallback onAddToGroup;
+  final VoidCallback onBlock;
+  final VoidCallback onSendMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    final isFollowing = followState.isFollowing;
+    return Padding(
+      key: const Key('blocked_user_unblocked_panel'),
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          WnButton(
+            key: const Key('blocked_user_follow_button'),
+            text: isFollowing == true ? context.l10n.unfollow : context.l10n.follow,
+            type: WnButtonType.outline,
+            size: WnButtonSize.medium,
+            trailingIcon: isFollowing == true ? WnIcons.userUnfollow : WnIcons.userFollow,
+            loading: followState.isLoading || followState.isActionLoading,
+            onPressed: onFollow,
+          ),
+          Gap(8.h),
+          WnButton(
+            key: const Key('blocked_user_add_to_group_button'),
+            text: context.l10n.addToGroup,
+            type: WnButtonType.outline,
+            size: WnButtonSize.medium,
+            trailingIcon: WnIcons.newGroupChat,
+            onPressed: onAddToGroup,
+          ),
+          Gap(8.h),
+          WnButton(
+            key: const Key('blocked_user_block_button'),
+            text: context.l10n.blockUser,
+            type: WnButtonType.outline,
+            size: WnButtonSize.medium,
+            trailingIcon: WnIcons.closeOutline,
+            loading: blockState.isActionLoading,
+            disabled: blockState.isLoading || blockState.isActionLoading,
+            onPressed: onBlock,
+          ),
+          Gap(8.h),
+          WnButton(
+            key: const Key('blocked_user_send_message_button'),
+            text: context.l10n.sendMessage,
+            size: WnButtonSize.medium,
+            trailingIcon: WnIcons.newChat,
+            loading: dmState.isLoading,
+            onPressed: onSendMessage,
           ),
         ],
       ),

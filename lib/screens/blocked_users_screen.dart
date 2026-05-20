@@ -5,11 +5,11 @@ import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_blocked_pubkeys.dart';
 import 'package:whitenoise/hooks/use_route_refresh.dart';
-import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/services/user_service.dart';
+import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/formatting.dart';
@@ -30,13 +30,13 @@ class BlockedUsersScreen extends HookConsumerWidget {
 
     useRouteRefresh(context, blocked.refresh);
 
-    final pubkeysKey = (blocked.blockedPubkeys.toList()..sort()).join(',');
+    final pubkeysKey = Object.hashAllUnordered(blocked.blockedPubkeys);
     final sortedFuture = useMemoized(
       () => _sortByDisplayName(blocked.blockedPubkeys),
       [pubkeysKey],
     );
     final sortedSnapshot = useFuture(sortedFuture);
-    final sortedPubkeys = sortedSnapshot.data ?? const <String>[];
+    final sortedEntries = sortedSnapshot.data ?? const <_BlockedUserEntry>[];
 
     Widget body;
     if (blocked.isLoading || sortedSnapshot.connectionState != ConnectionState.done) {
@@ -57,7 +57,7 @@ class BlockedUsersScreen extends HookConsumerWidget {
           textAlign: TextAlign.center,
         ),
       );
-    } else if (sortedPubkeys.isEmpty) {
+    } else if (sortedEntries.isEmpty) {
       body = Center(
         child: Text(
           context.l10n.blockedUsersEmpty,
@@ -72,12 +72,16 @@ class BlockedUsersScreen extends HookConsumerWidget {
       body = ListView.separated(
         key: const Key('blocked_users_list'),
         padding: EdgeInsets.zero,
-        itemCount: sortedPubkeys.length,
+        itemCount: sortedEntries.length,
         separatorBuilder: (context, index) => Gap(8.h),
-        itemBuilder: (context, index) => _BlockedUserTile(
-          pubkey: sortedPubkeys[index],
-          onTap: () => Routes.pushToBlockedUser(context, sortedPubkeys[index]),
-        ),
+        itemBuilder: (context, index) {
+          final entry = sortedEntries[index];
+          return _BlockedUserTile(
+            pubkey: entry.pubkey,
+            metadata: entry.metadata,
+            onTap: () => Routes.pushToBlockedUser(context, entry.pubkey),
+          );
+        },
       );
     }
 
@@ -100,38 +104,40 @@ class BlockedUsersScreen extends HookConsumerWidget {
   }
 }
 
-Future<List<String>> _sortByDisplayName(Set<String> pubkeys) async {
+typedef _BlockedUserEntry = ({String pubkey, FlutterMetadata? metadata});
+
+Future<List<_BlockedUserEntry>> _sortByDisplayName(Set<String> pubkeys) async {
   if (pubkeys.isEmpty) return const [];
   final entries = await Future.wait(
     pubkeys.map((pubkey) async {
-      String? name;
+      FlutterMetadata? metadata;
       try {
-        final metadata = await UserService(pubkey).getInitialMetadata();
-        name = presentName(metadata);
+        metadata = await UserService(pubkey).getInitialMetadata();
       } catch (_) {
-        name = null;
+        metadata = null;
       }
+      final name = presentName(metadata);
       final sortKey = (name ?? npubFromHex(pubkey) ?? pubkey).toLowerCase();
-      return (pubkey: pubkey, sortKey: sortKey);
+      return (pubkey: pubkey, sortKey: sortKey, metadata: metadata);
     }),
   );
   entries.sort((a, b) => a.sortKey.compareTo(b.sortKey));
-  return entries.map((e) => e.pubkey).toList();
+  return entries.map<_BlockedUserEntry>((e) => (pubkey: e.pubkey, metadata: e.metadata)).toList();
 }
 
-class _BlockedUserTile extends HookWidget {
+class _BlockedUserTile extends StatelessWidget {
   const _BlockedUserTile({
     required this.pubkey,
+    required this.metadata,
     required this.onTap,
   });
 
   final String pubkey;
+  final FlutterMetadata? metadata;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final metadataSnapshot = useUserMetadata(context, pubkey);
-    final metadata = metadataSnapshot.data;
     final displayName = presentName(metadata) ?? pubkey.substring(0, 8);
     final npub = npubFromHex(pubkey);
 

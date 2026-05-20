@@ -138,13 +138,15 @@ void main() {
       expect(find.byKey(const Key('blocked_user_unblock_button')), findsOneWidget);
     });
 
-    testWidgets('notice uses neutral type', (tester) async {
+    testWidgets('notice uses the elevatedCard type so the card stands off the slate', (
+      tester,
+    ) async {
       await pumpBlockedUserScreen(tester);
 
       final notice = tester.widget<WnSystemNotice>(
         find.byKey(const Key('blocked_user_detail_notice')),
       );
-      expect(notice.type, WnSystemNoticeType.neutral);
+      expect(notice.type, WnSystemNoticeType.elevatedCard);
     });
 
     testWidgets('notice collapses when chevron is tapped', (tester) async {
@@ -170,13 +172,17 @@ void main() {
       expect(_api.unblockCalls[0].target, _blockedPubkey);
     });
 
-    testWidgets('successful unblock pops back to the previous screen', (tester) async {
+    testWidgets('successful unblock morphs the same screen into the action panel', (tester) async {
       await pumpBlockedUserScreen(tester);
 
       await tester.tap(find.byKey(const Key('blocked_user_unblock_button')));
       await tester.pumpAndSettle();
 
-      expect(find.byType(BlockedUserScreen), findsNothing);
+      expect(find.byType(BlockedUserScreen), findsOneWidget);
+      expect(find.byKey(const Key('blocked_user_unblocked_panel')), findsOneWidget);
+      expect(find.byKey(const Key('blocked_user_detail_notice')), findsNothing);
+      expect(find.byKey(const Key('blocked_user_send_message_button')), findsOneWidget);
+      expect(find.byKey(const Key('blocked_user_block_button')), findsOneWidget);
     });
 
     testWidgets('shows loading state while unblock is in progress', (tester) async {
