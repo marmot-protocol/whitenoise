@@ -5,10 +5,17 @@ import 'package:whitenoise/hooks/use_group_members.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
-import 'package:whitenoise/src/rust/api/groups.dart' as groups_api;
-import 'package:whitenoise/widgets/user_picker_screen.dart';
+import 'package:whitenoise/screens/user_picker_screen.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_system_notice.dart';
+
+String _localizeMembersError(String errorKey, AppLocalizations l10n) {
+  return switch (errorKey) {
+    'failedToFetchGroupMembers' => l10n.failedToFetchGroupMembers,
+    'failedToAddMembers' => l10n.failedToAddMembers,
+    _ => l10n.somethingWentWrong,
+  };
+}
 
 class AddGroupMembersScreen extends HookConsumerWidget {
   const AddGroupMembersScreen({super.key, required this.groupId});
@@ -22,12 +29,13 @@ class AddGroupMembersScreen extends HookConsumerWidget {
       accountPubkey: accountPubkey,
       groupId: groupId,
     );
-    final fetchErrorMessage = useState<String?>(null);
-    final fetchErrorLabel = context.l10n.failedToFetchGroupMembers;
+    final errorMessage = useState<String?>(null);
+    final l10n = context.l10n;
 
     useEffect(() {
-      if (membersState.error != null) {
-        fetchErrorMessage.value = fetchErrorLabel;
+      final key = membersState.error;
+      if (key != null) {
+        errorMessage.value = _localizeMembersError(key, l10n);
         membersState.clearError();
       }
       return null;
@@ -38,30 +46,25 @@ class AddGroupMembersScreen extends HookConsumerWidget {
       [membersState.members],
     );
 
-    final fetchNotice = fetchErrorMessage.value != null
+    final notice = errorMessage.value != null
         ? WnSystemNotice(
-            key: ValueKey(fetchErrorMessage.value),
-            title: fetchErrorMessage.value!,
+            key: ValueKey(errorMessage.value),
+            title: errorMessage.value!,
             type: WnSystemNoticeType.error,
-            onDismiss: () => fetchErrorMessage.value = null,
+            onDismiss: () => errorMessage.value = null,
           )
         : null;
 
     return UserPickerScreen(
-      title: context.l10n.addMembers,
-      submitText: context.l10n.addMembers,
+      title: l10n.addMembers,
+      submitText: l10n.addMembers,
       submitIcon: WnIcons.userFollow,
-      submitErrorMessage: context.l10n.failedToAddMembers,
       additionalLoading: membersState.isLoading,
-      additionalNotice: fetchNotice,
+      additionalNotice: notice,
       candidateFilter: (user) => !existingMembersSet.contains(user.pubkey),
       onSubmit: (ctx, selected) async {
-        await groups_api.addMembersToGroup(
-          pubkey: accountPubkey,
-          groupId: groupId,
-          memberPubkeys: selected.map((u) => u.pubkey).toList(),
-        );
-        if (ctx.mounted) {
+        final ok = await membersState.addMembers(selected.map((u) => u.pubkey).toList());
+        if (ok && ctx.mounted) {
           Routes.goBack(ctx);
         }
       },

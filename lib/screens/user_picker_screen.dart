@@ -3,8 +3,6 @@ import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
-import 'package:logging/logging.dart';
-import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_user_search.dart';
 import 'package:whitenoise/hooks/use_user_selection.dart';
 import 'package:whitenoise/l10n/l10n.dart';
@@ -25,8 +23,10 @@ import 'package:whitenoise/widgets/wn_system_notice.dart';
 import 'package:whitenoise/widgets/wn_user_bubble.dart';
 import 'package:whitenoise/widgets/wn_user_item.dart';
 
-final _logger = Logger('UserPickerScreen');
-
+/// Shared base screen used by UserSelectionScreen (new-group flow) and
+/// AddGroupMembersScreen (add-to-existing-group flow). Callers compose the
+/// title/submit action/filter/notice; this screen owns the search + selection
+/// hooks and the standard picker layout.
 class UserPickerScreen extends HookConsumerWidget {
   const UserPickerScreen({
     super.key,
@@ -34,7 +34,6 @@ class UserPickerScreen extends HookConsumerWidget {
     required this.submitText,
     required this.submitIcon,
     required this.onSubmit,
-    this.submitErrorMessage,
     this.initialUsers = const [],
     this.candidateFilter,
     this.additionalLoading = false,
@@ -45,7 +44,6 @@ class UserPickerScreen extends HookConsumerWidget {
   final String submitText;
   final WnIcons submitIcon;
   final Future<void> Function(BuildContext context, List<User> selected) onSubmit;
-  final String? submitErrorMessage;
   final List<User> initialUsers;
   final bool Function(User user)? candidateFilter;
   final bool additionalLoading;
@@ -66,9 +64,6 @@ class UserPickerScreen extends HookConsumerWidget {
     );
     final selectionHook = useUserSelection(initialUsers: initialUsers);
 
-    final (:noticeMessage, :noticeType, :showErrorNotice, :showSuccessNotice, :dismissNotice) =
-        useSystemNotice();
-
     final filter = candidateFilter;
     final candidates = additionalLoading
         ? const <User>[]
@@ -83,26 +78,12 @@ class UserPickerScreen extends HookConsumerWidget {
       isSubmitting.value = true;
       try {
         await onSubmit(context, selected);
-      } catch (e, s) {
-        _logger.severe('User picker submit failed', e, s);
-        if (context.mounted && submitErrorMessage != null) {
-          showErrorNotice(submitErrorMessage!);
-        }
       } finally {
         if (context.mounted) {
           isSubmitting.value = false;
         }
       }
     }
-
-    final WnSystemNotice? notice = noticeMessage != null
-        ? WnSystemNotice(
-            key: ValueKey(noticeMessage),
-            title: noticeMessage,
-            type: noticeType,
-            onDismiss: dismissNotice,
-          )
-        : additionalNotice;
 
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
@@ -112,7 +93,7 @@ class UserPickerScreen extends HookConsumerWidget {
             title: title,
             onNavigate: () => Routes.goBack(context),
           ),
-          systemNotice: notice,
+          systemNotice: additionalNotice,
           footer: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
             child: SizedBox(
