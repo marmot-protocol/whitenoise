@@ -89,8 +89,10 @@ Future<void> expectLocalRelaysAvailable() async {
   for (final url in _relayUrls) {
     final uri = Uri.tryParse(url);
     if (uri == null) {
-      debugPrint('[app_setup] Skipping unparseable relay URL: $url');
-      continue;
+      fail(
+        'Unparseable relay URL "$url" in WHITENOISE_INTEGRATION_RELAYS. '
+        'Fix the relay list (comma-separated) and run the test again.',
+      );
     }
     final host = uri.host;
     final isLocal = host == 'localhost' || host == '127.0.0.1';
