@@ -95,11 +95,10 @@ class GroupMemberScreen extends HookConsumerWidget {
       if (membersState.members.contains(memberPubkey)) return null;
       didRedirect.value = true;
       WidgetsBinding.instance.addPostFrameCallback((_) {
-        final nav = Routes.navigatorKey.currentContext;
-        if (nav == null || !nav.mounted) return;
-        Routes.goBack(nav);
-        if (!nav.mounted) return;
-        StartChatScreen.show(nav, userPubkey: memberPubkey);
+        if (!context.mounted) return;
+        Routes.goBack(context);
+        if (!context.mounted) return;
+        StartChatScreen.show(context, userPubkey: memberPubkey);
       });
       return null;
     }, [membersState.isLoading, membersState.members]);
