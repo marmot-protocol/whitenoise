@@ -496,9 +496,6 @@ enum UpdateTrigger {
 
   /// The delivery status of an outgoing message changed (Sending -> Sent or Failed)
   deliveryStatusChanged,
-
-  /// A foreground catch-up replay refreshed this message from the local snapshot.
-  snapshotRefresh,
 }
 
 /// Flutter-compatible user reaction

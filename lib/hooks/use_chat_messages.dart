@@ -239,8 +239,7 @@ ChatMessagesResult useChatMessages(
 
                 messagesById.value[message.id] = message;
 
-                if ((update.trigger == UpdateTrigger.newMessage ||
-                        update.trigger == UpdateTrigger.snapshotRefresh) &&
+                if (update.trigger == UpdateTrigger.newMessage &&
                     !allMessageIdsSet.value.contains(message.id)) {
                   allMessageIds.value.add(message.id);
                   allMessageIdsSet.value.add(message.id);

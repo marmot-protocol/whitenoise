@@ -8325,7 +8325,6 @@ impl SseDecode for crate::api::messages::UpdateTrigger {
             2 => crate::api::messages::UpdateTrigger::ReactionRemoved,
             3 => crate::api::messages::UpdateTrigger::MessageDeleted,
             4 => crate::api::messages::UpdateTrigger::DeliveryStatusChanged,
-            5 => crate::api::messages::UpdateTrigger::SnapshotRefresh,
             _ => unreachable!("Invalid variant for UpdateTrigger: {}", inner),
         };
     }
@@ -10704,7 +10703,6 @@ impl flutter_rust_bridge::IntoDart for crate::api::messages::UpdateTrigger {
             Self::ReactionRemoved => 2.into_dart(),
             Self::MessageDeleted => 3.into_dart(),
             Self::DeliveryStatusChanged => 4.into_dart(),
-            Self::SnapshotRefresh => 5.into_dart(),
             _ => unreachable!(),
         }
     }
@@ -12862,7 +12860,6 @@ impl SseEncode for crate::api::messages::UpdateTrigger {
                 crate::api::messages::UpdateTrigger::ReactionRemoved => 2,
                 crate::api::messages::UpdateTrigger::MessageDeleted => 3,
                 crate::api::messages::UpdateTrigger::DeliveryStatusChanged => 4,
-                crate::api::messages::UpdateTrigger::SnapshotRefresh => 5,
                 _ => {
                     unimplemented!("");
                 }

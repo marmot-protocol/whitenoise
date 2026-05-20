@@ -109,14 +109,6 @@ class _MockApi extends MockWnApi {
     );
   }
 
-  void emitSnapshotRefresh(ChatMessage message) {
-    controller?.add(
-      MessageStreamItem.update(
-        update: MessageUpdate(trigger: UpdateTrigger.snapshotRefresh, message: message),
-      ),
-    );
-  }
-
   void emitError(Object error, [StackTrace? stackTrace]) {
     controller?.addError(error, stackTrace ?? StackTrace.current);
   }
@@ -346,45 +338,6 @@ void main() {
       final result = getResult();
       expect(result.messageCount, 2);
       expect(result.getMessage(0).id, 'm2');
-    });
-
-    testWidgets('snapshot refresh upserts existing message without duplicating it', (
-      tester,
-    ) async {
-      final getResult = await _pump(tester, 'group1');
-
-      _api.emitInitialSnapshot([
-        _message('m1', DateTime(2024), content: 'old'),
-      ]);
-      await tester.pumpAndSettle();
-
-      _api.emitSnapshotRefresh(
-        _message('m1', DateTime(2024), content: 'new'),
-      );
-      await tester.pumpAndSettle();
-
-      expect(getResult().messageCount, 1);
-      expect(getResult().getMessage(0).content, 'new');
-    });
-
-    testWidgets('snapshot refresh adds missing message without duplicating existing rows', (
-      tester,
-    ) async {
-      final getResult = await _pump(tester, 'group1');
-
-      _api.emitInitialSnapshot([
-        _message('m1', DateTime(2024), content: 'First'),
-      ]);
-      await tester.pumpAndSettle();
-
-      _api.emitSnapshotRefresh(
-        _message('m2', DateTime(2024, 2), content: 'Second'),
-      );
-      await tester.pumpAndSettle();
-
-      expect(getResult().messageCount, 2);
-      expect(getResult().getMessage(0).id, 'm2');
-      expect(getResult().getMessage(1).id, 'm1');
     });
 
     testWidgets('hides new messages from blocked authors', (tester) async {
