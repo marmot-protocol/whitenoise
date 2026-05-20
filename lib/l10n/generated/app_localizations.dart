@@ -2661,36 +2661,6 @@ abstract class AppLocalizations {
   /// **'Waiting for internet connection'**
   String get waitingForInternet;
 
-  /// Error message when permission is denied to save to gallery
-  ///
-  /// In en, this message translates to:
-  /// **'Permission denied to save image'**
-  String get saveToGalleryPermissionDenied;
-
-  /// Error message when there's not enough space to save image
-  ///
-  /// In en, this message translates to:
-  /// **'Not enough storage space'**
-  String get saveToGalleryNotEnoughSpace;
-
-  /// Error message when image format is not supported
-  ///
-  /// In en, this message translates to:
-  /// **'Image format not supported'**
-  String get saveToGalleryNotSupportedFormat;
-
-  /// Generic error message when saving to gallery fails
-  ///
-  /// In en, this message translates to:
-  /// **'Failed to save image to gallery'**
-  String get saveToGalleryError;
-
-  /// Label for the action that saves media to the device gallery
-  ///
-  /// In en, this message translates to:
-  /// **'Save to gallery'**
-  String get saveToGallery;
-
   /// Error notice shown when sharing a message or media fails
   ///
   /// In en, this message translates to:

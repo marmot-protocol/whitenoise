@@ -1457,21 +1457,6 @@ class AppLocalizationsTr extends AppLocalizations {
   String get waitingForInternet => 'İnternet bağlantısı bekleniyor';
 
   @override
-  String get saveToGalleryPermissionDenied => 'Görüntüyü kaydetme izni reddedildi';
-
-  @override
-  String get saveToGalleryNotEnoughSpace => 'Yeterli depolama alanı yok';
-
-  @override
-  String get saveToGalleryNotSupportedFormat => 'Görüntü formatı desteklenmiyor';
-
-  @override
-  String get saveToGalleryError => 'Görüntü galeriye kaydedilemedi';
-
-  @override
-  String get saveToGallery => 'Galeriye kaydet';
-
-  @override
   String get shareError => 'Paylaşım başarısız';
 
   @override

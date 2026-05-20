@@ -1494,21 +1494,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get waitingForInternet => 'Warten auf Internetverbindung';
 
   @override
-  String get saveToGalleryPermissionDenied => 'Speicherberechtigung verweigert';
-
-  @override
-  String get saveToGalleryNotEnoughSpace => 'Nicht genügend Speicherplatz';
-
-  @override
-  String get saveToGalleryNotSupportedFormat => 'Medienformat nicht unterstützt';
-
-  @override
-  String get saveToGalleryError => 'Medium konnte nicht gespeichert werden';
-
-  @override
-  String get saveToGallery => 'In Galerie speichern';
-
-  @override
   String get shareError => 'Teilen fehlgeschlagen';
 
   @override
