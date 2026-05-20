@@ -193,8 +193,9 @@ Future<void> _openAndTapDownload(
 Future<void> _openAndLongPress(
   WidgetTester tester,
   String filePath,
-  String id,
-) async {
+  String id, {
+  bool tapSave = true,
+}) async {
   await mountWidget(
     Builder(
       builder: (context) => ElevatedButton(
@@ -216,6 +217,13 @@ Future<void> _openAndLongPress(
   await tester.pump();
   await tester.pump();
   await tester.pump();
+
+  if (tapSave) {
+    await tester.tap(find.byKey(const Key('media_action_save')));
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+  }
 }
 
 Future<void> _openAndTapDownloadVideo(
@@ -251,8 +259,9 @@ Future<void> _openAndTapDownloadVideo(
 Future<void> _openAndLongPressVideo(
   WidgetTester tester,
   String filePath,
-  String id,
-) async {
+  String id, {
+  bool tapSave = true,
+}) async {
   await mountWidget(
     Builder(
       builder: (context) => ElevatedButton(
@@ -276,6 +285,13 @@ Future<void> _openAndLongPressVideo(
   await tester.pump();
   await tester.pump();
   await tester.pump();
+
+  if (tapSave) {
+    await tester.tap(find.byKey(const Key('media_action_save')));
+    await tester.pump();
+    await tester.pump();
+    await tester.pump();
+  }
 }
 
 void main() {
@@ -847,6 +863,17 @@ void main() {
 
       expect(find.byType(WnSystemNotice), findsOneWidget);
       expect(find.text('Permission denied to save image'), findsOneWidget);
+    });
+
+    testWidgets('long press shows action chooser with save and share', (tester) async {
+      final dir = Directory.systemTemp.createTempSync('mm_lp_chooser');
+      final file = File('${dir.path}/test.png')..writeAsBytesSync(Uint8List.fromList(_minimalPng));
+      addTearDown(() => dir.deleteSync(recursive: true));
+
+      await _openAndLongPress(tester, file.path, 'lp_chooser_1', tapSave: false);
+
+      expect(find.byKey(const Key('media_action_save')), findsOneWidget);
+      expect(find.byKey(const Key('media_action_share')), findsOneWidget);
     });
 
     testWidgets('long press is disabled when media is not downloaded', (tester) async {

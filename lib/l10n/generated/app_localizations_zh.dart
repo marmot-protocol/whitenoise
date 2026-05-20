@@ -1423,6 +1423,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get saveToGalleryError => '图片保存到相册失败';
 
   @override
+  String get saveToGallery => '保存到相册';
+
+  @override
+  String get shareError => '分享失败';
+
+  @override
   String get leave => '退出';
 
   @override
@@ -2871,6 +2877,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get saveToGalleryError => '圖片儲存到相簿失敗';
+
+  @override
+  String get saveToGallery => '儲存到相簿';
+
+  @override
+  String get shareError => '分享失敗';
 
   @override
   String get leave => '離開';

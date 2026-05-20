@@ -429,6 +429,8 @@
   "saveToGalleryNotEnoughSpace": "存储空间不足",
   "saveToGalleryNotSupportedFormat": "不支持的图片格式",
   "saveToGalleryError": "图片保存到相册失败",
+  "saveToGallery": "保存到相册",
+  "shareError": "分享失败",
   "leave": "退出",
   "leaveGroup": "退出群组",
   "leaveGroupWarning": "确定要退出此群组吗？如果您不删除，聊天记录将保留在列表中，但您将无法发送或接收新消息，除非有人再次邀请您。",

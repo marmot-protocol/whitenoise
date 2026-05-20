@@ -2685,6 +2685,18 @@ abstract class AppLocalizations {
   /// **'Failed to save image to gallery'**
   String get saveToGalleryError;
 
+  /// Label for the action that saves media to the device gallery
+  ///
+  /// In en, this message translates to:
+  /// **'Save to gallery'**
+  String get saveToGallery;
+
+  /// Error notice shown when sharing a message or media fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to share'**
+  String get shareError;
+
   /// Label for the confirm leave button
   ///
   /// In en, this message translates to:

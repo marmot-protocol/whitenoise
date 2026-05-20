@@ -435,6 +435,8 @@
   "saveToGalleryNotEnoughSpace": "Espace de stockage insuffisant",
   "saveToGalleryNotSupportedFormat": "Format d'image non pris en charge",
   "saveToGalleryError": "Échec de l'enregistrement de l'image dans la galerie",
+  "saveToGallery": "Enregistrer dans la galerie",
+  "shareError": "Échec du partage",
   "leaveGroupLastAdminWarning": "Vous êtes le seul administrateur de ce groupe. Promouvez au moins un membre en tant qu'administrateur avant de pouvoir quitter.",
   "leaveGroupNoCapabilitiesWarning": "Ce groupe a été créé avec une ancienne version et ne prend pas en charge le départ. Les administrateurs peuvent mettre à niveau les capacités du groupe une fois que tous les membres utilisent une version qui prend en charge le départ.",
   "unsupportedDeepLinkTitle": "Lien non pris en charge",

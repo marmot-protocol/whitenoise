@@ -1487,6 +1487,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get saveToGalleryError => 'Échec de l\'enregistrement de l\'image dans la galerie';
 
   @override
+  String get saveToGallery => 'Enregistrer dans la galerie';
+
+  @override
+  String get shareError => 'Échec du partage';
+
+  @override
   String get leave => 'Quitter';
 
   @override

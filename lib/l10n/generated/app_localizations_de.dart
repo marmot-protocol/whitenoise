@@ -1506,6 +1506,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get saveToGalleryError => 'Medium konnte nicht gespeichert werden';
 
   @override
+  String get saveToGallery => 'In Galerie speichern';
+
+  @override
+  String get shareError => 'Teilen fehlgeschlagen';
+
+  @override
   String get leave => 'Verlassen';
 
   @override

@@ -1502,6 +1502,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get saveToGalleryError => 'Не удалось сохранить изображение в галерею';
 
   @override
+  String get saveToGallery => 'Сохранить в галерею';
+
+  @override
+  String get shareError => 'Не удалось поделиться';
+
+  @override
   String get leave => 'Покинуть';
 
   @override

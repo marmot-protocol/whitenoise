@@ -435,6 +435,8 @@
   "saveToGalleryNotEnoughSpace": "No hay suficiente espacio de almacenamiento",
   "saveToGalleryNotSupportedFormat": "Formato de imagen no compatible",
   "saveToGalleryError": "Error al guardar imagen en la galería",
+  "saveToGallery": "Guardar en galería",
+  "shareError": "Error al compartir",
   "leaveGroupLastAdminWarning": "Eres el único administrador de este grupo. Promueve al menos a un miembro como administrador antes de poder salir.",
   "leaveGroupNoCapabilitiesWarning": "Este grupo fue creado con una versión anterior y no admite salir. Los administradores pueden mejorar las capacidades del grupo una vez que todos los miembros estén en una versión que soporte abandonar.",
   "unsupportedDeepLinkTitle": "Enlace no compatible",

@@ -4,6 +4,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:whitenoise/hooks/use_media_download.dart';
 import 'package:whitenoise/hooks/use_save_to_gallery.dart';
+import 'package:whitenoise/hooks/use_share_message.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/locale_provider.dart';
@@ -14,6 +15,7 @@ import 'package:whitenoise/utils/media_type.dart';
 import 'package:whitenoise/widgets/chat_media_thumbnail.dart';
 import 'package:whitenoise/widgets/media_image.dart';
 import 'package:whitenoise/widgets/media_video.dart';
+import 'package:whitenoise/widgets/wn_action_sheet.dart';
 import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_icon_button.dart';
@@ -193,11 +195,49 @@ class _MediaContent extends HookWidget {
         onSaveError(message);
       },
     );
+    final shareMedia = useShareMessage(
+      filePaths: localPath != null ? [localPath] : const [],
+      onError: (_) => onSaveError(l10n.shareError),
+    );
+
+    Future<void> onLongPress() async {
+      final saveAction = saveToGallery.save;
+      final shareAction = shareMedia.share;
+      final renderBox = context.findRenderObject() as RenderBox?;
+      final sharePositionOrigin = renderBox != null && renderBox.hasSize
+          ? renderBox.localToGlobal(Offset.zero) & renderBox.size
+          : null;
+      final picked = await WnActionSheet.show<_MediaAction>(
+        context: context,
+        actions: [
+          WnActionSheetAction(
+            key: const Key('media_action_save'),
+            value: _MediaAction.save,
+            label: l10n.saveToGallery,
+            icon: WnIcons.download,
+          ),
+          WnActionSheetAction(
+            key: const Key('media_action_share'),
+            value: _MediaAction.share,
+            label: l10n.share,
+            icon: WnIcons.forward,
+          ),
+        ],
+      );
+      if (picked == null) return;
+      await WidgetsBinding.instance.endOfFrame;
+      switch (picked) {
+        case _MediaAction.save:
+          saveAction?.call();
+        case _MediaAction.share:
+          await shareAction?.call(sharePositionOrigin: sharePositionOrigin);
+      }
+    }
 
     return GestureDetector(
       key: const Key('media_content_tap_area'),
       onTap: onTap,
-      onLongPress: localPath != null ? saveToGallery.save : null,
+      onLongPress: localPath != null ? onLongPress : null,
       behavior: HitTestBehavior.opaque,
       child: Column(
         children: [
@@ -405,3 +445,5 @@ class _ThumbnailStrip extends StatelessWidget {
     );
   }
 }
+
+enum _MediaAction { save, share }

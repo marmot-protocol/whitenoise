@@ -1466,6 +1466,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get saveToGalleryError => 'Failed to save image to gallery';
 
   @override
+  String get saveToGallery => 'Save to gallery';
+
+  @override
+  String get shareError => 'Failed to share';
+
+  @override
   String get leave => 'Leave';
 
   @override

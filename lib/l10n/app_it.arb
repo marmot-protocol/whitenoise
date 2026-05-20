@@ -435,6 +435,8 @@
   "saveToGalleryNotEnoughSpace": "Spazio di archiviazione insufficiente",
   "saveToGalleryNotSupportedFormat": "Formato immagine non supportato",
   "saveToGalleryError": "Impossibile salvare l'immagine nella galleria",
+  "saveToGallery": "Salva in galleria",
+  "shareError": "Condivisione non riuscita",
   "leaveGroupLastAdminWarning": "Sei l'unico amministratore di questo gruppo. Promuovi almeno un membro ad amministratore prima di poter uscire.",
   "leaveGroupNoCapabilitiesWarning": "Questo gruppo è stato creato con una versione precedente e non supporta l'uscita. Gli amministratori possono aggiornare le capacità del gruppo una volta che tutti i membri utilizzano una versione che supporta l'uscita.",
   "unsupportedDeepLinkTitle": "Link non supportato",

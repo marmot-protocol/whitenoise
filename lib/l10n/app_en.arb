@@ -1880,6 +1880,14 @@
   "@saveToGalleryError": {
     "description": "Generic error message when saving to gallery fails"
   },
+  "saveToGallery": "Save to gallery",
+  "@saveToGallery": {
+    "description": "Label for the action that saves media to the device gallery"
+  },
+  "shareError": "Failed to share",
+  "@shareError": {
+    "description": "Error notice shown when sharing a message or media fails"
+  },
   "leave": "Leave",
   "@leave": { "description": "Label for the confirm leave button" },
   "leaveGroup": "Leave group",

@@ -1469,6 +1469,12 @@ class AppLocalizationsTr extends AppLocalizations {
   String get saveToGalleryError => 'Görüntü galeriye kaydedilemedi';
 
   @override
+  String get saveToGallery => 'Galeriye kaydet';
+
+  @override
+  String get shareError => 'Paylaşım başarısız';
+
+  @override
   String get leave => 'Ayrıl';
 
   @override

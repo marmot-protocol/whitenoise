@@ -1472,6 +1472,12 @@ class AppLocalizationsIt extends AppLocalizations {
   String get saveToGalleryError => 'Impossibile salvare l\'immagine nella galleria';
 
   @override
+  String get saveToGallery => 'Salva in galleria';
+
+  @override
+  String get shareError => 'Condivisione non riuscita';
+
+  @override
   String get leave => 'Lascia';
 
   @override
