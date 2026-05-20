@@ -101,6 +101,32 @@ void main() {
       },
     );
 
+    test('logs push token stream errors without changing registration status', () async {
+      final container = ProviderContainer(
+        overrides: [
+          authProvider.overrideWith(() => _TestAuthNotifier(testPubkeyA)),
+          pushRegistrationServiceProvider.overrideWithValue(syncer),
+        ],
+      );
+      addTearDown(container.dispose);
+
+      await container.read(authProvider.future);
+      final subscription = container.listen(
+        pushRegistrationControllerProvider,
+        (_, _) {},
+      );
+      addTearDown(subscription.close);
+      await Future<void>.delayed(Duration.zero);
+
+      syncer.emitError(StateError('stream failed'));
+      await Future<void>.delayed(Duration.zero);
+
+      expect(
+        container.read(pushRegistrationStatusProvider)?.status,
+        PushRegistrationSyncStatus.registered,
+      );
+    });
+
     test('stores failed status when current token sync throws', () async {
       syncer.throwOnCurrentSync = true;
       final container = ProviderContainer(
@@ -203,6 +229,10 @@ class _FakePushRegistrationSyncer implements PushRegistrationSyncer {
 
   void emit(ProviderPushToken token) {
     _updates.add(token);
+  }
+
+  void emitError(Object error) {
+    _updates.addError(error, StackTrace.current);
   }
 
   void dispose() {

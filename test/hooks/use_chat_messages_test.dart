@@ -324,6 +324,24 @@ void main() {
       expect(_api.lastFetchOlderCall?.limit, 100);
     });
 
+    testWidgets('keeps visible timeline when resume snapshot refresh fails', (tester) async {
+      final getResult = await _pump(tester, 'group1');
+
+      _api.emitInitialSnapshot([
+        _message('m1', DateTime(2024), content: 'First'),
+      ]);
+      await tester.pumpAndSettle();
+      _api.fetchOlderFails = true;
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pumpAndSettle();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(getResult().messageCount, 1);
+      expect(getResult().getMessage(0).content, 'First');
+    });
+
     testWidgets('prepends new message at start (newest first)', (tester) async {
       final getResult = await _pump(tester, 'group1');
 

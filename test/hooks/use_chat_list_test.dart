@@ -58,6 +58,7 @@ class _MockApi extends MockWnApi {
   StreamController<ChatListStreamItem>? archivedController;
   List<ChatSummary> activeSnapshot = [];
   List<ChatSummary> archivedSnapshot = [];
+  bool failActiveSnapshot = false;
 
   void emitInitialSnapshot(List<ChatSummary> items) {
     controller?.add(ChatListStreamItem.initialSnapshot(items: items));
@@ -94,6 +95,7 @@ class _MockApi extends MockWnApi {
   Future<List<ChatSummary>> crateApiChatListFetchChatListSnapshot({
     required String accountPubkey,
   }) async {
+    if (failActiveSnapshot) throw StateError('snapshot failed');
     return activeSnapshot;
   }
 
@@ -359,6 +361,21 @@ void main() {
 
         final ids = getResult().chats.map((c) => c.mlsGroupId).toList();
         expect(ids, ['mls_c2']);
+      });
+
+      testWidgets('keeps current list when resume snapshot refresh fails', (tester) async {
+        final getResult = await _pump(tester, testPubkeyA);
+
+        _api.emitInitialSnapshot([_chatSummary('c1', DateTime(2024))]);
+        await tester.pumpAndSettle();
+        _api.failActiveSnapshot = true;
+
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+        await tester.pumpAndSettle();
+        tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+        await tester.pumpAndSettle();
+
+        expect(getResult().chats.map((c) => c.mlsGroupId), ['mls_c1']);
       });
     });
 

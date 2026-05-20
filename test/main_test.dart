@@ -900,5 +900,23 @@ void main() {
         ),
       );
     });
+
+    test('throws on iOS when App Group lookup fails', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        const MethodChannel('org.parres.whitenoise/app_group'),
+        (_) async {
+          throw PlatformException(code: 'unavailable');
+        },
+      );
+
+      await expectLater(
+        resolveWhitenoiseBaseDirectory(isIOS: true),
+        throwsA(
+          predicate<Object>(
+            (error) => error.toString().contains('App Group container unavailable'),
+          ),
+        ),
+      );
+    });
   });
 }

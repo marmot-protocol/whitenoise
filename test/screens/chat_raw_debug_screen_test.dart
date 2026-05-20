@@ -501,6 +501,40 @@ void main() {
       );
     });
 
+    testWidgets('shows push diagnostics when no tokens are cached', (tester) async {
+      _api.mockGroupPushDebugInfo = const GroupPushDebugInfo(
+        totalTokenCount: 0,
+        activeTokenCount: 0,
+        staleTokenCount: 0,
+        missingRelayHintCount: 0,
+        localRegistration: LocalPushRegistrationDebugInfo(
+          registered: true,
+          shareable: false,
+          notificationsEnabled: true,
+          localTokenCached: false,
+        ),
+        tokens: [],
+      );
+
+      await pumpDebugScreen(tester);
+      await tester.scrollUntilVisible(
+        find.text('Push Diagnostics'),
+        220,
+        scrollable: find.byType(Scrollable).first,
+      );
+
+      expect(find.text('0/0 active tokens'), findsOneWidget);
+      expect(find.text('push_tokens: (none cached for this group)'), findsOneWidget);
+      expect(
+        tester.widget<SelectableText>(find.byKey(const Key('push_debug_shareable'))).data,
+        'false',
+      );
+      expect(
+        tester.widget<SelectableText>(find.byKey(const Key('push_debug_local_token_cached'))).data,
+        'false',
+      );
+    });
+
     testWidgets('shows push diagnostics load error', (tester) async {
       _api.shouldFailGroupPushDebugInfo = true;
 
