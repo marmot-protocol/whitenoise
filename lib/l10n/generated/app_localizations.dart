@@ -2217,6 +2217,12 @@ abstract class AppLocalizations {
   /// **'Failed to add members. Please try again.'**
   String get failedToAddMembers;
 
+  /// Action label for opening the add-members screen from group info
+  ///
+  /// In en, this message translates to:
+  /// **'Add members'**
+  String get addMembers;
+
   /// Warning message when group is created successfully but image upload fails
   ///
   /// In en, this message translates to:

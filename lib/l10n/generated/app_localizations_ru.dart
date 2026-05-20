@@ -1237,6 +1237,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get failedToAddMembers => 'Не удалось добавить участников. Попробуйте снова.';
 
   @override
+  String get addMembers => 'Добавить участников';
+
+  @override
   String get groupImageUploadFailed => 'Группа создана, но загрузка изображения не удалась.';
 
   @override

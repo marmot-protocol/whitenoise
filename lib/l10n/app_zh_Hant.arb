@@ -296,6 +296,7 @@
   "deleteAllDataError": "刪除所有資料失敗。請再試一次。",
   "chatInformation": "聊天資訊",
   "addToGroup": "加入群組",
+  "addMembers": "新增成員",
   "blockUser": "封鎖使用者",
   "unblockUser": "解除封鎖使用者",
   "unblock": "解除封鎖",

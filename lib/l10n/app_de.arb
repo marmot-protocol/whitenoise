@@ -292,6 +292,7 @@
   "deleteAllDataError": "Fehler beim Löschen aller Daten. Bitte versuche es erneut.",
   "chatInformation": "Chat-Informationen",
   "addToGroup": "Zur Gruppe hinzufügen",
+  "addMembers": "Mitglieder hinzufügen",
   "blockUser": "Benutzer blockieren",
   "unblockUser": "Blockierung aufheben",
   "unblock": "Entsperren",

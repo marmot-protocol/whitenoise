@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/screens/add_group_members_screen.dart';
 import 'package:whitenoise/screens/edit_group_screen.dart';
 import 'package:whitenoise/screens/group_member_screen.dart';
 import 'package:whitenoise/src/rust/api/account_groups.dart';
@@ -382,6 +383,34 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(EditGroupScreen), findsOneWidget);
+    });
+
+    testWidgets('shows add members button when user is admin', (tester) async {
+      _api.membersList = [_testPubkey, testPubkeyB];
+      _api.adminsList = [_testPubkey];
+      await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+      expect(find.byKey(const Key('add_members_button')), findsOneWidget);
+      expect(find.text('Add members'), findsOneWidget);
+    });
+
+    testWidgets('hides add members button when user is not admin', (tester) async {
+      _api.membersList = [_testPubkey, testPubkeyB];
+      _api.adminsList = [testPubkeyB];
+      await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+      expect(find.byKey(const Key('add_members_button')), findsNothing);
+    });
+
+    testWidgets('navigates to add group members screen when button pressed', (tester) async {
+      _api.membersList = [_testPubkey, testPubkeyB];
+      _api.adminsList = [_testPubkey];
+      await pumpGroupInfoScreen(tester, groupId: testGroupId);
+
+      await tester.tap(find.byKey(const Key('add_members_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AddGroupMembersScreen), findsOneWidget);
     });
 
     testWidgets('navigates to group member screen when member is tapped', (tester) async {

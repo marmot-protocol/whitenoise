@@ -1170,6 +1170,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get failedToAddMembers => '添加成员失败。请重试。';
 
   @override
+  String get addMembers => '添加成员';
+
+  @override
   String get groupImageUploadFailed => '群组已创建，但图片上传失败。';
 
   @override
@@ -2614,6 +2617,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get failedToAddMembers => '新增成員失敗。請再試一次。';
+
+  @override
+  String get addMembers => '新增成員';
 
   @override
   String get groupImageUploadFailed => '群組已建立，但圖片上傳失敗。';
