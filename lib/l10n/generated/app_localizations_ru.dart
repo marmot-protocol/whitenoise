@@ -325,6 +325,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get scanToConnect => 'Сканируйте для подключения';
 
   @override
+  String get holdToShareQrCode => 'Удерживайте для отправки QR-кода';
+
+  @override
   String get signOutTitle => 'Выход';
 
   @override

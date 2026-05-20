@@ -324,6 +324,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get scanToConnect => 'Bağlanmak için tarayın';
 
   @override
+  String get holdToShareQrCode => 'QR kodu paylaşmak için basılı tutun';
+
+  @override
   String get signOutTitle => 'Çıkış yap';
 
   @override

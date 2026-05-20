@@ -675,6 +675,12 @@ abstract class AppLocalizations {
   /// **'Scan to connect'**
   String get scanToConnect;
 
+  /// Text below QR code when user can long-press to share
+  ///
+  /// In en, this message translates to:
+  /// **'Hold to share QR code'**
+  String get holdToShareQrCode;
+
   /// Sign out screen title
   ///
   /// In en, this message translates to:

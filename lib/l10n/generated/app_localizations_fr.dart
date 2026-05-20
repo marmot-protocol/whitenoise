@@ -325,6 +325,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scanToConnect => 'Scanner pour se connecter';
 
   @override
+  String get holdToShareQrCode => 'Maintenez pour partager le QR code';
+
+  @override
   String get signOutTitle => 'Déconnexion';
 
   @override

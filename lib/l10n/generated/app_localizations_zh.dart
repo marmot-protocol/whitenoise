@@ -312,6 +312,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scanToConnect => '扫码连接';
 
   @override
+  String get holdToShareQrCode => '长按分享二维码';
+
+  @override
   String get signOutTitle => '退出登录';
 
   @override
@@ -1769,6 +1772,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get scanToConnect => '掃描即可連結';
+
+  @override
+  String get holdToShareQrCode => '長按以分享QR碼';
 
   @override
   String get signOutTitle => '登出';

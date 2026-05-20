@@ -94,6 +94,7 @@
   "copiedToClipboardThankYou": "已复制到剪贴板。谢谢您的支持！",
   "shareProfileTitle": "分享与连接",
   "scanToConnect": "扫码连接",
+  "holdToShareQrCode": "长按分享二维码",
   "signOutTitle": "退出登录",
   "signOutConfirmation": "确定要退出登录吗？",
   "signOutWarning": "当您退出 White Noise 时，您的聊天记录将从此设备中删除，且无法在其他设备上恢复。",

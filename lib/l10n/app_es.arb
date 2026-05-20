@@ -94,6 +94,7 @@
   "copiedToClipboardThankYou": "Copiado al portapapeles. ¡Gracias!",
   "shareProfileTitle": "Compartir y conectar",
   "scanToConnect": "Escanear para conectar",
+  "holdToShareQrCode": "Mantén para compartir el código QR",
   "signOutTitle": "Cerrar sesión",
   "signOutConfirmation": "¿Estás seguro de que quieres cerrar sesión?",
   "signOutWarning": "Cuando cierres sesión en White Noise, tus chats se eliminarán de este dispositivo y no podrán restaurarse en otro dispositivo.",

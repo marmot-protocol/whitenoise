@@ -94,6 +94,7 @@
   "copiedToClipboardThankYou": "已複製到剪貼簿。謝謝您的支持！",
   "shareProfileTitle": "分享與連結",
   "scanToConnect": "掃描即可連結",
+  "holdToShareQrCode": "長按以分享QR碼",
   "signOutTitle": "登出",
   "signOutConfirmation": "確定要登出嗎？",
   "signOutWarning": "登出 White Noise 後，您的聊天記錄會從這台裝置刪除，且無法在其他裝置上還原。",

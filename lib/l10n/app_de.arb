@@ -94,6 +94,7 @@
   "copiedToClipboardThankYou": "In Zwischenablage kopiert. Danke!",
   "shareProfileTitle": "Teilen und verbinden",
   "scanToConnect": "Zum Verbinden scannen",
+  "holdToShareQrCode": "Halten, um QR-Code zu teilen",
   "signOutTitle": "Abmelden",
   "signOutConfirmation": "Möchtest du dich wirklich abmelden?",
   "signOutWarning": "Wenn du dich bei White Noise abmeldest, werden deine Chats von diesem Gerät gelöscht und können auf einem anderen Gerät nicht wiederhergestellt werden.",

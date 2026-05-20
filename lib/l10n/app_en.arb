@@ -399,6 +399,10 @@
   "@scanToConnect": {
     "description": "Text below QR code"
   },
+  "holdToShareQrCode": "Hold to share QR code",
+  "@holdToShareQrCode": {
+    "description": "Text below QR code when user can long-press to share"
+  },
   "signOutTitle": "Sign out",
   "@signOutTitle": {
     "description": "Sign out screen title"

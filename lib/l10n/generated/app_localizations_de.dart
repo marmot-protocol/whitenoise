@@ -327,6 +327,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get scanToConnect => 'Zum Verbinden scannen';
 
   @override
+  String get holdToShareQrCode => 'Halten, um QR-Code zu teilen';
+
+  @override
   String get signOutTitle => 'Abmelden';
 
   @override
