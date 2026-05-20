@@ -58,9 +58,7 @@ class BlockedUserScreen extends HookConsumerWidget {
       } catch (_) {
         if (context.mounted) {
           systemNotice.showErrorNotice(
-            wasBlocked
-                ? context.l10n.failedToUnblockUser
-                : context.l10n.failedToBlockUser,
+            wasBlocked ? context.l10n.failedToUnblockUser : context.l10n.failedToBlockUser,
           );
         }
       }
