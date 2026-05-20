@@ -97,6 +97,7 @@ NotificationSubscription _newSubscription(
   Locale locale = const Locale('en'),
   bool enabled = true,
   bool requestPermissionOnStart = true,
+  bool Function(NotificationUpdate update)? shouldShowNotification,
 }) {
   return NotificationSubscription(
     notificationService: notificationService,
@@ -104,6 +105,7 @@ NotificationSubscription _newSubscription(
     getLocale: () => locale,
     enabled: enabled,
     requestPermissionOnStart: requestPermissionOnStart,
+    shouldShowNotification: shouldShowNotification,
   );
 }
 
@@ -548,6 +550,25 @@ void main() {
       await _newSubscription(
         mockNotificationService,
         activeChatId: testGroupId,
+      ).handleUpdate(update);
+
+      expect(mockNotificationService.showCalls, isEmpty);
+    });
+
+    test('skips notification when local notification gate is closed', () async {
+      final update = NotificationUpdate(
+        trigger: NotificationTrigger.newMessage,
+        mlsGroupId: testGroupId,
+        isDm: true,
+        receiver: const NotificationUser(pubkey: testPubkeyA),
+        sender: const NotificationUser(pubkey: testPubkeyB, displayName: 'Alice'),
+        content: 'Hello',
+        timestamp: DateTime.now(),
+      );
+
+      await _newSubscription(
+        mockNotificationService,
+        shouldShowNotification: (_) => false,
       ).handleUpdate(update);
 
       expect(mockNotificationService.showCalls, isEmpty);
@@ -1119,9 +1140,9 @@ void main() {
       expect(sub.isRunning, isFalse);
     });
 
-    test('default enabled uses Platform.isAndroid', () async {
-      // On non-Android test platforms, constructing without `enabled` defaults
-      // to Platform.isAndroid (false here), so start() should be a no-op.
+    test('default enabled is false on unsupported host platforms', () async {
+      // On non-mobile test platforms, constructing without `enabled` defaults
+      // to false, so start() should be a no-op.
       final sub = NotificationSubscription(
         notificationService: mockNotificationService,
         getActiveChatId: () => null,

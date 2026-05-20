@@ -1,5 +1,5 @@
 use crate::api::error::ApiError;
-use crate::api::utils::group_id_to_string;
+use crate::api::utils::{group_id_from_string, group_id_to_string};
 use crate::api::{wn, wn_session};
 use crate::frb_generated::StreamSink;
 use chrono::{DateTime, Utc};
@@ -11,6 +11,9 @@ use whitenoise::whitenoise::notification_streaming::{
     NotificationUser as WhitenoiseNotificationUser,
 };
 use whitenoise::whitenoise::push_notifications::{
+    GroupPushDebugInfo as WhitenoiseGroupPushDebugInfo,
+    GroupPushTokenDebugEntry as WhitenoiseGroupPushTokenDebugEntry,
+    LocalPushRegistrationDebugInfo as WhitenoiseLocalPushRegistrationDebugInfo,
     PushPlatform as WhitenoisePushPlatform, PushRegistration as WhitenoisePushRegistration,
 };
 
@@ -158,12 +161,105 @@ impl From<WhitenoisePushRegistration> for PushRegistration {
     }
 }
 
+#[frb(non_opaque)]
+#[derive(Debug, Clone)]
+pub struct LocalPushRegistrationDebugInfo {
+    pub registered: bool,
+    pub shareable: bool,
+    pub notifications_enabled: bool,
+    pub local_leaf_index: Option<u32>,
+    pub local_token_cached: bool,
+}
+
+impl From<WhitenoiseLocalPushRegistrationDebugInfo> for LocalPushRegistrationDebugInfo {
+    fn from(info: WhitenoiseLocalPushRegistrationDebugInfo) -> Self {
+        Self {
+            registered: info.registered,
+            shareable: info.shareable,
+            notifications_enabled: info.notifications_enabled,
+            local_leaf_index: info.local_leaf_index,
+            local_token_cached: info.local_token_cached,
+        }
+    }
+}
+
+#[frb(non_opaque)]
+#[derive(Debug, Clone)]
+pub struct GroupPushTokenDebugEntry {
+    pub member_pubkey: String,
+    pub leaf_index: u32,
+    pub server_pubkey: String,
+    pub has_relay_hint: bool,
+    pub active_leaf: bool,
+    pub member_matches_active_leaf: bool,
+    pub is_local_member: bool,
+    pub updated_at: DateTime<Utc>,
+}
+
+impl From<WhitenoiseGroupPushTokenDebugEntry> for GroupPushTokenDebugEntry {
+    fn from(entry: WhitenoiseGroupPushTokenDebugEntry) -> Self {
+        Self {
+            member_pubkey: entry.member_pubkey.to_hex(),
+            leaf_index: entry.leaf_index,
+            server_pubkey: entry.server_pubkey.to_hex(),
+            has_relay_hint: entry.has_relay_hint,
+            active_leaf: entry.active_leaf,
+            member_matches_active_leaf: entry.member_matches_active_leaf,
+            is_local_member: entry.is_local_member,
+            updated_at: entry.updated_at,
+        }
+    }
+}
+
+#[frb(non_opaque)]
+#[derive(Debug, Clone)]
+pub struct GroupPushDebugInfo {
+    pub total_token_count: u32,
+    pub active_token_count: u32,
+    pub stale_token_count: u32,
+    pub missing_relay_hint_count: u32,
+    pub last_token_list_updated_at: Option<DateTime<Utc>>,
+    pub local_registration: LocalPushRegistrationDebugInfo,
+    pub tokens: Vec<GroupPushTokenDebugEntry>,
+}
+
+impl From<WhitenoiseGroupPushDebugInfo> for GroupPushDebugInfo {
+    fn from(info: WhitenoiseGroupPushDebugInfo) -> Self {
+        Self {
+            total_token_count: info.total_token_count as u32,
+            active_token_count: info.active_token_count as u32,
+            stale_token_count: info.stale_token_count as u32,
+            missing_relay_hint_count: info.missing_relay_hint_count as u32,
+            last_token_list_updated_at: info.last_token_list_updated_at,
+            local_registration: info.local_registration.into(),
+            tokens: info
+                .tokens
+                .into_iter()
+                .map(GroupPushTokenDebugEntry::from)
+                .collect(),
+        }
+    }
+}
+
 #[frb]
+// Reserved for settings/sign-out flows that need to inspect or clear the local push registration.
 pub async fn get_push_registration(pubkey: String) -> Result<Option<PushRegistration>, ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
     let session = wn_session(&pubkey).await?;
     let registration = session.push().registration().await?;
     Ok(registration.map(PushRegistration::from))
+}
+
+#[frb]
+pub async fn get_group_push_debug_info(
+    pubkey: String,
+    group_id: String,
+) -> Result<GroupPushDebugInfo, ApiError> {
+    let pubkey = PublicKey::parse(&pubkey)?;
+    let group_id = group_id_from_string(&group_id)?;
+    let session = wn_session(&pubkey).await?;
+    let info = session.push().get_group_debug_info(&group_id).await?;
+    Ok(info.into())
 }
 
 #[frb]
@@ -190,6 +286,7 @@ pub async fn upsert_push_registration(
 }
 
 #[frb]
+// Reserved for settings/sign-out flows that need to inspect or clear the local push registration.
 pub async fn clear_push_registration(pubkey: String) -> Result<(), ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
     let session = wn_session(&pubkey).await?;

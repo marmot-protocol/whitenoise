@@ -69,6 +69,18 @@ Future<List<ChatSummary>> getChatList({required String accountPubkey}) =>
       accountPubkey: accountPubkey,
     );
 
+Future<List<ChatSummary>> fetchChatListSnapshot({
+  required String accountPubkey,
+}) => RustLib.instance.api.crateApiChatListFetchChatListSnapshot(
+  accountPubkey: accountPubkey,
+);
+
+Future<List<ChatSummary>> fetchArchivedChatListSnapshot({
+  required String accountPubkey,
+}) => RustLib.instance.api.crateApiChatListFetchArchivedChatListSnapshot(
+  accountPubkey: accountPubkey,
+);
+
 /// Subscribe to real-time chat list updates for an account.
 ///
 /// The stream first emits an `InitialSnapshot` containing all current chats,
@@ -159,6 +171,9 @@ enum ChatListUpdateTrigger {
 
   /// A user was blocked or unblocked.
   userBlockChanged,
+
+  /// A foreground catch-up replay refreshed this chat from the local snapshot.
+  snapshotRefresh,
 }
 
 @freezed

@@ -120,6 +120,29 @@ void main() {
       expect(startSubscriptionCalls, 1);
     });
 
+    test('repeat leaves subscription stopped when bootstrap retry still fails', () async {
+      var bootstrapCalls = 0;
+      var startSubscriptionCalls = 0;
+
+      final handler = NotificationTaskHandler(
+        bootstrapIsolate: () async {
+          bootstrapCalls++;
+          return false;
+        },
+        startSubscription: () async {
+          startSubscriptionCalls++;
+          return true;
+        },
+      );
+
+      await handler.onStart(DateTime(2026), TaskStarter.system);
+      handler.onRepeatEvent(DateTime(2026));
+      await _flushTaskHandler();
+
+      expect(bootstrapCalls, 2);
+      expect(startSubscriptionCalls, 0);
+    });
+
     test('repeat health-checks relay subscriptions without duplicating stream', () async {
       var bootstrapCalls = 0;
       var ensureSubscriptionsCalls = 0;
@@ -285,6 +308,64 @@ void main() {
 
       expect(ensureSubscriptionsCalls, 0);
       expect(startSubscriptionCalls, 0);
+    });
+
+    test('destroy stops the owned subscription', () async {
+      final calls = <String>[];
+      var subscriptionRunning = false;
+
+      final handler = NotificationTaskHandler(
+        bootstrapIsolate: () async => true,
+        loadLocale: () async => const Locale('en'),
+        ensureExternalSigners: () async {},
+        ensureSubscriptions: () async {},
+        startSubscription: () async {
+          calls.add('start');
+          subscriptionRunning = true;
+          return true;
+        },
+        isSubscriptionRunning: () => subscriptionRunning,
+        stopSubscription: () async {
+          calls.add('stop');
+          subscriptionRunning = false;
+        },
+      );
+
+      await handler.onStart(DateTime(2026), TaskStarter.system);
+      await handler.onDestroy(DateTime(2026), false);
+
+      expect(calls, ['start', 'stop']);
+    });
+
+    test('button and dismissal callbacks are no-ops', () {
+      final handler = NotificationTaskHandler();
+
+      handler.onNotificationButtonPressed('ignored');
+      handler.onNotificationDismissed();
+    });
+  });
+
+  group('PendingNotificationTap', () {
+    test('uses payload fields for equality and hash code', () {
+      const tap = PendingNotificationTap(
+        groupId: 'group-1',
+        isInvite: false,
+        receiverPubkey: 'receiver-1',
+      );
+      const matching = PendingNotificationTap(
+        groupId: 'group-1',
+        isInvite: false,
+        receiverPubkey: 'receiver-1',
+      );
+      const different = PendingNotificationTap(
+        groupId: 'group-2',
+        isInvite: false,
+        receiverPubkey: 'receiver-1',
+      );
+
+      expect(tap, matching);
+      expect(tap.hashCode, matching.hashCode);
+      expect(tap, isNot(different));
     });
   });
 

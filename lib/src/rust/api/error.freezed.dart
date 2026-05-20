@@ -55,11 +55,12 @@ extension ApiErrorPatterns on ApiError {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ApiError_Whitenoise value)?  whitenoise,TResult Function( ApiError_InvalidKey value)?  invalidKey,TResult Function( ApiError_NostrUrl value)?  nostrUrl,TResult Function( ApiError_NostrTag value)?  nostrTag,TResult Function( ApiError_NostrEvent value)?  nostrEvent,TResult Function( ApiError_NostrParse value)?  nostrParse,TResult Function( ApiError_NostrHex value)?  nostrHex,TResult Function( ApiError_LoginInvalidKeyFormat value)?  loginInvalidKeyFormat,TResult Function( ApiError_LoginNoRelayConnections value)?  loginNoRelayConnections,TResult Function( ApiError_LoginTimeout value)?  loginTimeout,TResult Function( ApiError_LoginNoLoginInProgress value)?  loginNoLoginInProgress,TResult Function( ApiError_LoginInternal value)?  loginInternal,TResult Function( ApiError_LoginKeyringUnavailable value)?  loginKeyringUnavailable,TResult Function( ApiError_Other value)?  other,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( ApiError_Whitenoise value)?  whitenoise,TResult Function( ApiError_DatabasePoolTimedOut value)?  databasePoolTimedOut,TResult Function( ApiError_InvalidKey value)?  invalidKey,TResult Function( ApiError_NostrUrl value)?  nostrUrl,TResult Function( ApiError_NostrTag value)?  nostrTag,TResult Function( ApiError_NostrEvent value)?  nostrEvent,TResult Function( ApiError_NostrParse value)?  nostrParse,TResult Function( ApiError_NostrHex value)?  nostrHex,TResult Function( ApiError_LoginInvalidKeyFormat value)?  loginInvalidKeyFormat,TResult Function( ApiError_LoginNoRelayConnections value)?  loginNoRelayConnections,TResult Function( ApiError_LoginTimeout value)?  loginTimeout,TResult Function( ApiError_LoginNoLoginInProgress value)?  loginNoLoginInProgress,TResult Function( ApiError_LoginInternal value)?  loginInternal,TResult Function( ApiError_LoginKeyringUnavailable value)?  loginKeyringUnavailable,TResult Function( ApiError_Other value)?  other,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case ApiError_Whitenoise() when whitenoise != null:
-return whitenoise(_that);case ApiError_InvalidKey() when invalidKey != null:
+return whitenoise(_that);case ApiError_DatabasePoolTimedOut() when databasePoolTimedOut != null:
+return databasePoolTimedOut(_that);case ApiError_InvalidKey() when invalidKey != null:
 return invalidKey(_that);case ApiError_NostrUrl() when nostrUrl != null:
 return nostrUrl(_that);case ApiError_NostrTag() when nostrTag != null:
 return nostrTag(_that);case ApiError_NostrEvent() when nostrEvent != null:
@@ -90,11 +91,12 @@ return other(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ApiError_Whitenoise value)  whitenoise,required TResult Function( ApiError_InvalidKey value)  invalidKey,required TResult Function( ApiError_NostrUrl value)  nostrUrl,required TResult Function( ApiError_NostrTag value)  nostrTag,required TResult Function( ApiError_NostrEvent value)  nostrEvent,required TResult Function( ApiError_NostrParse value)  nostrParse,required TResult Function( ApiError_NostrHex value)  nostrHex,required TResult Function( ApiError_LoginInvalidKeyFormat value)  loginInvalidKeyFormat,required TResult Function( ApiError_LoginNoRelayConnections value)  loginNoRelayConnections,required TResult Function( ApiError_LoginTimeout value)  loginTimeout,required TResult Function( ApiError_LoginNoLoginInProgress value)  loginNoLoginInProgress,required TResult Function( ApiError_LoginInternal value)  loginInternal,required TResult Function( ApiError_LoginKeyringUnavailable value)  loginKeyringUnavailable,required TResult Function( ApiError_Other value)  other,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( ApiError_Whitenoise value)  whitenoise,required TResult Function( ApiError_DatabasePoolTimedOut value)  databasePoolTimedOut,required TResult Function( ApiError_InvalidKey value)  invalidKey,required TResult Function( ApiError_NostrUrl value)  nostrUrl,required TResult Function( ApiError_NostrTag value)  nostrTag,required TResult Function( ApiError_NostrEvent value)  nostrEvent,required TResult Function( ApiError_NostrParse value)  nostrParse,required TResult Function( ApiError_NostrHex value)  nostrHex,required TResult Function( ApiError_LoginInvalidKeyFormat value)  loginInvalidKeyFormat,required TResult Function( ApiError_LoginNoRelayConnections value)  loginNoRelayConnections,required TResult Function( ApiError_LoginTimeout value)  loginTimeout,required TResult Function( ApiError_LoginNoLoginInProgress value)  loginNoLoginInProgress,required TResult Function( ApiError_LoginInternal value)  loginInternal,required TResult Function( ApiError_LoginKeyringUnavailable value)  loginKeyringUnavailable,required TResult Function( ApiError_Other value)  other,}){
 final _that = this;
 switch (_that) {
 case ApiError_Whitenoise():
-return whitenoise(_that);case ApiError_InvalidKey():
+return whitenoise(_that);case ApiError_DatabasePoolTimedOut():
+return databasePoolTimedOut(_that);case ApiError_InvalidKey():
 return invalidKey(_that);case ApiError_NostrUrl():
 return nostrUrl(_that);case ApiError_NostrTag():
 return nostrTag(_that);case ApiError_NostrEvent():
@@ -121,11 +123,12 @@ return other(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ApiError_Whitenoise value)?  whitenoise,TResult? Function( ApiError_InvalidKey value)?  invalidKey,TResult? Function( ApiError_NostrUrl value)?  nostrUrl,TResult? Function( ApiError_NostrTag value)?  nostrTag,TResult? Function( ApiError_NostrEvent value)?  nostrEvent,TResult? Function( ApiError_NostrParse value)?  nostrParse,TResult? Function( ApiError_NostrHex value)?  nostrHex,TResult? Function( ApiError_LoginInvalidKeyFormat value)?  loginInvalidKeyFormat,TResult? Function( ApiError_LoginNoRelayConnections value)?  loginNoRelayConnections,TResult? Function( ApiError_LoginTimeout value)?  loginTimeout,TResult? Function( ApiError_LoginNoLoginInProgress value)?  loginNoLoginInProgress,TResult? Function( ApiError_LoginInternal value)?  loginInternal,TResult? Function( ApiError_LoginKeyringUnavailable value)?  loginKeyringUnavailable,TResult? Function( ApiError_Other value)?  other,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( ApiError_Whitenoise value)?  whitenoise,TResult? Function( ApiError_DatabasePoolTimedOut value)?  databasePoolTimedOut,TResult? Function( ApiError_InvalidKey value)?  invalidKey,TResult? Function( ApiError_NostrUrl value)?  nostrUrl,TResult? Function( ApiError_NostrTag value)?  nostrTag,TResult? Function( ApiError_NostrEvent value)?  nostrEvent,TResult? Function( ApiError_NostrParse value)?  nostrParse,TResult? Function( ApiError_NostrHex value)?  nostrHex,TResult? Function( ApiError_LoginInvalidKeyFormat value)?  loginInvalidKeyFormat,TResult? Function( ApiError_LoginNoRelayConnections value)?  loginNoRelayConnections,TResult? Function( ApiError_LoginTimeout value)?  loginTimeout,TResult? Function( ApiError_LoginNoLoginInProgress value)?  loginNoLoginInProgress,TResult? Function( ApiError_LoginInternal value)?  loginInternal,TResult? Function( ApiError_LoginKeyringUnavailable value)?  loginKeyringUnavailable,TResult? Function( ApiError_Other value)?  other,}){
 final _that = this;
 switch (_that) {
 case ApiError_Whitenoise() when whitenoise != null:
-return whitenoise(_that);case ApiError_InvalidKey() when invalidKey != null:
+return whitenoise(_that);case ApiError_DatabasePoolTimedOut() when databasePoolTimedOut != null:
+return databasePoolTimedOut(_that);case ApiError_InvalidKey() when invalidKey != null:
 return invalidKey(_that);case ApiError_NostrUrl() when nostrUrl != null:
 return nostrUrl(_that);case ApiError_NostrTag() when nostrTag != null:
 return nostrTag(_that);case ApiError_NostrEvent() when nostrEvent != null:
@@ -155,10 +158,11 @@ return other(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String message)?  whitenoise,TResult Function( String message)?  invalidKey,TResult Function( String message)?  nostrUrl,TResult Function( String message)?  nostrTag,TResult Function( String message)?  nostrEvent,TResult Function( String message)?  nostrParse,TResult Function( String message)?  nostrHex,TResult Function( String message)?  loginInvalidKeyFormat,TResult Function()?  loginNoRelayConnections,TResult Function( String message)?  loginTimeout,TResult Function()?  loginNoLoginInProgress,TResult Function( String message)?  loginInternal,TResult Function( String message)?  loginKeyringUnavailable,TResult Function( String message)?  other,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String message)?  whitenoise,TResult Function( String message)?  databasePoolTimedOut,TResult Function( String message)?  invalidKey,TResult Function( String message)?  nostrUrl,TResult Function( String message)?  nostrTag,TResult Function( String message)?  nostrEvent,TResult Function( String message)?  nostrParse,TResult Function( String message)?  nostrHex,TResult Function( String message)?  loginInvalidKeyFormat,TResult Function()?  loginNoRelayConnections,TResult Function( String message)?  loginTimeout,TResult Function()?  loginNoLoginInProgress,TResult Function( String message)?  loginInternal,TResult Function( String message)?  loginKeyringUnavailable,TResult Function( String message)?  other,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case ApiError_Whitenoise() when whitenoise != null:
-return whitenoise(_that.message);case ApiError_InvalidKey() when invalidKey != null:
+return whitenoise(_that.message);case ApiError_DatabasePoolTimedOut() when databasePoolTimedOut != null:
+return databasePoolTimedOut(_that.message);case ApiError_InvalidKey() when invalidKey != null:
 return invalidKey(_that.message);case ApiError_NostrUrl() when nostrUrl != null:
 return nostrUrl(_that.message);case ApiError_NostrTag() when nostrTag != null:
 return nostrTag(_that.message);case ApiError_NostrEvent() when nostrEvent != null:
@@ -189,10 +193,11 @@ return other(_that.message);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String message)  whitenoise,required TResult Function( String message)  invalidKey,required TResult Function( String message)  nostrUrl,required TResult Function( String message)  nostrTag,required TResult Function( String message)  nostrEvent,required TResult Function( String message)  nostrParse,required TResult Function( String message)  nostrHex,required TResult Function( String message)  loginInvalidKeyFormat,required TResult Function()  loginNoRelayConnections,required TResult Function( String message)  loginTimeout,required TResult Function()  loginNoLoginInProgress,required TResult Function( String message)  loginInternal,required TResult Function( String message)  loginKeyringUnavailable,required TResult Function( String message)  other,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String message)  whitenoise,required TResult Function( String message)  databasePoolTimedOut,required TResult Function( String message)  invalidKey,required TResult Function( String message)  nostrUrl,required TResult Function( String message)  nostrTag,required TResult Function( String message)  nostrEvent,required TResult Function( String message)  nostrParse,required TResult Function( String message)  nostrHex,required TResult Function( String message)  loginInvalidKeyFormat,required TResult Function()  loginNoRelayConnections,required TResult Function( String message)  loginTimeout,required TResult Function()  loginNoLoginInProgress,required TResult Function( String message)  loginInternal,required TResult Function( String message)  loginKeyringUnavailable,required TResult Function( String message)  other,}) {final _that = this;
 switch (_that) {
 case ApiError_Whitenoise():
-return whitenoise(_that.message);case ApiError_InvalidKey():
+return whitenoise(_that.message);case ApiError_DatabasePoolTimedOut():
+return databasePoolTimedOut(_that.message);case ApiError_InvalidKey():
 return invalidKey(_that.message);case ApiError_NostrUrl():
 return nostrUrl(_that.message);case ApiError_NostrTag():
 return nostrTag(_that.message);case ApiError_NostrEvent():
@@ -219,10 +224,11 @@ return other(_that.message);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String message)?  whitenoise,TResult? Function( String message)?  invalidKey,TResult? Function( String message)?  nostrUrl,TResult? Function( String message)?  nostrTag,TResult? Function( String message)?  nostrEvent,TResult? Function( String message)?  nostrParse,TResult? Function( String message)?  nostrHex,TResult? Function( String message)?  loginInvalidKeyFormat,TResult? Function()?  loginNoRelayConnections,TResult? Function( String message)?  loginTimeout,TResult? Function()?  loginNoLoginInProgress,TResult? Function( String message)?  loginInternal,TResult? Function( String message)?  loginKeyringUnavailable,TResult? Function( String message)?  other,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String message)?  whitenoise,TResult? Function( String message)?  databasePoolTimedOut,TResult? Function( String message)?  invalidKey,TResult? Function( String message)?  nostrUrl,TResult? Function( String message)?  nostrTag,TResult? Function( String message)?  nostrEvent,TResult? Function( String message)?  nostrParse,TResult? Function( String message)?  nostrHex,TResult? Function( String message)?  loginInvalidKeyFormat,TResult? Function()?  loginNoRelayConnections,TResult? Function( String message)?  loginTimeout,TResult? Function()?  loginNoLoginInProgress,TResult? Function( String message)?  loginInternal,TResult? Function( String message)?  loginKeyringUnavailable,TResult? Function( String message)?  other,}) {final _that = this;
 switch (_that) {
 case ApiError_Whitenoise() when whitenoise != null:
-return whitenoise(_that.message);case ApiError_InvalidKey() when invalidKey != null:
+return whitenoise(_that.message);case ApiError_DatabasePoolTimedOut() when databasePoolTimedOut != null:
+return databasePoolTimedOut(_that.message);case ApiError_InvalidKey() when invalidKey != null:
 return invalidKey(_that.message);case ApiError_NostrUrl() when nostrUrl != null:
 return nostrUrl(_that.message);case ApiError_NostrTag() when nostrTag != null:
 return nostrTag(_that.message);case ApiError_NostrEvent() when nostrEvent != null:
@@ -248,7 +254,7 @@ return other(_that.message);case _:
 
 class ApiError_Whitenoise extends ApiError {
   const ApiError_Whitenoise({required this.message}): super._();
-  
+
 
  final  String message;
 
@@ -312,9 +318,75 @@ as String,
 /// @nodoc
 
 
+class ApiError_DatabasePoolTimedOut extends ApiError {
+  const ApiError_DatabasePoolTimedOut({required this.message}): super._();
+
+
+ final  String message;
+
+/// Create a copy of ApiError
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ApiError_DatabasePoolTimedOutCopyWith<ApiError_DatabasePoolTimedOut> get copyWith => _$ApiError_DatabasePoolTimedOutCopyWithImpl<ApiError_DatabasePoolTimedOut>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ApiError_DatabasePoolTimedOut&&(identical(other.message, message) || other.message == message));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,message);
+
+@override
+String toString() {
+  return 'ApiError.databasePoolTimedOut(message: $message)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ApiError_DatabasePoolTimedOutCopyWith<$Res> implements $ApiErrorCopyWith<$Res> {
+  factory $ApiError_DatabasePoolTimedOutCopyWith(ApiError_DatabasePoolTimedOut value, $Res Function(ApiError_DatabasePoolTimedOut) _then) = _$ApiError_DatabasePoolTimedOutCopyWithImpl;
+@useResult
+$Res call({
+ String message
+});
+
+
+
+
+}
+/// @nodoc
+class _$ApiError_DatabasePoolTimedOutCopyWithImpl<$Res>
+    implements $ApiError_DatabasePoolTimedOutCopyWith<$Res> {
+  _$ApiError_DatabasePoolTimedOutCopyWithImpl(this._self, this._then);
+
+  final ApiError_DatabasePoolTimedOut _self;
+  final $Res Function(ApiError_DatabasePoolTimedOut) _then;
+
+/// Create a copy of ApiError
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? message = null,}) {
+  return _then(ApiError_DatabasePoolTimedOut(
+message: null == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
 class ApiError_InvalidKey extends ApiError {
   const ApiError_InvalidKey({required this.message}): super._();
-  
+
 
  final  String message;
 
@@ -380,7 +452,7 @@ as String,
 
 class ApiError_NostrUrl extends ApiError {
   const ApiError_NostrUrl({required this.message}): super._();
-  
+
 
  final  String message;
 
@@ -446,7 +518,7 @@ as String,
 
 class ApiError_NostrTag extends ApiError {
   const ApiError_NostrTag({required this.message}): super._();
-  
+
 
  final  String message;
 
@@ -512,7 +584,7 @@ as String,
 
 class ApiError_NostrEvent extends ApiError {
   const ApiError_NostrEvent({required this.message}): super._();
-  
+
 
  final  String message;
 
@@ -578,7 +650,7 @@ as String,
 
 class ApiError_NostrParse extends ApiError {
   const ApiError_NostrParse({required this.message}): super._();
-  
+
 
  final  String message;
 
@@ -644,7 +716,7 @@ as String,
 
 class ApiError_NostrHex extends ApiError {
   const ApiError_NostrHex({required this.message}): super._();
-  
+
 
  final  String message;
 
@@ -710,7 +782,7 @@ as String,
 
 class ApiError_LoginInvalidKeyFormat extends ApiError {
   const ApiError_LoginInvalidKeyFormat({required this.message}): super._();
-  
+
 
  final  String message;
 
@@ -776,7 +848,7 @@ as String,
 
 class ApiError_LoginNoRelayConnections extends ApiError {
   const ApiError_LoginNoRelayConnections(): super._();
-  
+
 
 
 
@@ -808,7 +880,7 @@ String toString() {
 
 class ApiError_LoginTimeout extends ApiError {
   const ApiError_LoginTimeout({required this.message}): super._();
-  
+
 
  final  String message;
 
@@ -874,7 +946,7 @@ as String,
 
 class ApiError_LoginNoLoginInProgress extends ApiError {
   const ApiError_LoginNoLoginInProgress(): super._();
-  
+
 
 
 
@@ -906,7 +978,7 @@ String toString() {
 
 class ApiError_LoginInternal extends ApiError {
   const ApiError_LoginInternal({required this.message}): super._();
-  
+
 
  final  String message;
 
@@ -972,7 +1044,7 @@ as String,
 
 class ApiError_LoginKeyringUnavailable extends ApiError {
   const ApiError_LoginKeyringUnavailable({required this.message}): super._();
-  
+
 
  final  String message;
 
@@ -1038,7 +1110,7 @@ as String,
 
 class ApiError_Other extends ApiError {
   const ApiError_Other({required this.message}): super._();
-  
+
 
  final  String message;
 

@@ -3997,11 +3997,14 @@ name = "rust_lib_whitenoise"
 version = "0.2.1"
 dependencies = [
  "anyhow",
+ "apple-native-keyring-store",
  "chrono",
  "flutter_rust_bridge",
  "hex",
+ "keyring-core",
  "nostr-sdk",
  "serde_json",
+ "sqlx",
  "thiserror 2.0.18",
  "tokio",
  "tracing",
@@ -5521,7 +5524,7 @@ checksum = "a28ac98ddc8b9274cb41bb4d9d4d5c425b6020c50c46f25559911905610b4a88"
 [[package]]
 name = "whitenoise"
 version = "0.2.1"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=fdbbf25a5bc32d39890417b65bb194226e0b0564#fdbbf25a5bc32d39890417b65bb194226e0b0564"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=062a6b4b7b0bf2a9d7f81c6154b49667643ad516#062a6b4b7b0bf2a9d7f81c6154b49667643ad516"
 dependencies = [
  "android-native-keyring-store",
  "apple-native-keyring-store",
@@ -5567,7 +5570,7 @@ dependencies = [
 [[package]]
 name = "whitenoise-macros"
 version = "0.1.0"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=fdbbf25a5bc32d39890417b65bb194226e0b0564#fdbbf25a5bc32d39890417b65bb194226e0b0564"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=062a6b4b7b0bf2a9d7f81c6154b49667643ad516#062a6b4b7b0bf2a9d7f81c6154b49667643ad516"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5577,7 +5580,7 @@ dependencies = [
 [[package]]
 name = "whitenoise-markdown"
 version = "0.1.0"
-source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=fdbbf25a5bc32d39890417b65bb194226e0b0564#fdbbf25a5bc32d39890417b65bb194226e0b0564"
+source = "git+https://github.com/marmot-protocol/whitenoise-rs?rev=062a6b4b7b0bf2a9d7f81c6154b49667643ad516#062a6b4b7b0bf2a9d7f81c6154b49667643ad516"
 dependencies = [
  "serde",
 ]

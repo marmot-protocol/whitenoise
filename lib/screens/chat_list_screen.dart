@@ -182,7 +182,10 @@ class ChatListScreen extends HookConsumerWidget {
     final typography = context.typographyScaled;
     final pubkey = ref.watch(accountPubkeyProvider);
     final chatListResult = useChatList(pubkey);
-    final archivedChatListResult = useChatList(pubkey, archived: true);
+    final archivedChatListResult = useChatList(
+      pubkey,
+      archived: true,
+    );
     final selectedFilter = useState(ChatListFilter.chats);
     final safeAreaTop = MediaQuery.of(context).padding.top;
     final notice = useSystemNotice();

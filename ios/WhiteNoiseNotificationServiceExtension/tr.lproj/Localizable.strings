@@ -1,0 +1,9 @@
+"notification_title" = "White Noise";
+"notification_new_encrypted_message" = "Yeni şifreli mesaj";
+"notification_unknown_sender" = "Birisi";
+"notification_secure_chat_invite_title" = "Güvenli sohbet daveti";
+"notification_secure_group_invite_title" = "Güvenli grup daveti";
+"notification_secure_group" = "güvenli bir grup";
+"notification_dm_invite_body" = "%@ sizi güvenli bir sohbete davet etti";
+"notification_group_invite_body" = "%@ sizi %@ grubuna davet etti";
+"notification_group_message_body" = "%@: %@";

@@ -19,6 +19,7 @@ import 'api/drafts.dart';
 import 'api/error.dart';
 import 'api/group_state.dart';
 import 'api/groups.dart';
+import 'api/lifecycle.dart';
 import 'api/logs.dart';
 import 'api/markdown.dart';
 import 'api/media_files.dart';
@@ -392,6 +393,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   GroupInformation dco_decode_group_information(dynamic raw);
 
   @protected
+  GroupPushDebugInfo dco_decode_group_push_debug_info(dynamic raw);
+
+  @protected
+  GroupPushTokenDebugEntry dco_decode_group_push_token_debug_entry(dynamic raw);
+
+  @protected
   GroupState dco_decode_group_state(dynamic raw);
 
   @protected
@@ -460,6 +467,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   List<GroupInformation> dco_decode_list_group_information(dynamic raw);
 
   @protected
+  List<GroupPushTokenDebugEntry> dco_decode_list_group_push_token_debug_entry(
+    dynamic raw,
+  );
+
+  @protected
   List<GroupWithInfoAndMembership> dco_decode_list_group_with_info_and_membership(dynamic raw);
 
   @protected
@@ -523,6 +535,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<UserSearchResult> dco_decode_list_user_search_result(dynamic raw);
+
+  @protected
+  LocalPushRegistrationDebugInfo dco_decode_local_push_registration_debug_info(
+    dynamic raw,
+  );
 
   @protected
   LoginResult dco_decode_login_result(dynamic raw);
@@ -1085,6 +1102,16 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   GroupInformation sse_decode_group_information(SseDeserializer deserializer);
 
   @protected
+  GroupPushDebugInfo sse_decode_group_push_debug_info(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  GroupPushTokenDebugEntry sse_decode_group_push_token_debug_entry(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   GroupState sse_decode_group_state(SseDeserializer deserializer);
 
   @protected
@@ -1155,6 +1182,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<GroupInformation> sse_decode_list_group_information(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  List<GroupPushTokenDebugEntry> sse_decode_list_group_push_token_debug_entry(
     SseDeserializer deserializer,
   );
 
@@ -1250,6 +1282,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   List<UserSearchResult> sse_decode_list_user_search_result(
+    SseDeserializer deserializer,
+  );
+
+  @protected
+  LocalPushRegistrationDebugInfo sse_decode_local_push_registration_debug_info(
     SseDeserializer deserializer,
   );
 
@@ -1938,6 +1975,18 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   );
 
   @protected
+  void sse_encode_group_push_debug_info(
+    GroupPushDebugInfo self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_group_push_token_debug_entry(
+    GroupPushTokenDebugEntry self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_group_state(GroupState self, SseSerializer serializer);
 
   @protected
@@ -2025,6 +2074,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_list_group_information(
     List<GroupInformation> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_list_group_push_token_debug_entry(
+    List<GroupPushTokenDebugEntry> self,
     SseSerializer serializer,
   );
 
@@ -2145,6 +2200,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_list_user_search_result(
     List<UserSearchResult> self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_local_push_registration_debug_info(
+    LocalPushRegistrationDebugInfo self,
     SseSerializer serializer,
   );
 
