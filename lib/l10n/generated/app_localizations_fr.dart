@@ -328,6 +328,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get holdToShareQrCode => 'Maintenez pour partager le QR code';
 
   @override
+  String get shareQrCodeError => 'Impossible de partager le QR code. Veuillez réessayer.';
+
+  @override
   String get signOutTitle => 'Déconnexion';
 
   @override

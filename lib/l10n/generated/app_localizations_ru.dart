@@ -328,6 +328,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get holdToShareQrCode => 'Удерживайте для отправки QR-кода';
 
   @override
+  String get shareQrCodeError => 'Не удалось поделиться QR-кодом. Попробуйте ещё раз.';
+
+  @override
   String get signOutTitle => 'Выход';
 
   @override

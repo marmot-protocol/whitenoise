@@ -57,9 +57,17 @@ class ShareProfileScreen extends HookConsumerWidget {
       end: Colors.grey,
     ).animate(CurvedAnimation(parent: qrColorAnim, curve: Curves.easeIn));
 
+    final isMounted = useRef(true);
+    useEffect(
+      () =>
+          () => isMounted.value = false,
+      const [],
+    );
+
     Future<void> captureAndShareQr() async {
       final boundary = qrRepaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
       if (boundary == null) return;
+      final errorMessage = context.l10n.shareQrCodeError;
       // Start dots and animation immediately; capture the last painted frame
       // in parallel — it's still full-color since no new frame has rendered yet.
       dotCount.value = 1;
@@ -69,16 +77,22 @@ class ShareProfileScreen extends HookConsumerWidget {
           .then((img) => img.toByteData(format: ui.ImageByteFormat.png));
       // onLongPressStart fires at 500ms total; dots step every 500ms after that
       await Future.delayed(const Duration(milliseconds: 500));
-      if (!isHolding.value) return;
+      if (!isMounted.value || !isHolding.value) return;
       dotCount.value = 2;
       await Future.delayed(const Duration(milliseconds: 500));
-      if (!isHolding.value) return;
+      if (!isMounted.value || !isHolding.value) return;
       dotCount.value = 3;
-      final byteData = await captureFuture;
-      if (byteData == null || !isHolding.value) return;
-      await SharePlus.instance.share(
-        ShareParams(files: [XFile.fromData(byteData.buffer.asUint8List(), mimeType: 'image/png')]),
-      );
+      try {
+        final byteData = await captureFuture;
+        if (!isMounted.value || byteData == null || !isHolding.value) return;
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [XFile.fromData(byteData.buffer.asUint8List(), mimeType: 'image/png')],
+          ),
+        );
+      } catch (e) {
+        if (isMounted.value) showErrorNotice(errorMessage);
+      }
     }
 
     return Scaffold(

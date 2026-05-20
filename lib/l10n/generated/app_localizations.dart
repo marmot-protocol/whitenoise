@@ -681,6 +681,12 @@ abstract class AppLocalizations {
   /// **'Hold to share QR code'**
   String get holdToShareQrCode;
 
+  /// Error shown when QR code sharing fails
+  ///
+  /// In en, this message translates to:
+  /// **'Unable to share QR code. Please try again.'**
+  String get shareQrCodeError;
+
   /// Sign out screen title
   ///
   /// In en, this message translates to:

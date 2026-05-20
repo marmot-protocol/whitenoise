@@ -403,6 +403,10 @@
   "@holdToShareQrCode": {
     "description": "Text below QR code when user can long-press to share"
   },
+  "shareQrCodeError": "Unable to share QR code. Please try again.",
+  "@shareQrCodeError": {
+    "description": "Error shown when QR code sharing fails"
+  },
   "signOutTitle": "Sign out",
   "@signOutTitle": {
     "description": "Sign out screen title"

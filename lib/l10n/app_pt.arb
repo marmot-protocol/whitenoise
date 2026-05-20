@@ -95,6 +95,7 @@
   "shareProfileTitle": "Compartilhar e conectar",
   "scanToConnect": "Escaneie para conectar",
   "holdToShareQrCode": "Segure para compartilhar o QR code",
+  "shareQrCodeError": "Não foi possível compartilhar o QR code. Tente novamente.",
   "signOutTitle": "Sair",
   "signOutConfirmation": "Tem certeza de que deseja sair?",
   "signOutWarning": "Quando você sair do White Noise, suas conversas serão excluídas deste dispositivo e não poderão ser restauradas em outro dispositivo.",

@@ -327,6 +327,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get holdToShareQrCode => 'QR kodu paylaşmak için basılı tutun';
 
   @override
+  String get shareQrCodeError => 'QR kodu paylaşılamadı. Lütfen tekrar deneyin.';
+
+  @override
   String get signOutTitle => 'Çıkış yap';
 
   @override
