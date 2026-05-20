@@ -92,7 +92,9 @@ Future<void> expectLocalRelaysAvailable() async {
     final host = uri.host;
     final isLocal = host == 'localhost' || host == '127.0.0.1';
     if (!isLocal) continue;
-    final port = uri.hasPort ? uri.port : 80;
+    final port = uri.port != 0
+        ? uri.port
+        : (uri.scheme == 'wss' ? 443 : 80);
     await _expectLocalRelayAvailable(host, port);
   }
 }

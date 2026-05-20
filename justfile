@@ -199,42 +199,54 @@ _resolve-device device:
         exit 1; \
     fi
 
+# Resolves relay URLs: WHITENOISE_INTEGRATION_RELAYS env, else public relays when the
+# device is Android (emulator can't reach host localhost), else empty (= the localhost
+# defaults baked into integration_test/_support/app_setup.dart).
+_resolve-relays device:
+    @relays="${WHITENOISE_INTEGRATION_RELAYS:-}"; \
+    if [ -z "$relays" ] && command -v adb >/dev/null 2>&1 && adb devices 2>/dev/null | awk 'NR>1 && $2=="device" {print $1}' | grep -qx "{{ device }}"; then \
+        relays="wss://nos.lol,wss://relay.primal.net,wss://relay.damus.io"; \
+        echo "📡 Android device detected — using public relays: $relays" >&2; \
+    fi; \
+    echo "$relays"
+
 # Run Flutter integration tests. iOS uses local Nostr relays on ports 8080 and 7777;
 # Android auto-uses public relays (emulator can't reach host localhost).
 
 # Run one file by passing its path: `just int-test integration_test/messaging_interactions_test.dart`.
 # Device: WHITENOISE_INTEGRATION_DEVICE, else the one booted simulator/emulator.
 # Relays: WHITENOISE_INTEGRATION_RELAYS (comma-separated) overrides defaults.
-int-test target="integration_test/all_tests.dart" device=env("WHITENOISE_INTEGRATION_DEVICE", "") flavor="staging" relays=env("WHITENOISE_INTEGRATION_RELAYS", ""):
+int-test target="integration_test/all_tests.dart" device=env("WHITENOISE_INTEGRATION_DEVICE", "") flavor="staging":
     @echo "🧪 Testing Flutter integration flows..."
     @device=$(just _resolve-device "{{ device }}") || exit 1; \
-    relays="{{ relays }}"; \
-    if [ -z "$relays" ] && command -v adb >/dev/null 2>&1 && adb devices 2>/dev/null | awk 'NR>1 && $2=="device" {print $1}' | grep -qx "$device"; then \
-        relays="wss://nos.lol,wss://relay.primal.net,wss://relay.damus.io"; \
-        echo "📡 Android device detected — using public relays: $relays" >&2; \
-    fi; \
+    relays=$(just _resolve-relays "$device") || exit 1; \
     define=""; \
     [ -n "$relays" ] && define="--dart-define=WHITENOISE_INTEGRATION_RELAYS=$relays"; \
     if [ -n "{{ flavor }}" ]; then \
-        flutter test -d "$device" --flavor {{ flavor }} $define {{ target }}; \
+        flutter test -d "$device" --flavor {{ flavor }} ${define:+"$define"} {{ target }}; \
     else \
-        flutter test -d "$device" $define {{ target }}; \
+        flutter test -d "$device" ${define:+"$define"} {{ target }}; \
     fi
 
-# Run Flutter integration tests with minimal output. Requires local Nostr relays on ports 8080 and 7777.
+# Run Flutter integration tests with minimal output. iOS uses local Nostr relays on
+# ports 8080 and 7777; Android auto-uses public relays.
 
 # Run one file by passing its path: `just int-test-quiet integration_test/messaging_interactions_test.dart`.
-# Device: WHITENOISE_INTEGRATION_DEVICE, else the one booted simulator.
+# Device: WHITENOISE_INTEGRATION_DEVICE, else the one booted simulator/emulator.
+# Relays: WHITENOISE_INTEGRATION_RELAYS (comma-separated) overrides defaults.
 int-test-quiet target="integration_test/all_tests.dart" device=env("WHITENOISE_INTEGRATION_DEVICE", "") flavor="staging":
     @if [ ! -e "{{ target }}" ]; then \
         echo "No integration test target found at {{ target }}."; \
         exit 1; \
     fi; \
     device=$(just _resolve-device "{{ device }}") || exit 1; \
+    relays=$(just _resolve-relays "$device") || exit 1; \
+    define=""; \
+    [ -n "$relays" ] && define="--dart-define=WHITENOISE_INTEGRATION_RELAYS=$relays"; \
     if [ -n "{{ flavor }}" ]; then \
-        flutter test -d "$device" --flavor {{ flavor }} --no-pub --reporter=failures-only {{ target }}; \
+        flutter test -d "$device" --flavor {{ flavor }} --no-pub --reporter=failures-only ${define:+"$define"} {{ target }}; \
     else \
-        flutter test -d "$device" --no-pub --reporter=failures-only {{ target }}; \
+        flutter test -d "$device" --no-pub --reporter=failures-only ${define:+"$define"} {{ target }}; \
     fi
 
 coverage min="99":
