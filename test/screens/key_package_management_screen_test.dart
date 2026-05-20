@@ -25,6 +25,7 @@ class _MockApi extends MockWnApi {
   bool shouldThrowOnFetch = false;
   bool shouldThrowOnPublish = false;
   bool shouldThrowOnDeleteAll = false;
+  bool shouldThrowOnDeleteAllKeyPackages = false;
   bool shouldThrowOnDelete = false;
   bool shouldThrowOnRefreshAfterDelete = false;
   Completer<List<FlutterEvent>>? fetchCompleter;
@@ -32,6 +33,7 @@ class _MockApi extends MockWnApi {
   int keyPackagesFetchCallCount = 0;
   int keyPackagesPublishCallCount = 0;
   int keyPackagesDeleteAllCallCount = 0;
+  int keyPackagesDeleteAllLegacyCallCount = 0;
 
   @override
   Future<FlutterMetadata> crateApiUsersUserMetadata({
@@ -82,12 +84,25 @@ class _MockApi extends MockWnApi {
   Future<BigInt> crateApiAccountsDeleteAccountKeyPackages({
     required String accountPubkey,
   }) async {
-    keyPackagesDeleteAllCallCount++;
+    keyPackagesDeleteAllLegacyCallCount++;
     if (shouldThrowOnDeleteAll) {
       throw Exception('delete all error');
     }
     final count = keyPackages.where((p) => p.kind == NostrEventKinds.mlsKeyPackageLegacy).length;
     keyPackages.removeWhere((p) => p.kind == NostrEventKinds.mlsKeyPackageLegacy);
+    return BigInt.from(count);
+  }
+
+  @override
+  Future<BigInt> crateApiAccountsDeleteAllAccountKeyPackages({
+    required String accountPubkey,
+  }) async {
+    keyPackagesDeleteAllCallCount++;
+    if (shouldThrowOnDeleteAllKeyPackages) {
+      throw Exception('delete all key packages error');
+    }
+    final count = keyPackages.length;
+    keyPackages.clear();
     return BigInt.from(count);
   }
 }
@@ -129,6 +144,7 @@ void main() {
     mockApi.shouldThrowOnFetch = false;
     mockApi.shouldThrowOnPublish = false;
     mockApi.shouldThrowOnDeleteAll = false;
+    mockApi.shouldThrowOnDeleteAllKeyPackages = false;
     mockApi.shouldThrowOnDelete = false;
     mockApi.shouldThrowOnRefreshAfterDelete = false;
     mockApi.fetchCompleter = null;
@@ -136,6 +152,7 @@ void main() {
     mockApi.keyPackagesFetchCallCount = 0;
     mockApi.keyPackagesPublishCallCount = 0;
     mockApi.keyPackagesDeleteAllCallCount = 0;
+    mockApi.keyPackagesDeleteAllLegacyCallCount = 0;
   });
 
   Future<void> pumpScreen(WidgetTester tester) async {
@@ -158,6 +175,7 @@ void main() {
       expect(find.text('Publish New Key Package'), findsOneWidget);
       expect(find.text('Refresh Key Packages'), findsOneWidget);
       expect(find.text('Delete Legacy Key Packages'), findsOneWidget);
+      expect(find.text('Delete All Key Packages'), findsOneWidget);
     });
 
     testWidgets('displays empty state when no packages', (tester) async {
@@ -303,6 +321,64 @@ void main() {
       );
     });
 
+    testWidgets('delete all key packages success removes current and legacy packages', (
+      tester,
+    ) async {
+      mockApi.keyPackages = [
+        FlutterEvent(
+          id: 'pkg_legacy',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackageLegacy,
+          tags: const [],
+          content: '',
+        ),
+        FlutterEvent(
+          id: 'pkg_current',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackage,
+          tags: const [],
+          content: '',
+        ),
+      ];
+      await pumpScreen(tester);
+
+      await tester.tap(find.text('Delete All Key Packages'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(mockApi.keyPackagesDeleteAllCallCount, 1);
+      expect(mockApi.keyPackagesDeleteAllLegacyCallCount, 0);
+      expect(find.text('All key packages deleted'), findsOneWidget);
+      expect(find.text('Key Packages (0)'), findsOneWidget);
+    });
+
+    testWidgets('delete all key packages error shows message', (tester) async {
+      mockApi.keyPackages = [
+        FlutterEvent(
+          id: 'pkg_current',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackage,
+          tags: const [],
+          content: '',
+        ),
+      ];
+      mockApi.shouldThrowOnDeleteAllKeyPackages = true;
+      await pumpScreen(tester);
+
+      await tester.tap(find.text('Delete All Key Packages'));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 300));
+
+      expect(find.byType(WnSystemNotice), findsOneWidget);
+      expect(
+        find.text('Failed to delete all key packages. Please try again.'),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('delete legacy button is disabled when no legacy key packages', (tester) async {
       mockApi.keyPackages = [
         FlutterEvent(
@@ -410,6 +486,35 @@ void main() {
 
       expect(find.byType(WnPill), findsOneWidget);
       expect(find.text('Legacy'), findsOneWidget);
+    });
+
+    testWidgets('shows d tag value on current key packages only', (tester) async {
+      mockApi.keyPackages = [
+        FlutterEvent(
+          id: 'pkg_current',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackage,
+          tags: const [
+            ['d', 'canonical-slot'],
+          ],
+          content: '',
+        ),
+        FlutterEvent(
+          id: 'pkg_legacy',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackageLegacy,
+          tags: const [
+            ['d', 'legacy-slot'],
+          ],
+          content: '',
+        ),
+      ];
+      await pumpScreen(tester);
+
+      expect(find.text('d-tag: canonical-slot'), findsOneWidget);
+      expect(find.text('d-tag: legacy-slot'), findsNothing);
     });
 
     testWidgets('shows error message on initial fetch failure', (tester) async {
@@ -617,6 +722,7 @@ void main() {
           expect(findWnButtonByLabel('Refresh Key Packages').disabled, isTrue);
           expect(findWnButtonByLabel('Publish New Key Package').disabled, isTrue);
           expect(findWnButtonByLabel('Delete Legacy Key Packages').disabled, isTrue);
+          expect(findWnButtonByLabel('Delete All Key Packages').disabled, isTrue);
           expect(
             tester.widget<WnButton>(find.byKey(const Key('delete_key_package_pkg1'))).disabled,
             isTrue,

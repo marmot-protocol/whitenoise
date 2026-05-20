@@ -447,6 +447,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get deleteLegacyKeyPackages => '删除旧版密钥包';
 
   @override
+  String get deleteAllKeyPackages => '删除所有密钥包';
+
+  @override
   String keyPackagesCount(int count) {
     return '密钥包 ($count)';
   }
@@ -464,6 +467,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get legacyKeyPackagesDeleted => '旧版密钥包已删除';
 
   @override
+  String get allKeyPackagesDeleted => '所有密钥包已删除';
+
+  @override
   String get keyPackageDeleted => '密钥包已删除';
 
   @override
@@ -477,6 +483,9 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get legacyKeyPackageDeleteFailed => '删除旧版密钥包失败。请重试。';
+
+  @override
+  String get allKeyPackageDeleteFailed => '删除所有密钥包失败。请重试。';
 
   @override
   String get legacyLabel => '旧版';
@@ -1880,6 +1889,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get deleteLegacyKeyPackages => '刪除舊版金鑰套件';
 
   @override
+  String get deleteAllKeyPackages => '刪除所有金鑰套件';
+
+  @override
   String keyPackagesCount(int count) {
     return '金鑰套件 ($count)';
   }
@@ -1897,6 +1909,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get legacyKeyPackagesDeleted => '舊版金鑰套件已刪除';
 
   @override
+  String get allKeyPackagesDeleted => '所有金鑰套件已刪除';
+
+  @override
   String get keyPackageDeleted => '金鑰套件已刪除';
 
   @override
@@ -1910,6 +1925,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get legacyKeyPackageDeleteFailed => '刪除舊版金鑰套件失敗。請再試一次。';
+
+  @override
+  String get allKeyPackageDeleteFailed => '刪除所有金鑰套件失敗。請再試一次。';
 
   @override
   String get legacyLabel => '舊版';

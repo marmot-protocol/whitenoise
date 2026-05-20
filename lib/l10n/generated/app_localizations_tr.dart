@@ -464,6 +464,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get deleteLegacyKeyPackages => 'Eski Anahtar Paketlerini Sil';
 
   @override
+  String get deleteAllKeyPackages => 'Tüm Anahtar Paketlerini Sil';
+
+  @override
   String keyPackagesCount(int count) {
     return 'Anahtar Paketleri ($count)';
   }
@@ -481,6 +484,9 @@ class AppLocalizationsTr extends AppLocalizations {
   String get legacyKeyPackagesDeleted => 'Eski anahtar paketleri silindi';
 
   @override
+  String get allKeyPackagesDeleted => 'Tüm anahtar paketleri silindi';
+
+  @override
   String get keyPackageDeleted => 'Anahtar paketi silindi';
 
   @override
@@ -495,6 +501,10 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get legacyKeyPackageDeleteFailed =>
       'Eski anahtar paketleri silinemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get allKeyPackageDeleteFailed =>
+      'Tüm anahtar paketleri silinemedi. Lütfen tekrar deneyin.';
 
   @override
   String get legacyLabel => 'Eski';

@@ -463,6 +463,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteLegacyKeyPackages => 'Delete Legacy Key Packages';
 
   @override
+  String get deleteAllKeyPackages => 'Delete All Key Packages';
+
+  @override
   String keyPackagesCount(int count) {
     return 'Key Packages ($count)';
   }
@@ -480,6 +483,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get legacyKeyPackagesDeleted => 'Legacy key packages deleted';
 
   @override
+  String get allKeyPackagesDeleted => 'All key packages deleted';
+
+  @override
   String get keyPackageDeleted => 'Key package deleted';
 
   @override
@@ -494,6 +500,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get legacyKeyPackageDeleteFailed =>
       'Failed to delete legacy key packages. Please try again.';
+
+  @override
+  String get allKeyPackageDeleteFailed => 'Failed to delete all key packages. Please try again.';
 
   @override
   String get legacyLabel => 'Legacy';

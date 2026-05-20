@@ -362,6 +362,14 @@ pub async fn delete_account_key_packages(account_pubkey: String) -> Result<usize
 }
 
 #[frb]
+pub async fn delete_all_account_key_packages(account_pubkey: String) -> Result<usize, ApiError> {
+    let pubkey = PublicKey::parse(&account_pubkey)?;
+    let session = wn_session(&pubkey).await?;
+    let deleted_count = session.key_packages().delete_all(true).await?;
+    Ok(deleted_count)
+}
+
+#[frb]
 pub async fn account_follows(pubkey: String) -> Result<Vec<User>, ApiError> {
     let pubkey = PublicKey::parse(&pubkey)?;
     let session = wn_session(&pubkey).await?;

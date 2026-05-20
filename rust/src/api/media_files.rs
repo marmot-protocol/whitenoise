@@ -13,6 +13,8 @@ pub struct FileMetadata {
     pub dimensions: Option<String>,
     pub blurhash: Option<String>,
     pub thumbhash: Option<String>,
+    pub duration_ms: Option<u64>,
+    pub waveform: Option<Vec<u8>>,
 }
 
 impl From<WhitenoiseFileMetadata> for FileMetadata {
@@ -22,6 +24,8 @@ impl From<WhitenoiseFileMetadata> for FileMetadata {
             dimensions: metadata.dimensions,
             blurhash: metadata.blurhash,
             thumbhash: metadata.thumbhash,
+            duration_ms: metadata.duration_ms,
+            waveform: metadata.waveform,
         }
     }
 }
@@ -33,7 +37,36 @@ impl From<FileMetadata> for WhitenoiseFileMetadata {
             dimensions: metadata.dimensions,
             blurhash: metadata.blurhash,
             thumbhash: metadata.thumbhash,
+            duration_ms: metadata.duration_ms,
+            waveform: metadata.waveform,
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn file_metadata_conversion_preserves_audio_fields() {
+        let metadata = WhitenoiseFileMetadata {
+            original_filename: Some("voice-note.m4a".to_string()),
+            dimensions: None,
+            blurhash: None,
+            thumbhash: None,
+            duration_ms: Some(12_345),
+            waveform: Some(vec![0, 8, 42, 100]),
+        };
+
+        let api_metadata = FileMetadata::from(metadata);
+
+        assert_eq!(api_metadata.duration_ms, Some(12_345));
+        assert_eq!(api_metadata.waveform, Some(vec![0, 8, 42, 100]));
+
+        let whitenoise_metadata = WhitenoiseFileMetadata::from(api_metadata);
+
+        assert_eq!(whitenoise_metadata.duration_ms, Some(12_345));
+        assert_eq!(whitenoise_metadata.waveform, Some(vec![0, 8, 42, 100]));
     }
 }
 #[frb(non_opaque)]

@@ -939,6 +939,12 @@ abstract class AppLocalizations {
   /// **'Delete Legacy Key Packages'**
   String get deleteLegacyKeyPackages;
 
+  /// Button to delete all key packages
+  ///
+  /// In en, this message translates to:
+  /// **'Delete All Key Packages'**
+  String get deleteAllKeyPackages;
+
   /// Key packages count header
   ///
   /// In en, this message translates to:
@@ -969,6 +975,12 @@ abstract class AppLocalizations {
   /// **'Legacy key packages deleted'**
   String get legacyKeyPackagesDeleted;
 
+  /// Success message when all key packages are deleted
+  ///
+  /// In en, this message translates to:
+  /// **'All key packages deleted'**
+  String get allKeyPackagesDeleted;
+
   /// Success message when a key package is deleted
   ///
   /// In en, this message translates to:
@@ -998,6 +1010,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Failed to delete legacy key packages. Please try again.'**
   String get legacyKeyPackageDeleteFailed;
+
+  /// Error message when deleting all key packages fails
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to delete all key packages. Please try again.'**
+  String get allKeyPackageDeleteFailed;
 
   /// Label shown on legacy key package cards
   ///
