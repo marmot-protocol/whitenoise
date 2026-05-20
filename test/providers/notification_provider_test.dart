@@ -1,3 +1,4 @@
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/notification_provider.dart';
@@ -11,10 +12,18 @@ void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   late MockWnApi mockApi;
+  const pushChannel = MethodChannel('org.parres.whitenoise/push_notifications');
 
   setUpAll(() {
     mockApi = MockWnApi();
     RustLib.initMock(api: mockApi);
+  });
+
+  tearDown(() {
+    TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+      pushChannel,
+      null,
+    );
   });
 
   group('notificationListenerProvider', () {
@@ -80,7 +89,7 @@ void main() {
 
     test('routes the tap when mounted and payload present', () async {
       String? switched;
-      await routePendingTap(
+      final routed = await routePendingTap(
         pending: tap,
         isMounted: true,
         currentActivePubkey: 'someone-else',
@@ -89,7 +98,116 @@ void main() {
         },
       );
 
+      expect(routed, isTrue);
       expect(switched, tap.receiverPubkey);
+    });
+
+    test('runs beforeNavigate after switching profile', () async {
+      final events = <String>[];
+
+      final routed = await routePendingTap(
+        pending: tap,
+        isMounted: true,
+        currentActivePubkey: 'someone-else',
+        switchToProfile: (pk) async {
+          events.add('switch:$pk');
+        },
+        beforeNavigate: () async {
+          events.add('refresh');
+        },
+      );
+
+      expect(routed, isTrue);
+      expect(events, ['switch:${tap.receiverPubkey}', 'refresh']);
+    });
+
+    test('runs afterNavigate after routing the tap', () async {
+      final events = <String>[];
+
+      final routed = await routePendingTap(
+        pending: tap,
+        isMounted: true,
+        currentActivePubkey: 'someone-else',
+        switchToProfile: (pk) async {
+          events.add('switch:$pk');
+        },
+        navigateToTarget: ({required String groupId, required bool isInvite}) {
+          events.add('route:$groupId:$isInvite');
+        },
+        afterNavigate: () async {
+          events.add('refresh');
+        },
+      );
+
+      expect(routed, isTrue);
+      expect(events, ['switch:${tap.receiverPubkey}', 'route:${tap.groupId}:false', 'refresh']);
+    });
+  });
+
+  group('consumePendingNotificationTap', () {
+    test('returns Android foreground-task tap when present', () async {
+      const tap = PendingNotificationTap(
+        groupId: 'android-group',
+        isInvite: false,
+        receiverPubkey: 'android-receiver',
+      );
+
+      final result = await consumePendingNotificationTap(
+        isAndroid: true,
+        isIOS: false,
+        consumeAndroidTap: () async => tap,
+      );
+
+      expect(result, tap);
+    });
+
+    test('returns iOS pending APNS tap from native channel', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        pushChannel,
+        (call) async {
+          expect(call.method, 'consumePendingNotificationTap');
+          return {
+            'groupId': 'ios-group',
+            'isInvite': true,
+            'receiverPubkey': 'ios-receiver',
+          };
+        },
+      );
+
+      final result = await consumePendingNotificationTap(isAndroid: false, isIOS: true);
+
+      expect(
+        result,
+        const PendingNotificationTap(
+          groupId: 'ios-group',
+          isInvite: true,
+          receiverPubkey: 'ios-receiver',
+        ),
+      );
+    });
+
+    test('returns null for malformed iOS pending APNS tap', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        pushChannel,
+        (_) async => {'groupId': 'ios-group'},
+      );
+
+      final result = await consumePendingNotificationTap(isAndroid: false, isIOS: true);
+
+      expect(result, isNull);
+    });
+
+    test('returns null when iOS pending APNS tap channel throws', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        pushChannel,
+        (_) async {
+          throw PlatformException(code: 'unavailable');
+        },
+      );
+
+      final result = await consumePendingNotificationTap(isAndroid: false, isIOS: true);
+
+      expect(result, isNull);
     });
   });
 

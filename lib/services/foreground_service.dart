@@ -35,6 +35,7 @@ void _startCallback() {
 
   Logger.root.level = kDebugMode ? Level.INFO : Level.WARNING;
   Logger.root.onRecord.listen((record) {
+    // To debug other background-isolate logs, temporarily remove this loggerName filter.
     if (record.loggerName != 'ForegroundService' &&
         record.loggerName != 'ExternalSignerCallbackRegistry' &&
         record.loggerName != 'NotificationSubscription') {
@@ -53,6 +54,7 @@ void _startCallback() {
   });
   FlutterForegroundTask.setTaskHandler(NotificationTaskHandler());
 }
+// coverage:ignore-end
 
 /// Task handler that runs inside the foreground-task background isolate.
 ///
@@ -150,9 +152,11 @@ class NotificationTaskHandler extends TaskHandler {
   }
 
   @override
+  // coverage:ignore-start
   void onNotificationPressed() {
     FlutterForegroundTask.launchApp();
   }
+  // coverage:ignore-end
 
   @override
   void onNotificationButtonPressed(String id) {}
@@ -203,37 +207,41 @@ class NotificationTaskHandler extends TaskHandler {
   Future<bool> _runBootstrapIsolate() {
     final override = _bootstrapIsolateOverride;
     if (override != null) return override();
-    return _bootstrapIsolate();
+    return _bootstrapIsolate(); // coverage:ignore-line
   }
 
   Future<Locale> _runLoadLocale() {
     final override = _loadLocaleOverride;
     if (override != null) return override();
-    return _loadLocale();
+    return _loadLocale(); // coverage:ignore-line
   }
 
   Future<void> _runEnsureExternalSigners() {
     final override = _ensureExternalSignersOverride;
     if (override != null) return override();
+    // coverage:ignore-start
     _logger.fine('Ensuring external signer callbacks are registered');
     final service = _externalSignerCallbackRegistry ??= ExternalSignerCallbackRegistry();
     return service.ensureRegistered(
       registeredExternalSignerPubkeys: _registeredExternalSignerPubkeys,
       externalSignerRegistrationFutures: _externalSignerRegistrationFutures,
-      requireAll: true,
     );
+    // coverage:ignore-end
   }
 
   Future<void> _runEnsureSubscriptions() {
     final override = _ensureSubscriptionsOverride;
     if (override != null) return override();
+    // coverage:ignore-start
     _logger.fine('Ensuring Rust relay subscriptions are active');
     return relays_api.ensureAllSubscriptions();
+    // coverage:ignore-end
   }
 
   /// Initializes Flutter bindings, Rust FFI, and the whitenoise singleton
   /// inside this isolate. Idempotent — if the main isolate already
   /// initialized whitenoise, we accept the "already initialized" error.
+  // coverage:ignore-start
   Future<bool> _bootstrapIsolate() async {
     try {
       WidgetsFlutterBinding.ensureInitialized();
@@ -269,6 +277,7 @@ class NotificationTaskHandler extends TaskHandler {
       return false;
     }
   }
+  // coverage:ignore-end
 
   Future<bool> _startSubscription(int ownershipGeneration) async {
     if (!_ownsSubscription(ownershipGeneration)) return false;
@@ -280,7 +289,14 @@ class NotificationTaskHandler extends TaskHandler {
       return started;
     }
 
+    // coverage:ignore-start
     if (!_ownsSubscription(ownershipGeneration)) return false;
+    return _startRealSubscription(ownershipGeneration);
+    // coverage:ignore-end
+  }
+
+  // coverage:ignore-start
+  Future<bool> _startRealSubscription(int ownershipGeneration) async {
     if (!_bootstrapped) {
       _logger.warning('Cannot start subscription: bootstrap failed earlier');
       return false;
@@ -316,6 +332,7 @@ class NotificationTaskHandler extends TaskHandler {
     _logger.info('Headless notification subscription started');
     return true;
   }
+  // coverage:ignore-end
 
   Future<void> _stopSubscription(int ownershipGeneration) async {
     if (!_matchesOwnershipGeneration(ownershipGeneration)) return;
@@ -328,9 +345,11 @@ class NotificationTaskHandler extends TaskHandler {
 
     final sub = _subscription;
     if (sub == null) return;
+    // coverage:ignore-start
     _subscription = null;
     await sub.stop();
     _logger.info('Headless notification subscription stopped');
+    // coverage:ignore-end
   }
 
   int _setShouldOwnSubscription(bool shouldOwnSubscription) {
@@ -356,6 +375,7 @@ class NotificationTaskHandler extends TaskHandler {
   /// Persists the tapped notification's payload so the main isolate can route
   /// to the right chat/invite on launch, then brings the app to the
   /// foreground.
+  // coverage:ignore-start
   void _persistTapAndLaunch(String groupId, bool isInvite, String receiverPubkey) {
     unawaited(() async {
       try {
@@ -373,7 +393,9 @@ class NotificationTaskHandler extends TaskHandler {
       FlutterForegroundTask.launchApp();
     }());
   }
+  // coverage:ignore-end
 
+  // coverage:ignore-start
   Future<Locale> _loadLocale() async {
     try {
       final settings = await rust_api.getAppSettings();
@@ -390,6 +412,8 @@ class NotificationTaskHandler extends TaskHandler {
       return const Locale('en');
     }
   }
+
+  // coverage:ignore-end
 }
 
 /// Payload captured when the user taps a notification fired by the headless
@@ -402,20 +426,7 @@ class PendingNotificationTap {
     required this.receiverPubkey,
   });
 
-  final String groupId;
-  final bool isInvite;
-  final String receiverPubkey;
-}
-
-/// Reads and clears any notification-tap payload stashed by the task
-/// isolate. Returns null if there's nothing pending.
-Future<PendingNotificationTap?> consumePendingNotificationTap() async {
-  if (!Platform.isAndroid) return null;
-  try {
-    final raw = await FlutterForegroundTask.getData<String>(key: _kPendingNotificationTapKey);
-    if (raw == null) return null;
-    await FlutterForegroundTask.removeData(key: _kPendingNotificationTapKey);
-    final data = jsonDecode(raw) as Map<String, dynamic>;
+  static PendingNotificationTap? fromMap(Map<Object?, Object?> data) {
     final groupId = data['groupId'] as String?;
     final isInvite = data['isInvite'] as bool?;
     final receiverPubkey = data['receiverPubkey'] as String?;
@@ -424,7 +435,6 @@ Future<PendingNotificationTap?> consumePendingNotificationTap() async {
         isInvite == null ||
         receiverPubkey == null ||
         receiverPubkey.isEmpty) {
-      _logger.warning('Malformed pending notification tap payload: $raw');
       return null;
     }
     return PendingNotificationTap(
@@ -432,12 +442,48 @@ Future<PendingNotificationTap?> consumePendingNotificationTap() async {
       isInvite: isInvite,
       receiverPubkey: receiverPubkey,
     );
+  }
+
+  final String groupId;
+  final bool isInvite;
+  final String receiverPubkey;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is PendingNotificationTap &&
+          runtimeType == other.runtimeType &&
+          groupId == other.groupId &&
+          isInvite == other.isInvite &&
+          receiverPubkey == other.receiverPubkey;
+
+  @override
+  int get hashCode => Object.hash(groupId, isInvite, receiverPubkey);
+}
+
+/// Reads and clears any notification-tap payload stashed by the task
+/// isolate. Returns null if there's nothing pending.
+// coverage:ignore-start
+Future<PendingNotificationTap?> consumePendingNotificationTap() async {
+  if (!Platform.isAndroid) return null;
+  try {
+    final raw = await FlutterForegroundTask.getData<String>(key: _kPendingNotificationTapKey);
+    if (raw == null) return null;
+    final tap = PendingNotificationTap.fromMap(jsonDecode(raw) as Map<String, dynamic>);
+    if (tap == null) {
+      _logger.warning('Malformed pending notification tap payload: $raw');
+      return null;
+    }
+    await FlutterForegroundTask.removeData(key: _kPendingNotificationTapKey);
+    return tap;
   } catch (e, st) {
     _logger.warning('Failed to consume pending notification tap', e, st);
     return null;
   }
 }
+// coverage:ignore-end
 
+// coverage:ignore-start
 class ForegroundTaskApi {
   void initCommunicationPort() => FlutterForegroundTask.initCommunicationPort();
 

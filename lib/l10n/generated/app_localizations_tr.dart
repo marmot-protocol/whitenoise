@@ -464,8 +464,16 @@ class AppLocalizationsTr extends AppLocalizations {
   String get deleteLegacyKeyPackages => 'Eski Anahtar Paketlerini Sil';
 
   @override
+  String get deleteAllKeyPackages => 'Tüm Anahtar Paketlerini Sil';
+
+  @override
   String keyPackagesCount(int count) {
     return 'Anahtar Paketleri ($count)';
+  }
+
+  @override
+  String keyPackageDTagLabel(String dTag) {
+    return 'd-tag: $dTag';
   }
 
   @override
@@ -479,6 +487,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get legacyKeyPackagesDeleted => 'Eski anahtar paketleri silindi';
+
+  @override
+  String get allKeyPackagesDeleted => 'Tüm anahtar paketleri silindi';
 
   @override
   String get keyPackageDeleted => 'Anahtar paketi silindi';
@@ -495,6 +506,10 @@ class AppLocalizationsTr extends AppLocalizations {
   @override
   String get legacyKeyPackageDeleteFailed =>
       'Eski anahtar paketleri silinemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get allKeyPackageDeleteFailed =>
+      'Tüm anahtar paketleri silinemedi. Lütfen tekrar deneyin.';
 
   @override
   String get legacyLabel => 'Eski';
@@ -1210,6 +1225,9 @@ class AppLocalizationsTr extends AppLocalizations {
 
   @override
   String get failedToAddMembers => 'Üye eklenemedi. Lütfen tekrar deneyin.';
+
+  @override
+  String get addMembers => 'Üye ekle';
 
   @override
   String get groupImageUploadFailed => 'Grup oluşturuldu, ancak görsel yüklenemedi.';

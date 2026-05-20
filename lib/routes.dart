@@ -1,14 +1,16 @@
 import 'package:flutter/material.dart'
-    show BuildContext, GlobalKey, Navigator, NavigatorState, Widget;
+    show Builder, BuildContext, GlobalKey, Navigator, NavigatorState, Widget;
 import 'package:flutter_riverpod/flutter_riverpod.dart' show WidgetRef;
 import 'package:go_router/go_router.dart'
     show CustomTransitionPage, GoRoute, GoRouter, GoRouterState;
 import 'package:whitenoise/hooks/use_network_relays.dart' show RelayCategory;
 import 'package:whitenoise/hooks/use_route_refresh.dart' show routeObserver;
+import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/observers/active_chat_route_observer.dart' show ActiveChatRouteObserver;
 import 'package:whitenoise/providers/active_chat_provider.dart' show activeChatProvider;
 import 'package:whitenoise/providers/auth_provider.dart' show authProvider;
 import 'package:whitenoise/providers/is_adding_account_provider.dart' show isAddingAccountProvider;
+import 'package:whitenoise/screens/add_group_members_screen.dart' show AddGroupMembersScreen;
 import 'package:whitenoise/screens/add_profile_screen.dart' show AddProfileScreen;
 import 'package:whitenoise/screens/add_relay_screen.dart' show AddRelayScreen;
 import 'package:whitenoise/screens/add_to_group_screen.dart' show AddToGroupScreen;
@@ -47,12 +49,27 @@ import 'package:whitenoise/screens/sign_out_screen.dart' show SignOutScreen;
 import 'package:whitenoise/screens/signup_screen.dart' show SignupScreen;
 import 'package:whitenoise/screens/start_support_chat_screen.dart' show StartSupportChatScreen;
 import 'package:whitenoise/screens/switch_profile_screen.dart' show SwitchProfileScreen;
+import 'package:whitenoise/screens/user_picker_screen.dart' show UserPickerScreen;
 import 'package:whitenoise/screens/user_profile_screen.dart' show UserProfileScreen;
 import 'package:whitenoise/screens/user_search_screen.dart' show UserSearchScreen;
-import 'package:whitenoise/screens/user_selection_screen.dart' show UserSelectionScreen;
 import 'package:whitenoise/src/rust/api/users.dart' show User;
 import 'package:whitenoise/utils/deep_links.dart' show DeepLinks;
+import 'package:whitenoise/widgets/wn_icon.dart' show WnIcons;
 import 'package:whitenoise/widgets/wn_slate_content_transition.dart' show WnSlateContentTransition;
+
+Widget _newGroupPicker({List<User> initialUsers = const []}) {
+  return Builder(
+    builder: (context) => UserPickerScreen(
+      title: context.l10n.newGroupChat,
+      submitText: context.l10n.continueButton,
+      submitIcon: WnIcons.arrowRight,
+      initialUsers: initialUsers,
+      onSubmit: (ctx, selected) async {
+        Routes.pushToSetUpGroup(ctx, selected);
+      },
+    ),
+  );
+}
 
 final class AddRelayArgs {
   const AddRelayArgs({required this.category, required this.onRelayAdded});
@@ -107,6 +124,7 @@ abstract final class Routes {
   static const _groupInfo = '/group-info/:groupId';
   static const _editGroup = '/edit-group/:groupId';
   static const _groupMember = '/group-member/:groupId/:memberPubkey';
+  static const _addGroupMembers = '/add-group-members/:groupId';
   static const _invite = '/invites/:mlsGroupId';
   static const _chat = '/chats/:groupId';
   static const _chatRawDebug = '/chats/:groupId/debug';
@@ -355,7 +373,7 @@ abstract final class Routes {
             final initialUsers = state.extra as List<User>? ?? const [];
             return _navigationTransition(
               state: state,
-              child: UserSelectionScreen(initialUsers: initialUsers),
+              child: _newGroupPicker(initialUsers: initialUsers),
             );
           },
         ),
@@ -367,7 +385,7 @@ abstract final class Routes {
             if (selectedUsers == null || selectedUsers.isEmpty) {
               return _navigationTransition(
                 state: state,
-                child: const UserSelectionScreen(),
+                child: _newGroupPicker(),
               );
             }
             return _navigationTransition(
@@ -451,6 +469,14 @@ abstract final class Routes {
           pageBuilder: (context, state) => _navigationTransition(
             state: state,
             child: EditGroupScreen(groupId: state.pathParameters['groupId']!),
+          ),
+        ),
+        GoRoute(
+          name: 'addGroupMembers',
+          path: _addGroupMembers,
+          pageBuilder: (context, state) => _navigationTransition(
+            state: state,
+            child: AddGroupMembersScreen(groupId: state.pathParameters['groupId']!),
           ),
         ),
         GoRoute(
@@ -694,6 +720,13 @@ abstract final class Routes {
     GoRouter.of(context).pushNamed(
       'groupMember',
       pathParameters: {'groupId': groupId, 'memberPubkey': memberPubkey},
+    );
+  }
+
+  static void pushToAddGroupMembers(BuildContext context, String groupId) {
+    GoRouter.of(context).pushNamed(
+      'addGroupMembers',
+      pathParameters: {'groupId': groupId},
     );
   }
 

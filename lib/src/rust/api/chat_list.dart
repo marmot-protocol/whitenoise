@@ -14,7 +14,7 @@ import 'messages.dart';
 
 part 'chat_list.freezed.dart';
 
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_fields_are_eq`, `assert_fields_are_eq`, `clone`, `clone`, `clone`, `clone`, `eq`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `from`, `from`, `from`
 
 /// Sets the pin order for a chat.
 ///
@@ -68,6 +68,18 @@ Future<List<ChatSummary>> getChatList({required String accountPubkey}) =>
     RustLib.instance.api.crateApiChatListGetChatList(
       accountPubkey: accountPubkey,
     );
+
+Future<List<ChatSummary>> fetchChatListSnapshot({
+  required String accountPubkey,
+}) => RustLib.instance.api.crateApiChatListFetchChatListSnapshot(
+  accountPubkey: accountPubkey,
+);
+
+Future<List<ChatSummary>> fetchArchivedChatListSnapshot({
+  required String accountPubkey,
+}) => RustLib.instance.api.crateApiChatListFetchArchivedChatListSnapshot(
+  accountPubkey: accountPubkey,
+);
 
 /// Subscribe to real-time chat list updates for an account.
 ///
@@ -159,6 +171,9 @@ enum ChatListUpdateTrigger {
 
   /// A user was blocked or unblocked.
   userBlockChanged,
+
+  /// A foreground catch-up replay refreshed this chat from the local snapshot.
+  snapshotRefresh,
 }
 
 @freezed

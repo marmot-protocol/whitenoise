@@ -586,12 +586,25 @@
   "@deleteLegacyKeyPackages": {
     "description": "Button to delete legacy key packages"
   },
+  "deleteAllKeyPackages": "Delete All Key Packages",
+  "@deleteAllKeyPackages": {
+    "description": "Button to delete all key packages"
+  },
   "keyPackagesCount": "Key Packages ({count})",
   "@keyPackagesCount": {
     "description": "Key packages count header",
     "placeholders": {
       "count": {
         "type": "int"
+      }
+    }
+  },
+  "keyPackageDTagLabel": "d-tag: {dTag}",
+  "@keyPackageDTagLabel": {
+    "description": "Label showing the d-tag value on a key package",
+    "placeholders": {
+      "dTag": {
+        "type": "String"
       }
     }
   },
@@ -610,6 +623,10 @@
   "legacyKeyPackagesDeleted": "Legacy key packages deleted",
   "@legacyKeyPackagesDeleted": {
     "description": "Success message when legacy key packages are deleted"
+  },
+  "allKeyPackagesDeleted": "All key packages deleted",
+  "@allKeyPackagesDeleted": {
+    "description": "Success message when all key packages are deleted"
   },
   "keyPackageDeleted": "Key package deleted",
   "@keyPackageDeleted": {
@@ -630,6 +647,10 @@
   "legacyKeyPackageDeleteFailed": "Failed to delete legacy key packages. Please try again.",
   "@legacyKeyPackageDeleteFailed": {
     "description": "Error message when deleting legacy key packages fails"
+  },
+  "allKeyPackageDeleteFailed": "Failed to delete all key packages. Please try again.",
+  "@allKeyPackageDeleteFailed": {
+    "description": "Error message when deleting all key packages fails"
   },
   "legacyLabel": "Legacy",
   "@legacyLabel": {
@@ -1528,6 +1549,10 @@
   "failedToAddMembers": "Failed to add members. Please try again.",
   "@failedToAddMembers": {
     "description": "Error message when adding members to group fails"
+  },
+  "addMembers": "Add members",
+  "@addMembers": {
+    "description": "Action label for opening the add-members screen from group info"
   },
   "groupImageUploadFailed": "Group created, but the image failed to upload.",
   "@groupImageUploadFailed": {

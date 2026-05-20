@@ -54,6 +54,7 @@ dependencies:
   flutter_secure_storage: ^10.2.0
   flutter_hooks: ^0.21.3
   hooks_riverpod: ^3.1.0
+  path: ^1.9.1
   path_provider: ^2.1.5
   image_picker: ^1.2.2
   video_player: ^2.10.1

@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/widgets.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart' show ProviderContainer;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart'
@@ -296,6 +297,49 @@ void main() {
       final result = getResult();
       expect(result.getMessage(0).id, 'm2');
       expect(result.getMessage(1).id, 'm1');
+    });
+
+    testWidgets('replaces visible timeline from snapshot on app resume', (tester) async {
+      final getResult = await _pump(tester, 'group1');
+
+      _api.emitInitialSnapshot([
+        _message('m1', DateTime(2024), content: 'First'),
+      ]);
+      await tester.pumpAndSettle();
+
+      expect(getResult().messageCount, 1);
+      expect(getResult().getMessage(0).content, 'First');
+
+      _api.olderMessagesResponse = [
+        _message('m2', DateTime(2024, 2), content: 'Second'),
+      ];
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pumpAndSettle();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(getResult().messageCount, 1);
+      expect(getResult().getMessage(0).content, 'Second');
+      expect(_api.lastFetchOlderCall?.before, isNull);
+      expect(_api.lastFetchOlderCall?.limit, 100);
+    });
+
+    testWidgets('keeps visible timeline when resume snapshot refresh fails', (tester) async {
+      final getResult = await _pump(tester, 'group1');
+
+      _api.emitInitialSnapshot([
+        _message('m1', DateTime(2024), content: 'First'),
+      ]);
+      await tester.pumpAndSettle();
+      _api.fetchOlderFails = true;
+
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.inactive);
+      await tester.pumpAndSettle();
+      tester.binding.handleAppLifecycleStateChanged(AppLifecycleState.resumed);
+      await tester.pumpAndSettle();
+
+      expect(getResult().messageCount, 1);
+      expect(getResult().getMessage(0).content, 'First');
     });
 
     testWidgets('prepends new message at start (newest first)', (tester) async {

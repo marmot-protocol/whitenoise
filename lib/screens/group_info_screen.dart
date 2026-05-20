@@ -153,6 +153,18 @@ class GroupInfoScreen extends HookConsumerWidget {
                           onPressed: () => Routes.pushToEditGroup(context, groupId),
                         ),
                       ),
+                      Gap(8.h),
+                      SizedBox(
+                        width: double.infinity,
+                        child: WnButton(
+                          key: const Key('add_members_button'),
+                          text: context.l10n.addMembers,
+                          type: WnButtonType.outline,
+                          trailingIcon: WnIcons.userFollow,
+                          size: WnButtonSize.medium,
+                          onPressed: () => Routes.pushToAddGroupMembers(context, groupId),
+                        ),
+                      ),
                       Gap(16.h),
                     ],
                     SizedBox(

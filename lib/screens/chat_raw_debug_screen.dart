@@ -16,6 +16,7 @@ import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
+import 'package:whitenoise/src/rust/api/notifications.dart' as notifications_api;
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/deep_links.dart';
 import 'package:whitenoise/widgets/debug_key_value_row.dart';
@@ -91,7 +92,7 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                   },
                   child: ListView.builder(
                     padding: EdgeInsets.fromLTRB(14.w, 14.h, 14.w, 18.h),
-                    itemCount: messageCount == 0 ? messageCount + 5 : messageCount + 4,
+                    itemCount: messageCount == 0 ? messageCount + 6 : messageCount + 5,
                     itemBuilder: (context, index) {
                       if (index == 0) {
                         return Padding(
@@ -119,10 +120,16 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                       if (index == 3) {
                         return Padding(
                           padding: EdgeInsets.only(bottom: 12.h),
+                          child: _PushDebugSection(groupId: groupId),
+                        );
+                      }
+                      if (index == 4) {
+                        return Padding(
+                          padding: EdgeInsets.only(bottom: 12.h),
                           child: _RatchetTreeSection(groupId: groupId),
                         );
                       }
-                      if (index == 4 && messageCount == 0) {
+                      if (index == 5 && messageCount == 0) {
                         return Center(
                           child: Padding(
                             padding: EdgeInsets.only(top: 32.h),
@@ -135,7 +142,7 @@ class ChatRawDebugScreen extends HookConsumerWidget {
                           ),
                         );
                       }
-                      final messageIndex = index - 4;
+                      final messageIndex = index - 5;
                       if (messageIndex < 0 || messageIndex >= messageCount) {
                         return const SizedBox.shrink();
                       }
@@ -451,6 +458,277 @@ class _StreamLogSection extends ConsumerWidget {
     if (e.laggedCount != null) parts.add('lagged=${e.laggedCount}');
     if (e.error != null) parts.add('error=${e.error}');
     return parts.join(' ');
+  }
+}
+
+class _PushDebugSection extends HookConsumerWidget {
+  const _PushDebugSection({required this.groupId});
+
+  final String groupId;
+
+  String _bool(bool value) => value ? 'true' : 'false';
+
+  String _shortKey(String value) {
+    if (value.length <= 24) {
+      return value;
+    }
+    return '${value.substring(0, 14)}…${value.substring(value.length - 8)}';
+  }
+
+  String _formatInfo(notifications_api.GroupPushDebugInfo info) {
+    final local = info.localRegistration;
+    final buffer = StringBuffer();
+    buffer.writeln('local_registration:');
+    buffer.writeln('  registered:            ${local.registered}');
+    buffer.writeln('  shareable:             ${local.shareable}');
+    buffer.writeln('  notifications_enabled: ${local.notificationsEnabled}');
+    buffer.writeln('  local_leaf_index:      ${local.localLeafIndex ?? '(none)'}');
+    buffer.writeln('  local_token_cached:    ${local.localTokenCached}');
+    buffer.writeln();
+    buffer.writeln('group_tokens:');
+    buffer.writeln('  total:                 ${info.totalTokenCount}');
+    buffer.writeln('  active:                ${info.activeTokenCount}');
+    buffer.writeln('  stale:                 ${info.staleTokenCount}');
+    buffer.writeln('  missing_relay_hint:    ${info.missingRelayHintCount}');
+    buffer.writeln('  last_updated_at:       ${info.lastTokenListUpdatedAt ?? '(never)'}');
+    for (final token in info.tokens) {
+      buffer.writeln();
+      buffer.writeln('  leaf[${token.leafIndex}]');
+      buffer.writeln('    member_pubkey:        ${token.memberPubkey}');
+      buffer.writeln('    server_pubkey:        ${token.serverPubkey}');
+      buffer.writeln('    has_relay_hint:       ${token.hasRelayHint}');
+      buffer.writeln('    active_leaf:          ${token.activeLeaf}');
+      buffer.writeln('    member_matches_leaf:  ${token.memberMatchesActiveLeaf}');
+      buffer.writeln('    is_local_member:      ${token.isLocalMember}');
+      buffer.writeln('    updated_at:           ${token.updatedAt.toIso8601String()}');
+    }
+    return buffer.toString().trimRight();
+  }
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final colors = context.colors;
+    final typography = context.typographyScaled;
+    final accountPubkey = ref.watch(accountPubkeyProvider);
+    final pushDebugFuture = useMemoized(
+      () => notifications_api.getGroupPushDebugInfo(
+        pubkey: accountPubkey,
+        groupId: groupId,
+      ),
+      [accountPubkey, groupId],
+    );
+
+    return FutureBuilder<notifications_api.GroupPushDebugInfo>(
+      future: pushDebugFuture,
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return DebugSectionCard(
+            title: 'Push Diagnostics',
+            subtitle: 'Loading push-token cache',
+            borderColor: colors.accent.amber.border,
+            child: Row(
+              children: [
+                SizedBox(
+                  width: 12.w,
+                  height: 12.w,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: colors.backgroundContentSecondary,
+                  ),
+                ),
+                SizedBox(width: 8.w),
+                Text(
+                  'push_debug: loading…',
+                  style: typography.medium10.copyWith(
+                    color: colors.backgroundContentTertiary,
+                    fontFamily: 'monospace',
+                  ),
+                ),
+              ],
+            ),
+          );
+        }
+        if (snapshot.hasError) {
+          return DebugSectionCard(
+            title: 'Push Diagnostics',
+            subtitle: 'Unable to load push-token cache',
+            borderColor: colors.borderDestructiveSecondary,
+            child: Text(
+              'push_debug: ${snapshot.error}',
+              style: typography.medium10.copyWith(
+                color: colors.fillDestructive,
+                fontFamily: 'monospace',
+              ),
+            ),
+          );
+        }
+
+        final info = snapshot.data!;
+        final local = info.localRegistration;
+        final text = _formatInfo(info);
+        final borderColor = local.shareable && local.localTokenCached
+            ? colors.accent.emerald.border
+            : colors.accent.amber.border;
+
+        return DebugSectionCard(
+          title: 'Push Diagnostics',
+          subtitle: '${info.activeTokenCount}/${info.totalTokenCount} active tokens',
+          borderColor: borderColor,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Wrap(
+                spacing: 8.w,
+                runSpacing: 8.h,
+                children: [
+                  WnPill(label: 'total ${info.totalTokenCount}'),
+                  WnPill(label: 'active ${info.activeTokenCount}'),
+                  WnPill(label: 'stale ${info.staleTokenCount}'),
+                  WnPill(label: 'missing relay ${info.missingRelayHintCount}'),
+                ],
+              ),
+              SizedBox(height: 10.h),
+              Container(
+                width: double.infinity,
+                padding: EdgeInsets.all(10.w),
+                decoration: BoxDecoration(
+                  color: colors.backgroundSecondary.withValues(alpha: 0.75),
+                  borderRadius: BorderRadius.circular(8.r),
+                  border: Border.all(color: colors.borderTertiary.withValues(alpha: 0.7)),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Local registration',
+                      style: typography.semiBold10.copyWith(
+                        color: colors.backgroundContentPrimary,
+                      ),
+                    ),
+                    SizedBox(height: 6.h),
+                    DebugKeyValueRow(
+                      label: 'registered',
+                      value: _bool(local.registered),
+                      valueKey: const Key('push_debug_registered'),
+                      labelWidth: 120.w,
+                    ),
+                    SizedBox(height: 4.h),
+                    DebugKeyValueRow(
+                      label: 'shareable',
+                      value: _bool(local.shareable),
+                      valueKey: const Key('push_debug_shareable'),
+                      labelWidth: 120.w,
+                    ),
+                    SizedBox(height: 4.h),
+                    DebugKeyValueRow(
+                      label: 'notifications',
+                      value: _bool(local.notificationsEnabled),
+                      valueKey: const Key('push_debug_notifications_enabled'),
+                      labelWidth: 120.w,
+                    ),
+                    SizedBox(height: 4.h),
+                    DebugKeyValueRow(
+                      label: 'leaf_index',
+                      value: '${local.localLeafIndex ?? '(none)'}',
+                      labelWidth: 120.w,
+                    ),
+                    SizedBox(height: 4.h),
+                    DebugKeyValueRow(
+                      label: 'cached',
+                      value: _bool(local.localTokenCached),
+                      valueKey: const Key('push_debug_local_token_cached'),
+                      labelWidth: 120.w,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10.h),
+              Text(
+                'Cached tokens',
+                style: typography.semiBold10.copyWith(
+                  color: colors.backgroundContentSecondary,
+                ),
+              ),
+              SizedBox(height: 8.h),
+              if (info.tokens.isEmpty)
+                Text(
+                  'push_tokens: (none cached for this group)',
+                  style: typography.medium10.copyWith(
+                    color: colors.backgroundContentTertiary,
+                    fontFamily: 'monospace',
+                  ),
+                )
+              else
+                ...info.tokens.map(
+                  (token) => Padding(
+                    padding: EdgeInsets.only(bottom: 8.h),
+                    child: Container(
+                      width: double.infinity,
+                      padding: EdgeInsets.all(10.w),
+                      decoration: BoxDecoration(
+                        color: colors.backgroundSecondary.withValues(alpha: 0.75),
+                        borderRadius: BorderRadius.circular(8.r),
+                        border: Border.all(color: colors.borderTertiary.withValues(alpha: 0.7)),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Push leaf [${token.leafIndex}]',
+                            style: typography.semiBold10.copyWith(
+                              color: colors.backgroundContentPrimary,
+                            ),
+                          ),
+                          SizedBox(height: 6.h),
+                          DebugKeyValueRow(
+                            label: 'member',
+                            value: _shortKey(token.memberPubkey),
+                            labelWidth: 90.w,
+                          ),
+                          SizedBox(height: 4.h),
+                          DebugKeyValueRow(
+                            label: 'server',
+                            value: _shortKey(token.serverPubkey),
+                            labelWidth: 90.w,
+                          ),
+                          SizedBox(height: 4.h),
+                          DebugKeyValueRow(
+                            label: 'relay_hint',
+                            value: _bool(token.hasRelayHint),
+                            labelWidth: 90.w,
+                          ),
+                          SizedBox(height: 4.h),
+                          DebugKeyValueRow(
+                            label: 'active_match',
+                            value: _bool(token.activeLeaf && token.memberMatchesActiveLeaf),
+                            labelWidth: 90.w,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              SizedBox(height: 2.h),
+              Text(
+                'Push raw snapshot',
+                style: typography.semiBold10.copyWith(
+                  color: colors.backgroundContentSecondary,
+                ),
+              ),
+              SizedBox(height: 6.h),
+              SelectableText(
+                text,
+                style: typography.medium10.copyWith(
+                  color: colors.backgroundContentPrimary,
+                  fontFamily: 'monospace',
+                  height: 1.4,
+                ),
+              ),
+            ],
+          ),
+        );
+      },
+    );
   }
 }
 

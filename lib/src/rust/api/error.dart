@@ -10,6 +10,7 @@ import '../frb_generated.dart';
 
 part 'error.freezed.dart';
 
+// These functions are ignored because they are not marked as `pub`: `is_database_pool_timeout`
 // These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `fmt`, `fmt`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`, `from`
 
 @freezed
@@ -20,6 +21,9 @@ sealed class ApiError with _$ApiError implements FrbException {
   const factory ApiError.whitenoise({
     required String message,
   }) = ApiError_Whitenoise;
+  const factory ApiError.databasePoolTimedOut({
+    required String message,
+  }) = ApiError_DatabasePoolTimedOut;
   const factory ApiError.invalidKey({
     required String message,
   }) = ApiError_InvalidKey;

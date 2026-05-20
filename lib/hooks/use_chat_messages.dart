@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
@@ -110,6 +111,50 @@ ChatMessagesResult useChatMessages(
     requestTokenRef.value++;
     return null;
   }, [groupId, pubkey, hiddenPubkeysKey]);
+
+  Future<void> refreshLatestMessagesSnapshot() async {
+    final requestToken = ++requestTokenRef.value;
+    final limit = math.min(math.max(allMessageIds.value.length, 100), _kWindowSize);
+    try {
+      final messages = await fetchAggregatedMessagesForGroup(
+        pubkey: pubkey,
+        groupId: groupId,
+        limit: limit,
+      );
+      if (isDisposed.value || requestToken != requestTokenRef.value) return;
+
+      allMessageIds.value = [];
+      allMessageIdsSet.value = {};
+      visibleMessageIds.value = [];
+      messagesById.value = {};
+      indexById.value = {};
+
+      for (final message in messages) {
+        if (allMessageIdsSet.value.add(message.id)) {
+          allMessageIds.value.add(message.id);
+        }
+        messagesById.value[message.id] = message;
+      }
+
+      hasMoreMessages.value = messages.length >= limit;
+      rebuildVisibleIndexes();
+      paginationVersion.value++;
+    } catch (error, stackTrace) {
+      _logger.warning(
+        'message snapshot refresh failed groupId=$groupId',
+        error,
+        stackTrace,
+      );
+    }
+  }
+
+  useOnAppLifecycleStateChange((previous, current) {
+    if (current == AppLifecycleState.resumed &&
+        previous != null &&
+        previous != AppLifecycleState.resumed) {
+      unawaited(refreshLatestMessagesSnapshot());
+    }
+  });
 
   final stream = useMemoized(
     () {

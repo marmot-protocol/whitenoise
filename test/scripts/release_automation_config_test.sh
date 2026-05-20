@@ -13,7 +13,7 @@ fail() {
 assert_contains() {
   local haystack="$1"
   local pattern="$2"
-  if ! printf '%s\n' "$haystack" | grep -Eq "^${pattern}$"; then
+  if ! grep -Eq "^${pattern}$" <<< "$haystack"; then
     fail "expected output to contain line matching regex '$pattern'"
   fi
 }
@@ -43,6 +43,7 @@ assert_contains "$android_gradle" '[[:space:]]*applicationIdSuffix = "\.staging"
 assert_contains "$android_gradle" '[[:space:]]*applicationId = "org\.parres\.whitenoise"'
 assert_contains "$android_gradle" '[[:space:]]*manifestPlaceholders\["deepLinkScheme"\] = "whitenoise-staging"'
 assert_contains "$android_gradle" '[[:space:]]*manifestPlaceholders\["deepLinkScheme"\] = "whitenoise"'
+assert_contains "$android_gradle" '[[:space:]]*file\("src/main/google-services\.json"\)\.exists\(\) \|\|'
 deep_link_scheme_count="$(printf '%s\n' "$android_gradle" | grep -c 'manifestPlaceholders\["deepLinkScheme"\]')"
 if [ "$deep_link_scheme_count" -ne 2 ]; then
   fail "expected each Android flavor to define exactly one deepLinkScheme placeholder"

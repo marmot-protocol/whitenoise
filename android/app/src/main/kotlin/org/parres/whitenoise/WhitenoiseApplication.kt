@@ -29,7 +29,8 @@ class WhitenoiseApplication : Application(), FlutterForegroundTaskLifecycleListe
         try {
             flutterEngine.plugins.add(AndroidSignerPlugin())
             flutterEngine.plugins.add(AndroidPlayServicesPlugin())
-        } catch (t: Throwable) {
+            flutterEngine.plugins.add(AndroidPushNotificationsPlugin())
+        } catch (t: Exception) {
             Log.e(TAG, "onEngineCreate: failed to register app plugins", t)
         }
     }

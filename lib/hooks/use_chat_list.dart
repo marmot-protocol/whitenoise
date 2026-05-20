@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:logging/logging.dart';
@@ -16,7 +18,10 @@ typedef ChatListResult = ({
 
 ChatListResult useChatList(String pubkey, {bool archived = false}) {
   final blockedPubkeysRefreshKey = useState(0);
-  final blockedState = useBlockedPubkeys(pubkey, refreshKey: blockedPubkeysRefreshKey.value);
+  final blockedState = useBlockedPubkeys(
+    pubkey,
+    refreshKey: blockedPubkeysRefreshKey.value,
+  );
   return _useChatList(
     pubkey,
     archived: archived,
@@ -49,8 +54,47 @@ ChatListResult _useChatList(
 }) {
   final chatMap = useRef(<String, ChatSummary>{});
   final refreshKey = useState(0);
+  final snapshotVersion = useState(0);
+  final snapshotRequestToken = useRef(0);
+  final isDisposed = useRef(false);
   final blockedPubkeysRef = useRef<Set<String>>({});
   blockedPubkeysRef.value = blockedState.blockedPubkeys;
+
+  Map<String, ChatSummary> currentChatMapSnapshot() => Map.unmodifiable(chatMap.value);
+
+  useEffect(() {
+    isDisposed.value = false;
+    return () {
+      isDisposed.value = true;
+      snapshotRequestToken.value++;
+    };
+  }, [pubkey, archived]);
+
+  Future<void> refreshFromSnapshot() async {
+    final requestToken = ++snapshotRequestToken.value;
+    try {
+      final items = archived
+          ? await fetchArchivedChatListSnapshot(accountPubkey: pubkey)
+          : await fetchChatListSnapshot(accountPubkey: pubkey);
+      if (isDisposed.value || requestToken != snapshotRequestToken.value) return;
+      chatMap.value = {for (final c in items.reversed) c.mlsGroupId: c};
+      snapshotVersion.value++;
+    } catch (error, stackTrace) {
+      _logger.warning(
+        'chatList snapshot refresh failed pubkey=${pubkey.substring(0, 8)}… archived=$archived',
+        error,
+        stackTrace,
+      );
+    }
+  }
+
+  useOnAppLifecycleStateChange((previous, current) {
+    if (current == AppLifecycleState.resumed &&
+        previous != null &&
+        previous != AppLifecycleState.resumed) {
+      unawaited(refreshFromSnapshot());
+    }
+  });
 
   final stream = useMemoized(
     () {
@@ -67,7 +111,7 @@ ChatListResult _useChatList(
                   'chatList stream initialSnapshot pubkey=${pubkey.substring(0, 8)}… count=${items.length}',
                 );
                 chatMap.value = {for (final c in items.reversed) c.mlsGroupId: c};
-                return chatMap.value;
+                return currentChatMapSnapshot();
               },
               update: (update) {
                 final id = update.item.mlsGroupId;
@@ -85,7 +129,7 @@ ChatListResult _useChatList(
                     final blockedPubkeys = blockedPubkeysRef.value;
                     if (lastMessage != null && blockedPubkeys.contains(lastMessage.author)) {
                       chatMap.value[id] = _sanitizeChatSummary(update.item, blockedPubkeys);
-                      return chatMap.value;
+                      return currentChatMapSnapshot();
                     }
                     if (update.item.pendingConfirmation) {
                       chatMap.value[id] = update.item;
@@ -113,8 +157,10 @@ ChatListResult _useChatList(
                   case ChatListUpdateTrigger.userBlockChanged:
                     chatMap.value[id] = update.item;
                     refreshBlockedPubkeys();
+                  case ChatListUpdateTrigger.snapshotRefresh:
+                    chatMap.value[id] = update.item;
                 }
-                return chatMap.value;
+                return currentChatMapSnapshot();
               },
             );
           });
@@ -124,14 +170,17 @@ ChatListResult _useChatList(
 
   final snapshot = useStream(stream, initialData: <String, ChatSummary>{});
   final isLoading = snapshot.connectionState == ConnectionState.waiting || blockedState.isLoading;
-  final chats = blockedState.isLoading
-      ? <ChatSummary>[]
-      : chatMap.value.values
-            .where((chat) => !_shouldHideChatSummary(chat, blockedState.blockedPubkeys))
-            .map((chat) => _sanitizeChatSummary(chat, blockedState.blockedPubkeys))
-            .toList()
-            .reversed
-            .toList();
+  final chats = useMemoized(
+    () => blockedState.isLoading
+        ? <ChatSummary>[]
+        : chatMap.value.values
+              .where((chat) => !_shouldHideChatSummary(chat, blockedState.blockedPubkeys))
+              .map((chat) => _sanitizeChatSummary(chat, blockedState.blockedPubkeys))
+              .toList()
+              .reversed
+              .toList(),
+    [blockedState.isLoading, blockedState.blockedPubkeys, snapshot.data, snapshotVersion.value],
+  );
   return (
     isLoading: isLoading,
     chats: chats,

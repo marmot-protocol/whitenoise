@@ -32,6 +32,7 @@ PODS:
     - Flutter
   - rust_lib_whitenoise (0.0.1):
     - Flutter
+  - rust_lib_whitenoise_nse (0.0.1)
   - share_plus (0.0.1):
     - Flutter
   - shared_preferences_foundation (0.0.1):
@@ -62,6 +63,7 @@ DEPENDENCIES:
   - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
   - permission_handler_apple (from `.symlinks/plugins/permission_handler_apple/ios`)
   - rust_lib_whitenoise (from `.symlinks/plugins/rust_lib_whitenoise/ios`)
+  - rust_lib_whitenoise_nse (from `../rust_builder/ios_nse`)
   - share_plus (from `.symlinks/plugins/share_plus/ios`)
   - shared_preferences_foundation (from `.symlinks/plugins/shared_preferences_foundation/darwin`)
   - sqflite_darwin (from `.symlinks/plugins/sqflite_darwin/darwin`)
@@ -99,6 +101,8 @@ EXTERNAL SOURCES:
     :path: ".symlinks/plugins/permission_handler_apple/ios"
   rust_lib_whitenoise:
     :path: ".symlinks/plugins/rust_lib_whitenoise/ios"
+  rust_lib_whitenoise_nse:
+    :path: "../rust_builder/ios_nse"
   share_plus:
     :path: ".symlinks/plugins/share_plus/ios"
   shared_preferences_foundation:
@@ -126,12 +130,13 @@ SPEC CHECKSUMS:
   path_provider_foundation: bb55f6dbba17d0dccd6737fe6f7f34fbd0376880
   permission_handler_apple: 4ed2196e43d0651e8ff7ca3483a069d469701f2d
   rust_lib_whitenoise: 22de658398f8e36a1a396d35b6b6547a0732e6bb
+  rust_lib_whitenoise_nse: f2d712c9c2daa5142183e81b8f221b267ec97ffb
   share_plus: 50da8cb520a8f0f65671c6c6a99b3617ed10a58a
   shared_preferences_foundation: 7036424c3d8ec98dfe75ff1667cb0cd531ec82bb
   sqflite_darwin: 20b2a3a3b70e43edae938624ce550a3cbf66a3d0
   url_launcher_ios: 7a95fa5b60cc718a708b8f2966718e93db0cef1b
   video_player_avfoundation: dd410b52df6d2466a42d28550e33e4146928280a
 
-PODFILE CHECKSUM: b2c34bf6052aababf5b658c7abbc50e4b8cc0e4d
+PODFILE CHECKSUM: 9b50e21f20de3a9506e263e75670e86fb6a031b1
 
 COCOAPODS: 1.16.2

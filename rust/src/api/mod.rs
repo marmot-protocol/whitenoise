@@ -182,6 +182,7 @@ pub mod drafts;
 pub mod error;
 pub mod group_state;
 pub mod groups;
+pub mod lifecycle;
 pub mod logs;
 pub mod markdown;
 pub mod media_files;
@@ -207,6 +208,7 @@ pub use drafts::*;
 pub use error::*;
 pub use group_state::*;
 pub use groups::*;
+pub use lifecycle::*;
 pub use logs::*;
 pub use markdown::*;
 pub use media_files::*;
@@ -245,6 +247,9 @@ pub async fn initialize_whitenoise(config: WhitenoiseConfig) -> Result<(), ApiEr
     {
         return Ok(());
     }
+
+    crate::ios_keyring::install_ios_keyring_store_if_needed()
+        .map_err(|message| ApiError::Whitenoise { message })?;
 
     let default_relay_urls = config.default_relay_urls.clone();
     let core_config = to_core_config(&config);

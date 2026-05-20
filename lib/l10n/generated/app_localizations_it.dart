@@ -466,8 +466,16 @@ class AppLocalizationsIt extends AppLocalizations {
   String get deleteLegacyKeyPackages => 'Elimina Pacchetti Chiavi Obsoleti';
 
   @override
+  String get deleteAllKeyPackages => 'Elimina Tutti i Pacchetti Chiavi';
+
+  @override
   String keyPackagesCount(int count) {
     return 'Pacchetti Chiavi ($count)';
+  }
+
+  @override
+  String keyPackageDTagLabel(String dTag) {
+    return 'd-tag: $dTag';
   }
 
   @override
@@ -481,6 +489,9 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get legacyKeyPackagesDeleted => 'Pacchetti chiavi obsoleti eliminati';
+
+  @override
+  String get allKeyPackagesDeleted => 'Tutti i pacchetti chiavi eliminati';
 
   @override
   String get keyPackageDeleted => 'Pacchetto chiavi eliminato';
@@ -497,6 +508,10 @@ class AppLocalizationsIt extends AppLocalizations {
   @override
   String get legacyKeyPackageDeleteFailed =>
       'Impossibile eliminare i pacchetti chiavi obsoleti. Riprova.';
+
+  @override
+  String get allKeyPackageDeleteFailed =>
+      'Impossibile eliminare tutti i pacchetti chiavi. Riprova.';
 
   @override
   String get legacyLabel => 'Obsoleto';
@@ -1212,6 +1227,9 @@ class AppLocalizationsIt extends AppLocalizations {
 
   @override
   String get failedToAddMembers => 'Impossibile aggiungere membri. Riprova.';
+
+  @override
+  String get addMembers => 'Aggiungi membri';
 
   @override
   String get groupImageUploadFailed => 'Gruppo creato, ma il caricamento dell\'immagine è fallito.';

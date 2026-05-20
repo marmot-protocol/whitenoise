@@ -10,22 +10,40 @@ import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/src/rust/api/users.dart' show User;
 import 'package:whitenoise/theme.dart';
+import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/formatting.dart' show formatPublicKey, npubFromHex;
 import 'package:whitenoise/utils/metadata.dart' show presentName;
-import 'package:whitenoise/widgets/wn_avatar.dart';
 import 'package:whitenoise/widgets/wn_button.dart';
 import 'package:whitenoise/widgets/wn_fade_overlay.dart';
 import 'package:whitenoise/widgets/wn_icon.dart';
 import 'package:whitenoise/widgets/wn_search_field.dart';
 import 'package:whitenoise/widgets/wn_slate.dart';
 import 'package:whitenoise/widgets/wn_slate_navigation_header.dart';
+import 'package:whitenoise/widgets/wn_system_notice.dart';
 import 'package:whitenoise/widgets/wn_user_bubble.dart';
 import 'package:whitenoise/widgets/wn_user_item.dart';
 
-class UserSelectionScreen extends HookConsumerWidget {
-  const UserSelectionScreen({super.key, this.initialUsers = const []});
+class UserPickerScreen extends HookConsumerWidget {
+  const UserPickerScreen({
+    super.key,
+    required this.title,
+    required this.submitText,
+    required this.submitIcon,
+    required this.onSubmit,
+    this.initialUsers = const [],
+    this.candidateFilter,
+    this.additionalLoading = false,
+    this.additionalNotice,
+  });
 
+  final String title;
+  final String submitText;
+  final WnIcons submitIcon;
+  final Future<void> Function(BuildContext context, List<User> selected) onSubmit;
   final List<User> initialUsers;
+  final bool Function(User user)? candidateFilter;
+  final bool additionalLoading;
+  final WnSystemNotice? additionalNotice;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -34,37 +52,55 @@ class UserSelectionScreen extends HookConsumerWidget {
     final accountPubkey = ref.watch(accountPubkeyProvider);
     final searchController = useTextEditingController();
     final searchQuery = useState('');
+    final isSubmitting = useState(false);
 
     final searchState = useUserSearch(
       accountPubkey: accountPubkey,
       searchQuery: searchQuery.value,
     );
-
     final selectionHook = useUserSelection(initialUsers: initialUsers);
+
+    final filter = candidateFilter;
+    final candidates = additionalLoading
+        ? const <User>[]
+        : (filter == null ? searchState.users : searchState.users.where(filter).toList());
+    final isLoadingList = searchState.isLoading || additionalLoading;
+
+    Future<void> handleSubmit() async {
+      if (isSubmitting.value) return;
+      final selected = selectionHook.state.selectedUsers;
+      if (selected.isEmpty) return;
+
+      isSubmitting.value = true;
+      try {
+        await onSubmit(context, selected);
+      } finally {
+        if (context.mounted) {
+          isSubmitting.value = false;
+        }
+      }
+    }
 
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
       body: SafeArea(
         child: WnSlate(
           header: WnSlateNavigationHeader(
-            title: context.l10n.newGroupChat,
+            title: title,
             onNavigate: () => Routes.goBack(context),
           ),
+          systemNotice: additionalNotice,
           footer: Padding(
             padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 16.h),
             child: SizedBox(
               width: double.infinity,
               child: WnButton(
-                key: const Key('user_selection_continue_button'),
-                onPressed: selectionHook.state.selectedCount > 0
-                    ? () => Routes.pushToSetUpGroup(
-                        context,
-                        selectionHook.state.selectedUsers,
-                      )
-                    : null,
-                text: context.l10n.continueButton,
+                key: const Key('user_picker_submit_button'),
+                text: submitText,
                 size: WnButtonSize.medium,
-                trailingIcon: WnIcons.arrowRight,
+                trailingIcon: submitIcon,
+                loading: isSubmitting.value,
+                onPressed: selectionHook.state.selectedCount > 0 ? handleSubmit : null,
               ),
             ),
           ),
@@ -74,7 +110,7 @@ class UserSelectionScreen extends HookConsumerWidget {
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 14.w),
                 child: WnSearchField(
-                  key: const Key('user_selection_search_field'),
+                  key: const Key('user_picker_search_field'),
                   placeholder: context.l10n.searchByNameOrNpub,
                   controller: searchController,
                   onChanged: (value) => searchQuery.value = value,
@@ -89,7 +125,7 @@ class UserSelectionScreen extends HookConsumerWidget {
                   child: Padding(
                     padding: EdgeInsets.symmetric(horizontal: 14.w),
                     child: ListView.separated(
-                      key: const Key('selected_users_bubbles'),
+                      key: const Key('user_picker_selected_bubbles'),
                       scrollDirection: Axis.horizontal,
                       itemCount: selectionHook.state.selectedUsers.length,
                       separatorBuilder: (_, _) => Gap(6.w),
@@ -100,7 +136,7 @@ class UserSelectionScreen extends HookConsumerWidget {
                           npubFromHex(user.pubkey) ?? user.pubkey,
                         );
                         return WnUserBubble(
-                          key: Key('bubble_${user.pubkey}'),
+                          key: Key('user_picker_bubble_${user.pubkey}'),
                           displayName: displayName ?? formattedPubKey,
                           pictureUrl: user.metadata.picture,
                           avatarColor: AvatarColor.fromPubkey(user.pubkey),
@@ -113,14 +149,14 @@ class UserSelectionScreen extends HookConsumerWidget {
                 Gap(12.h),
               ],
               Expanded(
-                child: searchState.isLoading
+                child: isLoadingList
                     ? Center(
                         child: CircularProgressIndicator(
                           color: colors.backgroundContentPrimary,
                           strokeCap: StrokeCap.round,
                         ),
                       )
-                    : searchState.users.isEmpty
+                    : candidates.isEmpty
                     ? Center(
                         child: Text(
                           searchState.hasSearchQuery
@@ -135,24 +171,20 @@ class UserSelectionScreen extends HookConsumerWidget {
                         children: [
                           ListView.builder(
                             padding: EdgeInsets.only(top: 4.h),
-                            itemCount: searchState.users.length,
+                            itemCount: candidates.length,
                             itemBuilder: (context, index) {
-                              final user = searchState.users[index];
+                              final user = candidates[index];
                               final displayName = presentName(user.metadata);
                               final formattedPubKey = formatPublicKey(
                                 npubFromHex(user.pubkey) ?? user.pubkey,
                               );
-                              final isSelected = selectionHook.state.isSelected(
-                                user,
-                              );
+                              final isSelected = selectionHook.state.isSelected(user);
                               return WnUserItem(
-                                key: Key(user.pubkey),
+                                key: Key('user_picker_user_${user.pubkey}'),
                                 displayName: displayName ?? formattedPubKey,
                                 npub: formattedPubKey,
                                 pictureUrl: user.metadata.picture,
-                                avatarColor: AvatarColor.fromPubkey(
-                                  user.pubkey,
-                                ),
+                                avatarColor: AvatarColor.fromPubkey(user.pubkey),
                                 size: WnUserItemSize.medium,
                                 showCheckbox: true,
                                 isSelected: isSelected,
@@ -161,9 +193,7 @@ class UserSelectionScreen extends HookConsumerWidget {
                             },
                           ),
                           WnFadeOverlay.top(color: colors.backgroundSecondary),
-                          WnFadeOverlay.bottom(
-                            color: colors.backgroundSecondary,
-                          ),
+                          WnFadeOverlay.bottom(color: colors.backgroundSecondary),
                         ],
                       ),
               ),

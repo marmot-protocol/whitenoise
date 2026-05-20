@@ -20,9 +20,9 @@ import 'package:whitenoise/screens/notification_settings_screen.dart';
 import 'package:whitenoise/screens/settings_screen.dart';
 import 'package:whitenoise/screens/signup_screen.dart';
 import 'package:whitenoise/screens/start_support_chat_screen.dart';
+import 'package:whitenoise/screens/user_picker_screen.dart';
 import 'package:whitenoise/screens/user_profile_screen.dart';
 import 'package:whitenoise/screens/user_search_screen.dart';
-import 'package:whitenoise/screens/user_selection_screen.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
@@ -644,7 +644,7 @@ void main() {
   });
 
   group('pushToSetUpGroup', () {
-    testWidgets('shows UserSelectionScreen when selectedUsers is empty', (tester) async {
+    testWidgets('shows the new-group picker when selectedUsers is empty', (tester) async {
       await pumpRouter(
         tester,
         overrides: [
@@ -653,7 +653,7 @@ void main() {
       );
       Routes.pushToSetUpGroup(getContext(tester), const <User>[]);
       await tester.pumpAndSettle();
-      expect(find.byType(UserSelectionScreen), findsOneWidget);
+      expect(find.byType(UserPickerScreen), findsOneWidget);
     });
   });
 

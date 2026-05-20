@@ -86,5 +86,9 @@
 		<string>White Noise needs access to save images and videos to your library.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>White Noise needs access to save images and videos to your library.</string>
-	</dict>
+	<key>WNAppGroupIdentifier</key>
+	<string>$(APP_GROUP_IDENTIFIER)</string>
+	<key>WNKeychainAccessGroup</key>
+	<string>$(AppIdentifierPrefix)$(KEYCHAIN_ACCESS_GROUP_IDENTIFIER)</string>
+</dict>
 </plist>
