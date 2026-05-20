@@ -32,7 +32,7 @@ class ScanNpubScreen extends HookWidget {
       final hexPubkey = hexFromNpub(value);
       if (hexPubkey != null) {
         Routes.goBack(context);
-        Routes.pushToStartChat(context, hexPubkey);
+        Routes.pushToUserProfile(context, hexPubkey);
       } else if (value.startsWith('npub1')) {
         showInvalidNpubError.value = true;
       }

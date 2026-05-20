@@ -79,7 +79,11 @@ class BlockedUsersScreen extends HookConsumerWidget {
           return _BlockedUserTile(
             pubkey: entry.pubkey,
             metadata: entry.metadata,
-            onTap: () => Routes.pushToBlockedUser(context, entry.pubkey),
+            onTap: () => Routes.pushToUserProfile(
+              context,
+              entry.pubkey,
+              topAligned: true,
+            ),
           );
         },
       );

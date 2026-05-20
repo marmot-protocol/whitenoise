@@ -7,7 +7,7 @@ import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/chat_screen.dart';
 import 'package:whitenoise/screens/share_profile_screen.dart';
-import 'package:whitenoise/screens/start_chat_screen.dart';
+import 'package:whitenoise/screens/user_profile_screen.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
 import 'package:whitenoise/widgets/qr_scanner.dart';
@@ -120,7 +120,7 @@ void main() {
         scanBox.onBarcodeDetected(testNpubB);
         await tester.pumpAndSettle();
 
-        expect(find.byType(StartChatScreen), findsOneWidget);
+        expect(find.byType(UserProfileScreen), findsOneWidget);
       });
 
       testWidgets('calling onBarcodeDetected with user deep link navigates to start chat', (
@@ -132,7 +132,7 @@ void main() {
         scanBox.onBarcodeDetected('whitenoise://user/$testNpubB');
         await tester.pumpAndSettle();
 
-        final screen = tester.widget<StartChatScreen>(find.byType(StartChatScreen));
+        final screen = tester.widget<UserProfileScreen>(find.byType(UserProfileScreen));
         expect(screen.userPubkey, testPubkeyB);
       });
 

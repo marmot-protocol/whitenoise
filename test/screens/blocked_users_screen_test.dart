@@ -5,8 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
-import 'package:whitenoise/screens/blocked_user_screen.dart';
 import 'package:whitenoise/screens/blocked_users_screen.dart';
+import 'package:whitenoise/screens/user_profile_screen.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/api/mute_list.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -140,7 +140,7 @@ void main() {
       expect(find.byKey(const Key('blocked_users_empty')), findsNothing);
     });
 
-    testWidgets('tapping a row navigates to BlockedUserScreen', (tester) async {
+    testWidgets('tapping a row navigates to UserProfileScreen', (tester) async {
       _api.blockedPubkeys.add(_blockedPubkeyB);
       _api.seedUserInitialSnapshot(
         _blockedPubkeyB,
@@ -152,7 +152,7 @@ void main() {
       await tester.tap(find.byKey(const Key('blocked_user_tile_$_blockedPubkeyB')));
       await tester.pumpAndSettle();
 
-      expect(find.byType(BlockedUserScreen), findsOneWidget);
+      expect(find.byType(UserProfileScreen), findsOneWidget);
     });
 
     testWidgets('returning from detail screen refreshes the blocked list', (tester) async {
@@ -161,12 +161,12 @@ void main() {
       await pumpBlockedUsersScreen(tester);
       final callsBeforeDetail = _api.getBlockedUsersCallCount;
 
-      Routes.pushToBlockedUser(
+      Routes.pushToUserProfile(
         tester.element(find.byType(BlockedUsersScreen)),
         _blockedPubkeyB,
       );
       await tester.pumpAndSettle();
-      Routes.goBack(tester.element(find.byType(BlockedUserScreen)));
+      Routes.goBack(tester.element(find.byType(UserProfileScreen)));
       await tester.pumpAndSettle();
 
       expect(_api.getBlockedUsersCallCount, greaterThan(callsBeforeDetail));

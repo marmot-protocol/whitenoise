@@ -7,7 +7,6 @@ import 'package:go_router/go_router.dart';
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
-import 'package:whitenoise/screens/blocked_user_screen.dart';
 import 'package:whitenoise/screens/blocked_users_screen.dart';
 import 'package:whitenoise/screens/chat_info_screen.dart';
 import 'package:whitenoise/screens/chat_invite_screen.dart';
@@ -20,8 +19,8 @@ import 'package:whitenoise/screens/login_screen.dart';
 import 'package:whitenoise/screens/notification_settings_screen.dart';
 import 'package:whitenoise/screens/settings_screen.dart';
 import 'package:whitenoise/screens/signup_screen.dart';
-import 'package:whitenoise/screens/start_chat_screen.dart';
 import 'package:whitenoise/screens/start_support_chat_screen.dart';
+import 'package:whitenoise/screens/user_profile_screen.dart';
 import 'package:whitenoise/screens/user_search_screen.dart';
 import 'package:whitenoise/screens/user_selection_screen.dart';
 import 'package:whitenoise/src/rust/api/accounts.dart';
@@ -199,7 +198,7 @@ void main() {
       router.go('whitenoise://user/$testNpubB');
       await tester.pumpAndSettle();
 
-      final screen = tester.widget<StartChatScreen>(find.byType(StartChatScreen));
+      final screen = tester.widget<UserProfileScreen>(find.byType(UserProfileScreen));
       expect(screen.userPubkey, testPubkeyB);
     });
 
@@ -730,23 +729,23 @@ void main() {
     });
   });
 
-  group('pushToBlockedUser', () {
-    testWidgets('passes userPubkey into BlockedUserScreen', (tester) async {
+  group('pushToUserProfile', () {
+    testWidgets('passes userPubkey into UserProfileScreen', (tester) async {
       await pumpRouter(
         tester,
         overrides: [
           authProvider.overrideWith(() => _AuthenticatedAuthNotifier()),
         ],
       );
-      Routes.pushToBlockedUser(getContext(tester), testPubkeyB);
+      Routes.pushToUserProfile(getContext(tester), testPubkeyB);
       await tester.pumpAndSettle();
-      final screen = tester.widget<BlockedUserScreen>(find.byType(BlockedUserScreen));
+      final screen = tester.widget<UserProfileScreen>(find.byType(UserProfileScreen));
       expect(screen.userPubkey, testPubkeyB);
     });
 
     testWidgets('redirects to LoginScreen when not authenticated', (tester) async {
       await pumpRouter(tester);
-      Routes.pushToBlockedUser(getContext(tester), testPubkeyB);
+      Routes.pushToUserProfile(getContext(tester), testPubkeyB);
       await tester.pumpAndSettle();
       expect(find.byType(LoginScreen), findsOneWidget);
     });

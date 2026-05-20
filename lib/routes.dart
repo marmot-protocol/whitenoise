@@ -14,7 +14,6 @@ import 'package:whitenoise/screens/add_relay_screen.dart' show AddRelayScreen;
 import 'package:whitenoise/screens/add_to_group_screen.dart' show AddToGroupScreen;
 import 'package:whitenoise/screens/app_logs_screen.dart' show AppLogsScreen;
 import 'package:whitenoise/screens/appearance_screen.dart' show AppearanceScreen;
-import 'package:whitenoise/screens/blocked_user_screen.dart' show BlockedUserScreen;
 import 'package:whitenoise/screens/blocked_users_screen.dart' show BlockedUsersScreen;
 import 'package:whitenoise/screens/chat_info_screen.dart' show ChatInfoScreen;
 import 'package:whitenoise/screens/chat_invite_screen.dart' show ChatInviteScreen;
@@ -46,9 +45,9 @@ import 'package:whitenoise/screens/settings_screen.dart' show SettingsScreen;
 import 'package:whitenoise/screens/share_profile_screen.dart' show ShareProfileScreen;
 import 'package:whitenoise/screens/sign_out_screen.dart' show SignOutScreen;
 import 'package:whitenoise/screens/signup_screen.dart' show SignupScreen;
-import 'package:whitenoise/screens/start_chat_screen.dart' show StartChatScreen;
 import 'package:whitenoise/screens/start_support_chat_screen.dart' show StartSupportChatScreen;
 import 'package:whitenoise/screens/switch_profile_screen.dart' show SwitchProfileScreen;
+import 'package:whitenoise/screens/user_profile_screen.dart' show UserProfileScreen;
 import 'package:whitenoise/screens/user_search_screen.dart' show UserSearchScreen;
 import 'package:whitenoise/screens/user_selection_screen.dart' show UserSelectionScreen;
 import 'package:whitenoise/src/rust/api/users.dart' show User;
@@ -82,7 +81,6 @@ abstract final class Routes {
   static const _notificationSettings = '/notification-settings';
   static const _privacySecurity = '/privacy-security';
   static const _blockedUsers = '/blocked-users';
-  static const _blockedUser = '/blocked-users/:userPubkey';
   static const _wip = '/wip';
   static const _developerSettings = '/developer-settings';
   static const _keyPackageManagement = '/key-package-management';
@@ -103,7 +101,7 @@ abstract final class Routes {
   static const _userSelection = '/user-selection';
   static const _setUpGroup = '/set-up-group';
   static const _addToGroup = '/add-to-group/:userPubkey';
-  static const _startChat = '/start-chat/:userPubkey';
+  static const _userProfile = '/user-profile/:userPubkey';
   static const _chatInfo = '/chat-info/:mlsGroupId';
   static const _inviteInfo = '/invite-info/:mlsGroupId';
   static const _groupInfo = '/group-info/:groupId';
@@ -221,16 +219,6 @@ abstract final class Routes {
             child: const BlockedUsersScreen(),
           ),
         ),
-        GoRoute(
-          name: 'blockedUser',
-          path: _blockedUser,
-          pageBuilder: (context, state) => _navigationTransition(
-            state: state,
-            child: BlockedUserScreen(userPubkey: state.pathParameters['userPubkey']!),
-            opaque: false,
-          ),
-        ),
-
         GoRoute(
           path: _reportBug,
           pageBuilder: (context, state) => _navigationTransition(
@@ -401,14 +389,19 @@ abstract final class Routes {
           ),
         ),
         GoRoute(
-          name: 'startChat',
-          path: _startChat,
-          pageBuilder: (context, state) => _navigationTransition(
-            state: state,
-            child: StartChatScreen(
-              userPubkey: state.pathParameters['userPubkey']!,
-            ),
-          ),
+          name: 'userProfile',
+          path: _userProfile,
+          pageBuilder: (context, state) {
+            final topAligned = state.uri.queryParameters['position'] == 'top';
+            return _navigationTransition(
+              state: state,
+              opaque: !topAligned,
+              child: UserProfileScreen(
+                userPubkey: state.pathParameters['userPubkey']!,
+                topAligned: topAligned,
+              ),
+            );
+          },
         ),
         GoRoute(
           name: 'chatInfo',
@@ -591,12 +584,6 @@ abstract final class Routes {
     return GoRouter.of(context).pushNamed('blockedUsers');
   }
 
-  static Future<void> pushToBlockedUser(BuildContext context, String userPubkey) {
-    return GoRouter.of(
-      context,
-    ).pushNamed('blockedUser', pathParameters: {'userPubkey': userPubkey});
-  }
-
   static void pushToDeveloperSettings(BuildContext context) {
     GoRouter.of(context).push(_developerSettings);
   }
@@ -729,13 +716,15 @@ abstract final class Routes {
     );
   }
 
-  static void pushToStartChat(
+  static void pushToUserProfile(
     BuildContext context,
-    String userPubkey,
-  ) {
+    String userPubkey, {
+    bool topAligned = false,
+  }) {
     GoRouter.of(context).pushNamed(
-      'startChat',
+      'userProfile',
       pathParameters: {'userPubkey': userPubkey},
+      queryParameters: topAligned ? const {'position': 'top'} : const {},
     );
   }
 

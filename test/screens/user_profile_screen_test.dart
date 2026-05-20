@@ -143,7 +143,7 @@ void main() {
   setUpAll(() => RustLib.initMock(api: _api));
   setUp(() => _api.reset());
 
-  Future<void> pumpStartChatScreen(
+  Future<void> pumpUserProfileScreen(
     WidgetTester tester, {
     required String userPubkey,
     bool settle = true,
@@ -154,7 +154,7 @@ void main() {
       overrides: [authProvider.overrideWith(() => _MockAuthNotifier())],
     );
     await tester.pumpAndSettle();
-    Routes.pushToStartChat(
+    Routes.pushToUserProfile(
       tester.element(find.byType(Scaffold)),
       userPubkey,
     );
@@ -166,41 +166,41 @@ void main() {
     }
   }
 
-  group('StartChatScreen', () {
+  group('UserProfileScreen', () {
     testWidgets('displays slate container', (tester) async {
-      await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+      await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
       expect(find.byType(WnSlate), findsOneWidget);
     });
 
     testWidgets('displays title', (tester) async {
-      await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
-      expect(find.text('Start new chat'), findsOneWidget);
+      await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
+      expect(find.text('Profile'), findsOneWidget);
     });
 
     testWidgets('displays back button', (tester) async {
-      await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+      await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
       expect(find.byKey(const Key('slate_back_button')), findsOneWidget);
     });
 
     testWidgets('displays avatar', (tester) async {
-      await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+      await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
       expect(find.byType(WnAvatar), findsOneWidget);
     });
 
     testWidgets('shows pubkey copy card', (tester) async {
-      await pumpStartChatScreen(tester, userPubkey: testPubkeyA);
+      await pumpUserProfileScreen(tester, userPubkey: testPubkeyA);
       final copyCard = tester.widget<WnCopyCard>(find.byType(WnCopyCard));
       expect(copyCard.textToDisplay, testNpubAFormatted);
       expect(copyCard.textToCopy, testNpubA);
     });
 
     testWidgets('displays follow button', (tester) async {
-      await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+      await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
       expect(find.byKey(const Key('follow_button')), findsOneWidget);
     });
 
     testWidgets('displays start chat button', (tester) async {
-      await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+      await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
       expect(find.byKey(const Key('start_chat_button')), findsOneWidget);
       expect(find.text('Send message'), findsOneWidget);
     });
@@ -208,7 +208,7 @@ void main() {
     testWidgets('keeps button layout stable while key package loads', (tester) async {
       _api.userHasKeyPackageCompleter = Completer<KeyPackageStatus>();
 
-      await pumpStartChatScreen(tester, userPubkey: _otherPubkey, settle: false);
+      await pumpUserProfileScreen(tester, userPubkey: _otherPubkey, settle: false);
 
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
       expect(find.byKey(const Key('follow_button')), findsOneWidget);
@@ -225,14 +225,14 @@ void main() {
     });
 
     testWidgets('does not show self action buttons for own profile', (tester) async {
-      await pumpStartChatScreen(tester, userPubkey: _testPubkey);
+      await pumpUserProfileScreen(tester, userPubkey: _testPubkey);
       expect(find.byKey(const Key('follow_button')), findsNothing);
       expect(find.byKey(const Key('add_to_group_button')), findsNothing);
       expect(find.byKey(const Key('start_chat_button')), findsNothing);
     });
 
     testWidgets('does not show invite button when user has valid key package', (tester) async {
-      await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+      await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
       expect(find.byKey(const Key('invite_button')), findsNothing);
     });
 
@@ -247,17 +247,17 @@ void main() {
       });
 
       testWidgets('displays user name', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.text('Alice'), findsOneWidget);
       });
 
       testWidgets('displays nip05', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.text('alice@example.com'), findsOneWidget);
       });
 
       testWidgets('displays about', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.text('I love Nostr!'), findsOneWidget);
       });
     });
@@ -275,17 +275,17 @@ void main() {
       });
 
       testWidgets('still displays about', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.text('I love Nostr!'), findsOneWidget);
       });
 
       testWidgets('still displays nip05', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.text('alice@example.com'), findsOneWidget);
       });
 
       testWidgets('passes picture url to avatar', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.byType(WnAvatar), findsOneWidget);
 
         final avatar = tester.widget<WnAvatar>(find.byType(WnAvatar));
@@ -295,18 +295,18 @@ void main() {
 
     group('follow button', () {
       testWidgets('shows Follow for non-followed user', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.text('Follow'), findsOneWidget);
       });
 
       testWidgets('shows Unfollow for followed user', (tester) async {
         _api.followingPubkeys.add(_otherPubkey);
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.text('Unfollow'), findsOneWidget);
       });
 
       testWidgets('calls follow API when tapped', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         await tester.tap(find.byKey(const Key('follow_button')));
         await tester.pumpAndSettle();
 
@@ -317,7 +317,7 @@ void main() {
 
       testWidgets('calls unfollow API when tapped', (tester) async {
         _api.followingPubkeys.add(_otherPubkey);
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         await tester.tap(find.byKey(const Key('follow_button')));
         await tester.pumpAndSettle();
 
@@ -328,7 +328,7 @@ void main() {
 
       testWidgets('shows loading state during follow', (tester) async {
         _api.followCompleter = Completer();
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         await tester.tap(find.byKey(const Key('follow_button')));
         await tester.pump();
 
@@ -339,7 +339,7 @@ void main() {
 
       testWidgets('shows system notice on follow error', (tester) async {
         _api.followError = Exception('Network error');
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
 
         await tester.tap(find.byKey(const Key('follow_button')));
         await tester.pump();
@@ -352,7 +352,7 @@ void main() {
 
     group('add to group button', () {
       testWidgets('displays add to group button', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.byKey(const Key('add_to_group_button')), findsOneWidget);
         expect(find.text('Add to group'), findsOneWidget);
       });
@@ -361,14 +361,14 @@ void main() {
         tester,
       ) async {
         _api.userHasKeyPackageStatus = KeyPackageStatus.notFound;
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.byKey(const Key('add_to_group_button')), findsNothing);
       });
 
       testWidgets('tapping add to group button navigates to add to group screen', (
         tester,
       ) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         await tester.tap(find.byKey(const Key('add_to_group_button')));
         await tester.pumpAndSettle();
 
@@ -378,7 +378,7 @@ void main() {
 
     group('start chat action', () {
       testWidgets('calls createGroup API with correct params', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         await tester.tap(find.byKey(const Key('start_chat_button')));
         await tester.pumpAndSettle();
 
@@ -390,7 +390,7 @@ void main() {
 
       testWidgets('shows loading state during creation', (tester) async {
         _api.createGroupCompleter = Completer();
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
 
         await tester.tap(find.byKey(const Key('start_chat_button')));
         await tester.pump();
@@ -402,7 +402,7 @@ void main() {
 
       testWidgets('shows system notice on failure', (tester) async {
         _api.createGroupError = Exception('Network error');
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
 
         await tester.tap(find.byKey(const Key('start_chat_button')));
         await tester.pumpAndSettle();
@@ -415,14 +415,14 @@ void main() {
         tester,
       ) async {
         _api.createGroupCompleter = Completer<Group>();
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
 
         await tester.tap(find.byKey(const Key('start_chat_button')));
         await tester.pump();
 
         await tester.tap(find.byKey(const Key('slate_back_button')));
         await tester.pumpAndSettle();
-        expect(find.text('Start new chat'), findsNothing);
+        expect(find.text('Profile'), findsNothing);
 
         _api.createGroupCompleter!.complete(
           Group(
@@ -444,21 +444,21 @@ void main() {
 
     group('back button', () {
       testWidgets('navigates back when tapped', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         await tester.tap(find.byKey(const Key('slate_back_button')));
         await tester.pumpAndSettle();
 
-        expect(find.text('Start new chat'), findsNothing);
+        expect(find.text('Profile'), findsNothing);
       });
     });
 
     group('background tap', () {
       testWidgets('navigates back when background tapped', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         await tester.tapAt(const Offset(10, 10));
         await tester.pumpAndSettle();
 
-        expect(find.text('Start new chat'), findsNothing);
+        expect(find.text('Profile'), findsNothing);
       });
     });
 
@@ -468,27 +468,27 @@ void main() {
       });
 
       testWidgets('shows invite callout', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.text('Invite to White Noise'), findsOneWidget);
       });
 
       testWidgets('does not show follow button', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.byKey(const Key('follow_button')), findsNothing);
       });
 
       testWidgets('does not show start chat button', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.byKey(const Key('start_chat_button')), findsNothing);
       });
 
       testWidgets('shows invite button', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.byKey(const Key('invite_button')), findsOneWidget);
       });
 
       testWidgets('invite button shows correct label', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         final button = tester.widget<WnButton>(find.byKey(const Key('invite_button')));
         expect(button.text, 'Share');
       });
@@ -496,7 +496,7 @@ void main() {
       testWidgets('handles share failure gracefully', (tester) async {
         mockSharePlusFailing();
         addTearDown(clearSharePlusMock);
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
 
         await tester.tap(find.byKey(const Key('invite_button')));
         await tester.pumpAndSettle();
@@ -509,7 +509,7 @@ void main() {
       ) async {
         final shareCalls = mockSharePlus();
         addTearDown(clearSharePlusMock);
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
 
         await tester.tap(find.byKey(const Key('invite_button')));
         await tester.pumpAndSettle();
@@ -531,7 +531,7 @@ void main() {
             name: 'alice_nostr',
             custom: {},
           );
-          await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+          await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
           expect(
             find.text("Alice isn't on White Noise yet. Share the app to start a secure chat."),
             findsOneWidget,
@@ -540,7 +540,7 @@ void main() {
 
         testWidgets('uses name when displayName is absent', (tester) async {
           _api.metadata = const FlutterMetadata(name: 'bob_nostr', custom: {});
-          await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+          await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
           expect(
             find.text(
               "bob_nostr isn't on White Noise yet. Share the app to start a secure chat.",
@@ -550,7 +550,7 @@ void main() {
         });
 
         testWidgets('uses generic message when no metadata names', (tester) async {
-          await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+          await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
           expect(
             find.text(
               "This user isn't on White Noise yet. Share the app to start a secure chat.",
@@ -567,22 +567,22 @@ void main() {
       });
 
       testWidgets('shows user needs update callout', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.text('Update required'), findsOneWidget);
       });
 
       testWidgets('does not show follow button', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.byKey(const Key('follow_button')), findsNothing);
       });
 
       testWidgets('does not show start chat button', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.byKey(const Key('start_chat_button')), findsNothing);
       });
 
       testWidgets('does not show invite button', (tester) async {
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
         expect(find.byKey(const Key('invite_button')), findsNothing);
       });
 
@@ -593,7 +593,7 @@ void main() {
             name: 'alice_nostr',
             custom: {},
           );
-          await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+          await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
           expect(
             find.text(
               "You can't start a secure chat with Alice yet. They need to update White Noise before secure messaging works.",
@@ -604,7 +604,7 @@ void main() {
 
         testWidgets('uses name when displayName is absent', (tester) async {
           _api.metadata = const FlutterMetadata(name: 'bob_nostr', custom: {});
-          await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+          await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
           expect(
             find.text(
               "You can't start a secure chat with bob_nostr yet. They need to update White Noise before secure messaging works.",
@@ -614,7 +614,7 @@ void main() {
         });
 
         testWidgets('uses generic message when no metadata names', (tester) async {
-          await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+          await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
           expect(
             find.text(
               "You can't start a secure chat with this user yet. They need to update White Noise before secure messaging works.",
@@ -628,7 +628,7 @@ void main() {
     group('system notice', () {
       testWidgets('shows notice when public key is copied', (tester) async {
         mockClipboard();
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
 
         await tester.tap(find.byKey(const Key('copy_button')));
         await tester.pump();
@@ -639,7 +639,7 @@ void main() {
       testWidgets('shows error notice when public key copy fails', (tester) async {
         mockClipboardFailing();
         addTearDown(clearClipboardMock);
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
 
         await tester.tap(find.byKey(const Key('copy_button')));
         await tester.pumpAndSettle();
@@ -649,7 +649,7 @@ void main() {
 
       testWidgets('dismisses notice after auto-hide duration', (tester) async {
         mockClipboard();
-        await pumpStartChatScreen(tester, userPubkey: _otherPubkey);
+        await pumpUserProfileScreen(tester, userPubkey: _otherPubkey);
 
         await tester.tap(find.byKey(const Key('copy_button')));
         await tester.pump();

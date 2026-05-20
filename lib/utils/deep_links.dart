@@ -81,7 +81,7 @@ abstract final class DeepLinks {
 
     return DeepLinkTarget(
       type: DeepLinkTargetType.user,
-      location: '/start-chat/${Uri.encodeComponent(pubkey)}',
+      location: '/user-profile/${Uri.encodeComponent(pubkey)}',
     );
   }
 
