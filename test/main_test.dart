@@ -362,6 +362,18 @@ void main() {
       expect(suppressedUntil!.isAfter(DateTime.now().toUtc()), isTrue);
     });
 
+    testWidgets('does not suppress local notifications on cold start without a tap', (
+      tester,
+    ) async {
+      await pumpWnApp(tester);
+      final container = ProviderScope.containerOf(
+        tester.element(find.byType(WnApp)),
+        listen: false,
+      );
+
+      expect(container.read(localNotificationSuppressedUntilProvider), isNull);
+    });
+
     testWidgets('logs Whitenoise resume failures without throwing', (tester) async {
       await pumpWnApp(tester);
       mockApi.shouldFailResumeAfterBackground = true;

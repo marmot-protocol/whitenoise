@@ -6,6 +6,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.util.Log
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -190,6 +192,8 @@ object AndroidPushNotificationBridge {
     private const val KEY_FCM_TOKEN = "fcm_token"
     private const val METHOD_PROVIDER_PUSH_TOKEN_UPDATED = "providerPushTokenUpdated"
 
+    private val mainHandler = Handler(Looper.getMainLooper())
+    @Volatile
     private var channel: MethodChannel? = null
 
     fun attach(channel: MethodChannel) {
@@ -221,7 +225,12 @@ object AndroidPushNotificationBridge {
             ?.takeIf { it.isNotBlank() }
 
     fun publishToken(token: String) {
-        channel?.invokeMethod(METHOD_PROVIDER_PUSH_TOKEN_UPDATED, tokenMap(token))
+        val currentChannel = channel ?: return
+        mainHandler.post {
+            if (channel == currentChannel) {
+                currentChannel.invokeMethod(METHOD_PROVIDER_PUSH_TOKEN_UPDATED, tokenMap(token))
+            }
+        }
     }
 
     fun handleBlankPushWake(context: Context) {

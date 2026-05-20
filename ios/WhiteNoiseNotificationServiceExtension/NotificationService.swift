@@ -83,6 +83,7 @@ final class NotificationService: UNNotificationServiceExtension {
   // Keep fallback delivery quick; slow relay collection should not hold the system UI for 30 seconds.
   private let maxNotificationServiceWaitMs: UInt32 = 8_000
   private var bestAttemptDelivery: NotificationDelivery?
+  private var bestAttemptContent: UNMutableNotificationContent?
 
   override func didReceive(
     _ request: UNNotificationRequest,
@@ -90,6 +91,7 @@ final class NotificationService: UNNotificationServiceExtension {
   ) {
     let delivery = NotificationDelivery(contentHandler)
     bestAttemptDelivery = delivery
+    bestAttemptContent = nil
     NSLog("White Noise NSE received mutable notification")
 
     guard let content = request.content.mutableCopy() as? UNMutableNotificationContent else {
@@ -97,6 +99,7 @@ final class NotificationService: UNNotificationServiceExtension {
       delivery.deliver(request.content)
       return
     }
+    bestAttemptContent = content
 
     Self.collectionQueue.async {
       let shouldDisplayNotification = self.collectAndApplyNotificationText(content)
@@ -109,7 +112,9 @@ final class NotificationService: UNNotificationServiceExtension {
       return
     }
     NSLog("White Noise NSE timed out before rendering notification")
-    bestAttemptDelivery.deliver(UNMutableNotificationContent())
+    let content = bestAttemptContent ?? UNMutableNotificationContent()
+    applyFallbackNotificationText(content)
+    bestAttemptDelivery.deliver(content)
   }
 
   private func collectAndApplyNotificationText(_ content: UNMutableNotificationContent) -> Bool {

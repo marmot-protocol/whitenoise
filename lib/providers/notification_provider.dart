@@ -277,7 +277,9 @@ void _navigateToNotificationTarget({
 bool _canShowLocalNotification(Ref ref) {
   final suppressedUntil = ref.read(localNotificationSuppressedUntilProvider);
   if (suppressedUntil == null) return true;
-  return !DateTime.now().toUtc().isBefore(suppressedUntil);
+  if (DateTime.now().toUtc().isBefore(suppressedUntil)) return false;
+  ref.read(localNotificationSuppressedUntilProvider.notifier).clear();
+  return true;
 }
 
 // coverage:ignore-end

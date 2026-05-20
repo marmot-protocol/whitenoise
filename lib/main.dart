@@ -358,14 +358,17 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
     _router = Routes.build(ref);
     WidgetsBinding.instance.addObserver(this);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      _suppressLocalNotificationsDuringResume();
       unawaited(
-        _consumePendingNotificationTap(afterNavigate: _resumeAfterBackground),
+        _consumePendingNotificationTap(
+          beforeNavigate: () async => _suppressLocalNotificationsDuringResume(),
+          afterNavigate: _resumeAfterBackground,
+        ),
       );
     });
   }
 
   Future<bool> _consumePendingNotificationTap({
+    Future<void> Function()? beforeNavigate,
     Future<void> Function()? afterNavigate,
   }) async {
     final pending = await consumePendingNotificationTap();
@@ -374,6 +377,7 @@ class _WnAppState extends ConsumerState<WnApp> with WidgetsBindingObserver {
       isMounted: mounted,
       currentActivePubkey: ref.read(authProvider).value,
       switchToProfile: ref.read(authProvider.notifier).switchProfile,
+      beforeNavigate: beforeNavigate,
       afterNavigate: afterNavigate,
     );
   }
