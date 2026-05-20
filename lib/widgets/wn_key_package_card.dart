@@ -13,6 +13,7 @@ class WnKeyPackageCard extends StatelessWidget {
     required this.createdAt,
     required this.onDelete,
     required this.deleteLabel,
+    this.dTagText,
     this.legacyLabel,
     this.disabled = false,
     this.loading = false,
@@ -24,6 +25,7 @@ class WnKeyPackageCard extends StatelessWidget {
   final String createdAt;
   final VoidCallback onDelete;
   final String deleteLabel;
+  final String? dTagText;
   final String? legacyLabel;
   final bool disabled;
   final bool loading;
@@ -90,7 +92,8 @@ class WnKeyPackageCard extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        _buildIdField(context),
+        _buildIdField(context, hasDTag: dTagText != null),
+        if (dTagText != null) _buildDTagField(context),
         _buildCreatedAtField(context),
         SizedBox(
           height: 44.h,
@@ -109,14 +112,14 @@ class WnKeyPackageCard extends StatelessWidget {
     );
   }
 
-  Widget _buildIdField(BuildContext context) {
+  Widget _buildIdField(BuildContext context, {required bool hasDTag}) {
     final colors = context.colors;
     final textStyle = context.typographyScaled.medium14.copyWith(
       color: colors.backgroundContentSecondary,
     );
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(0, 4.h, 8.w, 13.h),
+      padding: EdgeInsets.fromLTRB(0, 4.h, 8.w, hasDTag ? 4.h : 13.h),
       child: Text.rich(
         TextSpan(
           children: [
@@ -125,6 +128,22 @@ class WnKeyPackageCard extends StatelessWidget {
           ],
         ),
         key: const Key('package_id_text'),
+      ),
+    );
+  }
+
+  Widget _buildDTagField(BuildContext context) {
+    final colors = context.colors;
+    final textStyle = context.typographyScaled.medium14.copyWith(
+      color: colors.backgroundContentSecondary,
+    );
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(0, 0, 8.w, 13.h),
+      child: Text(
+        dTagText!,
+        key: const Key('package_d_tag_text'),
+        style: textStyle,
       ),
     );
   }

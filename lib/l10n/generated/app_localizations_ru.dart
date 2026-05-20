@@ -465,8 +465,16 @@ class AppLocalizationsRu extends AppLocalizations {
   String get deleteLegacyKeyPackages => 'Удалить Устаревшие Пакеты Ключей';
 
   @override
+  String get deleteAllKeyPackages => 'Удалить все пакеты ключей';
+
+  @override
   String keyPackagesCount(int count) {
     return 'Пакеты Ключей ($count)';
+  }
+
+  @override
+  String keyPackageDTagLabel(String dTag) {
+    return 'd-tag: $dTag';
   }
 
   @override
@@ -480,6 +488,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get legacyKeyPackagesDeleted => 'Устаревшие пакеты ключей удалены';
+
+  @override
+  String get allKeyPackagesDeleted => 'Все пакеты ключей удалены';
 
   @override
   String get keyPackageDeleted => 'Пакет ключей удалён';
@@ -496,6 +507,9 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get legacyKeyPackageDeleteFailed =>
       'Не удалось удалить устаревшие пакеты ключей. Попробуйте снова.';
+
+  @override
+  String get allKeyPackageDeleteFailed => 'Не удалось удалить все пакеты ключей. Попробуйте снова.';
 
   @override
   String get legacyLabel => 'Устаревший';

@@ -18,6 +18,7 @@ class MockApi implements RustLibApi {
   Completer<void>? fetchCompleter;
   Completer<void>? deleteCompleter;
   Completer<void>? deleteAllLegacyCompleter;
+  Completer<void>? deleteAllCompleter;
 
   @override
   Future<List<FlutterEvent>> crateApiAccountsAccountKeyPackages({
@@ -77,6 +78,19 @@ class MockApi implements RustLibApi {
   }
 
   @override
+  Future<BigInt> crateApiAccountsDeleteAllAccountKeyPackages({
+    required String accountPubkey,
+  }) async {
+    if (deleteAllCompleter != null) {
+      await deleteAllCompleter!.future;
+    }
+    if (shouldThrow) throw Exception('Network error');
+    final count = keyPackages.length;
+    keyPackages.clear();
+    return BigInt.from(count);
+  }
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => throw UnimplementedError();
 }
 
@@ -86,6 +100,7 @@ late ({
   Future<KeyPackageResult> Function() publish,
   Future<KeyPackageResult> Function(String id) delete,
   Future<KeyPackageResult> Function() deleteAllLegacy,
+  Future<KeyPackageResult> Function() deleteAll,
 })
 hook;
 
@@ -118,6 +133,7 @@ void main() {
     mockApi.fetchCompleter = null;
     mockApi.deleteCompleter = null;
     mockApi.deleteAllLegacyCompleter = null;
+    mockApi.deleteAllCompleter = null;
   });
 
   group('fetch', () {
@@ -514,7 +530,9 @@ void main() {
       expect(hook.state.activeAction, isNull);
     });
 
-    testWidgets('returns fetch failure when delete succeeds but refresh fails', (tester) async {
+    testWidgets('returns deleteAllLegacy failure when delete succeeds but refresh fails', (
+      tester,
+    ) async {
       mockApi.keyPackages = [
         FlutterEvent(
           id: 'pkg1',
@@ -535,7 +553,95 @@ void main() {
       await tester.pump();
 
       expect(result.success, isFalse);
-      expect(result.action, KeyPackageAction.fetch);
+      expect(result.action, KeyPackageAction.deleteAllLegacy);
+      expect(hook.state.isLoading, isFalse);
+      expect(hook.state.hasError, isFalse);
+    });
+  });
+
+  group('deleteAll', () {
+    testWidgets('removes legacy and current packages', (tester) async {
+      mockApi.keyPackages = [
+        FlutterEvent(
+          id: 'pkg_legacy',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackageLegacy,
+          tags: const [],
+          content: '',
+        ),
+        FlutterEvent(
+          id: 'pkg_current',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackage,
+          tags: const [],
+          content: '',
+        ),
+      ];
+
+      await _pump(tester);
+      await hook.fetch();
+      await tester.pump();
+      expect(hook.state.packages.length, 2);
+
+      await hook.deleteAll();
+      await tester.pump();
+
+      expect(hook.state.packages, isEmpty);
+    });
+
+    testWidgets('sets activeAction to deleteAll while loading', (tester) async {
+      mockApi.deleteAllCompleter = Completer<void>();
+
+      await _pump(tester);
+      final future = hook.deleteAll();
+      await tester.pump();
+
+      expect(hook.state.isLoading, isTrue);
+      expect(hook.state.activeAction, KeyPackageAction.deleteAll);
+
+      mockApi.deleteAllCompleter!.complete();
+      await future;
+      await tester.pump();
+
+      expect(hook.state.isLoading, isFalse);
+      expect(hook.state.activeAction, isNull);
+    });
+
+    testWidgets('sets error on failure', (tester) async {
+      mockApi.shouldThrow = true;
+
+      await _pump(tester);
+      await hook.deleteAll();
+      await tester.pump();
+
+      expect(hook.state.hasError, isTrue);
+      expect(hook.state.activeAction, isNull);
+    });
+
+    testWidgets('returns deleteAll failure when delete succeeds but refresh fails', (tester) async {
+      mockApi.keyPackages = [
+        FlutterEvent(
+          id: 'pkg1',
+          pubkey: testPubkeyA,
+          createdAt: DateTime.now(),
+          kind: NostrEventKinds.mlsKeyPackage,
+          tags: const [],
+          content: '',
+        ),
+      ];
+
+      await _pump(tester);
+      await hook.fetch();
+      await tester.pump();
+
+      mockApi.shouldThrowOnRefresh = true;
+      final result = await hook.deleteAll();
+      await tester.pump();
+
+      expect(result.success, isFalse);
+      expect(result.action, KeyPackageAction.deleteAll);
       expect(hook.state.isLoading, isFalse);
       expect(hook.state.hasError, isFalse);
     });

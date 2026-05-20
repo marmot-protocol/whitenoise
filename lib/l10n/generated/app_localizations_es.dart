@@ -467,8 +467,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get deleteLegacyKeyPackages => 'Eliminar paquetes de llaves obsoletos';
 
   @override
+  String get deleteAllKeyPackages => 'Eliminar todos los paquetes de llaves';
+
+  @override
   String keyPackagesCount(int count) {
     return 'Paquetes de llaves ($count)';
+  }
+
+  @override
+  String keyPackageDTagLabel(String dTag) {
+    return 'd-tag: $dTag';
   }
 
   @override
@@ -482,6 +490,9 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get legacyKeyPackagesDeleted => 'Paquetes de llaves obsoletos eliminados';
+
+  @override
+  String get allKeyPackagesDeleted => 'Todos los paquetes de llaves eliminados';
 
   @override
   String get keyPackageDeleted => 'Paquete de llaves eliminado';
@@ -501,6 +512,10 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get legacyKeyPackageDeleteFailed =>
       'Error al eliminar paquetes de llaves obsoletos. Inténtalo de nuevo.';
+
+  @override
+  String get allKeyPackageDeleteFailed =>
+      'Error al eliminar todos los paquetes de llaves. Inténtalo de nuevo.';
 
   @override
   String get legacyLabel => 'Obsoleto';
