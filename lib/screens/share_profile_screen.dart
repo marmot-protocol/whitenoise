@@ -58,6 +58,7 @@ class ShareProfileScreen extends HookConsumerWidget {
     ).animate(CurvedAnimation(parent: qrColorAnim, curve: Curves.easeIn));
 
     final isMounted = useRef(true);
+    final isCapturing = useRef(false);
     useEffect(
       () =>
           () => isMounted.value = false,
@@ -65,8 +66,13 @@ class ShareProfileScreen extends HookConsumerWidget {
     );
 
     Future<void> captureAndShareQr() async {
+      if (isCapturing.value) return;
+      isCapturing.value = true;
       final boundary = qrRepaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
-      if (boundary == null) return;
+      if (boundary == null) {
+        isCapturing.value = false;
+        return;
+      }
       final errorMessage = context.l10n.shareQrCodeError;
       // Start dots and animation immediately; capture the last painted frame
       // in parallel — it's still full-color since no new frame has rendered yet.
@@ -77,21 +83,42 @@ class ShareProfileScreen extends HookConsumerWidget {
           .then((img) => img.toByteData(format: ui.ImageByteFormat.png));
       // onLongPressStart fires at 500ms total; dots step every 500ms after that
       await Future.delayed(const Duration(milliseconds: 500));
-      if (!isMounted.value || !isHolding.value) return;
+      if (!isMounted.value || !isHolding.value) {
+        isCapturing.value = false;
+        return;
+      }
       dotCount.value = 2;
       await Future.delayed(const Duration(milliseconds: 500));
-      if (!isMounted.value || !isHolding.value) return;
+      if (!isMounted.value || !isHolding.value) {
+        isCapturing.value = false;
+        return;
+      }
       dotCount.value = 3;
       try {
         final byteData = await captureFuture;
-        if (!isMounted.value || byteData == null || !isHolding.value) return;
+        if (!isMounted.value || byteData == null || !isHolding.value) {
+          isCapturing.value = false;
+          return;
+        }
         await SharePlus.instance.share(
           ShareParams(
-            files: [XFile.fromData(byteData.buffer.asUint8List(), mimeType: 'image/png')],
+            files: [
+              XFile.fromData(
+                byteData.buffer.asUint8List(),
+                name: 'qr_code.png',
+                mimeType: 'image/png',
+              ),
+            ],
           ),
         );
       } catch (e) {
-        if (isMounted.value) showErrorNotice(errorMessage);
+        if (isMounted.value) {
+          dotCount.value = 0;
+          qrColorAnim.reverse();
+          showErrorNotice(errorMessage);
+        }
+      } finally {
+        isCapturing.value = false;
       }
     }
 
