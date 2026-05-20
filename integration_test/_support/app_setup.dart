@@ -88,11 +88,14 @@ Future<ProviderContainer> mountApp(WidgetTester tester) async {
 Future<void> expectLocalRelaysAvailable() async {
   for (final url in _relayUrls) {
     final uri = Uri.tryParse(url);
-    if (uri == null) continue;
+    if (uri == null) {
+      debugPrint('[app_setup] Skipping unparseable relay URL: $url');
+      continue;
+    }
     final host = uri.host;
     final isLocal = host == 'localhost' || host == '127.0.0.1';
     if (!isLocal) continue;
-    final port = uri.port != 0
+    final port = uri.hasPort
         ? uri.port
         : (uri.scheme == 'wss' ? 443 : 80);
     await _expectLocalRelayAvailable(host, port);
