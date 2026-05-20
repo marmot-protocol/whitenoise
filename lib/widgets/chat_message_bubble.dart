@@ -40,7 +40,6 @@ class ChatMessageBubble extends StatelessWidget {
   final VoidCallback? onRetry;
   final String? Function(String hexPubkey)? mentionDisplayName;
   final String? groupId;
-  final Set<String>? groupMemberPubkeys;
 
   const ChatMessageBubble({
     super.key,
@@ -64,7 +63,6 @@ class ChatMessageBubble extends StatelessWidget {
     this.onRetry,
     this.mentionDisplayName,
     this.groupId,
-    this.groupMemberPubkeys,
   });
 
   ChatStatusType? get _deliveryStatusType {
@@ -168,7 +166,7 @@ class ChatMessageBubble extends StatelessWidget {
           final hex = hexFromNpub(bech32);
           if (hex == null || !context.mounted) return;
           final gid = groupId;
-          if (gid != null && (groupMemberPubkeys?.contains(hex) ?? false)) {
+          if (gid != null) {
             Routes.pushToGroupMember(context, gid, hex);
           } else {
             await StartChatScreen.show(context, userPubkey: hex);

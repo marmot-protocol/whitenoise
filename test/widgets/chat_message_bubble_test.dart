@@ -919,7 +919,7 @@ void main() {
         );
       });
 
-      testWidgets('npub mention of group member navigates to group member screen', (tester) async {
+      testWidgets('npub mention in a group navigates to the group member screen', (tester) async {
         await _mountBubbleWithRouter(
           tester,
           ChatMessageBubble(
@@ -941,7 +941,6 @@ void main() {
             ),
             isOwnMessage: false,
             groupId: testGroupId,
-            groupMemberPubkeys: const {testPubkeyA},
           ),
         );
         final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
@@ -954,45 +953,6 @@ void main() {
           find.byKey(const ValueKey('group_member_route_${testGroupId}_$testPubkeyA')),
           findsOneWidget,
         );
-      });
-
-      testWidgets('npub mention of non-member in group opens StartChatScreen', (tester) async {
-        await _mountBubbleWithRouter(
-          tester,
-          ChatMessageBubble(
-            message: withDoc(
-              const MarkdownDocument(
-                blocks: [
-                  MarkdownBlock.paragraph(
-                    inlines: [
-                      MarkdownInline.nostrMention(
-                        entity: MarkdownNostrEntity(
-                          hrp: MarkdownNostrHrp.npub,
-                          bech32: testNpubA,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-            isOwnMessage: false,
-            groupId: testGroupId,
-            groupMemberPubkeys: const {testPubkeyB},
-          ),
-        );
-        final span = tester.widget<RichText>(find.byType(RichText).first).text as TextSpan;
-        final entity = _firstTextSpanWithRecognizer(span);
-        (entity.recognizer as TapGestureRecognizer).onTap!();
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 50));
-        tester.takeException();
-        expect(launcher.calls, isEmpty);
-        expect(
-          find.byKey(const ValueKey('group_member_route_${testGroupId}_$testPubkeyA')),
-          findsNothing,
-        );
-        expect(find.byType(StartChatScreen), findsOneWidget);
       });
 
       testWidgets('whitenoise://chat/<id> tap navigates via GoRouter', (tester) async {
