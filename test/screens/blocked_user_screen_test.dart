@@ -23,7 +23,10 @@ const _blockedPubkey = testPubkeyB;
 class _MockApi extends MockWnApi {
   Completer<void>? unblockCompleter;
   Exception? unblockError;
+  Exception? followError;
+  String? dmGroupForPeer;
   final unblockCalls = <({String account, String target})>[];
+  final followCalls = <String>[];
 
   @override
   Future<void> crateApiMuteListUnblockUser({
@@ -40,11 +43,31 @@ class _MockApi extends MockWnApi {
   }
 
   @override
+  Future<void> crateApiAccountsFollowUser({
+    required String accountPubkey,
+    required String userToFollowPubkey,
+  }) async {
+    followCalls.add(userToFollowPubkey);
+    if (followError != null) throw followError!;
+  }
+
+  @override
+  Future<String?> crateApiAccountGroupsGetDmGroupWithPeer({
+    required String accountPubkey,
+    required String peerPubkey,
+  }) async {
+    return dmGroupForPeer;
+  }
+
+  @override
   void reset() {
     super.reset();
     unblockCompleter = null;
     unblockError = null;
+    followError = null;
+    dmGroupForPeer = null;
     unblockCalls.clear();
+    followCalls.clear();
   }
 }
 
@@ -241,6 +264,79 @@ void main() {
       await pumpBlockedUserScreen(tester);
 
       await tester.tap(find.byKey(const Key('slate_back_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BlockedUserScreen), findsNothing);
+    });
+
+    Future<void> unblockToActionPanel(WidgetTester tester) async {
+      await pumpBlockedUserScreen(tester);
+      await tester.tap(find.byKey(const Key('blocked_user_unblock_button')));
+      await tester.pumpAndSettle();
+    }
+
+    testWidgets('tapping Follow on the unblocked panel calls the follow API', (tester) async {
+      await unblockToActionPanel(tester);
+
+      await tester.tap(find.byKey(const Key('blocked_user_follow_button')));
+      await tester.pumpAndSettle();
+
+      expect(_api.followCalls, [_blockedPubkey]);
+    });
+
+    testWidgets('Follow failure surfaces an error notice', (tester) async {
+      _api.followError = Exception('boom');
+      await unblockToActionPanel(tester);
+
+      await tester.tap(find.byKey(const Key('blocked_user_follow_button')));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.text('Failed to update follow status. Please try again.'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('tapping Send message navigates to the chat when a DM already exists', (
+      tester,
+    ) async {
+      _api.dmGroupForPeer = 'existing-group-id';
+      await unblockToActionPanel(tester);
+
+      await tester.tap(find.byKey(const Key('blocked_user_send_message_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(BlockedUserScreen), findsNothing);
+    });
+
+    testWidgets('Send message failure surfaces an error notice and keeps the screen', (
+      tester,
+    ) async {
+      await unblockToActionPanel(tester);
+
+      await tester.tap(find.byKey(const Key('blocked_user_send_message_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Failed to start chat. Please try again.'), findsOneWidget);
+      expect(find.byType(BlockedUserScreen), findsOneWidget);
+    });
+
+    testWidgets('tapping Block on the unblocked panel re-blocks and morphs back to the notice', (
+      tester,
+    ) async {
+      await unblockToActionPanel(tester);
+
+      await tester.tap(find.byKey(const Key('blocked_user_block_button')));
+      await tester.pumpAndSettle();
+
+      expect(find.byKey(const Key('blocked_user_detail_notice')), findsOneWidget);
+      expect(find.byKey(const Key('blocked_user_unblocked_panel')), findsNothing);
+    });
+
+    testWidgets('tapping Add to group leaves the BlockedUserScreen', (tester) async {
+      await unblockToActionPanel(tester);
+
+      await tester.tap(find.byKey(const Key('blocked_user_add_to_group_button')));
       await tester.pumpAndSettle();
 
       expect(find.byType(BlockedUserScreen), findsNothing);
