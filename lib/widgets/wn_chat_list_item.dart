@@ -114,6 +114,7 @@ class WnChatListItem extends HookWidget {
                       children: [
                         Expanded(
                           child: Text.rich(
+                            key: const Key('chat_list_subtitle'),
                             TextSpan(
                               style: typography.medium14Compact.copyWith(
                                 color: colors.backgroundContentSecondary,

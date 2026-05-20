@@ -254,7 +254,7 @@ return other(_that.message);case _:
 
 class ApiError_Whitenoise extends ApiError {
   const ApiError_Whitenoise({required this.message}): super._();
-
+  
 
  final  String message;
 
@@ -320,7 +320,7 @@ as String,
 
 class ApiError_DatabasePoolTimedOut extends ApiError {
   const ApiError_DatabasePoolTimedOut({required this.message}): super._();
-
+  
 
  final  String message;
 
@@ -386,7 +386,7 @@ as String,
 
 class ApiError_InvalidKey extends ApiError {
   const ApiError_InvalidKey({required this.message}): super._();
-
+  
 
  final  String message;
 
@@ -452,7 +452,7 @@ as String,
 
 class ApiError_NostrUrl extends ApiError {
   const ApiError_NostrUrl({required this.message}): super._();
-
+  
 
  final  String message;
 
@@ -518,7 +518,7 @@ as String,
 
 class ApiError_NostrTag extends ApiError {
   const ApiError_NostrTag({required this.message}): super._();
-
+  
 
  final  String message;
 
@@ -584,7 +584,7 @@ as String,
 
 class ApiError_NostrEvent extends ApiError {
   const ApiError_NostrEvent({required this.message}): super._();
-
+  
 
  final  String message;
 
@@ -650,7 +650,7 @@ as String,
 
 class ApiError_NostrParse extends ApiError {
   const ApiError_NostrParse({required this.message}): super._();
-
+  
 
  final  String message;
 
@@ -716,7 +716,7 @@ as String,
 
 class ApiError_NostrHex extends ApiError {
   const ApiError_NostrHex({required this.message}): super._();
-
+  
 
  final  String message;
 
@@ -782,7 +782,7 @@ as String,
 
 class ApiError_LoginInvalidKeyFormat extends ApiError {
   const ApiError_LoginInvalidKeyFormat({required this.message}): super._();
-
+  
 
  final  String message;
 
@@ -848,7 +848,7 @@ as String,
 
 class ApiError_LoginNoRelayConnections extends ApiError {
   const ApiError_LoginNoRelayConnections(): super._();
-
+  
 
 
 
@@ -880,7 +880,7 @@ String toString() {
 
 class ApiError_LoginTimeout extends ApiError {
   const ApiError_LoginTimeout({required this.message}): super._();
-
+  
 
  final  String message;
 
@@ -946,7 +946,7 @@ as String,
 
 class ApiError_LoginNoLoginInProgress extends ApiError {
   const ApiError_LoginNoLoginInProgress(): super._();
-
+  
 
 
 
@@ -978,7 +978,7 @@ String toString() {
 
 class ApiError_LoginInternal extends ApiError {
   const ApiError_LoginInternal({required this.message}): super._();
-
+  
 
  final  String message;
 
@@ -1044,7 +1044,7 @@ as String,
 
 class ApiError_LoginKeyringUnavailable extends ApiError {
   const ApiError_LoginKeyringUnavailable({required this.message}): super._();
-
+  
 
  final  String message;
 
@@ -1110,7 +1110,7 @@ as String,
 
 class ApiError_Other extends ApiError {
   const ApiError_Other({required this.message}): super._();
-
+  
 
  final  String message;
 
