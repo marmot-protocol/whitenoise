@@ -16,7 +16,15 @@ import 'package:whitenoise/src/rust/frb_generated.dart';
 import '../../test/mocks/mock_secure_storage.dart';
 import 'tester_helpers.dart';
 
-const _relayUrls = ['ws://localhost:8080', 'ws://localhost:7777'];
+const _relayUrlsEnv = String.fromEnvironment(
+  'WHITENOISE_INTEGRATION_RELAYS',
+  defaultValue: 'ws://localhost:8080,ws://localhost:7777',
+);
+final List<String> _relayUrls = _relayUrlsEnv
+    .split(',')
+    .map((s) => s.trim())
+    .where((s) => s.isNotEmpty)
+    .toList();
 
 bool _rustBridgeInitialized = false;
 Directory? _backendRoot;
@@ -78,21 +86,28 @@ Future<ProviderContainer> mountApp(WidgetTester tester) async {
 }
 
 Future<void> expectLocalRelaysAvailable() async {
-  await _expectLocalRelayAvailable(8080);
-  await _expectLocalRelayAvailable(7777);
+  for (final url in _relayUrls) {
+    final uri = Uri.tryParse(url);
+    if (uri == null) continue;
+    final host = uri.host;
+    final isLocal = host == 'localhost' || host == '127.0.0.1';
+    if (!isLocal) continue;
+    final port = uri.hasPort ? uri.port : 80;
+    await _expectLocalRelayAvailable(host, port);
+  }
 }
 
-Future<void> _expectLocalRelayAvailable(int port) async {
+Future<void> _expectLocalRelayAvailable(String host, int port) async {
   try {
     final socket = await Socket.connect(
-      '127.0.0.1',
+      host,
       port,
       timeout: const Duration(seconds: 1),
     );
     socket.destroy();
   } catch (error) {
     fail(
-      'Expected a local Nostr relay on 127.0.0.1:$port before running this integration test. '
+      'Expected a local Nostr relay on $host:$port before running this integration test. '
       'Run `docker compose up -d`, then run the test again. '
       'Connection error: $error',
     );

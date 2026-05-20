@@ -168,35 +168,57 @@ test-flutter-quiet:
         echo "No test directory found."; \
     fi
 
-# Resolves the integration-test device: the given id, else the one booted simulator.
+# Resolves the integration-test device: the given id, else the one booted iOS simulator or Android device.
 _resolve-device device:
     @device="{{ device }}"; \
     if [ -n "$device" ]; then echo "$device"; exit 0; fi; \
-    booted=$(xcrun simctl list devices booted 2>/dev/null | grep -oiE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}'); \
-    count=$(printf '%s' "$booted" | grep -c .); \
-    if [ "$count" -eq 1 ]; then \
-        echo "Using booted simulator $booted" >&2; \
-        echo "$booted"; \
-    elif [ "$count" -eq 0 ]; then \
-        echo "No device id given and no booted simulator found. Boot one, pass a device id, or set WHITENOISE_INTEGRATION_DEVICE." >&2; \
+    if command -v xcrun >/dev/null 2>&1; then \
+        booted=$(xcrun simctl list devices booted 2>/dev/null | grep -oiE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}'); \
+    else \
+        booted=""; \
+    fi; \
+    ios_count=$(printf '%s' "$booted" | grep -c .); \
+    if command -v adb >/dev/null 2>&1; then \
+        android=$(adb devices 2>/dev/null | awk 'NR>1 && $2=="device" {print $1}'); \
+    else \
+        android=""; \
+    fi; \
+    android_count=$(printf '%s' "$android" | grep -c .); \
+    total=$((ios_count + android_count)); \
+    if [ "$total" -eq 1 ]; then \
+        picked="${booted}${android}"; \
+        echo "Using device $picked" >&2; \
+        echo "$picked"; \
+    elif [ "$total" -eq 0 ]; then \
+        echo "No device id given and no booted iOS simulator or Android device found. Boot one, pass a device id, or set WHITENOISE_INTEGRATION_DEVICE." >&2; \
         exit 1; \
     else \
-        echo "Multiple booted simulators — pass a device id or set WHITENOISE_INTEGRATION_DEVICE:" >&2; \
-        xcrun simctl list devices booted >&2; \
+        echo "Multiple devices found — pass a device id or set WHITENOISE_INTEGRATION_DEVICE:" >&2; \
+        [ -n "$booted" ] && echo "iOS simulators:" >&2 && echo "$booted" >&2; \
+        [ -n "$android" ] && echo "Android devices:" >&2 && echo "$android" >&2; \
         exit 1; \
     fi
 
-# Run Flutter integration tests. Requires local Nostr relays on ports 8080 and 7777.
+# Run Flutter integration tests. iOS uses local Nostr relays on ports 8080 and 7777;
+# Android auto-uses public relays (emulator can't reach host localhost).
 
 # Run one file by passing its path: `just int-test integration_test/messaging_interactions_test.dart`.
-# Device: WHITENOISE_INTEGRATION_DEVICE, else the one booted simulator.
-int-test target="integration_test/all_tests.dart" device=env("WHITENOISE_INTEGRATION_DEVICE", "") flavor="staging":
+# Device: WHITENOISE_INTEGRATION_DEVICE, else the one booted simulator/emulator.
+# Relays: WHITENOISE_INTEGRATION_RELAYS (comma-separated) overrides defaults.
+int-test target="integration_test/all_tests.dart" device=env("WHITENOISE_INTEGRATION_DEVICE", "") flavor="staging" relays=env("WHITENOISE_INTEGRATION_RELAYS", ""):
     @echo "🧪 Testing Flutter integration flows..."
     @device=$(just _resolve-device "{{ device }}") || exit 1; \
+    relays="{{ relays }}"; \
+    if [ -z "$relays" ] && command -v adb >/dev/null 2>&1 && adb devices 2>/dev/null | awk 'NR>1 && $2=="device" {print $1}' | grep -qx "$device"; then \
+        relays="wss://nos.lol,wss://relay.primal.net,wss://relay.damus.io"; \
+        echo "📡 Android device detected — using public relays: $relays" >&2; \
+    fi; \
+    define=""; \
+    [ -n "$relays" ] && define="--dart-define=WHITENOISE_INTEGRATION_RELAYS=$relays"; \
     if [ -n "{{ flavor }}" ]; then \
-        flutter test -d "$device" --flavor {{ flavor }} {{ target }}; \
+        flutter test -d "$device" --flavor {{ flavor }} $define {{ target }}; \
     else \
-        flutter test -d "$device" {{ target }}; \
+        flutter test -d "$device" $define {{ target }}; \
     fi
 
 # Run Flutter integration tests with minimal output. Requires local Nostr relays on ports 8080 and 7777.
