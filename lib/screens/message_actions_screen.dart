@@ -468,9 +468,7 @@ class MessageActionsModal extends StatelessWidget {
                                 return UnconstrainedBox(
                                   constrainedAxis: Axis.horizontal,
                                   clipBehavior: Clip.hardEdge,
-                                  alignment: isOwnMessage
-                                      ? Alignment.topRight
-                                      : Alignment.topLeft,
+                                  alignment: isOwnMessage ? Alignment.topRight : Alignment.topLeft,
                                   child: ChatMessageBubble(
                                     message: message,
                                     isOwnMessage: isOwnMessage,
@@ -480,8 +478,7 @@ class MessageActionsModal extends StatelessWidget {
                                     senderPictureUrl: senderPictureUrl,
                                     isGroupChat: isGroupChat,
                                     replyPreview: replyPreview,
-                                    contentMaxLines:
-                                        shouldConstrainPreviewLines ? maxLines : null,
+                                    contentMaxLines: shouldConstrainPreviewLines ? maxLines : null,
                                     bubbleWidthFactor: 0.865,
                                     forceTightHeight: true,
                                     mentionDisplayName: mentionDisplayName,
