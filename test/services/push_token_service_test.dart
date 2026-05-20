@@ -9,6 +9,15 @@ void main() {
 
   const channelName = 'org.parres.whitenoise/push_notifications';
   const channel = MethodChannel(channelName);
+  const codec = StandardMethodCodec();
+
+  Future<void> sendNativePushMethod(MethodCall call) async {
+    await TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.handlePlatformMessage(
+      channelName,
+      codec.encodeMethodCall(call),
+      (_) {},
+    );
+  }
 
   tearDown(() {
     debugDefaultTargetPlatformOverride = null;
@@ -163,11 +172,43 @@ void main() {
       expect(await service.getProviderPushToken(), isNull);
     });
 
+    test('returns null when native token channel throws non-platform error', () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.android;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        (_) async {
+          throw StateError('channel failed');
+        },
+      );
+
+      final service = PushTokenService();
+      addTearDown(service.dispose);
+
+      expect(await service.getProviderPushToken(), isNull);
+    });
+
+    test('returns false when permission channel throws platform error', () async {
+      debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        (_) async {
+          throw PlatformException(code: 'unavailable');
+        },
+      );
+
+      final service = PushTokenService();
+      addTearDown(service.dispose);
+
+      expect(await service.requestNotificationPermission(), isFalse);
+    });
+
     test('returns false when permission channel throws', () async {
       debugDefaultTargetPlatformOverride = TargetPlatform.iOS;
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
         channel,
-        (_) async => throw StateError('channel failed'),
+        (_) async {
+          throw StateError('channel failed');
+        },
       );
 
       final service = PushTokenService();
@@ -187,8 +228,8 @@ void main() {
       });
       addTearDown(subscription.cancel);
 
-      await service.handleNativeMethodCall(const MethodCall('ignored'));
-      await service.handleNativeMethodCall(
+      await sendNativePushMethod(const MethodCall('ignored'));
+      await sendNativePushMethod(
         const MethodCall('providerPushTokenUpdated', {'platform': 'fcm'}),
       );
       await Future<void>.delayed(Duration.zero);
@@ -202,7 +243,7 @@ void main() {
       addTearDown(service.dispose);
 
       final nextToken = service.tokenUpdates.first;
-      await service.handleNativeMethodCall(
+      await sendNativePushMethod(
         const MethodCall('providerPushTokenUpdated', {
           'platform': 'apns',
           'rawToken': 'updated-token',

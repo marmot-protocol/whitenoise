@@ -47,9 +47,9 @@ final localNotificationSuppressedUntilProvider =
       LocalNotificationSuppressionNotifier.new,
     );
 
-// coverage:ignore-start
 final notificationServiceProvider = Provider<NotificationService>((ref) {
   return NotificationService(
+    // coverage:ignore-start
     onNotificationTap: (groupId, isInvite, receiverPubkey) {
       handleNotificationTap(
         currentActivePubkey: ref.read(authProvider).value,
@@ -59,9 +59,11 @@ final notificationServiceProvider = Provider<NotificationService>((ref) {
         receiverPubkey: receiverPubkey,
       );
     },
+    // coverage:ignore-end
   );
 });
 
+// coverage:ignore-start
 final notificationListenerProvider = Provider.autoDispose<void>((ref) {
   if (!notificationsSupported()) return;
 

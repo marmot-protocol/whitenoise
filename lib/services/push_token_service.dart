@@ -51,7 +51,7 @@ class PushTokenService implements PushTokenSource {
   PushTokenService({MethodChannel? channel, bool? enabled})
     : _channel = channel ?? const MethodChannel(_channelName),
       _enabled = enabled ?? _isMobileTarget {
-    _channel.setMethodCallHandler(handleNativeMethodCall);
+    _channel.setMethodCallHandler(_handleNativeMethodCall);
   }
 
   static const _channelName = 'org.parres.whitenoise/push_notifications';
@@ -111,8 +111,7 @@ class PushTokenService implements PushTokenSource {
     }
   }
 
-  @visibleForTesting
-  Future<void> handleNativeMethodCall(MethodCall call) async {
+  Future<void> _handleNativeMethodCall(MethodCall call) async {
     if (call.method != _methodProviderPushTokenUpdated) return;
     final arguments = call.arguments;
     if (arguments is! Map) return;
