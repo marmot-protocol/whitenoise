@@ -530,7 +530,9 @@ void main() {
       expect(hook.state.activeAction, isNull);
     });
 
-    testWidgets('returns fetch failure when delete succeeds but refresh fails', (tester) async {
+    testWidgets('returns deleteAllLegacy failure when delete succeeds but refresh fails', (
+      tester,
+    ) async {
       mockApi.keyPackages = [
         FlutterEvent(
           id: 'pkg1',
@@ -551,7 +553,7 @@ void main() {
       await tester.pump();
 
       expect(result.success, isFalse);
-      expect(result.action, KeyPackageAction.fetch);
+      expect(result.action, KeyPackageAction.deleteAllLegacy);
       expect(hook.state.isLoading, isFalse);
       expect(hook.state.hasError, isFalse);
     });
@@ -618,7 +620,7 @@ void main() {
       expect(hook.state.activeAction, isNull);
     });
 
-    testWidgets('returns fetch failure when delete succeeds but refresh fails', (tester) async {
+    testWidgets('returns deleteAll failure when delete succeeds but refresh fails', (tester) async {
       mockApi.keyPackages = [
         FlutterEvent(
           id: 'pkg1',
@@ -639,7 +641,7 @@ void main() {
       await tester.pump();
 
       expect(result.success, isFalse);
-      expect(result.action, KeyPackageAction.fetch);
+      expect(result.action, KeyPackageAction.deleteAll);
       expect(hook.state.isLoading, isFalse);
       expect(hook.state.hasError, isFalse);
     });

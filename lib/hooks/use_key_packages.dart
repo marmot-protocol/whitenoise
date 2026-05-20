@@ -129,7 +129,7 @@ useKeyPackages(String pubkey) {
       if (isCurrentRefresh(currentRefreshKey)) {
         state.value = state.value.copyWith(status: const KeyPackagesIdle());
       }
-      return (success: false, action: KeyPackageAction.fetch);
+      return (success: false, action: action);
     }
     return (success: true, action: action);
   }
