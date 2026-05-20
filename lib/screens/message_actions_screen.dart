@@ -189,7 +189,10 @@ class MessageActionsScreen extends HookWidget {
 
     final cachedMedia = useMemoized(
       () => _cachedAttachments(message.mediaAttachments),
-      [message.id, message.mediaAttachments.length],
+      [
+        message.id,
+        message.mediaAttachments.map((m) => m.filePath).join(''),
+      ],
     );
     final cachedPaths = cachedMedia.map((m) => m.filePath).toList(growable: false);
     final hasContent = !message.isDeleted && message.content.trim().isNotEmpty;
