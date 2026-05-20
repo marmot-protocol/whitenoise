@@ -23,10 +23,6 @@ import 'package:whitenoise/widgets/wn_system_notice.dart';
 import 'package:whitenoise/widgets/wn_user_bubble.dart';
 import 'package:whitenoise/widgets/wn_user_item.dart';
 
-/// Shared base screen used by UserSelectionScreen (new-group flow) and
-/// AddGroupMembersScreen (add-to-existing-group flow). Callers compose the
-/// title/submit action/filter/notice; this screen owns the search + selection
-/// hooks and the standard picker layout.
 class UserPickerScreen extends HookConsumerWidget {
   const UserPickerScreen({
     super.key,
