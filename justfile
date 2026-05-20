@@ -204,7 +204,7 @@ _resolve-device device:
 # defaults baked into integration_test/_support/app_setup.dart).
 _resolve-relays device:
     @relays="${WHITENOISE_INTEGRATION_RELAYS:-}"; \
-    if [ -z "$relays" ] && command -v adb >/dev/null 2>&1 && adb devices 2>/dev/null | awk 'NR>1 && $2=="device" {print $1}' | grep -qx "{{ device }}"; then \
+    if [ -z "$relays" ] && command -v adb >/dev/null 2>&1 && adb devices 2>/dev/null | awk 'NR>1 && $2=="device" {print $1}' | grep -Fqx "{{ device }}"; then \
         relays="wss://nos.lol,wss://relay.primal.net,wss://relay.damus.io"; \
         echo "📡 Android device detected — using public relays: $relays" >&2; \
     fi; \
