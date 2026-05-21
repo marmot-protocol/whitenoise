@@ -233,7 +233,8 @@ class UserProfileScreen extends HookConsumerWidget {
           color: colors.backgroundContentSecondary,
         ),
       ),
-      type: WnSystemNoticeType.elevatedCard,
+      type: WnSystemNoticeType.neutral,
+      backgroundColor: colors.fillSecondary,
       variant: isBlockedNoticeCollapsed.value
           ? WnSystemNoticeVariant.collapsed
           : WnSystemNoticeVariant.expanded,

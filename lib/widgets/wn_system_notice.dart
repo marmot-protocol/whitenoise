@@ -9,7 +9,6 @@ import 'package:whitenoise/widgets/wn_icon.dart';
 
 enum WnSystemNoticeType {
   neutral,
-  elevatedCard,
   info,
   success,
   warning,
@@ -39,6 +38,7 @@ class WnSystemNotice extends HookWidget {
     this.onToggle,
     this.autoHideDuration,
     this.animateEntrance = true,
+    this.backgroundColor,
   });
 
   final String title;
@@ -51,6 +51,7 @@ class WnSystemNotice extends HookWidget {
   final VoidCallback? onToggle;
   final Duration? autoHideDuration;
   final bool animateEntrance;
+  final Color? backgroundColor;
 
   bool get _isCollapsed => variant == WnSystemNoticeVariant.collapsed;
   bool get _isExpanded => variant == WnSystemNoticeVariant.expanded;
@@ -144,7 +145,7 @@ class WnSystemNotice extends HookWidget {
           child: Container(
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              color: bgColor,
+              color: backgroundColor ?? bgColor,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -229,12 +230,6 @@ class WnSystemNotice extends HookWidget {
       case WnSystemNoticeType.neutral:
         return (
           colors.backgroundSecondary,
-          colors.backgroundContentPrimary,
-          null,
-        );
-      case WnSystemNoticeType.elevatedCard:
-        return (
-          colors.backgroundSlateElevated,
           colors.backgroundContentPrimary,
           null,
         );
