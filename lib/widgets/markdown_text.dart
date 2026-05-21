@@ -580,12 +580,14 @@ class _MarkdownRenderer {
   }
 
   /// Style for an npub mention: bold, in the user's per-pubkey color.
-  /// Same palette as the bubble's sender-name color. When the hex pubkey
-  /// can't be derived, falls back to the surrounding text color so the
-  /// mention is still bold but doesn't pretend to identify someone.
+  /// Uses the accent `contentSecondary` (Color/500) step so the mention
+  /// stays legible on both light and dark bubble backgrounds. When the
+  /// hex pubkey can't be derived, falls back to the surrounding text
+  /// color so the mention is still bold but doesn't pretend to identify
+  /// someone.
   TextStyle _mentionStyle(TextStyle style, String? hex) {
     final color = hex != null
-        ? AvatarColor.fromPubkey(hex).toColorSet(context.colors).content
+        ? AvatarColor.fromPubkey(hex).toColorSet(context.colors).contentSecondary
         : style.color;
     return style.copyWith(color: color, fontWeight: FontWeight.w700);
   }
