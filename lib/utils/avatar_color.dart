@@ -11,11 +11,13 @@ class AvatarColorSet {
   final Color background;
   final Color border;
   final Color content;
+  final Color contentSecondary;
 
   const AvatarColorSet({
     required this.background,
     required this.border,
     required this.content,
+    required this.contentSecondary,
   });
 }
 
@@ -59,6 +61,7 @@ enum AvatarColor {
         background: colors.fillSecondary,
         border: colors.borderSecondary,
         content: colors.fillContentSecondary,
+        contentSecondary: colors.fillContentTertiary,
       ),
       blue => _fromAccent(colors.accent.blue),
       cyan => _fromAccent(colors.accent.cyan),
@@ -80,4 +83,5 @@ AvatarColorSet _fromAccent(AccentColorSet accent) => AvatarColorSet(
   background: accent.fill,
   border: accent.border,
   content: accent.contentPrimary,
+  contentSecondary: accent.contentSecondary,
 );

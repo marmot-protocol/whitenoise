@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/l10n/l10n.dart';
+import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/user_profile_screen.dart';
 import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
@@ -38,6 +39,7 @@ class ChatMessageBubble extends StatelessWidget {
   final VoidCallback? onHorizontalDragEnd;
   final VoidCallback? onRetry;
   final String? Function(String hexPubkey)? mentionDisplayName;
+  final String? groupId;
 
   const ChatMessageBubble({
     super.key,
@@ -60,6 +62,7 @@ class ChatMessageBubble extends StatelessWidget {
     this.onHorizontalDragEnd,
     this.onRetry,
     this.mentionDisplayName,
+    this.groupId,
   });
 
   ChatStatusType? get _deliveryStatusType {
@@ -148,6 +151,7 @@ class ChatMessageBubble extends StatelessWidget {
 
     final showStatus = showTail || _deliveryStatusType == ChatStatusType.failed;
     return WnMessageBubble(
+      key: Key('message_${message.id}'),
       direction: isOwnMessage ? MessageDirection.outgoing : MessageDirection.incoming,
       isDeleted: message.isDeleted,
       deletedLabel: message.isDeleted
@@ -161,7 +165,11 @@ class ChatMessageBubble extends StatelessWidget {
       onNostrTap: (hrp, bech32) async {
         if (hrp == MarkdownNostrHrp.npub) {
           final hex = hexFromNpub(bech32);
-          if (hex != null && context.mounted) {
+          if (hex == null || !context.mounted) return;
+          final gid = groupId;
+          if (gid != null) {
+            Routes.pushToGroupMember(context, gid, hex);
+          } else {
             await UserProfileScreen.show(context, userPubkey: hex);
           }
           return;

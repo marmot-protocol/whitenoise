@@ -212,7 +212,7 @@ return mathBlock(_that.content);case _:
 
 class MarkdownBlock_Paragraph extends MarkdownBlock {
   const MarkdownBlock_Paragraph({required final  List<MarkdownInline> inlines}): _inlines = inlines,super._();
-
+  
 
  final  List<MarkdownInline> _inlines;
  List<MarkdownInline> get inlines {
@@ -284,7 +284,7 @@ as List<MarkdownInline>,
 
 class MarkdownBlock_Heading extends MarkdownBlock {
   const MarkdownBlock_Heading({required this.level, required final  List<MarkdownInline> inlines}): _inlines = inlines,super._();
-
+  
 
  final  int level;
  final  List<MarkdownInline> _inlines;
@@ -358,7 +358,7 @@ as List<MarkdownInline>,
 
 class MarkdownBlock_ThematicBreak extends MarkdownBlock {
   const MarkdownBlock_ThematicBreak(): super._();
-
+  
 
 
 
@@ -390,7 +390,7 @@ String toString() {
 
 class MarkdownBlock_CodeBlock extends MarkdownBlock {
   const MarkdownBlock_CodeBlock({required this.kind, required this.info, required this.content}): super._();
-
+  
 
  final  MarkdownCodeBlockKind kind;
  final  String info;
@@ -460,7 +460,7 @@ as String,
 
 class MarkdownBlock_BlockQuote extends MarkdownBlock {
   const MarkdownBlock_BlockQuote({required final  List<MarkdownBlock> blocks}): _blocks = blocks,super._();
-
+  
 
  final  List<MarkdownBlock> _blocks;
  List<MarkdownBlock> get blocks {
@@ -532,7 +532,7 @@ as List<MarkdownBlock>,
 
 class MarkdownBlock_List extends MarkdownBlock {
   const MarkdownBlock_List({required this.kind, required this.tight, required final  List<MarkdownListItem> items}): _items = items,super._();
-
+  
 
  final  MarkdownListKind kind;
  final  bool tight;
@@ -605,7 +605,7 @@ as List<MarkdownListItem>,
 @override
 @pragma('vm:prefer-inline')
 $MarkdownListKindCopyWith<$Res> get kind {
-
+  
   return $MarkdownListKindCopyWith<$Res>(_self.kind, (value) {
     return _then(_self.copyWith(kind: value));
   });
@@ -617,7 +617,7 @@ $MarkdownListKindCopyWith<$Res> get kind {
 
 class MarkdownBlock_Table extends MarkdownBlock {
   const MarkdownBlock_Table({required final  List<MarkdownAlignment> alignments, required final  List<MarkdownTableCell> header, required final  List<List<MarkdownTableCell>> rows}): _alignments = alignments,_header = header,_rows = rows,super._();
-
+  
 
  final  List<MarkdownAlignment> _alignments;
  List<MarkdownAlignment> get alignments {
@@ -705,7 +705,7 @@ as List<List<MarkdownTableCell>>,
 
 class MarkdownBlock_MathBlock extends MarkdownBlock {
   const MarkdownBlock_MathBlock({required this.content}): super._();
-
+  
 
  final  String content;
 
@@ -997,7 +997,7 @@ return nostrUri(_that.entity);case _:
 
 class MarkdownInline_Text extends MarkdownInline {
   const MarkdownInline_Text({required this.content}): super._();
-
+  
 
  final  String content;
 
@@ -1063,7 +1063,7 @@ as String,
 
 class MarkdownInline_SoftBreak extends MarkdownInline {
   const MarkdownInline_SoftBreak(): super._();
-
+  
 
 
 
@@ -1095,7 +1095,7 @@ String toString() {
 
 class MarkdownInline_HardBreak extends MarkdownInline {
   const MarkdownInline_HardBreak(): super._();
-
+  
 
 
 
@@ -1127,7 +1127,7 @@ String toString() {
 
 class MarkdownInline_Code extends MarkdownInline {
   const MarkdownInline_Code({required this.content}): super._();
-
+  
 
  final  String content;
 
@@ -1193,7 +1193,7 @@ as String,
 
 class MarkdownInline_Emph extends MarkdownInline {
   const MarkdownInline_Emph({required final  List<MarkdownInline> children}): _children = children,super._();
-
+  
 
  final  List<MarkdownInline> _children;
  List<MarkdownInline> get children {
@@ -1265,7 +1265,7 @@ as List<MarkdownInline>,
 
 class MarkdownInline_Strong extends MarkdownInline {
   const MarkdownInline_Strong({required final  List<MarkdownInline> children}): _children = children,super._();
-
+  
 
  final  List<MarkdownInline> _children;
  List<MarkdownInline> get children {
@@ -1337,7 +1337,7 @@ as List<MarkdownInline>,
 
 class MarkdownInline_Strikethrough extends MarkdownInline {
   const MarkdownInline_Strikethrough({required final  List<MarkdownInline> children}): _children = children,super._();
-
+  
 
  final  List<MarkdownInline> _children;
  List<MarkdownInline> get children {
@@ -1409,7 +1409,7 @@ as List<MarkdownInline>,
 
 class MarkdownInline_Link extends MarkdownInline {
   const MarkdownInline_Link({required this.dest, this.title, required final  List<MarkdownInline> children}): _children = children,super._();
-
+  
 
  final  String dest;
  final  String? title;
@@ -1485,7 +1485,7 @@ as List<MarkdownInline>,
 
 class MarkdownInline_Image extends MarkdownInline {
   const MarkdownInline_Image({required this.dest, this.title, required final  List<MarkdownInline> alt}): _alt = alt,super._();
-
+  
 
  final  String dest;
  final  String? title;
@@ -1561,7 +1561,7 @@ as List<MarkdownInline>,
 
 class MarkdownInline_Autolink extends MarkdownInline {
   const MarkdownInline_Autolink({required this.url, required this.kind}): super._();
-
+  
 
  final  String url;
  final  MarkdownAutolinkKind kind;
@@ -1629,7 +1629,7 @@ as MarkdownAutolinkKind,
 
 class MarkdownInline_Math extends MarkdownInline {
   const MarkdownInline_Math({required this.content}): super._();
-
+  
 
  final  String content;
 
@@ -1695,7 +1695,7 @@ as String,
 
 class MarkdownInline_NostrMention extends MarkdownInline {
   const MarkdownInline_NostrMention({required this.entity}): super._();
-
+  
 
  final  MarkdownNostrEntity entity;
 
@@ -1761,7 +1761,7 @@ as MarkdownNostrEntity,
 
 class MarkdownInline_NostrUri extends MarkdownInline {
   const MarkdownInline_NostrUri({required this.entity}): super._();
-
+  
 
  final  MarkdownNostrEntity entity;
 
@@ -1987,7 +1987,7 @@ return ordered(_that.start,_that.delimiter);case _:
 
 class MarkdownListKind_Bullet extends MarkdownListKind {
   const MarkdownListKind_Bullet({required this.marker}): super._();
-
+  
 
  final  String marker;
 
@@ -2053,7 +2053,7 @@ as String,
 
 class MarkdownListKind_Ordered extends MarkdownListKind {
   const MarkdownListKind_Ordered({required this.start, required this.delimiter}): super._();
-
+  
 
  final  int start;
  final  String delimiter;

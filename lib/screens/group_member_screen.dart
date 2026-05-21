@@ -12,6 +12,7 @@ import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/screens/user_profile_screen.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/metadata.dart' show presentName;
@@ -86,6 +87,21 @@ class GroupMemberScreen extends HookConsumerWidget {
       }
       return null;
     }, [membersState.error]);
+
+    final didRedirect = useRef(false);
+    useEffect(() {
+      if (didRedirect.value) return null;
+      if (membersState.isLoading || membersState.error != null) return null;
+      if (membersState.members.contains(memberPubkey)) return null;
+      didRedirect.value = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!context.mounted) return;
+        Routes.goBack(context);
+        if (!context.mounted) return;
+        UserProfileScreen.show(context, userPubkey: memberPubkey);
+      });
+      return null;
+    }, [membersState.isLoading, membersState.members]);
 
     final isCurrentUserAdmin = membersState.admins.contains(accountPubkey);
     final isMemberAdmin = membersState.admins.contains(memberPubkey);

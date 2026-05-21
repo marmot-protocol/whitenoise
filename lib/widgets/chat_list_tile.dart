@@ -434,23 +434,26 @@ class ChatListTile extends HookConsumerWidget {
       );
     }
 
-    return WnChatListItem(
-      key: itemKey,
-      onTap: isPending
-          ? () => Routes.pushToInvite(context, chatSummary.mlsGroupId)
-          : () => Routes.goToChat(context, chatSummary.mlsGroupId),
-      onLongPress: isPending ? null : showContextMenu,
-      title: display.title,
-      subtitle: display.subtitle,
-      timestamp: display.formattedTime,
-      avatarUrl: display.pictureUrl,
-      avatarName: display.avatarName,
-      avatarColor: display.avatarColor,
-      showPinned: display.showPinned,
-      status: display.status,
-      unreadCount: display.unreadCount,
-      prefixSubtitle: display.prefixSubtitle,
-      subtitleIcon: display.subtitleIcon,
+    return KeyedSubtree(
+      key: Key('chat_list_tile_${chatSummary.mlsGroupId}'),
+      child: WnChatListItem(
+        key: itemKey,
+        onTap: isPending
+            ? () => Routes.pushToInvite(context, chatSummary.mlsGroupId)
+            : () => Routes.goToChat(context, chatSummary.mlsGroupId),
+        onLongPress: isPending ? null : showContextMenu,
+        title: display.title,
+        subtitle: display.subtitle,
+        timestamp: display.formattedTime,
+        avatarUrl: display.pictureUrl,
+        avatarName: display.avatarName,
+        avatarColor: display.avatarColor,
+        showPinned: display.showPinned,
+        status: display.status,
+        unreadCount: display.unreadCount,
+        prefixSubtitle: display.prefixSubtitle,
+        subtitleIcon: display.subtitleIcon,
+      ),
     );
   }
 }

@@ -5,6 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart' show AsyncData;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
+import 'package:whitenoise/screens/group_member_screen.dart';
+import 'package:whitenoise/screens/user_profile_screen.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -724,6 +726,28 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.text('Add to group'), findsWidgets);
+      });
+    });
+
+    group('non-member redirect', () {
+      testWidgets('redirects to UserProfileScreen when the user is not in the group', (
+        tester,
+      ) async {
+        _api.adminsList = [_testPubkey];
+        await pumpGroupMemberScreen(tester, memberPubkey: testPubkeyD);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(GroupMemberScreen), findsNothing);
+        expect(find.byType(UserProfileScreen), findsOneWidget);
+      });
+
+      testWidgets('does not redirect when the user is a member', (tester) async {
+        _api.adminsList = [_testPubkey];
+        await pumpGroupMemberScreen(tester, memberPubkey: _memberPubkey);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(GroupMemberScreen), findsOneWidget);
+        expect(find.byType(UserProfileScreen), findsNothing);
       });
     });
   });

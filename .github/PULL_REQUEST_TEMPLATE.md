@@ -41,3 +41,4 @@ Describe what changed and why. Link the related issue: `Closes #NNN`
 - [ ] Related issue linked (`Closes #NNN`)
 - [ ] `CHANGELOG.md` updated (if user-visible change)
 - [ ] Screenshots added (for UI changes)
+- [ ] Integration tests pass (`just int-test` with an open simulator and local Nostr relays running — `docker compose up -d`)

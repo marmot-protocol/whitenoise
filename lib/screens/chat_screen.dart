@@ -547,6 +547,7 @@ class ChatScreen extends HookConsumerWidget {
                   : null,
               onHorizontalDragEnd: isSearchMode ? null : () => input.setReplyingTo(message),
               mentionDisplayName: resolveMentionDisplayName,
+              groupId: isGroupChat ? groupId : null,
               onRetry:
                   !isSearchMode && isOwnMessage && message.deliveryStatus is DeliveryStatus_Failed
                   ? () async {
