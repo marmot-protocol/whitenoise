@@ -4,6 +4,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:leak_tracker_flutter_testing/leak_tracker_flutter_testing.dart';
 import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
+import 'package:whitenoise/theme/semantic_colors.dart';
+import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/widgets/markdown_text.dart';
 
 import '../mocks/mock_wn_api.dart';
@@ -608,6 +610,33 @@ void main() {
       // base style colour so we know the user-color path fired.
       expect(mention.style?.color, isNotNull);
       expect(mention.style?.color, isNot(_baseStyle.color));
+    });
+
+    testWidgets('npub mention uses accent contentSecondary (Color/500), not contentPrimary', (
+      tester,
+    ) async {
+      await _pump(
+        tester,
+        MarkdownText(
+          document: _doc([
+            _paragraph([
+              const MarkdownInline.nostrMention(
+                entity: MarkdownNostrEntity(
+                  hrp: MarkdownNostrHrp.npub,
+                  bech32: testNpubA,
+                ),
+              ),
+            ]),
+          ]),
+          baseStyle: _baseStyle,
+          mentionDisplayName: (_) => 'Alice',
+        ),
+      );
+      final span = tester.widget<Text>(find.byType(Text).first).textSpan! as TextSpan;
+      final mention = span.children!.first as TextSpan;
+      final colorSet = AvatarColor.fromPubkey(testPubkeyA).toColorSet(SemanticColors.light);
+      expect(mention.style?.color, colorSet.contentSecondary);
+      expect(mention.style?.color, isNot(colorSet.content));
     });
 
     testWidgets('npub mention with empty resolved name falls back to truncation', (tester) async {
