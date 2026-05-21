@@ -38,7 +38,6 @@ class WnSystemNotice extends HookWidget {
     this.onToggle,
     this.autoHideDuration,
     this.animateEntrance = true,
-    this.backgroundColor,
   });
 
   final String title;
@@ -51,7 +50,6 @@ class WnSystemNotice extends HookWidget {
   final VoidCallback? onToggle;
   final Duration? autoHideDuration;
   final bool animateEntrance;
-  final Color? backgroundColor;
 
   bool get _isCollapsed => variant == WnSystemNoticeVariant.collapsed;
   bool get _isExpanded => variant == WnSystemNoticeVariant.expanded;
@@ -145,7 +143,7 @@ class WnSystemNotice extends HookWidget {
           child: Container(
             padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
-              color: backgroundColor ?? bgColor,
+              color: bgColor,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -229,7 +227,7 @@ class WnSystemNotice extends HookWidget {
     switch (type) {
       case WnSystemNoticeType.neutral:
         return (
-          colors.backgroundSecondary,
+          colors.backgroundTertiary,
           colors.backgroundContentPrimary,
           null,
         );

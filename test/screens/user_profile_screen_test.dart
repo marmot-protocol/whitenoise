@@ -939,6 +939,7 @@ void main() {
 
         final screen = tester.widget<UserProfileScreen>(find.byType(UserProfileScreen));
         expect(screen.asShade, isTrue);
+        expect(screen.topAligned, isTrue);
         expect(screen.userPubkey, _otherPubkey);
       });
     });

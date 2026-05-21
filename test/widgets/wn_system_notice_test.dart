@@ -96,28 +96,6 @@ void main() {
       );
       expect(find.byType(WnIcon), findsNothing);
     });
-
-    testWidgets('backgroundColor overrides type-derived bg', (tester) async {
-      const overrideColor = Color(0xFF123456);
-      await mountWidget(
-        const WnSystemNotice(
-          title: 'Override',
-          type: WnSystemNoticeType.neutral,
-          backgroundColor: overrideColor,
-        ),
-        tester,
-      );
-      final container = tester.widget<Container>(
-        find
-            .descendant(
-              of: find.byType(WnSystemNotice),
-              matching: find.byType(Container),
-            )
-            .first,
-      );
-      final decoration = container.decoration as BoxDecoration;
-      expect(decoration.color, overrideColor);
-    });
   });
 
   group('WnSystemNotice Variants', () {

@@ -109,6 +109,7 @@ class UserSearchScreen extends HookConsumerWidget {
                                 onTap: () => Routes.pushToUserProfile(
                                   context,
                                   user.pubkey,
+                                  topAligned: true,
                                 ),
                               );
                             },

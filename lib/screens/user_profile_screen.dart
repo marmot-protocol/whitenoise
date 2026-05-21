@@ -43,13 +43,13 @@ class UserProfileScreen extends HookConsumerWidget {
 
   static Future<void> show(BuildContext context, {required String userPubkey}) {
     FocusScope.of(context).unfocus();
-    final colors = context.colors;
     return Navigator.of(context).push(
       PageRouteBuilder(
         opaque: false,
         barrierDismissible: true,
-        barrierColor: colors.backgroundPrimary.withValues(alpha: 0.8),
-        pageBuilder: (_, _, _) => UserProfileScreen(userPubkey: userPubkey, asShade: true),
+        barrierColor: Colors.transparent,
+        pageBuilder: (_, _, _) =>
+            UserProfileScreen(userPubkey: userPubkey, asShade: true, topAligned: true),
         transitionsBuilder: (_, animation, _, child) =>
             FadeTransition(opacity: animation, child: child),
       ),
@@ -230,11 +230,10 @@ class UserProfileScreen extends HookConsumerWidget {
       description: Text(
         context.l10n.blockedUserDetailDescription,
         style: typography.medium14.copyWith(
-          color: colors.backgroundContentSecondary,
+          color: colors.backgroundContentQuaternary,
         ),
       ),
       type: WnSystemNoticeType.neutral,
-      backgroundColor: colors.fillSecondary,
       variant: isBlockedNoticeCollapsed.value
           ? WnSystemNoticeVariant.collapsed
           : WnSystemNoticeVariant.expanded,
