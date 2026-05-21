@@ -148,6 +148,7 @@ class ChatMessageBubble extends StatelessWidget {
 
     final showStatus = showTail || _deliveryStatusType == ChatStatusType.failed;
     return WnMessageBubble(
+      key: Key('message_${message.id}'),
       direction: isOwnMessage ? MessageDirection.outgoing : MessageDirection.incoming,
       isDeleted: message.isDeleted,
       deletedLabel: message.isDeleted

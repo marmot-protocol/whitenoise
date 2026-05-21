@@ -168,41 +168,51 @@ test-flutter-quiet:
         echo "No test directory found."; \
     fi
 
+# Resolves the integration-test device: the given id, else the one booted simulator.
+_resolve-device device:
+    @device="{{ device }}"; \
+    if [ -n "$device" ]; then echo "$device"; exit 0; fi; \
+    booted=$(xcrun simctl list devices booted 2>/dev/null | grep -oiE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}'); \
+    count=$(printf '%s' "$booted" | grep -c .); \
+    if [ "$count" -eq 1 ]; then \
+        echo "Using booted simulator $booted" >&2; \
+        echo "$booted"; \
+    elif [ "$count" -eq 0 ]; then \
+        echo "No device id given and no booted simulator found. Boot one, pass a device id, or set WHITENOISE_INTEGRATION_DEVICE." >&2; \
+        exit 1; \
+    else \
+        echo "Multiple booted simulators — pass a device id or set WHITENOISE_INTEGRATION_DEVICE:" >&2; \
+        xcrun simctl list devices booted >&2; \
+        exit 1; \
+    fi
+
 # Run Flutter integration tests. Requires local Nostr relays on ports 8080 and 7777.
 
-# Pass an iOS/Android device id, or set WHITENOISE_INTEGRATION_DEVICE.
-test-flutter-integration device=env("WHITENOISE_INTEGRATION_DEVICE", "") flavor="staging":
+# Run one file by passing its path: `just int-test integration_test/messaging_interactions_test.dart`.
+# Device: WHITENOISE_INTEGRATION_DEVICE, else the one booted simulator.
+int-test target="integration_test/all_tests.dart" device=env("WHITENOISE_INTEGRATION_DEVICE", "") flavor="staging":
     @echo "🧪 Testing Flutter integration flows..."
-    @device="{{ device }}"; \
-    if [ -z "$device" ]; then \
-        echo "Pass a device id or set WHITENOISE_INTEGRATION_DEVICE."; \
-        flutter devices; \
-        exit 1; \
-    fi; \
+    @device=$(just _resolve-device "{{ device }}") || exit 1; \
     if [ -n "{{ flavor }}" ]; then \
-        flutter test -d "$device" --flavor {{ flavor }} integration_test; \
+        flutter test -d "$device" --flavor {{ flavor }} {{ target }}; \
     else \
-        flutter test -d "$device" integration_test; \
+        flutter test -d "$device" {{ target }}; \
     fi
 
 # Run Flutter integration tests with minimal output. Requires local Nostr relays on ports 8080 and 7777.
 
-# Pass an iOS/Android device id, or set WHITENOISE_INTEGRATION_DEVICE.
-test-flutter-integration-quiet device=env("WHITENOISE_INTEGRATION_DEVICE", "") flavor="staging":
-    @if [ -d "integration_test" ]; then \
-        device="{{ device }}"; \
-        if [ -z "$device" ]; then \
-            echo "Pass a device id or set WHITENOISE_INTEGRATION_DEVICE."; \
-            flutter devices; \
-            exit 1; \
-        fi; \
-        if [ -n "{{ flavor }}" ]; then \
-            flutter test -d "$device" --flavor {{ flavor }} --no-pub --reporter=failures-only integration_test; \
-        else \
-            flutter test -d "$device" --no-pub --reporter=failures-only integration_test; \
-        fi; \
+# Run one file by passing its path: `just int-test-quiet integration_test/messaging_interactions_test.dart`.
+# Device: WHITENOISE_INTEGRATION_DEVICE, else the one booted simulator.
+int-test-quiet target="integration_test/all_tests.dart" device=env("WHITENOISE_INTEGRATION_DEVICE", "") flavor="staging":
+    @if [ ! -e "{{ target }}" ]; then \
+        echo "No integration test target found at {{ target }}."; \
+        exit 1; \
+    fi; \
+    device=$(just _resolve-device "{{ device }}") || exit 1; \
+    if [ -n "{{ flavor }}" ]; then \
+        flutter test -d "$device" --flavor {{ flavor }} --no-pub --reporter=failures-only {{ target }}; \
     else \
-        echo "No integration_test directory found."; \
+        flutter test -d "$device" --no-pub --reporter=failures-only {{ target }}; \
     fi
 
 coverage min="99":
