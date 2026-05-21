@@ -191,8 +191,8 @@ class StartChatScreen extends HookConsumerWidget {
         child: SafeArea(
           child: Column(
             children: [
-              const Spacer(),
               WnSlate(
+                shrinkWrapContent: true,
                 header: WnSlateNavigationHeader(
                   title: context.l10n.startNewChat,
                   onNavigate: () => Routes.goBack(context),
