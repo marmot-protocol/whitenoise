@@ -316,10 +316,12 @@ void main() {
         // Advance fake timers for captureAndShareQr's two 500ms delays.
         await tester.pump(const Duration(milliseconds: 400)); // first delay (fake t=1000ms)
         await tester.pump(const Duration(milliseconds: 500)); // second delay (fake t=1500ms)
-        // Give toByteData(png) real time to complete via the engine.
-        await Future<void>.delayed(const Duration(milliseconds: 100));
-        await tester.pump(); // captureFuture resolved → share() called
-        await tester.pump(); // SharePlus response + finally block
+        // Poll until share() is called — toByteData(png) takes variable real time on CI.
+        for (var i = 0; i < 30; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          await tester.pump();
+          if (calls.isNotEmpty) break;
+        }
 
         expect(calls, isNotEmpty);
 
@@ -339,10 +341,12 @@ void main() {
       await tester.runAsync(() async {
         await tester.pump(const Duration(milliseconds: 400));
         await tester.pump(const Duration(milliseconds: 500)); // second delay; dotCount=3
-        await Future<void>.delayed(const Duration(milliseconds: 300)); // toByteData completes
-        await tester.pump(); // captureFuture resolved → share() throws → catch fires
-        await tester.pump(); // showErrorNotice state applied
-        await tester.pump(); // widget rebuilt with error notice
+        // Poll until error notice appears — toByteData(png) takes variable real time on CI.
+        for (var i = 0; i < 30; i++) {
+          await Future<void>.delayed(const Duration(milliseconds: 100));
+          await tester.pump();
+          if (find.text('Unable to share QR code. Please try again.').evaluate().isNotEmpty) break;
+        }
 
         expect(find.text('Unable to share QR code. Please try again.'), findsOneWidget);
 
