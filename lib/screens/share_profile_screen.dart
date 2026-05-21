@@ -78,28 +78,18 @@ class ShareProfileScreen extends HookConsumerWidget {
       // image is always the full-color QR regardless of animation state.
       dotCount.value = 1;
       qrColorAnim.forward();
-      final captureFuture = boundary
-          .toImageSync(pixelRatio: 3)
-          .toByteData(format: ui.ImageByteFormat.png);
-      // onLongPressStart fires at 500ms total; dots step every 500ms after that
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (!isMounted.value || !isHolding.value) {
-        isCapturing.value = false;
-        return;
-      }
-      dotCount.value = 2;
-      await Future.delayed(const Duration(milliseconds: 500));
-      if (!isMounted.value || !isHolding.value) {
-        isCapturing.value = false;
-        return;
-      }
-      dotCount.value = 3;
+      final image = boundary.toImageSync(pixelRatio: 3);
       try {
+        final captureFuture = image.toByteData(format: ui.ImageByteFormat.png);
+        // onLongPressStart fires at 500ms total; dots step every 500ms after that
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (!isMounted.value || !isHolding.value) return;
+        dotCount.value = 2;
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (!isMounted.value || !isHolding.value) return;
+        dotCount.value = 3;
         final byteData = await captureFuture;
-        if (!isMounted.value || byteData == null || !isHolding.value) {
-          isCapturing.value = false;
-          return;
-        }
+        if (!isMounted.value || byteData == null || !isHolding.value) return;
         await SharePlus.instance.share(
           ShareParams(
             files: [
@@ -118,6 +108,7 @@ class ShareProfileScreen extends HookConsumerWidget {
           showErrorNotice(errorMessage);
         }
       } finally {
+        image.dispose();
         isCapturing.value = false;
       }
     }
@@ -188,14 +179,14 @@ class ShareProfileScreen extends HookConsumerWidget {
                           dotCount.value = 0;
                           qrColorAnim.reverse();
                         },
-                        child: RepaintBoundary(
-                          key: qrRepaintKey,
-                          child: ConstrainedBox(
-                            constraints: BoxConstraints(maxWidth: 256.w),
-                            child: AspectRatio(
-                              aspectRatio: 1,
-                              child: ClipRRect(
-                                borderRadius: BorderRadius.circular(12.r),
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: 256.w),
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12.r),
+                              child: RepaintBoundary(
+                                key: qrRepaintKey,
                                 child: AnimatedBuilder(
                                   animation: qrColor,
                                   builder: (context, _) => QrImageView(
