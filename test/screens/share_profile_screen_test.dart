@@ -28,7 +28,6 @@ class _MockApi extends MockWnApi {
   }) async => const FlutterMetadata(
     name: 'Test User',
     displayName: 'Test Display Name',
-    picture: null,
     custom: {},
   );
 }
