@@ -227,7 +227,7 @@ class WnSystemNotice extends HookWidget {
     switch (type) {
       case WnSystemNoticeType.neutral:
         return (
-          colors.backgroundSecondary,
+          colors.backgroundTertiary,
           colors.backgroundContentPrimary,
           null,
         );

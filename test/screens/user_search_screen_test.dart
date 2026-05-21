@@ -375,7 +375,7 @@ void main() {
         await tester.tap(find.text('Bob'));
         await tester.pumpAndSettle();
 
-        expect(find.text('Start new chat'), findsOneWidget);
+        expect(find.text('Profile'), findsOneWidget);
         expect(find.byKey(const Key('start_chat_button')), findsOneWidget);
       });
 
@@ -401,7 +401,7 @@ void main() {
         await tester.tap(find.text('Found User'));
         await tester.pumpAndSettle();
 
-        expect(find.text('Start new chat'), findsOneWidget);
+        expect(find.text('Profile'), findsOneWidget);
         expect(find.byKey(const Key('start_chat_button')), findsOneWidget);
       });
     });

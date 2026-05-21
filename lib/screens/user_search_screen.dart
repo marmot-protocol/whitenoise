@@ -106,9 +106,10 @@ class UserSearchScreen extends HookConsumerWidget {
                                 pictureUrl: user.metadata.picture,
                                 avatarColor: AvatarColor.fromPubkey(user.pubkey),
                                 size: WnUserItemSize.big,
-                                onTap: () => Routes.pushToStartChat(
+                                onTap: () => Routes.pushToUserProfile(
                                   context,
                                   user.pubkey,
+                                  topAligned: true,
                                 ),
                               );
                             },

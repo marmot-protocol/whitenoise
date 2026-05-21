@@ -14,19 +14,19 @@ void main() {
     test('maps production user links to the user profile route', () {
       final target = DeepLinks.parse(Uri.parse('whitenoise://user/$testNpubB'));
 
-      expect(target?.location, '/start-chat/$testPubkeyB');
+      expect(target?.location, '/user-profile/$testPubkeyB');
     });
 
     test('maps staging user links to the user profile route', () {
       final target = DeepLinks.parse(Uri.parse('whitenoise-staging://user/$testNpubB'));
 
-      expect(target?.location, '/start-chat/$testPubkeyB');
+      expect(target?.location, '/user-profile/$testPubkeyB');
     });
 
     test('maps triple-slash user links to the user profile route', () {
       final target = DeepLinks.parse(Uri.parse('whitenoise:///user/$testNpubB'));
 
-      expect(target?.location, '/start-chat/$testPubkeyB');
+      expect(target?.location, '/user-profile/$testPubkeyB');
     });
 
     test('maps chat links to the chat route', () {

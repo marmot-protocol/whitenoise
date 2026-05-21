@@ -4,7 +4,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/routes.dart';
-import 'package:whitenoise/screens/start_chat_screen.dart';
+import 'package:whitenoise/screens/user_profile_screen.dart';
 import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
 import 'package:whitenoise/theme.dart';
@@ -109,7 +109,7 @@ class ChatMessageBubble extends StatelessWidget {
       if (target.type == DeepLinkTargetType.user) {
         final hex = hexFromNpub(uri.pathSegments.first);
         if (hex != null && context.mounted) {
-          await StartChatScreen.show(context, userPubkey: hex);
+          await UserProfileScreen.show(context, userPubkey: hex);
         }
         return;
       }
@@ -170,7 +170,7 @@ class ChatMessageBubble extends StatelessWidget {
           if (gid != null) {
             Routes.pushToGroupMember(context, gid, hex);
           } else {
-            await StartChatScreen.show(context, userPubkey: hex);
+            await UserProfileScreen.show(context, userPubkey: hex);
           }
           return;
         }

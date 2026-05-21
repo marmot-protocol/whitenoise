@@ -6,7 +6,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:whitenoise/providers/auth_provider.dart';
 import 'package:whitenoise/routes.dart';
 import 'package:whitenoise/screens/group_member_screen.dart';
-import 'package:whitenoise/screens/start_chat_screen.dart';
+import 'package:whitenoise/screens/user_profile_screen.dart';
 import 'package:whitenoise/src/rust/api/groups.dart';
 import 'package:whitenoise/src/rust/api/metadata.dart';
 import 'package:whitenoise/src/rust/frb_generated.dart';
@@ -730,7 +730,7 @@ void main() {
     });
 
     group('non-member redirect', () {
-      testWidgets('redirects to StartChatScreen when the user is not in the group', (
+      testWidgets('redirects to UserProfileScreen when the user is not in the group', (
         tester,
       ) async {
         _api.adminsList = [_testPubkey];
@@ -738,7 +738,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(GroupMemberScreen), findsNothing);
-        expect(find.byType(StartChatScreen), findsOneWidget);
+        expect(find.byType(UserProfileScreen), findsOneWidget);
       });
 
       testWidgets('does not redirect when the user is a member', (tester) async {
@@ -747,7 +747,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(find.byType(GroupMemberScreen), findsOneWidget);
-        expect(find.byType(StartChatScreen), findsNothing);
+        expect(find.byType(UserProfileScreen), findsNothing);
       });
     });
   });

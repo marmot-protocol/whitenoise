@@ -12,7 +12,7 @@ import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
 import 'package:whitenoise/providers/account_pubkey_provider.dart';
 import 'package:whitenoise/routes.dart';
-import 'package:whitenoise/screens/start_chat_screen.dart';
+import 'package:whitenoise/screens/user_profile_screen.dart';
 import 'package:whitenoise/theme.dart';
 import 'package:whitenoise/utils/avatar_color.dart';
 import 'package:whitenoise/utils/metadata.dart' show presentName;
@@ -98,7 +98,7 @@ class GroupMemberScreen extends HookConsumerWidget {
         if (!context.mounted) return;
         Routes.goBack(context);
         if (!context.mounted) return;
-        StartChatScreen.show(context, userPubkey: memberPubkey);
+        UserProfileScreen.show(context, userPubkey: memberPubkey);
       });
       return null;
     }, [membersState.isLoading, membersState.members]);

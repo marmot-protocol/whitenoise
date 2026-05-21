@@ -1045,6 +1045,25 @@ class AppLocalizationsEn extends AppLocalizations {
   String get userIsBlockedDescription => 'You won\'t receive new messages until you unblock them.';
 
   @override
+  String get blockedUsers => 'Blocked users';
+
+  @override
+  String get viewBlockedUsers => 'View blocked users';
+
+  @override
+  String get blockedUsersDescription => 'View and manage people you\'ve blocked.';
+
+  @override
+  String get blockedUsersEmpty => 'You haven\'t blocked anyone yet.';
+
+  @override
+  String get failedToFetchBlockedUsers => 'Failed to load blocked users. Please try again.';
+
+  @override
+  String get blockedUserDetailDescription =>
+      'You\'ve blocked this user. You won\'t be able to send messages until you unblock them.';
+
+  @override
   String get addToAnotherGroup => 'Add to another group';
 
   @override

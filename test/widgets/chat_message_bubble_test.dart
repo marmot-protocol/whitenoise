@@ -10,7 +10,7 @@ import 'package:url_launcher_platform_interface/link.dart';
 import 'package:url_launcher_platform_interface/url_launcher_platform_interface.dart';
 import 'package:whitenoise/hooks/use_chat_messages.dart' show ChatMessageQuoteData;
 import 'package:whitenoise/l10n/generated/app_localizations.dart';
-import 'package:whitenoise/screens/start_chat_screen.dart';
+import 'package:whitenoise/screens/user_profile_screen.dart';
 import 'package:whitenoise/src/rust/api/markdown.dart';
 import 'package:whitenoise/src/rust/api/media_files.dart';
 import 'package:whitenoise/src/rust/api/messages.dart';
@@ -882,7 +882,7 @@ void main() {
         expect(launcher.calls, isEmpty);
       });
 
-      testWidgets('npub mention tap opens StartChatScreen as shade', (tester) async {
+      testWidgets('npub mention tap opens UserProfileScreen as shade', (tester) async {
         await _mountBubbleWithRouter(
           tester,
           ChatMessageBubble(
@@ -912,9 +912,9 @@ void main() {
         await tester.pump(const Duration(milliseconds: 50));
         tester.takeException();
         expect(launcher.calls, isEmpty);
-        expect(find.byType(StartChatScreen), findsOneWidget);
+        expect(find.byType(UserProfileScreen), findsOneWidget);
         expect(
-          tester.widget<StartChatScreen>(find.byType(StartChatScreen)).asShade,
+          tester.widget<UserProfileScreen>(find.byType(UserProfileScreen)).asShade,
           isTrue,
         );
       });
@@ -948,7 +948,7 @@ void main() {
         (entity.recognizer as TapGestureRecognizer).onTap!();
         await tester.pumpAndSettle();
         expect(launcher.calls, isEmpty);
-        expect(find.byType(StartChatScreen), findsNothing);
+        expect(find.byType(UserProfileScreen), findsNothing);
         expect(
           find.byKey(const ValueKey('group_member_route_${testGroupId}_$testPubkeyA')),
           findsOneWidget,
@@ -984,7 +984,7 @@ void main() {
         expect(find.byKey(const ValueKey('chat_route_$testGroupId')), findsOneWidget);
       });
 
-      testWidgets('whitenoise://user/<npub> tap opens StartChatScreen as shade', (tester) async {
+      testWidgets('whitenoise://user/<npub> tap opens UserProfileScreen as shade', (tester) async {
         await _mountBubbleWithRouter(
           tester,
           ChatMessageBubble(
@@ -1010,15 +1010,14 @@ void main() {
         (link.recognizer as TapGestureRecognizer).onTap!();
         await tester.pump();
         await tester.pump(const Duration(milliseconds: 50));
-        // StartChatScreen reads accountPubkeyProvider which throws without auth in tests.
+        // UserProfileScreen reads accountPubkeyProvider which throws without auth in tests.
         // The shade still pushes onto the navigator — drain the expected build error
         // so the framework doesn't flag it.
         tester.takeException();
         expect(launcher.calls, isEmpty);
-        expect(find.byKey(const ValueKey('user_route_$testPubkeyA')), findsNothing);
-        expect(find.byType(StartChatScreen), findsOneWidget);
+        expect(find.byType(UserProfileScreen), findsOneWidget);
         expect(
-          tester.widget<StartChatScreen>(find.byType(StartChatScreen)).asShade,
+          tester.widget<UserProfileScreen>(find.byType(UserProfileScreen)).asShade,
           isTrue,
         );
       });
@@ -1101,13 +1100,6 @@ Future<void> _mountBubbleWithRouter(WidgetTester tester, Widget bubble) async {
         path: '/chats/:groupId',
         builder: (_, state) => Scaffold(
           key: ValueKey('chat_route_${state.pathParameters['groupId']}'),
-          body: const SizedBox(),
-        ),
-      ),
-      GoRoute(
-        path: '/start-chat/:pubkey',
-        builder: (_, state) => Scaffold(
-          key: ValueKey('user_route_${state.pathParameters['pubkey']}'),
           body: const SizedBox(),
         ),
       ),

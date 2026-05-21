@@ -1077,6 +1077,26 @@ class AppLocalizationsDe extends AppLocalizations {
       'Du erhältst keine neuen Nachrichten, bis du die Blockierung aufhebst.';
 
   @override
+  String get blockedUsers => 'Blockierte Nutzer';
+
+  @override
+  String get viewBlockedUsers => 'Blockierte Nutzer anzeigen';
+
+  @override
+  String get blockedUsersDescription => 'Personen, die du blockiert hast, ansehen und verwalten.';
+
+  @override
+  String get blockedUsersEmpty => 'Du hast noch niemanden blockiert.';
+
+  @override
+  String get failedToFetchBlockedUsers =>
+      'Blockierte Nutzer konnten nicht geladen werden. Bitte erneut versuchen.';
+
+  @override
+  String get blockedUserDetailDescription =>
+      'Du hast diesen Nutzer blockiert. Du kannst keine Nachrichten senden, bis die Blockierung aufgehoben ist.';
+
+  @override
   String get addToAnotherGroup => 'Zu einer anderen Gruppe hinzufügen';
 
   @override
