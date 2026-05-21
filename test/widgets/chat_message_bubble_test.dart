@@ -979,7 +979,6 @@ void main() {
         // so the framework doesn't flag it.
         tester.takeException();
         expect(launcher.calls, isEmpty);
-        expect(find.byKey(const ValueKey('user_route_$testPubkeyA')), findsNothing);
         expect(find.byType(UserProfileScreen), findsOneWidget);
         expect(
           tester.widget<UserProfileScreen>(find.byType(UserProfileScreen)).asShade,
@@ -1065,13 +1064,6 @@ Future<void> _mountBubbleWithRouter(WidgetTester tester, Widget bubble) async {
         path: '/chats/:groupId',
         builder: (_, state) => Scaffold(
           key: ValueKey('chat_route_${state.pathParameters['groupId']}'),
-          body: const SizedBox(),
-        ),
-      ),
-      GoRoute(
-        path: '/start-chat/:pubkey',
-        builder: (_, state) => Scaffold(
-          key: ValueKey('user_route_${state.pathParameters['pubkey']}'),
           body: const SizedBox(),
         ),
       ),

@@ -142,8 +142,8 @@ class _BlockedUserTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayName = presentName(metadata) ?? pubkey.substring(0, 8);
     final npub = npubFromHex(pubkey);
+    final displayName = presentName(metadata) ?? npub ?? pubkey.substring(0, 8);
 
     return WnUserItem(
       key: Key('blocked_user_tile_$pubkey'),
