@@ -1575,7 +1575,7 @@ packages:
       path: ".."
       relative: true
     source: path
-    version: "2026.5.7+24"
+    version: "2026.5.22+25"
   widgetbook:
     dependency: "direct main"
     description:

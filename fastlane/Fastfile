@@ -20,7 +20,16 @@ FLAVORS = {
 }.freeze
 
 def run_from_root(parts)
-  sh("cd #{Shellwords.escape(ROOT)} && #{parts.shelljoin}")
+  env_parts = [
+    'env',
+    '-u', 'BUNDLE_BIN_PATH',
+    '-u', 'BUNDLE_GEMFILE',
+    '-u', 'BUNDLE_PATH',
+    '-u', 'BUNDLER_VERSION',
+    '-u', 'BUNDLER_SETUP',
+    '-u', 'RUBYOPT',
+  ]
+  sh("cd #{Shellwords.escape(ROOT)} && #{(env_parts + parts).shelljoin}")
 end
 
 def flavor_config(flavor)
@@ -144,12 +153,16 @@ def build_ios_flavor(flavor, options, build_native: true)
   require_macos!
   info = release_info(options)
   config = flavor_config(flavor)
+  export_options = File.join(ROOT, 'ios', "ExportOptions.#{flavor}-ad-hoc.plist")
 
   run_from_root(['./scripts/build_ios.sh']) if build_native
-  run_from_root(
-    ['flutter', 'build', 'ipa', '--flavor', flavor, '--export-method', 'app-store'] +
-      flutter_build_args(info),
-  )
+  build_args = ['flutter', 'build', 'ipa', '--flavor', flavor]
+  build_args += if File.file?(export_options)
+                  ['--export-options-plist', export_options]
+                else
+                  ['--export-method', 'app-store']
+                end
+  run_from_root(build_args + flutter_build_args(info))
 
   source = latest_ipa
   UI.user_error!("#{flavor.capitalize} IPA was not found") unless source
