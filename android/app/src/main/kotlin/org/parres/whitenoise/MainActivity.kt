@@ -29,6 +29,11 @@ class MainActivity : FlutterActivity() {
         // Keyring.initializeNdkContext moved to WhitenoiseApplication.onCreate
         // so the Android Context is available from every process entry point,
         // not just Activity launch.
+        // Register the signer plugin on the UI engine. WhitenoiseApplication
+        // only registers it on the foreground-task background engine, so without
+        // this the login screen's signer channel is missing and the "Login with
+        // Amber" button never appears.
+        flutterEngine.plugins.add(AndroidSignerPlugin())
     }
 
     private fun cleanForegroundTaskPrefs() {
