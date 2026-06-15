@@ -113,6 +113,8 @@ Future<ProviderContainer> initializeAppContainer({
 
   await _migrateDataIfNeeded(dataDir);
 
+  await applyIosDataProtection(paths: [dataDir, logsDir], isIOS: isIOS);
+
   final config = await rust_api.createWhitenoiseConfig(
     dataDir: dataDir,
     logsDir: logsDir,
@@ -128,6 +130,31 @@ Future<ProviderContainer> initializeAppContainer({
 }
 
 Future<void> _defaultInitializeRetryDelay(Duration delay) => Future<void>.delayed(delay);
+
+/// Relaxes the data-protection class of the White Noise data and log
+/// directories on iOS so the encrypted SQLite database (and its WAL/SHM files)
+/// stay accessible after first unlock.
+///
+/// The database lives in the shared App Group container so the notification
+/// service extension can read it. iOS files default to a protection class that
+/// becomes unavailable while the device is locked. Holding a SQLite/WAL lock on
+/// such a file in a shared container across suspension makes the OS terminate
+/// the process with 0xdead10cc. Marking the directories
+/// `completeUntilFirstUserAuthentication` keeps the files reachable and avoids
+/// that kill. Best effort: failures are logged but never block startup.
+@visibleForTesting
+Future<void> applyIosDataProtection({
+  required List<String> paths,
+  bool? isIOS,
+  MethodChannel appGroupChannel = _appGroupChannel,
+}) async {
+  if (!(isIOS ?? Platform.isIOS)) return;
+  try {
+    await appGroupChannel.invokeMethod<void>('applyDataProtection', {'paths': paths});
+  } catch (error, stackTrace) {
+    _logger.warning('Failed to apply iOS data protection to White Noise data', error, stackTrace);
+  }
+}
 
 Future<bool> _hasPendingReset() async => (await resetPendingMarkerFile()).existsSync();
 

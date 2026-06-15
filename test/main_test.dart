@@ -9,6 +9,7 @@ import 'package:logging/logging.dart';
 import 'package:whitenoise/main.dart'
     show
         WnApp,
+        applyIosDataProtection,
         formatAppLogRecord,
         initializeAppContainer,
         initializeWhitenoiseWithRetry,
@@ -928,6 +929,72 @@ void main() {
             (error) => error.toString().contains('App Group container unavailable'),
           ),
         ),
+      );
+    });
+  });
+
+  group('applyIosDataProtection', () {
+    const channel = MethodChannel('org.parres.whitenoise/app_group');
+
+    tearDown(() {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        null,
+      );
+    });
+
+    test('invokes applyDataProtection with the given paths on iOS', () async {
+      final calls = <MethodCall>[];
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        (call) async {
+          calls.add(call);
+          return null;
+        },
+      );
+
+      await applyIosDataProtection(
+        paths: const ['/tmp/data', '/tmp/logs'],
+        isIOS: true,
+      );
+
+      expect(calls, hasLength(1));
+      expect(calls.single.method, 'applyDataProtection');
+      expect(
+        (calls.single.arguments as Map)['paths'],
+        ['/tmp/data', '/tmp/logs'],
+      );
+    });
+
+    test('is a no-op on non-iOS platforms', () async {
+      var invoked = false;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        (call) async {
+          invoked = true;
+          return null;
+        },
+      );
+
+      await applyIosDataProtection(
+        paths: const ['/tmp/data', '/tmp/logs'],
+        isIOS: false,
+      );
+
+      expect(invoked, isFalse);
+    });
+
+    test('swallows platform exceptions so startup is never blocked', () async {
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger.setMockMethodCallHandler(
+        channel,
+        (call) async {
+          throw PlatformException(code: 'unavailable');
+        },
+      );
+
+      await expectLater(
+        applyIosDataProtection(paths: const ['/tmp/data'], isIOS: true),
+        completes,
       );
     });
   });
