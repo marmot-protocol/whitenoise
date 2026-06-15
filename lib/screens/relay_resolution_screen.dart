@@ -20,6 +20,7 @@ String _resolveError(String errorKey, AppLocalizations l10n) {
     'relayResolutionNotFound' => l10n.relayResolutionNotFound,
     'loginErrorNoRelayConnections' => l10n.loginErrorNoRelayConnections,
     'loginErrorTimeout' => l10n.loginErrorTimeout,
+    'loginErrorNoLoginInProgress' => l10n.loginErrorNoLoginInProgress,
     'loginErrorInternal' => l10n.loginErrorInternal,
     'invalidRelayUrlScheme' => l10n.invalidRelayUrlScheme,
     'invalidRelayUrl' => l10n.invalidRelayUrl,
