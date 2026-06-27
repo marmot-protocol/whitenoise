@@ -34,7 +34,7 @@ End-user White Noise clients. Each repository owns its own build, release, and i
 | Repository | Purpose |
 |---|---|
 | [`marmot`](https://github.com/marmot-protocol/marmot) | The Marmot Protocol specification. Contains the MIP series defining MLS over Nostr group messaging, the Marmot Group Data Extension (`0xF2EE`), key package and welcome event kinds (`443`, `444`), group event kind (`445`), and the exporter-secret-based NIP-44 encryption scheme. |
-| [`marmot-web`](https://github.com/marmot-protocol/marmot-web) | The marmot protocol website. |
+| [`marmot-web`](https://github.com/marmot-protocol/marmot-web) | The Marmot Protocol website. |
 
 ## Marmot Development Kit (MDK)
 
@@ -82,7 +82,7 @@ OpenMLS storage backends. Useful if you are embedding OpenMLS in a client or ser
 | Repository | Purpose |
 |---|---|
 | [`wn-tui`](https://github.com/marmot-protocol/wn-tui) | Terminal user interface for White Noise. Useful for headless testing and scripted interaction. |
-| [`goggles`](https://github.com/marmot-protocol/goggles) | Visualization tooling for Marmot. Helpful when debugging group state or epoch transitions. |
+| [`goggles`](https://github.com/marmot-protocol/goggles) | Visualization tooling for Marmot group state. Helpful when debugging group state or epoch transitions. |
 | [`proton-beam`](https://github.com/marmot-protocol/proton-beam) | Converts Nostr events to Protobuf. Useful for analytics pipelines and offline processing. |
 | [`homebrew-tap`](https://github.com/marmot-protocol/homebrew-tap) | Homebrew formulas for Marmot Protocol tools. Run `brew tap marmot-protocol/tap` to install. |
 
