@@ -4,7 +4,7 @@ A private, decentralized messenger built on [Nostr](https://github.com/nostr-pro
 
 No phone. No email. No compromise.
 
-> **Note:** This repository was the original Flutter codebase that targeted both iOS and Android. Development has moved to per-platform repositories. The Flutter sources remain in place on the `master` branch for history and any in-flight work; new development happens in the platform repos linked below.
+> **Note:** This repository was the original Flutter codebase that targeted both iOS and Android. Development has moved to per-platform repositories; this repo is now the project landing page. New development happens in the platform repos linked below.
 
 ## Clients
 
@@ -30,3 +30,7 @@ For an exhaustive map of every repository in the Marmot Protocol organization, i
 ## License
 
 Each client repository carries its own license. The legacy Flutter sources in this repository are released under the [AGPL-3.0 license](LICENSE).
+
+---
+
+*This repository previously held the White Noise Flutter app (iOS + Android). The complete Flutter codebase is preserved at the [`flutter-final`](https://github.com/marmot-protocol/whitenoise/tree/flutter-final) tag.*

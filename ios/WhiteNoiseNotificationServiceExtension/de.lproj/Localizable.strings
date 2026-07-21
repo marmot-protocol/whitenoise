@@ -1,9 +1,0 @@
-"notification_title" = "White Noise";
-"notification_new_encrypted_message" = "Neue verschlüsselte Nachricht";
-"notification_unknown_sender" = "Jemand";
-"notification_secure_chat_invite_title" = "Einladung zu sicherem Chat";
-"notification_secure_group_invite_title" = "Einladung zu sicherer Gruppe";
-"notification_secure_group" = "eine sichere Gruppe";
-"notification_dm_invite_body" = "%@ hat dich zu einem sicheren Chat eingeladen";
-"notification_group_invite_body" = "%@ hat dich zu %@ eingeladen";
-"notification_group_message_body" = "%@: %@";

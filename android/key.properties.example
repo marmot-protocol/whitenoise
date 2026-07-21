@@ -1,4 +1,0 @@
-storePassword=android
-keyPassword=android
-keyAlias=androiddebugkey
-storeFile=/path/to/production.keystore

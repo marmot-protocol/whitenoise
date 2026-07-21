@@ -1,8 +1,8 @@
 # Marmot Protocol Repository Map
 
-A map of every active repository in the `marmot-protocol` organization, intended for humans and coding agents navigating the project. For per-repo agent guidance specific to this Flutter codebase, see [`AGENTS.md`](AGENTS.md). For a one-page introduction to White Noise, see [`README.md`](README.md).
+A map of every active repository in the `marmot-protocol` organization, intended for humans and coding agents navigating the project. For a one-page introduction to White Noise, see [`README.md`](README.md).
 
-> **About this repository.** `marmot-protocol/whitenoise` originally held the cross-platform Flutter app for iOS and Android. Active client development has since moved to per-platform repositories. The Flutter sources remain on `master` for history and any in-flight work; this file points you to where current work happens.
+> **About this repository.** `marmot-protocol/whitenoise` originally held the cross-platform Flutter app for iOS and Android. Active client development has since moved to per-platform repositories. The complete Flutter codebase is preserved at the [`flutter-final`](https://github.com/marmot-protocol/whitenoise/tree/flutter-final) tag; this file points you to where current work happens.
 
 ## Quick routing
 
