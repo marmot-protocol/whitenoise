@@ -4,7 +4,7 @@ A private, decentralized messenger built on [Nostr](https://github.com/nostr-pro
 
 No phone. No email. No compromise.
 
-> **Note:** This repository was the original Flutter codebase that targeted both iOS and Android. Development has moved to per-platform repositories. The Flutter sources remain in place on the `master` branch for history and any in-flight work (see [`README-flutter.md`](README-flutter.md) for the legacy app documentation); new development happens in the platform repos linked below.
+> **Note:** This repository was the original Flutter codebase that targeted both iOS and Android. Development has moved to per-platform repositories. The Flutter sources remain in place on the `master` branch for history and any in-flight work; new development happens in the platform repos linked below.
 
 ## Clients
 
