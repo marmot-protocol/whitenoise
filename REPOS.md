@@ -1,6 +1,6 @@
 # Marmot Protocol Repository Map
 
-A map of every active repository in the `marmot-protocol` organization, intended for humans and coding agents navigating the project. For per-repo agent guidance specific to this Flutter codebase, see [`AGENTS.md`](AGENTS.md). For a one-page introduction to White Noise, see [`LANDING.md`](LANDING.md).
+A map of every active repository in the `marmot-protocol` organization, intended for humans and coding agents navigating the project. For per-repo agent guidance specific to this Flutter codebase, see [`AGENTS.md`](AGENTS.md). For a one-page introduction to White Noise, see [`README.md`](README.md).
 
 > **About this repository.** `marmot-protocol/whitenoise` originally held the cross-platform Flutter app for iOS and Android. Active client development has since moved to per-platform repositories. The Flutter sources remain on `master` for history and any in-flight work; this file points you to where current work happens.
 
@@ -33,7 +33,7 @@ End-user White Noise clients. Each repository owns its own build, release, and i
 
 | Repository | Purpose |
 |---|---|
-| [`marmot`](https://github.com/marmot-protocol/marmot) | The Marmot Protocol specification. Contains the MIP series defining MLS over Nostr group messaging, the Marmot Group Data Extension (`0xF2EE`), key package and welcome event kinds (`443`, `444`), group event kind (`445`), and the exporter-secret-based NIP-44 encryption scheme. |
+| [`marmot`](https://github.com/marmot-protocol/marmot) | The Marmot Protocol specification (status: adopted). Organized by protocol surface: foundation invariants, protocol-core group flows, versioned app components (registry in `foundation/registries.md`), and transport bindings. The Nostr binding defines welcome events (kind `444`), group events (kind `445`, ChaCha20-Poly1305 over the MLS exporter secret), and KeyPackage publication (kind `30443`). The deprecated MIP-era documents are mapped to current surfaces in `mip-coverage.md`. |
 | [`marmot-web`](https://github.com/marmot-protocol/marmot-web) | The Marmot Protocol website. |
 
 ## Marmot Development Kit (MDK)
@@ -65,7 +65,7 @@ For browser and Node.js builders who want a pure TypeScript path rather than a W
 
 | Repository | Purpose |
 |---|---|
-| [`transponder`](https://github.com/marmot-protocol/transponder) | MIP-05 Marmot notifications server, implemented in Rust. Run this if you operate push infrastructure for Marmot clients. |
+| [`transponder`](https://github.com/marmot-protocol/transponder) | Marmot push-notifications server (the `features/push-notifications.md` flow), implemented in Rust. Run this if you operate push infrastructure for Marmot clients. |
 
 ## Storage adapters
 
@@ -97,9 +97,9 @@ OpenMLS storage backends. Useful if you are embedding OpenMLS in a client or ser
 - **Default branch.** Most repositories default to `master`. The following use `main`: `mdk-swift`, `mdk-python`, `mdk-ruby`, `mdk-python-example`. Verify with `gh api repos/marmot-protocol/<repo> --jq .default_branch` before opening a PR.
 - **Issue templates.** Client repositories use `[Bug]:` and `[Feature]:` title prefixes. Check each repo's `.github/ISSUE_TEMPLATE/` directory for the current schema before filing.
 - **Protocol terminology.** The group encryption protocol is called **the Marmot Protocol**. Group encryption is Marmot end-to-end.
-- **Spec changes.** Protocol-level changes belong as MIP proposals in [`marmot`](https://github.com/marmot-protocol/marmot), not as features in individual clients.
+- **Spec changes.** Protocol-level changes belong as proposals against the spec in [`marmot`](https://github.com/marmot-protocol/marmot), not as features in individual clients.
 - **Scope.** Glue code that combines HTTPS and Nostr-relay traffic (for example, app-update checks against Zapstore) belongs in the client app repositories, not in the core MDK.
 
 ## What is intentionally not listed here
 
-This file lists the repositories most relevant to building on or contributing to the Marmot Protocol and White Noise clients. Internal experiments, personal websites, media-asset archives, and unrelated tooling owned by organization members are not enumerated here even though they may exist in the organization. When in doubt, consult [`awesome-marmot`](https://github.com/marmot-protocol/awesome-marmot) or the organization's repository list.
+This file lists the repositories most relevant to building on or contributing to the Marmot Protocol and White Noise clients. Internal experiments, personal websites, media-asset archives, empty placeholder repositories (`mdk-c`, `mdk-js`, `mdk-zig`), and unrelated tooling owned by organization members are not enumerated here even though they may exist in the organization. When in doubt, consult [`awesome-marmot`](https://github.com/marmot-protocol/awesome-marmot) or the organization's repository list.
