@@ -1,3 +1,6 @@
+> [!WARNING]
+> This repository is obsolete and is no longer updated. Use [marmot-protocol/whitenoise-ios](https://github.com/marmot-protocol/whitenoise-ios) and [marmot-protocol/whitenoise-android](https://github.com/marmot-protocol/whitenoise-android) instead.
+
 # White Noise
 
 ![White Noise](https://blossom.primal.net/3c36c07202823ff2f84072b94e9dd59896add1ceaaedb464fa639f988a6d8d1e.png)
