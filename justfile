@@ -168,51 +168,85 @@ test-flutter-quiet:
         echo "No test directory found."; \
     fi
 
-# Resolves the integration-test device: the given id, else the one booted simulator.
+# Resolves the integration-test device: the given id, else the one booted iOS simulator or Android device.
 _resolve-device device:
     @device="{{ device }}"; \
     if [ -n "$device" ]; then echo "$device"; exit 0; fi; \
-    booted=$(xcrun simctl list devices booted 2>/dev/null | grep -oiE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}'); \
-    count=$(printf '%s' "$booted" | grep -c .); \
-    if [ "$count" -eq 1 ]; then \
-        echo "Using booted simulator $booted" >&2; \
-        echo "$booted"; \
-    elif [ "$count" -eq 0 ]; then \
-        echo "No device id given and no booted simulator found. Boot one, pass a device id, or set WHITENOISE_INTEGRATION_DEVICE." >&2; \
+    if command -v xcrun >/dev/null 2>&1; then \
+        booted=$(xcrun simctl list devices booted 2>/dev/null | grep -oiE '[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}'); \
+    else \
+        booted=""; \
+    fi; \
+    ios_count=$(printf '%s' "$booted" | grep -c .); \
+    if command -v adb >/dev/null 2>&1; then \
+        android=$(adb devices 2>/dev/null | awk 'NR>1 && $2=="device" {print $1}'); \
+    else \
+        android=""; \
+    fi; \
+    android_count=$(printf '%s' "$android" | grep -c .); \
+    total=$((ios_count + android_count)); \
+    if [ "$total" -eq 1 ]; then \
+        picked="${booted}${android}"; \
+        echo "Using device $picked" >&2; \
+        echo "$picked"; \
+    elif [ "$total" -eq 0 ]; then \
+        echo "No device id given and no booted iOS simulator or Android device found. Boot one, pass a device id, or set WHITENOISE_INTEGRATION_DEVICE." >&2; \
         exit 1; \
     else \
-        echo "Multiple booted simulators — pass a device id or set WHITENOISE_INTEGRATION_DEVICE:" >&2; \
-        xcrun simctl list devices booted >&2; \
+        echo "Multiple devices found — pass a device id or set WHITENOISE_INTEGRATION_DEVICE:" >&2; \
+        [ -n "$booted" ] && echo "iOS simulators:" >&2 && echo "$booted" >&2; \
+        [ -n "$android" ] && echo "Android devices:" >&2 && echo "$android" >&2; \
         exit 1; \
     fi
 
-# Run Flutter integration tests. Requires local Nostr relays on ports 8080 and 7777.
+# If device is an Android adb device, tunnel host ports 8080/7777 to its loopback via
+# `adb reverse` so `ws://localhost:<port>` from the device hits the host's docker relays.
+# No-op for iOS simulators and desktop targets.
+_setup-android-relays device:
+    @if command -v adb >/dev/null 2>&1 && adb devices 2>/dev/null | awk 'NR>1 && $2=="device" {print $1}' | grep -Fqx "{{ device }}"; then \
+        adb -s "{{ device }}" reverse tcp:8080 tcp:8080 >/dev/null || { echo "❌ adb reverse tcp:8080 failed for {{ device }}" >&2; exit 1; }; \
+        adb -s "{{ device }}" reverse tcp:7777 tcp:7777 >/dev/null || { echo "❌ adb reverse tcp:7777 failed for {{ device }}" >&2; exit 1; }; \
+        echo "📡 Android device {{ device }} — adb reverse set for ports 8080, 7777 → host docker relays" >&2; \
+    fi
+
+# Run Flutter integration tests against local Nostr relays on ports 8080 and 7777
+# (`docker compose up -d`). On Android, `adb reverse` tunnels the device's localhost
+# to the host so the same URLs work on iOS simulators, desktop, and Android.
 
 # Run one file by passing its path: `just int-test integration_test/messaging_interactions_test.dart`.
-# Device: WHITENOISE_INTEGRATION_DEVICE, else the one booted simulator.
+# Device: WHITENOISE_INTEGRATION_DEVICE, else the one booted simulator/emulator.
+# Relays: WHITENOISE_INTEGRATION_RELAYS (comma-separated) overrides defaults.
 int-test target="integration_test/all_tests.dart" device=env("WHITENOISE_INTEGRATION_DEVICE", "") flavor="staging":
     @echo "🧪 Testing Flutter integration flows..."
     @device=$(just _resolve-device "{{ device }}") || exit 1; \
+    just _setup-android-relays "$device" || exit 1; \
+    define=""; \
+    [ -n "${WHITENOISE_INTEGRATION_RELAYS:-}" ] && define="--dart-define=WHITENOISE_INTEGRATION_RELAYS=$WHITENOISE_INTEGRATION_RELAYS"; \
     if [ -n "{{ flavor }}" ]; then \
-        flutter test -d "$device" --flavor {{ flavor }} {{ target }}; \
+        flutter test -d "$device" --flavor {{ flavor }} ${define:+"$define"} {{ target }}; \
     else \
-        flutter test -d "$device" {{ target }}; \
+        flutter test -d "$device" ${define:+"$define"} {{ target }}; \
     fi
 
-# Run Flutter integration tests with minimal output. Requires local Nostr relays on ports 8080 and 7777.
+# Run Flutter integration tests with minimal output against local Nostr relays on
+# ports 8080 and 7777; Android tunnels via `adb reverse`.
 
 # Run one file by passing its path: `just int-test-quiet integration_test/messaging_interactions_test.dart`.
-# Device: WHITENOISE_INTEGRATION_DEVICE, else the one booted simulator.
+# Device: WHITENOISE_INTEGRATION_DEVICE, else the one booted simulator/emulator.
+# Relays: WHITENOISE_INTEGRATION_RELAYS (comma-separated) overrides defaults.
 int-test-quiet target="integration_test/all_tests.dart" device=env("WHITENOISE_INTEGRATION_DEVICE", "") flavor="staging":
     @if [ ! -e "{{ target }}" ]; then \
         echo "No integration test target found at {{ target }}."; \
         exit 1; \
     fi; \
     device=$(just _resolve-device "{{ device }}") || exit 1; \
+    just _setup-android-relays "$device" || exit 1; \
+    define=""; \
+    [ -n "${WHITENOISE_INTEGRATION_RELAYS:-}" ] && define="--dart-define=WHITENOISE_INTEGRATION_RELAYS=$WHITENOISE_INTEGRATION_RELAYS"; \
     if [ -n "{{ flavor }}" ]; then \
-        flutter test -d "$device" --flavor {{ flavor }} --no-pub --reporter=failures-only {{ target }}; \
+        flutter test -d "$device" --flavor {{ flavor }} --no-pub --reporter=failures-only ${define:+"$define"} {{ target }}; \
     else \
-        flutter test -d "$device" --no-pub --reporter=failures-only {{ target }}; \
+        flutter test -d "$device" --no-pub --reporter=failures-only ${define:+"$define"} {{ target }}; \
     fi
 
 coverage min="99":
