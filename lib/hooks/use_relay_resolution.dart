@@ -44,6 +44,7 @@ String _relayResolutionErrorMessage(Object error) {
   return switch (error) {
     ApiError_LoginNoRelayConnections() => 'loginErrorNoRelayConnections',
     ApiError_LoginTimeout() => 'loginErrorTimeout',
+    ApiError_LoginNoLoginInProgress() => 'loginErrorNoLoginInProgress',
     ApiError_LoginInternal() => 'loginErrorInternal',
     _ => 'loginErrorGeneric',
   };

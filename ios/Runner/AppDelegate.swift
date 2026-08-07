@@ -92,6 +92,8 @@ private func wn_install_ios_background_keyring_store_with_access_group(
       switch call.method {
       case "getAppGroupContainerPath":
         result(self.appGroupContainerPath())
+      case "applyDataProtection":
+        result(self.applyDataProtection(arguments: call.arguments))
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -189,6 +191,16 @@ private func wn_install_ios_background_keyring_store_with_access_group(
     trigger == "invite" || trigger == "group_invite" || trigger == "GroupInvite"
   }
 
+  private func applyDataProtection(arguments: Any?) -> Bool {
+    guard
+      let args = arguments as? [String: Any],
+      let paths = args["paths"] as? [String]
+    else {
+      return false
+    }
+    return paths.allSatisfy { WhiteNoiseDataProtection.apply(atPath: $0) }
+  }
+
   private func appGroupContainerPath() -> String? {
     guard
       let identifier = Bundle.main.object(forInfoDictionaryKey: "WNAppGroupIdentifier") as? String,
@@ -256,6 +268,62 @@ private func wn_install_ios_background_keyring_store_with_access_group(
     let bytes = Array(string.utf8)
     return bytes.withUnsafeBufferPointer { buffer in
       body(buffer.baseAddress, buffer.count)
+    }
+  }
+}
+
+/// Applies `completeUntilFirstUserAuthentication` data protection to a directory
+/// and everything inside it.
+///
+/// The White Noise database lives in the shared App Group container so the
+/// notification service extension can read it. Files there default to a
+/// protection class that is unavailable while the device is locked; holding a
+/// SQLite/WAL lock on such a file in a shared container across suspension makes
+/// iOS terminate the process with 0xdead10cc. Setting the relaxed class keeps
+/// the files reachable after first unlock and avoids that termination.
+enum WhiteNoiseDataProtection {
+  private static let markerName = ".wn_data_protection_v1"
+
+  @discardableResult
+  static func apply(atPath path: String) -> Bool {
+    let fileManager = FileManager.default
+    let attributes: [FileAttributeKey: Any] = [
+      .protectionKey: FileProtectionType.completeUntilFirstUserAuthentication
+    ]
+    // Always set the class on the directory itself; new files (db, -wal, -shm,
+    // media cache) inherit it, so this is the only step needed on most launches.
+    var success = setAttributes(attributes, atPath: path, using: fileManager)
+
+    // Downgrade files that predate this fix exactly once. Recursing the whole
+    // data dir (which holds the media cache) on every launch would be unbounded
+    // work, so a marker gates it after the first successful pass.
+    let markerPath = (path as NSString).appendingPathComponent(markerName)
+    guard !fileManager.fileExists(atPath: markerPath) else {
+      return success
+    }
+    if let enumerator = fileManager.enumerator(atPath: path) {
+      for case let relativePath as String in enumerator {
+        let itemPath = (path as NSString).appendingPathComponent(relativePath)
+        success = setAttributes(attributes, atPath: itemPath, using: fileManager) && success
+      }
+    }
+    if success {
+      fileManager.createFile(atPath: markerPath, contents: nil, attributes: attributes)
+    }
+    return success
+  }
+
+  private static func setAttributes(
+    _ attributes: [FileAttributeKey: Any],
+    atPath path: String,
+    using fileManager: FileManager
+  ) -> Bool {
+    do {
+      try fileManager.setAttributes(attributes, ofItemAtPath: path)
+      return true
+    } catch {
+      NSLog("White Noise failed to set data protection on %@: %@", path, error.localizedDescription)
+      return false
     }
   }
 }

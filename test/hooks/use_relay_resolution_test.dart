@@ -1090,6 +1090,40 @@ void main() {
         expect(capturedState.error, 'loginErrorInternal');
       });
 
+      testWidgets('publishDefaults maps LoginNoLoginInProgress to specific key', (tester) async {
+        late Future<bool> Function() capturedPublishDefaults;
+        late RelayResolutionState capturedState;
+
+        final widget = _buildTestWidget(
+          publishDefaultRelays: (_) async {
+            throw const ApiError.loginNoLoginInProgress();
+          },
+          onBuild:
+              (
+                controller,
+                state,
+                isRelayUrlValid,
+                validationError,
+                trailingIcon,
+                trailingKey,
+                handleTrailingAction,
+                publishDefaults,
+                tryCustomRelay,
+                cancel,
+                clearError,
+              ) {
+                capturedPublishDefaults = publishDefaults;
+                capturedState = state;
+              },
+        );
+        await mountWidget(widget, tester);
+
+        await capturedPublishDefaults();
+        await tester.pump();
+
+        expect(capturedState.error, 'loginErrorNoLoginInProgress');
+      });
+
       testWidgets('tryCustomRelay maps LoginTimeout to specific key', (tester) async {
         late Future<bool> Function() capturedTryCustomRelay;
         late RelayResolutionState capturedState;

@@ -450,6 +450,18 @@ void main() {
         );
       });
 
+      testWidgets('shows start-over message when no login is in progress', (tester) async {
+        await pumpRelayResolutionScreen(tester);
+        mockAuth.publishDefaultRelaysError = const ApiError.loginNoLoginInProgress();
+        await tester.tap(find.byKey(const Key('use_default_relays_button')));
+        await tester.pumpAndSettle();
+        expect(find.byType(WnSystemNotice), findsOneWidget);
+        expect(
+          find.text('No login in progress. Please start over.'),
+          findsOneWidget,
+        );
+      });
+
       testWidgets('shows connection error when custom relay has no connections', (tester) async {
         await pumpRelayResolutionScreen(tester);
         mockAuth.customRelayError = const ApiError.loginNoRelayConnections();
