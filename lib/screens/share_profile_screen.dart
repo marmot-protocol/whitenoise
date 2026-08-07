@@ -1,8 +1,13 @@
+import 'dart:ui' as ui;
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:gap/gap.dart';
 import 'package:hooks_riverpod/hooks_riverpod.dart';
 import 'package:qr_flutter/qr_flutter.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:whitenoise/hooks/use_system_notice.dart';
 import 'package:whitenoise/hooks/use_user_metadata.dart';
 import 'package:whitenoise/l10n/l10n.dart';
@@ -40,6 +45,73 @@ class ShareProfileScreen extends HookConsumerWidget {
 
     final metadata = metadataSnapshot.data;
     final displayName = presentName(metadata);
+
+    final qrRepaintKey = useMemoized(GlobalKey.new);
+    final isHolding = useState(false);
+    final dotCount = useState(0);
+    final qrColorAnim = useAnimationController(
+      duration: const Duration(milliseconds: 150),
+    );
+    final qrColor = ColorTween(
+      begin: colors.backgroundContentPrimary,
+      end: Colors.grey,
+    ).animate(CurvedAnimation(parent: qrColorAnim, curve: Curves.easeIn));
+
+    final isMounted = useRef(true);
+    final isCapturing = useRef(false);
+    useEffect(
+      () =>
+          () => isMounted.value = false,
+      const [],
+    );
+
+    Future<void> captureAndShareQr() async {
+      if (isCapturing.value) return;
+      isCapturing.value = true;
+      final boundary = qrRepaintKey.currentContext?.findRenderObject() as RenderRepaintBoundary?;
+      if (boundary == null) {
+        isCapturing.value = false;
+        return;
+      }
+      final errorMessage = context.l10n.shareQrCodeError;
+      // Capture synchronously before any animation frame can render, so the
+      // image is always the full-color QR regardless of animation state.
+      dotCount.value = 1;
+      qrColorAnim.forward();
+      final image = boundary.toImageSync(pixelRatio: 3);
+      try {
+        final captureFuture = image.toByteData(format: ui.ImageByteFormat.png);
+        // onLongPressStart fires at 500ms total; dots step every 500ms after that
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (!isMounted.value || !isHolding.value) return;
+        dotCount.value = 2;
+        await Future.delayed(const Duration(milliseconds: 500));
+        if (!isMounted.value || !isHolding.value) return;
+        dotCount.value = 3;
+        final byteData = await captureFuture;
+        if (!isMounted.value || byteData == null || !isHolding.value) return;
+        await SharePlus.instance.share(
+          ShareParams(
+            files: [
+              XFile.fromData(
+                byteData.buffer.asUint8List(),
+                name: 'qr_code.png',
+                mimeType: 'image/png',
+              ),
+            ],
+          ),
+        );
+      } catch (e) {
+        if (isMounted.value) {
+          dotCount.value = 0;
+          qrColorAnim.reverse();
+          showErrorNotice(errorMessage);
+        }
+      } finally {
+        image.dispose();
+        isCapturing.value = false;
+      }
+    }
 
     return Scaffold(
       backgroundColor: colors.backgroundPrimary,
@@ -92,24 +164,46 @@ class ShareProfileScreen extends HookConsumerWidget {
                     ),
                     if (profileDeepLink != null) ...[
                       Gap(36.h),
-                      ConstrainedBox(
-                        constraints: BoxConstraints(maxWidth: 256.w),
-                        child: AspectRatio(
-                          aspectRatio: 1,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12.r),
-                            child: QrImageView(
-                              key: ValueKey<String>(profileDeepLink),
-                              data: profileDeepLink,
-                              padding: EdgeInsets.zero,
-                              backgroundColor: colors.backgroundSecondary,
-                              eyeStyle: QrEyeStyle(
-                                eyeShape: QrEyeShape.square,
-                                color: colors.backgroundContentPrimary,
-                              ),
-                              dataModuleStyle: QrDataModuleStyle(
-                                dataModuleShape: QrDataModuleShape.square,
-                                color: colors.backgroundContentPrimary,
+                      GestureDetector(
+                        onLongPressStart: (_) {
+                          isHolding.value = true;
+                          captureAndShareQr();
+                        },
+                        onLongPressEnd: (_) {
+                          isHolding.value = false;
+                          dotCount.value = 0;
+                          qrColorAnim.reverse();
+                        },
+                        onLongPressCancel: () {
+                          isHolding.value = false;
+                          dotCount.value = 0;
+                          qrColorAnim.reverse();
+                        },
+                        child: ConstrainedBox(
+                          constraints: BoxConstraints(maxWidth: 256.w),
+                          child: AspectRatio(
+                            aspectRatio: 1,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12.r),
+                              child: RepaintBoundary(
+                                key: qrRepaintKey,
+                                child: AnimatedBuilder(
+                                  animation: qrColor,
+                                  builder: (context, _) => QrImageView(
+                                    key: ValueKey<String>(profileDeepLink),
+                                    data: profileDeepLink,
+                                    padding: EdgeInsets.all(12.r),
+                                    backgroundColor: colors.backgroundSecondary,
+                                    eyeStyle: QrEyeStyle(
+                                      eyeShape: QrEyeShape.square,
+                                      color: qrColor.value ?? colors.backgroundContentPrimary,
+                                    ),
+                                    dataModuleStyle: QrDataModuleStyle(
+                                      dataModuleShape: QrDataModuleShape.square,
+                                      color: qrColor.value ?? colors.backgroundContentPrimary,
+                                    ),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
@@ -120,7 +214,9 @@ class ShareProfileScreen extends HookConsumerWidget {
                     Gap(32.h),
                   Gap(12.h),
                   Text(
-                    context.l10n.scanToConnect,
+                    isHolding.value
+                        ? '${context.l10n.holdToShareQrCode}${'.' * dotCount.value}'
+                        : context.l10n.scanToConnect,
                     textAlign: TextAlign.center,
                     style: typography.medium14.copyWith(
                       color: colors.backgroundContentSecondary,

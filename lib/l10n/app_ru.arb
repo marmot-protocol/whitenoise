@@ -94,6 +94,8 @@
   "copiedToClipboardThankYou": "Скопировано в буфер обмена. Спасибо!",
   "shareProfileTitle": "Поделиться и подключиться",
   "scanToConnect": "Сканируйте для подключения",
+  "holdToShareQrCode": "Удерживайте для отправки QR-кода",
+  "shareQrCodeError": "Не удалось поделиться QR-кодом. Попробуйте ещё раз.",
   "signOutTitle": "Выход",
   "signOutConfirmation": "Вы уверены, что хотите выйти?",
   "signOutWarning": "Когда вы выходите из White Noise, ваши чаты будут удалены с этого устройства и не могут быть восстановлены на другом устройстве.",

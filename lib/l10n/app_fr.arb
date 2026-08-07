@@ -94,6 +94,8 @@
   "copiedToClipboardThankYou": "Copié dans le presse-papiers. Merci !",
   "shareProfileTitle": "Partager et connecter",
   "scanToConnect": "Scanner pour se connecter",
+  "holdToShareQrCode": "Maintenez pour partager le QR code",
+  "shareQrCodeError": "Impossible de partager le QR code. Veuillez réessayer.",
   "signOutTitle": "Déconnexion",
   "signOutConfirmation": "Êtes-vous sûr de vouloir vous déconnecter ?",
   "signOutWarning": "Lorsque vous vous déconnectez de White Noise, vos discussions seront supprimées de cet appareil et ne pourront pas être restaurées sur un autre appareil.",

@@ -94,6 +94,8 @@
   "copiedToClipboardThankYou": "Panoya kopyalandı. Teşekkürler!",
   "shareProfileTitle": "Paylaş ve bağlan",
   "scanToConnect": "Bağlanmak için tarayın",
+  "holdToShareQrCode": "QR kodu paylaşmak için basılı tutun",
+  "shareQrCodeError": "QR kodu paylaşılamadı. Lütfen tekrar deneyin.",
   "signOutTitle": "Çıkış yap",
   "signOutConfirmation": "Çıkış yapmak istediğinizden emin misiniz?",
   "signOutWarning": "White Noise'dan çıkış yaptığınızda, sohbetleriniz bu cihazdan silinecek ve başka bir cihazda geri yüklenemeyecektir.",

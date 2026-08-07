@@ -312,6 +312,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get scanToConnect => '扫码连接';
 
   @override
+  String get holdToShareQrCode => '长按分享二维码';
+
+  @override
+  String get shareQrCodeError => '无法分享二维码。请重试。';
+
+  @override
   String get signOutTitle => '退出登录';
 
   @override
@@ -1769,6 +1775,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get scanToConnect => '掃描即可連結';
+
+  @override
+  String get holdToShareQrCode => '長按以分享 QR 碼';
+
+  @override
+  String get shareQrCodeError => '無法分享 QR 碼。請再試一次。';
 
   @override
   String get signOutTitle => '登出';

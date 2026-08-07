@@ -552,13 +552,8 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(shareCalls.length, 1);
-        expect(shareCalls[0].method, 'share');
-
-        final args = shareCalls[0].arguments as Map<dynamic, dynamic>;
-        expect(
-          args['text'],
-          contains('whitenoise.chat'),
-        );
+        expect(shareCalls[0].text, contains('whitenoise.chat'));
+        expect(shareCalls[0].files, isNull, reason: 'invite share is text-only');
       });
 
       group('invite callout description', () {
