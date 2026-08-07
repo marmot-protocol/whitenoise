@@ -102,7 +102,9 @@ void main() {
     });
 
     group('navigation', () {
-      testWidgets('tapping back button returns to share profile screen', (tester) async {
+      testWidgets('tapping back button returns to share profile screen', (
+        tester,
+      ) async {
         await pumpScanNpubScreen(tester);
         await tester.tap(find.byKey(const Key('slate_back_button')));
         await tester.pumpAndSettle();
@@ -110,66 +112,80 @@ void main() {
       });
     });
 
-    group('barcode detection', () {
-      testWidgets('calling onBarcodeDetected with valid npub navigates to start chat', (
-        tester,
-      ) async {
-        await pumpScanNpubScreen(tester);
+    group('QrCode detection', () {
+      testWidgets(
+        'calling onQrCodeDetected with valid npub navigates to start chat',
+        (tester) async {
+          await pumpScanNpubScreen(tester);
 
-        final scanBox = tester.widget<QrScanner>(find.byType(QrScanner));
-        scanBox.onBarcodeDetected(testNpubB);
-        await tester.pumpAndSettle();
+          final qrScanner = tester.widget<QrScanner>(find.byType(QrScanner));
+          qrScanner.onQrCodeDetected(testNpubB);
+          await tester.pumpAndSettle();
 
-        expect(find.byType(UserProfileScreen), findsOneWidget);
-      });
+          expect(find.byType(UserProfileScreen), findsOneWidget);
+        },
+      );
 
-      testWidgets('calling onBarcodeDetected with user deep link navigates to start chat', (
-        tester,
-      ) async {
-        await pumpScanNpubScreen(tester);
+      testWidgets(
+        'calling onQrCodeDetected with user deep link navigates to start chat',
+        (tester) async {
+          await pumpScanNpubScreen(tester);
 
-        final scanBox = tester.widget<QrScanner>(find.byType(QrScanner));
-        scanBox.onBarcodeDetected('whitenoise://user/$testNpubB');
-        await tester.pumpAndSettle();
+          final qrScanner = tester.widget<QrScanner>(find.byType(QrScanner));
+          qrScanner.onQrCodeDetected('whitenoise://user/$testNpubB');
+          await tester.pumpAndSettle();
 
-        final screen = tester.widget<UserProfileScreen>(find.byType(UserProfileScreen));
-        expect(screen.userPubkey, testPubkeyB);
-      });
+          final screen = tester.widget<UserProfileScreen>(
+            find.byType(UserProfileScreen),
+          );
+          expect(screen.userPubkey, testPubkeyB);
+        },
+      );
 
-      testWidgets('calling onBarcodeDetected with chat deep link navigates to chat', (
-        tester,
-      ) async {
-        await pumpScanNpubScreen(tester);
+      testWidgets(
+        'calling onQrCodeDetected with chat deep link navigates to chat',
+        (tester) async {
+          await pumpScanNpubScreen(tester);
 
-        final scanBox = tester.widget<QrScanner>(find.byType(QrScanner));
-        scanBox.onBarcodeDetected('whitenoise://chat/$testGroupId');
-        await tester.pumpAndSettle();
+          final qrScanner = tester.widget<QrScanner>(find.byType(QrScanner));
+          qrScanner.onQrCodeDetected('whitenoise://chat/$testGroupId');
+          await tester.pumpAndSettle();
 
-        final screen = tester.widget<ChatScreen>(find.byType(ChatScreen));
-        expect(screen.groupId, testGroupId);
-      });
+          final screen = tester.widget<ChatScreen>(find.byType(ChatScreen));
+          expect(screen.groupId, testGroupId);
+        },
+      );
 
-      testWidgets('calling onBarcodeDetected with non-npub value does nothing', (tester) async {
-        await pumpScanNpubScreen(tester);
+      testWidgets(
+        'calling onQrCodeDetected with non-npub value does nothing',
+        (tester) async {
+          await pumpScanNpubScreen(tester);
 
-        final scanBox = tester.widget<QrScanner>(find.byType(QrScanner));
-        scanBox.onBarcodeDetected('https://example.com');
-        await tester.pumpAndSettle();
+          final qrScanner = tester.widget<QrScanner>(find.byType(QrScanner));
+          qrScanner.onQrCodeDetected('https://example.com');
+          await tester.pumpAndSettle();
 
-        expect(find.byType(QrScanner), findsOneWidget);
-        expect(find.text('Scan a contact\'s QR code.'), findsOneWidget);
-      });
+          expect(find.byType(QrScanner), findsOneWidget);
+          expect(find.text('Scan a contact\'s QR code.'), findsOneWidget);
+        },
+      );
 
-      testWidgets('calling onBarcodeDetected with invalid npub shows error', (tester) async {
-        await pumpScanNpubScreen(tester);
+      testWidgets(
+        'calling onQrCodeDetected with invalid npub shows error',
+        (tester) async {
+          await pumpScanNpubScreen(tester);
 
-        final scanBox = tester.widget<QrScanner>(find.byType(QrScanner));
-        scanBox.onBarcodeDetected('npub1invalidkey');
-        await tester.pumpAndSettle();
+          final qrScanner = tester.widget<QrScanner>(find.byType(QrScanner));
+          qrScanner.onQrCodeDetected('npub1invalid');
+          await tester.pumpAndSettle();
 
-        expect(find.byType(QrScanner), findsOneWidget);
-        expect(find.text('Invalid public key. Please try again.'), findsOneWidget);
-      });
+          expect(find.byType(QrScanner), findsOneWidget);
+          expect(
+            find.text('Invalid public key. Please try again.'),
+            findsOneWidget,
+          );
+        },
+      );
     });
   });
 
