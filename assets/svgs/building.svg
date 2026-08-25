@@ -1,9 +1,0 @@
-<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-<path d="M14 1H8C7.73486 1.00026 7.48066 1.10571 7.29319 1.29319C7.10571 1.48066 7.00026 1.73486 7 2V7H2C1.73486 7.00026 1.48066 7.10571 1.29319 7.29319C1.10571 7.48066 1.00026 7.73486 1 8V15H15V2C14.9997 1.73488 14.8942 1.4807 14.7068 1.29323C14.5193 1.10576 14.2651 1.0003 14 1ZM4.5 14V10.5H6.5V14H4.5ZM14 14H7.5V10C7.5 9.86739 7.44732 9.74021 7.35355 9.64645C7.25979 9.55268 7.13261 9.5 7 9.5H4C3.86739 9.5 3.74021 9.55268 3.64645 9.64645C3.55268 9.74021 3.5 9.86739 3.5 10V14H2V8H8V2H14V14Z" fill="black" style="fill:black;fill-opacity:1;"/>
-<path d="M10 4H9V5H10V4Z" fill="black" style="fill:black;fill-opacity:1;"/>
-<path d="M13 4H12V5H13V4Z" fill="black" style="fill:black;fill-opacity:1;"/>
-<path d="M10 7H9V8H10V7Z" fill="black" style="fill:black;fill-opacity:1;"/>
-<path d="M13 7H12V8H13V7Z" fill="black" style="fill:black;fill-opacity:1;"/>
-<path d="M10 9.9998H9V10.9998H10V9.9998Z" fill="black" style="fill:black;fill-opacity:1;"/>
-<path d="M13 9.9998H12V10.9998H13V9.9998Z" fill="black" style="fill:black;fill-opacity:1;"/>
-</svg>
