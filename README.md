@@ -25,7 +25,7 @@ White Noise speaks the [Marmot Protocol](https://github.com/marmot-protocol/marm
 
 A curated list of apps, libraries, and tools built on the Marmot Protocol is maintained at [`awesome-marmot`](https://github.com/marmot-protocol/awesome-marmot).
 
-For an exhaustive map of every repository in the Marmot Protocol organization, including SDKs, language bindings, and tooling, see [`REPOS.md`](REPOS.md).
+For a curated map of relevant repositories in the Marmot Protocol organization, including SDKs, language bindings, and tooling, see [`REPOS.md`](REPOS.md). For the exhaustive inventory, see the [organization's repository list](https://github.com/orgs/marmot-protocol/repositories).
 
 ## License
 

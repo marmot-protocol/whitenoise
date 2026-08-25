@@ -1,6 +1,6 @@
 # Marmot Protocol Repository Map
 
-A map of every active repository in the `marmot-protocol` organization, intended for humans and coding agents navigating the project. For a one-page introduction to White Noise, see [`README.md`](README.md).
+A curated map of the repositories most relevant to building on or contributing to Marmot, intended for humans and coding agents navigating the project. For a one-page introduction to White Noise, see [`README.md`](README.md).
 
 > **About this repository.** `marmot-protocol/whitenoise` originally held the cross-platform Flutter app for iOS and Android. Active client development has since moved to per-platform repositories. The complete Flutter codebase is preserved at the [`flutter-final`](https://github.com/marmot-protocol/whitenoise/tree/flutter-final) tag; this file points you to where current work happens.
 
@@ -94,7 +94,7 @@ OpenMLS storage backends. Useful if you are embedding OpenMLS in a client or ser
 
 ## Conventions agents should know
 
-- **Default branch.** Most repositories default to `master`. The following use `main`: `mdk-swift`, `mdk-python`, `mdk-ruby`, `mdk-python-example`. Verify with `gh api repos/marmot-protocol/<repo> --jq .default_branch` before opening a PR.
+- **Default branch.** Most repositories default to `master`. The following use `main`: `mdk-swift`, `mdk-python`, `mdk-ruby`, `mdk-python-example`. Set `repo` to the repository name, then verify with `gh api "repos/marmot-protocol/$repo" --jq .default_branch` before opening a PR.
 - **Issue templates.** Client repositories use `[Bug]:` and `[Feature]:` title prefixes. Check each repo's `.github/ISSUE_TEMPLATE/` directory for the current schema before filing.
 - **Protocol terminology.** The group encryption protocol is called **the Marmot Protocol**. Group encryption is Marmot end-to-end.
 - **Spec changes.** Protocol-level changes belong as proposals against the spec in [`marmot`](https://github.com/marmot-protocol/marmot), not as features in individual clients.
