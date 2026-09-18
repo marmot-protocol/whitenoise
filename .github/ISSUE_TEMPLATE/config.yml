@@ -1,1 +1,23 @@
 blank_issues_enabled: false
+contact_links:
+  - name: Android client (whitenoise-android)
+    url: https://github.com/marmot-protocol/whitenoise-android/issues/new/choose
+    about: Bug reports and feature requests for the Android client.
+  - name: iOS client (whitenoise-ios)
+    url: https://github.com/marmot-protocol/whitenoise-ios/issues/new/choose
+    about: Bug reports and feature requests for the iOS client.
+  - name: macOS client (whitenoise-mac)
+    url: https://github.com/marmot-protocol/whitenoise-mac/issues/new/choose
+    about: Bug reports and feature requests for the macOS client.
+  - name: Linux client (whitenoise-linux)
+    url: https://github.com/marmot-protocol/whitenoise-linux/issues/new/choose
+    about: Bug reports and feature requests for the Linux client.
+  - name: Marmot Protocol spec
+    url: https://github.com/marmot-protocol/marmot/issues/new/choose
+    about: Protocol-level proposals, clarifications, and spec questions.
+  - name: Marmot Development Kit (MDK)
+    url: https://github.com/marmot-protocol/mdk/issues/new/choose
+    about: Issues with the core Rust SDK or the language bindings.
+  - name: Awesome Marmot
+    url: https://github.com/marmot-protocol/awesome-marmot
+    about: Browse the curated list of apps, libraries, and tools built on Marmot.
